@@ -52,8 +52,29 @@ final class ThemeTokenSetTest extends TestCase
         self::assertStringContainsString('--faluss-accent:#123456;', $css);
         self::assertStringContainsString('--faluss-border:rgba(8,8,8,0.25);', $css);
         self::assertStringContainsString('--faluss-card_radius:24px;', $css);
+        self::assertStringContainsString('--faluss-card-radius:24px;', $css);
+        self::assertStringContainsString('--faluss-action-text:#FFFFFF;', $css);
         self::assertStringContainsString('--faluss-shadow:0 12px 30px rgba(8, 8, 8, 0.06);', $css);
         self::assertStringNotContainsString('color: blue', $css);
+    }
+
+    public function testDefaultCssMatchesHistoricalPluginOutput(): void
+    {
+        $expected = ':root{'
+            . '--faluss-canvas:#FFFDF5;--faluss-surface:#FFFFFF;--faluss-ink:#080808;'
+            . '--faluss-muted:#6F6A63;--faluss-accent:#FF3D16;--faluss-action:#080808;'
+            . '--faluss-action_text:#FFFFFF;--faluss-action_hover:#28231F;--faluss-action_active:#000000;'
+            . '--faluss-card_radius:24px;--faluss-control_radius:8px;--faluss-pill_radius:999px;'
+            . '--faluss-card-radius:24px;--faluss-control-radius:8px;--faluss-pill-radius:999px;'
+            . '--faluss-action-text:#FFFFFF;--faluss-action-hover:#28231F;--faluss-action-active:#000000;'
+            . '--faluss-border:rgba(8,8,8,0.12);--faluss-shadow:0 12px 30px rgba(8, 8, 8, 0.06);}';
+
+        self::assertSame($expected, ThemeTokenSet::css(ThemeTokenSet::defaults()));
+    }
+
+    public function testShadowLabelsMatchHistoricalAdminScreen(): void
+    {
+        self::assertSame(['none' => 'Sans ombre', 'soft' => 'Douce', 'lifted' => 'Légèrement relevée'], ThemeTokenSet::shadowLabels());
     }
 
     public function testPreviewCssUsesSanitizedValues(): void

@@ -40,6 +40,16 @@ final class ThemeTokenSet
         ];
     }
 
+    /** @return array<string, string> */
+    public static function shadowLabels(): array
+    {
+        return [
+            'none' => 'Sans ombre',
+            'soft' => 'Douce',
+            'lifted' => 'Légèrement relevée',
+        ];
+    }
+
     /** @param mixed $stored
      *  @return array<string, string>
      */
@@ -96,10 +106,17 @@ final class ThemeTokenSet
         $values = self::sanitize($values);
         $css = ':root{';
 
-        foreach (array_merge(array_slice(self::colorKeys(), 0, 9), self::radiusKeys()) as $key) {
+        // Faluss Link consumes both legacy radius spellings. Preserve their order too.
+        foreach (['canvas', 'surface', 'ink', 'muted', 'accent', 'action', 'action_text', 'action_hover', 'action_active', 'card_radius', 'control_radius', 'pill_radius'] as $key) {
             $css .= '--faluss-' . $key . ':' . $values[$key] . ';';
         }
 
+        $css .= '--faluss-card-radius:' . $values['card_radius'] . ';';
+        $css .= '--faluss-control-radius:' . $values['control_radius'] . ';';
+        $css .= '--faluss-pill-radius:' . $values['pill_radius'] . ';';
+        $css .= '--faluss-action-text:' . $values['action_text'] . ';';
+        $css .= '--faluss-action-hover:' . $values['action_hover'] . ';';
+        $css .= '--faluss-action-active:' . $values['action_active'] . ';';
         $css .= '--faluss-border:rgba(' . self::rgb($values['border_color']) . ',';
         $css .= ((int) $values['border_opacity'] / 100) . ');';
         $css .= '--faluss-shadow:' . self::shadows()[$values['shadow']] . ';}';

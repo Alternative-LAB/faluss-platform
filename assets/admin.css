@@ -130,7 +130,7 @@
 
 .faluss-admin__field :is(input, select):focus-visible,
 .faluss-admin__reset button:focus-visible {
-    outline: 2px solid var(--faluss-accent);
+    outline: 2px solid var(--faluss-accent, #FF3D16);
     outline-offset: 2px;
 }
 
@@ -156,7 +156,8 @@
 }
 
 .faluss-theme-preview__card p { color: var(--ft-muted); }
-.faluss-theme-preview__card button {
+.faluss-theme-preview__action {
+    display: inline-block;
     margin: 0 8px 8px 0;
     padding: 9px 15px;
     border: 0;
@@ -164,7 +165,7 @@
     background: var(--ft-action);
     color: var(--ft-action-text);
 }
-.faluss-theme-preview__card .is-hover { background: var(--ft-action-hover); }
+.faluss-theme-preview__action.is-hover { background: var(--ft-action-hover); }
 
 @media (max-width: 782px) {
     .faluss-admin__hero { margin-right: 10px; }
