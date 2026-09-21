@@ -24,7 +24,11 @@ Cette étape n’enregistre aucun hook, menu, route ou façade globale. Le plugi
 
 `CatalogAdminActions` prépare les endpoints `admin-post.php` historiques. La capacité `manage_options` et un nonce propre à chaque action sont vérifiés avant toute mutation. Les valeurs sont déséchappées, validées, puis écrites dans la même option ; les désactivations et suppressions réémettent `faluss_catalog_theme_deactivated`. La classe n’est pas encore branchée au démarrage du plugin : elle ne peut donc pas entrer en collision avec les endpoints de l’ancien catalogue.
 
-L’interface de gestion, l’activation contrôlée des actions et la façade PHP consommée par Faluss Link restent à migrer. Aucun ancien plugin ne peut encore être désactivé.
+`CatalogAdminPage` prépare le sous-menu « Faluss → Catalogue de thèmes ». Il reprend tous les champs du catalogue historique, les formulaires avec nonce, les messages de résultat et le sélecteur de médias WordPress, avec la présentation commune de Faluss Platform. Le menu et ses assets ne sont pas encore enregistrés par le bootstrap : aucun écran supplémentaire n’apparaît tant que le module complet n’est pas activé.
+
+Le rendu a été vérifié dans une installation WordPress jetable avec un thème enregistré : le titre, le thème et les trois nonces attendus sont présents. Cet essai ne couvre pas encore le thème Elementor réel ni la bascule de production.
+
+L’activation contrôlée de l’écran et des actions, ainsi que la façade PHP consommée par Faluss Link, restent à migrer. Aucun ancien plugin ne peut encore être désactivé.
 
 ## Dépendances et risques à vérifier avant bascule
 

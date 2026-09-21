@@ -1,0 +1,12 @@
+.faluss-catalog > h2 { margin: 26px 0 14px; }
+.faluss-catalog__form { margin: 16px 0 4px; }
+.faluss-catalog__form h3 { margin: 0; font-size: 18px; }
+.faluss-catalog__media .button { align-self: flex-start; }
+.faluss-catalog__preview {
+    width: 100%;
+    max-width: 220px;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    border-radius: 8px;
+}
+.faluss-catalog__delete { margin: 0 0 24px 16px; }

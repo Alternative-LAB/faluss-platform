@@ -8,6 +8,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Écran de gestion du catalogue préparé dans l’administration Faluss, non activé avant la bascule du module.
+- Vérification CI de la syntaxe JavaScript de l’écran du catalogue.
 - Actions d’administration du catalogue avec contrôles de droits, nonces et compatibilité des événements, non activées par défaut.
 - Adaptateur de lecture des droits de thème fournis par Token Engine Connector, avec filtrage des définitions invalides.
 - Éditeur du catalogue préparant en mémoire les créations, modifications et suppressions avec validation des droits associés.
