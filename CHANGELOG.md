@@ -16,6 +16,9 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Module Faluss Subscriptions optionnel pour le Hub, avec stockage InnoDB, catalogue, essais, entitlements, facturation Stripe, webhooks, notifications, administration et retours historiques conservés.
+- Contrat public étroit de Subscriptions pour Portal, cycle d’activation/désactivation, garde de coexistence et SDK Stripe `21.3.0` verrouillé sans secret versionné.
+- Contrats automatisés Subscriptions pour les écritures transactionnelles, Checkout, essai, retours, idempotence, refus fermés et parité des sources historiques.
 - Module Faluss Link et Studio optionnel pour `.me`, avec éditeur, profil public, blocs, collections, médias, découvertes, onboarding, shortcodes et widgets historiques conservés.
 - Adaptateurs fermés de Link vers Identity, Catalog et Token Engine Connector, sans copie d’identité ni décision économique locale.
 - Contrats automatisés Link/Studio pour la coexistence, le schéma, les mutations transactionnelles, l’autosauvegarde, les assets historiques et la présentation mobile et bureau.

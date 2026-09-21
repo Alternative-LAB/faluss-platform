@@ -32,5 +32,7 @@ jobs:
         run: composer test
       - name: Faluss Link transactional behavior contract
         run: php tests/Link/link-hotfix-behavior-test.php
+      - name: Faluss Subscriptions historical behavior contracts
+        run: for test in tests/Subscriptions/faluss-subscriptions-*.php; do php "$test"; done
       - name: Dependency audit
         run: composer audit --locked

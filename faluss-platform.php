@@ -28,6 +28,15 @@ spl_autoload_register(static function (string $class): void {
     }
 });
 
+register_activation_hook(
+    __FILE__,
+    [\Faluss\Platform\Subscriptions\SubscriptionsModule::class, 'activate']
+);
+register_deactivation_hook(
+    __FILE__,
+    [\Faluss\Platform\Subscriptions\SubscriptionsModule::class, 'deactivate']
+);
+
 add_action('plugins_loaded', static function (): void {
     $role = \Faluss\Platform\Core\SiteRole::fromValue(
         defined('FALUSS_PLATFORM_ROLE') ? constant('FALUSS_PLATFORM_ROLE') : null
@@ -87,6 +96,19 @@ add_action('plugins_loaded', static function (): void {
         && !class_exists('Faluss_Identity_Client_Schema', false)
     ) {
         $registry->register(new \Faluss\Platform\IdentityClient\IdentityClientModule());
+    }
+    if ($role === \Faluss\Platform\Core\SiteRole::Hub
+        && defined('FALUSS_PLATFORM_SUBSCRIPTIONS')
+        && constant('FALUSS_PLATFORM_SUBSCRIPTIONS') === true
+        && !class_exists('Faluss_Subscriptions_Schema', false)
+        && !class_exists('Faluss_Subscriptions_Catalog', false)
+        && !class_exists('Faluss_Subscriptions_Repository', false)
+        && !class_exists('Faluss_Subscriptions_Resolver', false)
+        && !class_exists('Faluss_Subscriptions_Billing', false)
+        && !class_exists('Faluss_Subscriptions_Webhooks', false)
+        && !class_exists('Faluss_Subscriptions_Admin', false)
+    ) {
+        $registry->register(new \Faluss\Platform\Subscriptions\SubscriptionsModule());
     }
     if ($role === \Faluss\Platform\Core\SiteRole::Hub
         && defined('FALUSS_PLATFORM_PORTAL')

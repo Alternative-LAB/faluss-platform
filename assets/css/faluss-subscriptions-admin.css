@@ -1,0 +1,30 @@
+.faluss-subscriptions-admin {
+    --faluss-subscriptions-canvas: #fffdf5;
+    --faluss-subscriptions-surface: #fff;
+    --faluss-subscriptions-ink: #080808;
+    --faluss-subscriptions-muted: #6f6a63;
+    --faluss-subscriptions-accent: #ff3d16;
+    --faluss-subscriptions-border: rgba(8, 8, 8, .12);
+    --faluss-subscriptions-shadow: 0 12px 30px rgba(8, 8, 8, .06);
+    color: var(--faluss-subscriptions-ink);
+    max-width: 1120px;
+}
+.faluss-subscriptions-admin .nav-tab-wrapper { margin: 26px 0 18px; }
+.faluss-subscriptions-admin .nav-tab { border-color: var(--faluss-subscriptions-border); color: var(--faluss-subscriptions-muted); }
+.faluss-subscriptions-admin .nav-tab-active { background: var(--faluss-subscriptions-surface); border-bottom-color: var(--faluss-subscriptions-surface); color: var(--faluss-subscriptions-ink); }
+.faluss-subscriptions-admin__panel { background: var(--faluss-subscriptions-surface); border: 1px solid var(--faluss-subscriptions-border); border-radius: 14px; box-shadow: var(--faluss-subscriptions-shadow); margin: 18px 0; padding: 24px; }
+.faluss-subscriptions-admin__panel h2 { margin-top: 0; }
+.faluss-subscriptions-admin__search, .faluss-subscriptions-admin__form { display: grid; gap: 12px; max-width: 680px; }
+.faluss-subscriptions-admin__search label, .faluss-subscriptions-admin__form label { font-weight: 600; }
+.faluss-subscriptions-admin__search input, .faluss-subscriptions-admin__form input, .faluss-subscriptions-admin__form textarea { border: 1px solid var(--faluss-subscriptions-border); border-radius: 8px; box-sizing: border-box; display: block; margin-top: 6px; max-width: 100%; min-height: 40px; padding: 8px 10px; width: 100%; }
+.faluss-subscriptions-admin__form + .faluss-subscriptions-admin__form { border-top: 1px solid var(--faluss-subscriptions-border); margin-top: 24px; padding-top: 24px; }
+.faluss-subscriptions-admin .button-primary { background: var(--faluss-subscriptions-accent); border-color: var(--faluss-subscriptions-accent); }
+.faluss-subscriptions-admin .button-primary:hover, .faluss-subscriptions-admin .button-primary:focus { background: #d93412; border-color: #d93412; }
+.faluss-subscriptions-admin__definition { display: grid; gap: 6px 24px; grid-template-columns: minmax(160px, 240px) 1fr; }
+.faluss-subscriptions-admin__definition dt { color: var(--faluss-subscriptions-muted); font-weight: 600; }
+.faluss-subscriptions-admin__definition dd { margin: 0; }
+.faluss-subscriptions-admin pre { background: var(--faluss-subscriptions-canvas); border-radius: 8px; overflow: auto; padding: 12px; }
+.faluss-subscriptions-admin table form { align-items: center; display: flex; gap: 8px; }
+.faluss-subscriptions-admin table input { max-width: 180px; }
+.faluss-subscriptions-admin :focus-visible { outline: 3px solid #5548ff; outline-offset: 2px; }
+@media (max-width: 782px) { .faluss-subscriptions-admin__panel { padding: 16px; } .faluss-subscriptions-admin__definition { grid-template-columns: 1fr; } }

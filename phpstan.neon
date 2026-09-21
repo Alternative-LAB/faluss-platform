@@ -20,4 +20,5 @@ parameters:
             - src/Link/LegacyLinkSchema.php
             - src/Link/LegacyLinkService.php
             - src/Link/LegacyLinkWidgets.php
+            - src/Subscriptions/Legacy/includes/*.php
     tmpDir: .cache/phpstan
