@@ -28,6 +28,7 @@ final class IdentityClientModuleTest extends TestCase
         self::assertTrue(class_exists('Faluss_Identity_Client_Schema', false));
         self::assertTrue(class_exists('Faluss_Identity_Client_Apps_Registry_Adapter', false));
         self::assertTrue(method_exists('Faluss_Identity_Client', 'member_app_projection'));
+        self::assertTrue(method_exists('Faluss_Identity_Client', 'current_linked_subject'));
         self::assertSame(600, \Faluss_Identity_Client::TTL);
         self::assertSame(3600, \Faluss_Identity_Client::MEMBER_SESSION_TTL);
         self::assertArrayHasKey('admin_post_faluss_identity_client_start', $GLOBALS['identity_client_test_hooks']);

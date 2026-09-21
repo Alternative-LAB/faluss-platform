@@ -16,6 +16,9 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Module Faluss Portal optionnel pour le Hub, avec shortcode, navigation, assets, manifest, catalogues descriptifs et façades historiques conservés.
+- Adaptateurs fermés de Portal vers Identity Client, Apps Registry, Subscriptions, Token Engine et Analytics, sans lecture directe de table ni copie de prix, droit ou montant PF.
+- Contrats automatisés Portal pour la session liée, l’unique lecture Apps Registry, les dépendances indisponibles, l’autorité économique, la coexistence et la parité de présentation.
 - Module Faluss Apps Registry optionnel pour `.me` et le Hub, avec façades PHP historiques, contrats fermés, lecture membre bornée et cache public fédéré de cinq minutes au plus.
 - Contrats automatisés du registre pour les manifests propriétaires, le modèle `apps.registry`, les collisions de sources, l'autorité Hub exacte et l'absence de fuite du `faluss_id`.
 - Module Faluss Identity Client optionnel pour `faluss.com`, avec Authorization Code, PKCE S256, état navigateur lié, tables et façades publiques historiques conservées.

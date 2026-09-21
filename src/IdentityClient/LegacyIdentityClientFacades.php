@@ -94,6 +94,12 @@ final class Faluss_Identity_Client
     {
         return IdentityClientService::callbackUrl();
     }
+
+    /** @return array{faluss_id:string,created_at:string,last_proved_at:string}|null */
+    public static function current_linked_subject(): ?array
+    {
+        return IdentityClientService::currentLinkedSubject();
+    }
 }
 
 final class Faluss_Identity_Client_Schema

@@ -18,4 +18,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --check assets/catalog.js
+      - run: find assets tests -name '*.js' -print0 | xargs -0 -n1 node --check

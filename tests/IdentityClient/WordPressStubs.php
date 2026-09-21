@@ -80,6 +80,8 @@ namespace Faluss\Platform\IdentityClient {
         public ?string $expectedBrowserHash = null;
         public mixed $linkedUserId = null;
         public mixed $existingLinkId = null;
+        /** @var array<string, mixed>|null */
+        public ?array $subjectRow = null;
         public int $updateResult = 1;
         public int $insertResult = 1;
 
@@ -107,6 +109,9 @@ namespace Faluss\Platform\IdentityClient {
         public function get_row(string $query, mixed $output = null): ?array
         {
             unset($output);
+            if (str_contains($query, 'SELECT faluss_id, created_at, last_proved_at')) {
+                return $this->subjectRow;
+            }
             $last = end($this->prepared);
             if (str_contains($query, 'state_hash')
                 && $this->expectedBrowserHash !== null
@@ -235,6 +240,13 @@ namespace Faluss\Platform\IdentityClient {
         $user = $GLOBALS['identity_client_test_current_user'];
 
         return $user instanceof \WP_User ? $user->ID : 0;
+    }
+
+    function wp_get_current_user(): \WP_User
+    {
+        $user = $GLOBALS['identity_client_test_current_user'];
+
+        return $user instanceof \WP_User ? $user : new \WP_User(0, []);
     }
 
     function get_userdata(int $userId): \WP_User|false

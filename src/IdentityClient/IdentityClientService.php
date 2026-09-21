@@ -262,6 +262,43 @@ final class IdentityClientService
         return self::callbackUri();
     }
 
+    /**
+     * Narrow local contract for member surfaces. It exposes no email, WordPress
+     * identifier, role, secret or cross-application business data.
+     *
+     * @return array{faluss_id:string,created_at:string,last_proved_at:string}|null
+     */
+    public static function currentLinkedSubject(): ?array
+    {
+        if (!is_user_logged_in()) {
+            return null;
+        }
+        $user = wp_get_current_user();
+        if (array_values((array) $user->roles) !== ['subscriber']) {
+            return null;
+        }
+        global $wpdb;
+        $tables = IdentityClientSchema::tables();
+        if (empty($tables['links'])) {
+            return null;
+        }
+        $link = $wpdb->get_row($wpdb->prepare(
+            'SELECT faluss_id, created_at, last_proved_at FROM '
+                . self::quoteIdentifier($tables['links'])
+                . ' WHERE wp_user_id = %d LIMIT 1',
+            $user->ID
+        ), 'ARRAY_A');
+        if (!is_array($link) || !self::isUuid($link['faluss_id'] ?? null)) {
+            return null;
+        }
+
+        return [
+            'faluss_id' => strtolower((string) $link['faluss_id']),
+            'created_at' => self::isUtcDate($link['created_at'] ?? null) ? (string) $link['created_at'] : '',
+            'last_proved_at' => self::isUtcDate($link['last_proved_at'] ?? null) ? (string) $link['last_proved_at'] : '',
+        ];
+    }
+
     private static function isLocalMemberSession(): bool
     {
         return is_user_logged_in() && self::isLinkedNormalMember(get_current_user_id());
@@ -691,5 +728,11 @@ final class IdentityClientService
         return is_string($value)
             && preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/D', $value) === 1
             && $value > gmdate('Y-m-d H:i:s');
+    }
+
+    private static function isUtcDate(mixed $value): bool
+    {
+        return is_string($value)
+            && preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/D', $value) === 1;
     }
 }

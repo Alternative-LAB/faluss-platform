@@ -5,4 +5,12 @@ parameters:
     scanFiles:
         - vendor/php-stubs/wordpress-stubs/wordpress-stubs.php
         - phpstan/elementor-stubs.php
+        - phpstan/portal-runtime-stubs.php
+    excludePaths:
+        analyse:
+            - src/Portal/LegacyPortalService.php
+            - src/Portal/LegacyPortalManifest.php
+            - src/Portal/LegacyPortalAppsRegistryAdapter.php
+            - src/Portal/LegacyPortalEventsCatalog.php
+            - src/Portal/LegacyPortalEventsRuntime.php
     tmpDir: .cache/phpstan

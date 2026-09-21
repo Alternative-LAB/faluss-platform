@@ -76,5 +76,16 @@ add_action('plugins_loaded', static function (): void {
     ) {
         $registry->register(new \Faluss\Platform\IdentityClient\IdentityClientModule());
     }
+    if ($role === \Faluss\Platform\Core\SiteRole::Hub
+        && defined('FALUSS_PLATFORM_PORTAL')
+        && constant('FALUSS_PLATFORM_PORTAL') === true
+        && !class_exists('Faluss_Portal', false)
+        && !class_exists('Faluss_Portal_Manifest', false)
+        && !class_exists('Faluss_Portal_Apps_Registry_Adapter', false)
+        && !class_exists('Faluss_Portal_Events_Catalog', false)
+        && !class_exists('Faluss_Portal_Events_Runtime', false)
+    ) {
+        $registry->register(new \Faluss\Platform\Portal\PortalModule());
+    }
     $registry->boot();
 }, 20);

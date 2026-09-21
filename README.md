@@ -18,6 +18,8 @@ Le module optionnel des jetons visuels de `faluss.me` est décrit dans [`docs/mo
 
 Le module optionnel du catalogue de thèmes de cartes est décrit dans [`docs/modules/CATALOG.md`](docs/modules/CATALOG.md). Sa bascule exige une validation séparée de Faluss Link et du Connector ; il reste lui aussi désactivé par défaut.
 
+Le module optionnel Faluss Portal du Hub est décrit dans [`docs/modules/PORTAL.md`](docs/modules/PORTAL.md). Il exige Identity Client et Apps Registry, conserve les surfaces historiques et reste désactivé par défaut.
+
 ## Contribution
 
 - Les règles applicables aux agents sont définies dans [`AGENTS.md`](AGENTS.md).
