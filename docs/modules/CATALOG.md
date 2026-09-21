@@ -28,7 +28,24 @@ Cette étape n’enregistre aucun hook, menu, route ou façade globale. Le plugi
 
 Le rendu a été vérifié dans une installation WordPress jetable avec un thème enregistré : le titre, le thème et les trois nonces attendus sont présents. Cet essai ne couvre pas encore le thème Elementor réel ni la bascule de production.
 
-L’activation contrôlée de l’écran et des actions, ainsi que la façade PHP consommée par Faluss Link, restent à migrer. Aucun ancien plugin ne peut encore être désactivé.
+## Activation contrôlée et compatibilité
+
+`CatalogModule` réunit le lecteur, l’éditeur, l’écran et les actions. Il s’enregistre uniquement sur le rôle `me`, avec la constante booléenne `FALUSS_PLATFORM_CATALOG` à `true`, et si la classe historique `Faluss_Catalog_Themes` n’est pas déjà chargée. La façade globale portant ce nom conserve les méthodes de lecture et les constantes utilisées par Faluss Link ; les noms d’actions et l’option restent inchangés.
+
+```php
+define('FALUSS_PLATFORM_ROLE', 'me');
+define('FALUSS_PLATFORM_CATALOG', true);
+```
+
+Ces constantes appartiennent à la configuration non versionnée du site, pas au dépôt Git. Tant que `faluss-catalog` est actif, le nouveau module ne se charge pas et aucun endpoint ne se superpose. Aucun site de production n’a été modifié par cette branche.
+
+Un essai sur un WordPress jetable a confirmé l’activation explicite, la lecture d’un thème par `Faluss_Catalog_Themes`, l’enregistrement du sous-menu et des actions, la création d’un thème par l’action WordPress avec nonce réel, ainsi que le refus de chargement lorsqu’une classe historique existe déjà. L’environnement d’essai a été supprimé après vérification.
+
+Une comparaison supplémentaire a exécuté successivement l’ancien et le nouveau catalogue sur la même option synthétique (thème actif, thème archivé, entrée invalide). Les résultats complets de `all_for_scope`, `active_for_scope` et `get_active_theme` étaient identiques ; ce jeu est conservé comme test de non-régression. Cette preuve ciblée ne remplace pas une comparaison sur les données et le thème réels de `faluss.me`.
+
+Avant une bascule approuvée, tester sur une copie de `faluss.me` : sauvegarder l’option et des cartes utilisant des thèmes personnalisés ; vérifier Faluss Link, l’éditeur, les images, les droits Connector et les comportements lors de désactivation/suppression. Pour basculer, définir la constante, puis désactiver l’ancien catalogue. Le nouveau module prend le relais à la requête suivante, sans conversion des données.
+
+Pour revenir en arrière, **désactiver d’abord `FALUSS_PLATFORM_CATALOG` dans la configuration, charger une nouvelle requête, puis réactiver `faluss-catalog`**. Réactiver l’ancien plugin dans la même requête où la façade du nouveau module est déjà chargée provoquerait une collision de classe PHP. L’option historique est conservée.
 
 ## Dépendances et risques à vérifier avant bascule
 

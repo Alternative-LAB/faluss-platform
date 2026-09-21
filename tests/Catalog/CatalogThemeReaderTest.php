@@ -75,4 +75,43 @@ final class CatalogThemeReaderTest extends TestCase
         self::assertSame(['faluss-default', 'first', 'a', 'z'], array_keys($reader->allForScope()));
         self::assertSame(['faluss-default'], array_keys($reader->allForScope('other-scope')));
     }
+
+    public function testMatchesLegacyPluginSnapshotForRepresentativeRecords(): void
+    {
+        $reader = new CatalogThemeReader([
+            'evening' => [
+                'name' => 'Evening', 'active' => 1, 'sort_order' => 10,
+                'page_background' => '#123456', 'hero_transition_color' => '#ABCDEF',
+                'name_color' => '#BE79FF', 'alignment' => 'center',
+                'social_variant' => 'full', 'link_style' => 'light',
+                'entitlement_code' => 'theme.gold',
+            ],
+            'archived' => ['name' => 'Archived', 'active' => 0, 'sort_order' => 1],
+            'invalid' => ['name' => ''],
+        ]);
+
+        $expectedEvening = [
+            'name' => 'Evening', 'slug' => 'evening', 'active' => 1,
+            'sort_order' => 10, 'preview_attachment_id' => 0, 'scope' => 'faluss-link',
+            'page_background' => '#123456', 'hero_transition_color' => '#ABCDEF',
+            'name_color' => '#BE79FF', 'alignment' => 'center',
+            'social_variant' => 'full', 'link_style' => 'light',
+            'entitlement_code' => 'theme.gold', 'system' => false,
+        ];
+        $expectedArchived = array_replace($expectedEvening, [
+            'name' => 'Archived', 'slug' => 'archived', 'active' => 0,
+            'sort_order' => 1, 'page_background' => '#FFFDF5',
+            'hero_transition_color' => '#FFFDF5', 'name_color' => '#000000',
+            'alignment' => 'left', 'social_variant' => 'outline',
+            'link_style' => 'dark', 'entitlement_code' => '',
+        ]);
+
+        self::assertSame([
+            'faluss-default' => CatalogThemeReader::systemTheme(),
+            'archived' => $expectedArchived,
+            'evening' => $expectedEvening,
+        ], $reader->allForScope());
+        self::assertSame(['faluss-default', 'evening'], array_keys($reader->activeForScope()));
+        self::assertSame($expectedEvening, $reader->getActiveTheme('evening'));
+    }
 }

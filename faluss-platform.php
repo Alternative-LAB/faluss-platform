@@ -46,5 +46,12 @@ add_action('plugins_loaded', static function (): void {
     ) {
         $registry->register(new \Faluss\Platform\Theme\ThemeTokensModule());
     }
+    if ($role === \Faluss\Platform\Core\SiteRole::Me
+        && defined('FALUSS_PLATFORM_CATALOG')
+        && constant('FALUSS_PLATFORM_CATALOG') === true
+        && !class_exists('Faluss_Catalog_Themes', false)
+    ) {
+        $registry->register(new \Faluss\Platform\Catalog\CatalogModule());
+    }
     $registry->boot();
 }, 20);

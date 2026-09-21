@@ -16,6 +16,8 @@ Le socle n’active que le module d’administration : il ne remplace aucun plug
 
 Le module optionnel des jetons visuels de `faluss.me` est décrit dans [`docs/modules/THEME-TOKENS.md`](docs/modules/THEME-TOKENS.md). Il reste désactivé sans activation explicite.
 
+Le module optionnel du catalogue de thèmes de cartes est décrit dans [`docs/modules/CATALOG.md`](docs/modules/CATALOG.md). Sa bascule exige une validation séparée de Faluss Link et du Connector ; il reste lui aussi désactivé par défaut.
+
 ## Contribution
 
 - Les règles applicables aux agents sont définies dans [`AGENTS.md`](AGENTS.md).
