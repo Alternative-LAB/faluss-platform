@@ -41,6 +41,8 @@ Ces constantes appartiennent à la configuration non versionnée du site, pas au
 
 Un essai sur un WordPress jetable a confirmé l’activation explicite, la lecture d’un thème par `Faluss_Catalog_Themes`, l’enregistrement du sous-menu et des actions, la création d’un thème par l’action WordPress avec nonce réel, ainsi que le refus de chargement lorsqu’une classe historique existe déjà. L’environnement d’essai a été supprimé après vérification.
 
+Une comparaison supplémentaire a exécuté successivement l’ancien et le nouveau catalogue sur la même option synthétique (thème actif, thème archivé, entrée invalide). Les résultats complets de `all_for_scope`, `active_for_scope` et `get_active_theme` étaient identiques ; ce jeu est conservé comme test de non-régression. Cette preuve ciblée ne remplace pas une comparaison sur les données et le thème réels de `faluss.me`.
+
 Avant une bascule approuvée, tester sur une copie de `faluss.me` : sauvegarder l’option et des cartes utilisant des thèmes personnalisés ; vérifier Faluss Link, l’éditeur, les images, les droits Connector et les comportements lors de désactivation/suppression. Pour basculer, définir la constante, puis désactiver l’ancien catalogue. Le nouveau module prend le relais à la requête suivante, sans conversion des données.
 
 Pour revenir en arrière, **désactiver d’abord `FALUSS_PLATFORM_CATALOG` dans la configuration, charger une nouvelle requête, puis réactiver `faluss-catalog`**. Réactiver l’ancien plugin dans la même requête où la façade du nouveau module est déjà chargée provoquerait une collision de classe PHP. L’option historique est conservée.

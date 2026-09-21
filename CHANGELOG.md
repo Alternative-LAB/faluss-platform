@@ -9,6 +9,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 ### Ajouté
 
 - Module de catalogue optionnel pour `.me`, avec façade PHP compatible Faluss Link et garde empêchant la coexistence avec l’ancien plugin.
+- Test de parité de lecture du catalogue issu d’une comparaison avec le plugin historique sur des données synthétiques.
 - Écran de gestion du catalogue préparé dans l’administration Faluss, non activé avant la bascule du module.
 - Vérification CI de la syntaxe JavaScript de l’écran du catalogue.
 - Actions d’administration du catalogue avec contrôles de droits, nonces et compatibilité des événements, non activées par défaut.
