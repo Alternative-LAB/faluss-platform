@@ -37,6 +37,8 @@ git pull --ff-only
 git switch -c feat/module-registry
 ```
 
+Quand une petite PR dépend d’une autre PR non fusionnée, créer la branche suivante depuis la branche précédente et choisir cette dernière comme base de la nouvelle PR. Chaque PR montre ainsi uniquement son propre changement. Après fusion de la PR de base, rebaser ou ajuster la cible de la suivante vers `main`. Les contrôles CI s’exécutent sur toutes les PR, y compris celles de cette chaîne.
+
 ## Commits
 
 Les sujets de commits utilisent un gitmoji suivi d’un message impératif en anglais :

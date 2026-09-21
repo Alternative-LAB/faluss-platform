@@ -11,7 +11,7 @@ WordPress remains responsible for content, presentation, Elementor integration, 
 ## Git workflow
 
 - Never commit or push directly to `main`.
-- Create a dedicated branch from an up-to-date `main` for every change.
+- Create a dedicated branch from an up-to-date `main`. For a sequence of small dependent PRs, branch from the preceding PR branch and explicitly target that branch; retarget to `main` as earlier PRs merge.
 - Use explicit branch prefixes: `feat/`, `fix/`, `refactor/`, `docs/`, `chore/`, `test/`, `ci/`, `build/`, `perf/`, or `hotfix/`.
 - Keep pull requests small, coherent, independently testable, and easy to review.
 - Do not mix unrelated refactors, features, and formatting changes.
