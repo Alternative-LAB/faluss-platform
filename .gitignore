@@ -32,6 +32,22 @@ wp-config.php
 # Log files
 *.log
 
+# Development dependencies and generated output
+/vendor/
+/.cache/
+/.phpunit.cache/
+/.phpunit.result.cache
+/coverage/
+/dist/
+/.env
+/.env.*
+!/.env.example
+*.sql
+*.sql.gz
+*.pem
+*.key
+auth.json
+
 # htaccess
 /.htaccess
 
