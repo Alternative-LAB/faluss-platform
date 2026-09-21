@@ -73,7 +73,19 @@ final class ThemeTokensModule implements Module
         wp_enqueue_style('faluss-platform-admin', plugins_url('assets/admin.css', dirname(__DIR__, 2) . '/faluss-platform.php'), [], '0.1.0');
         wp_enqueue_style('wp-color-picker');
         wp_enqueue_script('wp-color-picker');
-        wp_add_inline_script('wp-color-picker', 'jQuery(function($){$(".faluss-theme-color").wpColorPicker();});');
+        wp_add_inline_script('wp-color-picker', <<<'JS'
+jQuery(function($) {
+    $('.faluss-theme-color').wpColorPicker();
+    $('.faluss-admin__field').each(function() {
+        const field = $(this);
+        const label = field.find('label').first().text().trim();
+        const button = field.find('.wp-color-result');
+        if (label && button.length) {
+            button.attr('aria-label', label + ' : ' + button.text().trim());
+        }
+    });
+});
+JS);
     }
 
     public function render(): void
@@ -107,10 +119,10 @@ final class ThemeTokensModule implements Module
                     <h2><?php echo esc_html__('Couleurs', 'faluss-platform'); ?></h2>
                     <div class="faluss-admin__fields">
                         <?php foreach ($colors as $key => $label): ?>
-                            <label class="faluss-admin__field" for="faluss-theme-<?php echo esc_attr($key); ?>">
-                                <span><?php echo esc_html($label); ?></span>
+                            <div class="faluss-admin__field">
+                                <label for="faluss-theme-<?php echo esc_attr($key); ?>"><?php echo esc_html($label); ?></label>
                                 <input id="faluss-theme-<?php echo esc_attr($key); ?>" class="faluss-theme-color" name="<?php echo esc_attr(ThemeTokenSet::OPTION); ?>[<?php echo esc_attr($key); ?>]" value="<?php echo esc_attr($values[$key]); ?>">
-                            </label>
+                            </div>
                         <?php endforeach; ?>
                     </div>
                     <h2><?php echo esc_html__('Formes et relief', 'faluss-platform'); ?></h2>
@@ -123,7 +135,7 @@ final class ThemeTokensModule implements Module
                             <span><?php echo esc_html__('Ombre de carte', 'faluss-platform'); ?></span>
                             <select id="faluss-theme-shadow" name="<?php echo esc_attr(ThemeTokenSet::OPTION); ?>[shadow]">
                                 <?php foreach (ThemeTokenSet::shadows() as $key => $shadow): ?>
-                                    <option value="<?php echo esc_attr($key); ?>" <?php selected($values['shadow'], $key); ?>><?php echo esc_html($key); ?></option>
+                                    <option value="<?php echo esc_attr($key); ?>" <?php selected($values['shadow'], $key); ?>><?php echo esc_html(ThemeTokenSet::shadowLabels()[$key]); ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </label>
@@ -137,7 +149,9 @@ final class ThemeTokensModule implements Module
                     <?php submit_button(__('Enregistrer les réglages', 'faluss-platform')); ?>
                 </form>
                 <form method="post" action="options.php" class="faluss-admin__reset">
-                    <?php settings_fields('faluss_platform_theme'); ?>
+                    <input type="hidden" name="option_page" value="faluss_platform_theme">
+                    <input type="hidden" name="action" value="update">
+                    <input type="hidden" id="faluss-theme-reset-nonce" name="_wpnonce" value="<?php echo esc_attr(wp_create_nonce('faluss_platform_theme-options')); ?>">
                     <?php foreach (ThemeTokenSet::defaults() as $key => $value): ?>
                         <input type="hidden" name="<?php echo esc_attr(ThemeTokenSet::OPTION); ?>[<?php echo esc_attr($key); ?>]" value="<?php echo esc_attr($value); ?>">
                     <?php endforeach; ?>
@@ -148,8 +162,8 @@ final class ThemeTokensModule implements Module
                     <div class="faluss-theme-preview__card">
                         <strong><?php echo esc_html__('Une carte Faluss', 'faluss-platform'); ?></strong>
                         <p><?php echo esc_html__('Une surface calme, lisible et cohérente.', 'faluss-platform'); ?></p>
-                        <button type="button"><?php echo esc_html__('Action principale', 'faluss-platform'); ?></button>
-                        <button class="is-hover" type="button"><?php echo esc_html__('Survol', 'faluss-platform'); ?></button>
+                        <span class="faluss-theme-preview__action"><?php echo esc_html__('Action principale', 'faluss-platform'); ?></span>
+                        <span class="faluss-theme-preview__action is-hover"><?php echo esc_html__('Survol', 'faluss-platform'); ?></span>
                     </div>
                 </div>
             </div>
