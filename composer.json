@@ -7,6 +7,7 @@
     "php": ">=8.2"
   },
   "require-dev": {
+    "php-stubs/wordpress-stubs": "^7.1",
     "phpstan/phpstan": "^2.0",
     "phpunit/phpunit": "^11.0"
   },
