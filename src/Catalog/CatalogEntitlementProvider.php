@@ -6,17 +6,21 @@ namespace Faluss\Platform\Catalog;
 
 final class CatalogEntitlementProvider
 {
+    public function __construct(
+        private readonly string $connectorClass = 'Token_Engine_Connector_Service'
+    ) {
+    }
+
     /** @return array<string, string>|false */
     public function available(): array|false
     {
-        if (!class_exists('Token_Engine_Connector_Service')
-            || !is_callable(['Token_Engine_Connector_Service', 'entitlement_definitions'])
-        ) {
+        $callback = [$this->connectorClass, 'entitlement_definitions'];
+        if (!class_exists($this->connectorClass, false) || !is_callable($callback)) {
             return false;
         }
 
-        $definitions = call_user_func(['Token_Engine_Connector_Service', 'entitlement_definitions']);
-        if (is_wp_error($definitions) || !is_array($definitions)) {
+        $definitions = call_user_func($callback);
+        if ($definitions instanceof \WP_Error || !is_array($definitions)) {
             return false;
         }
 
