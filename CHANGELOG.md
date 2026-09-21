@@ -8,6 +8,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Inventaire en lecture seule des plugins Faluss historiques actifs dans le tableau de bord de chaque site.
 - Validation des PR empilées par les workflows de gouvernance et de qualité PHP.
 - Tests automatisés des hooks, de l’option et du handle CSS conservés par le module de jetons visuels.
 - Module optionnel des jetons visuels de `.me`, réutilisant l’option et les variables CSS du plugin historique sans activation automatique.

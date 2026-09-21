@@ -38,3 +38,5 @@ Le socle ne déclare aucune route REST, aucun shortcode, hook métier, schéma S
 ## Administration
 
 Sur un site dont le rôle est configuré, l’entrée de menu « Faluss » donne accès à une page de synthèse montrant le rôle local et les modules chargés. Ce n’est pas un indicateur de connexion réseau entre les deux sites. Seuls les comptes disposant de la capacité WordPress `manage_options` peuvent y accéder. La feuille de style est chargée uniquement sur cette page et ne modifie pas les interfaces des anciens plugins. Aucune action d’écriture, donnée personnelle ou appel réseau n’est ajouté. Si le rôle manque, aucun menu Faluss Platform n’est créé.
+
+L’[inventaire des plugins historiques](modules/LEGACY-INVENTORY.md) s’affiche sur cette page pour aider à suivre la migration sur chaque site. Il est local et en lecture seule.

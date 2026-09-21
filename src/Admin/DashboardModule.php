@@ -76,6 +76,11 @@ final class DashboardModule implements Module
 
         $role = $this->role === SiteRole::Me ? 'faluss.me' : 'faluss.com';
         $modules = $this->registry->activeModuleIds();
+        $activePlugins = get_option('active_plugins', []);
+        $inventory = new LegacyPluginInventory(
+            $this->role,
+            is_array($activePlugins) ? array_values(array_filter($activePlugins, 'is_string')) : []
+        );
         ?>
         <div class="wrap faluss-admin">
             <div class="faluss-admin__hero">
@@ -94,6 +99,11 @@ final class DashboardModule implements Module
                     <p class="faluss-admin__value"><?php echo esc_html((string) count($modules)); ?></p>
                     <p><?php echo esc_html__('La liste évoluera progressivement, après validation de chaque migration.', 'faluss-platform'); ?></p>
                 </section>
+                <section class="faluss-admin__card" aria-labelledby="faluss-legacy-count-title">
+                    <h2 id="faluss-legacy-count-title"><?php echo esc_html__('Plugins Faluss historiques actifs', 'faluss-platform'); ?></h2>
+                    <p class="faluss-admin__value"><?php echo esc_html((string) $inventory->activeCount()); ?></p>
+                    <p><?php echo esc_html__('Inventaire local, sans appel à l’autre site.', 'faluss-platform'); ?></p>
+                </section>
             </div>
             <section class="faluss-admin__card" aria-labelledby="faluss-status-title">
                 <h2 id="faluss-status-title"><?php echo esc_html__('État des modules', 'faluss-platform'); ?></h2>
@@ -102,6 +112,28 @@ final class DashboardModule implements Module
                         <li><span class="faluss-admin__dot" aria-hidden="true"></span><?php echo esc_html($module); ?></li>
                     <?php endforeach; ?>
                 </ul>
+            </section>
+            <section class="faluss-admin__card faluss-admin__inventory" aria-labelledby="faluss-legacy-title">
+                <h2 id="faluss-legacy-title"><?php echo esc_html__('Inventaire des plugins historiques', 'faluss-platform'); ?></h2>
+                <p><?php echo esc_html__('État des extensions connues sur ce WordPress. Ce relevé ne vérifie pas leur bon fonctionnement.', 'faluss-platform'); ?></p>
+                <div class="faluss-admin__table-scroll">
+                    <table class="widefat striped">
+                        <thead><tr>
+                            <th scope="col"><?php echo esc_html__('Extension', 'faluss-platform'); ?></th>
+                            <th scope="col"><?php echo esc_html__('Fichier', 'faluss-platform'); ?></th>
+                            <th scope="col"><?php echo esc_html__('État', 'faluss-platform'); ?></th>
+                        </tr></thead>
+                        <tbody>
+                            <?php foreach ($inventory->rows() as $plugin): ?>
+                                <tr>
+                                    <th scope="row"><?php echo esc_html($plugin['name']); ?></th>
+                                    <td><code><?php echo esc_html($plugin['basename']); ?></code></td>
+                                    <td><span class="faluss-admin__badge <?php echo $plugin['active'] ? 'is-active' : 'is-inactive'; ?>"><?php echo $plugin['active'] ? esc_html__('Actif', 'faluss-platform') : esc_html__('Inactif', 'faluss-platform'); ?></span></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </section>
         </div>
         <?php
