@@ -8,6 +8,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Adaptateur de lecture des droits de thème fournis par Token Engine Connector, avec filtrage des définitions invalides.
 - Éditeur du catalogue préparant en mémoire les créations, modifications et suppressions avec validation des droits associés.
 - Lecteur de thèmes de catalogue compatible avec le schéma et les règles de lecture historiques, non activé en production.
 - Inventaire en lecture seule des plugins Faluss historiques actifs dans le tableau de bord de chaque site.

@@ -20,7 +20,9 @@ Cette étape n’enregistre aucun hook, menu, route ou façade globale. Le plugi
 
 `CatalogThemeEditor` valide les créations et modifications, génère des identifiants uniques, refuse les changements du thème système et prépare les suppressions. Il accepte uniquement les codes de droit fournis par le Connector ; lorsque ce dernier est indisponible, seul un code déjà associé peut être conservé. Les valeurs sont préparées en mémoire, sans écriture WordPress dans cette étape. L’adaptateur administratif à venir devra contrôler capacités et nonces, appliquer `wp_unslash`, persister l’option et émettre le hook de désactivation.
 
-L’interface de gestion, le raccordement au Connector et la façade PHP consommée par Faluss Link restent à migrer. Aucun ancien plugin ne peut encore être désactivé.
+`CatalogEntitlementProvider` isole désormais la lecture des définitions du Connector et ne transmet à l’éditeur que les droits valides de type `theme`. Une réponse absente ou en erreur verrouille l’ajout de nouveaux droits, tout en permettant de conserver un droit déjà associé.
+
+L’interface de gestion, les actions WordPress et la façade PHP consommée par Faluss Link restent à migrer. Aucun ancien plugin ne peut encore être désactivé.
 
 ## Dépendances et risques à vérifier avant bascule
 
