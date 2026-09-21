@@ -20,9 +20,7 @@ final class IdentityClientAppsRegistryAdapter
 
     public static function registerSource(): bool|\WP_Error
     {
-        if (!class_exists('Faluss_Apps_Registry')
-            || !is_callable(['Faluss_Apps_Registry', 'register_source'])
-        ) {
+        if (!class_exists('Faluss_Apps_Registry')) {
             return false;
         }
 
@@ -39,7 +37,7 @@ final class IdentityClientAppsRegistryAdapter
             'peer_app_key' => 'faluss-me',
         ]);
 
-        return is_bool($result) || $result instanceof \WP_Error ? $result : false;
+        return $result;
     }
 
     public static function relationship(mixed $falussId): string|\WP_Error

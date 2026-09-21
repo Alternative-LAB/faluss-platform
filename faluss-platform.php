@@ -60,6 +60,14 @@ add_action('plugins_loaded', static function (): void {
     ) {
         $registry->register(new \Faluss\Platform\TokenEngineConnector\TokenEngineConnectorModule());
     }
+    if (defined('FALUSS_PLATFORM_APPS_REGISTRY')
+        && constant('FALUSS_PLATFORM_APPS_REGISTRY') === true
+        && !class_exists('Faluss_Apps_Registry', false)
+        && !class_exists('Faluss_Apps_Registry_Manifest_Validator', false)
+        && !class_exists('Faluss_Apps_Registry_Read_Model_Validator', false)
+    ) {
+        $registry->register(new \Faluss\Platform\AppsRegistry\AppsRegistryModule());
+    }
     if ($role === \Faluss\Platform\Core\SiteRole::Hub
         && defined('FALUSS_PLATFORM_IDENTITY_CLIENT')
         && constant('FALUSS_PLATFORM_IDENTITY_CLIENT') === true
