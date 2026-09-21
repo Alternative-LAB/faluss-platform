@@ -19,3 +19,5 @@ jobs:
         with:
           node-version: '22'
       - run: find assets tests -name '*.js' -print0 | xargs -0 -n1 node --check
+      - name: Faluss Link Studio mutation contract
+        run: node tests/Link/link-hotfix-autosave-test.js

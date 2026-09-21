@@ -1,0 +1,59 @@
+/* Private Faluss Link library: no theme- or kit-level selectors. */
+.faluss-link-discoveries {
+  --fld-canvas: var(--faluss-canvas, #FFFDF5);
+  --fld-surface: var(--faluss-surface, #FFFFFF);
+  --fld-ink: var(--faluss-ink, #080808);
+  --fld-muted: var(--faluss-muted, #6F6A63);
+  --fld-border: var(--faluss-border, rgba(8, 8, 8, .12));
+  --fld-shadow: var(--faluss-shadow, 0 8px 24px rgba(8, 8, 8, .05));
+  --fld-action: var(--faluss-action, #080808);
+  --fld-action-hover: var(--faluss-action-hover, #272522);
+  --fld-action-active: var(--faluss-action-active, #080808);
+  --fld-action-text: var(--faluss-action-text, #FFFFFF);
+  box-sizing: border-box;
+  max-width: 46rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  color: var(--fld-ink);
+  background: var(--fld-canvas);
+  font-family: Outfit, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.faluss-link-discoveries *, .faluss-link-discoveries *::before, .faluss-link-discoveries *::after { box-sizing: border-box; }
+.faluss-link-discoveries__title { margin: 0 0 1rem; color: var(--fld-ink); font-size: clamp(1.35rem, 4vw, 1.75rem); line-height: 1.12; }
+.faluss-link-discoveries__setting { display: grid; gap: .45rem; margin: 0 0 1rem; padding: 1rem; border: 1px solid var(--fld-border); border-radius: var(--faluss-card-radius, var(--faluss-card_radius, 1rem)); background: var(--fld-surface); box-shadow: var(--fld-shadow); }
+.faluss-link-discoveries__setting label { display: inline-flex; align-items: center; gap: .55rem; width: fit-content; color: var(--fld-ink); font-weight: 650; cursor: pointer; }
+.faluss-link-discoveries__setting input { inline-size: 1.1rem; block-size: 1.1rem; accent-color: var(--fld-action); }
+.faluss-link-discoveries__setting p { margin: 0; color: var(--fld-muted); font-size: .9rem; line-height: 1.45; }
+.faluss-link-discoveries__save, .faluss-link-discoveries__remove button, .faluss-link-discoveries__clear button { width: fit-content; min-height: 2.5rem; padding: .6rem 1rem; border: 1px solid transparent; border-radius: var(--faluss-pill-radius, var(--faluss-pill_radius, 999px)); font: inherit; font-weight: 650; cursor: pointer; transition: background-color .18s ease, color .18s ease, border-color .18s ease, transform .18s ease; }
+.faluss-link-discoveries__save { margin-top: .2rem; color: var(--fld-action-text); background: var(--fld-action); }
+.faluss-link-discoveries__save:hover, .faluss-link-discoveries__save:focus-visible { background: var(--fld-action-hover); }
+.faluss-link-discoveries__save:active { background: var(--fld-action-active); transform: translateY(1px); }
+.faluss-link-discoveries__notice .faluss-link-notice { margin: 0 0 1rem; color: var(--fld-ink); font-size: .9rem; }
+.faluss-link-discoveries__items { display: grid; gap: .75rem; margin: 0; padding: 0; list-style: none; }
+.faluss-link-discoveries--grid .faluss-link-discoveries__items { grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
+.faluss-link-discoveries__item { display: flex; align-items: center; gap: .75rem; min-width: 0; padding: .75rem; border: 1px solid var(--fld-border); border-radius: var(--faluss-card-radius, var(--faluss-card_radius, 1rem)); background: var(--fld-surface); box-shadow: var(--fld-shadow); }
+.faluss-link-discoveries__profile { display: flex; align-items: center; gap: .75rem; min-width: 0; flex: 1 1 auto; color: inherit; text-decoration: none; }
+.faluss-link-discoveries__profile > img { flex: 0 0 auto; inline-size: 3rem; block-size: 3rem; border-radius: 50%; object-fit: cover; background: var(--fld-canvas); }
+.faluss-link-discoveries__identity { display: grid; min-width: 0; gap: .08rem; }
+.faluss-link-discoveries__identity strong, .faluss-link-discoveries__identity span, .faluss-link-discoveries__identity time { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.faluss-link-discoveries__identity strong { color: var(--fld-ink); }
+.faluss-link-discoveries__identity span, .faluss-link-discoveries__identity time { color: var(--fld-muted); font-size: .86rem; }
+.faluss-link-discoveries__remove { margin: 0; flex: 0 0 auto; }
+.faluss-link-discoveries__remove button, .faluss-link-discoveries__clear button { color: var(--fld-ink); border-color: var(--fld-border); background: transparent; font-size: .86rem; }
+.faluss-link-discoveries__remove button:hover, .faluss-link-discoveries__remove button:focus-visible, .faluss-link-discoveries__clear button:hover, .faluss-link-discoveries__clear button:focus-visible { border-color: var(--fld-ink); background: var(--fld-canvas); }
+.faluss-link-discoveries__pages { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-top: 1rem; color: var(--fld-muted); font-size: .9rem; }
+.faluss-link-discoveries__pages a { color: var(--fld-ink); font-weight: 650; text-decoration: none; }
+.faluss-link-discoveries__pages a:hover, .faluss-link-discoveries__pages a:focus-visible { text-decoration: underline; }
+.faluss-link-discoveries__clear { margin: 1rem 0 0; }
+.faluss-link-discoveries__empty { margin: 0; padding: 1.5rem; border: 1px dashed var(--fld-border); border-radius: var(--faluss-card-radius, var(--faluss-card_radius, 1rem)); color: var(--fld-muted); background: var(--fld-surface); text-align: center; }
+.faluss-link-discoveries a:focus-visible, .faluss-link-discoveries button:focus-visible, .faluss-link-discoveries input:focus-visible { outline: 3px solid var(--faluss-accent, #FF3D16); outline-offset: 3px; }
+
+@media (max-width: 420px) {
+  .faluss-link-discoveries { padding: 1rem; }
+  .faluss-link-discoveries__item { align-items: flex-start; }
+  .faluss-link-discoveries__remove button { min-height: 2.75rem; padding-inline: .8rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faluss-link-discoveries__save, .faluss-link-discoveries__remove button, .faluss-link-discoveries__clear button { transition: none; }
+}

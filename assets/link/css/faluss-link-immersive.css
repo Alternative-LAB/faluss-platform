@@ -1,0 +1,190 @@
+.faluss-link-card--presentation-immersive {
+  --fl-page: var(--fl-page-background, var(--fl-canvas));
+  width: 100%;
+  max-width:none;
+  min-height:100vh;
+  min-height:100svh;
+  margin: 0 !important;
+  border:0;
+  border-radius: 0;
+  box-shadow:none;
+  background: var(--fl-page);
+}
+
+/* The route shell owns only the layout relationship. The real Elementor header
+   is emitted after the profile in DOM order, still out of flow: The Plus can
+   therefore keep its own popup and overlay stack without a Faluss context
+   trapping the off-canvas panel below the card. */
+body.faluss-identity-public-route {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  min-height: 100svh;
+  background: var(--faluss-ink, #080808);
+}
+
+html:has(body.faluss-identity-public-route) {
+  background: var(--faluss-ink, #080808);
+}
+
+body.faluss-identity-public-route > .faluss-identity-public-header-layer,
+body.faluss-identity-public-route > .elementor-location-header {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* Elementor Theme Builder normally emits header.elementor-location-header.
+   Accept its direct header and location variants while preserving their own
+   positioning and stacking choices. No Faluss layer may clip their panel. */
+body.faluss-identity-public-route > .faluss-identity-public-header-layer > header,
+body.faluss-identity-public-route > .faluss-identity-public-header-layer > .elementor-location-header,
+body.faluss-identity-public-route > .faluss-identity-public-header-layer > [class*="elementor-location-header"] {
+  overflow: visible;
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+body.faluss-identity-public-route > .faluss-identity-profile-page {
+  position: relative;
+  overflow: visible;
+  margin: 0;
+  padding: 0;
+}
+
+/* The Elementor header owns its overlay treatment. The immersive route never outranks it. */
+body.faluss-identity-public-route .faluss-link-card--presentation-immersive {
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+.faluss-link-card--presentation-immersive .faluss-link-card__cover {
+  /* svh is stable while Safari expands or collapses its browser chrome. */
+  height: clamp(32rem, 92vh, 54rem);
+  height: clamp(32rem, 92svh, 54rem);
+  background: var(--fl-hero-transition-color, var(--fl-page));
+}
+
+.faluss-link-card--presentation-immersive .faluss-link-card__cover img {
+  height: calc(100% + 3rem);
+  transform: translate3d(0, var(--fl-immersive-depth, 0px), 0) scale(1.05);
+  transform-origin: center top;
+  mask-image: none;
+  will-change: transform;
+}
+
+.faluss-link-card--presentation-immersive .faluss-link-card__cover::after {
+  background: linear-gradient(
+    180deg,
+    var(--fl-hero-overlay-top, rgba(8, 8, 8, .08)) 0%,
+    rgba(8, 8, 8, .18) calc(100% - var(--fl-hero-transition-intensity, 82%)),
+    var(--fl-hero-transition-color, var(--fl-page)) var(--fl-hero-transition-position, 72%),
+    var(--fl-page) 100%
+  );
+  opacity: 1;
+}
+
+.faluss-link-card--presentation-immersive .faluss-link-card__body {
+  margin-top: -21rem;
+  padding:
+    max(8rem, calc(env(safe-area-inset-top, 0px) + 4.5rem))
+    max(clamp(1.25rem, 6vw, 4rem), env(safe-area-inset-right, 0px))
+    max(3rem, calc(env(safe-area-inset-bottom, 0px) + 2rem))
+    max(clamp(1.25rem, 6vw, 4rem), env(safe-area-inset-left, 0px));
+  background: linear-gradient(180deg, transparent 0, var(--fl-page) 19rem);
+  color: var(--fl-ink);
+  transform: translate3d(0, var(--fl-immersive-panel-depth, 0px), 0);
+  will-change: transform;
+}
+
+.faluss-link-card--presentation-immersive .faluss-link-card__name {
+  max-width: min(100%, 42rem);
+  font-size: clamp(2.5rem, 9vw, 5.5rem);
+}
+
+.faluss-link-card--presentation-immersive .faluss-link-card__links {
+  max-width: 44rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--fl-border);
+}
+
+.faluss-link-card--presentation-immersive .faluss-link-card__link {
+  min-height: 3.5rem;
+  padding: 1rem 1.4rem;
+}
+
+.faluss-link-card--presentation-immersive .faluss-link-card__social {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  visibility: visible;
+  margin-top: 2rem;
+  opacity: 1;
+}
+
+.faluss-link-card--presentation-immersive.faluss-link-card--cover-no .faluss-link-card__body {
+  min-height: 100vh;
+  min-height: 100svh;
+  margin-top: 0;
+  padding-top: max(clamp(7rem, 22vw, 13rem), calc(env(safe-area-inset-top, 0px) + 4.5rem));
+  background: var(--fl-page);
+}
+
+.faluss-link-card--presentation-immersive.faluss-link-card--cover-yes.faluss-link-card--avatar-yes .faluss-link-card__avatar {
+  margin-top: -5rem;
+}
+
+.faluss-link-card--presentation-immersive.faluss-link-card--cover-no.faluss-link-card--avatar-yes .faluss-link-card__avatar {
+  margin-bottom: 1.25rem;
+}
+
+.faluss-link-card--presentation-immersive.faluss-link-card--align-center .faluss-link-card__availability {
+  width: max-content;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+@media (max-width: 799px) {
+  /* Keep the real header wrapper unclipped while The Plus opens its mobile
+     off-canvas content. This adds no stacking context or event interception. */
+  body.faluss-identity-public-route > .faluss-identity-public-header-layer,
+  body.faluss-identity-public-route > .elementor-location-header {
+    overflow: visible;
+  }
+
+  .faluss-link-card--presentation-immersive .faluss-link-card__social a,
+  .faluss-link-card--presentation-immersive .faluss-link-card__social--inline a {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (min-width: 800px) {
+  .faluss-link-card--presentation-immersive .faluss-link-card__body {
+    padding-inline: max(8vw, calc((100% - 72rem) / 2));
+  }
+
+  .faluss-link-card--presentation-immersive .faluss-link-card__cover {
+    height: min(80vh, 54rem);
+    height: min(80svh, 54rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faluss-link-card--presentation-immersive .faluss-link-card__cover img {
+    transform: none;
+    will-change: auto;
+  }
+
+  .faluss-link-card--presentation-immersive .faluss-link-card__body {
+    transform: none;
+    will-change: auto;
+  }
+}
+.faluss-link-card--presentation-immersive .faluss-link-card__content-blocks{max-width:44rem;margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--fl-border)}.faluss-link-card--presentation-immersive .faluss-link-card__section-title{margin-top:1.8rem;padding-top:1.8rem;font-size:clamp(1.2rem,4vw,1.65rem)}.faluss-link-card--presentation-immersive .faluss-link-card__content-text{max-width:42rem;font-size:1rem}
+.faluss-link-card--presentation-immersive .faluss-link-card__media-teaser{max-width:44rem;margin-top:1.5rem}.faluss-link-card--presentation-immersive .faluss-link-card__media-teaser>img{aspect-ratio:16/9}.faluss-link-card--presentation-immersive .faluss-link-card__media-teaser-copy{padding:clamp(1rem,3vw,1.5rem)}.faluss-link-card--presentation-immersive .faluss-link-card__media-teaser-copy h3{font-size:clamp(1.15rem,4vw,1.5rem)}
+.faluss-link-card--presentation-immersive .faluss-link-card__media-teaser--format-landscape>img{aspect-ratio:16/9}.faluss-link-card--presentation-immersive .faluss-link-card__media-teaser--format-portrait>img{aspect-ratio:4/5}.faluss-link-card--presentation-immersive .faluss-link-card__media-teaser--format-square>img{aspect-ratio:1/1}.faluss-link-card--presentation-immersive .faluss-link-card__media-teaser--image-only{background:transparent}

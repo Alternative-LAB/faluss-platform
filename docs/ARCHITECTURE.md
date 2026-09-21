@@ -42,3 +42,5 @@ Sur un site dont le rôle est configuré, l’entrée de menu « Faluss » donne
 L’[inventaire des plugins historiques](modules/LEGACY-INVENTORY.md) s’affiche sur cette page pour aider à suivre la migration sur chaque site. Il est local et en lecture seule.
 
 Le [module de catalogue de thèmes](modules/CATALOG.md) fournit une migration optionnelle de l’ancien catalogue sur `faluss.me`. Sans opt-in, aucun hook du nouveau catalogue n’est enregistré. Si le plugin historique est encore chargé, il reste seul responsable du catalogue.
+
+Le [module Faluss Link et Studio](modules/LINK.md) reprend sur le rôle `me` les surfaces publiques et éditoriales historiques derrière un opt-in distinct. Faluss Identity reste l’autorité active ; Link consomme ses contrats publics ainsi que ceux de Catalog et Token Engine Connector, sans recopier l’identité ni les décisions économiques.

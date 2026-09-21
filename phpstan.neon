@@ -13,4 +13,11 @@ parameters:
             - src/Portal/LegacyPortalAppsRegistryAdapter.php
             - src/Portal/LegacyPortalEventsCatalog.php
             - src/Portal/LegacyPortalEventsRuntime.php
+            - src/Link/LegacyLinkAdmin.php
+            - src/Link/LegacyLinkEventsCatalog.php
+            - src/Link/LegacyLinkEventsRuntime.php
+            - src/Link/LegacyLinkManifest.php
+            - src/Link/LegacyLinkSchema.php
+            - src/Link/LegacyLinkService.php
+            - src/Link/LegacyLinkWidgets.php
     tmpDir: .cache/phpstan

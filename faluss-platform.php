@@ -60,6 +60,18 @@ add_action('plugins_loaded', static function (): void {
     ) {
         $registry->register(new \Faluss\Platform\TokenEngineConnector\TokenEngineConnectorModule());
     }
+    if ($role === \Faluss\Platform\Core\SiteRole::Me
+        && defined('FALUSS_PLATFORM_LINK')
+        && constant('FALUSS_PLATFORM_LINK') === true
+        && !class_exists('Faluss_Link', false)
+        && !class_exists('Faluss_Link_Schema', false)
+        && !class_exists('Faluss_Link_Admin', false)
+        && !class_exists('Faluss_Link_Manifest', false)
+        && !class_exists('Faluss_Link_Events_Catalog', false)
+        && !class_exists('Faluss_Link_Events_Runtime', false)
+    ) {
+        $registry->register(new \Faluss\Platform\Link\LinkModule());
+    }
     if (defined('FALUSS_PLATFORM_APPS_REGISTRY')
         && constant('FALUSS_PLATFORM_APPS_REGISTRY') === true
         && !class_exists('Faluss_Apps_Registry', false)
