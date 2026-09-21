@@ -39,12 +39,5 @@ add_action('plugins_loaded', static function (): void {
 
     $registry = new \Faluss\Platform\Core\ModuleRegistry($role);
     $registry->register(new \Faluss\Platform\Admin\DashboardModule($role, $registry));
-    if ($role === \Faluss\Platform\Core\SiteRole::Me
-        && defined('FALUSS_PLATFORM_THEME_TOKENS')
-        && constant('FALUSS_PLATFORM_THEME_TOKENS') === true
-        && !class_exists('Faluss_Theme', false)
-    ) {
-        $registry->register(new \Faluss\Platform\Theme\ThemeTokensModule());
-    }
     $registry->boot();
 }, 20);
