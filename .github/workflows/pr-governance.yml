@@ -1,0 +1,94 @@
+name: PR governance
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  validate:
+    name: Validate branch and PR content
+    runs-on: ubuntu-latest
+    env:
+      PR_BRANCH: ${{ github.head_ref }}
+      PR_BODY: ${{ github.event.pull_request.body }}
+    steps:
+      - name: Check out the proposed changes
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate branch name
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! "$PR_BRANCH" =~ ^(feat|fix|refactor|docs|chore|test|ci|build|perf|hotfix)/[a-z0-9][a-z0-9._-]*$ ]]; then
+            echo "Invalid branch name: $PR_BRANCH"
+            echo "Use an allowed prefix followed by a lowercase explicit name."
+            exit 1
+          fi
+
+      - name: Validate required PR sections
+        shell: bash
+        run: |
+          set -euo pipefail
+          required_sections=(
+            "## Objectif"
+            "## Changements"
+            "## Changelog"
+            "## Vérifications effectuées"
+            "## Intégration et absence de régression"
+            "## Risques et retour arrière"
+          )
+
+          for section in "${required_sections[@]}"; do
+            if ! grep -Fq "$section" <<< "$PR_BODY"; then
+              echo "Missing required PR section: $section"
+              exit 1
+            fi
+          done
+
+          if ! grep -Eq '^### (Ajouté|Modifié|Corrigé|Supprimé)$' <<< "$PR_BODY"; then
+            echo "The PR changelog is missing its expected categories."
+            exit 1
+          fi
+
+          if grep -Eq '^-[[:space:]]*$' <<< "$PR_BODY"; then
+            echo "Complete every bullet in the PR template. Use 'Sans objet' when necessary."
+            exit 1
+          fi
+
+      - name: Validate changelog and commits
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if ! git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep -Fxq CHANGELOG.md; then
+            echo "Every PR must update CHANGELOG.md."
+            exit 1
+          fi
+
+          while IFS= read -r subject; do
+            emoji="${subject%% *}"
+            message="${subject#* }"
+            if [[ "$emoji" == "$subject" || ! "$message" =~ ^[A-Z] ]]; then
+              echo "Invalid gitmoji/English commit subject: $subject"
+              exit 1
+            fi
+            if ! EMOJI="$emoji" python3 -c 'import os, sys; sys.exit(not any(ord(char) > 127 for char in os.environ["EMOJI"]))'; then
+              echo "A gitmoji must start the commit subject: $subject"
+              exit 1
+            fi
+          done < <(git log --format=%s "$BASE_SHA".."$HEAD_SHA")
