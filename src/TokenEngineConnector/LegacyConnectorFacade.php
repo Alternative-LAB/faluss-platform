@@ -75,8 +75,8 @@ final class Token_Engine_Connector_Service
         return \Faluss\Platform\TokenEngineConnector\ConnectorService::balanceForCurrentSubject();
     }
 
-    /** @return array<int, array<string, mixed>>|\WP_Error */
-    public static function entitlement_definitions(): array|\WP_Error
+    /** The historical optional-provider boundary deliberately remains untyped. */
+    public static function entitlement_definitions(): mixed
     {
         return \Faluss\Platform\TokenEngineConnector\ConnectorService::entitlementDefinitions();
     }
