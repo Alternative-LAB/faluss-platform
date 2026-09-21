@@ -1,0 +1,101 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Faluss\Platform\Catalog;
+
+use PHPUnit\Framework\TestCase;
+
+function sanitize_title(string $value): string
+{
+    return strtolower(trim(preg_replace('/[^a-z0-9-]+/i', '-', $value) ?? '', '-'));
+}
+
+function sanitize_text_field(string $value): string
+{
+    return trim(strip_tags($value));
+}
+
+function sanitize_hex_color(string $value): string
+{
+    return preg_match('/^#[a-f0-9]{6}$/i', $value) ? $value : '';
+}
+
+function absint(mixed $value): int
+{
+    return abs((int) $value);
+}
+
+function wp_attachment_is_image(int $id): bool
+{
+    return $id === 17;
+}
+
+final class CatalogThemeReaderTest extends TestCase
+{
+    public function testSystemThemeIsImmutableBaseline(): void
+    {
+        $reader = new CatalogThemeReader([]);
+
+        self::assertSame('faluss_catalog_card_themes', CatalogThemeReader::OPTION);
+        self::assertSame(['faluss-default'], array_keys($reader->allForScope()));
+        self::assertSame('#FFFDF5', $reader->getActiveTheme('faluss-default')['page_background']);
+        self::assertSame(1, $reader->getActiveTheme('faluss-default')['active']);
+    }
+
+    public function testNormalizesStoredThemesAndKeepsLegacyKeys(): void
+    {
+        $reader = new CatalogThemeReader([
+            'evening' => [
+                'name' => '  <b>Evening</b>  ',
+                'active' => 1,
+                'sort_order' => 10,
+                'preview_attachment_id' => 17,
+                'page_background' => '#abcdef',
+                'hero_transition_color' => '#123456',
+                'name_color' => '#be79ff',
+                'alignment' => 'center',
+                'social_variant' => 'full',
+                'link_style' => 'light',
+                'entitlement_code' => 'THEME.PREMIUM',
+            ],
+        ]);
+
+        $theme = $reader->getActiveTheme('evening');
+        self::assertIsArray($theme);
+        self::assertSame('Evening', $theme['name']);
+        self::assertSame('#ABCDEF', $theme['page_background']);
+        self::assertSame('#BE79FF', $theme['name_color']);
+        self::assertSame('theme.premium', $theme['entitlement_code']);
+        self::assertSame(17, $theme['preview_attachment_id']);
+        self::assertSame('faluss-link', $theme['scope']);
+        self::assertFalse($theme['system']);
+    }
+
+    public function testInactiveAndInvalidThemesCannotBeResolvedAsActive(): void
+    {
+        $reader = new CatalogThemeReader([
+            'archived' => ['name' => 'Archived', 'active' => 0],
+            'invalid' => ['name' => ''],
+            'faluss-default' => ['name' => 'Override', 'active' => 1],
+        ]);
+
+        self::assertCount(2, $reader->allForScope());
+        self::assertSame(['faluss-default'], array_keys($reader->activeForScope()));
+        self::assertFalse($reader->getActiveTheme('archived'));
+        self::assertFalse($reader->getTheme('invalid'));
+        self::assertSame('Faluss par défaut', $reader->getTheme('faluss-default')['name']);
+    }
+
+    public function testSortsByOrderThenNameAndRejectsOutOfScopeCustomThemes(): void
+    {
+        $reader = new CatalogThemeReader([
+            'z' => ['name' => 'Zulu', 'sort_order' => 10],
+            'a' => ['name' => 'Alpha', 'sort_order' => 10],
+            'first' => ['name' => 'First', 'sort_order' => 1],
+        ]);
+
+        self::assertSame(['faluss-default', 'first', 'a', 'z'], array_keys($reader->allForScope()));
+        self::assertSame(['faluss-default'], array_keys($reader->allForScope('other-scope')));
+    }
+}
