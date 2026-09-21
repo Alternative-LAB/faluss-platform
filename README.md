@@ -12,7 +12,7 @@ Le plugin reste inactif tant que le rôle du site n’est pas défini dans une c
 define('FALUSS_PLATFORM_ROLE', 'me'); // ou 'hub' sur faluss.com
 ```
 
-Le socle actuel n’active encore aucun module et ne remplace aucun plugin en production. Voir [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+Le socle n’active que le module d’administration : il ne remplace aucun plugin en production. Voir [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Contribution
 

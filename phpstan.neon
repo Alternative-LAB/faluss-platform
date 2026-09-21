@@ -2,4 +2,6 @@ parameters:
     level: 7
     paths:
         - src
+    scanFiles:
+        - vendor/php-stubs/wordpress-stubs/wordpress-stubs.php
     tmpDir: .cache/phpstan

@@ -16,7 +16,7 @@ flowchart LR
 
 ## État actuel
 
-Le plugin fournit uniquement son point d’entrée, le rôle de site et un registre capable de charger des modules dans l’ordre de leurs dépendances. Aucun ancien plugin Faluss n’est remplacé, aucune table n’est créée et aucune configuration de production n’est modifiée.
+Le plugin fournit son point d’entrée, le rôle de site et un registre capable de charger des modules dans l’ordre de leurs dépendances. Le seul module actuellement chargé est le tableau de bord d’administration, commun aux deux rôles. Aucun ancien plugin Faluss n’est remplacé, aucune table n’est créée et aucune configuration de production n’est modifiée.
 
 Si le rôle n’est pas configuré ou est invalide, le plugin ne charge aucun module. Si une dépendance manque ou forme un cycle, le registre refuse le chargement avant de démarrer le moindre module.
 
@@ -34,3 +34,7 @@ Le registre vérifie les doublons, l’absence de dépendance, l’incompatibili
 ## Cohabitation et rollback
 
 Le socle ne déclare aucune route REST, aucun shortcode, hook métier, schéma SQL ou cron ; il peut cohabiter avec les plugins existants. Désactiver le plugin revient entièrement à l’état précédent. Aucun déploiement en production n’est inclus dans cette étape.
+
+## Administration
+
+Sur un site dont le rôle est configuré, l’entrée de menu « Faluss » donne accès à une page de synthèse montrant le rôle local et les modules chargés. Ce n’est pas un indicateur de connexion réseau entre les deux sites. Seuls les comptes disposant de la capacité WordPress `manage_options` peuvent y accéder. La feuille de style est chargée uniquement sur cette page et ne modifie pas les interfaces des anciens plugins. Aucune action d’écriture, donnée personnelle ou appel réseau n’est ajouté. Si le rôle manque, aucun menu Faluss Platform n’est créé.

@@ -38,5 +38,6 @@ add_action('plugins_loaded', static function (): void {
     }
 
     $registry = new \Faluss\Platform\Core\ModuleRegistry($role);
+    $registry->register(new \Faluss\Platform\Admin\DashboardModule($role, $registry));
     $registry->boot();
 }, 20);
