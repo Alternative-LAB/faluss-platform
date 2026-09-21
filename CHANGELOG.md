@@ -16,6 +16,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Module Faluss Identity Client optionnel pour `faluss.com`, avec Authorization Code, PKCE S256, état navigateur lié, tables et façades publiques historiques conservées.
+- Contrats automatisés de l'Identity Client pour le schéma InnoDB, les retours locaux exacts, la consommation transactionnelle de l'état, les claims, la création limitée à `subscriber` et la coexistence.
 - Module Token Engine Connector optionnel pour `.me`, sans ledger local, avec façade PHP compatible, administration privée et garde de coexistence avec l’ancien plugin.
 - Contrats automatisés du Connector pour la protection du secret, les permissions, le cache et renouvellement Bearer, les erreurs fermées, le sujet Identity et les actions administratives.
 - Module de catalogue optionnel pour `.me`, avec façade PHP compatible Faluss Link et garde empêchant la coexistence avec l’ancien plugin.

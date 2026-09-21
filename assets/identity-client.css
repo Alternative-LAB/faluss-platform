@@ -1,0 +1,43 @@
+.faluss-identity-client-button {
+    --fic-accent: #ff3d16;
+    --fic-ink: #080808;
+    --fic-surface: #fff;
+    --fic-radius: 48px;
+}
+
+.faluss-identity-client-button__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 12px 24px;
+    border: 1px solid var(--fic-accent);
+    border-radius: var(--fic-radius);
+    background: var(--fic-accent);
+    color: var(--fic-ink);
+    font: inherit;
+    font-weight: 700;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: filter 160ms ease, transform 160ms ease;
+}
+
+.faluss-identity-client-button__action:hover,
+.faluss-identity-client-button__action:focus-visible {
+    filter: brightness(.94);
+}
+
+.faluss-identity-client-button__action:focus-visible {
+    outline: 3px solid var(--fic-surface);
+    outline-offset: 3px;
+}
+
+.faluss-identity-client-button__action:active {
+    transform: translateY(1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .faluss-identity-client-button__action {
+        transition: none;
+    }
+}

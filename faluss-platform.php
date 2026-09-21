@@ -60,5 +60,13 @@ add_action('plugins_loaded', static function (): void {
     ) {
         $registry->register(new \Faluss\Platform\TokenEngineConnector\TokenEngineConnectorModule());
     }
+    if ($role === \Faluss\Platform\Core\SiteRole::Hub
+        && defined('FALUSS_PLATFORM_IDENTITY_CLIENT')
+        && constant('FALUSS_PLATFORM_IDENTITY_CLIENT') === true
+        && !class_exists('Faluss_Identity_Client', false)
+        && !class_exists('Faluss_Identity_Client_Schema', false)
+    ) {
+        $registry->register(new \Faluss\Platform\IdentityClient\IdentityClientModule());
+    }
     $registry->boot();
 }, 20);
