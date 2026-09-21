@@ -16,6 +16,9 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Module Faluss Link et Studio optionnel pour `.me`, avec éditeur, profil public, blocs, collections, médias, découvertes, onboarding, shortcodes et widgets historiques conservés.
+- Adaptateurs fermés de Link vers Identity, Catalog et Token Engine Connector, sans copie d’identité ni décision économique locale.
+- Contrats automatisés Link/Studio pour la coexistence, le schéma, les mutations transactionnelles, l’autosauvegarde, les assets historiques et la présentation mobile et bureau.
 - Module Faluss Portal optionnel pour le Hub, avec shortcode, navigation, assets, manifest, catalogues descriptifs et façades historiques conservés.
 - Adaptateurs fermés de Portal vers Identity Client, Apps Registry, Subscriptions, Token Engine et Analytics, sans lecture directe de table ni copie de prix, droit ou montant PF.
 - Contrats automatisés Portal pour la session liée, l’unique lecture Apps Registry, les dépendances indisponibles, l’autorité économique, la coexistence et la parité de présentation.
