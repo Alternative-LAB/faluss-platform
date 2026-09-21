@@ -8,6 +8,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Actions d’administration du catalogue avec contrôles de droits, nonces et compatibilité des événements, non activées par défaut.
 - Adaptateur de lecture des droits de thème fournis par Token Engine Connector, avec filtrage des définitions invalides.
 - Éditeur du catalogue préparant en mémoire les créations, modifications et suppressions avec validation des droits associés.
 - Lecteur de thèmes de catalogue compatible avec le schéma et les règles de lecture historiques, non activé en production.

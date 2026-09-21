@@ -22,7 +22,9 @@ Cette étape n’enregistre aucun hook, menu, route ou façade globale. Le plugi
 
 `CatalogEntitlementProvider` isole désormais la lecture des définitions du Connector et ne transmet à l’éditeur que les droits valides de type `theme`. Une réponse absente ou en erreur verrouille l’ajout de nouveaux droits, tout en permettant de conserver un droit déjà associé.
 
-L’interface de gestion, les actions WordPress et la façade PHP consommée par Faluss Link restent à migrer. Aucun ancien plugin ne peut encore être désactivé.
+`CatalogAdminActions` prépare les endpoints `admin-post.php` historiques. La capacité `manage_options` et un nonce propre à chaque action sont vérifiés avant toute mutation. Les valeurs sont déséchappées, validées, puis écrites dans la même option ; les désactivations et suppressions réémettent `faluss_catalog_theme_deactivated`. La classe n’est pas encore branchée au démarrage du plugin : elle ne peut donc pas entrer en collision avec les endpoints de l’ancien catalogue.
+
+L’interface de gestion, l’activation contrôlée des actions et la façade PHP consommée par Faluss Link restent à migrer. Aucun ancien plugin ne peut encore être désactivé.
 
 ## Dépendances et risques à vérifier avant bascule
 
