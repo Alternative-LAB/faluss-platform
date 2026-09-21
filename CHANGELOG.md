@@ -16,6 +16,9 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Module Token Engine optionnel pour le Hub, avec projets, permissions, règles, droits, octrois, ledger générique et ledger PF append-only historiques conservés.
+- Contrat Platform étroit pour le gain quotidien Hub, utilisé par Portal sans lecture directe de balance ou de table.
+- Contrats automatisés Token Engine pour la coexistence, les schémas, la parité historique, les gains, l’idempotence et les compensations.
 - Module Faluss Subscriptions optionnel pour le Hub, avec stockage InnoDB, catalogue, essais, entitlements, facturation Stripe, webhooks, notifications, administration et retours historiques conservés.
 - Contrat public étroit de Subscriptions pour Portal, cycle d’activation/désactivation, garde de coexistence et SDK Stripe `21.3.0` verrouillé sans secret versionné.
 - Contrats automatisés Subscriptions pour les écritures transactionnelles, Checkout, essai, retours, idempotence, refus fermés et parité des sources historiques.

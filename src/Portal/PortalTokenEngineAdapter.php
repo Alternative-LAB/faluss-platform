@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Faluss\Platform\Portal;
 
-use Throwable;
+use Faluss\Platform\TokenEngine\TokenEngineContract;
 
 final class PortalTokenEngineAdapter
 {
@@ -14,59 +14,13 @@ final class PortalTokenEngineAdapter
     /** @return array<string, mixed> */
     public static function dailyStatus(string $falussId): array
     {
-        if (!self::uuid($falussId) || !self::available()) {
-            return ['status' => 'unavailable'];
-        }
-        try {
-            return self::document(\Token_Engine_Points_Service::daily_status(
-                $falussId,
-                self::OWNER,
-                self::REWARD,
-                self::serverProof()
-            ));
-        } catch (Throwable) {
-            return ['status' => 'unavailable'];
-        }
+        return self::document(TokenEngineContract::hubDailyStatus($falussId));
     }
 
     /** @return array<string, mixed> */
     public static function claim(string $falussId): array
     {
-        if (!self::uuid($falussId) || !self::available()) {
-            return ['status' => 'unavailable'];
-        }
-        try {
-            return self::document(\Token_Engine_Points_Service::claim_hub_daily($falussId, self::serverProof()));
-        } catch (Throwable) {
-            return ['status' => 'unavailable'];
-        }
-    }
-
-    private static function available(): bool
-    {
-        $schemaClass = 'Token_Engine_Schema';
-        if (!class_exists('Token_Engine_Points_Service')
-            || !defined('TOKEN_ENGINE_VERSION')
-        ) {
-            return false;
-        }
-        if (constant('TOKEN_ENGINE_VERSION') !== '0.4.1' || !class_exists($schemaClass)) {
-            return false;
-        }
-
-        return (string) (new \ReflectionClass($schemaClass))->getConstant('VERSION') === '5';
-    }
-
-    /** @return array{owner:string,identity_active:true} */
-    private static function serverProof(): array
-    {
-        return ['owner' => self::OWNER, 'identity_active' => true];
-    }
-
-    private static function uuid(mixed $value): bool
-    {
-        return is_string($value)
-            && preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/D', $value) === 1;
+        return self::document(TokenEngineContract::claimHubDaily($falussId));
     }
 
     /** @return array<string, mixed> */

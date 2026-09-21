@@ -21,4 +21,5 @@ parameters:
             - src/Link/LegacyLinkService.php
             - src/Link/LegacyLinkWidgets.php
             - src/Subscriptions/Legacy/includes/*.php
+            - src/TokenEngine/Legacy/includes/*.php
     tmpDir: .cache/phpstan

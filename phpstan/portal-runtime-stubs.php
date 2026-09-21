@@ -54,6 +54,15 @@ final class Faluss_Subscriptions_Billing
 final class Token_Engine_Schema
 {
     public const VERSION = 5;
+
+    public static function maybe_install(): bool
+    {
+        return true;
+    }
+
+    public static function activate(): void
+    {
+    }
 }
 
 final class Token_Engine_Points_Service

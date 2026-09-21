@@ -32,6 +32,10 @@ register_activation_hook(
     __FILE__,
     [\Faluss\Platform\Subscriptions\SubscriptionsModule::class, 'activate']
 );
+register_activation_hook(
+    __FILE__,
+    [\Faluss\Platform\TokenEngine\TokenEngineModule::class, 'activate']
+);
 register_deactivation_hook(
     __FILE__,
     [\Faluss\Platform\Subscriptions\SubscriptionsModule::class, 'deactivate']
@@ -109,6 +113,18 @@ add_action('plugins_loaded', static function (): void {
         && !class_exists('Faluss_Subscriptions_Admin', false)
     ) {
         $registry->register(new \Faluss\Platform\Subscriptions\SubscriptionsModule());
+    }
+    if ($role === \Faluss\Platform\Core\SiteRole::Hub
+        && defined('FALUSS_PLATFORM_TOKEN_ENGINE')
+        && constant('FALUSS_PLATFORM_TOKEN_ENGINE') === true
+        && !class_exists('Token_Engine_Schema', false)
+        && !class_exists('Token_Engine_Service', false)
+        && !class_exists('Token_Engine_Points_Service', false)
+        && !class_exists('Token_Engine_Entitlements', false)
+        && !class_exists('Token_Engine_Connector_Access', false)
+        && !class_exists('Token_Engine_Admin', false)
+    ) {
+        $registry->register(new \Faluss\Platform\TokenEngine\TokenEngineModule());
     }
     if ($role === \Faluss\Platform\Core\SiteRole::Hub
         && defined('FALUSS_PLATFORM_PORTAL')
