@@ -39,3 +39,5 @@ Retirer ou mettre à `false` `FALUSS_PLATFORM_THEME_TOKENS`, puis réactiver `Fa
 ## Limites de la parité
 
 Le nouvel écran conserve les réglages, la remise aux valeurs par défaut et l’aperçu visuel de l’ancien écran. La validation de parité fonctionnelle et visuelle en préproduction reste obligatoire avant retrait définitif de l’ancien plugin.
+
+Des tests automatisés vérifient les hooks WordPress, la clé d’option et le handle CSS. Un essai manuel sur une installation WordPress isolée a aussi vérifié l’activation, le sous-menu, l’enregistrement du réglage, le nonce, l’aperçu et la sortie CSS. Cela ne remplace pas un essai sur une copie de `faluss.me` avec son thème et Elementor réels.
