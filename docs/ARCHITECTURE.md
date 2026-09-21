@@ -41,4 +41,4 @@ Sur un site dont le rôle est configuré, l’entrée de menu « Faluss » donne
 
 L’[inventaire des plugins historiques](modules/LEGACY-INVENTORY.md) s’affiche sur cette page pour aider à suivre la migration sur chaque site. Il est local et en lecture seule.
 
-Le [lecteur du catalogue de thèmes](modules/CATALOG.md) prépare la prochaine migration sans encore enregistrer de module WordPress ni remplacer le plugin historique.
+Le [module de catalogue de thèmes](modules/CATALOG.md) fournit une migration optionnelle de l’ancien catalogue sur `faluss.me`. Sans opt-in, aucun hook du nouveau catalogue n’est enregistré. Si le plugin historique est encore chargé, il reste seul responsable du catalogue.
