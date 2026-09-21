@@ -75,6 +75,21 @@
     margin: 0;
 }
 
+.faluss-admin__inventory { margin-top: 18px; }
+.faluss-admin__table-scroll { overflow-x: auto; }
+.faluss-admin__inventory table { min-width: 620px; }
+.faluss-admin__inventory th,
+.faluss-admin__inventory td { padding: 12px; vertical-align: middle; }
+.faluss-admin__badge {
+    display: inline-block;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+.faluss-admin__badge.is-active { background: #e7f5ef; color: #176f50; }
+.faluss-admin__badge.is-inactive { background: #edf0f5; color: #526078; }
+
 .faluss-admin__modules li {
     display: inline-flex;
     align-items: center;
