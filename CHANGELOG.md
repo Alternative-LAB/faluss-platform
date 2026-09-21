@@ -8,6 +8,9 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Point d’entrée WordPress inactif sans rôle explicite, rôles de site et registre de modules avec validation des dépendances.
+- Tests unitaires du socle et contrôles CI de syntaxe PHP, analyse statique et tests.
+- Documentation de l’architecture initiale et du mécanisme de cohabitation.
 - Règles communes de contribution pour les agents Codex.
 - Template français unique pour les pull requests.
 - Validation automatique du nom des branches et des sections obligatoires des pull requests.
