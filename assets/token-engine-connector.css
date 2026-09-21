@@ -1,0 +1,41 @@
+.faluss-connector-admin .nav-tab-wrapper {
+    margin: 0 0 18px;
+}
+
+.faluss-connector-admin__panel {
+    max-width: 960px;
+}
+
+.faluss-connector-admin__diagnostic {
+    margin-top: 18px;
+    padding: 20px;
+    border: 1px solid #dce3ee;
+    border-radius: 10px;
+    background: #f8faff;
+}
+
+.faluss-connector-admin__diagnostic h3 {
+    margin-top: 0;
+}
+
+.faluss-connector-admin__result {
+    display: grid;
+    grid-template-columns: minmax(180px, .55fr) 1fr;
+    gap: 8px 18px;
+    max-width: 680px;
+    margin: 18px 0;
+}
+
+.faluss-connector-admin__result dt {
+    font-weight: 700;
+}
+
+.faluss-connector-admin__result dd {
+    margin: 0;
+}
+
+@media (max-width: 600px) {
+    .faluss-connector-admin__result {
+        grid-template-columns: 1fr;
+    }
+}

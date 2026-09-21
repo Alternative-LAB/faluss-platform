@@ -53,5 +53,12 @@ add_action('plugins_loaded', static function (): void {
     ) {
         $registry->register(new \Faluss\Platform\Catalog\CatalogModule());
     }
+    if ($role === \Faluss\Platform\Core\SiteRole::Me
+        && defined('FALUSS_PLATFORM_TOKEN_ENGINE_CONNECTOR')
+        && constant('FALUSS_PLATFORM_TOKEN_ENGINE_CONNECTOR') === true
+        && !class_exists('Token_Engine_Connector_Service', false)
+    ) {
+        $registry->register(new \Faluss\Platform\TokenEngineConnector\TokenEngineConnectorModule());
+    }
     $registry->boot();
 }, 20);
