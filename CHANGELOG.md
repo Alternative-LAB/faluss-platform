@@ -8,6 +8,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Corrigé
 
+- Contrat public complet de `Faluss_Catalog_Themes`, y compris l’activation, les méthodes administratives historiques et leur route de retour compatible.
+- Couverture des scénarios Catalog de coexistence, Connector indisponible et conservation des options d’activation sans écrasement.
 - Parité exacte des variables CSS du module Faluss Theme avec le plugin historique, notamment les noms de rayon et d’action consommés par Faluss Link.
 - Libellés de couleur visibles avec le sélecteur WordPress, noms des ombres, identifiants de nonce distincts et aperçu non interactif dans l’écran « Identité visuelle ».
 

@@ -6,7 +6,10 @@ namespace Faluss\Platform\Catalog;
 
 final class CatalogAdminActions
 {
-    public function __construct(private readonly CatalogEntitlementProvider $entitlements)
+    public function __construct(
+        private readonly CatalogEntitlementProvider $entitlements,
+        private readonly string $page = 'faluss-platform-catalog'
+    )
     {
     }
 
@@ -105,7 +108,7 @@ final class CatalogAdminActions
         $url = add_query_arg(
             'faluss_catalog_notice',
             sanitize_key($notice),
-            admin_url('admin.php?page=faluss-platform-catalog')
+            admin_url('admin.php?page=' . $this->page)
         );
         wp_safe_redirect($url);
         exit;

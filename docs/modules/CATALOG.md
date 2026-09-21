@@ -16,6 +16,21 @@ flowchart LR
 
 Cette étape n’enregistre aucun hook, menu, route ou façade globale. Le plugin historique reste seul actif et l’option demeure sa propriété. Aucun basculement de production n’est possible à ce stade.
 
+## Inventaire de compatibilité
+
+| Surface | Contrat historique conservé | Propriétaire ou consommateur |
+|---|---|---|
+| Données | Option `faluss_catalog_card_themes`, enregistrements structurés par identifiant stable ; option de version `faluss_catalog_version` à `2` | Catalogue local de `faluss.me` |
+| Tables | Aucune table propre | Sans objet |
+| Classe publique | `Faluss_Catalog_Themes`, ses constantes historiques et ses méthodes publiques de lecture, activation et administration | Faluss Link et compatibilité d’exploitation |
+| Hooks | `admin_menu`, `admin_enqueue_scripts`, les trois actions `admin_post_faluss_catalog_*` et `faluss_catalog_theme_deactivated` | WordPress et Faluss Link |
+| Administration | Capacité `manage_options`, nonce distinct par action, même option persistée et même sélecteur de médias WordPress | Administrateurs de `faluss.me` |
+| Contrat Connector | `Token_Engine_Connector_Service::entitlement_definitions()` ; seuls les droits actifs de type `theme` sont acceptés | Token Engine Connector historique |
+| Faluss Link | `get_active_theme`, `all_for_scope` et `active_for_scope`, scope fermé `faluss-link`, repli vers `faluss-default` | Studio, onboarding, profil public et widgets Elementor Faluss Link |
+| Routes REST, shortcodes, widgets propres, crons | Aucun | Sans objet |
+
+Le module ne lit aucune table Faluss Link et ne décide d’aucun droit. La désactivation ou la suppression émet seulement le hook historique avec l’identifiant exact ; les consommateurs restent responsables de leurs propres références et données.
+
 ## Deuxième étape : validation des écritures
 
 `CatalogThemeEditor` valide les créations et modifications, génère des identifiants uniques, refuse les changements du thème système et prépare les suppressions. Il accepte uniquement les codes de droit fournis par le Connector ; lorsque ce dernier est indisponible, seul un code déjà associé peut être conservé. Les valeurs sont préparées en mémoire, sans écriture WordPress dans cette étape. L’adaptateur administratif à venir devra contrôler capacités et nonces, appliquer `wp_unslash`, persister l’option et émettre le hook de désactivation.
@@ -32,6 +47,8 @@ Le rendu a été vérifié dans une installation WordPress jetable avec un thèm
 
 `CatalogModule` réunit le lecteur, l’éditeur, l’écran et les actions. Il s’enregistre uniquement sur le rôle `me`, avec la constante booléenne `FALUSS_PLATFORM_CATALOG` à `true`, et si la classe historique `Faluss_Catalog_Themes` n’est pas déjà chargée. La façade globale portant ce nom conserve les méthodes de lecture et les constantes utilisées par Faluss Link ; les noms d’actions et l’option restent inchangés.
 
+La façade conserve également les méthodes publiques historiques `boot`, `activate`, `menu`, `assets`, `create`, `update`, `delete` et `page`. Leur présence évite de casser un appelant historique, tandis que le démarrage normal de Faluss Platform continue d’utiliser le sous-menu commun « Faluss ». La méthode d’activation initialise uniquement l’option absente et enregistre la version `2` ; elle ne convertit ni ne supprime aucun thème.
+
 ```php
 define('FALUSS_PLATFORM_ROLE', 'me');
 define('FALUSS_PLATFORM_CATALOG', true);
@@ -42,6 +59,8 @@ Ces constantes appartiennent à la configuration non versionnée du site, pas au
 Un essai sur un WordPress jetable a confirmé l’activation explicite, la lecture d’un thème par `Faluss_Catalog_Themes`, l’enregistrement du sous-menu et des actions, la création d’un thème par l’action WordPress avec nonce réel, ainsi que le refus de chargement lorsqu’une classe historique existe déjà. L’environnement d’essai a été supprimé après vérification.
 
 Une comparaison supplémentaire a exécuté successivement l’ancien et le nouveau catalogue sur la même option synthétique (thème actif, thème archivé, entrée invalide). Les résultats complets de `all_for_scope`, `active_for_scope` et `get_active_theme` étaient identiques ; ce jeu est conservé comme test de non-régression. Cette preuve ciblée ne remplace pas une comparaison sur les données et le thème réels de `faluss.me`.
+
+Les contrats historiques ciblés `FC-01`, `FC-01.1`, `FL-15` et `FL-15.1` couvrent le schéma des thèmes, le refus des valeurs libres, le filtrage actif, le repli Faluss Link, le Studio, le rendu partagé et la priorité finale des réglages Elementor. Les tests du nouveau module couvrent en plus la façade publique complète, l’activation sans écrasement, les actions et nonces, l’émission du hook, l’indisponibilité du Connector et le refus de coexistence avec l’ancienne classe.
 
 Avant une bascule approuvée, tester sur une copie de `faluss.me` : sauvegarder l’option et des cartes utilisant des thèmes personnalisés ; vérifier Faluss Link, l’éditeur, les images, les droits Connector et les comportements lors de désactivation/suppression. Pour basculer, définir la constante, puis désactiver l’ancien catalogue. Le nouveau module prend le relais à la requête suivante, sans conversion des données.
 
@@ -54,5 +73,7 @@ Pour revenir en arrière, **désactiver d’abord `FALUSS_PLATFORM_CATALOG` dans
 - L’administration historique consulte les droits de thème via `Token_Engine_Connector_Service`.
 - Les suppressions et désactivations émettent `faluss_catalog_theme_deactivated`.
 - Les identifiants, images de prévisualisation, droits associés et références de cartes doivent survivre au changement de plugin.
+
+La porte de bascule reste fermée tant qu’une copie représentative de `faluss.me` n’a pas confirmé les données réelles de `faluss_catalog_card_themes`, les pièces jointes, le thème actif, Elementor, Faluss Link et les réponses réelles du Connector. Cette limite n’empêche pas les migrations de code indépendantes des modules suivants, mais interdit de déclarer la parité de production ou de désactiver l’ancien plugin.
 
 Le futur retour arrière conservera l’option historique intacte et réactivera le plugin `faluss-catalog` ; cette procédure devra être éprouvée sur une copie de `faluss.me` avant toute désactivation réelle.

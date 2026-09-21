@@ -10,6 +10,11 @@ require_once __DIR__ . '/WordPressStubs.php';
 
 final class CatalogEntitlementProviderTest extends TestCase
 {
+    public function testReportsUnavailableWhenTheConnectorIsAbsent(): void
+    {
+        self::assertFalse((new CatalogEntitlementProvider())->available());
+    }
+
     public function testKeepsOnlyValidThemeEntitlements(): void
     {
         $definitions = CatalogEntitlementProvider::filter([
