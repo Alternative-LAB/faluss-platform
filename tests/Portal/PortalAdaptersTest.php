@@ -22,22 +22,21 @@ final class PortalAdaptersTest extends TestCase
         self::assertFalse(PortalAnalyticsAdapter::registerRuntime());
     }
 
-    public function testPortalAssetsRemainByteForByteHistorical(): void
+    public function testPortalAssetsRemainPinnedToTheHistoricalHashes(): void
     {
-        $historical = dirname(__DIR__, 3) . '/FALUSS/plugins/faluss-portal/assets';
         $target = dirname(__DIR__, 2) . '/assets';
         $files = [
-            'css/faluss-portal.css',
-            'images/apps/faluss-hub.png',
-            'images/apps/faluss-me.png',
-            'images/apps/faluss-date.png',
-            'images/apps/faluss-pro.png',
-            'images/pf/faluss-pf-badge.png',
+            'css/faluss-portal.css' => 'e229f44faad1d390b0af5a9aea606bcc878cf013c9650f0733288bf9dcbcab02',
+            'images/apps/faluss-hub.png' => '5a534c15e5254c6982df0739152c3784dbb2edd7c7972976e32e306fc55b017b',
+            'images/apps/faluss-me.png' => '1541ef775c32d229c11ec79a579ef9d371cf8f23a77c0c4b1920fda5bdb6d64a',
+            'images/apps/faluss-date.png' => '21ee86bbe26342a2ca4a6f979a0052b3cf24a9ff0fd15c1c54c3638e8c113ed8',
+            'images/apps/faluss-pro.png' => '33c828517cb2b9de0599ea3df6d0c735266bcbbc63212c743d1ef4e81f2467ff',
+            'images/pf/faluss-pf-badge.png' => 'a25533ca502e4e6286cb58c858de8d7a4de5d25b18a5d91894b31c46ff1f1955',
         ];
 
-        foreach ($files as $file) {
+        foreach ($files as $file => $expectedHash) {
             self::assertFileExists($target . '/' . $file);
-            self::assertSame(hash_file('sha256', $historical . '/' . $file), hash_file('sha256', $target . '/' . $file), $file);
+            self::assertSame($expectedHash, hash_file('sha256', $target . '/' . $file), $file);
         }
 
         $script = file_get_contents($target . '/js/faluss-portal.js');
