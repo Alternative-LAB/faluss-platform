@@ -14,7 +14,13 @@ flowchart LR
 
 `CatalogThemeReader` reprend le thème système immuable, la normalisation des enregistrements existants, le tri, le filtrage des thèmes actifs et la résolution par identifiant. Il utilise le même nom d’option et les mêmes champs que l’ancien plugin. Il ne lit ni n’écrit lui-même la base WordPress : le futur adaptateur fournira les valeurs de l’option au constructeur.
 
-Cette étape n’enregistre aucun hook, menu, route ou façade globale. Le plugin historique reste seul actif et l’option demeure sa propriété. La création, la modification, la suppression, les droits issus du Connector et la compatibilité PHP avec Faluss Link restent à migrer dans des PR suivantes. Aucun basculement de production n’est possible à ce stade.
+Cette étape n’enregistre aucun hook, menu, route ou façade globale. Le plugin historique reste seul actif et l’option demeure sa propriété. Aucun basculement de production n’est possible à ce stade.
+
+## Deuxième étape : validation des écritures
+
+`CatalogThemeEditor` valide les créations et modifications, génère des identifiants uniques, refuse les changements du thème système et prépare les suppressions. Il accepte uniquement les codes de droit fournis par le Connector ; lorsque ce dernier est indisponible, seul un code déjà associé peut être conservé. Les valeurs sont préparées en mémoire, sans écriture WordPress dans cette étape. L’adaptateur administratif à venir devra contrôler capacités et nonces, appliquer `wp_unslash`, persister l’option et émettre le hook de désactivation.
+
+L’interface de gestion, le raccordement au Connector et la façade PHP consommée par Faluss Link restent à migrer. Aucun ancien plugin ne peut encore être désactivé.
 
 ## Dépendances et risques à vérifier avant bascule
 
