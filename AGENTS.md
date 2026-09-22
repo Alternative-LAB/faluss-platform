@@ -11,6 +11,9 @@ WordPress remains responsible for content, presentation, Elementor integration, 
 ## Git workflow
 
 - Never commit or push directly to `main`.
+- Never merge a local branch into `main` or use a direct GitHub push, API merge, administrator override, bypass actor, or disabled check to evade a pull request. This applies equally to humans and AI agents.
+- Merge into `main` only through a pull request after all required checks pass. Human review is welcome but is not a mandatory merge gate.
+- Changes to `AGENTS.md`, `.github/`, or the governance documentation follow the same pull request and CI rules; a change to a check must not validate itself using the proposed version of that check.
 - Create a dedicated branch from an up-to-date `main`. For a sequence of small dependent PRs, branch from the preceding PR branch and explicitly target that branch; retarget to `main` as earlier PRs merge.
 - Use explicit branch prefixes: `feat/`, `fix/`, `refactor/`, `docs/`, `chore/`, `test/`, `ci/`, `build/`, `perf/`, or `hotfix/`.
 - Keep pull requests small, coherent, independently testable, and easy to review.

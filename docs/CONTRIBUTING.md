@@ -4,14 +4,15 @@
 
 Chaque changement est développé dans une branche dédiée et livré dans une pull request petite et cohérente. La branche `main` reste protégée et publiable.
 
+Ces règles s'appliquent aux contributions humaines et à celles produites avec une IA. Un commit direct, une fusion locale ou un contournement administrateur vers `main` est interdit, même si la CI passe ensuite. La relecture humaine reste possible, sans être une condition de fusion.
+
 ```mermaid
 flowchart LR
     M[main à jour] --> B[Branche dédiée]
     B --> C[Commits atomiques]
     C --> Q[Contrôles qualité]
     Q --> P[Pull request en français]
-    P --> R[Relecture]
-    R --> M
+    P --> M[Fusion après CI]
 ```
 
 ## Branches
@@ -64,6 +65,34 @@ Les PR sont rédigées en français avec le template du dépôt. Elles doivent :
 - inclure des captures pour toute modification visuelle.
 
 Une ligne correspondante doit aussi être ajoutée sous `Unreleased` dans `CHANGELOG.md`.
+
+## Protection GitHub de `main`
+
+Le workflow « PR governance » lit les règles depuis la branche de base avec
+`pull_request_target` et traite le code proposé uniquement comme des données.
+Une PR qui modifie le workflow ne peut donc pas affaiblir son propre contrôle.
+Ce workflow vérifie la forme de la contribution ; il ne peut pas empêcher à lui
+seul un push direct. La protection GitHub est le verrou effectif.
+
+Configurer une règle de protection ou un ruleset ciblant exactement `main` :
+
+1. Exiger une pull request avant toute fusion, avec zéro approbation obligatoire.
+   Exiger la résolution des conversations lorsqu'il y en a.
+2. Exiger le statut de commit `Faluss PR governance` publié sur le dernier
+   commit de la PR par GitHub Actions, ainsi que les contrôles
+   `Lint, static analysis and tests`, `Federation without native Sodium` et
+   `Check JavaScript syntax`, sur le commit à fusionner. Sélectionner GitHub
+   Actions comme source attendue de chaque statut, jamais « n'importe quelle
+   source ». Exiger une branche à jour avant fusion si la règle GitHub le permet.
+3. Interdire les poussées forcées, la suppression de `main` et tout acteur de
+   contournement, y compris les administrateurs, applications et jetons
+   d'automatisation. Ne pas autoriser de poussée directe sur `main`.
+4. Vérifier la protection après sa création avec une PR valide et un essai de
+   push direct rejeté, sans modifier le contenu de `main`.
+
+Le nom exact des contrôles doit être choisi parmi les statuts publiés par les
+workflows du dépôt. Après modification de la protection, vérifier dans GitHub
+qu'aucun rôle ni application ne figure dans la liste de contournement.
 
 ## Taille des changements
 

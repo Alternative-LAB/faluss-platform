@@ -8,6 +8,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Corrigé
 
+- Gouvernance des PR exécutée depuis la branche de base pour empêcher une PR de neutraliser ses propres contrôles, avec validation plus stricte des sections et des gitmojis.
+- Règle explicite imposant branche, PR et contrôles CI avant `main`, sans approbation obligatoire, y compris pour les contributions produites avec une IA.
 - Validation stricte des jetons et réponses Token Engine, cache Bearer court avec renouvellement unique après rejet, et résolution exclusivement serveur du sujet de session.
 - Contrat public complet de `Faluss_Catalog_Themes`, y compris l’activation, les méthodes administratives historiques et leur route de retour compatible.
 - Couverture des scénarios Catalog de coexistence, Connector indisponible et conservation des options d’activation sans écrasement.
@@ -16,6 +18,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Revue du `main` du 22 septembre 2026 : traçabilité des commits directs, résultats de contrôle et validations de migration encore nécessaires.
 - Dossier de retrait de Faluss Production Reset, inventaire exact de son runtime destructif et contrat automatisé garantissant que Platform n’expose ni module, ni action, ni route de reset.
 - Module Faluss Federation optionnel pour les rôles `me` et `hub`, avec transport Ed25519, politiques locales de pairs, anti-rejeu transactionnel, diagnostics bidirectionnels et administration historiques conservés.
 - Contrats JSON FED et contrats automatisés Federation pour la canonicalisation, les signatures, la fraîcheur, les en-têtes, les limites, la concurrence, les politiques, les diagnostics et la parité des sources historiques.
