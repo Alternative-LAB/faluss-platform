@@ -7,15 +7,23 @@ namespace Faluss\Platform\IdentityClient;
 /** AP-02A relation adapter for the federated Faluss Me application source. */
 final class IdentityClientAppsRegistryAdapter
 {
+    private static bool $booted = false;
+
     /** @var array<string, array{contract_version:string,publication_status:string,canonical_url:string}|null|\WP_Error> */
     private static array $relationshipCache = [];
 
     public static function boot(): void
     {
-        add_action('plugins_loaded', [self::class, 'registerSource'], 40);
-        if (did_action('plugins_loaded')) {
-            self::registerSource();
+        if (self::$booted) {
+            return;
         }
+        self::$booted = true;
+        if (did_action('plugins_loaded') && !doing_action('plugins_loaded')) {
+            self::registerSource();
+
+            return;
+        }
+        add_action('plugins_loaded', [self::class, 'registerSource'], 40);
     }
 
     public static function registerSource(): bool|\WP_Error
