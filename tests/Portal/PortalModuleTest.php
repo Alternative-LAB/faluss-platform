@@ -5,12 +5,47 @@ declare(strict_types=1);
 namespace Faluss\Platform\Portal;
 
 use Faluss\Platform\Core\SiteRole;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/WordPressStubs.php';
 
 final class PortalModuleTest extends TestCase
 {
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testSchedulesEachLateRegistrationOnceWhilePluginsLoadedIsRunning(): void
+    {
+        portal_test_reset();
+        $GLOBALS['portal_test_doing_plugins_loaded'] = true;
+
+        (new PortalModule())->boot();
+
+        $priorities = array_column($GLOBALS['portal_test_actions']['plugins_loaded'], 'priority');
+        sort($priorities);
+        self::assertSame([30, 40, 50, 70], $priorities);
+        self::assertSame(
+            [30, 50],
+            array_column($GLOBALS['portal_test_actions']['faluss_federation_ready'], 'priority')
+        );
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testDoesNotScheduleDeadPluginCallbacksAfterPluginsLoadedFinished(): void
+    {
+        portal_test_reset();
+
+        (new PortalModule())->boot();
+
+        self::assertArrayNotHasKey('plugins_loaded', $GLOBALS['portal_test_actions']);
+        self::assertSame(
+            [30, 50],
+            array_column($GLOBALS['portal_test_actions']['faluss_federation_ready'], 'priority')
+        );
+    }
+
     public function testBootsTheHistoricalPortalSurfaceBehindExplicitDependencies(): void
     {
         portal_test_reset();

@@ -13,11 +13,12 @@ final class Faluss_Portal_Events_Runtime {
         if ( ! function_exists( 'add_action' ) ) {
             return;
         }
-        add_action( 'plugins_loaded', array( __CLASS__, 'register_runtime' ), 70 );
         add_action( 'faluss_federation_ready', array( __CLASS__, 'register_runtime' ), 50 );
-        if ( function_exists( 'did_action' ) && did_action( 'plugins_loaded' ) ) {
+        if ( function_exists( 'did_action' ) && did_action( 'plugins_loaded' ) && ! doing_action( 'plugins_loaded' ) ) {
             self::register_runtime();
+            return;
         }
+        add_action( 'plugins_loaded', array( __CLASS__, 'register_runtime' ), 70 );
     }
 
     /** Register only after the owner catalog and exact Hub Analytics target are ready. */
