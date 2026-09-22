@@ -52,4 +52,28 @@ Pour revenir en arrière, **désactiver d’abord `FALUSS_PLATFORM_TOKEN_ENGINE_
 
 Les tests du nouveau module couvrent les URL canoniques et refusées, la protection et la conservation du secret, la réutilisation et l’expiration du cache Bearer, le renouvellement unique après rejet, les jetons mal formés, la résolution du sujet de session, les hooks privés, le refus d’un nonce invalide, la façade publique et la collision avec le plugin historique. Les contrats historiques ciblés du Connector et de Faluss Link restent exécutés comme caractérisation de leurs consommateurs.
 
-La porte de bascule de production reste fermée tant qu’une copie représentative de `faluss.me` n’a pas confirmé : la relecture du secret existant, une authentification réelle vers le Core, les trois permissions, l’expiration et le renouvellement du Bearer, les erreurs réseau, une session Faluss Identity réelle, le portefeuille, le gain quotidien, les droits de thème et les parcours Faluss Link. Cette limite n’empêche pas les migrations de code indépendantes suivantes, mais interdit de désactiver l’ancien Connector ou de déclarer la parité de production.
+La porte de bascule de production reste fermée tant qu'une copie représentative de `faluss.me` n'a pas confirmé : la relecture du secret existant, une authentification réelle vers le Core, les trois permissions, l'expiration et le renouvellement du Bearer, les erreurs réseau, une session Faluss Identity réelle, le portefeuille, le gain quotidien, les droits de thème et les parcours Faluss Link. Cette limite n'empêche pas les migrations de code indépendantes suivantes, mais interdit de désactiver l'ancien Connector ou de déclarer la parité de production.
+
+## Bascule de production du 22 septembre 2026
+
+Avant la bascule, les implémentations historique et Platform ont relu la même
+configuration protégée, réussi le diagnostic réel du Core avec
+`wallet.read`, `reward.claim` et `entitlements.read`, puis retourné les deux
+mêmes définitions de droits. Elles ont également retourné la même offre de
+gain quotidien. Avec un utilisateur possédant un profil Identity actif, les
+deux résolutions serveur ont produit le même sujet, le même solde, le même
+état du gain quotidien et la même décision pour le droit du thème payant.
+Aucune réclamation de gain, qui constitue une écriture métier, n'a été lancée
+pour cette comparaison.
+
+La copie isolée a confirmé le chargement de la façade Platform, l'échec fermé
+quand son secret anonymisé est absent et le retour à la classe historique.
+En production, `FALUSS_PLATFORM_TOKEN_ENGINE_CONNECTOR` a été activé puis
+`token-engine-connector` désactivé. La façade provient désormais de Platform,
+relit le secret existant et réussit le diagnostic Core, les définitions de
+droits, le solde et l'état de gain. Les pages ciblées répondent HTTP 200 et
+les fichiers historiques restent disponibles.
+
+Les scénarios d'expiration, de renouvellement et d'erreur réseau restent
+couverts automatiquement. Pour revenir en arrière, remettre le drapeau à
+`false`, charger une nouvelle requête, puis réactiver l'ancien Connector.
