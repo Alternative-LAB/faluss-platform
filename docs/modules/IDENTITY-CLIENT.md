@@ -66,3 +66,31 @@ Pour revenir en arrière, **désactiver d'abord `FALUSS_PLATFORM_IDENTITY_CLIENT
 Les tests du nouveau module couvrent les deux schémas et leurs index uniques, la garde de coexistence, les hooks historiques, les URL de retour exactes, PKCE S256, la liaison et la consommation transactionnelle de l'état, le rejet des claims hors contrat, l'absence de rapprochement implicite par e-mail et la session courte du seul membre normal lié. Les contrats historiques FI-05, FI-06, AP-02A, AP-02A1 et Portal restent des caractérisations séparées de l'ancien plugin et de ses consommateurs.
 
 La porte de bascule reste fermée tant qu'une copie représentative de `faluss.com` et une autorité de préproduction n'ont pas validé : les deux tables InnoDB existantes, le callback HTTPS exact, le secret serveur réel, un code à usage unique expirant en 60 secondes, les erreurs et rejeux, la liaison d'un compte existant, la création d'un nouveau `subscriber`, la session d'une heure, le widget Elementor, puis les projections consommées par Apps Registry et Portal. Les tests statiques et le harnais PHP ne constituent pas une recette WordPress, MariaDB, Elementor ou réseau réelle.
+
+## Bascule de production du 22 septembre 2026
+
+Avant la bascule, les implémentations historique et Platform ont retourné la
+même configuration, le même callback et le même HTML de bouton. Les tables
+`wp_faluss_identity_links` et `wp_faluss_identity_client_state` sont InnoDB ;
+les quatre liaisons existantes sont restées intactes. Le client configuré est
+un client PKCE sans constante serveur `FALUSS_IDENTITY_CLIENT_SECRET`, que le
+protocole historique traite comme optionnelle.
+
+Un démarrage synthétique non authentifié a produit une redirection vers
+`https://faluss.me/oauth/authorize` avec les paramètres attendus, un challenge
+PKCE S256, les scopes `identity.basic identity.email` et un cookie Secure,
+HttpOnly et SameSite=Lax. Le callback a consommé l'état à usage unique puis
+refusé un faux code opaque avec une redirection d'erreur locale.
+
+`FALUSS_PLATFORM_IDENTITY_CLIENT` a ensuite été activé et
+`faluss-identity-client` désactivé. Les mêmes contrôles synthétiques ont réussi
+avec la façade Platform. L'accueil, le portail et le callback répondent, les
+conteneurs restent sains et les fichiers historiques sont conservés.
+
+Un parcours réussi avec un membre existant et la création d'un nouveau
+`subscriber` exigera une recette contrôlée avec des identités de test ; aucun
+compte de production n'a été usurpé pour simuler cette preuve. Les cas de
+rejeu, expiration, liaison et durée de session restent couverts par les tests
+automatisés. Avant suppression des fichiers historiques, vérifier aussi le
+widget Elementor dans un navigateur. Pour revenir en arrière, remettre le
+drapeau à `false`, charger une requête, puis réactiver l'ancien client.

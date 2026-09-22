@@ -12,6 +12,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 - Bascule de Faluss Theme sur `faluss.me`, avec parité CSS et contrôles de production consignés.
 - Bascule de Faluss Catalog sur `faluss.me`, avec parité des lectures, droits et retour arrière consignés.
 - Bascule de Token Engine Connector sur `faluss.me`, avec authentification réelle, permissions et lectures métier validées.
+- Bascule de Faluss Identity Client sur `faluss.com`, avec tables, PKCE, cookie de liaison et rejet du callback invalide vérifiés.
 
 ### Corrigé
 
