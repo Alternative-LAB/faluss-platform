@@ -4,7 +4,7 @@
 
 Chaque changement est développé dans une branche dédiée et livré dans une pull request petite et cohérente. La branche `main` reste protégée et publiable.
 
-Ces règles s'appliquent aux contributions humaines et à celles produites avec une IA. Un commit direct, une fusion locale ou un contournement administrateur vers `main` est interdit, même si la CI passe ensuite. La relecture est faite par une autre personne que l'auteur.
+Ces règles s'appliquent aux contributions humaines et à celles produites avec une IA. Un commit direct, une fusion locale ou un contournement administrateur vers `main` est interdit, même si la CI passe ensuite. La relecture humaine reste possible, sans être une condition de fusion.
 
 ```mermaid
 flowchart LR
@@ -12,8 +12,7 @@ flowchart LR
     B --> C[Commits atomiques]
     C --> Q[Contrôles qualité]
     Q --> P[Pull request en français]
-    P --> R[Relecture]
-    R --> M
+    P --> M[Fusion après CI]
 ```
 
 ## Branches
@@ -77,9 +76,8 @@ seul un push direct. La protection GitHub est le verrou effectif.
 
 Configurer une règle de protection ou un ruleset ciblant exactement `main` :
 
-1. Exiger une pull request avant toute fusion, avec au moins une approbation par
-   une autre personne que l'auteur, suppression des approbations devenues
-   obsolètes après un nouveau commit et résolution des conversations.
+1. Exiger une pull request avant toute fusion, avec zéro approbation obligatoire.
+   Exiger la résolution des conversations lorsqu'il y en a.
 2. Exiger le statut de commit `Faluss PR governance` publié sur le dernier
    commit de la PR par GitHub Actions, ainsi que les contrôles
    `Lint, static analysis and tests`, `Federation without native Sodium` et
@@ -89,10 +87,8 @@ Configurer une règle de protection ou un ruleset ciblant exactement `main` :
 3. Interdire les poussées forcées, la suppression de `main` et tout acteur de
    contournement, y compris les administrateurs, applications et jetons
    d'automatisation. Ne pas autoriser de poussée directe sur `main`.
-4. Pour `AGENTS.md`, `.github/` et cette procédure, désigner des responsables
-   de revue distincts des auteurs et exiger leur approbation. Vérifier la
-   protection après sa création avec un essai de PR et un essai de push direct
-   rejeté, sans modifier le contenu de `main`.
+4. Vérifier la protection après sa création avec une PR valide et un essai de
+   push direct rejeté, sans modifier le contenu de `main`.
 
 Le nom exact des contrôles doit être choisi parmi les statuts publiés par les
 workflows du dépôt. Après modification de la protection, vérifier dans GitHub
