@@ -28,6 +28,8 @@ Le module privé Faluss Analytics est décrit dans [`docs/modules/ANALYTICS.md`]
 
 Le module Faluss Federation est décrit dans [`docs/modules/FEDERATION.md`](docs/modules/FEDERATION.md). Il conserve sur les deux rôles le transport Ed25519, les politiques de pairs, l’anti-rejeu et les diagnostics bidirectionnels derrière un opt-in explicite, sans créer de clé, de pair ou de politique.
 
+Le retrait de l’outil historique Faluss Production Reset est documenté dans [`docs/modules/PRODUCTION-RESET.md`](docs/modules/PRODUCTION-RESET.md). Son runtime destructif n’est ni copié, ni chargé, ni exposé par Platform ; toute intervention sur les sites réels reste une décision de production séparée.
+
 ## Contribution
 
 - Les règles applicables aux agents sont définies dans [`AGENTS.md`](AGENTS.md).
