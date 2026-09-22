@@ -61,6 +61,7 @@ namespace Faluss\Platform\IdentityClient {
         $GLOBALS['identity_client_test_remote_queue'] = [];
         $GLOBALS['identity_client_test_remote_calls'] = [];
         $GLOBALS['identity_client_test_did_plugins_loaded'] = true;
+        $GLOBALS['identity_client_test_doing_plugins_loaded'] = false;
         $GLOBALS['wpdb'] = new IdentityClientWpdbStub();
         $_COOKIE = [];
         $_GET = [];
@@ -218,6 +219,11 @@ namespace Faluss\Platform\IdentityClient {
     function did_action(string $hook): int
     {
         return $hook === 'plugins_loaded' && !empty($GLOBALS['identity_client_test_did_plugins_loaded']) ? 1 : 0;
+    }
+
+    function doing_action(?string $hook = null): bool
+    {
+        return $hook === 'plugins_loaded' && !empty($GLOBALS['identity_client_test_doing_plugins_loaded']);
     }
 
     function is_admin(): bool
