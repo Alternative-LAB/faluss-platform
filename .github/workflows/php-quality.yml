@@ -41,12 +41,20 @@ jobs:
       - name: Faluss Analytics historical behavior contracts
         run: for test in tests/Analytics/contracts/faluss-analytics-*.php; do php "$test"; done
       - name: Faluss Federation historical behavior contracts
-        run: |
-          for test in tests/Federation/contracts/faluss-federation-*.php; do
-            if [ "$test" != "tests/Federation/contracts/faluss-federation-fed01b3-regression-test.php" ]; then
-              php "$test"
-            fi
-          done
-          php -n tests/Federation/contracts/faluss-federation-fed01b3-regression-test.php
+        run: for test in tests/Federation/contracts/faluss-federation-*.php; do if [ "$test" != "tests/Federation/contracts/faluss-federation-fed01b3-regression-test.php" ]; then php "$test"; fi; done
       - name: Dependency audit
         run: composer audit --locked
+
+  federation-sodium-compat:
+    name: Federation without native Sodium
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.1'
+          coverage: none
+          extensions: :sodium
+          ini-file: none
+      - name: Faluss Federation sodium_compat regression
+        run: php -n tests/Federation/contracts/faluss-federation-fed01b3-regression-test.php
