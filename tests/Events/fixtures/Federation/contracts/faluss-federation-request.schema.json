@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.faluss.example/faluss-federation-request.schema.json",
+  "title": "Faluss Federation FED-01A.1 request envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocol_version", "message_type", "request_id", "operation", "sender", "recipient", "issued_at", "expires_at", "nonce", "subject_context", "parameters"],
+  "properties": {
+    "protocol_version": { "const": "1" },
+    "message_type": { "const": "request" },
+    "request_id": { "$ref": "#/$defs/uuidV4" },
+    "operation": { "enum": ["diagnostic.read", "manifest.read", "read_model.read", "event_catalog.read", "event.publish"] },
+    "sender": { "$ref": "#/$defs/sender" },
+    "recipient": { "$ref": "#/$defs/recipient" },
+    "issued_at": { "$ref": "#/$defs/rfc3339Utc" },
+    "expires_at": { "$ref": "#/$defs/rfc3339Utc" },
+    "nonce": { "$ref": "#/$defs/nonce" },
+    "subject_context": { "$ref": "#/$defs/subjectContext" },
+    "parameters": { "type": "object", "maxProperties": 8 }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "operation": { "const": "diagnostic.read" } }, "required": ["operation"] },
+      "then": { "properties": { "subject_context": { "const": null }, "parameters": { "type": "object", "additionalProperties": false, "maxProperties": 0 } } }
+    },
+    {
+      "if": { "properties": { "operation": { "const": "manifest.read" } }, "required": ["operation"] },
+      "then": {
+        "properties": {
+          "subject_context": { "const": null },
+          "parameters": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["app_key"],
+            "properties": {
+              "app_key": { "$ref": "#/$defs/appKey" },
+              "requested_manifest_version": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/semanticVersion" }] }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "operation": { "const": "read_model.read" } }, "required": ["operation"] },
+      "then": {
+        "properties": {
+          "parameters": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["owner_app_key", "capability_key", "document_type", "contract_version", "audience"],
+            "properties": {
+              "owner_app_key": { "$ref": "#/$defs/appKey" },
+              "capability_key": { "$ref": "#/$defs/capabilityKey" },
+              "document_type": { "$ref": "#/$defs/documentType" },
+              "contract_version": { "$ref": "#/$defs/semanticVersion" },
+              "audience": { "$ref": "#/$defs/audience" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "operation": { "const": "event_catalog.read" } }, "required": ["operation"] },
+      "then": {
+        "properties": {
+          "subject_context": { "const": null },
+          "parameters": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["owner_app_key", "capability_key", "catalog_version"],
+            "properties": {
+              "owner_app_key": { "$ref": "#/$defs/appKey" },
+              "capability_key": { "$ref": "#/$defs/capabilityKey" },
+              "catalog_version": { "$ref": "#/$defs/semanticVersion" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "operation": { "const": "event.publish" } }, "required": ["operation"] },
+      "then": {
+        "properties": {
+          "subject_context": { "const": null },
+          "parameters": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["event"],
+            "properties": { "event": { "$ref": "faluss-event-envelope.schema.json" } }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "uuidV4": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "rfc3339Utc": { "type": "string", "format": "date-time", "pattern": "Z$", "maxLength": 32 },
+    "semanticVersion": { "type": "string", "pattern": "^[1-9][0-9]*\\.[0-9]+\\.[0-9]+$", "maxLength": 32 },
+    "nodeId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,63}$" },
+    "appKey": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,63}$" },
+    "keyId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{7,127}$" },
+    "nonce": { "type": "string", "pattern": "^[A-Za-z0-9_-]{43}$" },
+    "capabilityKey": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,63}(?:\\.[a-z][a-z0-9_.-]{1,127})+$", "maxLength": 160 },
+    "documentType": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,63}(?:\\.[a-z][a-z0-9-]{1,63})+$", "maxLength": 128 },
+    "audience": { "enum": ["private", "members", "public"] },
+    "sender": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node_id", "app_key", "key_id"],
+      "properties": { "node_id": { "$ref": "#/$defs/nodeId" }, "app_key": { "$ref": "#/$defs/appKey" }, "key_id": { "$ref": "#/$defs/keyId" } }
+    },
+    "recipient": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node_id", "app_key"],
+      "properties": { "node_id": { "$ref": "#/$defs/nodeId" }, "app_key": { "$ref": "#/$defs/appKey" } }
+    },
+    "subjectContext": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["subject_faluss_id"],
+          "properties": { "subject_faluss_id": { "$ref": "#/$defs/uuidV4" } }
+        }
+      ]
+    }
+  },
+  "x-fed01a-transport": {
+    "method": "POST",
+    "path": "/wp-json/faluss-federation/v1/exchange",
+    "https_only": true,
+    "canonical_port_only": true,
+    "forbid_query_fragment_userinfo_redirect": true,
+    "sslverify": true,
+    "content_type": "application/json",
+    "required_headers_exactly_once": ["X-Faluss-Federation-Key-Id", "X-Faluss-Federation-Content-SHA256", "X-Faluss-Federation-Signature"],
+    "signature_algorithm": "Ed25519",
+    "signature_encoding": "base64url-no-padding-canonical-64-bytes",
+    "request_max_lifetime_seconds": 300,
+    "maximum_clock_skew_seconds": 60,
+    "sodium_unavailable": "fail_closed",
+    "nonce": { "source": "random_bytes(32)", "encoding": "base64url-no-padding-canonical", "decoded_bytes": 32, "encoded_characters": 43 },
+    "nonce_consumption": "atomic_after_crypto_before_dispatch",
+    "nonce_unique_tuple": ["sender.node_id", "sender.key_id", "nonce"],
+    "request_id_hash_binding": ["sender.node_id", "request_id", "request_body_sha256"]
+  },
+  "x-fed01a-semantic-invariants": {
+    "single_audience_authority": "parameters.audience is the only requested audience; subject_context contains only a server-resolved Faluss ID",
+    "read_model_subject_context": "present only when the specialised contract is subject-linked; its Faluss ID is server-resolved and re-authorized, never browser input or authorization alone",
+    "canonical_request_components": ["protocol_version", "HTTP_method", "exact_path", "sender.node_id", "recipient.node_id", "sender.key_id", "issued_at", "expires_at", "nonce", "raw_body_sha256_hex"],
+    "canonicalization": { "encoding": "UTF-8", "bom": "forbidden", "separator_byte": "0x0A", "carriage_return": "forbidden", "final_lf": "forbidden", "component_cr_or_lf": "forbidden", "method": "POST", "path": "/wp-json/faluss-federation/v1/exchange", "body_hash": "exact_transmitted_raw_bytes_without_json_decode_normalization_or_reencode", "verifier": "rebuild_from_received_data_and_local_expectations" },
+    "local_policy": { "exact_sender_node_app_key": true, "exact_recipient_node_app": true, "canonical_https_peer_origin": "local_configuration_only", "operations": "explicit", "owner_apps": "exact_no_wildcard", "capabilities": "exact_no_wildcard", "audiences": "exact_no_wildcard", "manifest": "signed_accepted_compatible_revalidated" },
+    "operation_authorization": { "diagnostic.read": "exact sender key recipient; null subject and empty parameters", "manifest.read": "parameters.app_key is in owner_apps and equals recipient.app_key", "read_model.read": "owner_app_key is in owner_apps and equals recipient.app_key; capability, document, version, audience and interface are declared by the accepted compatible owner manifest", "event_catalog.read": "null subject; owner_app_key equals recipient.app_key and is explicitly allowed; capability_key is explicitly allowed; catalog_version is exact; no audience", "event.publish": "null subject; event source node, app and owner equal the authenticated sender; source capability is explicitly allowed; exact accepted catalog and consumers are required" },
+    "limits": { "raw_body_bytes": 65536, "json_depth": 16, "object_fields": 128, "array_items": 128, "string_bytes": 4096, "connect_timeout_seconds": 3, "total_timeout_seconds": 10 },
+    "prohibited": ["browser_transport", "wordpress_session_sharing", "direct_table_access", "generic_rpc", "profile_write", "registry_write", "claim", "debit", "credit", "purchase", "payment", "entitlement", "media_proxy", "fpr_reuse", "identity_reuse", "token_connector_reuse", "hmac", "rsa", "custom_crypto", "unsigned_fallback"]
+  },
+  "x-fed01a-scope": ["docs/FALUSS_FEDERATION_CONTRACT.md", "contracts/faluss-federation-request.schema.json", "contracts/faluss-federation-response.schema.json", "tests/faluss-federation-fed01a-contract-test.php", "docs/FALUSS_CAPABILITIES_CONTRACT.md", "docs/MASTER_PROFILE_CONTRACT.md", "docs/ARCHITECTURE.md", "docs/DATA_MODEL.md", "docs/ROADMAP.md"]
+}

@@ -23,4 +23,6 @@ parameters:
             - src/Subscriptions/Legacy/includes/*.php
             - src/TokenEngine/Legacy/includes/*.php
             - src/Identity/Legacy/includes/*.php
+            - src/Events/Legacy/faluss-events.php
+            - src/Events/Legacy/includes/*.php
     tmpDir: .cache/phpstan

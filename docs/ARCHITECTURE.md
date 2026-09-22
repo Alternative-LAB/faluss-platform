@@ -50,3 +50,5 @@ Le [module Faluss Identity](modules/IDENTITY.md) reprend sur le rôle `me` l’u
 Le [module Faluss Subscriptions](modules/SUBSCRIPTIONS.md) reprend sur le rôle `hub` l’autorité historique des offres, essais, abonnements, entitlements, clients Stripe et audits. Il est opt-in, refuse la coexistence avec l’ancien plugin et expose à Portal une projection étroite sans déplacer la source de vérité avant la bascule approuvée.
 
 Le [module Token Engine](modules/TOKEN-ENGINE.md) reprend sur le rôle `hub` les projets, permissions, règles, droits et les ledgers générique/PF historiques. Il reste opt-in, conserve les lignes append-only sans recalcul et expose à Portal uniquement le gain quotidien Hub derrière un contrat serveur fermé.
+
+Le [module Faluss Events](modules/EVENTS.md) reprend sur les rôles `me` et `hub` les contrats EVT, les six tables privées, les registres fermés, le transport Federation existant, les leases, les retries et les trois workers Cron. Il reste opt-in, refuse un second runtime actif et ne crée aucun événement métier au chargement.

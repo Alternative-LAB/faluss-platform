@@ -1,0 +1,404 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.faluss.com/events/v1/faluss-event-source-catalog.schema.json",
+  "title": "Faluss event source catalog v1",
+  "description": "EVT-01A documentary contract only. This catalog declares possible owner-produced facts but authorizes and emits none.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "document_type",
+    "catalog_version",
+    "node_id",
+    "app_key",
+    "owner",
+    "owner_engine",
+    "capability_key",
+    "capability_interface",
+    "event_types",
+    "compatibility"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "1.0.0"
+    },
+    "document_type": {
+      "const": "faluss.event-source-catalog"
+    },
+    "catalog_version": {
+      "$ref": "#/$defs/semanticVersion"
+    },
+    "node_id": {
+      "$ref": "#/$defs/nodeId"
+    },
+    "app_key": {
+      "$ref": "#/$defs/appKey"
+    },
+    "owner": {
+      "$ref": "#/$defs/appKey"
+    },
+    "owner_engine": {
+      "$ref": "#/$defs/engineId"
+    },
+    "capability_key": {
+      "$ref": "#/$defs/namespacedKey"
+    },
+    "capability_interface": {
+      "const": "event_source"
+    },
+    "event_types": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/eventDefinition"
+      }
+    },
+    "compatibility": {
+      "$ref": "#/$defs/catalogCompatibility"
+    }
+  },
+  "$defs": {
+    "semanticVersion": {
+      "type": "string",
+      "maxLength": 32,
+      "pattern": "^[1-9][0-9]*\\.[0-9]+\\.[0-9]+$"
+    },
+    "nodeId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,63}$"
+    },
+    "appKey": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,63}$"
+    },
+    "engineId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,63}$"
+    },
+    "namespacedKey": {
+      "type": "string",
+      "maxLength": 512,
+      "pattern": "^[a-z][a-z0-9-]{1,63}(?:\\.[a-z][a-z0-9-]{1,63}){1,7}$"
+    },
+    "documentType": {
+      "type": "string",
+      "maxLength": 512,
+      "pattern": "^[a-z][a-z0-9-]{1,63}(?:\\.[a-z][a-z0-9-]{1,63}){1,7}$"
+    },
+    "strictUtcDateTime": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]Z$"
+    },
+    "payloadContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "document_type",
+        "contract_version"
+      ],
+      "properties": {
+        "document_type": {
+          "$ref": "#/$defs/documentType"
+        },
+        "contract_version": {
+          "$ref": "#/$defs/semanticVersion"
+        }
+      }
+    },
+    "subjectPolicy": {
+      "enum": [
+        "required",
+        "optional",
+        "forbidden"
+      ]
+    },
+    "actorType": {
+      "enum": [
+        "member",
+        "system",
+        "anonymous"
+      ]
+    },
+    "objectType": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{1,63}$"
+    },
+    "objectPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "presence",
+        "allowed_types"
+      ],
+      "properties": {
+        "presence": {
+          "enum": [
+            "required",
+            "optional",
+            "forbidden"
+          ]
+        },
+        "allowed_types": {
+          "type": "array",
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/objectType"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "presence": {
+                "const": "forbidden"
+              }
+            },
+            "required": [
+              "presence"
+            ]
+          },
+          "then": {
+            "properties": {
+              "allowed_types": {
+                "maxItems": 0
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "allowed_types": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "destination": {
+      "enum": [
+        "analytics.events",
+        "quests.events",
+        "progression.events"
+      ]
+    },
+    "eventLifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deprecated",
+        "sunset_at",
+        "replacement_event_type"
+      ],
+      "properties": {
+        "deprecated": {
+          "type": "boolean"
+        },
+        "sunset_at": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/strictUtcDateTime"
+            }
+          ]
+        },
+        "replacement_event_type": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/namespacedKey"
+            }
+          ]
+        }
+      }
+    },
+    "eventDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event_type",
+        "event_version",
+        "payload_contract",
+        "subject_policy",
+        "allowed_actor_types",
+        "object_policy",
+        "allowed_destinations",
+        "max_delivery_delay_seconds",
+        "data_classification",
+        "max_retention_seconds",
+        "member_result_visibility",
+        "lifecycle"
+      ],
+      "properties": {
+        "event_type": {
+          "$ref": "#/$defs/namespacedKey"
+        },
+        "event_version": {
+          "$ref": "#/$defs/semanticVersion"
+        },
+        "payload_contract": {
+          "$ref": "#/$defs/payloadContract"
+        },
+        "subject_policy": {
+          "$ref": "#/$defs/subjectPolicy"
+        },
+        "allowed_actor_types": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/actorType"
+          }
+        },
+        "object_policy": {
+          "$ref": "#/$defs/objectPolicy"
+        },
+        "allowed_destinations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/destination"
+          }
+        },
+        "max_delivery_delay_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 604800
+        },
+        "data_classification": {
+          "enum": [
+            "operational",
+            "pseudonymous",
+            "personal"
+          ]
+        },
+        "max_retention_seconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 31536000
+        },
+        "member_result_visibility": {
+          "enum": [
+            "aggregate_only",
+            "own_subject_only",
+            "never"
+          ]
+        },
+        "lifecycle": {
+          "$ref": "#/$defs/eventLifecycle"
+        }
+      }
+    },
+    "catalogCompatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minimum_runtime_version",
+        "compatible_with",
+        "deprecated",
+        "sunset_at",
+        "replacement_catalog_version"
+      ],
+      "properties": {
+        "minimum_runtime_version": {
+          "$ref": "#/$defs/semanticVersion"
+        },
+        "compatible_with": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/semanticVersion"
+          }
+        },
+        "deprecated": {
+          "type": "boolean"
+        },
+        "sunset_at": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/strictUtcDateTime"
+            }
+          ]
+        },
+        "replacement_catalog_version": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/semanticVersion"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "x-semantic-invariants": {
+    "server_validation_required": true,
+    "on_violation": "reject",
+    "owner_equals_app_key": true,
+    "capability_key_prefix": "app_key + '.'",
+    "capability_interface_required": "event_source",
+    "event_type_prefix": "app_key + '.'",
+    "event_type_unique": true,
+    "event_type_and_version_unique": true,
+    "payload_contract_exact_match_required": true,
+    "envelope_destinations_subset_required": true,
+    "subject_actor_object_policy_enforced": true,
+    "catalog_does_not_authorize_emission": true,
+    "active_cap_binding_and_consumer_policy_required": true
+  },
+  "x-forbidden-catalog-content": [
+    "transport_url",
+    "endpoint",
+    "public_key",
+    "private_key",
+    "secret",
+    "signature",
+    "php_callback",
+    "class_name",
+    "function_name",
+    "script",
+    "html",
+    "css",
+    "asset",
+    "executable_content"
+  ],
+  "x-evt01a-scope": {
+    "nature": "documentary-contract-only",
+    "wordpress_runtime_changes": false,
+    "transport": false,
+    "tables_or_migrations": false,
+    "endpoints": false,
+    "real_events": false,
+    "assets_or_ui_changes": false,
+    "allowed_changed_paths": [
+      "docs/FALUSS_EVENTS_CONTRACT.md",
+      "contracts/faluss-event-envelope.schema.json",
+      "contracts/faluss-event-source-catalog.schema.json",
+      "tests/faluss-events-evt01a-contract-test.php",
+      "docs/FALUSS_CAPABILITIES_CONTRACT.md",
+      "docs/FALUSS_FEDERATION_CONTRACT.md",
+      "docs/FALUSS_PORTAL.md",
+      "docs/ARCHITECTURE.md",
+      "docs/DATA_MODEL.md",
+      "docs/ROADMAP.md"
+    ]
+  }
+}

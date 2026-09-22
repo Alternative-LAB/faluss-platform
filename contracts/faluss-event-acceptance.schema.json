@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.faluss.example/faluss-event-acceptance.schema.json",
+  "title": "Faluss event acceptance 1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id", "event_sha256", "disposition"],
+  "properties": {
+    "event_id": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "event_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "disposition": { "enum": ["accepted", "existing"] }
+  }
+}

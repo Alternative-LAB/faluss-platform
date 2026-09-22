@@ -22,6 +22,8 @@ Le module optionnel Faluss Portal du Hub est décrit dans [`docs/modules/PORTAL.
 
 Le module critique Faluss Identity de `faluss.me` est décrit dans [`docs/modules/IDENTITY.md`](docs/modules/IDENTITY.md). Il reste désactivé par défaut et ne peut jamais être chargé avec l’ancienne autorité d’identité.
 
+Le module commun Faluss Events est décrit dans [`docs/modules/EVENTS.md`](docs/modules/EVENTS.md). Il conserve les contrats, tables, outbox/inbox, workers et règles de rétention historiques sur les rôles `me` et `hub`, derrière un opt-in explicite et sans coexistence avec l’ancien runtime.
+
 ## Contribution
 
 - Les règles applicables aux agents sont définies dans [`AGENTS.md`](AGENTS.md).

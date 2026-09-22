@@ -16,6 +16,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Module Faluss Events optionnel pour les rôles `me` et `hub`, avec catalogues, stockage append-only, outbox, inbox, consumers, leases, retries, rétention et workers Cron historiques conservés.
+- Contrats JSON EVT et contrats automatisés Events pour les événements locaux et intersites, doublons, rollback, panne réseau, reprise, limites de stockage, purge et parité des sources historiques.
 - Module Faluss Identity optionnel pour `.me`, avec registre `faluss_id`, passwordless, profils publics, onboarding, serveur OAuth, consentements, administration et audit historiques conservés.
 - Contrat public étroit d’Identity pour Link, projection bornée des profils publiés sans jointure intermodule, cycle d’activation/désactivation et garde contre une seconde autorité active.
 - Contrats automatisés Identity pour le schéma additif, PKCE, codes à usage unique, passwordless, sessions, onboarding, navigation, profils publics, coexistence et parité octet des sources et assets historiques.

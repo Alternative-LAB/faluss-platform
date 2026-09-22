@@ -40,6 +40,10 @@ register_activation_hook(
     __FILE__,
     [\Faluss\Platform\Identity\IdentityModule::class, 'activate']
 );
+register_activation_hook(
+    __FILE__,
+    [\Faluss\Platform\Events\EventsModule::class, 'activate']
+);
 register_deactivation_hook(
     __FILE__,
     [\Faluss\Platform\Subscriptions\SubscriptionsModule::class, 'deactivate']
@@ -47,6 +51,10 @@ register_deactivation_hook(
 register_deactivation_hook(
     __FILE__,
     [\Faluss\Platform\Identity\IdentityModule::class, 'deactivate']
+);
+register_deactivation_hook(
+    __FILE__,
+    [\Faluss\Platform\Events\EventsModule::class, 'deactivate']
 );
 
 add_action('plugins_loaded', static function (): void {
@@ -91,6 +99,19 @@ add_action('plugins_loaded', static function (): void {
         && !class_exists('Faluss_Identity_Authorization', false)
     ) {
         $registry->register(new \Faluss\Platform\Identity\IdentityModule());
+    }
+    if (defined('FALUSS_PLATFORM_EVENTS')
+        && constant('FALUSS_PLATFORM_EVENTS') === true
+        && !class_exists('Faluss_Events', false)
+        && !class_exists('Faluss_Events_Catalog_Validator', false)
+        && !class_exists('Faluss_Events_Envelope_Validator', false)
+        && !class_exists('Faluss_Events_Canonicalizer', false)
+        && !class_exists('Faluss_Events_Schema', false)
+        && !class_exists('Faluss_Events_Engine', false)
+        && !class_exists('Faluss_Events_Retention', false)
+        && !class_exists('Faluss_Events_Workers', false)
+    ) {
+        $registry->register(new \Faluss\Platform\Events\EventsModule());
     }
     if ($role === \Faluss\Platform\Core\SiteRole::Me
         && defined('FALUSS_PLATFORM_LINK')
