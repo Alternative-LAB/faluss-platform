@@ -76,4 +76,28 @@ Pour revenir en arrière, **désactiver d’abord `FALUSS_PLATFORM_CATALOG` dans
 
 La porte de bascule reste fermée tant qu’une copie représentative de `faluss.me` n’a pas confirmé les données réelles de `faluss_catalog_card_themes`, les pièces jointes, le thème actif, Elementor, Faluss Link et les réponses réelles du Connector. Cette limite n’empêche pas les migrations de code indépendantes des modules suivants, mais interdit de déclarer la parité de production ou de désactiver l’ancien plugin.
 
-Le futur retour arrière conservera l’option historique intacte et réactivera le plugin `faluss-catalog` ; cette procédure devra être éprouvée sur une copie de `faluss.me` avant toute désactivation réelle.
+Le futur retour arrière conservera l'option historique intacte et réactivera le plugin `faluss-catalog` ; cette procédure devra être éprouvée sur une copie de `faluss.me` avant toute désactivation réelle.
+
+## Bascule de production du 22 septembre 2026
+
+La copie isolée de `faluss.me` contient les deux thèmes enregistrés en
+production. La lecture historique puis celle du module Platform ont toutes
+deux retourné trois thèmes avec le thème système, dont deux actifs, avec le
+même SHA-256 de résultat
+`34e3085c45c97b1cba4abbb56c9570e1e8530246292d81bfddb1b15d1d75b8e3`.
+Les quatre profils publiés ont répondu HTTP 200. Le retour arrière a restauré
+la classe du plugin historique sans collision. Le Connector isolé ne pouvait
+pas joindre le Core, mais son indisponibilité a produit l'échec fermé prévu.
+
+En production, le même hash de lecture a été obtenu avant et après la bascule.
+Les deux définitions de droits ont été reçues du Connector ; le thème payant
+référence une définition valide. Aucun thème ne référence une image de
+prévisualisation absente. `FALUSS_PLATFORM_CATALOG` a été activé, puis
+`faluss-catalog` a été désactivé. La façade `Faluss_Catalog_Themes` provient
+désormais de Platform, les quatre profils publiés répondent HTTP 200 et les
+fichiers historiques restent disponibles.
+
+Pour revenir en arrière, remettre `FALUSS_PLATFORM_CATALOG` à `false`, charger
+une nouvelle requête, puis réactiver `faluss-catalog`. Le contrôle visuel de
+l'écran administratif et les mutations création, modification, désactivation
+et suppression restent à exécuter avant de supprimer les fichiers historiques.
