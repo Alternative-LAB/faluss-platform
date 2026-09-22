@@ -309,7 +309,7 @@ final class Faluss_Portal {
                 'active'      => $hub_owned,
                 'short_title' => 'Portail Central',
                 'description' => 'Gérez vos applications et comptes Faluss depuis un espace unique. Retrouvez votre activité, vos préférences et les données que chaque service vous autorise à consulter.',
-                'daily_reward' => self::hub_daily_presentation( $hub ),
+                'daily_reward' => self::hub_daily_presentation( $hub, $faluss_id ),
             ),
             array(
                 'slug'        => 'me',
@@ -368,7 +368,7 @@ final class Faluss_Portal {
     }
 
     /** Convert only the exact active Daily Reward binding into renderer input. */
-    private static function hub_daily_presentation( $hub ) {
+    private static function hub_daily_presentation( $hub, $faluss_id ) {
         $capabilities = is_array( $hub ) && is_array( $hub['capabilities'] ?? null ) ? array_column( $hub['capabilities'], null, 'capability_key' ) : array();
         $capability = $capabilities['faluss-hub.daily-reward'] ?? null;
         if ( ! is_array( $capability ) || 'enabled' !== ( $capability['state'] ?? null ) || 'available' !== ( $capability['specialized_read_model']['status'] ?? null ) ) {
@@ -383,11 +383,17 @@ final class Faluss_Portal {
         if ( ! $binding_found ) {
             return array( 'status' => 'unavailable' );
         }
-        if ( array() === ( $capability['allowed_actions'] ?? null ) ) {
-            return array( 'status' => 'claimed' );
-        }
         $expected = array( 'action_key' => 'faluss-hub.daily-reward.claim', 'owner' => 'faluss-hub', 'delegation' => array( 'type' => 'owner_delegated_action', 'target' => 'faluss-hub.daily-reward.claim' ) );
-        return array( $expected ) === $capability['allowed_actions'] ? array( 'status' => 'claimable' ) : array( 'status' => 'unavailable' );
+        $registry_status = array() === ( $capability['allowed_actions'] ?? null )
+            ? 'claimed'
+            : ( array( $expected ) === $capability['allowed_actions'] ? 'claimable' : 'unavailable' );
+        if ( 'unavailable' === $registry_status ) {
+            return array( 'status' => 'unavailable' );
+        }
+        $daily = \Faluss\Platform\Portal\PortalTokenEngineAdapter::dailyStatus( (string) $faluss_id );
+        return is_array( $daily ) && $registry_status === ( $daily['status'] ?? null )
+            ? $daily
+            : array( 'status' => 'unavailable' );
     }
 
     /** @param array<string,mixed> $app */
