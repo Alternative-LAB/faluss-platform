@@ -91,3 +91,26 @@ Les tests automatisés vérifient les hooks WordPress, la clé d’option, le ha
 et la chaîne CSS historique. Les écarts de validation sur des entrées malformées
 restent volontaires : la nouvelle validation refuse les suffixes et sauts de
 ligne qui n’ont jamais été enregistrés dans l’option actuelle.
+
+## Bascule de production du 22 septembre 2026
+
+`faluss-platform` a été activé sur `faluss.me` avec le rôle `me`. Le drapeau
+`FALUSS_PLATFORM_THEME_TOKENS` a été défini avant la désactivation de
+`faluss-theme` : la garde de coexistence a laissé l'ancien plugin prioritaire
+jusqu'à sa désactivation. Les fichiers de l'ancien plugin restent présents
+pour le retour arrière.
+
+Avant et après la bascule, la page d'accueil a rendu exactement un bloc CSS
+`faluss-theme-tokens-inline-css`, avec le même SHA-256
+`705ae9dd312e59ef0a6f958660dfe1b58336da9aae2a9e614c3365befb2236c0`.
+Les pages d'accueil, de connexion, d'espace membre et de modèle de profil
+ont répondu HTTP 200 ; le conteneur WordPress est resté sain. La copie
+isolée avait déjà validé l'enregistrement, la remise à zéro et le retour
+arrière des réglages. Le contrôle visuel dans un navigateur et les parcours
+Elementor interactifs restent à compléter avant de supprimer les fichiers
+historiques.
+
+Pour revenir en arrière en production, remettre
+`FALUSS_PLATFORM_THEME_TOKENS` à `false`, charger une nouvelle requête, puis
+réactiver `faluss-theme`. La sauvegarde privée de `wp-config.php` et de la
+base est décrite dans le [journal d'installation](../deploiement/2026-09-22-installation-socle.md).
