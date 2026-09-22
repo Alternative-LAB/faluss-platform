@@ -17,6 +17,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Corrigé
 
+- Ordonnancement des quatre adaptateurs Portal pendant `plugins_loaded`, afin d'éviter le double enregistrement des providers et de la source Apps Registry.
 - Double enregistrement de la source `faluss-me` lorsque Identity Client Platform démarre pendant `plugins_loaded`, qui verrouillait les lectures d'Apps Registry.
 - Gouvernance des PR exécutée depuis la branche de base pour empêcher une PR de neutraliser ses propres contrôles, avec validation plus stricte des sections et des gitmojis.
 - Règle explicite imposant branche, PR et contrôles CI avant `main`, sans approbation obligatoire, y compris pour les contributions produites avec une IA.

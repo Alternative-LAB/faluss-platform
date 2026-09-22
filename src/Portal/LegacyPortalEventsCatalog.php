@@ -10,9 +10,12 @@ final class Faluss_Portal_Events_Catalog {
 
     public static function boot() {
         if ( ! function_exists( 'add_action' ) ) { return; }
-        add_action( 'plugins_loaded', array( __CLASS__, 'register_provider' ), 50 );
         add_action( 'faluss_federation_ready', array( __CLASS__, 'register_provider' ), 30 );
-        if ( function_exists( 'did_action' ) && did_action( 'plugins_loaded' ) ) { self::register_provider(); }
+        if ( function_exists( 'did_action' ) && did_action( 'plugins_loaded' ) && ! doing_action( 'plugins_loaded' ) ) {
+            self::register_provider();
+            return;
+        }
+        add_action( 'plugins_loaded', array( __CLASS__, 'register_provider' ), 50 );
     }
 
     public static function register_provider() {

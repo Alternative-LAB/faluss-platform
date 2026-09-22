@@ -6,10 +6,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** Owner-only public capability manifest for the Faluss Hub node. */
 final class Faluss_Portal_Manifest {
     public static function boot() {
-        add_action( 'plugins_loaded', array( __CLASS__, 'register_provider' ), 30 );
-        if ( did_action( 'plugins_loaded' ) ) {
+        if ( did_action( 'plugins_loaded' ) && ! doing_action( 'plugins_loaded' ) ) {
             self::register_provider();
+            return;
         }
+        add_action( 'plugins_loaded', array( __CLASS__, 'register_provider' ), 30 );
     }
 
     /** @return true|false|WP_Error */

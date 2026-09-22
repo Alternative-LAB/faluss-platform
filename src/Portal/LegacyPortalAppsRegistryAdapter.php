@@ -10,10 +10,11 @@ final class Faluss_Portal_Apps_Registry_Adapter {
     private static $capability_cache = array();
 
     public static function boot() {
-        add_action( 'plugins_loaded', array( __CLASS__, 'register_source' ), 40 );
-        if ( did_action( 'plugins_loaded' ) ) {
+        if ( did_action( 'plugins_loaded' ) && ! doing_action( 'plugins_loaded' ) ) {
             self::register_source();
+            return;
         }
+        add_action( 'plugins_loaded', array( __CLASS__, 'register_source' ), 40 );
     }
 
     /** @return true|false|WP_Error */

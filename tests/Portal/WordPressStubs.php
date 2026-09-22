@@ -12,7 +12,7 @@ namespace {
     if (!function_exists('add_action')) {
         function add_action(string $hook, callable $callback, int $priority = 10, int $acceptedArgs = 1): void
         {
-            $GLOBALS['portal_test_actions'][$hook] = compact('callback', 'priority', 'acceptedArgs');
+            $GLOBALS['portal_test_actions'][$hook][] = compact('callback', 'priority', 'acceptedArgs');
         }
     }
 
@@ -33,7 +33,14 @@ namespace {
     if (!function_exists('did_action')) {
         function did_action(string $hook): int
         {
-            return $hook === 'plugins_loaded' ? 1 : 0;
+            return $hook === 'plugins_loaded' ? (int) ($GLOBALS['portal_test_did_plugins_loaded'] ?? 0) : 0;
+        }
+    }
+
+    if (!function_exists('doing_action')) {
+        function doing_action(?string $hook = null): bool
+        {
+            return $hook === 'plugins_loaded' && !empty($GLOBALS['portal_test_doing_plugins_loaded']);
         }
     }
 
@@ -61,6 +68,8 @@ namespace Faluss\Platform\Portal {
         $GLOBALS['portal_test_actions'] = [];
         $GLOBALS['portal_test_filters'] = [];
         $GLOBALS['portal_test_shortcodes'] = [];
+        $GLOBALS['portal_test_did_plugins_loaded'] = 1;
+        $GLOBALS['portal_test_doing_plugins_loaded'] = false;
         $GLOBALS['portal_test_logged_in'] = false;
         $GLOBALS['portal_test_current_user'] = null;
         $GLOBALS['portal_test_link'] = null;
