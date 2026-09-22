@@ -1,29 +1,44 @@
 name: PR governance
 
 on:
-  pull_request:
+  # Run the workflow from the protected base branch. A PR must not be able to
+  # weaken its own governance check by editing this file.
+  pull_request_target:
     types:
       - opened
       - edited
       - synchronize
       - reopened
+      - ready_for_review
 
 permissions:
   contents: read
   pull-requests: read
+  statuses: write
 
 jobs:
   validate:
     name: Validate branch and PR content
     runs-on: ubuntu-latest
     env:
-      PR_BRANCH: ${{ github.head_ref }}
+      PR_BRANCH: ${{ github.event.pull_request.head.ref }}
       PR_BODY: ${{ github.event.pull_request.body }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
     steps:
-      - name: Check out the proposed changes
+      - name: Check out trusted base branch
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Fetch proposed commit as data
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "refs/pull/${PR_NUMBER}/head"
+          test "$(git rev-parse FETCH_HEAD)" = "$HEAD_SHA"
+          git cat-file -e "${BASE_SHA}^{commit}"
 
       - name: Validate branch name
         shell: bash
@@ -60,15 +75,35 @@ jobs:
             exit 1
           fi
 
-          if grep -Eq '^-[[:space:]]*$' <<< "$PR_BODY"; then
+          if grep -Eq '^-[[:space:]]*$|^-[[:space:]]*\[[[:space:]]*\][[:space:]]*$' <<< "$PR_BODY"; then
             echo "Complete every bullet in the PR template. Use 'Sans objet' when necessary."
             exit 1
           fi
 
+          if ! python3 - <<'PY'
+          import os
+          import re
+          import sys
+
+          body = os.environ['PR_BODY']
+          sections = re.split(r'^## ', body, flags=re.MULTILINE)[1:]
+          for section in sections:
+              heading, _, content = section.partition('\n')
+              if heading in {
+                  'Objectif', 'Changements', 'Vérifications effectuées',
+                  'Intégration et absence de régression', 'Risques et retour arrière',
+              }:
+                  content = re.sub(r'<!--.*?-->', '', content, flags=re.DOTALL)
+                  content = re.sub(r'^\s*[-*]\s*$', '', content, flags=re.MULTILINE)
+                  if not content.strip():
+                      print(f'Empty required PR section: {heading}')
+                      sys.exit(1)
+          PY
+          then
+            exit 1
+          fi
+
       - name: Validate changelog and commits
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         shell: bash
         run: |
           set -euo pipefail
@@ -85,8 +120,26 @@ jobs:
               echo "Invalid gitmoji/English commit subject: $subject"
               exit 1
             fi
-            if ! EMOJI="$emoji" python3 -c 'import os, sys; sys.exit(not any(ord(char) > 127 for char in os.environ["EMOJI"]))'; then
+            if ! EMOJI="$emoji" python3 -c 'import os, sys; code = ord(os.environ["EMOJI"][0]); sys.exit(not (0x1F300 <= code <= 0x1FAFF or 0x2600 <= code <= 0x27BF or 0x2300 <= code <= 0x23FF))'; then
               echo "A gitmoji must start the commit subject: $subject"
               exit 1
             fi
           done < <(git log --format=%s "$BASE_SHA".."$HEAD_SHA")
+
+      - name: Publish trusted status on proposed commit
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VALIDATION_RESULT: ${{ job.status }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          state=failure
+          if [[ "$VALIDATION_RESULT" == success ]]; then
+            state=success
+          fi
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
+            -f state="$state" \
+            -f context='Faluss PR governance' \
+            -f description="Trusted PR policy validation: $state" \
+            -f target_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" >/dev/null
