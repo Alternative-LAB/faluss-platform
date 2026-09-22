@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Documentation
+
+- Installation initiale de `faluss-platform` sur les deux sites, avec sauvegarde, vérification et retour arrière documentés.
+
 ### Corrigé
 
 - Gouvernance des PR exécutée depuis la branche de base pour empêcher une PR de neutraliser ses propres contrôles, avec validation plus stricte des sections et des gitmojis.
