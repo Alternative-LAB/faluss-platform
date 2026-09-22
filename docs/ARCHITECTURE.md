@@ -52,3 +52,5 @@ Le [module Faluss Subscriptions](modules/SUBSCRIPTIONS.md) reprend sur le rôle 
 Le [module Token Engine](modules/TOKEN-ENGINE.md) reprend sur le rôle `hub` les projets, permissions, règles, droits et les ledgers générique/PF historiques. Il reste opt-in, conserve les lignes append-only sans recalcul et expose à Portal uniquement le gain quotidien Hub derrière un contrat serveur fermé.
 
 Le [module Faluss Events](modules/EVENTS.md) reprend sur les rôles `me` et `hub` les contrats EVT, les six tables privées, les registres fermés, le transport Federation existant, les leases, les retries et les trois workers Cron. Il reste opt-in, refuse un second runtime actif et ne crée aucun événement métier au chargement.
+
+Le [module Faluss Analytics](modules/ANALYTICS.md) reprend sur le rôle `hub` le consumer `faluss-analytics.aggregate-v1`, les reçus d’idempotence, les agrégats journaliers anonymisés, le read-model privé et le Cron de rétention. Il dépend du module Events, reste opt-in et n’ajoute aucun producteur, route publique, cookie ou statistique artificielle.

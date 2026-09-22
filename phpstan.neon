@@ -25,4 +25,6 @@ parameters:
             - src/Identity/Legacy/includes/*.php
             - src/Events/Legacy/faluss-events.php
             - src/Events/Legacy/includes/*.php
+            - src/Analytics/Legacy/faluss-analytics.php
+            - src/Analytics/Legacy/includes/*.php
     tmpDir: .cache/phpstan

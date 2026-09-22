@@ -16,6 +16,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Module Faluss Analytics optionnel pour le rôle `hub`, avec consumer Events, trois tables privées, reçus d’idempotence, anonymisation, agrégats journaliers, read-model privé et rétention historique conservés.
+- Schémas AN-01 et contrats automatisés Analytics pour les six mappings, les rejouements, les rollbacks, les bornes, la suppression de sujet et l’absence de faux zéro ou de visiteur unique inventé.
 - Module Faluss Events optionnel pour les rôles `me` et `hub`, avec catalogues, stockage append-only, outbox, inbox, consumers, leases, retries, rétention et workers Cron historiques conservés.
 - Contrats JSON EVT et contrats automatisés Events pour les événements locaux et intersites, doublons, rollback, panne réseau, reprise, limites de stockage, purge et parité des sources historiques.
 - Module Faluss Identity optionnel pour `.me`, avec registre `faluss_id`, passwordless, profils publics, onboarding, serveur OAuth, consentements, administration et audit historiques conservés.

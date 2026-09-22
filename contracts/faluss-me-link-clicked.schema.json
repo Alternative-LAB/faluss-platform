@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.faluss.com/analytics/v1/faluss-me-link-clicked.schema.json",
+  "title": "Faluss Me link clicked payload v1",
+  "description": "AN-01A closed empty payload. Link identity is limited to the opaque server object context.",
+  "type": "object",
+  "additionalProperties": false,
+  "maxProperties": 0,
+  "x-document-type": "faluss-me.link-clicked",
+  "x-contract-version": "1.0.0",
+  "x-an01a-scope": {
+    "nature": "documentary-contract-only",
+    "changed_path_count": 16,
+    "wordpress_runtime_changes": false,
+    "plugins_or_routes": false,
+    "tables_or_migrations": false,
+    "real_events_or_tracking": false,
+    "cookies_or_ui": false,
+    "allowed_changed_paths": [
+      "docs/FALUSS_ANALYTICS_CONTRACT.md",
+      "contracts/faluss-hub-portal-viewed.schema.json",
+      "contracts/faluss-hub-app-opened.schema.json",
+      "contracts/faluss-hub-daily-reward-claimed.schema.json",
+      "contracts/faluss-me-card-viewed.schema.json",
+      "contracts/faluss-me-link-clicked.schema.json",
+      "contracts/faluss-me-collection-opened.schema.json",
+      "contracts/faluss-analytics-summary.schema.json",
+      "tests/faluss-analytics-an01a-contract-test.php",
+      "docs/FALUSS_EVENTS_CONTRACT.md",
+      "docs/FALUSS_CAPABILITIES_CONTRACT.md",
+      "docs/FALUSS_FEDERATION_CONTRACT.md",
+      "docs/MASTER_PROFILE_CONTRACT.md",
+      "docs/ARCHITECTURE.md",
+      "docs/DATA_MODEL.md",
+      "docs/ROADMAP.md"
+    ]
+  }
+}

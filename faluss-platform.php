@@ -44,6 +44,10 @@ register_activation_hook(
     __FILE__,
     [\Faluss\Platform\Events\EventsModule::class, 'activate']
 );
+register_activation_hook(
+    __FILE__,
+    [\Faluss\Platform\Analytics\AnalyticsModule::class, 'activate']
+);
 register_deactivation_hook(
     __FILE__,
     [\Faluss\Platform\Subscriptions\SubscriptionsModule::class, 'deactivate']
@@ -55,6 +59,10 @@ register_deactivation_hook(
 register_deactivation_hook(
     __FILE__,
     [\Faluss\Platform\Events\EventsModule::class, 'deactivate']
+);
+register_deactivation_hook(
+    __FILE__,
+    [\Faluss\Platform\Analytics\AnalyticsModule::class, 'deactivate']
 );
 
 add_action('plugins_loaded', static function (): void {
@@ -112,6 +120,18 @@ add_action('plugins_loaded', static function (): void {
         && !class_exists('Faluss_Events_Workers', false)
     ) {
         $registry->register(new \Faluss\Platform\Events\EventsModule());
+    }
+    if ($role === \Faluss\Platform\Core\SiteRole::Hub
+        && defined('FALUSS_PLATFORM_ANALYTICS')
+        && constant('FALUSS_PLATFORM_ANALYTICS') === true
+        && !class_exists('Faluss_Analytics', false)
+        && !class_exists('Faluss_Analytics_Schema', false)
+        && !class_exists('Faluss_Analytics_Event_Validator', false)
+        && !class_exists('Faluss_Analytics_Consumer', false)
+        && !class_exists('Faluss_Analytics_Read_Model', false)
+        && !class_exists('Faluss_Analytics_Retention', false)
+    ) {
+        $registry->register(new \Faluss\Platform\Analytics\AnalyticsModule());
     }
     if ($role === \Faluss\Platform\Core\SiteRole::Me
         && defined('FALUSS_PLATFORM_LINK')

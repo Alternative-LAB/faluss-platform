@@ -1,0 +1,498 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.faluss.com/analytics/v1/faluss-analytics-summary.schema.json",
+  "title": "Faluss Analytics private summary v1",
+  "description": "AN-01A private aggregate read-model contract. It contains no raw EVT envelope and creates no Analytics runtime.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "document_type",
+    "contract_version",
+    "status",
+    "requested_period",
+    "produced_period",
+    "measurement_semantics",
+    "totals",
+    "daily_series",
+    "breakdowns",
+    "unique_visitors",
+    "freshness",
+    "source",
+    "compatibility"
+  ],
+  "properties": {
+    "document_type": {
+      "const": "analytics.summary"
+    },
+    "contract_version": {
+      "const": "1.0.0"
+    },
+    "status": {
+      "enum": ["ready", "empty", "unavailable", "not_supported"]
+    },
+    "requested_period": {
+      "$ref": "#/$defs/period"
+    },
+    "produced_period": {
+      "$ref": "#/$defs/period"
+    },
+    "measurement_semantics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["raw_views", "unique_visitors"],
+      "properties": {
+        "raw_views": {
+          "const": "qualified_event_count"
+        },
+        "unique_visitors": {
+          "const": "not_supported"
+        }
+      }
+    },
+    "totals": {
+      "$ref": "#/$defs/metricTotals"
+    },
+    "daily_series": {
+      "type": "array",
+      "maxItems": 800,
+      "items": {
+        "$ref": "#/$defs/dailyPoint"
+      }
+    },
+    "breakdowns": {
+      "$ref": "#/$defs/breakdowns"
+    },
+    "unique_visitors": {
+      "$ref": "#/$defs/uniqueVisitors"
+    },
+    "freshness": {
+      "$ref": "#/$defs/freshness"
+    },
+    "source": {
+      "$ref": "#/$defs/source"
+    },
+    "compatibility": {
+      "$ref": "#/$defs/compatibility"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ready"
+          }
+        },
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "totals": {
+            "minProperties": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "enum": ["empty", "unavailable", "not_supported"]
+          }
+        },
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "totals": {
+            "maxProperties": 0
+          },
+          "daily_series": {
+            "maxItems": 0
+          },
+          "breakdowns": {
+            "properties": {
+              "by_event_type": {
+                "maxItems": 0
+              },
+              "by_object_reference": {
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "strictUtcDateTime": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]Z$"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])$"
+    },
+    "semanticVersion": {
+      "type": "string",
+      "maxLength": 32,
+      "pattern": "^[1-9][0-9]*\\.[0-9]+\\.[0-9]+$"
+    },
+    "period": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to"],
+      "properties": {
+        "from": {
+          "$ref": "#/$defs/strictUtcDateTime"
+        },
+        "to": {
+          "$ref": "#/$defs/strictUtcDateTime"
+        }
+      }
+    },
+    "metricValue": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "metricTotals": {
+      "type": "object",
+      "additionalProperties": false,
+      "maxProperties": 6,
+      "properties": {
+        "hub.portal.raw_views": {
+          "$ref": "#/$defs/metricValue"
+        },
+        "hub.app.opens": {
+          "$ref": "#/$defs/metricValue"
+        },
+        "hub.daily_reward.claims": {
+          "$ref": "#/$defs/metricValue"
+        },
+        "me.card.raw_views": {
+          "$ref": "#/$defs/metricValue"
+        },
+        "me.link.clicks": {
+          "$ref": "#/$defs/metricValue"
+        },
+        "me.collection.opens": {
+          "$ref": "#/$defs/metricValue"
+        }
+      }
+    },
+    "dailyPoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["date", "totals"],
+      "properties": {
+        "date": {
+          "$ref": "#/$defs/date"
+        },
+        "totals": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/metricTotals"
+            },
+            {
+              "minProperties": 1
+            }
+          ]
+        }
+      }
+    },
+    "eventTypeBreakdown": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event_type", "total"],
+      "properties": {
+        "event_type": {
+          "enum": [
+            "faluss-hub.portal.viewed",
+            "faluss-hub.app.opened",
+            "faluss-hub.daily-reward.claimed",
+            "faluss-me.card.viewed",
+            "faluss-me.link.clicked",
+            "faluss-me.collection.opened"
+          ]
+        },
+        "total": {
+          "$ref": "#/$defs/metricValue"
+        }
+      }
+    },
+    "opaqueObjectReference": {
+      "type": "string",
+      "pattern": "^an01_(?:app|link|collection)_[a-f0-9]{64}$",
+      "maxLength": 84
+    },
+    "objectBreakdown": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["object_type", "object_reference", "total"],
+      "properties": {
+        "object_type": {
+          "enum": ["app", "link", "collection"]
+        },
+        "object_reference": {
+          "$ref": "#/$defs/opaqueObjectReference"
+        },
+        "total": {
+          "$ref": "#/$defs/metricValue"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "object_type": {
+                "const": "app"
+              }
+            },
+            "required": ["object_type"]
+          },
+          "then": {
+            "properties": {
+              "object_reference": {
+                "pattern": "^an01_app_[a-f0-9]{64}$"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "object_type": {
+                "const": "link"
+              }
+            },
+            "required": ["object_type"]
+          },
+          "then": {
+            "properties": {
+              "object_reference": {
+                "pattern": "^an01_link_[a-f0-9]{64}$"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "object_type": {
+                "const": "collection"
+              }
+            },
+            "required": ["object_type"]
+          },
+          "then": {
+            "properties": {
+              "object_reference": {
+                "pattern": "^an01_collection_[a-f0-9]{64}$"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "breakdowns": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["by_event_type", "by_object_reference"],
+      "properties": {
+        "by_event_type": {
+          "type": "array",
+          "maxItems": 6,
+          "items": {
+            "$ref": "#/$defs/eventTypeBreakdown"
+          }
+        },
+        "by_object_reference": {
+          "type": "array",
+          "maxItems": 200,
+          "items": {
+            "$ref": "#/$defs/objectBreakdown"
+          }
+        }
+      }
+    },
+    "uniqueVisitors": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "total", "daily_series"],
+      "properties": {
+        "status": {
+          "const": "not_supported"
+        },
+        "total": {
+          "type": "null"
+        },
+        "daily_series": {
+          "type": "array",
+          "maxItems": 0
+        }
+      }
+    },
+    "freshness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["generated_at", "max_age_seconds", "stale_behavior"],
+      "properties": {
+        "generated_at": {
+          "$ref": "#/$defs/strictUtcDateTime"
+        },
+        "max_age_seconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3600
+        },
+        "stale_behavior": {
+          "enum": ["omit", "refresh_from_owner"]
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["owner", "node_id", "hosting_app", "destination", "consumer_key"],
+      "properties": {
+        "owner": {
+          "const": "faluss-analytics"
+        },
+        "node_id": {
+          "const": "hub-node"
+        },
+        "hosting_app": {
+          "const": "faluss-hub"
+        },
+        "destination": {
+          "const": "analytics.events"
+        },
+        "consumer_key": {
+          "const": "faluss-analytics.aggregate-v1"
+        }
+      }
+    },
+    "compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimum_consumer_version", "compatible_with", "deprecated", "sunset_at"],
+      "properties": {
+        "minimum_consumer_version": {
+          "$ref": "#/$defs/semanticVersion"
+        },
+        "compatible_with": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/semanticVersion"
+          }
+        },
+        "deprecated": {
+          "type": "boolean"
+        },
+        "sunset_at": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/strictUtcDateTime"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "x-document-type": "analytics.summary",
+  "x-contract-version": "1.0.0",
+  "x-semantic-invariants": {
+    "private_only": true,
+    "own_authenticated_subject_only": true,
+    "subject_resolved_and_authorized_server_side": true,
+    "subject_identifier_omitted_from_document": true,
+    "requested_and_produced_periods_server_owned": true,
+    "period_from_not_after_to": true,
+    "daily_dates_unique_and_in_period": true,
+    "metric_and_breakdown_keys_unique": true,
+    "raw_views_are_qualified_event_counts": true,
+    "unique_visitors_v1": "not_supported",
+    "visitor_identity_collection": "forbidden",
+    "raw_event_or_transport_data": "forbidden",
+    "score_pf_ranking_entitlement_billing_use": "forbidden",
+    "master_profile_module": "reserved-not-active"
+  },
+  "x-retention": {
+    "analytics_raw_events_max_days": 90,
+    "analytics_idempotency_receipts_min_days": 30,
+    "daily_aggregates_max_months": 25,
+    "member_totals_deletable_with_identity": true,
+    "visitor_identity_retention": "forbidden"
+  },
+  "x-forbidden-data": [
+    "faluss_id",
+    "email",
+    "handle",
+    "url",
+    "ip_address",
+    "user_agent",
+    "session",
+    "cookie",
+    "visitor_identity",
+    "event_envelope",
+    "event_id",
+    "event_hash",
+    "inbox",
+    "outbox",
+    "delivery",
+    "federation_data",
+    "score",
+    "pf",
+    "ranking",
+    "entitlement",
+    "billing"
+  ],
+  "x-an01a-scope": {
+    "nature": "documentary-contract-only",
+    "changed_path_count": 16,
+    "wordpress_runtime_changes": false,
+    "plugins_or_routes": false,
+    "tables_or_migrations": false,
+    "real_events_or_tracking": false,
+    "cookies_or_ui": false,
+    "allowed_changed_paths": [
+      "docs/FALUSS_ANALYTICS_CONTRACT.md",
+      "contracts/faluss-hub-portal-viewed.schema.json",
+      "contracts/faluss-hub-app-opened.schema.json",
+      "contracts/faluss-hub-daily-reward-claimed.schema.json",
+      "contracts/faluss-me-card-viewed.schema.json",
+      "contracts/faluss-me-link-clicked.schema.json",
+      "contracts/faluss-me-collection-opened.schema.json",
+      "contracts/faluss-analytics-summary.schema.json",
+      "tests/faluss-analytics-an01a-contract-test.php",
+      "docs/FALUSS_EVENTS_CONTRACT.md",
+      "docs/FALUSS_CAPABILITIES_CONTRACT.md",
+      "docs/FALUSS_FEDERATION_CONTRACT.md",
+      "docs/MASTER_PROFILE_CONTRACT.md",
+      "docs/ARCHITECTURE.md",
+      "docs/DATA_MODEL.md",
+      "docs/ROADMAP.md"
+    ]
+  },
+  "x-an01a1-scope": {
+    "nature": "documentary-compatibility-correction-only",
+    "changed_path_count": 3,
+    "event_contract_changes": false,
+    "events_runtime_changes": false,
+    "payload_schema_changes": false,
+    "allowed_changed_paths": [
+      "docs/FALUSS_ANALYTICS_CONTRACT.md",
+      "contracts/faluss-analytics-summary.schema.json",
+      "tests/faluss-analytics-an01a-contract-test.php"
+    ]
+  }
+}

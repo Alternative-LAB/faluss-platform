@@ -24,6 +24,8 @@ Le module critique Faluss Identity de `faluss.me` est décrit dans [`docs/module
 
 Le module commun Faluss Events est décrit dans [`docs/modules/EVENTS.md`](docs/modules/EVENTS.md). Il conserve les contrats, tables, outbox/inbox, workers et règles de rétention historiques sur les rôles `me` et `hub`, derrière un opt-in explicite et sans coexistence avec l’ancien runtime.
 
+Le module privé Faluss Analytics est décrit dans [`docs/modules/ANALYTICS.md`](docs/modules/ANALYTICS.md). Il conserve sur le rôle `hub` le consumer Events, les reçus d’idempotence, les agrégats anonymisés et leur rétention, sans activer de producteur ni de tracking.
+
 ## Contribution
 
 - Les règles applicables aux agents sont définies dans [`AGENTS.md`](AGENTS.md).

@@ -38,5 +38,7 @@ jobs:
         run: for test in tests/Identity/contracts/faluss-identity-*.php; do php "$test"; done
       - name: Faluss Events historical behavior contracts
         run: for test in tests/Events/contracts/faluss-events-*.php; do php "$test"; done
+      - name: Faluss Analytics historical behavior contracts
+        run: for test in tests/Analytics/contracts/faluss-analytics-*.php; do php "$test"; done
       - name: Dependency audit
         run: composer audit --locked
