@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Faluss\Platform\TokenEngineConnector;
 
+use Faluss\Platform\Identity\IdentityContract;
+
 final class ConnectorSubjectResolver
 {
     public static function current(): string
@@ -38,54 +40,10 @@ final class ConnectorSubjectResolver
     private static function identityResolution(object $user): array
     {
         $userId = self::userId($user);
-        if (class_exists('Faluss_Identity_Registry')
-            && is_callable(['Faluss_Identity_Registry', 'get_active_for_wp_user'])
-        ) {
-            $falussId = \Faluss_Identity_Registry::get_active_for_wp_user($userId);
-            $active = self::validFalussId($falussId);
-
-            return [
-                'identity_detected' => true,
-                'active' => $active,
-                'faluss_id' => $active ? self::normalise($falussId) : '',
-            ];
-        }
-
-        return self::readOnlySchemaResolution($userId);
-    }
-
-    /** @return array{identity_detected:bool,active:bool,faluss_id:string} */
-    private static function readOnlySchemaResolution(int $userId): array
-    {
-        global $wpdb;
-
-        if (!class_exists('Faluss_Identity_Schema')
-            || !is_callable(['Faluss_Identity_Schema', 'get_status'])
-            || !is_callable(['Faluss_Identity_Schema', 'get_table_names'])
-        ) {
+        if (!IdentityContract::ready()) {
             return self::emptyResolution();
         }
-
-        $status = \Faluss_Identity_Schema::get_status();
-        $tables = \Faluss_Identity_Schema::get_table_names();
-        $table = is_array($tables) ? (string) ($tables['profiles'] ?? '') : '';
-        if (empty($status['ready'])
-            || $table === ''
-            || preg_match('/^[A-Za-z0-9_]+$/D', $table) !== 1
-            || !is_object($wpdb)
-            || !is_callable([$wpdb, 'prepare'])
-            || !is_callable([$wpdb, 'get_var'])
-        ) {
-            return ['identity_detected' => true, 'active' => false, 'faluss_id' => ''];
-        }
-
-        $falussId = $wpdb->get_var(
-            $wpdb->prepare(
-                'SELECT faluss_id FROM `' . $table . '` WHERE wp_user_id = %d AND status = %s',
-                $userId,
-                'active'
-            )
-        );
+        $falussId = IdentityContract::activeFalussIdForWpUser($userId);
         $active = self::validFalussId($falussId);
 
         return [
@@ -120,12 +78,6 @@ final class ConnectorSubjectResolver
 
     private static function validFalussId(mixed $value): bool
     {
-        if (class_exists('Faluss_Identity_Registry')
-            && is_callable(['Faluss_Identity_Registry', 'is_valid_faluss_id'])
-        ) {
-            return \Faluss_Identity_Registry::is_valid_faluss_id($value);
-        }
-
         return is_string($value)
             && preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/D', $value) === 1;
     }

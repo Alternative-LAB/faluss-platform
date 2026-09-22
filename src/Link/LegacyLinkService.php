@@ -2161,38 +2161,42 @@ final class Faluss_Link {
         ) );
     }
 
-    /** The public Identity table is read only, and unpublished rows are omitted. */
+    /** Identity publishes only the fields required by this private list. */
     private static function discoveries_for_viewer( $viewer, $limit, $offset = 0 ) {
         global $wpdb;
         $discoveries = Faluss_Link_Schema::discoveries_table();
-        $profiles = \Faluss\Platform\Link\LinkIdentityAdapter::publicProfilesTable();
-        if ( '' === $discoveries || '' === $profiles || ! self::valid_faluss_id( $viewer ) ) { return array(); }
-        if ( ! is_string( $profiles ) || '' === $profiles ) { return array(); }
+        if ( '' === $discoveries || ! self::valid_faluss_id( $viewer ) ) { return array(); }
         $rows = $wpdb->get_results( $wpdb->prepare(
-            'SELECT d.id,d.last_seen_at,p.public_slug,p.display_name,p.avatar_attachment_id FROM ' . $discoveries . ' d INNER JOIN ' . $profiles . ' p ON p.faluss_id=d.discovered_faluss_id WHERE d.viewer_faluss_id=%s AND p.publication_status=%s ORDER BY d.last_seen_at DESC,d.id DESC LIMIT %d OFFSET %d',
-            $viewer, 'published', min( 250, max( 1, absint( $limit ) ) ), max( 0, absint( $offset ) )
+            'SELECT id,discovered_faluss_id,last_seen_at FROM ' . $discoveries . ' WHERE viewer_faluss_id=%s ORDER BY last_seen_at DESC,id DESC LIMIT 250',
+            $viewer
         ), ARRAY_A );
+        $ids = array();
+        foreach ( (array) $rows as $row ) {
+            if ( is_array( $row ) && self::valid_faluss_id( $row['discovered_faluss_id'] ?? '' ) ) { $ids[] = (string) $row['discovered_faluss_id']; }
+        }
+        $profiles = \Faluss\Platform\Link\LinkIdentityAdapter::publishedProfilesByFalussIds( $ids );
         $out = array();
         foreach ( (array) $rows as $row ) {
-            if ( ! is_array( $row ) || ! absint( $row['id'] ?? 0 ) || '' === sanitize_title( $row['public_slug'] ?? '' ) ) { continue; }
+            $faluss_id = is_array( $row ) ? strtolower( (string) ( $row['discovered_faluss_id'] ?? '' ) ) : '';
+            $profile = $profiles[ $faluss_id ] ?? null;
+            if ( ! is_array( $row ) || ! is_array( $profile ) || ! absint( $row['id'] ?? 0 ) || '' === sanitize_title( $profile['public_slug'] ?? '' ) ) { continue; }
             $out[] = array(
                 'id' => absint( $row['id'] ),
                 'last_seen_at' => (string) $row['last_seen_at'],
-                'public_slug' => sanitize_title( $row['public_slug'] ),
-                'display_name' => sanitize_text_field( $row['display_name'] ?? '' ),
-                'avatar_attachment_id' => absint( $row['avatar_attachment_id'] ?? 0 ),
+                'public_slug' => sanitize_title( $profile['public_slug'] ),
+                'display_name' => sanitize_text_field( $profile['display_name'] ?? '' ),
+                'avatar_attachment_id' => absint( $profile['avatar_attachment_id'] ?? 0 ),
             );
         }
-        return $out;
+        return array_slice( $out, max( 0, absint( $offset ) ), min( 250, max( 1, absint( $limit ) ) ) );
     }
 
     private static function discoveries_count_for_viewer( $viewer ) {
         global $wpdb;
         $discoveries = Faluss_Link_Schema::discoveries_table();
-        $profiles = \Faluss\Platform\Link\LinkIdentityAdapter::publicProfilesTable();
-        if ( '' === $discoveries || '' === $profiles || ! self::valid_faluss_id( $viewer ) ) { return 0; }
-        if ( ! is_string( $profiles ) || '' === $profiles ) { return 0; }
-        return max( 0, (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . $discoveries . ' d INNER JOIN ' . $profiles . ' p ON p.faluss_id=d.discovered_faluss_id WHERE d.viewer_faluss_id=%s AND p.publication_status=%s', $viewer, 'published' ) ) );
+        if ( '' === $discoveries || ! self::valid_faluss_id( $viewer ) ) { return 0; }
+        $ids = $wpdb->get_col( $wpdb->prepare( 'SELECT discovered_faluss_id FROM ' . $discoveries . ' WHERE viewer_faluss_id=%s ORDER BY last_seen_at DESC,id DESC LIMIT 250', $viewer ) );
+        return count( \Faluss\Platform\Link\LinkIdentityAdapter::publishedProfilesByFalussIds( array_values( array_filter( (array) $ids, array( __CLASS__, 'valid_faluss_id' ) ) ) ) );
     }
 
     private static function discoveries_page_url( $page ) {

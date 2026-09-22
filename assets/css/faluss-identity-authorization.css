@@ -1,0 +1,55 @@
+.faluss-identity-authorization {
+  box-sizing: border-box;
+  display: grid;
+  min-height: 58vh;
+  padding: 48px 20px;
+  place-items: center;
+  background: #FFFDF5;
+  color: #080808;
+  font-family: Outfit, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.faluss-identity-authorization *,
+.faluss-identity-authorization *::before,
+.faluss-identity-authorization *::after { box-sizing: border-box; }
+
+.faluss-identity-authorization__card {
+  width: min(100%, 540px);
+  padding: clamp(28px, 6vw, 48px);
+  background: #FFFFFF;
+  border: 1px solid rgba(8, 8, 8, .12);
+  border-radius: 20px;
+  box-shadow: 0 12px 30px rgba(8, 8, 8, .06);
+}
+
+.faluss-identity-authorization__eyebrow {
+  margin: 0 0 12px;
+  color: #FF3D16;
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+}
+
+.faluss-identity-authorization h1 { margin: 0 0 16px; color: #080808; font-size: clamp(1.75rem, 4vw, 2.5rem); line-height: 1.08; }
+.faluss-identity-authorization p,
+.faluss-identity-authorization li { color: #6F6A63; line-height: 1.55; }
+.faluss-identity-authorization strong { color: #080808; }
+.faluss-identity-authorization ul { margin: 20px 0; padding-left: 1.25rem; }
+.faluss-identity-authorization__hint { padding-top: 18px; border-top: 1px solid rgba(8, 8, 8, .12); font-size: .92rem; }
+.faluss-identity-authorization form { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+.faluss-identity-authorization button {
+  appearance: none;
+  padding: 12px 20px;
+  border: 1px solid #FF3D16;
+  border-radius: 999px;
+  background: #FF3D16;
+  color: #FFFFFF;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+.faluss-identity-authorization button:hover,
+.faluss-identity-authorization button:focus-visible { background: #d9300f; border-color: #d9300f; }
+.faluss-identity-authorization button.faluss-identity-authorization__secondary { background: #FFFFFF; border-color: rgba(8, 8, 8, .12); color: #080808; }
+.faluss-identity-authorization button.faluss-identity-authorization__secondary:hover,
+.faluss-identity-authorization button.faluss-identity-authorization__secondary:focus-visible { border-color: #080808; }

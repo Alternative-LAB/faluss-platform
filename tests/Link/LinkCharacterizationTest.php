@@ -48,6 +48,9 @@ final class LinkCharacterizationTest extends TestCase
         self::assertStringNotContainsString('Faluss_Identity_', $source);
         self::assertStringNotContainsString('Faluss_Catalog_Themes', $source);
         self::assertStringNotContainsString('Token_Engine_Connector_Service', $source);
+        self::assertStringContainsString('publishedProfilesByFalussIds', $source);
+        self::assertStringNotContainsString('get_public_profiles_table', $source);
+        self::assertStringNotContainsString('INNER JOIN', $source);
     }
 
     public function testSupportingCompatibilityFacadesRemainByteIdentical(): void

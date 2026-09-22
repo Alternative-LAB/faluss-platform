@@ -36,9 +36,17 @@ register_activation_hook(
     __FILE__,
     [\Faluss\Platform\TokenEngine\TokenEngineModule::class, 'activate']
 );
+register_activation_hook(
+    __FILE__,
+    [\Faluss\Platform\Identity\IdentityModule::class, 'activate']
+);
 register_deactivation_hook(
     __FILE__,
     [\Faluss\Platform\Subscriptions\SubscriptionsModule::class, 'deactivate']
+);
+register_deactivation_hook(
+    __FILE__,
+    [\Faluss\Platform\Identity\IdentityModule::class, 'deactivate']
 );
 
 add_action('plugins_loaded', static function (): void {
@@ -72,6 +80,17 @@ add_action('plugins_loaded', static function (): void {
         && !class_exists('Token_Engine_Connector_Service', false)
     ) {
         $registry->register(new \Faluss\Platform\TokenEngineConnector\TokenEngineConnectorModule());
+    }
+    if ($role === \Faluss\Platform\Core\SiteRole::Me
+        && defined('FALUSS_PLATFORM_IDENTITY')
+        && constant('FALUSS_PLATFORM_IDENTITY') === true
+        && !class_exists('Faluss_Identity_Plugin', false)
+        && !class_exists('Faluss_Identity_Schema', false)
+        && !class_exists('Faluss_Identity_Registry', false)
+        && !class_exists('Faluss_Identity_Passwordless', false)
+        && !class_exists('Faluss_Identity_Authorization', false)
+    ) {
+        $registry->register(new \Faluss\Platform\Identity\IdentityModule());
     }
     if ($role === \Faluss\Platform\Core\SiteRole::Me
         && defined('FALUSS_PLATFORM_LINK')

@@ -20,7 +20,7 @@ flowchart LR
 | Classe publique | `Token_Engine_Connector_Service`, constantes et méthodes historiques | Faluss Link et autres appelants PHP |
 | Permissions | `wallet.read`, `reward.claim`, `entitlements.read` seulement | Token Engine Core |
 | Actions privées | `token_engine_connector_save`, `test`, `test_core`, `test_subject`, `test_daily_reward`, `test_entitlements` | Administration WordPress |
-| Sujet | Profil Faluss Identity actif de l’utilisateur WordPress courant, résolu côté serveur après `plugins_loaded` | Faluss Identity |
+| Sujet | Profil Faluss Identity actif de l’utilisateur WordPress courant, résolu côté serveur après `plugins_loaded` via `IdentityContract` | Faluss Identity |
 | Routes Core | Token, diagnostic, balance, reward offer/diagnostic/status/claim et entitlements | Token Engine sur `faluss.com` |
 | Tables locales | Aucune | Sans objet |
 | Routes publiques, shortcode ou JavaScript métier | Aucun | Sans objet |

@@ -20,6 +20,8 @@ Le module optionnel du catalogue de thèmes de cartes est décrit dans [`docs/mo
 
 Le module optionnel Faluss Portal du Hub est décrit dans [`docs/modules/PORTAL.md`](docs/modules/PORTAL.md). Il exige Identity Client et Apps Registry, conserve les surfaces historiques et reste désactivé par défaut.
 
+Le module critique Faluss Identity de `faluss.me` est décrit dans [`docs/modules/IDENTITY.md`](docs/modules/IDENTITY.md). Il reste désactivé par défaut et ne peut jamais être chargé avec l’ancienne autorité d’identité.
+
 ## Contribution
 
 - Les règles applicables aux agents sont définies dans [`AGENTS.md`](AGENTS.md).

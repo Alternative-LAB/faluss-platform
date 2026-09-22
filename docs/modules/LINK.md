@@ -12,7 +12,7 @@ Faluss Link est la surface publique et éditoriale du rôle `me`. Le module repr
 
 Identity reste l’unique propriétaire du `faluss_id`, du slug, du nom, de la bio, de l’avatar, de la publication et de la projection des liens publics. Link conserve seulement ses préférences de carte, son flux ordonné de blocs et la bibliothèque privée de découvertes. La transaction Studio continue de verrouiller le profil Identity, la carte et les blocs dans une seule transaction MariaDB avant de projeter les liens et de commit.
 
-Le module Identity de Faluss Platform n’est volontairement pas encore chargé : l’ordre de migration le place après Link. Pendant cette étape, l’adaptateur consomme exclusivement les méthodes publiques du plugin Faluss Identity historique. La jointure privée des découvertes utilise temporairement son getter public de table ; elle ne copie aucune ligne Identity.
+`LinkIdentityAdapter` consomme désormais le contrat étroit `IdentityContract`, qu’Identity soit encore fourni par le plugin historique ou par son module Platform. La liste privée des découvertes lit uniquement la table Link, puis demande à Identity une projection bornée des profils publiés ; elle ne joint plus et ne lit plus directement la table Identity.
 
 ## Compatibilité conservée
 
@@ -42,7 +42,7 @@ define('FALUSS_PLATFORM_TOKEN_ENGINE_CONNECTOR', true);
 define('FALUSS_PLATFORM_LINK', true);
 ```
 
-Ces constantes appartiennent à une configuration non versionnée. Faluss Identity historique doit rester l’autorité active pendant cette étape. L’ancien plugin `faluss-link` doit rester désactivé ; si l’une de ses classes est déjà chargée, le nouveau module ne s’enregistre pas et son démarrage direct refuse la collision. La copie Link historiquement inactive de `faluss.com` ne doit jamais être activée.
+Ces constantes appartiennent à une configuration non versionnée. Faluss Identity historique ou le module Platform Identity doit être l’unique autorité active. L’ancien plugin `faluss-link` doit rester désactivé ; si l’une de ses classes est déjà chargée, le nouveau module ne s’enregistre pas et son démarrage direct refuse la collision. La copie Link historiquement inactive de `faluss.com` ne doit jamais être activée.
 
 Pour revenir en arrière, **désactiver d’abord `FALUSS_PLATFORM_LINK`, charger une nouvelle requête, puis réactiver l’ancien plugin `faluss-link` sur `faluss.me`**. Les quatre tables, les deux options, les pièces jointes, les slugs et les références de thèmes sont inchangés, donc aucun transfert de données n’est requis. Réactiver l’ancien plugin dans une requête où les classes du module sont déjà chargées créerait une collision PHP.
 

@@ -22,7 +22,7 @@ final class LinkAdaptersTest extends TestCase
         self::assertFalse(LinkIdentityAdapter::ready());
         self::assertSame('', LinkIdentityAdapter::currentFalussId());
         self::assertNull(LinkIdentityAdapter::publishedProfileBySlug('member'));
-        self::assertSame('', LinkIdentityAdapter::publicProfilesTable());
+        self::assertSame([], LinkIdentityAdapter::publishedProfilesByFalussIds([]));
         self::assertFalse(LinkCatalogAdapter::available());
         self::assertFalse(LinkCatalogAdapter::activeTheme('faluss-default'));
         self::assertSame([], LinkCatalogAdapter::themes(true));
@@ -54,7 +54,7 @@ final class LinkAdaptersTest extends TestCase
         self::assertTrue(LinkIdentityAdapter::ready());
         self::assertSame($falussId, LinkIdentityAdapter::currentFalussId());
         self::assertSame('member', LinkIdentityAdapter::publishedProfileBySlug('member')['public_slug']);
-        self::assertSame('wp_faluss_identity_public_profiles', LinkIdentityAdapter::publicProfilesTable());
+        self::assertSame([], LinkIdentityAdapter::publishedProfilesByFalussIds([$falussId]));
         self::assertTrue(LinkIdentityAdapter::studioAvailable());
         self::assertTrue(LinkIdentityAdapter::persistStudioProfileInTransaction($falussId, ['display_name' => 'Membre']));
         self::assertTrue(LinkIdentityAdapter::persistExternalLinksInTransaction($falussId, []));

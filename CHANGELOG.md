@@ -16,6 +16,9 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Module Faluss Identity optionnel pour `.me`, avec registre `faluss_id`, passwordless, profils publics, onboarding, serveur OAuth, consentements, administration et audit historiques conservés.
+- Contrat public étroit d’Identity pour Link, projection bornée des profils publiés sans jointure intermodule, cycle d’activation/désactivation et garde contre une seconde autorité active.
+- Contrats automatisés Identity pour le schéma additif, PKCE, codes à usage unique, passwordless, sessions, onboarding, navigation, profils publics, coexistence et parité octet des sources et assets historiques.
 - Module Token Engine optionnel pour le Hub, avec projets, permissions, règles, droits, octrois, ledger générique et ledger PF append-only historiques conservés.
 - Contrat Platform étroit pour le gain quotidien Hub, utilisé par Portal sans lecture directe de balance ou de table.
 - Contrats automatisés Token Engine pour la coexistence, les schémas, la parité historique, les gains, l’idempotence et les compensations.
