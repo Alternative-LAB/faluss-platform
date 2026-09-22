@@ -50,3 +50,28 @@ Ces constantes appartiennent à une configuration non versionnée. Tant que `fal
 Les tests du module couvrent les manifests Hub et Me, les champs supplémentaires ou sensibles, les versions et namespaces, la forme complète du modèle de lecture, l'absence de sorties pour une relation inactive, le déterminisme, le cache fédéré borné, les sources invalides ou dupliquées, l'autorité Hub exacte et la coexistence des classes historiques. Les contrats CAP-01A, CAP-01B1 et CAP-01B2 de l'ancien dépôt restent des caractérisations séparées du plugin et de ses consommateurs historiques.
 
 La porte de bascule reste fermée tant qu'une copie représentative du Hub et de `.me` n'a pas validé avec WordPress et la Fédération réels : ordre de chargement des adaptateurs, identité locale Hub, politique du pair Me, signature et rotation de clé, expiration et invalidation du transient, indisponibilité réseau, manifests propriétaires, relations membre et rendu Portal. Les tests statiques et le harnais PHP ne constituent pas une recette WordPress, MariaDB, réseau ou Portal réelle.
+
+## Bascule de production du 22 septembre 2026
+
+La première lecture préparatoire a révélé un double enregistrement de la source
+`faluss-me` par le module Identity Client. L'incident est décrit dans le
+[rapport dédié](../incidents/2026-09-22-apps-registry-source-conflict.md) et
+suivi par l'issue GitHub #21. Le correctif de la PR #22 a été validé par 133
+tests et 2 096 assertions, puis déployé. Après déploiement, le registre
+historique a retrouvé `source_conflict=0` et une lecture membre valide avec
+les applications `faluss-hub` et `faluss-me`.
+
+`FALUSS_PLATFORM_APPS_REGISTRY` a ensuite été activé sur les deux sites et
+les deux instances de `faluss-apps-registry` ont été désactivées. Une bascule
+aller-retour contrôlée sur le Hub a comparé les documents historique et
+Platform : leur seule différence est l'horodatage `generated_at` du modèle
+spécialisé, produit au moment de chaque lecture. Le document Platform passe
+le validateur `apps.registry`, conserve les deux applications et obtient le
+manifest Me par la Fédération réelle. Les deux accueils répondent HTTP 200 et
+les conteneurs restent sains.
+
+Les fichiers historiques restent disponibles. Pour revenir en arrière,
+remettre le drapeau Apps Registry à `false` sur le site concerné, charger une
+nouvelle requête, puis réactiver son ancien plugin. La rotation de clé et une
+panne réseau réelle restent couvertes par les tests et devront être rejouées
+sur une copie avant la suppression physique des fichiers historiques.
