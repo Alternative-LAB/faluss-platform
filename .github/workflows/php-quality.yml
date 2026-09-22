@@ -40,5 +40,13 @@ jobs:
         run: for test in tests/Events/contracts/faluss-events-*.php; do php "$test"; done
       - name: Faluss Analytics historical behavior contracts
         run: for test in tests/Analytics/contracts/faluss-analytics-*.php; do php "$test"; done
+      - name: Faluss Federation historical behavior contracts
+        run: |
+          for test in tests/Federation/contracts/faluss-federation-*.php; do
+            if [ "$test" != "tests/Federation/contracts/faluss-federation-fed01b3-regression-test.php" ]; then
+              php "$test"
+            fi
+          done
+          php -n tests/Federation/contracts/faluss-federation-fed01b3-regression-test.php
       - name: Dependency audit
         run: composer audit --locked

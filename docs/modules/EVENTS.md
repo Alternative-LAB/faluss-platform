@@ -59,8 +59,9 @@ aucune copie de données et ne modifie aucune instance WordPress.
 Les noms d’événements, destinations et opérations Federation historiques sont
 inchangés. Le transport intersite continue de passer exclusivement par
 `Faluss_Federation_Client::event_publish()` et par l’adaptateur signé
-`event.publish`. Tant que le module Federation n’est pas migré et validé, son
-plugin historique reste la dépendance de transport.
+`event.publish`. Cette façade peut provenir du module Federation Platform opt-in
+ou du plugin historique, jamais des deux simultanément. La source historique
+reste l’autorité de production jusqu’à une bascule séparément approuvée.
 
 Les hooks suivants sont conservés :
 

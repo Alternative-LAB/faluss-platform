@@ -26,6 +26,8 @@ Le module commun Faluss Events est décrit dans [`docs/modules/EVENTS.md`](docs/
 
 Le module privé Faluss Analytics est décrit dans [`docs/modules/ANALYTICS.md`](docs/modules/ANALYTICS.md). Il conserve sur le rôle `hub` le consumer Events, les reçus d’idempotence, les agrégats anonymisés et leur rétention, sans activer de producteur ni de tracking.
 
+Le module Faluss Federation est décrit dans [`docs/modules/FEDERATION.md`](docs/modules/FEDERATION.md). Il conserve sur les deux rôles le transport Ed25519, les politiques de pairs, l’anti-rejeu et les diagnostics bidirectionnels derrière un opt-in explicite, sans créer de clé, de pair ou de politique.
+
 ## Contribution
 
 - Les règles applicables aux agents sont définies dans [`AGENTS.md`](AGENTS.md).

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Faluss\Platform\AppsRegistry;
 
 use DateTimeImmutable;
+use Faluss\Platform\Federation\FederationBridge;
 
 /** Trusted owner registry and member-scoped apps.registry resolver. */
 final class AppsRegistryService
@@ -27,17 +28,16 @@ final class AppsRegistryService
 
     public static function registerFederationValidator(): bool|\WP_Error
     {
-        if (!class_exists('Faluss_Federation_Providers')
-            || !class_exists('Faluss_Federation_Crypto')
-            || !is_callable(['Faluss_Federation_Providers', 'register_manifest_contract_validator'])
-            || !is_callable(['Faluss_Federation_Crypto', 'transport_ready'])
-            || call_user_func(['Faluss_Federation_Crypto', 'transport_ready']) !== true
+        if (!FederationBridge::isCallable('Faluss_Federation_Providers', 'register_manifest_contract_validator')
+            || !FederationBridge::isCallable('Faluss_Federation_Crypto', 'transport_ready')
+            || FederationBridge::invoke('Faluss_Federation_Crypto', 'transport_ready') !== true
         ) {
             return false;
         }
 
-        $result = call_user_func(
-            ['Faluss_Federation_Providers', 'register_manifest_contract_validator'],
+        $result = FederationBridge::invoke(
+            'Faluss_Federation_Providers',
+            'register_manifest_contract_validator',
             self::DOCUMENT_TYPE,
             self::CONTRACT_VERSION,
             ['Faluss_Apps_Registry_Manifest_Validator', 'validate']
@@ -344,16 +344,15 @@ final class AppsRegistryService
      */
     private static function federatedManifest(array $source): ?array
     {
-        if (!class_exists('Faluss_Federation_Client')
-            || !class_exists('Faluss_Federation_Policy')
-            || !is_callable(['Faluss_Federation_Client', 'manifest_read'])
-            || !is_callable(['Faluss_Federation_Policy', 'find_outbound_peer'])
+        if (!FederationBridge::isCallable('Faluss_Federation_Client', 'manifest_read')
+            || !FederationBridge::isCallable('Faluss_Federation_Policy', 'find_outbound_peer')
         ) {
             return null;
         }
 
-        $peer = call_user_func(
-            ['Faluss_Federation_Policy', 'find_outbound_peer'],
+        $peer = FederationBridge::invoke(
+            'Faluss_Federation_Policy',
+            'find_outbound_peer',
             $source['peer_node_id'],
             $source['peer_app_key']
         );
@@ -374,8 +373,9 @@ final class AppsRegistryService
             delete_transient($cacheKey);
         }
 
-        $response = call_user_func(
-            ['Faluss_Federation_Client', 'manifest_read'],
+        $response = FederationBridge::invoke(
+            'Faluss_Federation_Client',
+            'manifest_read',
             $source['peer_node_id'],
             $source['peer_app_key'],
             $source['requested_manifest_version']
@@ -662,13 +662,11 @@ final class AppsRegistryService
 
     private static function isHubAuthority(): bool
     {
-        if (!class_exists('Faluss_Federation_Crypto')
-            || !is_callable(['Faluss_Federation_Crypto', 'local_identity'])
-        ) {
+        if (!FederationBridge::isCallable('Faluss_Federation_Crypto', 'local_identity')) {
             return false;
         }
 
-        $identity = call_user_func(['Faluss_Federation_Crypto', 'local_identity']);
+        $identity = FederationBridge::invoke('Faluss_Federation_Crypto', 'local_identity');
 
         return !is_wp_error($identity)
             && is_array($identity)

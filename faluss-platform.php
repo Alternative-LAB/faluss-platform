@@ -42,6 +42,10 @@ register_activation_hook(
 );
 register_activation_hook(
     __FILE__,
+    [\Faluss\Platform\Federation\FederationModule::class, 'activate']
+);
+register_activation_hook(
+    __FILE__,
     [\Faluss\Platform\Events\EventsModule::class, 'activate']
 );
 register_activation_hook(
@@ -76,6 +80,19 @@ add_action('plugins_loaded', static function (): void {
 
     $registry = new \Faluss\Platform\Core\ModuleRegistry($role);
     $registry->register(new \Faluss\Platform\Admin\DashboardModule($role, $registry));
+    if (defined('FALUSS_PLATFORM_FEDERATION')
+        && constant('FALUSS_PLATFORM_FEDERATION') === true
+        && !class_exists('Faluss_Federation', false)
+        && !class_exists('Faluss_Federation_Admin', false)
+        && !class_exists('Faluss_Federation_Client', false)
+        && !class_exists('Faluss_Federation_Crypto', false)
+        && !class_exists('Faluss_Federation_Policy', false)
+        && !class_exists('Faluss_Federation_Providers', false)
+        && !class_exists('Faluss_Federation_Schema', false)
+        && !class_exists('Faluss_Federation_Server', false)
+    ) {
+        $registry->register(new \Faluss\Platform\Federation\FederationModule());
+    }
     if ($role === \Faluss\Platform\Core\SiteRole::Me
         && defined('FALUSS_PLATFORM_THEME_TOKENS')
         && constant('FALUSS_PLATFORM_THEME_TOKENS') === true

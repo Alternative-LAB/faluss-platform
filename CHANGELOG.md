@@ -16,6 +16,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Module Faluss Federation optionnel pour les rôles `me` et `hub`, avec transport Ed25519, politiques locales de pairs, anti-rejeu transactionnel, diagnostics bidirectionnels et administration historiques conservés.
+- Contrats JSON FED et contrats automatisés Federation pour la canonicalisation, les signatures, la fraîcheur, les en-têtes, les limites, la concurrence, les politiques, les diagnostics et la parité des sources historiques.
 - Module Faluss Analytics optionnel pour le rôle `hub`, avec consumer Events, trois tables privées, reçus d’idempotence, anonymisation, agrégats journaliers, read-model privé et rétention historique conservés.
 - Schémas AN-01 et contrats automatisés Analytics pour les six mappings, les rejouements, les rollbacks, les bornes, la suppression de sujet et l’absence de faux zéro ou de visiteur unique inventé.
 - Module Faluss Events optionnel pour les rôles `me` et `hub`, avec catalogues, stockage append-only, outbox, inbox, consumers, leases, retries, rétention et workers Cron historiques conservés.

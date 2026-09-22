@@ -25,15 +25,17 @@ hors Git :
 
 ```php
 define('FALUSS_PLATFORM_ROLE', 'hub');
+define('FALUSS_PLATFORM_FEDERATION', true);
 define('FALUSS_PLATFORM_EVENTS', true);
 define('FALUSS_PLATFORM_ANALYTICS', true);
 ```
 
 Sans l’opt-in Analytics exact, aucune de ses classes, tables ou planifications
 n’est chargée. La présence d’une classe du plugin Faluss Analytics historique
-empêche Platform de charger une seconde autorité. Sans identité Federation Hub
-exacte, schéma prêt et runtime Events disponible, le consumer reste fermé sans
-créer de métrique.
+empêche Platform de charger une seconde autorité. Federation peut encore être
+fourni par son plugin historique pendant la transition, mais jamais en même
+temps que le module Platform. Sans identité Federation Hub exacte, schéma prêt
+et runtime Events disponible, le consumer reste fermé sans créer de métrique.
 
 ## Stockage et anonymisation
 
