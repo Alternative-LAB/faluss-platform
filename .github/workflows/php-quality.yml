@@ -57,4 +57,4 @@ jobs:
           extensions: :sodium
           ini-file: none
       - name: Faluss Federation sodium_compat regression
-        run: php -n tests/Federation/contracts/faluss-federation-fed01b3-regression-test.php
+        run: php -n -d extension=json tests/Federation/contracts/faluss-federation-fed01b3-regression-test.php
