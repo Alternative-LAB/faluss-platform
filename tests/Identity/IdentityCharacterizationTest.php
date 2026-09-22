@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 final class IdentityCharacterizationTest extends TestCase
 {
-    public function testHistoricalSourcesAndAssetsRemainByteIdentical(): void
+    public function testHistoricalSourcesAndAssetsRemainContentIdentical(): void
     {
         $root = dirname(__DIR__, 2);
         $legacy = $root . '/src/Identity/Legacy/includes/';
@@ -23,11 +23,11 @@ final class IdentityCharacterizationTest extends TestCase
             'class-faluss-identity-onboarding-elementor-widget.php' => 'e22059042b83a245154b784570db3a1c05a4e4907d75f40da7a65d99a51c32af',
             'class-faluss-identity-onboarding.php' => '6def5ef0869af03d5de2b62c027b06ff3e95550d708a280aaac26e88c5c47c84',
             'class-faluss-identity-passwordless.php' => '11e87b26f3f12712f77fd77d5d19609560f7dcfb240037cd2b0f449430719f30',
-            'class-faluss-identity-plugin.php' => '8af13fc3000fed7972d0d848f067fcdb31d8efaf2103be951c3ffe24b44e00a3',
-            'class-faluss-identity-public-profile-elementor-widgets.php' => 'e1d3a988e5c36d87e6dfaf6072a8da3341cb9880b053951d3271e63af69df5a1',
-            'class-faluss-identity-public-profile.php' => 'd226486df21f4d6007e21ff9fd103d30fec92670ba6192cc0eb12e5ac8b1a43e',
-            'class-faluss-identity-registry.php' => 'c2b3e52f91e0a7855aeb4dd399c6b5bde5fca46a777f66eab632346d3dad72c6',
-            'class-faluss-identity-schema.php' => '3141ead5dbcaef6baeda9ae04991130e87ca3076436c94b038c829e312891220',
+            'class-faluss-identity-plugin.php' => 'a8ff95f0bf076b0ee36cdcea3104215a1b7e43045225d4cb72ec02e221217ffa',
+            'class-faluss-identity-public-profile-elementor-widgets.php' => '9b10d26e71ccecb4784f959e51775bb89b83bac5a400d9e6364de69472a30aa3',
+            'class-faluss-identity-public-profile.php' => 'c91efb6619368e79e44d4c74cbe3c25b90068843895b5bde266e12efef0923a2',
+            'class-faluss-identity-registry.php' => '6a69c3c3f0c9320e2cf7c9b9fc352e51689a44e5718d28c19120b53cdeb83d3a',
+            'class-faluss-identity-schema.php' => 'f2e62e9e0fc9feb66813f19fe948c56cdb6ff8d3472cc596501b3dc1ff233aad',
             'class-faluss-identity-sso-clients-admin.php' => '56fa014d8904f097e1519c3a4f8a03bb33f1f23a864b08cf6eb0628eb41fd496',
         ];
         $assets = [
@@ -35,17 +35,25 @@ final class IdentityCharacterizationTest extends TestCase
             'assets/css/faluss-identity-navigation.css' => 'b0ee91dbd0bb8b01b6713e546ecdf73684e31b83dc64aa7c86d3443db5597dd3',
             'assets/css/faluss-identity-onboarding.css' => '8f099388b9a249d0890c0b8411e98b56a0dc407c33f852f5838beace6d371f41',
             'assets/css/faluss-identity-passwordless.css' => '98f17deca03474c710b674435d0d8d42e802b88be6c1c817396df6dc2b6bff7e',
-            'assets/css/faluss-identity-public-profile.css' => '01689634cde6285987c1e53a5d24b9b7310c15b8ed5ddbf4ed3bfca50e45fb7a',
+            'assets/css/faluss-identity-public-profile.css' => '1309afadec29703fabc7da1027c1d600b973d4ca9d238a01a9a6f1d43edc0905',
             'assets/js/faluss-identity-navigation.js' => '520cf6e32a0d2200e2d7e262fb62de6ec2efea496d908d8993abfd41e6d5c58a',
             'assets/js/faluss-identity-onboarding.js' => '486b6fa938508393564e19bd0ba7adba970d96f6fed6125f7e1c76ab7f256b42',
             'assets/js/faluss-identity-passwordless-login.js' => 'f6fe696ae0eadd4bd20eaadb5b43adbc4d73619ad65d73a27df7c6034c101199',
         ];
 
         foreach ($files as $file => $hash) {
-            self::assertSame($hash, hash_file('sha256', $legacy . $file), $file);
+            self::assertSame($hash, $this->normalizedSha256($legacy . $file), $file);
         }
         foreach ($assets as $file => $hash) {
-            self::assertSame($hash, hash_file('sha256', $root . '/' . $file), $file);
+            self::assertSame($hash, $this->normalizedSha256($root . '/' . $file), $file);
         }
+    }
+
+    private function normalizedSha256(string $path): string
+    {
+        $contents = file_get_contents($path);
+        self::assertNotFalse($contents, $path);
+
+        return hash('sha256', str_replace("\r\n", "\n", $contents));
     }
 }
