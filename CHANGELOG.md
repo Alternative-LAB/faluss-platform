@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Modifié
+
+- Version du Master Plugin portée de `0.1.0` à `0.2.0` afin que l’updater WordPress reconnaisse la livraison de Studio V2 et Link 0.4.0 comme une mise à jour plus récente.
+
 ### Documentation
 
 - Interface d’administration Platform modernisée avec une hiérarchie plus claire, des cartes d’état, des badges accessibles, un tableau responsive et des états de focus visibles.
