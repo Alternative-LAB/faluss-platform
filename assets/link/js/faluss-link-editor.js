@@ -957,7 +957,7 @@
         .on('click.falussLink', '.faluss-link-studio [data-fl-save-link]', function () {
             var studio = $(this).closest('.faluss-link-studio'), linkCard = $(this).closest('[data-fl-link-card]'), label = $.trim(linkCard.find('[data-fl-link-label]').val() || ''), url = $.trim(linkCard.find('[data-fl-link-url]').val() || '');
             if (!label || !safeURL(url)) { showStatus(studio, 'Renseignez un nom et une URL HTTPS valide.', true); return; }
-            enqueueStudioMutation(studio, 'update_link', { block_id: String(linkCard.data('block-id') || ''), label: label, url: url });
+            enqueueStudioMutation(studio, 'update_link', { block_id: String(linkCard.data('block-id') || ''), label: label, url: url, attachment_id: linkCard.find('[data-fl-link-attachment]').val() || 0, visibility: linkCard.find('[data-fl-link-visibility]').val() || 'all' });
         })
         .on('click.falussLink', '.faluss-link-studio [data-fl-delete-link]', function () {
             var studio = $(this).closest('.faluss-link-studio'), linkCard = $(this).closest('[data-fl-link-card]');

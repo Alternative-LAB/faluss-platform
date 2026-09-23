@@ -22,7 +22,13 @@ final class Faluss_Identity_Onboarding {
     const FLOW_VERSION = 1;
 
     /** ONB-02 persists only its resumable step in the existing ONB-01 state. */
-    const CARD_WIZARD_STEPS = array( 'wizard_name', 'wizard_avatar', 'wizard_header', 'wizard_style', 'wizard_socials', 'wizard_links', 'wizard_finish', 'complete' );
+    const CARD_WIZARD_STEPS = array(
+        'wizard_structure',
+        'wizard_name', 'wizard_avatar', 'wizard_header', 'wizard_style', 'wizard_socials', 'wizard_links',
+        'wizard_atomic_warning', 'wizard_atomic_colors', 'wizard_atomic_buttons', 'wizard_atomic_avatar_upload',
+        'wizard_atomic_avatar', 'wizard_atomic_wallpaper_upload', 'wizard_atomic_wallpaper', 'wizard_atomic_networks',
+        'wizard_finish', 'complete',
+    );
 
     /** @var array<int, string> */
     const INTENTS = array( 'unlock_teaser', 'claim_reward', 'create_card', 'generic_login' );
@@ -287,7 +293,7 @@ final class Faluss_Identity_Onboarding {
             self::send_ajax_error();
         }
         $result = Faluss_Identity_Public_Profile::reserve_public_slug( $faluss_id, $slug );
-        if ( 'claimed' !== $result || ! self::record_state( $faluss_id, 'create_card', 'claimed', 'wizard_name' ) ) {
+        if ( 'claimed' !== $result || ! self::record_state( $faluss_id, 'create_card', 'claimed', 'wizard_structure' ) ) {
             wp_send_json_error( array( 'message' => self::availability_message( $result ) ), 400 );
         }
         wp_send_json_success( array( 'redirect' => self::onboarding_url() ) );

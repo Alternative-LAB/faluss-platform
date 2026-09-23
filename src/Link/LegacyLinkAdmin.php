@@ -8,6 +8,10 @@ final class Faluss_Link_Admin {
         return array(
             'instagram' => array( 'label' => 'Instagram', 'active' => 1, 'outline_icon' => 0, 'full_logo' => 0 ),
             'tiktok' => array( 'label' => 'TikTok', 'active' => 1, 'outline_icon' => 0, 'full_logo' => 0 ),
+            'telegram' => array( 'label' => 'Telegram', 'active' => 1, 'outline_icon' => 0, 'full_logo' => 0 ),
+            'snapchat' => array( 'label' => 'Snapchat', 'active' => 1, 'outline_icon' => 0, 'full_logo' => 0 ),
+            'threads' => array( 'label' => 'Threads', 'active' => 1, 'outline_icon' => 0, 'full_logo' => 0 ),
+            'onlyfans' => array( 'label' => 'OnlyFans', 'active' => 1, 'outline_icon' => 0, 'full_logo' => 0 ),
             'youtube' => array( 'label' => 'YouTube', 'active' => 1, 'outline_icon' => 0, 'full_logo' => 0 ),
             'x' => array( 'label' => 'X', 'active' => 1, 'outline_icon' => 0, 'full_logo' => 0 ),
             'linkedin' => array( 'label' => 'LinkedIn', 'active' => 1, 'outline_icon' => 0, 'full_logo' => 0 ),
