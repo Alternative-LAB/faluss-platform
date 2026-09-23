@@ -86,7 +86,7 @@ final class DashboardModule implements Module
             <div class="faluss-admin__hero">
                 <span class="faluss-admin__eyebrow"><?php echo esc_html__('Administration unifiée', 'faluss-platform'); ?></span>
                 <h1><?php echo esc_html__('Faluss Platform', 'faluss-platform'); ?></h1>
-                <p><?php echo esc_html__('Un point de repère pour les modules de votre site. Les plugins historiques restent actifs pendant la migration.', 'faluss-platform'); ?></p>
+                <p><?php echo esc_html__('Un espace de pilotage pour les modules de votre site, leurs diagnostics et les réglages disponibles.', 'faluss-platform'); ?></p>
             </div>
             <div class="faluss-admin__grid">
                 <section class="faluss-admin__card" aria-labelledby="faluss-site-title">
