@@ -8,6 +8,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Documentation
 
+- Interface d’administration Platform modernisée avec une hiérarchie plus claire, des cartes d’état, des badges accessibles, un tableau responsive et des états de focus visibles.
 - Migration de production achevée : `faluss-platform` devient l'unique plugin Faluss chargé sur les deux sites et les anciennes sources sont archivées hors de WordPress.
 - Installation initiale de `faluss-platform` sur les deux sites, avec sauvegarde, vérification et retour arrière documentés.
 - Bascule de Faluss Theme sur `faluss.me`, avec parité CSS et contrôles de production consignés.
