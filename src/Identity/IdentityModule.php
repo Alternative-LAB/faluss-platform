@@ -33,7 +33,7 @@ final class IdentityModule implements Module
     {
         self::loadCompatibilityLayer();
 
-        if (isset($GLOBALS['wpdb']) && is_object($GLOBALS['wpdb']) && !self::installOrMigrateSchema()) {
+        if (isset($GLOBALS['wpdb']) && is_object($GLOBALS['wpdb']) && !self::schemaIsReady()) {
             throw new LogicException('Faluss Identity schema is unavailable.');
         }
 
@@ -70,15 +70,9 @@ final class IdentityModule implements Module
             && constant('FALUSS_PLATFORM_IDENTITY') === true;
     }
 
-    private static function installOrMigrateSchema(): bool
+    private static function schemaIsReady(): bool
     {
-        return \Faluss_Identity_Schema::install_or_verify()
-            && \Faluss_Identity_Schema::migrate_fi02()
-            && \Faluss_Identity_Schema::migrate_fi03()
-            && \Faluss_Identity_Schema::migrate_fi04()
-            && \Faluss_Identity_Schema::migrate_onb01()
-            && \Faluss_Identity_Schema::migrate_fi06_sso()
-            && (string) get_option(\Faluss_Identity_Schema::OPTION_VERSION, '') === \Faluss_Identity_Schema::VERSION
+        return (string) get_option(\Faluss_Identity_Schema::OPTION_VERSION, '') === \Faluss_Identity_Schema::VERSION
             && !empty(\Faluss_Identity_Schema::get_status()['ready']);
     }
 
