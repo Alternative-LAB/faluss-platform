@@ -1,6 +1,6 @@
 # Migration de Faluss Link et Studio
 
-Faluss Link est la surface publique et éditoriale du rôle `me`. Le module reprend la version historique `0.3.21` auditée au commit `4c84e4bbfc859f9d6c17b1d44a76c79bdbcdadb4` : profil public, Studio, blocs, collections projetées, médias, découvertes privées, onboarding, récompense quotidienne, shortcodes et widgets Elementor.
+Faluss Link est la surface publique et éditoriale du rôle `me`. Le module `0.4.0` conserve le profil public, le Studio interne de fallback, les blocs, collections projetées, médias, découvertes privées, onboarding, récompense quotidienne, shortcodes et widgets Elementor. Le [Studio V2 natif](ME-STUDIO.md) s’ajoute comme fournisseur optionnel sans dupliquer ces points d’entrée.
 
 ## Propriété et contrats consommés
 
@@ -18,18 +18,18 @@ Identity reste l’unique propriétaire du `faluss_id`, du slug, du nom, de la b
 
 | Surface | Contrat historique |
 |---|---|
-| Version et activation | `FALUSS_LINK_VERSION` à `0.3.21`, opt-in `FALUSS_PLATFORM_LINK` |
-| Options | `faluss_link_schema_version` à `3`, `faluss_link_network_catalog` |
+| Version et activation | `FALUSS_LINK_VERSION` à `0.4.0`, opt-in `FALUSS_PLATFORM_LINK` |
+| Options | `faluss_link_schema_version` à `4`, `faluss_link_network_catalog` |
 | Tables | `faluss_link_cards`, `faluss_link_blocks`, `faluss_link_discoveries`, `faluss_link_discovery_settings` avec préfixe WordPress |
 | Shortcodes | `faluss_link_card`, `faluss_link_appearance`, `faluss_link_studio`, `faluss_link_daily_reward`, `faluss_link_discoveries` |
 | Écritures | actions `admin_post_faluss_link_*` et AJAX authentifiés historiques ; aucun équivalent `wp_ajax_nopriv_*` |
 | URLs publiques | slug et rewrite possédés par Identity, rendu dynamique sans cache |
 | Studio | mêmes onglets, libellés, collections, blocs, prévisualisation partagée, version agrégée et mutations fermées |
 | Elementor | mêmes noms de widgets, contrôles et sélecteurs isolés par `{{WRAPPER}}` |
-| Assets | CSS, JavaScript et images historiques conservés octet pour octet sous `assets/link/` |
+| Assets | assets historiques sous `assets/link/`, complétés de façon ciblée pour les images/visibilités de lien ; assets V2 isolés sous `assets/me-studio/` |
 | Manifestes/Events | fournisseurs descriptifs historiques conservés ; aucune production ou collecte d’événement n’est activée par ce lot |
 
-Le schéma reste additif et échoue fermé devant une installation partielle ou une table non conforme. Il n’efface, ne renomme et ne convertit aucune donnée existante. Les collections restent une projection des blocs `section_title`, `text` et `link`, sans nouvelle table. Les URLs de contenu restent HTTPS, les médias doivent appartenir à l’utilisateur courant et la récompense ne reçoit jamais de `faluss_id`, montant ou règle depuis le navigateur.
+Le schéma V4 ajoute uniquement la composition canonique à `faluss_link_cards`, avec migration V3 additive et reprise d’une promotion interrompue. Il échoue fermé devant une installation partielle ou une table non conforme et n’exécute aucun DDL depuis une requête publique. Il n’efface, ne renomme et ne convertit aucune donnée existante. Les collections restent une projection des blocs `section_title`, `text` et `link`, sans nouvelle table. Les URLs de contenu restent HTTPS, les médias doivent appartenir à l’utilisateur courant et la récompense ne reçoit jamais de `faluss_id`, montant ou règle depuis le navigateur.
 
 ## Activation contrôlée et rollback
 
@@ -44,7 +44,7 @@ define('FALUSS_PLATFORM_LINK', true);
 
 Ces constantes appartiennent à une configuration non versionnée. Faluss Identity historique ou le module Platform Identity doit être l’unique autorité active. L’ancien plugin `faluss-link` doit rester désactivé ; si l’une de ses classes est déjà chargée, le nouveau module ne s’enregistre pas et son démarrage direct refuse la collision. La copie Link historiquement inactive de `faluss.com` ne doit jamais être activée.
 
-Pour revenir en arrière, **désactiver d’abord `FALUSS_PLATFORM_LINK`, charger une nouvelle requête, puis réactiver l’ancien plugin `faluss-link` sur `faluss.me`**. Les quatre tables, les deux options, les pièces jointes, les slugs et les références de thèmes sont inchangés, donc aucun transfert de données n’est requis. Réactiver l’ancien plugin dans une requête où les classes du module sont déjà chargées créerait une collision PHP.
+Pour revenir du Studio V2 au Studio interne, désactiver uniquement `FALUSS_PLATFORM_ME_STUDIO_V2` et charger une nouvelle requête. Aucun plugin V1 ne doit être réactivé. La colonne additive `composition` reste disponible, sans suppression ni restauration de base. Le rollback complet de Link reste une opération de production séparée, soumise au dossier de bascule du Master Plugin et jamais effectuée par ce lot.
 
 ## Preuves et porte de bascule
 

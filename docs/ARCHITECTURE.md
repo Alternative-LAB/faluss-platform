@@ -45,6 +45,8 @@ Le [module de catalogue de thèmes](modules/CATALOG.md) fournit une migration op
 
 Le [module Faluss Link et Studio](modules/LINK.md) reprend sur le rôle `me` les surfaces publiques et éditoriales historiques derrière un opt-in distinct. Faluss Identity reste l’autorité active ; Link consomme ses contrats publics ainsi que ceux de Catalog et Token Engine Connector, sans recopier l’identité ni les décisions économiques.
 
+Le [Studio Faluss V2 natif](modules/ME-STUDIO.md) est un fournisseur optionnel de l’interface Link sur le rôle `me`. Il dépend explicitement d’Identity, Catalog, Link et Apps Registry, conserve le renderer Link unique et retombe sur le Studio interne par simple configuration. Son activation est distincte d’une mise à jour du plugin.
+
 Le [module Faluss Identity](modules/IDENTITY.md) reprend sur le rôle `me` l’unique autorité de `faluss_id`, le passwordless, les profils, l’onboarding et le serveur OAuth. Il reste opt-in, refuse toute seconde autorité chargée et fournit à Link une projection publiée sans accès direct au stockage Identity.
 
 Le [module Faluss Subscriptions](modules/SUBSCRIPTIONS.md) reprend sur le rôle `hub` l’autorité historique des offres, essais, abonnements, entitlements, clients Stripe et audits. Il est opt-in, refuse la coexistence avec l’ancien plugin et expose à Portal une projection étroite sans déplacer la source de vérité avant la bascule approuvée.

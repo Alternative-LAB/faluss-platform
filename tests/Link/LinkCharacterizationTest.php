@@ -19,7 +19,7 @@ final class LinkCharacterizationTest extends TestCase
             'css/faluss-link-studio.css' => 'd605c7c6607d73a7f7927cced4aff9edf15670327c1fc64ff8c6a7a9a255e0cc',
             'css/faluss-link.css' => 'd51156fe26719a4e68b2b9aeaa52f69acdb89961534c02e5636266b89abfcfa4',
             'js/faluss-link-card.js' => '94cafb8da5c001990dc433bbcdc3bfc201fffd37a3da50c747db8e3ecd5080b6',
-            'js/faluss-link-editor.js' => '7d615786f44811fafd453162b49b4bfaf45e0740414c929dcc5443847a9551a8',
+            'js/faluss-link-editor.js' => '18a3a4bbdbfc0bf2278c4418bc678fb60d2e0ed412aa6ca8e8d9239c39dc2023',
             'js/faluss-link-immersive.js' => 'cf9b6e9cf7f1c16b91ea53c6da636b4fca252254468e3cfaf4a689c4f14980d2',
             'js/faluss-link-onboarding.js' => '918a6f4c778ec671fd6514bf45944cd60c4925089a7fad26b0e41f4a5a3b34a4',
             'js/faluss-link-reward.js' => '1aa529f7bac8ea5ff0e4bb9ef634e5a4dce105f2b311e7fed5250e798404683a',
@@ -57,11 +57,11 @@ final class LinkCharacterizationTest extends TestCase
     {
         $target = dirname(__DIR__, 2) . '/src/Link';
         $files = [
-            'LegacyLinkAdmin.php' => 'f9514c3b691a0f7319d5fa24ff4b7eaa6199c076d15dd9a4d726dd85daa96eaf',
+            'LegacyLinkAdmin.php' => '3bed6d1d9d83cf255133c917cad9dc73eae1a52f5a87be04e4c7f348fe81e233',
             'LegacyLinkEventsCatalog.php' => '68fcc8d19da8c67c8dbd5d0085a04f46789740e4f93cf0563ec5aa171a886ee1',
             'LegacyLinkEventsRuntime.php' => 'ddb578a7e66d0fcf67fd600484fe27b1bb91b4136c2436f66fb9cef44ee0843d',
-            'LegacyLinkManifest.php' => 'c9db1fcaffa1a05802b96ca47925227109da947a7cfe70b8d25dcd4190a893ae',
-            'LegacyLinkSchema.php' => '6f8a17fef9a7672561011d09901fa2c0e5b22f21a732621c1c7610325021ed03',
+            'LegacyLinkManifest.php' => '4da011366c5a15387dae6e6c199c5d8268624db5732716b4f6e46ee4a91273c3',
+            'LegacyLinkSchema.php' => '3d03f6e8a108649e9f7293bc72484e0f16773f25c3e6ca1ae4166ec489976023',
             'LegacyLinkWidgets.php' => '6c84ac7a657ce6a978549b3b383bf3e975c55c15fce4f3fb9a832c16da36c83b',
         ];
 
