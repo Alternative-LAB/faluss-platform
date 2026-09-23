@@ -120,7 +120,7 @@ foreach ( $paths as $path ) { an01b3_assert( is_file( $path ), 'Required product
 
 $portal_module = file_get_contents( $root . '/src/Portal/PortalModule.php' );
 $link_module = file_get_contents( $root . '/src/Link/LinkModule.php' );
-an01b3_assert( false !== strpos( $portal_module, "VERSION = '0.1.24'" ) && false !== strpos( $link_module, "VERSION = '0.3.21'" ), 'Portal and Link compatibility versions must remain exact.' );
+an01b3_assert( false !== strpos( $portal_module, "VERSION = '0.1.24'" ) && false !== strpos( $link_module, "VERSION = '0.4.0'" ), 'Portal and Link compatibility versions must remain exact.' );
 an01b3_assert( false !== strpos( $portal_module, 'Faluss_Portal_Events_Runtime::boot()' ) && false !== strpos( $link_module, 'Faluss_Link_Events_Runtime::boot()' ), 'Both owner runtimes must boot from their Platform module.' );
 
 $hub_route = array(

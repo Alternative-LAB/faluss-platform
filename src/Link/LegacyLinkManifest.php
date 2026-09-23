@@ -57,6 +57,21 @@ final class Faluss_Link_Manifest {
                     'symbolic_actions' => array(),
                     'compatibility' => array( 'minimum_consumer_version' => '1.0.0', 'compatible_with' => array( '1.0.0' ), 'deprecated' => false, 'sunset_at' => null, 'replacement_capability_key' => null ),
                 ),
+                array(
+                    'capability_key' => 'faluss-me.studio-composition',
+                    'interfaces' => array( 'module_read_model', 'delegated_action', 'content_reference_source' ),
+                    'requested_bindings' => array(
+                        array( 'interface' => 'module_read_model', 'slot' => 'me.studio.tab' ),
+                        array( 'interface' => 'content_reference_source', 'slot' => 'me.studio.block_source' ),
+                        array( 'interface' => 'module_read_model', 'slot' => 'me.public.tab' ),
+                        array( 'interface' => 'content_reference_source', 'slot' => 'me.public.block' ),
+                    ),
+                    'read_model_contract' => array( 'document_type' => 'faluss-me.studio-composition', 'contract_version' => '1.0.0' ),
+                    'symbolic_actions' => array(
+                        array( 'action_key' => 'faluss-me.studio.open', 'kind' => 'delegated_action' ),
+                    ),
+                    'compatibility' => array( 'minimum_consumer_version' => '1.0.0', 'compatible_with' => array( '1.0.0' ), 'deprecated' => false, 'sunset_at' => null, 'replacement_capability_key' => null ),
+                ),
             ),
             'compatibility' => array( 'minimum_consumer_version' => '1.0.0', 'compatible_with' => array( '1.0.0' ), 'deprecated' => false, 'sunset_at' => null, 'replacement_capability_key' => null ),
         );

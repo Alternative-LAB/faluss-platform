@@ -22,6 +22,8 @@ Le module optionnel Faluss Portal du Hub est décrit dans [`docs/modules/PORTAL.
 
 Le module critique Faluss Identity de `faluss.me` est décrit dans [`docs/modules/IDENTITY.md`](docs/modules/IDENTITY.md). Il reste désactivé par défaut et ne peut jamais être chargé avec l’ancienne autorité d’identité.
 
+Le [Studio Faluss V2 natif](docs/modules/ME-STUDIO.md) fournit l’édition et l’onboarding Atomique au-dessus des contrats Identity, Link, Catalog et Apps Registry. Il conserve le parcours Simple et le Studio interne comme fallback, et exige son propre opt-in `FALUSS_PLATFORM_ME_STUDIO_V2` après migration et recette.
+
 Le module commun Faluss Events est décrit dans [`docs/modules/EVENTS.md`](docs/modules/EVENTS.md). Il conserve les contrats, tables, outbox/inbox, workers et règles de rétention historiques sur les rôles `me` et `hub`, derrière un opt-in explicite et sans coexistence avec l’ancien runtime.
 
 Le module privé Faluss Analytics est décrit dans [`docs/modules/ANALYTICS.md`](docs/modules/ANALYTICS.md). Il conserve sur le rôle `hub` le consumer Events, les reçus d’idempotence, les agrégats anonymisés et leur rétention, sans activer de producteur ni de tracking.

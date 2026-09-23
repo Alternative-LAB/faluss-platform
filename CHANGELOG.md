@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Modifié
+
+- Version du Master Plugin portée de `0.1.0` à `0.2.0` afin que l’updater WordPress reconnaisse la livraison de Studio V2 et Link 0.4.0 comme une mise à jour plus récente.
+
 ### Documentation
 
 - Interface d’administration Platform modernisée avec une hiérarchie plus claire, des cartes d’état, des badges accessibles, un tableau responsive et des états de focus visibles.
@@ -35,6 +39,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Studio Faluss V2 natif et opt-in sur le rôle `me`, avec onboarding Atomique reprenable, preview/rendu public partagés, composition Link V4 additive, variantes visuelles, liens illustrés et registre d’extensions Apps Registry strict.
 - Revue du `main` du 22 septembre 2026 : traçabilité des commits directs, résultats de contrôle et validations de migration encore nécessaires.
 - Dossier de retrait de Faluss Production Reset, inventaire exact de son runtime destructif et contrat automatisé garantissant que Platform n’expose ni module, ni action, ni route de reset.
 - Module Faluss Federation optionnel pour les rôles `me` et `hub`, avec transport Ed25519, politiques locales de pairs, anti-rejeu transactionnel, diagnostics bidirectionnels et administration historiques conservés.

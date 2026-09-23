@@ -31,9 +31,9 @@ final class LinkModuleTest extends TestCase
         self::assertTrue(class_exists('Faluss_Link_Manifest', false));
         self::assertTrue(class_exists('Faluss_Link_Events_Catalog', false));
         self::assertTrue(class_exists('Faluss_Link_Events_Runtime', false));
-        self::assertSame('3', \Faluss_Link_Schema::VERSION);
+        self::assertSame('4', \Faluss_Link_Schema::VERSION);
         self::assertSame('faluss_link_schema_version', \Faluss_Link_Schema::OPTION);
-        self::assertSame('0.3.21', LinkModule::VERSION);
+        self::assertSame('0.4.0', LinkModule::VERSION);
         $moduleSource = file_get_contents(dirname(__DIR__, 2) . '/src/Link/LinkModule.php');
         self::assertIsString($moduleSource);
         self::assertStringContainsString('Faluss_Link_Schema::maybe_install();', $moduleSource);
@@ -60,5 +60,46 @@ final class LinkModuleTest extends TestCase
         self::assertIsString($source);
         self::assertStringContainsString("add_action( 'wp_ajax_faluss_link_daily_reward_claim'", $source);
         self::assertStringNotContainsString('wp_ajax_nopriv_faluss_link_daily_reward_claim', $source);
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testLegacyCompositionBackfillNormalisesHistoricalValuesIntoTheStrictV2Document(): void
+    {
+        link_test_reset();
+        (new LinkModule())->boot();
+
+        $legacy = new \ReflectionMethod('Faluss_Link_Schema', 'legacy_composition');
+        $valid = new \ReflectionMethod('Faluss_Link_Schema', 'valid_composition');
+        $document = $legacy->invoke(null, json_encode([
+            'avatar_border' => true,
+            'name_font' => '../remote-font',
+            'social_selected' => ['instagram', 'instagram', 'bad network', 'x'],
+            'alignment' => 'outside',
+            'page_background' => '#a748b5',
+            'button_color' => 'javascript:red',
+            'hero_transition_color' => '#fffdf5',
+            'hero_transition_intensity' => 140,
+            'hero_transition_position' => 2,
+            'name_color' => '#be79ff',
+            'social_variant' => 'unknown',
+            'selected_theme' => '../theme',
+            'theme_overrides' => ['page_background', 'page_background', 'php'],
+        ], JSON_THROW_ON_ERROR));
+
+        self::assertIsArray($document);
+        self::assertTrue($valid->invoke(null, $document));
+        self::assertSame('outfit', $document['presentation']['name_font']);
+        self::assertSame(['instagram', 'x'], $document['presentation']['social_selected']);
+        self::assertSame('center', $document['presentation']['alignment']);
+        self::assertSame('#A748B5', $document['presentation']['page_background']);
+        self::assertSame('#080808', $document['presentation']['button_color']);
+        self::assertSame(100, $document['presentation']['hero_transition_intensity']);
+        self::assertSame(35, $document['presentation']['hero_transition_position']);
+        self::assertSame('faluss-default', $document['presentation']['selected_theme']);
+        self::assertSame(['page_background'], $document['presentation']['theme_overrides']);
+
+        $document['presentation']['theme_overrides'] = ['php'];
+        self::assertFalse($valid->invoke(null, $document));
     }
 }

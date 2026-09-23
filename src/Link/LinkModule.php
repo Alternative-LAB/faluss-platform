@@ -10,7 +10,16 @@ use LogicException;
 
 final class LinkModule implements Module
 {
-    public const VERSION = '0.3.21';
+    public const VERSION = '0.4.0';
+
+    public static function activate(): void
+    {
+        if (!defined('FALUSS_PLATFORM_LINK') || constant('FALUSS_PLATFORM_LINK') !== true) {
+            return;
+        }
+        require_once __DIR__ . '/LegacyLinkSchema.php';
+        \Faluss_Link_Schema::install(true);
+    }
 
     public function id(): string
     {
@@ -62,6 +71,7 @@ final class LinkModule implements Module
         \Faluss_Link_Schema::maybe_install();
         \Faluss_Link::boot();
         \Faluss_Link_Admin::boot();
+        LinkSchemaMigrationAction::register();
         \Faluss_Link_Manifest::boot();
         \Faluss_Link_Events_Catalog::boot();
         \Faluss_Link_Events_Runtime::boot();

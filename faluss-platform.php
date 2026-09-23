@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Faluss Platform
  * Description: Modular foundation for the Faluss WordPress ecosystem.
- * Version: 0.1.0
+ * Version: 0.2.0
  * Requires PHP: 8.2
  * Text Domain: faluss-platform
  */
@@ -51,6 +51,10 @@ register_activation_hook(
 register_activation_hook(
     __FILE__,
     [\Faluss\Platform\Analytics\AnalyticsModule::class, 'activate']
+);
+register_activation_hook(
+    __FILE__,
+    [\Faluss\Platform\Link\LinkModule::class, 'activate']
 );
 register_deactivation_hook(
     __FILE__,
@@ -169,6 +173,20 @@ add_action('plugins_loaded', static function (): void {
         && !class_exists('Faluss_Apps_Registry_Read_Model_Validator', false)
     ) {
         $registry->register(new \Faluss\Platform\AppsRegistry\AppsRegistryModule());
+    }
+    if ($role === \Faluss\Platform\Core\SiteRole::Me
+        && defined('FALUSS_PLATFORM_ME_STUDIO_V2')
+        && constant('FALUSS_PLATFORM_ME_STUDIO_V2') === true
+        && defined('FALUSS_PLATFORM_LINK')
+        && constant('FALUSS_PLATFORM_LINK') === true
+        && defined('FALUSS_PLATFORM_IDENTITY')
+        && constant('FALUSS_PLATFORM_IDENTITY') === true
+        && defined('FALUSS_PLATFORM_CATALOG')
+        && constant('FALUSS_PLATFORM_CATALOG') === true
+        && defined('FALUSS_PLATFORM_APPS_REGISTRY')
+        && constant('FALUSS_PLATFORM_APPS_REGISTRY') === true
+    ) {
+        $registry->register(new \Faluss\Platform\MeStudio\MeStudioModule());
     }
     if ($role === \Faluss\Platform\Core\SiteRole::Hub
         && defined('FALUSS_PLATFORM_IDENTITY_CLIENT')
