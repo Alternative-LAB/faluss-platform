@@ -16,6 +16,7 @@ final class MeStudioContractTest extends TestCase
     protected function tearDown(): void
     {
         StudioProviderRegistry::resetForTests();
+        StudioBlockProviderRegistry::resetForTests();
     }
 
     public function testNativeModuleIsExplicitlyOptedInAndDependencyBound(): void
@@ -194,15 +195,22 @@ final class MeStudioContractTest extends TestCase
     public function testSchemaMigrationIsAdditiveVersionedAndNeverPublicOpportunistic(): void
     {
         $schema = $this->source('src/Link/LegacyLinkSchema.php');
+        $migration = $this->source('src/Link/LinkSchemaMigrationAction.php');
 
         self::assertStringContainsString("const VERSION = '4'", $schema);
         self::assertStringContainsString("const LEGACY_VERSION = '3'", $schema);
         self::assertStringContainsString('ADD `composition` longtext NULL', $schema);
         self::assertStringContainsString('MODIFY `composition` longtext NOT NULL', $schema);
-        self::assertStringContainsString("current_user_can( 'manage_options' )", $schema);
+        self::assertStringContainsString('return self::verify_current();', $schema);
+        self::assertStringContainsString('public static function migrate_v4()', $schema);
+        self::assertStringNotContainsString("current_user_can( 'manage_options' )", $schema);
         self::assertStringContainsString('if ( ! $allow_schema_change )', $schema);
         self::assertStringNotContainsString('DROP TABLE', strtoupper($schema));
         self::assertStringNotContainsString('DROP COLUMN', strtoupper($schema));
+        self::assertStringContainsString("admin_post_' . self::ACTION", $migration);
+        self::assertStringContainsString("current_user_can('manage_options')", $migration);
+        self::assertStringContainsString('wp_verify_nonce($nonce, self::NONCE_ACTION)', $migration);
+        self::assertStringContainsString('Faluss_Link_Schema::migrate_v4()', $migration);
 
         $link = $this->source('src/Link/LegacyLinkService.php');
         self::assertStringContainsString("\$storage_column = \$composition_ready ? 'composition' : 'social_links';", $link);

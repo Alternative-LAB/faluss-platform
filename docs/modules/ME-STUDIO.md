@@ -45,7 +45,7 @@ La migration V3 vers V4 est additive :
 5. passage de la colonne en `NOT NULL` ;
 6. mise à jour de `faluss_link_schema_version` à `4`.
 
-Aucune colonne ou table n’est supprimée, renommée ou convertie. Une migration interrompue peut reprendre depuis la colonne nullable. Les requêtes publiques vérifient le schéma sans DDL ; seuls l’activation du plugin avec Link opt-in ou un chargement d’administration par un compte `manage_options` peuvent promouvoir le schéma. Les anciennes données restent lisibles par Link V1 interne au Master Plugin.
+Aucune colonne ou table n’est supprimée, renommée ou convertie. Une migration interrompue peut reprendre depuis la colonne nullable. Les requêtes publiques et les requêtes d’administration ordinaires vérifient le schéma sans DDL, sans backfill et sans mise à jour d’option. Une installation neuve peut créer V4 pendant l’activation explicite du plugin avec Link opt-in. Pour une extension déjà active, la promotion V3 vers V4 nécessite l’action manuelle « Migrer Link vers V4 » sur Réglages > Réseaux Faluss Link ; son POST dédié exige `manage_options` et un nonce WordPress. Les anciennes données restent lisibles par Link V1 interne au Master Plugin tant que cette action n’a pas abouti.
 
 ## Activation et rollback
 
@@ -71,7 +71,7 @@ Le manifest Link déclare les bindings descriptifs :
 - `me.public.tab` ;
 - `me.public.block`.
 
-Un futur module doit ensuite enregistrer localement un `StudioBlockProvider` dont le descripteur fermé contient exactement : identifiant, emplacement, contrat de read model versionné, actions symboliques, visibilité et fallback. Les doublons, champs supplémentaires et valeurs inconnues sont rejetés. Ce lot ne développe ni Fans, ni Store, ni Collections, ni Progression.
+Un futur module doit ensuite enregistrer localement un `StudioBlockProvider` dans `StudioBlockProviderRegistry::shared()`. Le registre vit pendant toute la requête et le fournisseur Studio consulte ses descripteurs au moment du rendu : un module dépendant de `me-studio-v2`, démarré après lui, reste donc visible sans dépendre d’un hook déjà passé. Le descripteur fermé contient exactement : identifiant, emplacement, contrat de read model versionné, actions symboliques, visibilité et fallback. L’ordre final est déterministe par identifiant ; les doublons, champs supplémentaires et valeurs inconnues sont rejetés. Ce lot ne développe ni Fans, ni Store, ni Collections, ni Progression.
 
 ## Matrice d’onboarding
 
@@ -101,7 +101,7 @@ Les tests automatisés couvrent le flag d’activation, les dépendances, le fal
 ## Recette exacte avant bascule
 
 1. Cloner sur un staging isolé une base et une médiathèque représentatives, puis prendre et dater une sauvegarde restaurable. Ne pas activer ce lot en production.
-2. Démarrer avec `FALUSS_PLATFORM_ME_STUDIO_V2` absent ou à `false`, les modules Identity, Catalog, Link et Apps Registry activés, puis déclencher la migration V4 uniquement par l’activation du plugin ou une requête d’administration `manage_options`.
+2. Démarrer avec `FALUSS_PLATFORM_ME_STUDIO_V2` absent ou à `false`, les modules Identity, Catalog, Link et Apps Registry activés. Sur une extension déjà active, ouvrir Réglages > Réseaux Faluss Link avec un compte `manage_options`, cliquer explicitement sur « Migrer Link vers V4 » puis attendre le résultat. Une simple ouverture du back-office ne doit produire ni DDL ni backfill.
 3. Vérifier dans MariaDB que `faluss_link_schema_version` vaut `4`, que `faluss_link_cards.composition` est `LONGTEXT NOT NULL`, que chaque document possède exactement `version`, `structure`, `presentation` et `atomic`, que le nombre de cartes n’a pas changé et qu’aucune colonne ou table historique n’a été supprimée.
 4. Ouvrir un membre Simple existant avant d’activer Studio V2 et comparer Studio, shortcode, widget Elementor et profil public : identité, liens, thème, blocs et ordre doivent rester identiques.
 5. Configurer dans Link les médias officiels des réseaux attendus. Vérifier qu’aucun favicon n’est demandé. Vérifier aussi qu’Outfit est la seule famille exacte disponible et qu’aucune police distante ne remplace silencieusement les familles encore absentes du Catalog.

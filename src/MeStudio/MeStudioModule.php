@@ -35,10 +35,7 @@ final class MeStudioModule implements Module
             return;
         }
 
-        $extensions = new StudioBlockProviderRegistry();
-        do_action('faluss_me_studio_register_block_providers', $extensions);
-
-        StudioProviderRegistry::register(new MeStudioProvider($extensions));
+        StudioProviderRegistry::register(new MeStudioProvider(StudioBlockProviderRegistry::shared()));
         StudioActions::register();
     }
 }

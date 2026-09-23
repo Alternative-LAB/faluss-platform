@@ -8,6 +8,9 @@ use Faluss\Platform\Link\LinkStudioContract;
 
 final class StudioRenderer
 {
+    /** @var list<string> */
+    private const ONBOARDING_SOCIAL_PREVIEW = ['tiktok', 'telegram', 'x', 'snapchat', 'threads', 'onlyfans'];
+
     /**
      * @param array<string, mixed> $state
      * @param list<array<string, mixed>> $extensions
@@ -153,9 +156,8 @@ final class StudioRenderer
 
     private static function socialStyleCards(string $selected): void
     {
-        $catalog = array_filter(LinkStudioContract::socialCatalog(), static fn (array $settings): bool => !empty($settings['active']));
-        $catalog = array_slice($catalog, 0, 6, true);
-        ?><fieldset class="faluss-me-onboarding-v2__cards faluss-me-onboarding-v2__social-styles"><legend class="screen-reader-text">Style des réseaux</legend><?php foreach (self::socialStyles() as $value => $label) : $assetType = str_starts_with($value, 'brand-') ? 'full' : 'outline'; ?><label class="faluss-me-onboarding-v2__card faluss-me-onboarding-v2__social-style faluss-me-onboarding-v2__social-style--<?php echo esc_attr($value); ?>"><input type="radio" name="social_style" value="<?php echo esc_attr($value); ?>" data-social-style-label="<?php echo esc_attr($label); ?>" <?php checked($selected, $value); ?>><span aria-hidden="true"><?php foreach ($catalog as $network => $settings) : $asset = is_array($settings[$assetType] ?? null) ? $settings[$assetType] : []; $src = is_string($asset['src'] ?? null) ? $asset['src'] : ''; ?><i><?php if ($src !== '') : ?><img src="<?php echo esc_url($src); ?>"<?php if (!empty($asset['srcset'])) : ?> srcset="<?php echo esc_attr($asset['srcset']); ?>"<?php endif; ?><?php if (!empty($asset['sizes'])) : ?> sizes="<?php echo esc_attr($asset['sizes']); ?>"<?php endif; ?> alt=""><?php else : ?><b><?php echo esc_html(strtoupper(substr((string) $network, 0, 1))); ?></b><?php endif; ?></i><?php endforeach; ?></span><strong><?php echo esc_html($label); ?></strong></label><?php endforeach; ?></fieldset><?php
+        $catalog = LinkStudioContract::socialCatalog();
+        ?><fieldset class="faluss-me-onboarding-v2__cards faluss-me-onboarding-v2__social-styles"><legend class="screen-reader-text">Style des réseaux</legend><?php foreach (self::socialStyles() as $value => $label) : $assetType = str_starts_with($value, 'brand-') ? 'full' : 'outline'; ?><label class="faluss-me-onboarding-v2__card faluss-me-onboarding-v2__social-style faluss-me-onboarding-v2__social-style--<?php echo esc_attr($value); ?>"><input type="radio" name="social_style" value="<?php echo esc_attr($value); ?>" data-social-style-label="<?php echo esc_attr($label); ?>" <?php checked($selected, $value); ?>><span aria-hidden="true"><?php foreach (self::ONBOARDING_SOCIAL_PREVIEW as $network) : $settings = is_array($catalog[$network] ?? null) ? $catalog[$network] : []; $asset = is_array($settings[$assetType] ?? null) ? $settings[$assetType] : []; $src = is_string($asset['src'] ?? null) ? $asset['src'] : ''; ?><i data-faluss-network="<?php echo esc_attr($network); ?>"><?php if ($src !== '') : ?><img src="<?php echo esc_url($src); ?>"<?php if (!empty($asset['srcset'])) : ?> srcset="<?php echo esc_attr($asset['srcset']); ?>"<?php endif; ?><?php if (!empty($asset['sizes'])) : ?> sizes="<?php echo esc_attr($asset['sizes']); ?>"<?php endif; ?> alt=""><?php else : ?><b><?php echo esc_html(strtoupper(substr($network, 0, 1))); ?></b><?php endif; ?></i><?php endforeach; ?></span><strong><?php echo esc_html($label); ?></strong></label><?php endforeach; ?></fieldset><?php
     }
 
     /** @return array<string, string> */

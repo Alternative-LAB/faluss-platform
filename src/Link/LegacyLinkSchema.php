@@ -18,16 +18,37 @@ final class Faluss_Link_Schema {
     public static function discoveries_table() { global $wpdb; return self::valid_prefix() ? $wpdb->prefix . 'faluss_link_discoveries' : ''; }
     public static function discovery_settings_table() { global $wpdb; return self::valid_prefix() ? $wpdb->prefix . 'faluss_link_discovery_settings' : ''; }
 
-    /** Public requests verify only. A privileged administration request may upgrade. */
+    /** Ordinary requests only verify the installed schema. They never mutate it. */
     public static function maybe_install() {
-        $allow_schema_change = function_exists( 'is_admin' ) && is_admin()
-            && function_exists( 'current_user_can' ) && current_user_can( 'manage_options' );
-        return self::install( $allow_schema_change );
+        return self::verify_current();
+    }
+
+    /** Read-only compatibility check used during ordinary module boot. */
+    public static function verify_current() {
+        $cards = self::table();
+        $blocks = self::blocks_table();
+        $discoveries = self::discoveries_table();
+        $settings = self::discovery_settings_table();
+        if ( '' === $cards || '' === $blocks || '' === $discoveries || '' === $settings
+            || ! self::exists( $cards ) || ! self::exists( $blocks ) || ! self::exists( $discoveries ) || ! self::exists( $settings )
+        ) { return false; }
+        return ( self::verify_cards_v3( $cards ) || self::verify_cards_v4( $cards ) )
+            && self::verify_blocks( $blocks )
+            && self::verify_discoveries( $discoveries )
+            && self::verify_discovery_settings( $settings );
+    }
+
+    /** Explicit V4 promotion entrypoint. Callers must enforce their own authorization. */
+    public static function migrate_v4() {
+        return self::install( true );
     }
 
     public static function composition_ready() {
         $table = self::table();
-        return '' !== $table && self::exists( $table ) && self::verify_cards_v4( $table );
+        return (string) get_option( self::OPTION, '' ) === self::VERSION
+            && '' !== $table
+            && self::exists( $table )
+            && self::verify_cards_v4( $table );
     }
 
     public static function install( $allow_schema_change = true ) {

@@ -9,8 +9,15 @@ use LogicException;
 /** Strict local runtime registry. Apps Registry manifests remain descriptive only. */
 final class StudioBlockProviderRegistry
 {
+    private static ?self $shared = null;
+
     /** @var array<string, StudioBlockProvider> */
     private array $providers = [];
+
+    public static function shared(): self
+    {
+        return self::$shared ??= new self();
+    }
 
     public function register(StudioBlockProvider $provider): void
     {
@@ -32,6 +39,12 @@ final class StudioBlockProviderRegistry
         usort($descriptors, static fn (array $left, array $right): int => strcmp($left['id'], $right['id']));
 
         return $descriptors;
+    }
+
+    /** Test-only reset; production keeps one registry for the complete request. */
+    public static function resetForTests(): void
+    {
+        self::$shared = null;
     }
 
     /** @param array<string, mixed> $descriptor */

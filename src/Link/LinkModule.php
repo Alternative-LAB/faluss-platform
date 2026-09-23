@@ -71,6 +71,7 @@ final class LinkModule implements Module
         \Faluss_Link_Schema::maybe_install();
         \Faluss_Link::boot();
         \Faluss_Link_Admin::boot();
+        LinkSchemaMigrationAction::register();
         \Faluss_Link_Manifest::boot();
         \Faluss_Link_Events_Catalog::boot();
         \Faluss_Link_Events_Runtime::boot();

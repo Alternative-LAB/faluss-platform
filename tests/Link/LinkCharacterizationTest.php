@@ -61,7 +61,7 @@ final class LinkCharacterizationTest extends TestCase
             'LegacyLinkEventsCatalog.php' => '68fcc8d19da8c67c8dbd5d0085a04f46789740e4f93cf0563ec5aa171a886ee1',
             'LegacyLinkEventsRuntime.php' => 'ddb578a7e66d0fcf67fd600484fe27b1bb91b4136c2436f66fb9cef44ee0843d',
             'LegacyLinkManifest.php' => '4da011366c5a15387dae6e6c199c5d8268624db5732716b4f6e46ee4a91273c3',
-            'LegacyLinkSchema.php' => '3d03f6e8a108649e9f7293bc72484e0f16773f25c3e6ca1ae4166ec489976023',
+            'LegacyLinkSchema.php' => '7393884b2f8cde76daab6616e98dd4ebf8e62cb1d4b59d851d380afbc3b534eb',
             'LegacyLinkWidgets.php' => '6c84ac7a657ce6a978549b3b383bf3e975c55c15fce4f3fb9a832c16da36c83b',
         ];
 
