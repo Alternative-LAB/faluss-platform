@@ -51,3 +51,5 @@ Avant une bascule, travailler sur une copie représentative de `faluss.me` et `f
 Ces contrôles réels ne sont pas exécutés par les tests statiques du dépôt et ne sont pas une autorisation de production.
 
 Pour revenir en arrière, remettre d’abord `FALUSS_PLATFORM_IDENTITY` à `false`, charger une nouvelle requête sans les classes Platform, puis réactiver l’ancien plugin Faluss Identity contre les mêmes tables et options. Ne supprimer, renommer, fusionner ou réécrire aucune donnée. La remise en service de deux autorités dans une même requête est interdite.
+
+La bascule de production a été réalisée le 23 septembre 2026 après correction de l'issue #31. Les huit tables, quatre profils, quatre profils publics, trois clients OAuth et les compteurs d'audit ont été conservés. Link consomme le contrat Identity Platform et les routes publiques, login et OAuth répondent sans seconde autorité active.
