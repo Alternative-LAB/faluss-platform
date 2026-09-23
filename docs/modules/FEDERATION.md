@@ -101,3 +101,8 @@ Les contrats locaux sont des harnais PHP et des vérifications statiques. Ils ne
 constituent pas une recette WordPress/MariaDB réelle, ne prouvent aucun échange
 entre les domaines de production et n’autorisent aucune activation ou écriture
 de données réelles.
+
+La bascule Platform a été réalisée sur les deux sites le 23 septembre 2026.
+Les quatre tables, les pairs, les politiques et les clés configurées hors Git
+ont été conservés. Un diagnostic signé `me → hub` puis `hub → me` a répondu
+`success` après désactivation des deux plugins historiques.

@@ -102,3 +102,8 @@ WordPress/MariaDB/Federation réelle. Avant toute bascule, il faudra sauvegarder
 et rapprocher les trois tables et l’option de schéma, vérifier le Cron unique,
 livrer les six événements depuis leurs véritables points de commit métier et
 prouver le trajet Events → consumer → agrégat sur les deux sites sans doublon.
+
+La bascule Platform a été réalisée le 23 septembre 2026. Le runtime Hub est
+prêt sans conflit, le Cron est unique et les trois tables ont été conservées.
+La recette synthétique Events → consumer → agrégat a produit une livraison
+`processed`, un reçu et une métrique `hub.portal.raw_views` égale à `1`.

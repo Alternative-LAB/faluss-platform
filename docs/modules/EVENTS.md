@@ -87,3 +87,8 @@ il reste obligatoire de tester les deux sites avec leurs vraies politiques
 Federation, les catalogues Portal/Link, le consumer Analytics, une panne réseau,
 la récupération des leases, les trois Cron et le rapprochement des lignes sans
 événement ni effet consommateur dupliqué.
+
+La bascule Platform a été réalisée sur les deux sites le 23 septembre 2026.
+Les six tables et les trois Crons ont été conservés. Un événement synthétique
+Hub a créé une outbox, une livraison locale traitée une seule fois et la
+métrique Analytics attendue.
