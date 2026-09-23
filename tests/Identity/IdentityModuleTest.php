@@ -25,6 +25,36 @@ final class IdentityModuleTest extends TestCase
         self::assertStringContainsString('[\\Faluss\\Platform\\Identity\\IdentityModule::class, \'deactivate\']', $source);
     }
 
+    public function testNormalBootNeverRunsPrivilegedSchemaMigrations(): void
+    {
+        $source = file_get_contents(dirname(__DIR__, 2) . '/src/Identity/IdentityModule.php');
+
+        self::assertIsString($source);
+        self::assertStringContainsString('private static function schemaIsReady()', $source);
+        self::assertStringContainsString('Faluss_Identity_Schema::get_status()', $source);
+        self::assertStringNotContainsString('Faluss_Identity_Schema::install_or_verify()', $source);
+        self::assertStringNotContainsString('Faluss_Identity_Schema::migrate_fi02()', $source);
+        self::assertStringNotContainsString('Faluss_Identity_Schema::migrate_fi06_sso()', $source);
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testAnonymousBootGateAcceptsOnlyTheReadyCurrentSchemaWithoutWriting(): void
+    {
+        identity_test_reset();
+        eval('namespace { function get_option($name, $default = false) { unset($name, $default); return $GLOBALS["identity_schema_version"]; } final class Faluss_Identity_Schema { public const OPTION_VERSION = "faluss_identity_schema_version"; public const VERSION = "6"; public static int $statusCalls = 0; public static function get_status(): array { ++self::$statusCalls; return $GLOBALS["identity_schema_status"]; } } }');
+        $method = new \ReflectionMethod(IdentityModule::class, 'schemaIsReady');
+
+        $GLOBALS['identity_schema_version'] = '6';
+        $GLOBALS['identity_schema_status'] = ['ready' => true, 'code' => 'fi_schema_ready'];
+        self::assertTrue($method->invoke(null));
+        self::assertSame(1, \Faluss_Identity_Schema::$statusCalls);
+
+        $GLOBALS['identity_schema_version'] = '5';
+        self::assertFalse($method->invoke(null));
+        self::assertSame(1, \Faluss_Identity_Schema::$statusCalls);
+    }
+
     #[RunInSeparateProcess]
     #[PreserveGlobalState(false)]
     public function testBootsTheHistoricalMeAuthorityAndPreservesItsSurfaces(): void
