@@ -17,6 +17,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Corrigé
 
+- Documentation du rollback Link après une constante d'activation absente et renforcement de la vérification préalable à la désactivation historique.
 - Projection du montant du gain quotidien dans Portal et suppression de la fausse échéance historique lorsqu'un abonnement n'en fournit aucune.
 - Documentation de la bascule Portal validée sur faluss.com et de son retour arrière.
 - Ordonnancement des quatre adaptateurs Portal pendant `plugins_loaded`, afin d'éviter le double enregistrement des providers et de la source Apps Registry.
