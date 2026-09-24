@@ -2,7 +2,7 @@
 
 ## Décision
 
-Le premier profil créateur Fans contient un identifiant public opaque, une catégorie contrôlée et un état approuvé par un administrateur. Il n'offre aucun champ libre, média, lien ou upload. Les lectures publiques filtrent exclusivement l'état `active`. Le contrat et les routes sont détaillés dans [FANS-PROFILES.md](../modules/FANS-PROFILES.md).
+Le premier profil créateur Fans contient un identifiant public opaque, une catégorie contrôlée et un état de publication approuvé par un administrateur. Il n'offre aucun champ libre, média, lien ou upload. Les lectures publiques filtrent exclusivement l'état `active`, qui ne représente pas une vérification d'identité ; l'API renvoie `identity_verified=false`. Le contrat et les routes sont détaillés dans [FANS-PROFILES.md](../modules/FANS-PROFILES.md).
 
 ## Motif
 
@@ -10,4 +10,4 @@ Une biographie ou un fichier transmis directement à Fans constituerait immédia
 
 ## Conséquences
 
-L'expérience reste volontairement minimale : les noms affichés, biographies et médias nécessitent un lot avec modération, retrait et tests d'API et de stockage. Le SSO Me reste une preuve d'identité et n'accorde aucun droit métier ou commercial ; l'approbation du profil est une décision locale Fans.
+L'expérience reste volontairement minimale : les noms affichés, biographies et médias nécessitent un lot avec modération, retrait et tests d'API et de stockage. Le SSO Me prouve la possession du compte lié, sans vérifier l'identité du créateur ni accorder de droit métier ou commercial. L'approbation du profil est une décision locale de publication Fans ; une future vente devra imposer une vérification du créateur distincte.
