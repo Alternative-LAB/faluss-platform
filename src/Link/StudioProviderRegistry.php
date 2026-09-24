@@ -41,14 +41,20 @@ final class StudioProviderRegistry
     /** @param callable(): string $fallback */
     public static function renderOnboarding(callable $fallback): string
     {
+        $v3 = defined('FALUSS_PLATFORM_ONBOARDING_V3') && constant('FALUSS_PLATFORM_ONBOARDING_V3') === true;
         if (self::$active === null) {
-            return $fallback();
+            return $v3 ? self::v3Unavailable() : $fallback();
         }
         try {
             return self::$active->renderOnboarding($fallback);
         } catch (Throwable) {
-            return $fallback();
+            return $v3 ? self::v3Unavailable() : $fallback();
         }
+    }
+
+    private static function v3Unavailable(): string
+    {
+        return '<section class="faluss-onboarding-v3__unavailable" role="alert"><h1>Création temporairement indisponible</h1><p>Votre brouillon est conservé. Réessayez dans un instant.</p><a href="">Réessayer</a></section>';
     }
 
     public static function enqueueCardAssets(): void

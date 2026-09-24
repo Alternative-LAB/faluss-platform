@@ -2,14 +2,14 @@
 /**
  * Plugin Name: Faluss Platform
  * Description: Modular foundation for the Faluss WordPress ecosystem.
- * Version: 0.3.3
+ * Version: 0.4.0
  * Requires PHP: 8.2
  * Text Domain: faluss-platform
  */
 
 declare(strict_types=1);
 
-define('FALUSS_PLATFORM_VERSION', '0.3.3');
+define('FALUSS_PLATFORM_VERSION', '0.4.0');
 
 if (!defined('ABSPATH')) {
     exit;
@@ -184,8 +184,8 @@ add_action('plugins_loaded', static function (): void {
         $registry->register(new \Faluss\Platform\AppsRegistry\AppsRegistryModule());
     }
     if ($role === \Faluss\Platform\Core\SiteRole::Me
-        && defined('FALUSS_PLATFORM_ME_STUDIO_V2')
-        && constant('FALUSS_PLATFORM_ME_STUDIO_V2') === true
+        && ((defined('FALUSS_PLATFORM_ME_STUDIO_V2') && constant('FALUSS_PLATFORM_ME_STUDIO_V2') === true)
+            || (defined('FALUSS_PLATFORM_ONBOARDING_V3') && constant('FALUSS_PLATFORM_ONBOARDING_V3') === true))
         && defined('FALUSS_PLATFORM_LINK')
         && constant('FALUSS_PLATFORM_LINK') === true
         && defined('FALUSS_PLATFORM_IDENTITY')
