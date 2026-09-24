@@ -112,11 +112,6 @@ final class DashboardModule implements Module
 
         $role = $this->role === SiteRole::Me ? 'faluss.me' : 'faluss.com';
         $modules = $this->registry->activeModuleIds();
-        $activePlugins = get_option('active_plugins', []);
-        $inventory = new LegacyPluginInventory(
-            $this->role,
-            is_array($activePlugins) ? array_values(array_filter($activePlugins, 'is_string')) : []
-        );
         $licenseStatus = isset($_GET['license_status']) && is_string($_GET['license_status'])
             ? sanitize_key(wp_unslash($_GET['license_status']))
             : '';
@@ -138,19 +133,22 @@ final class DashboardModule implements Module
                     <p class="faluss-admin__value"><?php echo esc_html((string) count($modules)); ?></p>
                     <p><?php echo esc_html__('La liste évoluera progressivement, après validation de chaque migration.', 'faluss-platform'); ?></p>
                 </section>
-                <section class="faluss-admin__card" aria-labelledby="faluss-legacy-count-title">
-                    <h2 id="faluss-legacy-count-title"><?php echo esc_html__('Plugins Faluss historiques actifs', 'faluss-platform'); ?></h2>
-                    <p class="faluss-admin__value"><?php echo esc_html((string) $inventory->activeCount()); ?></p>
-                    <p><?php echo esc_html__('Inventaire local, sans appel à l’autre site.', 'faluss-platform'); ?></p>
-                </section>
             </div>
             <section class="faluss-admin__card" aria-labelledby="faluss-status-title">
                 <h2 id="faluss-status-title"><?php echo esc_html__('État des modules', 'faluss-platform'); ?></h2>
-                <ul class="faluss-admin__modules">
+                <div class="faluss-admin__module-cards">
                     <?php foreach ($modules as $module): ?>
-                        <li><span class="faluss-admin__dot" aria-hidden="true"></span><?php echo esc_html($module); ?></li>
+                        <?php $details = self::moduleDetails($module); ?>
+                        <article class="faluss-admin__module-card">
+                            <div class="faluss-admin__module-card-head">
+                                <span class="faluss-admin__module-icon" aria-hidden="true"><?php echo esc_html($details['short']); ?></span>
+                                <span class="faluss-admin__badge is-active"><?php echo esc_html__('Actif', 'faluss-platform'); ?></span>
+                            </div>
+                            <h3><?php echo esc_html($details['label']); ?></h3>
+                            <p><?php echo esc_html($details['description']); ?></p>
+                        </article>
                     <?php endforeach; ?>
-                </ul>
+                </div>
             </section>
             <section class="faluss-admin__card faluss-admin__updates" aria-labelledby="faluss-updates-title">
                 <h2 id="faluss-updates-title"><?php echo esc_html__('Mises à jour privées', 'faluss-platform'); ?></h2>
@@ -190,28 +188,6 @@ final class DashboardModule implements Module
                     </form>
                 <?php endif; ?>
             </section>
-            <section class="faluss-admin__card faluss-admin__inventory" aria-labelledby="faluss-legacy-title">
-                <h2 id="faluss-legacy-title"><?php echo esc_html__('Inventaire des plugins historiques', 'faluss-platform'); ?></h2>
-                <p><?php echo esc_html__('État des extensions connues sur ce WordPress. Ce relevé ne vérifie pas leur bon fonctionnement.', 'faluss-platform'); ?></p>
-                <div class="faluss-admin__table-scroll">
-                    <table class="widefat striped">
-                        <thead><tr>
-                            <th scope="col"><?php echo esc_html__('Extension', 'faluss-platform'); ?></th>
-                            <th scope="col"><?php echo esc_html__('Fichier', 'faluss-platform'); ?></th>
-                            <th scope="col"><?php echo esc_html__('État', 'faluss-platform'); ?></th>
-                        </tr></thead>
-                        <tbody>
-                            <?php foreach ($inventory->rows() as $plugin): ?>
-                                <tr>
-                                    <th scope="row"><?php echo esc_html($plugin['name']); ?></th>
-                                    <td><code><?php echo esc_html($plugin['basename']); ?></code></td>
-                                    <td><span class="faluss-admin__badge <?php echo $plugin['active'] ? 'is-active' : 'is-inactive'; ?>"><?php echo $plugin['active'] ? esc_html__('Actif', 'faluss-platform') : esc_html__('Inactif', 'faluss-platform'); ?></span></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
         </div>
         <?php
     }
@@ -224,5 +200,33 @@ final class DashboardModule implements Module
             'constant' => __('La licence est gérée par la configuration du serveur.', 'faluss-platform'),
             default => __('La clé fournie est invalide.', 'faluss-platform'),
         };
+    }
+
+    /** @return array{label: string, description: string, short: string} */
+    private static function moduleDetails(string $module): array
+    {
+        $details = [
+            'admin-dashboard' => ['label' => 'Administration Faluss', 'description' => 'Vue d’ensemble, diagnostics et réglages communs du site.', 'short' => 'AD'],
+            'theme-tokens' => ['label' => 'Identité visuelle', 'description' => 'Gère les couleurs, formes et ombres utilisées par le design Faluss.', 'short' => 'IV'],
+            'catalog' => ['label' => 'Catalogue de thèmes', 'description' => 'Gère les thèmes disponibles pour les cartes Faluss Link.', 'short' => 'CT'],
+            'token-engine-connector' => ['label' => 'Connecteur Token Engine', 'description' => 'Relie faluss.me au moteur de droits, de solde et de récompenses de faluss.com.', 'short' => 'TE'],
+            'identity' => ['label' => 'Identité', 'description' => 'Gère les profils, le passwordless et l’autorité d’identité de faluss.me.', 'short' => 'ID'],
+            'identity-client' => ['label' => 'Client Identity', 'description' => 'Connecte faluss.com à l’autorité d’identité via OAuth et PKCE.', 'short' => 'IC'],
+            'link' => ['label' => 'Faluss Link', 'description' => 'Gère les cartes publiques, leur édition, les médias et les découvertes.', 'short' => 'FL'],
+            'me-studio' => ['label' => 'Me Studio', 'description' => 'Fournit l’interface Studio moderne pour créer et personnaliser une carte.', 'short' => 'MS'],
+            'portal' => ['label' => 'Portail membre', 'description' => 'Affiche l’espace membre et orchestre ses applications et services.', 'short' => 'PM'],
+            'apps-registry' => ['label' => 'Registre des applications', 'description' => 'Décrit les applications disponibles et leurs capacités compatibles.', 'short' => 'RA'],
+            'subscriptions' => ['label' => 'Abonnements', 'description' => 'Gère les offres, essais, droits et intégration de facturation.', 'short' => 'AB'],
+            'token-engine' => ['label' => 'Token Engine', 'description' => 'Gère les projets, permissions, droits et ledgers de points PF.', 'short' => 'TE'],
+            'events' => ['label' => 'Événements', 'description' => 'Enregistre et traite les événements avec reprise et idempotence.', 'short' => 'EV'],
+            'analytics' => ['label' => 'Analytics', 'description' => 'Construit des agrégats anonymisés à partir des événements validés.', 'short' => 'AN'],
+            'federation' => ['label' => 'Fédération', 'description' => 'Sécurise les échanges intersites signés entre faluss.me et faluss.com.', 'short' => 'FE'],
+        ];
+
+        return $details[$module] ?? [
+            'label' => ucwords(str_replace('-', ' ', $module)),
+            'description' => 'Module Faluss actif sur ce site.',
+            'short' => 'FA',
+        ];
     }
 }

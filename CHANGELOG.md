@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Modifié
+
+- Remplacement de l’inventaire des anciens plugins par des cartes de modules actives, nommées et décrites dans l’administration Faluss.
+
 ## [0.3.2] - 2026-09-24
 
 ### Ajouté
