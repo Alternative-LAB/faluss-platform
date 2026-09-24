@@ -15,6 +15,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 - Séparation complète entre le Bearer de publication GitHub Actions et la licence installée sur les sites WordPress.
 
+### Corrigé
+
+- Procédure de mise à jour scriptée renforcée pour conserver et vérifier l'état actif du plugin après son remplacement.
+
 ### Modifié
 
 - Version du Master Plugin portée de `0.1.0` à `0.2.0` afin que l’updater WordPress reconnaisse la livraison de Studio V2 et Link 0.4.0 comme une mise à jour plus récente.

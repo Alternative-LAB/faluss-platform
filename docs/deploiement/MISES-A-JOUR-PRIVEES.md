@@ -52,8 +52,19 @@ installé dans WordPress.
 ## Vérification et retour arrière
 
 Après publication, vérifier que le serveur retourne `401` sans licence, des
-métadonnées avec une licence autorisée, puis que `wp plugin update
-faluss-platform` installe la version annoncée. Pour revenir en arrière, supprimer
-le tag avant toute publication ou retirer le workflow et le client par une PR.
+métadonnées avec une licence autorisée, puis effectuer la mise à jour depuis
+l'administration WordPress. WP-CLI n'est pas installé sur les conteneurs Faluss
+actuels. Pour revenir en arrière, supprimer le tag avant toute publication ou
+retirer le workflow et le client par une PR.
 Les packages déjà publiés restent immuables ; leur suppression est une opération
 serveur distincte.
+
+Un appel PHP direct à `Plugin_Upgrader::upgrade()` ne reproduit pas tout le
+parcours interactif de WordPress. Un lanceur scripté doit utiliser trois
+processus séparés : relevé de l'état actif local et réseau, installation, puis
+restauration et vérification de cet état avec `activate_plugin()` en mode
+silencieux. Il doit aussi tenter la restauration après un échec, sans masquer
+l'erreur initiale. Il ne doit jamais modifier directement l'option
+`active_plugins` ni simuler un contexte cron. L'incident et la procédure
+détaillée sont documentés dans
+`docs/incidents/2026-09-24-scripted-update-deactivation.md`.
