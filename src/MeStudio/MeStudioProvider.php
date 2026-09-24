@@ -21,6 +21,9 @@ final class MeStudioProvider implements StudioProvider
 
     public function renderStudio(callable $fallback): string
     {
+        if (!self::studioV2Enabled()) {
+            return $fallback();
+        }
         $state = LinkStudioContract::state();
         if (is_wp_error($state)) {
             return $fallback();
@@ -37,6 +40,9 @@ final class MeStudioProvider implements StudioProvider
 
     public function renderOnboarding(callable $fallback): string
     {
+        if (OnboardingV3::enabled()) {
+            return OnboardingV3::render();
+        }
         $context = IdentityContract::onboardingContext();
         $step = is_string($context['step'] ?? null) ? $context['step'] : '';
         if ($step !== 'wizard_structure' && !str_starts_with($step, 'wizard_atomic_')) {
@@ -66,11 +72,16 @@ final class MeStudioProvider implements StudioProvider
 
     public function renderStudioExtension(array $state): string
     {
-        return StudioRenderer::studioExtension($state, $this->extensions->descriptors());
+        return self::studioV2Enabled() ? StudioRenderer::studioExtension($state, $this->extensions->descriptors()) : '';
     }
 
     public function enqueueCardAssets(): void
     {
         MeStudioAssets::enqueueCard();
+    }
+
+    private static function studioV2Enabled(): bool
+    {
+        return defined('FALUSS_PLATFORM_ME_STUDIO_V2') && constant('FALUSS_PLATFORM_ME_STUDIO_V2') === true;
     }
 }

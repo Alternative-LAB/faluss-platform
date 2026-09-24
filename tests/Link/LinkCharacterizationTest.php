@@ -34,7 +34,7 @@ final class LinkCharacterizationTest extends TestCase
 
         foreach ($files as $file => $expectedHash) {
             self::assertFileExists($target . '/' . $file);
-            self::assertSame($expectedHash, hash_file('sha256', $target . '/' . $file), $file);
+            self::assertSame($expectedHash, $this->sourceHash($target . '/' . $file), $file);
         }
     }
 
@@ -57,7 +57,7 @@ final class LinkCharacterizationTest extends TestCase
     {
         $target = dirname(__DIR__, 2) . '/src/Link';
         $files = [
-            'LegacyLinkAdmin.php' => '3bed6d1d9d83cf255133c917cad9dc73eae1a52f5a87be04e4c7f348fe81e233',
+            'LegacyLinkAdmin.php' => '4baa9135fd4b568231cf64a01432004c7083651427dd200ae18ff0de2f2a846d',
             'LegacyLinkEventsCatalog.php' => '68fcc8d19da8c67c8dbd5d0085a04f46789740e4f93cf0563ec5aa171a886ee1',
             'LegacyLinkEventsRuntime.php' => 'ddb578a7e66d0fcf67fd600484fe27b1bb91b4136c2436f66fb9cef44ee0843d',
             'LegacyLinkManifest.php' => '4da011366c5a15387dae6e6c199c5d8268624db5732716b4f6e46ee4a91273c3',
@@ -66,7 +66,7 @@ final class LinkCharacterizationTest extends TestCase
         ];
 
         foreach ($files as $file => $expectedHash) {
-            self::assertSame($expectedHash, hash_file('sha256', $target . '/' . $file), $file);
+            self::assertSame($expectedHash, $this->sourceHash($target . '/' . $file), $file);
         }
     }
 
@@ -81,5 +81,13 @@ final class LinkCharacterizationTest extends TestCase
         self::assertStringContainsString("'stale_version'", $source);
         self::assertStringContainsString("'legacy_blocks_not_initialized'", $source);
         self::assertStringNotContainsString('wp_ajax_nopriv_', $source);
+    }
+
+    private function sourceHash(string $path): string
+    {
+        $contents = file_get_contents($path);
+        self::assertNotFalse($contents, $path);
+
+        return hash('sha256', str_ends_with($path, '.png') ? $contents : str_replace("\r\n", "\n", $contents));
     }
 }

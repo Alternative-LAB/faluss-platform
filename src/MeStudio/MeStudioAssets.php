@@ -11,6 +11,8 @@ final class MeStudioAssets
     private const STUDIO_SCRIPT = 'faluss-me-studio-v2';
     private const ONBOARDING_STYLE = 'faluss-me-studio-v2-onboarding';
     private const ONBOARDING_SCRIPT = 'faluss-me-studio-v2-onboarding';
+    private const ONBOARDING_V3_STYLE = 'faluss-me-onboarding-v3';
+    private const ONBOARDING_V3_SCRIPT = 'faluss-me-onboarding-v3';
 
     public static function enqueueCard(): void
     {
@@ -46,6 +48,31 @@ final class MeStudioAssets
         wp_enqueue_style(self::CARD_STYLE);
         wp_enqueue_style(self::ONBOARDING_STYLE);
         wp_enqueue_script(self::ONBOARDING_SCRIPT);
+    }
+
+    public static function enqueueOnboardingV3(): void
+    {
+        self::register();
+        $file = dirname(__DIR__, 2) . '/faluss-platform.php';
+        if (!wp_style_is(self::ONBOARDING_V3_STYLE, 'registered')) {
+            wp_register_style(self::ONBOARDING_V3_STYLE, plugins_url('assets/me-studio/css/onboarding-v3.css', $file), [self::CARD_STYLE], MeStudioModule::VERSION);
+            $scriptUrl = plugins_url('assets/me-studio/js/onboarding-v3.js', $file);
+            if ($scriptUrl !== '') {
+                wp_register_script(self::ONBOARDING_V3_SCRIPT, $scriptUrl, [], MeStudioModule::VERSION, true);
+            }
+        }
+        wp_localize_script(self::ONBOARDING_V3_SCRIPT, 'falussOnboardingV3', [
+            'ajaxUrl' => admin_url('admin-ajax.php'),
+            'transitionNonce' => wp_create_nonce('faluss_onboarding_v3_transition'),
+            'identityDraftNonce' => wp_create_nonce('faluss_onboarding_v3_identity_draft'),
+            'previewNonce' => wp_create_nonce('faluss_onboarding_v3_preview'),
+            'publishNonce' => wp_create_nonce('faluss_onboarding_v3_publish'),
+            'avatarNonce' => wp_create_nonce('faluss_onboarding_v3_upload_avatar'),
+            'coverNonce' => wp_create_nonce('faluss_onboarding_v3_upload_cover'),
+        ]);
+        wp_enqueue_style(self::CARD_STYLE);
+        wp_enqueue_style(self::ONBOARDING_V3_STYLE);
+        wp_enqueue_script(self::ONBOARDING_V3_SCRIPT);
     }
 
     private static function register(): void

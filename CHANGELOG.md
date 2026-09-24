@@ -10,15 +10,33 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 - Catalogue Fans opt-in avec deux catégories visibles, fiches structurées et refus serveur de toute tentative d'achat actuelle, API comprise.
 - Suivi Fans opt-in : relation locale idempotente, retrait et compteur public sans identité de follower.
+- Limites d'ouverture sociale du suivi Fans documentées : blocage, signalements, suppression de compte et rétention à implémenter.
 - Profils créateurs Fans opt-in : identifiant public opaque, catégorie fermée, approbation et suspension, routes REST à permissions explicites sans champ libre ni média.
+- Champ de contrat `identity_verified=false` sur chaque profil Fans ; l'approbation de publication ne constitue pas une vérification d'identité ni une autorisation de vendre.
 - Client SSO Fans opt-in avec tables, état navigateur, PKCE S256, échange confidentiel avec Me et session locale limitée aux subscribers liés.
 - Contrat d'activation, rollback et preuves restantes pour le SSO Fans, indépendamment des domaines métier et commerciaux.
+
+### Corrigé
+
+- Création de compte Fans et liaison SSO atomiques sur InnoDB, avec verrouillage concurrent et rollback en cas d'échec de liaison.
+
+## [0.4.0] - 2026-09-25
+
+### Ajouté
+
+- Parcours d'onboarding Faluss.me V3 natif, optionnel et désactivé par défaut, avec aperçu de la carte partagée, reprise des anciens curseurs et publication transactionnelle.
 - Admission du rôle de site `fans` dans l'administration commune, sans module métier actif.
 - Contrat de frontière et étapes de validation des futures catégories commerciales Fans.
 
 ### Corrigé
 
+- Diagnostics structurés pour les échecs d'envoi d'image et signalement des médias de réseaux absents dans l'administration Link.
+- Conservation du brouillon Identité V3 au Retour, au rechargement et après upload d'avatar ; préservation des dérogations de thème Link V4 lors des modifications successives du Studio.
 - Empêche le hook d'activation Link d'installer son schéma sur un site non `me`, même si son flag est présent.
+
+### Documentation
+
+- Étend la recette locale V3 au parcours passwordless et aux uploads JPEG/GIF/WebP, avec réponses HTTP horodatées et protocole de staging en attente d'accès.
 
 ## [0.3.3] - 2026-09-24
 
