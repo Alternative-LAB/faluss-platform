@@ -64,6 +64,7 @@ final class MeStudioAssets
         wp_localize_script(self::ONBOARDING_V3_SCRIPT, 'falussOnboardingV3', [
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'transitionNonce' => wp_create_nonce('faluss_onboarding_v3_transition'),
+            'identityDraftNonce' => wp_create_nonce('faluss_onboarding_v3_identity_draft'),
             'previewNonce' => wp_create_nonce('faluss_onboarding_v3_preview'),
             'publishNonce' => wp_create_nonce('faluss_onboarding_v3_publish'),
             'avatarNonce' => wp_create_nonce('faluss_onboarding_v3_upload_avatar'),

@@ -229,6 +229,23 @@ final class IdentityContract
         return self::call('Faluss_Identity_Onboarding', 'set_v3_cursor', [$step]) === true;
     }
 
+    /** @return array<string, mixed> */
+    public static function onboardingV3IdentityDraft(): array
+    {
+        return OnboardingV3Draft::read();
+    }
+
+    /** @param array<string, mixed> $fields */
+    public static function saveOnboardingV3IdentityDraft(array $fields): bool
+    {
+        return OnboardingV3Draft::save($fields);
+    }
+
+    public static function clearOnboardingV3IdentityDraft(): void
+    {
+        OnboardingV3Draft::clear();
+    }
+
     public static function advanceCardWizard(string $step): bool
     {
         return self::onboardingAvailable()

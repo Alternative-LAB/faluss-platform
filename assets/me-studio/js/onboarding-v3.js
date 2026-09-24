@@ -14,6 +14,9 @@
     var timer = 0;
     var previewRequest = null;
     var previewRevision = 0;
+    var draftTimer = 0;
+    var draftRevision = 0;
+    var draftQueue = Promise.resolve();
     var pending = false;
     var expanded = false;
     var drag = null;
@@ -129,9 +132,30 @@
         timer = window.setTimeout(preview, 120);
     }
 
+    function scheduleIdentityDraft() {
+        if (root.dataset.step !== 'v3_identity') { return; }
+        window.clearTimeout(draftTimer);
+        var revision = ++draftRevision;
+        draftTimer = window.setTimeout(function () {
+            var snapshot = JSON.stringify(fields());
+            draftQueue = draftQueue.catch(function () {}).then(function () {
+                if (revision !== draftRevision || pending) { return; }
+                return post('faluss_onboarding_v3_identity_draft', config.identityDraftNonce, {
+                    version: root.dataset.version || '', fields: snapshot
+                }).then(function (response) {
+                    if (!response.success) { throw new Error(serverError(response, 'save_failed')); }
+                }).catch(function (failure) {
+                    if (!pending) { notice(failure.message || 'Brouillon indisponible.', true); }
+                });
+            });
+        }, 350);
+    }
+
     function submit(direction) {
         if (pending) { return; }
         pending = true;
+        window.clearTimeout(draftTimer);
+        ++draftRevision;
         var button = root.querySelector('[data-v3-primary]');
         if (button) { button.disabled = true; }
         notice(direction === 'publish' ? 'Publication…' : 'Enregistrement…', false);
@@ -140,7 +164,7 @@
         var payload = direction === 'publish' ? { version: root.dataset.version || '' } : {
             step: root.dataset.step || '', direction: direction, version: root.dataset.version || '', fields: JSON.stringify(fields())
         };
-        post(action, nonce, payload).then(function (response) {
+        draftQueue.catch(function () {}).then(function () { return post(action, nonce, payload); }).then(function (response) {
             if (!response.success) { throw new Error(serverError(response, direction === 'publish' ? 'publish_failed' : 'save_failed')); }
             window.location.reload();
         }).catch(function (failure) {
@@ -179,6 +203,7 @@
             if (hidden) { hidden.value = payload.data.id; }
             notice('Image prête.', false);
             schedulePreview();
+            scheduleIdentityDraft();
         }).catch(function (failure) {
             notice(failure.message || 'Envoi impossible.', true);
         }).finally(function () { input.disabled = false; });
@@ -326,10 +351,11 @@
             if (custom) { custom.dataset.selected = 'false'; }
         }
         schedulePreview();
+        scheduleIdentityDraft();
     });
     root.addEventListener('input', function (event) {
         if (event.target.matches('[data-v3-color]')) { event.target.dataset.selected = 'true'; }
-        if (event.target.matches('input, select')) { schedulePreview(); }
+        if (event.target.matches('input, select')) { schedulePreview(); scheduleIdentityDraft(); }
     });
     panel.addEventListener('submit', function (event) {
         event.preventDefault();

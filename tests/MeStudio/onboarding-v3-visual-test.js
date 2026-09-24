@@ -123,6 +123,38 @@ async function geometry(page, engine, width, step) {
             assert(keyboardState.expanded && keyboardState.actionBottom <= 501, 'Short visible viewport obscures the action');
             await keyboardPage.close();
 
+            const touchContext = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, reducedMotion: 'reduce' });
+            const touchPage = await touchContext.newPage();
+            await touchPage.setContent(html('atomic', 'v3_socials', fixture.atomic.v3_socials));
+            await touchPage.evaluate(() => {
+                document.querySelectorAll('[data-v3-network-url]').forEach((input) => { input.hidden = false; });
+            });
+            const cdp = await touchContext.newCDPSession(touchPage);
+            async function swipe(x, startY, endY) {
+                await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y: startY }] });
+                for (let index = 1; index <= 10; index += 1) {
+                    const y = startY + (endY - startY) * index / 10;
+                    await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y }] });
+                    await touchPage.waitForTimeout(12);
+                }
+                await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+                await touchPage.waitForTimeout(120);
+            }
+            const compactTop = await touchPage.locator('[data-v3-panel]').evaluate((element) => element.getBoundingClientRect().top);
+            await swipe(335, compactTop + 90, compactTop - 190);
+            const afterFirstSwipe = await touchPage.evaluate(() => ({
+                expanded: document.querySelector('[data-v3-panel]').classList.contains('is-expanded'),
+                scrollTop: document.querySelector('[data-v3-scroll]').scrollTop
+            }));
+            assert(afterFirstSwipe.expanded && afterFirstSwipe.scrollTop === 0, 'First upward touch must expand before scrolling');
+            for (let attempt = 0; attempt < 5; attempt += 1) { await swipe(335, 600, 180); }
+            const afterScroll = await touchPage.evaluate(() => {
+                const element = document.querySelector('[data-v3-scroll]');
+                return { top: element.scrollTop, max: element.scrollHeight - element.clientHeight };
+            });
+            assert(afterScroll.max > 0 && afterScroll.top >= afterScroll.max - 2, 'Expanded Networks content must scroll fully by touch');
+            await touchContext.close();
+
             const dragPage = await browser.newPage({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
             await dragPage.setContent(html('atomic', 'v3_links', fixture.atomic.v3_links));
             const handle = await dragPage.locator('[data-v3-grabber]').boundingBox();

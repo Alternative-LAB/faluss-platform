@@ -872,7 +872,8 @@ final class Faluss_Link {
         $payload['avatar_border'] = ! empty( $payload['avatar_border'] ) ? 1 : 0;
         $payload['name_font'] = self::onboarding_name_font( $payload['name_font'] ?? 'outfit' );
         $payload['selected_theme'] = self::theme_reference( $payload['selected_theme'] ?? 'faluss-default' );
-        $payload['theme_overrides'] = self::theme_overrides( $payload['theme_overrides'] ?? array() );
+        // Composition V4 owns the overrides; social_links is only a network list there.
+        $payload['theme_overrides'] = self::theme_overrides( $old['theme_overrides'] ?? $payload['theme_overrides'] ?? array() );
         $updates = array();
         $formats = array();
         $payload_changed = false;
