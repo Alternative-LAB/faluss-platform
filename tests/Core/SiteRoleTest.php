@@ -13,7 +13,9 @@ final class SiteRoleTest extends TestCase
     {
         self::assertSame(SiteRole::Me, SiteRole::fromValue('me'));
         self::assertSame(SiteRole::Hub, SiteRole::fromValue('hub'));
+        self::assertSame(SiteRole::Fans, SiteRole::fromValue('fans'));
         self::assertNull(SiteRole::fromValue('com'));
+        self::assertNull(SiteRole::fromValue('Fans'));
         self::assertNull(SiteRole::fromValue(null));
         self::assertNull(SiteRole::fromValue(['me']));
     }

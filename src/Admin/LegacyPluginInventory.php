@@ -55,6 +55,10 @@ final class LegacyPluginInventory
             ];
         }
 
+        if ($role === SiteRole::Fans) {
+            return [];
+        }
+
         return $shared + [
             'faluss-analytics/faluss-analytics.php' => 'Faluss Analytics',
             'faluss-identity-client/faluss-identity-client.php' => 'Faluss Identity Client',

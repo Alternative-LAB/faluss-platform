@@ -84,4 +84,43 @@ final class DashboardRenderTest extends TestCase
         self::assertStringContainsString('updates.faluss.com', $html);
         self::assertStringNotContainsString('Faluss Portal', $html);
     }
+
+    public function testDashboardNamesFansWithoutBorrowingTheMeOrHubSite(): void
+    {
+        $registry = new ModuleRegistry(SiteRole::Fans);
+        $module = new DashboardModule(SiteRole::Fans, $registry);
+        $registry->register($module);
+        $registry->boot();
+        ob_start();
+
+        try {
+            $module->render();
+            $html = (string) ob_get_contents();
+        } finally {
+            ob_end_clean();
+        }
+
+        self::assertStringContainsString('Faluss Fans', $html);
+        self::assertStringNotContainsString('class="faluss-admin__value">faluss.me', $html);
+        self::assertStringNotContainsString('class="faluss-admin__value">faluss.com', $html);
+        self::assertStringContainsString('Administration Faluss', $html);
+    }
+
+    public function testDashboardStillNamesTheHubSite(): void
+    {
+        $registry = new ModuleRegistry(SiteRole::Hub);
+        $module = new DashboardModule(SiteRole::Hub, $registry);
+        $registry->register($module);
+        $registry->boot();
+        ob_start();
+
+        try {
+            $module->render();
+            $html = (string) ob_get_contents();
+        } finally {
+            ob_end_clean();
+        }
+
+        self::assertStringContainsString('class="faluss-admin__value">faluss.com', $html);
+    }
 }
