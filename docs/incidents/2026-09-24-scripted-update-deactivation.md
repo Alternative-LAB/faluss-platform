@@ -56,3 +56,22 @@ Le suivi est conservé dans l'issue GitHub #37.
 - Plugin Update Checker présent dans le paquet publié ;
 - `faluss.me`, `faluss.com` et `/mon-faluss/` répondent avec HTTP `200` ;
 - conteneurs WordPress, bases et serveur de mises à jour sains.
+
+## Récurrence pendant la validation 0.3.0
+
+La procédure scriptée a été retentée après publication automatique de `0.3.0`.
+Sur `faluss.me`, `Plugin_Upgrader::upgrade()` a retourné `false` après avoir
+supprimé le répertoire installé. La restauration temporaire du cœur WordPress
+n'a pas remis le plugin en place. L'orchestrateur s'est arrêté avant de toucher
+`faluss.com`.
+
+La sauvegarde externe créée immédiatement avant l'opération a été restaurée,
+puis Faluss Platform `0.2.0` a été réactivé. Les deux sites et le portail ont été
+recontrôlés avec HTTP `200`. L'issue #37 a été rouverte avec les preuves de la
+récurrence.
+
+Jusqu'à résolution de cette issue, les appels directs à
+`Plugin_Upgrader::upgrade()` sont suspendus sur les sites Faluss. La release
+`0.3.0` reste publiée et détectable, mais son installation doit passer par le
+parcours interactif WordPress ou par un outil d'orchestration validé sur une
+copie jetable représentative, avec sauvegarde externe obligatoire.
