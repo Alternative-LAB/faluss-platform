@@ -142,6 +142,8 @@ final class StoreCatalogTest extends TestCase
         self::assertSame('Droit à une livraison adulte externe', $response->data[1]['label']);
     }
 
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testAdminCreatesOnlyStructuredListingWithIdempotencyKey(): void
     {
         self::assertInstanceOf(\WP_Error::class, StoreCatalogService::create(self::CREATOR, PurchaseGate::EXTERNAL_ADULT, self::REQUEST));
@@ -159,7 +161,7 @@ final class StoreCatalogTest extends TestCase
         self::assertArrayNotHasKey('request_key', $created);
         self::assertSame([], StoreCatalogService::publicList(PurchaseGate::EXTERNAL_ADULT));
         self::assertNull(StoreCatalogService::publicById($created['product_id']));
-        self::assertSame(404, StoreCatalogRest::product(new \WP_REST_Request(['product_id' => $created['product_id']]))->data['status']);
+        self::assertSame(404, StoreCatalogRest::product(new \WP_REST_Request(['product_id' => $created['product_id']]))->get_error_data()['status']);
         self::assertSame([], StoreCatalogService::publicList(PurchaseGate::HOSTED));
     }
 
@@ -175,20 +177,22 @@ final class StoreCatalogTest extends TestCase
         }
         $service = StoreCatalogService::purchase($created['product_id']);
         self::assertSame('external_adult_purchase_blocked', $service->get_error_code());
-        self::assertSame(403, $service->data['status']);
+        self::assertSame(403, $service->get_error_data()['status']);
         $request = new \WP_REST_Request(['product_id' => $created['product_id']]);
         $api = StoreCatalogRest::purchase($request);
         self::assertSame('external_adult_purchase_blocked', $api->get_error_code());
-        self::assertSame(403, $api->data['status']);
+        self::assertSame(403, $api->get_error_data()['status']);
         $GLOBALS['wpdb']->product['category'] = PurchaseGate::HOSTED;
-        self::assertSame(503, StoreCatalogRest::purchase($request)->data['status']);
+        self::assertSame(503, StoreCatalogRest::purchase($request)->get_error_data()['status']);
         $GLOBALS['wpdb']->product['category'] = PurchaseGate::EXTERNAL_ADULT;
-        self::assertSame(403, StoreCatalogRest::purchase($request)->data['status']);
+        self::assertSame(403, StoreCatalogRest::purchase($request)->get_error_data()['status']);
         StoreCatalogRest::routes();
         $route = $GLOBALS['store_routes']['faluss-fans/v1/store/products/(?P<product_id>[0-9a-f-]{36})/purchase'];
         self::assertSame([StoreCatalogRest::class, 'purchase'], $route['callback']);
     }
 
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testHostedPurchaseAlsoRemainsClosedAndUnknownProductCreatesNoOrder(): void
     {
         $GLOBALS['profile_admin'] = true;
@@ -196,17 +200,19 @@ final class StoreCatalogTest extends TestCase
         self::assertIsArray($created);
         self::assertSame('visible', $created['visibility']);
         self::assertSame('hosted_purchase_not_open', StoreCatalogService::purchase($created['product_id'])->get_error_code());
-        self::assertSame(503, StoreCatalogRest::purchase(new \WP_REST_Request(['product_id' => $created['product_id']]))->data['status']);
+        self::assertSame(503, StoreCatalogRest::purchase(new \WP_REST_Request(['product_id' => $created['product_id']]))->get_error_data()['status']);
         $GLOBALS['wpdb']->product['category'] = PurchaseGate::EXTERNAL_ADULT;
         self::assertSame('external_adult_purchase_blocked', StoreCatalogService::purchase($created['product_id'])->get_error_code());
         self::assertNull(StoreCatalogService::publicById($created['product_id']));
         self::assertSame([], StoreCatalogService::publicList(PurchaseGate::EXTERNAL_ADULT));
-        self::assertSame(403, StoreCatalogRest::purchase(new \WP_REST_Request(['product_id' => $created['product_id']]))->data['status']);
+        self::assertSame(403, StoreCatalogRest::purchase(new \WP_REST_Request(['product_id' => $created['product_id']]))->get_error_data()['status']);
         self::assertSame('product_not_found', StoreCatalogService::purchase('44444444-4444-4444-8444-444444444444')->get_error_code());
         self::assertSame('invalid_category', PurchaseGate::refusePurchase('unknown')->get_error_code());
         self::assertNull(StoreCatalogService::publicById('bad'));
     }
 
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testSuspendedCreatorHidesListingButAdultPurchaseStillReturns403(): void
     {
         $GLOBALS['profile_admin'] = true;
@@ -216,6 +222,6 @@ final class StoreCatalogTest extends TestCase
         self::assertNull(StoreCatalogService::publicById($created['product_id']));
         self::assertSame([], StoreCatalogService::publicList(PurchaseGate::EXTERNAL_ADULT));
         self::assertSame('external_adult_purchase_blocked', StoreCatalogService::purchase($created['product_id'])->get_error_code());
-        self::assertSame(403, StoreCatalogRest::purchase(new \WP_REST_Request(['product_id' => $created['product_id']]))->data['status']);
+        self::assertSame(403, StoreCatalogRest::purchase(new \WP_REST_Request(['product_id' => $created['product_id']]))->get_error_data()['status']);
     }
 }
