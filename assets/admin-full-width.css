@@ -1,0 +1,11 @@
+/* Page shells use the full WordPress content area; controls keep local reading widths. */
+.token-engine-admin {
+    width: auto;
+    max-width: none;
+    margin: 24px 20px 24px 0;
+}
+
+.faluss-subscriptions-admin {
+    width: auto;
+    max-width: none;
+}

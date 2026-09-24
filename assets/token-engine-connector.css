@@ -3,7 +3,7 @@
 }
 
 .faluss-connector-admin__panel {
-    max-width: 960px;
+    max-width: none;
 }
 
 .faluss-connector-admin__diagnostic {
