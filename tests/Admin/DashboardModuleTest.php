@@ -22,7 +22,7 @@ final class DashboardModuleTest extends TestCase
 
     public function testRegistersOnlyOnSupportedRolesWithoutDependencies(): void
     {
-        foreach ([SiteRole::Me, SiteRole::Hub] as $role) {
+        foreach ([SiteRole::Me, SiteRole::Hub, SiteRole::Fans] as $role) {
             $registry = new ModuleRegistry($role);
             $module = new DashboardModule($role, $registry);
             $registry->register($module);

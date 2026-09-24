@@ -15,6 +15,33 @@ final class LinkModuleTest extends TestCase
 {
     #[RunInSeparateProcess]
     #[PreserveGlobalState(false)]
+    public function testActivationStillReachesTheLinkSchemaOnMeWithOptIn(): void
+    {
+        link_test_reset();
+        define('FALUSS_PLATFORM_ROLE', 'me');
+        define('FALUSS_PLATFORM_LINK', true);
+        $GLOBALS['wpdb'] = (object) ['prefix' => 'wp_'];
+
+        LinkModule::activate();
+
+        self::assertTrue(class_exists('Faluss_Link_Schema', false));
+        self::assertSame([], $GLOBALS['link_test_option_updates']);
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testActivationRejectsAnAccidentalLinkFlagOnHub(): void
+    {
+        define('FALUSS_PLATFORM_ROLE', 'hub');
+        define('FALUSS_PLATFORM_LINK', true);
+
+        LinkModule::activate();
+
+        self::assertFalse(class_exists('Faluss_Link_Schema', false));
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testBootsTheHistoricalMeSurfaceBehindExplicitPlatformDependencies(): void
     {
         link_test_reset();

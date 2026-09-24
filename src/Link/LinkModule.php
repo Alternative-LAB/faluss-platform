@@ -14,7 +14,12 @@ final class LinkModule implements Module
 
     public static function activate(): void
     {
-        if (!defined('FALUSS_PLATFORM_LINK') || constant('FALUSS_PLATFORM_LINK') !== true) {
+        if (SiteRole::fromValue(
+            defined('FALUSS_PLATFORM_ROLE') ? constant('FALUSS_PLATFORM_ROLE') : null
+        ) !== SiteRole::Me
+            || !defined('FALUSS_PLATFORM_LINK')
+            || constant('FALUSS_PLATFORM_LINK') !== true
+        ) {
             return;
         }
         require_once __DIR__ . '/LegacyLinkSchema.php';

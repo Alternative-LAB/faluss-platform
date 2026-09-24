@@ -8,6 +8,7 @@ enum SiteRole: string
 {
     case Me = 'me';
     case Hub = 'hub';
+    case Fans = 'fans';
 
     public static function fromValue(mixed $value): ?self
     {
