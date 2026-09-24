@@ -11,8 +11,8 @@ La table InnoDB `${prefix}faluss_fans_store_catalog` possède une clé primaire 
 | Route | Permission | Résultat |
 | --- | --- | --- |
 | `GET /store/categories` | Public | Les deux catégories avec libellés contrôlés et `purchasable=false`. |
-| `GET /store/products` avec filtre `category` optionnel | Public | Au plus 20 fiches visibles, triées par identifiant opaque. |
-| `GET /store/products/{product_id}` | Public | Fiche visible ou 404. |
+| `GET /store/products` avec filtre `category` optionnel | Public | Au plus 20 fiches visibles de créateurs encore actifs, triées par identifiant opaque. |
+| `GET /store/products/{product_id}` | Public | Fiche visible d'un créateur encore actif ou 404. |
 | `POST /store/products` | `manage_options`, nonce REST et `Idempotency-Key` UUID | Crée une fiche structurée pour un profil actif ; même clé et mêmes données donnent la même fiche, conflit de clé refusé. |
 | `POST /store/products/{product_id}/purchase` | Public, pour que toute requête atteigne le refus serveur | `403 external_adult_purchase_blocked` pour la catégorie adulte externe ; `503 hosted_purchase_not_open` pour le contenu hébergé ; aucun effet de bord. |
 

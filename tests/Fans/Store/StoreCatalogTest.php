@@ -193,4 +193,15 @@ final class StoreCatalogTest extends TestCase
         self::assertSame('invalid_category', PurchaseGate::refusePurchase('unknown')->get_error_code());
         self::assertNull(StoreCatalogService::publicById('bad'));
     }
+
+    public function testSuspendedCreatorHidesListingAndPurchaseEndpoint(): void
+    {
+        $GLOBALS['profile_admin'] = true;
+        $created = StoreCatalogService::create(self::CREATOR, PurchaseGate::EXTERNAL_ADULT, self::REQUEST);
+        self::assertIsArray($created);
+        $GLOBALS['wpdb']->profile['status'] = 'suspended';
+        self::assertNull(StoreCatalogService::publicById($created['product_id']));
+        self::assertSame([], StoreCatalogService::publicList(PurchaseGate::EXTERNAL_ADULT));
+        self::assertSame('product_not_found', StoreCatalogService::purchase($created['product_id'])->get_error_code());
+    }
 }

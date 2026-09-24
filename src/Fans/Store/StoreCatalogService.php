@@ -84,7 +84,11 @@ final class StoreCatalogService
         ), 'ARRAY_A');
         $product = self::product($row);
 
-        return $product !== null && $product['visibility'] === 'visible' ? $product : null;
+        return $product !== null
+            && $product['visibility'] === 'visible'
+            && CreatorProfileService::publicById($product['creator_id']) !== null
+            ? $product
+            : null;
     }
 
     /** @return list<array{product_id:string,creator_id:string,category:string,category_label:string,visibility:string,created_at:string}>|\WP_Error */
@@ -113,7 +117,9 @@ final class StoreCatalogService
             if ($product === null || $product['visibility'] !== 'visible') {
                 return self::error('store_unavailable', 503);
             }
-            $products[] = $product;
+            if (CreatorProfileService::publicById($product['creator_id']) !== null) {
+                $products[] = $product;
+            }
         }
 
         return $products;
