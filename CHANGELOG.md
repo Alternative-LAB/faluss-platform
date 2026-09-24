@@ -18,6 +18,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 - Conservation du brouillon Identité V3 au Retour, au rechargement et après upload d'avatar ; préservation des dérogations de thème Link V4 lors des modifications successives du Studio.
 - Empêche le hook d'activation Link d'installer son schéma sur un site non `me`, même si son flag est présent.
 
+### Documentation
+
+- Étend la recette locale V3 au parcours passwordless et aux uploads JPEG/GIF/WebP, avec réponses HTTP horodatées et protocole de staging en attente d'accès.
+
 ## [0.3.3] - 2026-09-24
 
 ### Ajouté

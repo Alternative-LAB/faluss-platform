@@ -2,6 +2,7 @@
 
 // Run against an isolated WordPress/MariaDB site. Set the URL and local test account in env.
 const path = require('path');
+const fs = require('fs');
 const { chromium } = require('playwright');
 
 const base = process.env.FALUSS_V3_WP_BASE;
@@ -10,10 +11,12 @@ const password = process.env.FALUSS_V3_WP_PASSWORD;
 const pageId = process.env.FALUSS_V3_WP_PAGE;
 const onboardingPath = process.env.FALUSS_V3_WP_PATH || '/?page_id=' + pageId;
 const mode = process.env.FALUSS_V3_WP_MODE || 'simple';
+const auth = process.env.FALUSS_V3_WP_AUTH || 'wordpress';
+const mailbox = process.env.FALUSS_V3_WP_MAILBOX;
 const chrome = process.env.FALUSS_BROWSER_EXECUTABLE || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const root = path.resolve(__dirname, '../..');
-if (!base || !user || !password || !pageId || !['simple', 'atomic'].includes(mode)) {
-    throw new Error('Set FALUSS_V3_WP_BASE, USER, PASSWORD, PAGE and MODE');
+if (!base || !user || (!password && auth !== 'passwordless') || !pageId || !['simple', 'atomic'].includes(mode) || !['wordpress', 'passwordless'].includes(auth)) {
+    throw new Error('Set FALUSS_V3_WP_BASE, USER, PAGE, MODE and the selected authentication inputs');
 }
 function assert(value, message) { if (!value) { throw new Error(message); } }
 
@@ -28,13 +31,37 @@ function assert(value, message) { if (!value) { throw new Error(message); } }
         const action = new URLSearchParams(post).get('action') || 'multipart';
         const raw = await response.text().catch(() => '');
         const failed = response.status() >= 400 || raw.startsWith('{"success":false');
-        requests.push({ at: new Date().toISOString(), action, status: response.status(), ...(failed || action === 'multipart' ? { body: raw } : {}) });
+        requests.push({ at: new Date().toISOString(), action, status: response.status(), ...(failed && action !== 'multipart' ? { body: raw } : {}) });
     });
+    async function authenticate(target) {
+        if (auth === 'passwordless') {
+            assert(mailbox, 'A local passwordless mail sink is required');
+            fs.rmSync(mailbox, { force: true });
+            await target.goto(base + '/login/?redirect_to=' + encodeURIComponent(base + onboardingPath));
+            assert(await target.locator('[data-faluss-login-stage="email"]').count() === 1, 'Passwordless email stage unavailable');
+            await target.locator('[data-faluss-login-stage="email"] [name="email"]').fill(user);
+            await target.locator('[data-faluss-login-stage="email"] button[type="submit"]').click();
+            await target.waitForSelector('[data-faluss-login-stage="otp"]', { timeout: 12000 });
+            const started = Date.now();
+            while (!fs.existsSync(mailbox) && Date.now() - started < 12000) { await target.waitForTimeout(100); }
+            assert(fs.existsSync(mailbox), 'Local test mail was not captured');
+            const mail = JSON.parse(fs.readFileSync(mailbox, 'utf8'));
+            fs.rmSync(mailbox, { force: true });
+            assert(mail.to === user, 'Passwordless mail recipient differs from requested account');
+            const match = String(mail.message || '').match(/\b[0-9]{6}\b/);
+            assert(match, 'Passwordless mail has no six-digit code');
+            await target.locator('[data-faluss-login-stage="otp"] [name="otp"]').fill(match[0]);
+            await target.locator('[data-faluss-login-stage="otp"] button[type="submit"]').first().click();
+            await target.waitForURL((url) => url.pathname === '/commencer/', { timeout: 12000 });
+        } else {
+            await target.goto(base + '/wp-login.php');
+            await target.locator('#user_login').fill(user);
+            await target.locator('#user_pass').fill(password);
+            await Promise.all([target.waitForNavigation(), target.locator('#wp-submit').click()]);
+        }
+    }
     try {
-        await page.goto(base + '/wp-login.php');
-        await page.locator('#user_login').fill(user);
-        await page.locator('#user_pass').fill(password);
-        await Promise.all([page.waitForNavigation(), page.locator('#wp-submit').click()]);
+        await authenticate(page);
         await page.goto(base + onboardingPath);
         await page.waitForSelector('[data-faluss-onboarding-v3]', { timeout: 10000 });
         await page.waitForLoadState('networkidle');
@@ -70,7 +97,7 @@ function assert(value, message) { if (!value) { throw new Error(message); } }
             assert(await page.locator('[name="display_name"]').inputValue() === displayName, 'Identity name lost after Back');
             assert(await page.locator('[name="public_slug"]').inputValue() === slug, 'Identity slug lost after Back');
             assert(!(await page.locator('[name="public_slug"]').isDisabled()) && !(await page.locator('[name="public_slug"]').getAttribute('readonly')), 'Unclaimed slug became readonly');
-            const avatar = path.join(root, 'assets/images/pf/faluss-pf-badge.png');
+            const avatar = process.env.FALUSS_V3_AVATAR_PATH || path.join(root, 'assets/images/pf/faluss-pf-badge.png');
             const oldAvatarId = Number(await page.locator('[name="avatar_attachment_id"]').inputValue());
             await page.locator('[data-v3-upload="avatar"]').setInputFiles(avatar);
             await page.waitForFunction((oldId) => {
@@ -188,10 +215,7 @@ function assert(value, message) { if (!value) { throw new Error(message); } }
         {
             const second = await browser.newContext({ viewport: { width: 390, height: 844 } });
             const rival = await second.newPage();
-            await rival.goto(base + '/wp-login.php');
-            await rival.locator('#user_login').fill(user);
-            await rival.locator('#user_pass').fill(password);
-            await Promise.all([rival.waitForNavigation(), rival.locator('#wp-submit').click()]);
+            await authenticate(rival);
             await rival.goto(base + onboardingPath);
             await rival.waitForLoadState('networkidle');
             assert(await rival.locator('[data-faluss-onboarding-v3]').getAttribute('data-step') === 'v3_review', 'Second session did not see review');
@@ -249,12 +273,16 @@ function assert(value, message) { if (!value) { throw new Error(message); } }
             assert(publicResponse.status() === 200, 'Public profile returned non-200');
             const publicCard = await cardSnapshot('.faluss-link-card');
             assert(JSON.stringify(review) === JSON.stringify(publicCard), 'Review and public card content differ');
-            await page.goto(base + '/shortcode-' + mode + '/');
-            const shortcodeCard = await cardSnapshot('.faluss-link-card');
-            assert(JSON.stringify(publicCard) === JSON.stringify(shortcodeCard), 'Shortcode and public card differ');
-            await page.goto(base + '/widget-' + mode + '/');
-            const widgetCard = await cardSnapshot('.elementor-widget-faluss_link_card .faluss-link-card');
-            assert(JSON.stringify(publicCard) === JSON.stringify(widgetCard), 'Elementor widget and public card differ');
+            let shortcodeCard = null;
+            let widgetCard = null;
+            if (process.env.FALUSS_V3_WP_SKIP_INTEGRATION_PARITY !== 'true') {
+                await page.goto(base + '/shortcode-' + mode + '/');
+                shortcodeCard = await cardSnapshot('.faluss-link-card');
+                assert(JSON.stringify(publicCard) === JSON.stringify(shortcodeCard), 'Shortcode and public card differ');
+                await page.goto(base + '/widget-' + mode + '/');
+                widgetCard = await cardSnapshot('.elementor-widget-faluss_link_card .faluss-link-card');
+                assert(JSON.stringify(publicCard) === JSON.stringify(widgetCard), 'Elementor widget and public card differ');
+            }
             console.log(JSON.stringify({ mode, slug, avatarId, coverId, publicUrl: published.data.public_url, review, publicCard, shortcodeCard, widgetCard,
                 stalePublish: { at: staleAt, status: stale.status(), raw: staleRaw },
                 refusedUpload: { at: badAt, status: badUpload.status(), raw: badRaw },
