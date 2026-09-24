@@ -1,0 +1,130 @@
+name: Prepare release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Semantic version increment
+        required: true
+        default: auto
+        type: choice
+        options:
+          - auto
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: prepare-release
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate version and changelog
+        id: release
+        env:
+          REQUESTED_BUMP: ${{ inputs.bump }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          latest_tag="$(git tag --list 'v[0-9]*' --sort=-v:refname | head -n 1)"
+          if [[ -z "$latest_tag" ]]; then
+            echo 'No semantic release tag was found.' >&2
+            exit 1
+          fi
+          git log "$latest_tag..HEAD" --no-merges --format='%H%x09%s' > "$RUNNER_TEMP/release-commits.tsv"
+          version="$(php scripts/prepare-release.php \
+            --root="$GITHUB_WORKSPACE" \
+            --commits="$RUNNER_TEMP/release-commits.tsv" \
+            --bump="$REQUESTED_BUMP" \
+            --date="$(date -u +%F)")"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "branch=chore/release-v$version" >> "$GITHUB_OUTPUT"
+
+      - name: Create release branch
+        env:
+          RELEASE_BRANCH: ${{ steps.release.outputs.branch }}
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code --heads origin "$RELEASE_BRANCH" >/dev/null 2>&1; then
+            echo "Release branch $RELEASE_BRANCH already exists." >&2
+            exit 1
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -c "$RELEASE_BRANCH"
+          git add faluss-platform.php CHANGELOG.md
+          git commit -m "🔖 Prepare Faluss Platform v$RELEASE_VERSION"
+          git push origin "$RELEASE_BRANCH"
+
+      - name: Open release pull request
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PR_TOKEN }}
+          RELEASE_BRANCH: ${{ steps.release.outputs.branch }}
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$GH_TOKEN" ]]; then
+            echo 'RELEASE_PR_TOKEN is not configured.' >&2
+            exit 1
+          fi
+          body="$RUNNER_TEMP/release-pr.md"
+          printf '%s\n' \
+            '## Objectif' \
+            '' \
+            "Préparer automatiquement Faluss Platform v$RELEASE_VERSION depuis les commits fusionnés depuis le dernier tag." \
+            '' \
+            '## Changements' \
+            '' \
+            "- Mise à jour de la version du plugin vers $RELEASE_VERSION." \
+            '- Génération du changelog à partir des commits fusionnés.' \
+            '' \
+            '## Changelog' \
+            '' \
+            '### Modifié' \
+            '' \
+            '- Version et notes de publication générées automatiquement.' \
+            '' \
+            '## Vérifications effectuées' \
+            '' \
+            '- [x] Cohérence de la version sémantique' \
+            '- [x] Changelog généré depuis Git' \
+            '- [ ] Contrôles CI de la PR' \
+            '' \
+            'Précisions :' \
+            '' \
+            '- Le tag et le paquet seront créés uniquement après fusion de cette PR.' \
+            '' \
+            '## Intégration et absence de régression' \
+            '' \
+            '- `faluss.com` : aucune modification avant publication.' \
+            '- `faluss.me` : aucune modification avant publication.' \
+            '- Modules ou plugins Faluss existants : aucun contrat modifié.' \
+            '- WordPress et Elementor : aucun comportement modifié.' \
+            '' \
+            '## Risques et retour arrière' \
+            '' \
+            '- Risques : une catégorisation automatique peut nécessiter une correction dans la PR.' \
+            '- Retour arrière : fermer la PR sans la fusionner.' \
+            '' \
+            '## Captures d’écran' \
+            '' \
+            'Sans objet' > "$body"
+          gh pr create \
+            --base main \
+            --head "$RELEASE_BRANCH" \
+            --title "Publier Faluss Platform v$RELEASE_VERSION" \
+            --body-file "$body"

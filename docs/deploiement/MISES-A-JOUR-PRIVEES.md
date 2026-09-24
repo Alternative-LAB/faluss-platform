@@ -17,22 +17,34 @@ sequenceDiagram
 
 ## Publication
 
-Le workflow `.github/workflows/publish-private-release.yml` est déclenché par un
-tag `v*`. Le tag doit correspondre exactement à l'en-tête `Version` de
-`faluss-platform.php`. Le workflow installe les dépendances de production,
-construit une archive dont le dossier racine est `faluss-platform`, puis l'envoie
-avec le secret GitHub Actions `WP_UPDATE_UPLOAD_TOKEN`.
+Le workflow manuel `Prepare release` calcule la prochaine version, génère les
+notes depuis les commits postérieurs au dernier tag, crée une branche
+`chore/release-vX.Y.Z` et ouvre une PR. Il ne modifie jamais `main` directement.
+En mode `auto`, `💥` produit une version majeure, `✨` une version mineure et les
+autres commits une version corrective. L'opérateur peut imposer `patch`, `minor`
+ou `major` au lancement.
 
-Pour publier la version `0.2.0` après fusion de la PR :
+Le secret GitHub Actions `RELEASE_PR_TOKEN` contient un jeton limité au dépôt,
+autorisé à créer la PR afin que ses événements déclenchent les contrôles CI. Le
+jeton ne rejoint jamais le paquet et reste distinct du Bearer d'upload.
+
+Après fusion et contrôles verts, `.github/workflows/publish-private-release.yml`
+détecte la nouvelle version sur `main`, crée le tag correspondant puis publie le
+ZIP. Le même workflow accepte encore un tag `v*` créé manuellement, à condition
+qu'il corresponde exactement à l'en-tête `Version` de `faluss-platform.php`.
+Il installe les dépendances de production, construit une archive dont le dossier
+racine est `faluss-platform`, puis l'envoie avec le secret GitHub Actions
+`WP_UPDATE_UPLOAD_TOKEN`.
+
+Pour préparer une publication depuis GitHub CLI :
 
 ```sh
-git tag -s v0.2.0 -m "Faluss Platform 0.2.0"
-git push origin v0.2.0
+gh workflow run prepare-release.yml -f bump=auto
 ```
 
-Une exécution manuelle est disponible pour diagnostiquer le workflow. Elle ne
-remplace pas un tag versionné et le serveur refuse normalement de remplacer une
-version déjà publiée.
+Relire puis fusionner la PR générée après ses contrôles CI. Le tag et le paquet
+sont alors produits automatiquement. Le serveur refuse de remplacer une version
+déjà publiée.
 
 ## Licence des sites WordPress
 
