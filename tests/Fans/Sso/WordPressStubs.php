@@ -30,6 +30,7 @@ namespace Faluss\Platform\Fans\Sso {
         $GLOBALS['fans_sso_users'] = [];
         $GLOBALS['fans_sso_email_users'] = [];
         $GLOBALS['fans_sso_insert_calls'] = [];
+        $GLOBALS['fans_sso_insert_error'] = false;
         $GLOBALS['fans_sso_remote_queue'] = [];
         $GLOBALS['fans_sso_remote_calls'] = [];
         $GLOBALS['fans_sso_logged_in'] = false;
@@ -47,6 +48,9 @@ namespace Faluss\Platform\Fans\Sso {
     final class FansSsoWpdbStub
     {
         public string $prefix = 'wp_';
+        public string $users = 'wp_users';
+        public string $usermeta = 'wp_usermeta';
+        public string $coreEngine = 'InnoDB';
         public string $last_error = '';
         /** @var list<string> */
         public array $queries = [];
@@ -60,6 +64,11 @@ namespace Faluss\Platform\Fans\Sso {
         public array $presentTables = [];
         public int $insertResult = 1;
         public int $updateResult = 1;
+        /** @var list<int> */
+        public array $lockResults = [];
+        public ?\Closure $onLock = null;
+        /** @var array{users:array<int,\WP_User>,emails:array<string,\WP_User>}|null */
+        private ?array $transactionSnapshot = null;
 
         public function prepare(string $query, mixed ...$args): string
         {
@@ -70,6 +79,20 @@ namespace Faluss\Platform\Fans\Sso {
         public function query(string $query): int|false
         {
             $this->queries[] = $query;
+            if ($query === 'START TRANSACTION') {
+                $this->transactionSnapshot = [
+                    'users' => $GLOBALS['fans_sso_users'],
+                    'emails' => $GLOBALS['fans_sso_email_users'],
+                ];
+            }
+            if ($query === 'ROLLBACK' && $this->transactionSnapshot !== null) {
+                $GLOBALS['fans_sso_users'] = $this->transactionSnapshot['users'];
+                $GLOBALS['fans_sso_email_users'] = $this->transactionSnapshot['emails'];
+                $this->transactionSnapshot = null;
+            }
+            if ($query === 'COMMIT') {
+                $this->transactionSnapshot = null;
+            }
             if (str_starts_with($query, 'INSERT INTO')) {
                 return $this->insertResult;
             }
@@ -82,11 +105,24 @@ namespace Faluss\Platform\Fans\Sso {
         /** @return array<string,mixed>|null */
         public function get_row(string $query, mixed $output = null): ?array
         {
+            if (str_starts_with($query, 'SHOW TABLE STATUS')) {
+                return ['Engine' => $this->coreEngine];
+            }
             return $this->stateRow;
         }
 
         public function get_var(string $query): mixed
         {
+            if (str_starts_with($query, 'SELECT GET_LOCK')) {
+                if ($this->onLock instanceof \Closure) {
+                    ($this->onLock)();
+                    $this->onLock = null;
+                }
+                return array_shift($this->lockResults) ?? 1;
+            }
+            if (str_starts_with($query, 'SELECT RELEASE_LOCK')) {
+                return 1;
+            }
             if (str_starts_with($query, 'SHOW TABLES LIKE')) {
                 $last = end($this->prepared);
                 $table = $last['args'][0] ?? null;
@@ -130,7 +166,11 @@ namespace Faluss\Platform\Fans\Sso {
     function wp_insert_user(array $data): int|\WP_Error
     {
         $GLOBALS['fans_sso_insert_calls'][] = $data;
+        if ($GLOBALS['fans_sso_insert_error']) {
+            return new \WP_Error();
+        }
         $GLOBALS['fans_sso_users'][51] = new \WP_User(51, [$data['role']], $data['user_login'], $data['user_email']);
+        $GLOBALS['fans_sso_email_users'][$data['user_email']] = $GLOBALS['fans_sso_users'][51];
         return 51;
     }
     function is_email(mixed $email): bool { return is_string($email) && filter_var($email, FILTER_VALIDATE_EMAIL) !== false; }

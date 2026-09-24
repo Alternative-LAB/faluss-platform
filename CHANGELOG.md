@@ -11,6 +11,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 - Client SSO Fans opt-in avec tables, état navigateur, PKCE S256, échange confidentiel avec Me et session locale limitée aux subscribers liés.
 - Contrat d'activation, rollback et preuves restantes pour le SSO Fans, indépendamment des domaines métier et commerciaux.
 
+### Corrigé
+
+- Création de compte Fans et liaison SSO atomiques sur InnoDB, avec verrouillage concurrent et rollback en cas d'échec de liaison.
+
 ## [0.4.0] - 2026-09-25
 
 ### Ajouté
