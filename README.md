@@ -9,10 +9,12 @@ Le projet est au début de sa construction. Les plugins Faluss actuellement en p
 Le plugin reste inactif tant que le rôle du site n’est pas défini dans une configuration non versionnée :
 
 ```php
-define('FALUSS_PLATFORM_ROLE', 'me'); // ou 'hub' sur faluss.com
+define('FALUSS_PLATFORM_ROLE', 'me'); // 'hub' sur faluss.com, 'fans' sur un site Fans
 ```
 
 Le socle n’active que le module d’administration : il ne remplace aucun plugin en production. Voir [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
+Le rôle `fans` n'admet pour l'instant que cette administration commune. Les domaines et portes commerciales envisagés sont décrits dans [`docs/modules/FANS.md`](docs/modules/FANS.md) ; aucune vente ou fonction Fans n'est activée par ce rôle.
 
 Le module optionnel des jetons visuels de `faluss.me` est décrit dans [`docs/modules/THEME-TOKENS.md`](docs/modules/THEME-TOKENS.md). Il reste désactivé sans activation explicite.
 

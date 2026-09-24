@@ -39,4 +39,15 @@ final class LegacyPluginInventoryTest extends TestCase
         self::assertContains('Faluss Portal', array_column($rows, 'name'));
         self::assertNotContains('Faluss Theme', array_column($rows, 'name'));
     }
+
+    public function testFansDoesNotInheritTheHubLegacyInventory(): void
+    {
+        $inventory = new LegacyPluginInventory(SiteRole::Fans, [
+            'faluss-portal/faluss-portal.php',
+            'faluss-link/faluss-link.php',
+        ]);
+
+        self::assertSame([], $inventory->rows());
+        self::assertSame(0, $inventory->activeCount());
+    }
 }

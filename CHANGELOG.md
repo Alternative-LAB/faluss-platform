@@ -6,6 +6,15 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Ajouté
+
+- Admission du rôle de site `fans` dans l'administration commune, sans module métier actif.
+- Contrat de frontière et étapes de validation des futures catégories commerciales Fans.
+
+### Corrigé
+
+- Empêche le hook d'activation Link d'installer son schéma sur un site non `me`, même si son flag est présent.
+
 ## [0.3.3] - 2026-09-24
 
 ### Ajouté

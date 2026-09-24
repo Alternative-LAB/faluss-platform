@@ -1,6 +1,6 @@
 # Architecture initiale
 
-`faluss-platform` est un plugin WordPress commun à `faluss.me` et `faluss.com`. Le site choisit explicitement son rôle via `FALUSS_PLATFORM_ROLE`, dont les seules valeurs autorisées sont `me` et `hub`.
+`faluss-platform` est un plugin WordPress modulaire. Le site choisit explicitement son rôle via `FALUSS_PLATFORM_ROLE`, dont les seules valeurs autorisées sont `me`, `hub` et `fans`. Le rôle `fans` n'admet dans ce lot que l'administration commune ; les autres modules restent limités à leurs rôles déclarés.
 
 ```mermaid
 flowchart LR
@@ -8,15 +8,17 @@ flowchart LR
     Bootstrap --> Role{Rôle du site}
     Role -->|me| Me[Modules compatibles me]
     Role -->|hub| Hub[Modules compatibles hub]
+    Role -->|fans| Fans[Administration commune uniquement]
     Me --> Registry[Registre de modules]
     Hub --> Registry
+    Fans --> Registry
     Registry --> Checks[Validation des dépendances]
     Checks --> Boot[Chargement ordonné]
 ```
 
 ## État actuel
 
-Le plugin fournit son point d’entrée, le rôle de site et un registre capable de charger des modules dans l’ordre de leurs dépendances. Le tableau de bord d’administration est commun aux deux rôles. Le module optionnel des [jetons visuels](modules/THEME-TOKENS.md) est limité au rôle `me` et reste inactif sans opt-in explicite. Aucune table n’est créée et aucune configuration de production n’est modifiée.
+Le plugin fournit son point d’entrée, le rôle de site et un registre capable de charger des modules dans l’ordre de leurs dépendances. Le tableau de bord d’administration est commun aux trois rôles. Le module optionnel des [jetons visuels](modules/THEME-TOKENS.md) est limité au rôle `me` et reste inactif sans opt-in explicite. L'admission de `fans` ne crée aucune table et ne modifie aucune configuration de production.
 
 Si le rôle n’est pas configuré ou est invalide, le plugin ne charge aucun module. Si une dépendance manque ou forme un cycle, le registre refuse le chargement avant de démarrer le moindre module.
 
@@ -29,7 +31,7 @@ Un module implémente `Faluss\Platform\Core\Module` et déclare :
 - les identifiants de ses dépendances ;
 - sa méthode `boot()`.
 
-Le registre vérifie les doublons, l’absence de dépendance, l’incompatibilité de rôle et les cycles avant le chargement. Le module `theme-tokens` est la première migration optionnelle ; chaque module suivant fera l’objet d’une PR distincte et de tests de parité ciblés.
+Le registre vérifie les doublons, l’absence de dépendance, l’incompatibilité de rôle et les cycles avant le chargement. Le module `theme-tokens` est la première migration optionnelle ; chaque module suivant fera l’objet d’une PR distincte et de tests de parité ciblés. Le futur domaine [Faluss Fans](modules/FANS.md) aura ses propres contrats et ne sera pas chargé par l'admission du rôle seule.
 
 ## Cohabitation et rollback
 

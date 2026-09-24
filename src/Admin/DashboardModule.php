@@ -28,7 +28,7 @@ final class DashboardModule implements Module
 
     public function roles(): array
     {
-        return [SiteRole::Me, SiteRole::Hub];
+        return [SiteRole::Me, SiteRole::Hub, SiteRole::Fans];
     }
 
     public function dependencies(): array
@@ -110,7 +110,11 @@ final class DashboardModule implements Module
             wp_die(esc_html__('Accès non autorisé.', 'faluss-platform'));
         }
 
-        $role = $this->role === SiteRole::Me ? 'faluss.me' : 'faluss.com';
+        $role = match ($this->role) {
+            SiteRole::Me => 'faluss.me',
+            SiteRole::Hub => 'faluss.com',
+            SiteRole::Fans => 'Faluss Fans',
+        };
         $modules = $this->registry->activeModuleIds();
         $licenseStatus = isset($_GET['license_status']) && is_string($_GET['license_status'])
             ? sanitize_key(wp_unslash($_GET['license_status']))
