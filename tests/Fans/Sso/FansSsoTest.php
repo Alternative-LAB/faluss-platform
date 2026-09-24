@@ -173,6 +173,71 @@ final class FansSsoTest extends TestCase
         self::assertSame(172800, FansSsoService::cookieExpiration(172800, 52, false));
     }
 
+    public function testFailedLinkRollsBackCreatedSubscriberAndAllowsRetry(): void
+    {
+        $claims = ['faluss_id' => self::ID, 'scope' => 'identity.basic identity.email', 'email' => 'retry@example.test'];
+        $pending = ['verifier' => str_repeat('v', 43), 'flow_mode' => 'login', 'wp_user_id' => 0];
+        $db = $GLOBALS['wpdb'];
+        $db->insertResult = 0;
+
+        self::assertNull(self::method('resolveUser')->invoke(null, $claims, $pending));
+        self::assertArrayNotHasKey(51, $GLOBALS['fans_sso_users']);
+        self::assertArrayNotHasKey('retry@example.test', $GLOBALS['fans_sso_email_users']);
+        self::assertContains('ROLLBACK', $db->queries);
+        self::assertSame(1, count(array_filter($db->queries, static fn (string $query): bool => $query === 'START TRANSACTION')));
+
+        $db->insertResult = 1;
+        self::assertInstanceOf(\WP_User::class, self::method('resolveUser')->invoke(null, $claims, $pending));
+        self::assertCount(1, $GLOBALS['fans_sso_users']);
+        self::assertCount(2, $GLOBALS['fans_sso_insert_calls']);
+    }
+
+    public function testFailedExistingAccountLinkNeverRemovesThatAccount(): void
+    {
+        $claims = ['faluss_id' => self::ID, 'scope' => 'identity.basic'];
+        $pending = ['verifier' => str_repeat('v', 43), 'flow_mode' => 'link', 'wp_user_id' => 17];
+        $existing = new \WP_User(17);
+        $GLOBALS['fans_sso_users'][17] = $existing;
+        $GLOBALS['fans_sso_logged_in'] = true;
+        $GLOBALS['fans_sso_current_user'] = 17;
+        $GLOBALS['wpdb']->insertResult = 0;
+
+        self::assertNull(self::method('resolveUser')->invoke(null, $claims, $pending));
+        self::assertSame($existing, $GLOBALS['fans_sso_users'][17]);
+        self::assertSame([], $GLOBALS['fans_sso_insert_calls']);
+        self::assertContains('ROLLBACK', $GLOBALS['wpdb']->queries);
+    }
+
+    public function testConcurrentRequestsFailClosedOrReuseTheCommittedLink(): void
+    {
+        $claims = ['faluss_id' => self::ID, 'scope' => 'identity.basic identity.email', 'email' => 'race@example.test'];
+        $pending = ['verifier' => str_repeat('v', 43), 'flow_mode' => 'login', 'wp_user_id' => 0];
+        $db = $GLOBALS['wpdb'];
+        $db->lockResults = [0];
+        self::assertNull(self::method('resolveUser')->invoke(null, $claims, $pending));
+        self::assertSame([], $GLOBALS['fans_sso_insert_calls']);
+
+        // Another request commits the same subject while this request waits on GET_LOCK.
+        $db->onLock = static function () use ($db): void {
+            $db->linkedId = 51;
+            $GLOBALS['fans_sso_users'][51] = new \WP_User(51);
+        };
+        $user = self::method('resolveUser')->invoke(null, $claims, $pending);
+        self::assertSame(51, $user?->ID);
+        self::assertSame([], $GLOBALS['fans_sso_insert_calls']);
+        self::assertContains('ROLLBACK', $db->queries);
+        self::assertSame(3, count(array_filter($db->prepared, static fn (array $item): bool => str_contains($item['query'], 'GET_LOCK'))));
+    }
+
+    public function testCreationFailsClosedWhenWordPressUserTablesAreNotInnoDb(): void
+    {
+        $GLOBALS['wpdb']->coreEngine = 'MyISAM';
+        $claims = ['faluss_id' => self::ID, 'scope' => 'identity.basic identity.email', 'email' => 'member@example.test'];
+        $pending = ['verifier' => str_repeat('v', 43), 'flow_mode' => 'login', 'wp_user_id' => 0];
+        self::assertNull(self::method('resolveUser')->invoke(null, $claims, $pending));
+        self::assertSame([], $GLOBALS['fans_sso_insert_calls']);
+    }
+
     public function testExplicitLinkRequiresSameLoggedInSubscriber(): void
     {
         $claims = ['faluss_id' => self::ID, 'scope' => 'identity.basic'];

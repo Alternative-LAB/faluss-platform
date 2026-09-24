@@ -362,28 +362,97 @@ final class FansSsoService
             return $user instanceof \WP_User && self::normalUser($user->ID) ? $user : null;
         }
 
-        if (!isset($claims['email'])
-            || get_user_by('email', $claims['email']) instanceof \WP_User
-            || !get_role('subscriber') instanceof \WP_Role
-        ) {
+        if (!isset($claims['email'])) {
             return null;
         }
 
+        return self::createAndLink($claims['email'], $claims['faluss_id']);
+    }
+
+    private static function createAndLink(string $email, string $falussId): ?\WP_User
+    {
+        global $wpdb;
+        $table = FansSsoSchema::tables()['links'] ?? null;
+        if (!is_string($table) || !self::coreUserTablesTransactional()) {
+            return null;
+        }
+
+        // Both locks are connection scoped. They serialize a subject and an email before
+        // WordPress checks its non-unique user_email index and inserts a local user.
+        $locks = [
+            'fans_subject_' . substr(hash('sha256', $falussId), 0, 40),
+            'fans_email_' . substr(hash('sha256', strtolower($email)), 0, 40),
+        ];
+        $acquired = [];
         try {
+            foreach ($locks as $lock) {
+                if ((int) $wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, %d)', $lock, 5)) !== 1) {
+                    return null;
+                }
+                $acquired[] = $lock;
+            }
+            if ($wpdb->query('START TRANSACTION') === false) {
+                return null;
+            }
+
+            $linkedId = $wpdb->get_var($wpdb->prepare(
+                'SELECT wp_user_id FROM ' . self::quote($table) . ' WHERE faluss_id = %s LIMIT 1',
+                $falussId
+            ));
+            if ($linkedId !== null) {
+                $wpdb->query('ROLLBACK');
+                $user = self::user((int) $linkedId);
+
+                return $user instanceof \WP_User && self::normalUser($user->ID) ? $user : null;
+            }
+            if (get_user_by('email', $email) instanceof \WP_User || !get_role('subscriber') instanceof \WP_Role) {
+                $wpdb->query('ROLLBACK');
+
+                return null;
+            }
+
             $created = wp_insert_user([
                 'user_login' => 'fans_' . bin2hex(random_bytes(10)),
                 'user_pass' => bin2hex(random_bytes(32)),
-                'user_email' => $claims['email'],
+                'user_email' => $email,
                 'role' => 'subscriber',
             ]);
+            if (is_wp_error($created) || $created < 1
+                || !self::insertLink($created, $falussId)
+            ) {
+                $wpdb->query('ROLLBACK');
+
+                return null;
+            }
+            if ($wpdb->query('COMMIT') === false) {
+                $wpdb->query('ROLLBACK');
+
+                return null;
+            }
+
+            return self::user($created);
         } catch (\Throwable) {
+            $wpdb->query('ROLLBACK');
+
             return null;
+        } finally {
+            foreach (array_reverse($acquired) as $lock) {
+                $wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)', $lock));
+            }
         }
-        if (is_wp_error($created) || $created < 1) {
-            return null;
+    }
+
+    private static function coreUserTablesTransactional(): bool
+    {
+        global $wpdb;
+        foreach ([$wpdb->users, $wpdb->usermeta] as $table) {
+            $status = $wpdb->get_row($wpdb->prepare('SHOW TABLE STATUS WHERE Name = %s', $table), 'ARRAY_A');
+            if (!is_array($status) || strcasecmp((string) ($status['Engine'] ?? ''), 'InnoDB') !== 0) {
+                return false;
+            }
         }
 
-        return self::link($created, $claims['faluss_id']) ? self::user($created) : null;
+        return true;
     }
 
     private static function link(int $userId, string $falussId): bool
@@ -394,24 +463,7 @@ final class FansSsoService
             return false;
         }
         try {
-            $existing = $wpdb->get_var($wpdb->prepare(
-                'SELECT id FROM ' . self::quote($table)
-                    . ' WHERE wp_user_id = %d OR faluss_id = %s FOR UPDATE',
-                $userId,
-                $falussId
-            ));
-            $now = gmdate('Y-m-d H:i:s');
-            if ($existing !== null
-                || $wpdb->query($wpdb->prepare(
-                    'INSERT INTO ' . self::quote($table)
-                        . ' (wp_user_id, faluss_id, created_at, last_proved_at) VALUES (%d, %s, %s, %s)',
-                    $userId,
-                    $falussId,
-                    $now,
-                    $now
-                )) !== 1
-                || $wpdb->query('COMMIT') === false
-            ) {
+            if (!self::insertLink($userId, $falussId) || $wpdb->query('COMMIT') === false) {
                 $wpdb->query('ROLLBACK');
 
                 return false;
@@ -423,6 +475,34 @@ final class FansSsoService
 
             return false;
         }
+    }
+
+    private static function insertLink(int $userId, string $falussId): bool
+    {
+        global $wpdb;
+        $table = FansSsoSchema::tables()['links'] ?? null;
+        if (!is_string($table)) {
+            return false;
+        }
+        $existing = $wpdb->get_var($wpdb->prepare(
+            'SELECT id FROM ' . self::quote($table)
+                . ' WHERE wp_user_id = %d OR faluss_id = %s FOR UPDATE',
+            $userId,
+            $falussId
+        ));
+        if ($existing !== null) {
+            return false;
+        }
+        $now = gmdate('Y-m-d H:i:s');
+
+        return $wpdb->query($wpdb->prepare(
+            'INSERT INTO ' . self::quote($table)
+                . ' (wp_user_id, faluss_id, created_at, last_proved_at) VALUES (%d, %s, %s, %s)',
+            $userId,
+            $falussId,
+            $now,
+            $now
+        )) === 1;
     }
 
     private static function markProved(int $userId, string $falussId): bool

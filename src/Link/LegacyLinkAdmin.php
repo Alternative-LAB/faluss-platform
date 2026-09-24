@@ -91,7 +91,7 @@ final class Faluss_Link_Admin {
                     <tbody>
                     <?php foreach ( $catalog as $slug => $network ) : ?>
                         <tr>
-                            <td><label><span class="screen-reader-text">Nom du réseau</span><input name="networks[<?php echo esc_attr( $slug ); ?>][label]" value="<?php echo esc_attr( $network['label'] ); ?>"></label></td>
+                            <td><label><span class="screen-reader-text">Nom du réseau</span><input name="networks[<?php echo esc_attr( $slug ); ?>][label]" value="<?php echo esc_attr( $network['label'] ); ?>"></label><?php if ( ! empty( $network['active'] ) && ! $network['outline_icon'] && ! $network['full_logo'] ) : ?><p role="status"><strong>Médias absents : ce réseau ne sera pas visible sur la carte.</strong></p><?php endif; ?></td>
                             <td><label><input type="checkbox" name="networks[<?php echo esc_attr( $slug ); ?>][active]" value="1" <?php checked( ! empty( $network['active'] ) ); ?>> <span class="screen-reader-text">Activer <?php echo esc_html( $network['label'] ); ?></span></label></td>
                             <?php self::asset_field( $slug, 'outline_icon', 'Icône contour', (int) $network['outline_icon'] ); ?>
                             <?php self::asset_field( $slug, 'full_logo', 'Logo plein', (int) $network['full_logo'] ); ?>
