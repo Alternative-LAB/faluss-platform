@@ -42,10 +42,10 @@ jobs:
             echo 'No semantic release tag was found.' >&2
             exit 1
           fi
-          git log "$latest_tag..HEAD" --no-merges --format='%H%x09%s' > "$RUNNER_TEMP/release-commits.tsv"
+          git log "$latest_tag..HEAD" --no-merges --format='%H%x1f%s%x1f%b%x1e' > "$RUNNER_TEMP/release-commits.log"
           version="$(php scripts/prepare-release.php \
             --root="$GITHUB_WORKSPACE" \
-            --commits="$RUNNER_TEMP/release-commits.tsv" \
+            --commits="$RUNNER_TEMP/release-commits.log" \
             --bump="$REQUESTED_BUMP" \
             --date="$(date -u +%F)")"
           echo "version=$version" >> "$GITHUB_OUTPUT"

@@ -30,20 +30,40 @@ final class ReleasePreparer
     /** @return list<array{sha: string, subject: string}> */
     public static function readCommits(string $path): array
     {
-        $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        if ($lines === false) {
+        $contents = file_get_contents($path);
+        if ($contents === false) {
             throw new \RuntimeException('Unable to read the release commit list.');
         }
 
+        return self::parseCommitLog($contents);
+    }
+
+    /** @return list<array{sha: string, subject: string}> */
+    public static function parseCommitLog(string $contents): array
+    {
+        $records = explode("\x1e", $contents);
+
         $commits = [];
-        foreach ($lines as $line) {
-            [$sha, $subject] = array_pad(explode("\t", $line, 2), 2, '');
+        foreach ($records as $record) {
+            [$sha, $subject, $body] = array_pad(explode("\x1f", trim($record), 3), 3, '');
             $sha = trim($sha);
             $subject = trim($subject);
             if ($sha === '' || $subject === '' || str_starts_with($subject, 'Merge pull request ')) {
                 continue;
             }
-            $commits[] = ['sha' => $sha, 'subject' => $subject];
+
+            preg_match_all('/^\* (.+)$/m', $body, $matches);
+            $squashedSubjects = array_values(array_filter(
+                array_map('trim', $matches[1] ?? []),
+                static fn(string $candidate): bool => preg_match('/^[^\p{L}\p{N}\s]/u', $candidate) === 1
+            ));
+            if ($squashedSubjects === []) {
+                $commits[] = ['sha' => $sha, 'subject' => $subject];
+                continue;
+            }
+            foreach ($squashedSubjects as $squashedSubject) {
+                $commits[] = ['sha' => $sha, 'subject' => $squashedSubject];
+            }
         }
 
         if ($commits === []) {
