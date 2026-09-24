@@ -6,6 +6,14 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Ajouté
+
+- Parcours d'onboarding Faluss.me V3 natif, optionnel et désactivé par défaut, avec aperçu de la carte partagée, reprise des anciens curseurs et publication transactionnelle.
+
+### Corrigé
+
+- Diagnostics structurés pour les échecs d'envoi d'image et signalement des médias de réseaux absents dans l'administration Link.
+
 ## [0.3.2] - 2026-09-24
 
 ### Ajouté

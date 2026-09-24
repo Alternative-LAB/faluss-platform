@@ -57,4 +57,34 @@ final class LinkStudioContract
     {
         \Faluss_Link::studio_v2_upload_image($field, $nonceAction);
     }
+
+    /**
+     * @param array<string, mixed> $draft
+     * @return array<string, mixed>|\WP_Error
+     */
+    public static function previewOnboardingV3(array $draft): array|\WP_Error
+    {
+        return \Faluss_Link::studio_v3_preview($draft);
+    }
+
+    /**
+     * @param array<string, mixed> $fields
+     * @return array<string, mixed>
+     */
+    public static function saveOnboardingV3Step(string $step, string $next, array $fields, string $version): array
+    {
+        return \Faluss_Link::studio_v2_save_onboarding_step($step, $next, $fields, $version);
+    }
+
+    /** @return array<string, mixed> */
+    public static function publishOnboardingV3(string $version): array
+    {
+        return \Faluss_Link::studio_v3_publish($version);
+    }
+
+    /** @return array<string, mixed> */
+    public static function nameOptions(): array
+    {
+        return \Faluss_Link::studio_v3_name_options();
+    }
 }

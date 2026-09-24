@@ -184,8 +184,8 @@ add_action('plugins_loaded', static function (): void {
         $registry->register(new \Faluss\Platform\AppsRegistry\AppsRegistryModule());
     }
     if ($role === \Faluss\Platform\Core\SiteRole::Me
-        && defined('FALUSS_PLATFORM_ME_STUDIO_V2')
-        && constant('FALUSS_PLATFORM_ME_STUDIO_V2') === true
+        && ((defined('FALUSS_PLATFORM_ME_STUDIO_V2') && constant('FALUSS_PLATFORM_ME_STUDIO_V2') === true)
+            || (defined('FALUSS_PLATFORM_ONBOARDING_V3') && constant('FALUSS_PLATFORM_ONBOARDING_V3') === true))
         && defined('FALUSS_PLATFORM_LINK')
         && constant('FALUSS_PLATFORM_LINK') === true
         && defined('FALUSS_PLATFORM_IDENTITY')

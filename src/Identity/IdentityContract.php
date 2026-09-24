@@ -206,6 +206,29 @@ final class IdentityContract
         return is_array($context) ? $context : [];
     }
 
+    /** @return array<string, mixed> */
+    public static function onboardingV3Context(): array
+    {
+        $context = self::call('Faluss_Identity_Onboarding', 'v3_context');
+        return is_array($context) ? $context : [];
+    }
+
+    public static function beginOnboardingV3(string $mode): bool
+    {
+        return self::call('Faluss_Identity_Onboarding', 'begin_v3', [$mode]) === true;
+    }
+
+    public static function reserveOnboardingV3Slug(string $slug): string
+    {
+        $result = self::call('Faluss_Identity_Onboarding', 'reserve_v3_slug', [$slug]);
+        return is_string($result) ? $result : 'invalid';
+    }
+
+    public static function setOnboardingV3Cursor(string $step): bool
+    {
+        return self::call('Faluss_Identity_Onboarding', 'set_v3_cursor', [$step]) === true;
+    }
+
     public static function advanceCardWizard(string $step): bool
     {
         return self::onboardingAvailable()
