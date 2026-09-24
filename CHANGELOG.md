@@ -6,6 +6,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+## [0.4.0] - 2026-09-25
+
 ### Ajouté
 
 - Parcours d'onboarding Faluss.me V3 natif, optionnel et désactivé par défaut, avec aperçu de la carte partagée, reprise des anciens curseurs et publication transactionnelle.
