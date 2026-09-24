@@ -14,6 +14,16 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 - Diagnostics structurés pour les échecs d'envoi d'image et signalement des médias de réseaux absents dans l'administration Link.
 
+## [0.3.3] - 2026-09-24
+
+### Ajouté
+
+- Replace legacy inventory with module cards (`0b50070`)
+
+### Documentation
+
+- Refresh PR metadata (`0b50070`)
+
 ## [0.3.2] - 2026-09-24
 
 ### Ajouté
