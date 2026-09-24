@@ -19,6 +19,9 @@ final class ReleasePreparerTest extends TestCase
         self::assertSame('1.5.0', ReleasePreparer::nextVersion('1.4.2', 'auto', [
             ['sha' => str_repeat('b', 40), 'subject' => '✨ Add release automation'],
         ]));
+        self::assertSame('1.5.0', ReleasePreparer::nextVersion('1.4.2', 'auto', [
+            ['sha' => str_repeat('d', 40), 'subject' => '🚀 Automate release delivery'],
+        ]));
         self::assertSame('1.4.3', ReleasePreparer::nextVersion('1.4.2', 'auto', [
             ['sha' => str_repeat('c', 40), 'subject' => '🐛 Preserve active state'],
         ]));

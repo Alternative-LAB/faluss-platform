@@ -61,7 +61,7 @@ final class ReleasePreparer
         foreach ($commits as $commit) {
             $subject = $commit['subject'];
             $group = match (true) {
-                str_starts_with($subject, '✨'), str_starts_with($subject, '🎉') => 'Ajouté',
+                str_starts_with($subject, '✨'), str_starts_with($subject, '🎉'), str_starts_with($subject, '🚀') => 'Ajouté',
                 str_starts_with($subject, '🐛'), str_starts_with($subject, '🚑') => 'Corrigé',
                 str_starts_with($subject, '🔒') => 'Sécurité',
                 str_starts_with($subject, '📝') => 'Documentation',
@@ -146,7 +146,10 @@ final class ReleasePreparer
             }
         }
         foreach ($commits as $commit) {
-            if (str_starts_with($commit['subject'], '✨') || preg_match('/^feat(?:\(.+\))?:/i', $commit['subject']) === 1) {
+            if (str_starts_with($commit['subject'], '✨')
+                || str_starts_with($commit['subject'], '🚀')
+                || preg_match('/^feat(?:\(.+\))?:/i', $commit['subject']) === 1
+            ) {
                 return 'minor';
             }
         }
