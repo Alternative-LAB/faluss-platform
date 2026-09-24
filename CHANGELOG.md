@@ -15,7 +15,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 ### Corrigé
 
 - Diagnostics structurés pour les échecs d'envoi d'image et signalement des médias de réseaux absents dans l'administration Link.
-- Conservation du brouillon Identité V3 au Retour et au rechargement ; préservation des dérogations de thème Link V4 lors des modifications successives du Studio.
+- Conservation du brouillon Identité V3 au Retour, au rechargement et après upload d'avatar ; préservation des dérogations de thème Link V4 lors des modifications successives du Studio.
 - Empêche le hook d'activation Link d'installer son schéma sur un site non `me`, même si son flag est présent.
 
 ## [0.3.3] - 2026-09-24

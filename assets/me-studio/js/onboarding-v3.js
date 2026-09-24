@@ -132,21 +132,29 @@
         timer = window.setTimeout(preview, 120);
     }
 
+    function saveIdentityDraftNow() {
+        if (root.dataset.step !== 'v3_identity') { return Promise.resolve(); }
+        window.clearTimeout(draftTimer);
+        var revision = ++draftRevision;
+        var snapshot = JSON.stringify(fields());
+        draftQueue = draftQueue.catch(function () {}).then(function () {
+            if (revision !== draftRevision || pending) { return; }
+            return post('faluss_onboarding_v3_identity_draft', config.identityDraftNonce, {
+                version: root.dataset.version || '', fields: snapshot
+            }).then(function (response) {
+                if (!response.success) { throw new Error(serverError(response, 'save_failed')); }
+            });
+        });
+        return draftQueue;
+    }
+
     function scheduleIdentityDraft() {
         if (root.dataset.step !== 'v3_identity') { return; }
         window.clearTimeout(draftTimer);
-        var revision = ++draftRevision;
+        ++draftRevision;
         draftTimer = window.setTimeout(function () {
-            var snapshot = JSON.stringify(fields());
-            draftQueue = draftQueue.catch(function () {}).then(function () {
-                if (revision !== draftRevision || pending) { return; }
-                return post('faluss_onboarding_v3_identity_draft', config.identityDraftNonce, {
-                    version: root.dataset.version || '', fields: snapshot
-                }).then(function (response) {
-                    if (!response.success) { throw new Error(serverError(response, 'save_failed')); }
-                }).catch(function (failure) {
-                    if (!pending) { notice(failure.message || 'Brouillon indisponible.', true); }
-                });
+            saveIdentityDraftNow().catch(function (failure) {
+                if (!pending) { notice(failure.message || 'Brouillon indisponible.', true); }
             });
         }, 350);
     }
@@ -201,9 +209,14 @@
             if (!payload.success || !payload.data || !payload.data.id) { throw new Error(serverError(payload, 'upload_failed')); }
             var hidden = root.querySelector('[name="' + kind + '_attachment_id"]');
             if (hidden) { hidden.value = payload.data.id; }
+            if (kind === 'avatar' && root.dataset.step === 'v3_identity') {
+                return saveIdentityDraftNow().then(function () {
+                    notice('Image prête.', false);
+                    schedulePreview();
+                });
+            }
             notice('Image prête.', false);
             schedulePreview();
-            scheduleIdentityDraft();
         }).catch(function (failure) {
             notice(failure.message || 'Envoi impossible.', true);
         }).finally(function () { input.disabled = false; });
@@ -354,6 +367,7 @@
         scheduleIdentityDraft();
     });
     root.addEventListener('input', function (event) {
+        if (event.target.matches('[data-v3-upload]')) { return; }
         if (event.target.matches('[data-v3-color]')) { event.target.dataset.selected = 'true'; }
         if (event.target.matches('input, select')) { schedulePreview(); scheduleIdentityDraft(); }
     });

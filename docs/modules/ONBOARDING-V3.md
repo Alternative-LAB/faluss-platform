@@ -4,7 +4,7 @@ V3 est le parcours de création de carte du rôle `me`. Le flag `FALUSS_PLATFORM
 
 ## Parcours et reprise
 
-Simple : rythme → identité → réseaux → liens → dernier regard → publication. Atomique suit les mêmes quatre premières étapes puis ajoute couleurs, boutons, avatar, image de fond, nom et style des réseaux avant le dernier regard. Le panneau inférieur a une position compacte et une position déployée ; son contenu défile une fois déployé. La prévisualisation AJAX réutilise le renderer public. À l'étape Identité, une sauvegarde différée enregistre aussi les champs dans une métadonnée privée du compte WordPress, liée au Faluss ID actif ; les autres aperçus ne sauvegardent pas l'étape courante.
+Simple : rythme → identité → réseaux → liens → dernier regard → publication. Atomique suit les mêmes quatre premières étapes puis ajoute couleurs, boutons, avatar, image de fond, nom et style des réseaux avant le dernier regard. Le panneau inférieur a une position compacte et une position déployée ; son contenu défile une fois déployé. La prévisualisation AJAX réutilise le renderer public. À l'étape Identité, une sauvegarde différée enregistre les champs dans une métadonnée privée du compte WordPress, liée au Faluss ID actif ; après un upload d'avatar réussi, cette sauvegarde est immédiate avant d'annoncer « Image prête ». Les autres aperçus ne sauvegardent pas l'étape courante.
 
 ```mermaid
 stateDiagram-v2

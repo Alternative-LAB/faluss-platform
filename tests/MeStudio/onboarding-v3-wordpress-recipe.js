@@ -51,13 +51,16 @@ function assert(value, message) { if (!value) { throw new Error(message); } }
         let slug = '';
         let avatarId = 0;
         if (step === 'v3_mode') {
+            await page.reload();
+            await page.waitForLoadState('networkidle');
+            assert(await page.locator('[data-faluss-onboarding-v3]').getAttribute('data-step') === 'v3_mode', 'Mode lost after reload');
             await page.locator('input[name="structure"][value="' + mode + '"]').check({ force: true });
             await action('v3_identity');
             const displayName = 'Recette ' + mode;
             slug = 'v3-' + mode + '-' + Date.now().toString(36);
             await page.locator('[name="display_name"]').fill(displayName);
             await page.locator('[name="public_slug"]').fill(slug);
-            await page.waitForResponse((response) => response.url().includes('admin-ajax.php') && response.request().postData().includes('faluss_onboarding_v3_identity_draft') && response.status() === 200);
+            await page.waitForResponse((response) => response.url().includes('admin-ajax.php') && (response.request().postData() || '').includes('faluss_onboarding_v3_identity_draft') && response.status() === 200);
             await page.reload();
             await page.waitForLoadState('networkidle');
             assert(await page.locator('[name="display_name"]').inputValue() === displayName, 'Identity name lost after reload');
@@ -68,9 +71,20 @@ function assert(value, message) { if (!value) { throw new Error(message); } }
             assert(await page.locator('[name="public_slug"]').inputValue() === slug, 'Identity slug lost after Back');
             assert(!(await page.locator('[name="public_slug"]').isDisabled()) && !(await page.locator('[name="public_slug"]').getAttribute('readonly')), 'Unclaimed slug became readonly');
             const avatar = path.join(root, 'assets/images/pf/faluss-pf-badge.png');
+            const oldAvatarId = Number(await page.locator('[name="avatar_attachment_id"]').inputValue());
             await page.locator('[data-v3-upload="avatar"]').setInputFiles(avatar);
-            await page.waitForFunction(() => Number(document.querySelector('[name="avatar_attachment_id"]').value) > 0, null, { timeout: 12000 });
+            await page.waitForFunction((oldId) => {
+                const current = Number(document.querySelector('[name="avatar_attachment_id"]').value);
+                return current > 0 && current !== oldId;
+            }, oldAvatarId, { timeout: 12000 });
             avatarId = Number(await page.locator('[name="avatar_attachment_id"]').inputValue());
+            await page.waitForFunction(() => (document.querySelector('[data-v3-status]')?.textContent || '').includes('Image prête.'), null, { timeout: 12000 });
+            await page.reload();
+            await page.waitForLoadState('networkidle');
+            assert(await page.locator('[name="display_name"]').inputValue() === displayName, 'Identity name lost after avatar reload');
+            assert(await page.locator('[name="public_slug"]').inputValue() === slug, 'Identity slug lost after avatar reload');
+            const reloadedAvatar = await page.locator('[name="avatar_attachment_id"]').evaluate((field) => ({ value: field.value, attribute: field.getAttribute('value') }));
+            assert(Number(reloadedAvatar.value) === avatarId, 'Avatar lost after reload: ' + JSON.stringify({ avatarId, reloadedAvatar }));
             await action('v3_socials');
         } else {
             slug = (await page.locator('[data-v3-preview] .faluss-link-card__handle').textContent()).trim().replace(/^@/, '');
