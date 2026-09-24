@@ -65,6 +65,10 @@ register_activation_hook(
     __FILE__,
     [\Faluss\Platform\Link\LinkModule::class, 'activate']
 );
+register_activation_hook(
+    __FILE__,
+    [\Faluss\Platform\Fans\Sso\FansSsoModule::class, 'activate']
+);
 register_deactivation_hook(
     __FILE__,
     [\Faluss\Platform\Subscriptions\SubscriptionsModule::class, 'deactivate']
@@ -81,6 +85,10 @@ register_deactivation_hook(
     __FILE__,
     [\Faluss\Platform\Analytics\AnalyticsModule::class, 'deactivate']
 );
+register_deactivation_hook(
+    __FILE__,
+    [\Faluss\Platform\Fans\Sso\FansSsoModule::class, 'deactivate']
+);
 
 add_action('plugins_loaded', static function (): void {
     $role = \Faluss\Platform\Core\SiteRole::fromValue(
@@ -93,6 +101,14 @@ add_action('plugins_loaded', static function (): void {
 
     $registry = new \Faluss\Platform\Core\ModuleRegistry($role);
     $registry->register(new \Faluss\Platform\Admin\DashboardModule($role, $registry));
+    if ($role === \Faluss\Platform\Core\SiteRole::Fans
+        && defined('FALUSS_PLATFORM_FANS_SSO')
+        && constant('FALUSS_PLATFORM_FANS_SSO') === true
+        && \Faluss\Platform\Fans\Sso\FansSsoSchema::ready()
+        && \Faluss\Platform\Fans\Sso\FansSsoService::configured()
+    ) {
+        $registry->register(new \Faluss\Platform\Fans\Sso\FansSsoModule());
+    }
     if (defined('FALUSS_PLATFORM_FEDERATION')
         && constant('FALUSS_PLATFORM_FEDERATION') === true
         && !class_exists('Faluss_Federation', false)
