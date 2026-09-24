@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Documentation
+
+- Récurrence de l'échec de restauration du plugin par l'upgrader scripté consignée, avec suspension de ce chemin et restauration externe vérifiée.
+
 ## [0.3.0] - 2026-09-24
 
 ### Ajouté
