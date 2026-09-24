@@ -30,6 +30,7 @@ namespace Faluss\Platform\Fans\Sso {
         $GLOBALS['fans_sso_users'] = [];
         $GLOBALS['fans_sso_email_users'] = [];
         $GLOBALS['fans_sso_insert_calls'] = [];
+        $GLOBALS['fans_sso_cache_cleared'] = [];
         $GLOBALS['fans_sso_insert_error'] = false;
         $GLOBALS['fans_sso_remote_queue'] = [];
         $GLOBALS['fans_sso_remote_calls'] = [];
@@ -175,6 +176,7 @@ namespace Faluss\Platform\Fans\Sso {
     }
     function is_email(mixed $email): bool { return is_string($email) && filter_var($email, FILTER_VALIDATE_EMAIL) !== false; }
     function is_wp_error(mixed $value): bool { return $value instanceof \WP_Error; }
+    function clean_user_cache(int $userId): void { $GLOBALS['fans_sso_cache_cleared'][] = $userId; }
     function wp_remote_post(string $url, array $args): mixed
     {
         $GLOBALS['fans_sso_remote_calls'][] = ['url' => $url, 'args' => $args];
