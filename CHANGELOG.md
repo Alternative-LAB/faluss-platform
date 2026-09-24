@@ -13,7 +13,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Corrigé
 
-- Création de compte Fans et liaison SSO atomiques sur InnoDB, avec verrouillage concurrent et rollback en cas d'échec de liaison.
+- Création de compte Fans et liaison SSO atomiques sur InnoDB, avec verrouillage concurrent, rollback et invalidation du cache utilisateur en cas d'échec de liaison.
 
 ## [0.4.0] - 2026-09-25
 
