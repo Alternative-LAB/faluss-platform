@@ -33,16 +33,15 @@ final class FansSsoModule implements Module
         FansSsoService::register();
     }
 
-    public static function activate(): bool
+    public static function activate(): void
     {
         if (!self::enabledForFans() || !FansSsoService::configured() || !FansSsoSchema::installOrVerify()) {
-            return false;
+            return;
         }
 
         FansSsoService::rewrite();
         flush_rewrite_rules(false);
 
-        return true;
     }
 
     public static function deactivate(): void

@@ -68,7 +68,7 @@ final class FansSsoTest extends TestCase
     {
         define('FALUSS_PLATFORM_ROLE', 'hub');
         define('FALUSS_PLATFORM_FANS_SSO', true);
-        self::assertFalse(FansSsoModule::activate());
+        FansSsoModule::activate();
         self::assertSame([], $GLOBALS['wpdb']->queries);
         self::assertSame([], $GLOBALS['fans_sso_options']);
     }
