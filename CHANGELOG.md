@@ -9,6 +9,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 ### Ajouté
 
 - Catalogue Fans opt-in avec deux catégories visibles, fiches structurées et refus serveur de toute tentative d'achat actuelle, API comprise.
+- Fiches adultes associées à un créateur masquées sans consentement explicite ; refus d'achat 403/503 fondé sur la catégorie stockée, y compris après changement.
 - Suivi Fans opt-in : relation locale idempotente, retrait et compteur public sans identité de follower.
 - Limites d'ouverture sociale du suivi Fans documentées : blocage, signalements, suppression de compte et rétention à implémenter.
 - Profils créateurs Fans opt-in : identifiant public opaque, catégorie fermée, approbation et suspension, routes REST à permissions explicites sans champ libre ni média.

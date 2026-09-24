@@ -48,7 +48,7 @@ final class StoreCatalogDb extends CreatorProfileDb
             }
             if (str_contains($query, 'WHERE product_id')) {
                 return ($last['args'][0] ?? null) === ($this->product['product_id'] ?? null)
-                    && ($this->product['visibility'] ?? null) === 'visible'
+                    && (!str_contains($query, 'AND visibility =') || ($this->product['visibility'] ?? null) === 'visible')
                     ? $this->product : null;
             }
         }
@@ -149,6 +149,7 @@ final class StoreCatalogTest extends TestCase
         $created = StoreCatalogService::create(self::CREATOR, PurchaseGate::EXTERNAL_ADULT, self::REQUEST);
         self::assertIsArray($created);
         self::assertSame(PurchaseGate::EXTERNAL_ADULT, $created['category']);
+        self::assertSame('hidden', $created['visibility']);
         self::assertSame($created, StoreCatalogService::create(self::CREATOR, PurchaseGate::EXTERNAL_ADULT, self::REQUEST));
         self::assertInstanceOf(\WP_Error::class, StoreCatalogService::create(self::CREATOR, PurchaseGate::HOSTED, self::REQUEST));
         self::assertInstanceOf(\WP_Error::class, StoreCatalogService::create(self::CREATOR, 'other', '44444444-4444-4444-8444-444444444444'));
@@ -156,7 +157,9 @@ final class StoreCatalogTest extends TestCase
         self::assertArrayNotHasKey('media', $GLOBALS['wpdb']->product);
         self::assertArrayNotHasKey('delivery_url', $GLOBALS['wpdb']->product);
         self::assertArrayNotHasKey('request_key', $created);
-        self::assertCount(1, StoreCatalogService::publicList(PurchaseGate::EXTERNAL_ADULT));
+        self::assertSame([], StoreCatalogService::publicList(PurchaseGate::EXTERNAL_ADULT));
+        self::assertNull(StoreCatalogService::publicById($created['product_id']));
+        self::assertSame(404, StoreCatalogRest::product(new \WP_REST_Request(['product_id' => $created['product_id']]))->data['status']);
         self::assertSame([], StoreCatalogService::publicList(PurchaseGate::HOSTED));
     }
 
@@ -176,6 +179,11 @@ final class StoreCatalogTest extends TestCase
         $request = new \WP_REST_Request(['product_id' => $created['product_id']]);
         $api = StoreCatalogRest::purchase($request);
         self::assertSame('external_adult_purchase_blocked', $api->get_error_code());
+        self::assertSame(403, $api->data['status']);
+        $GLOBALS['wpdb']->product['category'] = PurchaseGate::HOSTED;
+        self::assertSame(503, StoreCatalogRest::purchase($request)->data['status']);
+        $GLOBALS['wpdb']->product['category'] = PurchaseGate::EXTERNAL_ADULT;
+        self::assertSame(403, StoreCatalogRest::purchase($request)->data['status']);
         StoreCatalogRest::routes();
         $route = $GLOBALS['store_routes']['faluss-fans/v1/store/products/(?P<product_id>[0-9a-f-]{36})/purchase'];
         self::assertSame([StoreCatalogRest::class, 'purchase'], $route['callback']);
@@ -186,15 +194,20 @@ final class StoreCatalogTest extends TestCase
         $GLOBALS['profile_admin'] = true;
         $created = StoreCatalogService::create(self::CREATOR, PurchaseGate::HOSTED, self::REQUEST);
         self::assertIsArray($created);
+        self::assertSame('visible', $created['visibility']);
         self::assertSame('hosted_purchase_not_open', StoreCatalogService::purchase($created['product_id'])->get_error_code());
+        self::assertSame(503, StoreCatalogRest::purchase(new \WP_REST_Request(['product_id' => $created['product_id']]))->data['status']);
         $GLOBALS['wpdb']->product['category'] = PurchaseGate::EXTERNAL_ADULT;
         self::assertSame('external_adult_purchase_blocked', StoreCatalogService::purchase($created['product_id'])->get_error_code());
+        self::assertNull(StoreCatalogService::publicById($created['product_id']));
+        self::assertSame([], StoreCatalogService::publicList(PurchaseGate::EXTERNAL_ADULT));
+        self::assertSame(403, StoreCatalogRest::purchase(new \WP_REST_Request(['product_id' => $created['product_id']]))->data['status']);
         self::assertSame('product_not_found', StoreCatalogService::purchase('44444444-4444-4444-8444-444444444444')->get_error_code());
         self::assertSame('invalid_category', PurchaseGate::refusePurchase('unknown')->get_error_code());
         self::assertNull(StoreCatalogService::publicById('bad'));
     }
 
-    public function testSuspendedCreatorHidesListingAndPurchaseEndpoint(): void
+    public function testSuspendedCreatorHidesListingButAdultPurchaseStillReturns403(): void
     {
         $GLOBALS['profile_admin'] = true;
         $created = StoreCatalogService::create(self::CREATOR, PurchaseGate::EXTERNAL_ADULT, self::REQUEST);
@@ -202,6 +215,7 @@ final class StoreCatalogTest extends TestCase
         $GLOBALS['wpdb']->profile['status'] = 'suspended';
         self::assertNull(StoreCatalogService::publicById($created['product_id']));
         self::assertSame([], StoreCatalogService::publicList(PurchaseGate::EXTERNAL_ADULT));
-        self::assertSame('product_not_found', StoreCatalogService::purchase($created['product_id'])->get_error_code());
+        self::assertSame('external_adult_purchase_blocked', StoreCatalogService::purchase($created['product_id'])->get_error_code());
+        self::assertSame(403, StoreCatalogRest::purchase(new \WP_REST_Request(['product_id' => $created['product_id']]))->data['status']);
     }
 }

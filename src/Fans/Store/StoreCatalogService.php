@@ -39,6 +39,9 @@ final class StoreCatalogService
             return self::error('product_id_unavailable', 503);
         }
         $now = gmdate('Y-m-d H:i:s');
+        // No creator consent record exists yet for the adult external category.
+        // An administrator's approval alone must not publish that association.
+        $visibility = $category === PurchaseGate::EXTERNAL_ADULT ? 'hidden' : 'visible';
         $inserted = $wpdb->query($wpdb->prepare(
             'INSERT INTO ' . self::quote($table)
                 . ' (product_id, request_key, creator_id, category, visibility, created_at)'
@@ -47,7 +50,7 @@ final class StoreCatalogService
             $requestKey,
             $creatorId,
             $category,
-            'visible',
+            $visibility,
             $now
         ));
         if ($inserted !== 1) {
@@ -63,7 +66,7 @@ final class StoreCatalogService
             'creator_id' => $creatorId,
             'category' => $category,
             'category_label' => (string) PurchaseGate::categoryLabel($category),
-            'visibility' => 'visible',
+            'visibility' => $visibility,
             'created_at' => $now,
         ];
     }
@@ -86,6 +89,7 @@ final class StoreCatalogService
 
         return $product !== null
             && $product['visibility'] === 'visible'
+            && $product['category'] !== PurchaseGate::EXTERNAL_ADULT
             && CreatorProfileService::publicById($product['creator_id']) !== null
             ? $product
             : null;
@@ -117,7 +121,9 @@ final class StoreCatalogService
             if ($product === null || $product['visibility'] !== 'visible') {
                 return self::error('store_unavailable', 503);
             }
-            if (CreatorProfileService::publicById($product['creator_id']) !== null) {
+            if ($product['category'] !== PurchaseGate::EXTERNAL_ADULT
+                && CreatorProfileService::publicById($product['creator_id']) !== null
+            ) {
                 $products[] = $product;
             }
         }
@@ -127,11 +133,28 @@ final class StoreCatalogService
 
     public static function purchase(mixed $productId): \WP_Error
     {
-        $product = self::publicById($productId);
+        $product = self::byId($productId);
 
         return $product === null
             ? self::error('product_not_found', 404)
             : PurchaseGate::refusePurchase($product['category']);
+    }
+
+    /** @return array{product_id:string,creator_id:string,category:string,category_label:string,visibility:string,created_at:string}|null */
+    private static function byId(mixed $productId): ?array
+    {
+        $table = StoreCatalogSchema::table();
+        if (!self::uuidValid($productId) || $table === null || !StoreCatalogSchema::ready()) {
+            return null;
+        }
+        global $wpdb;
+        $row = $wpdb->get_row($wpdb->prepare(
+            'SELECT product_id, creator_id, category, visibility, created_at FROM ' . self::quote($table)
+                . ' WHERE product_id = %s LIMIT 1',
+            $productId
+        ), 'ARRAY_A');
+
+        return self::product($row);
     }
 
     /** @return array{product_id:string,creator_id:string,category:string,category_label:string,visibility:string,created_at:string}|null */
