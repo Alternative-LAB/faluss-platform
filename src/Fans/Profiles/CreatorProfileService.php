@@ -11,7 +11,7 @@ final class CreatorProfileService
     public const CATEGORIES = ['arts', 'music', 'games', 'learning', 'lifestyle'];
     private const STATUS = ['pending', 'active', 'suspended'];
 
-    /** @return array{creator_id:string,category:string,status:string,created_at:string,updated_at:string}|\WP_Error */
+    /** @return array{creator_id:string,category:string,status:string,identity_verified:false,created_at:string,updated_at:string}|\WP_Error */
     public static function create(mixed $category): array|\WP_Error
     {
         if (!is_string($category) || !in_array($category, self::CATEGORIES, true)) {
@@ -60,12 +60,13 @@ final class CreatorProfileService
             'creator_id' => $creatorId,
             'category' => $category,
             'status' => 'pending',
+            'identity_verified' => false,
             'created_at' => $now,
             'updated_at' => $now,
         ];
     }
 
-    /** @return array{creator_id:string,category:string,status:string,created_at:string,updated_at:string}|null */
+    /** @return array{creator_id:string,category:string,status:string,identity_verified:false,created_at:string,updated_at:string}|null */
     public static function own(): ?array
     {
         $owner = self::currentOwner();
@@ -83,7 +84,7 @@ final class CreatorProfileService
         return self::profile($row);
     }
 
-    /** @return array{creator_id:string,category:string,status:string,created_at:string,updated_at:string}|null */
+    /** @return array{creator_id:string,category:string,status:string,identity_verified:false,created_at:string,updated_at:string}|null */
     public static function publicById(mixed $creatorId): ?array
     {
         $table = CreatorProfileSchema::table();
@@ -101,7 +102,7 @@ final class CreatorProfileService
         return self::profile($row);
     }
 
-    /** @return list<array{creator_id:string,category:string,status:string,created_at:string,updated_at:string}>|\WP_Error */
+    /** @return list<array{creator_id:string,category:string,status:string,identity_verified:false,created_at:string,updated_at:string}>|\WP_Error */
     public static function publicList(mixed $category): array|\WP_Error
     {
         if ($category !== null && (!is_string($category) || !in_array($category, self::CATEGORIES, true))) {
@@ -133,7 +134,7 @@ final class CreatorProfileService
         return $profiles;
     }
 
-    /** @return array{creator_id:string,category:string,status:string,created_at:string,updated_at:string}|\WP_Error */
+    /** @return array{creator_id:string,category:string,status:string,identity_verified:false,created_at:string,updated_at:string}|\WP_Error */
     public static function setStatus(mixed $creatorId, mixed $status): array|\WP_Error
     {
         if (!current_user_can('manage_options')) {
@@ -173,7 +174,7 @@ final class CreatorProfileService
         return FansSsoService::currentLinkedSubject() !== null ? get_current_user_id() : null;
     }
 
-    /** @return array{creator_id:string,category:string,status:string,created_at:string,updated_at:string}|null */
+    /** @return array{creator_id:string,category:string,status:string,identity_verified:false,created_at:string,updated_at:string}|null */
     private static function profile(mixed $row): ?array
     {
         if (!is_array($row)
@@ -190,6 +191,7 @@ final class CreatorProfileService
             'creator_id' => $row['creator_id'],
             'category' => $row['category'],
             'status' => $row['status'],
+            'identity_verified' => false,
             'created_at' => $row['created_at'],
             'updated_at' => $row['updated_at'],
         ];

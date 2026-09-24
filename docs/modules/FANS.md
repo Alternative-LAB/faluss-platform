@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | Admission du rôle, PR #53 | Implémenté et fusionné | `FALUSS_PLATFORM_ROLE='fans'` donne accès à l'administration commune ; les modules Me et Hub et leurs hooks d'activation restent isolés, y compris Link avec un flag erroné. |
 | Client SSO Fans, PR #54 | Implémenté sur la branche précédente, opt-in, non activé sur un site réel | Client distinct de celui du Hub, deux tables locales, état navigateur, PKCE S256, échange avec Me et session WordPress locale. Voir [FANS-SSO.md](FANS-SSO.md). |
-| Profils créateurs structurés | Implémenté dans cette PR dépendante, opt-in, non activé sur un site réel | Identifiant public opaque, catégorie fermée, statut soumis à approbation, lectures publiques des seuls profils actifs et API avec permissions. Aucun texte libre, média ou upload. Voir [FANS-PROFILES.md](FANS-PROFILES.md). |
+| Profils créateurs structurés | Implémenté dans cette PR dépendante, opt-in, non activé sur un site réel | Identifiant public opaque, catégorie fermée, statut `active` limité à l'approbation de publication, `identity_verified=false` dans l'API. La vérification d'identité et la condition de vente du créateur restent à implémenter. Aucun texte libre, média ou upload. Voir [FANS-PROFILES.md](FANS-PROFILES.md). |
 | Publications, followers, messagerie, store, commandes et droits | Contractuel seulement | Aucun de ces domaines, stockage, route, transaction, achat ou droit n'est implémenté ici. |
 
 Le choix du rôle, du client confidentiel Me, de son secret et du flag Fans appartient à une configuration de site hors Git. Aucun site de production n'est configuré, activé, migré ou déployé par cette PR.

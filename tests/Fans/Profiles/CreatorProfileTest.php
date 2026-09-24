@@ -198,6 +198,7 @@ namespace Faluss\Platform\Fans\Profiles {
             self::assertIsArray($created);
             self::assertMatchesRegularExpression('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/', $created['creator_id']);
             self::assertSame('pending', $created['status']);
+            self::assertFalse($created['identity_verified']);
             self::assertSame($created, CreatorProfileService::create('arts'));
             self::assertInstanceOf(\WP_Error::class, CreatorProfileService::create('music'));
             self::assertArrayNotHasKey('wp_user_id', $created);
@@ -226,8 +227,12 @@ namespace Faluss\Platform\Fans\Profiles {
             $GLOBALS['profile_admin'] = true;
             $approved = CreatorProfileService::setStatus($created['creator_id'], 'active');
             self::assertIsArray($approved);
+            self::assertFalse($approved['identity_verified']);
             self::assertSame('active', CreatorProfileService::publicById($created['creator_id'])['status']);
-            self::assertCount(1, CreatorProfileService::publicList('music'));
+            self::assertFalse(CreatorProfileService::publicById($created['creator_id'])['identity_verified']);
+            $listed = CreatorProfileService::publicList('music');
+            self::assertCount(1, $listed);
+            self::assertFalse($listed[0]['identity_verified']);
             self::assertSame([], CreatorProfileService::publicList('arts'));
             CreatorProfileService::setStatus($created['creator_id'], 'suspended');
             self::assertNull(CreatorProfileService::publicById($created['creator_id']));
