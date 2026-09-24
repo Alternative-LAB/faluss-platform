@@ -183,6 +183,7 @@ final class FansSsoTest extends TestCase
         self::assertNull(self::method('resolveUser')->invoke(null, $claims, $pending));
         self::assertArrayNotHasKey(51, $GLOBALS['fans_sso_users']);
         self::assertArrayNotHasKey('retry@example.test', $GLOBALS['fans_sso_email_users']);
+        self::assertSame([51], $GLOBALS['fans_sso_cache_cleared']);
         self::assertContains('ROLLBACK', $db->queries);
         self::assertSame(1, count(array_filter($db->queries, static fn (string $query): bool => $query === 'START TRANSACTION')));
 

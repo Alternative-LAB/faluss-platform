@@ -384,6 +384,7 @@ final class FansSsoService
             'fans_email_' . substr(hash('sha256', strtolower($email)), 0, 40),
         ];
         $acquired = [];
+        $created = null;
         try {
             foreach ($locks as $lock) {
                 if ((int) $wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, %d)', $lock, 5)) !== 1) {
@@ -420,25 +421,36 @@ final class FansSsoService
             if (is_wp_error($created) || $created < 1
                 || !self::insertLink($created, $falussId)
             ) {
-                $wpdb->query('ROLLBACK');
+                self::rollBackCreatedUser($created);
 
                 return null;
             }
             if ($wpdb->query('COMMIT') === false) {
-                $wpdb->query('ROLLBACK');
+                self::rollBackCreatedUser($created);
 
                 return null;
             }
 
             return self::user($created);
         } catch (\Throwable) {
-            $wpdb->query('ROLLBACK');
+            self::rollBackCreatedUser($created);
 
             return null;
         } finally {
             foreach (array_reverse($acquired) as $lock) {
                 $wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)', $lock));
             }
+        }
+    }
+
+    private static function rollBackCreatedUser(mixed $created): void
+    {
+        global $wpdb;
+        $wpdb->query('ROLLBACK');
+        if (is_int($created) && $created > 0) {
+            // wp_insert_user() has already populated WordPress's object cache.
+            // Keep the rolled-back email reusable in this and later requests.
+            clean_user_cache($created);
         }
     }
 
