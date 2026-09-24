@@ -32,7 +32,10 @@ final class DashboardModuleTest extends TestCase
             self::assertContains($role, $module->roles());
             self::assertSame([], $module->dependencies());
             self::assertSame(['admin-dashboard'], $registry->activeModuleIds());
-            self::assertSame(['admin_menu', 'admin_enqueue_scripts'], array_keys($GLOBALS['faluss_test_hooks']));
+            self::assertSame(
+                ['admin_menu', 'admin_enqueue_scripts', 'admin_post_faluss_platform_save_license'],
+                array_keys($GLOBALS['faluss_test_hooks'])
+            );
         }
     }
 }
