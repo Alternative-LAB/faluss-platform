@@ -160,6 +160,11 @@ final class DashboardModule implements Module
                         <p><?php echo esc_html($this->licenseNotice($licenseStatus)); ?></p>
                     </div>
                 <?php endif; ?>
+                <?php if (!UpdateClient::isAvailable()): ?>
+                    <div class="notice inline notice-error">
+                        <p><?php echo esc_html__('Le client de mises à jour est absent. Réinstallez le paquet officiel Faluss Platform pour rétablir la détection des versions.', 'faluss-platform'); ?></p>
+                    </div>
+                <?php endif; ?>
                 <div class="faluss-admin__update-status">
                     <span class="faluss-admin__badge <?php echo UpdateClient::hasLicense() ? 'is-active' : 'is-inactive'; ?>">
                         <?php echo UpdateClient::hasLicense() ? esc_html__('Licence configurée', 'faluss-platform') : esc_html__('Licence absente', 'faluss-platform'); ?>

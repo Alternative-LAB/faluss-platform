@@ -6,9 +6,19 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Modifié
+
+- Ajustement discret du dégradé de l'en-tête dans l'administration Faluss pour vérifier visuellement une mise à jour réelle.
+
+### Corrigé
+
+- Signalement dans l'administration lorsque les dépendances de production manquent et empêchent le client de mise à jour de démarrer.
+- Contrôle du contenu de l'archive de production avant sa publication privée.
+
 ### Documentation
 
 - Récurrence de l'échec de restauration du plugin par l'upgrader scripté consignée, avec suspension de ce chemin et restauration externe vérifiée.
+- Installation incomplète `0.3.0`, réparation et diagnostic de l'erreur `upgrade-temp-backup` consignés.
 
 ## [0.3.0] - 2026-09-24
 

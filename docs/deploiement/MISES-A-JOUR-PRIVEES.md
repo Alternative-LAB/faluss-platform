@@ -34,7 +34,8 @@ ZIP. Le même workflow accepte encore un tag `v*` créé manuellement, à condit
 qu'il corresponde exactement à l'en-tête `Version` de `faluss-platform.php`.
 Il installe les dépendances de production, construit une archive dont le dossier
 racine est `faluss-platform`, puis l'envoie avec le secret GitHub Actions
-`WP_UPDATE_UPLOAD_TOKEN`.
+`WP_UPDATE_UPLOAD_TOKEN`. Le workflow vérifie la présence de l'autoloader et
+des deux dépendances de production dans l'archive avant l'envoi.
 
 Pour préparer une publication depuis GitHub CLI :
 
@@ -65,11 +66,19 @@ installé dans WordPress.
 
 Après publication, vérifier que le serveur retourne `401` sans licence, des
 métadonnées avec une licence autorisée, puis effectuer la mise à jour depuis
-l'administration WordPress. WP-CLI n'est pas installé sur les conteneurs Faluss
-actuels. Pour revenir en arrière, supprimer le tag avant toute publication ou
-retirer le workflow et le client par une PR.
+l'administration WordPress. Avant l'installation, vérifier que **Faluss →
+Mises à jour privées** ne signale pas l'absence du client et sauvegarder la base
+et le dossier du plugin. Si l'erreur `upgrade-temp-backup` apparaît, conserver
+les traces puis restaurer la sauvegarde avant un nouvel essai. WP-CLI n'est pas
+installé sur les conteneurs Faluss actuels. Pour revenir en arrière avant la
+publication, fermer la PR de release ; après installation, restaurer la
+sauvegarde du site concerné.
 Les packages déjà publiés restent immuables ; leur suppression est une opération
 serveur distincte.
+
+L'incident d'installation incomplète `0.3.0`, les contrôles des dossiers et les
+limites du diagnostic de l'erreur de déplacement sont consignés dans
+`docs/incidents/2026-09-24-installation-incomplete.md`.
 
 Un appel PHP direct à `Plugin_Upgrader::upgrade()` ne reproduit pas tout le
 parcours interactif de WordPress. Un lanceur scripté doit utiliser trois
