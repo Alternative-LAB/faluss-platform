@@ -77,6 +77,10 @@ register_activation_hook(
     __FILE__,
     [\Faluss\Platform\Fans\Followers\FollowersModule::class, 'activate']
 );
+register_activation_hook(
+    __FILE__,
+    [\Faluss\Platform\Fans\Store\StoreCatalogModule::class, 'activate']
+);
 register_deactivation_hook(
     __FILE__,
     [\Faluss\Platform\Subscriptions\SubscriptionsModule::class, 'deactivate']
@@ -126,6 +130,12 @@ add_action('plugins_loaded', static function (): void {
                 && \Faluss\Platform\Fans\Followers\FollowersSchema::ready()
             ) {
                 $registry->register(new \Faluss\Platform\Fans\Followers\FollowersModule());
+            }
+            if (defined('FALUSS_PLATFORM_FANS_STORE_CATALOG')
+                && constant('FALUSS_PLATFORM_FANS_STORE_CATALOG') === true
+                && \Faluss\Platform\Fans\Store\StoreCatalogSchema::ready()
+            ) {
+                $registry->register(new \Faluss\Platform\Fans\Store\StoreCatalogModule());
             }
         }
     }

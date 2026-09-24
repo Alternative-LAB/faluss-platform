@@ -15,6 +15,7 @@ use Faluss\Platform\Federation\FederationModule;
 use Faluss\Platform\Fans\Sso\FansSsoModule;
 use Faluss\Platform\Fans\Profiles\CreatorProfilesModule;
 use Faluss\Platform\Fans\Followers\FollowersModule;
+use Faluss\Platform\Fans\Store\StoreCatalogModule;
 use Faluss\Platform\Identity\IdentityModule;
 use Faluss\Platform\IdentityClient\IdentityClientModule;
 use Faluss\Platform\Link\LinkModule;
@@ -72,7 +73,7 @@ final class FansRoleIsolationTest extends TestCase
         }
 
         require dirname(__DIR__, 2) . '/faluss-platform.php';
-        self::assertCount(10, $GLOBALS['fans_test_activation_hooks']);
+        self::assertCount(11, $GLOBALS['fans_test_activation_hooks']);
         self::assertSame([
             SubscriptionsModule::class,
             TokenEngineModule::class,
@@ -84,6 +85,7 @@ final class FansRoleIsolationTest extends TestCase
             FansSsoModule::class,
             CreatorProfilesModule::class,
             FollowersModule::class,
+            StoreCatalogModule::class,
         ], array_map(static fn (array $callback): string => $callback[0], $GLOBALS['fans_test_activation_hooks']));
         self::assertCount(5, $GLOBALS['fans_test_deactivation_hooks']);
         self::assertCount(1, $GLOBALS['fans_test_actions']['plugins_loaded']);
