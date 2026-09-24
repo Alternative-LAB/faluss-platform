@@ -9,6 +9,8 @@
 
 declare(strict_types=1);
 
+define('FALUSS_PLATFORM_VERSION', '0.2.0');
+
 if (!defined('ABSPATH')) {
     exit;
 }

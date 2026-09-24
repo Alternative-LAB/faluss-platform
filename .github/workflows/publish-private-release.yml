@@ -2,12 +2,15 @@ name: Publish private release
 
 on:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
-  workflow_dispatch:
+    paths:
+      - faluss-platform.php
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: private-release-${{ github.ref }}
@@ -18,8 +21,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Validate release version
+      - name: Resolve and tag release version
         id: version
         shell: bash
         run: |
@@ -33,12 +38,26 @@ jobs:
             echo "Tag $GITHUB_REF_NAME does not match plugin version v$plugin_version." >&2
             exit 1
           fi
+          if [[ "$GITHUB_REF_TYPE" == 'branch' ]]; then
+            if git ls-remote --exit-code --tags origin "refs/tags/v$plugin_version" >/dev/null 2>&1; then
+              echo "Version v$plugin_version is already tagged; nothing to publish."
+              echo 'publish=false' >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git tag -a "v$plugin_version" -m "Faluss Platform $plugin_version"
+            git push origin "v$plugin_version"
+          fi
           echo "plugin_version=$plugin_version" >> "$GITHUB_OUTPUT"
+          echo 'publish=true' >> "$GITHUB_OUTPUT"
 
       - name: Install production dependencies
+        if: steps.version.outputs.publish == 'true'
         run: composer install --no-dev --prefer-dist --no-interaction --no-progress --classmap-authoritative
 
       - name: Build plugin archive
+        if: steps.version.outputs.publish == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -57,6 +76,7 @@ jobs:
           (cd "$package_root" && zip -qr "$RUNNER_TEMP/faluss-platform.zip" faluss-platform)
 
       - name: Upload package to Faluss update server
+        if: steps.version.outputs.publish == 'true'
         env:
           UPLOAD_TOKEN: ${{ secrets.WP_UPDATE_UPLOAD_TOKEN }}
         shell: bash
@@ -73,6 +93,7 @@ jobs:
             'https://updates.faluss.com/?action=upload'
 
       - name: Store published archive
+        if: steps.version.outputs.publish == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: faluss-platform-${{ steps.version.outputs.plugin_version }}

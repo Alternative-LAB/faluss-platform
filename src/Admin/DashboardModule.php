@@ -100,7 +100,7 @@ final class DashboardModule implements Module
             'faluss-platform-admin',
             plugins_url('assets/admin.css', dirname(__DIR__, 2) . '/faluss-platform.php'),
             [],
-            '0.2.0'
+            (string) constant('FALUSS_PLATFORM_VERSION')
         );
     }
 
