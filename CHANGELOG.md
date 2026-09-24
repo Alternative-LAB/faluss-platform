@@ -6,14 +6,20 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+## [0.3.0] - 2026-09-24
+
 ### Ajouté
 
-- Préparation automatisée des releases avec calcul sémantique de version, changelog issu des commits et PR conforme au Gitflow.
-- Création automatique du tag et publication du ZIP après fusion de la PR de release.
+- Automate semantic release preparation (`4d4fbd3`)
 
 ### Corrigé
 
-- Analyse des commits originaux conservés dans le corps des fusions squash afin de calculer correctement la portée sémantique et les notes de release.
+- Parse gitmoji commits from squash bodies (#41) (`4d5705a`)
+- Classify delivery commits as minor releases (`4d4fbd3`)
+
+### Documentation
+
+- Document scripted update activation recovery (#38) (`2317f63`)
 
 ## [0.2.0] - 2026-09-24
 
