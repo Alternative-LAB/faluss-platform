@@ -39,4 +39,21 @@ final class ReleasePreparerTest extends TestCase
         self::assertStringContainsString("### Sécurité\n\n- Restrict upload token (`abcdef1`)", $notes);
         self::assertStringContainsString("### Documentation\n\n- Explain release flow (`fedcba0`)", $notes);
     }
+
+    public function testSquashedCommitBodiesRestoreOriginalGitmojiSubjects(): void
+    {
+        $log = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\x1fTitre français (#39)\x1f"
+            . "* 🚀 Automate semantic release preparation\n\n"
+            . "* 🐛 Classify delivery commits as minor releases\n\x1e";
+
+        self::assertSame([
+            ['sha' => str_repeat('a', 40), 'subject' => '🚀 Automate semantic release preparation'],
+            ['sha' => str_repeat('a', 40), 'subject' => '🐛 Classify delivery commits as minor releases'],
+        ], ReleasePreparer::parseCommitLog($log));
+        self::assertSame('0.3.0', ReleasePreparer::nextVersion(
+            '0.2.0',
+            'auto',
+            ReleasePreparer::parseCommitLog($log)
+        ));
+    }
 }
