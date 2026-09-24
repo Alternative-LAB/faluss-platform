@@ -65,6 +65,7 @@ namespace Faluss\Platform\MeStudio {
         #[PreserveGlobalState(false)]
         public function testModuleBootedAfterMeStudioCanRegisterAProviderVisibleInStudio(): void
         {
+            define('FALUSS_PLATFORM_ME_STUDIO_V2', true);
             $this->defineLinkRuntimeFixture();
             (new MeStudioModule())->boot();
             self::assertSame('me-studio-v2', StudioProviderRegistry::activeId());

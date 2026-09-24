@@ -4,6 +4,8 @@
 
 `fans-sso` est un client local de l'autorité Identity sur `faluss.me`. Il ne partage ni les classes du client Hub, ni son adaptateur Apps Registry, ses widgets Elementor, ses tables, ses options, ses hooks ou ses routes. Me reste propriétaire du `faluss_id`, du code à usage unique de 60 secondes et de la session centrale. Fans garde son propre `wp_user_id` et sa session WordPress. Aucun profil créateur, publication, message ou droit commercial n'est créé par ce module.
 
+Le protocole commun est limité à `GET /oauth/authorize` (`client_id`, `redirect_uri` exact, `state`, `code_challenge` S256 et scopes) puis `POST /oauth/token` serveur à serveur (`code`, `code_verifier`, `client_secret` et même URI). Fans n'accepte que `faluss_id` UUID et les scopes demandés ; l'e-mail vérifié ne sert qu'à créer un compte local non privilégié. Les claims `apps` et les projections Hub sont ignorés. `IdentityClientService`, `IdentityClientAppsRegistryAdapter`, ses façades historiques, son widget Elementor, ses options et sa table `faluss_identity_links` restent exclusivement du côté Hub. Modifier le protocole Me impose de caractériser les deux clients séparément.
+
 ```mermaid
 sequenceDiagram
     participant B as Navigateur
@@ -50,8 +52,10 @@ Le démarrage crée 32 octets aléatoires indépendants pour l'état, le verifie
 
 Le flux anonyme peut créer uniquement un compte `subscriber` local après une preuve `identity.email`, et refuse une collision avec un e-mail déjà présent. La liaison d'un compte existant exige un `subscriber` connecté, le nonce et le même compte au retour. Un rôle privilégié ne reçoit pas de session SSO. Une session locale liée expire après une heure. Ni l'e-mail ni le `wp_user_id` d'un autre site ne servent de clé de droit.
 
+La création anonyme exige que `wp_users` et `wp_usermeta` soient InnoDB, comme la table de liaison Fans. Un verrou MariaDB par `faluss_id`, puis un par e-mail, sérialise les tentatives concurrentes avant la vérification de collision. `wp_insert_user()` et l'insertion de la liaison s'exécutent dans **la même transaction** sur la connexion `$wpdb` : si l'insertion de liaison échoue, `ROLLBACK` retire le compte créé et permet une nouvelle tentative. Le chemin de liaison explicite ne crée ni ne supprime de compte ; son échec laisse intact le membre préexistant. Si un verrou ou la vérification InnoDB échoue, aucune création n'est tentée. Les hooks WordPress de création peuvent déclencher des effets externes hors transaction ; une recette jetable doit vérifier les plugins présents avant activation réelle.
+
 ## Tests, limites et ouverture
 
-Les tests automatisés couvrent les noms et rôles isolés, le schéma partiel fermé, HTTPS, l'URI fixe, PKCE S256, le secret dans le POST serveur, les claims bornés, l'état lié au navigateur, le rejeu, l'expiration, la collision d'e-mail, le refus des rôles privilégiés et la session courte. Les tests d'isolation préexistants vérifient que les hooks Link ne chargent pas son schéma sur Fans avec un flag erroné.
+Les tests automatisés couvrent les noms et rôles isolés, le schéma partiel fermé, HTTPS, l'URI fixe, PKCE S256, le secret dans le POST serveur, les claims bornés, l'état lié au navigateur, le rejeu, l'expiration, la collision d'e-mail, le refus des rôles privilégiés, la session courte, le rollback après échec de liaison, une nouvelle tentative, le compte préexistant et le verrouillage concurrent simulé. Les tests d'isolation préexistants vérifient que les hooks Link ne chargent pas son schéma sur Fans avec un flag erroné.
 
 Avant une activation réelle, vérifier sur un site WordPress/MariaDB de test : les deux tables InnoDB exactes, le client confidentiel Me et son URI enregistrée, une autorisation et un échange réussis, un code expiré ou rejoué, la création et la liaison de comptes, la collision d'e-mail, les cookies dans le navigateur et la durée de session. Faire un essai de rollback par retrait du flag et des règles de réécriture, sans supprimer les liaisons. Aucun de ces essais réels ni déploiement de production n'est réalisé par cette PR.

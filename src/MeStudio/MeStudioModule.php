@@ -36,6 +36,11 @@ final class MeStudioModule implements Module
         }
 
         StudioProviderRegistry::register(new MeStudioProvider(StudioBlockProviderRegistry::shared()));
-        StudioActions::register();
+        if (defined('FALUSS_PLATFORM_ME_STUDIO_V2') && constant('FALUSS_PLATFORM_ME_STUDIO_V2') === true) {
+            StudioActions::register();
+        }
+        if (OnboardingV3::enabled()) {
+            OnboardingV3::register();
+        }
     }
 }
