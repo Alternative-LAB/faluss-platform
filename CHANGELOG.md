@@ -6,6 +6,15 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Ajouté
+
+- Publication privée de Faluss Platform par tag GitHub vers `updates.faluss.com`, avec archive de production et contrôle strict de la version.
+- Client de mise à jour WordPress avec authentification par clé de licence et configuration centralisée dans l'administration Faluss.
+
+### Sécurité
+
+- Séparation complète entre le Bearer de publication GitHub Actions et la licence installée sur les sites WordPress.
+
 ### Modifié
 
 - Version du Master Plugin portée de `0.1.0` à `0.2.0` afin que l’updater WordPress reconnaisse la livraison de Studio V2 et Link 0.4.0 comme une mise à jour plus récente.

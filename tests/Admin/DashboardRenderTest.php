@@ -30,6 +30,31 @@ function esc_html(string $value): string
     return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 }
 
+function esc_url(string $value): string
+{
+    return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+}
+
+function admin_url(string $path): string
+{
+    return 'https://example.test/wp-admin/' . $path;
+}
+
+function wp_nonce_field(string $action): void
+{
+    echo '<input type="hidden" name="_wpnonce" value="' . esc_html($action) . '">';
+}
+
+function sanitize_key(string $value): string
+{
+    return preg_replace('/[^a-z0-9_-]/', '', strtolower($value)) ?? '';
+}
+
+function wp_unslash(string $value): string
+{
+    return $value;
+}
+
 final class DashboardRenderTest extends TestCase
 {
     public function testDashboardRendersLocalLegacyInventory(): void
@@ -55,6 +80,9 @@ final class DashboardRenderTest extends TestCase
         self::assertStringContainsString('Faluss Theme', $html);
         self::assertStringContainsString('is-active', $html);
         self::assertStringContainsString('is-inactive', $html);
+        self::assertStringContainsString('Mises à jour privées', $html);
+        self::assertStringContainsString('Licence absente', $html);
+        self::assertStringContainsString('updates.faluss.com', $html);
         self::assertStringNotContainsString('Faluss Portal', $html);
     }
 }

@@ -13,6 +13,11 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+$composerAutoloader = __DIR__ . '/vendor/autoload.php';
+if (is_file($composerAutoloader)) {
+    require_once $composerAutoloader;
+}
+
 spl_autoload_register(static function (string $class): void {
     $prefix = 'Faluss\\Platform\\';
 
@@ -27,6 +32,8 @@ spl_autoload_register(static function (string $class): void {
         require_once $path;
     }
 });
+
+\Faluss\Platform\Core\UpdateClient::boot(__FILE__);
 
 register_activation_hook(
     __FILE__,

@@ -1,0 +1,81 @@
+name: Publish private release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: private-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate release version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          plugin_version="$(sed -n 's/^ \* Version: //p' faluss-platform.php | head -n 1)"
+          if [[ -z "$plugin_version" ]]; then
+            echo 'Plugin version header is missing.' >&2
+            exit 1
+          fi
+          if [[ "$GITHUB_REF_TYPE" == 'tag' && "$GITHUB_REF_NAME" != "v$plugin_version" ]]; then
+            echo "Tag $GITHUB_REF_NAME does not match plugin version v$plugin_version." >&2
+            exit 1
+          fi
+          echo "plugin_version=$plugin_version" >> "$GITHUB_OUTPUT"
+
+      - name: Install production dependencies
+        run: composer install --no-dev --prefer-dist --no-interaction --no-progress --classmap-authoritative
+
+      - name: Build plugin archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          package_root="$(mktemp -d)"
+          mkdir -p "$package_root/faluss-platform"
+          rsync -a \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='.cache' \
+            --exclude='tests' \
+            --exclude='node_modules' \
+            --exclude='phpstan' \
+            --exclude='phpunit.xml' \
+            --exclude='phpstan.neon' \
+            ./ "$package_root/faluss-platform/"
+          (cd "$package_root" && zip -qr "$RUNNER_TEMP/faluss-platform.zip" faluss-platform)
+
+      - name: Upload package to Faluss update server
+        env:
+          UPLOAD_TOKEN: ${{ secrets.WP_UPDATE_UPLOAD_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$UPLOAD_TOKEN" ]]; then
+            echo 'WP_UPDATE_UPLOAD_TOKEN is not configured.' >&2
+            exit 1
+          fi
+          curl --fail-with-body --show-error --silent \
+            -H "Authorization: Bearer $UPLOAD_TOKEN" \
+            -F 'slug=faluss-platform' \
+            -F "package=@$RUNNER_TEMP/faluss-platform.zip" \
+            'https://updates.faluss.com/?action=upload'
+
+      - name: Store published archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: faluss-platform-${{ steps.version.outputs.plugin_version }}
+          path: ${{ runner.temp }}/faluss-platform.zip
+          if-no-files-found: error
+          retention-days: 30

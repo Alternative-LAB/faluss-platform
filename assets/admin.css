@@ -56,6 +56,12 @@
 .faluss-admin__modules li { display: flex; align-items: center; gap: 9px; min-height: 42px; margin: 0; padding: 9px 12px; border: 1px solid #e0e7f3; border-radius: 10px; background: var(--faluss-soft); color: #35435d; font-size: 13px; font-weight: 650; }
 .faluss-admin__dot { flex: 0 0 auto; width: 8px; height: 8px; border-radius: 50%; background: #24966c; box-shadow: 0 0 0 4px rgb(36 150 108 / 12%); }
 .faluss-admin__inventory { margin-top: 16px; }
+.faluss-admin__updates { margin-top: 16px; }
+.faluss-admin__update-status { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 18px; }
+.faluss-admin__update-status code { overflow-wrap: anywhere; color: #526078; font-size: 12px; }
+.faluss-admin__license-form { max-width: 620px; margin-top: 20px; }
+.faluss-admin__license-form .faluss-admin__field input { max-width: 100%; }
+.faluss-admin__license-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .faluss-admin__inventory > p { margin-top: -4px; }
 .faluss-admin__table-scroll { overflow-x: auto; margin: 18px -4px -4px; padding: 0 4px 4px; }
 .faluss-admin__inventory table { min-width: 620px; border: 0; border-spacing: 0; }
