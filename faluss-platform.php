@@ -73,6 +73,10 @@ register_activation_hook(
     __FILE__,
     [\Faluss\Platform\Fans\Profiles\CreatorProfilesModule::class, 'activate']
 );
+register_activation_hook(
+    __FILE__,
+    [\Faluss\Platform\Fans\Followers\FollowersModule::class, 'activate']
+);
 register_deactivation_hook(
     __FILE__,
     [\Faluss\Platform\Subscriptions\SubscriptionsModule::class, 'deactivate']
@@ -117,6 +121,12 @@ add_action('plugins_loaded', static function (): void {
             && \Faluss\Platform\Fans\Profiles\CreatorProfileSchema::ready()
         ) {
             $registry->register(new \Faluss\Platform\Fans\Profiles\CreatorProfilesModule());
+            if (defined('FALUSS_PLATFORM_FANS_FOLLOWERS')
+                && constant('FALUSS_PLATFORM_FANS_FOLLOWERS') === true
+                && \Faluss\Platform\Fans\Followers\FollowersSchema::ready()
+            ) {
+                $registry->register(new \Faluss\Platform\Fans\Followers\FollowersModule());
+            }
         }
     }
     if (defined('FALUSS_PLATFORM_FEDERATION')
