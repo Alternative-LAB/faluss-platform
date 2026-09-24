@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Documentation
+
+- Validation de la mise à jour WordPress `0.3.1` sur les deux sites, conservation des données et état opérationnel consignés.
+
 ## [0.3.1] - 2026-09-24
 
 ### Corrigé
