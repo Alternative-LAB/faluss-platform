@@ -9,6 +9,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 ### Ajouté
 
 - Suivi Fans opt-in : relation locale idempotente, retrait et compteur public sans identité de follower.
+- Limites d'ouverture sociale du suivi Fans documentées : blocage, signalements, suppression de compte et rétention à implémenter.
 - Profils créateurs Fans opt-in : identifiant public opaque, catégorie fermée, approbation et suspension, routes REST à permissions explicites sans champ libre ni média.
 - Champ de contrat `identity_verified=false` sur chaque profil Fans ; l'approbation de publication ne constitue pas une vérification d'identité ni une autorisation de vendre.
 - Client SSO Fans opt-in avec tables, état navigateur, PKCE S256, échange confidentiel avec Me et session locale limitée aux subscribers liés.
