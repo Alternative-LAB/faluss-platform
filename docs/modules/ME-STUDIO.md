@@ -1,5 +1,7 @@
 # Studio Faluss V2 natif
 
+Le nouveau parcours de création V3, activé séparément, est décrit dans [ONBOARDING-V3.md](ONBOARDING-V3.md).
+
 Studio V2 est un module natif et optionnel du Master Plugin sur le rôle `me`. Il ne remplace ni Identity ni Link : il fournit l’interface d’édition et le parcours d’onboarding Atomique, tandis que Link reste l’autorité de composition et l’unique renderer de carte.
 
 ## Frontières d’autorité

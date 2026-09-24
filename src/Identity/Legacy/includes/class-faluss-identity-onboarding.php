@@ -28,6 +28,9 @@ final class Faluss_Identity_Onboarding {
         'wizard_atomic_warning', 'wizard_atomic_colors', 'wizard_atomic_buttons', 'wizard_atomic_avatar_upload',
         'wizard_atomic_avatar', 'wizard_atomic_wallpaper_upload', 'wizard_atomic_wallpaper', 'wizard_atomic_networks',
         'wizard_finish', 'complete',
+        'v3_mode', 'v3_mode_simple', 'v3_mode_atomic', 'v3_identity_simple', 'v3_identity_atomic', 'v3_socials', 'v3_links',
+        'v3_colors', 'v3_buttons', 'v3_avatar', 'v3_wallpaper', 'v3_name',
+        'v3_network_style', 'v3_review',
     );
 
     /** @var array<int, string> */
@@ -242,13 +245,22 @@ final class Faluss_Identity_Onboarding {
 
     /** @return string */
     public static function render( $settings = array() ) {
-        self::enqueue_assets();
         $settings = wp_parse_args( (array) $settings, array(
             'heading' => __( 'Créez votre espace Faluss', 'faluss-identity' ),
             'intro' => __( 'Choisissez ce que vous souhaitez faire après votre connexion.', 'faluss-identity' ),
             'create_label' => __( 'Créer mon Faluss', 'faluss-identity' ),
             'continue_label' => __( 'Continuer sans carte', 'faluss-identity' ),
         ) );
+        if ( defined( 'FALUSS_PLATFORM_ONBOARDING_V3' ) && true === constant( 'FALUSS_PLATFORM_ONBOARDING_V3' ) ) {
+            if ( ! is_user_logged_in() ) {
+                return '<section class="faluss-onboarding-v3__unavailable"><h1>Crée ton Faluss</h1><p>Connecte-toi pour commencer ou reprendre ton parcours.</p><a href="' . esc_url( self::login_url( 'create_card', self::onboarding_url() ) ) . '">Se connecter</a></section>';
+            }
+            if ( null === self::active_faluss_id() || ! class_exists( 'Faluss_Link' ) || ! method_exists( 'Faluss_Link', 'render_onboarding_wizard' ) ) {
+                return '<section class="faluss-onboarding-v3__unavailable" role="alert"><h1>Création temporairement indisponible</h1><p>Votre brouillon est conservé. Réessayez dans un instant.</p><a href="">Réessayer</a></section>';
+            }
+            return Faluss_Link::render_onboarding_wizard();
+        }
+        self::enqueue_assets();
         if ( ! is_user_logged_in() ) {
             return self::render_login_gate( $settings );
         }
@@ -493,6 +505,53 @@ final class Faluss_Identity_Onboarding {
             'required' => null !== $faluss_id && $reserved && 'create_card' === $state['choice'] && 'claimed' === $state['slug_status'] && 'complete' !== $step,
             'step' => $step,
         );
+    }
+
+    /** V3 reads the historical cursor without rewriting or publishing a draft. */
+    public static function v3_context() {
+        $faluss_id = self::active_faluss_id();
+        $state = self::current_member_onboarding_state();
+        $profile = null !== $faluss_id && class_exists( 'Faluss_Identity_Public_Profile' )
+            ? Faluss_Identity_Public_Profile::studio_profile( $faluss_id ) : array();
+        return array(
+            'available' => null !== $faluss_id && is_array( $profile ),
+            'step' => (string) ( $state['next_step'] ?? 'choice' ),
+            'choice' => (string) ( $state['choice'] ?? 'unknown' ),
+            'slug_status' => (string) ( $state['slug_status'] ?? 'none' ),
+            'profile' => is_array( $profile ) ? $profile : array(),
+        );
+    }
+
+    /** The mode is encoded in the cursor until the slug is claimed. */
+    public static function begin_v3( $mode ) {
+        $faluss_id = self::active_faluss_id();
+        if ( null === $faluss_id || ! in_array( $mode, array( 'simple', 'atomic' ), true ) || self::current_member_has_completed_public_profile() ) {
+            return false;
+        }
+        $profile = Faluss_Identity_Public_Profile::studio_profile( $faluss_id );
+        $claimed = is_array( $profile ) && '' !== (string) ( $profile['public_slug'] ?? '' );
+        return self::record_state( $faluss_id, 'create_card', $claimed ? 'claimed' : 'none', 'v3_identity_' . $mode );
+    }
+
+    public static function set_v3_cursor( $step ) {
+        $faluss_id = self::active_faluss_id();
+        $state = self::current_member_onboarding_state();
+        $profile = null !== $faluss_id ? Faluss_Identity_Public_Profile::studio_profile( $faluss_id ) : array();
+        if ( null === $faluss_id || ! in_array( $step, self::CARD_WIZARD_STEPS, true ) || ! str_starts_with( $step, 'v3_' )
+            || ! is_array( $profile ) || 'published' === ( $profile['publication_status'] ?? '' ) ) { return false; }
+        $claimed = '' !== (string) ( $profile['public_slug'] ?? '' );
+        return self::record_state( $faluss_id, 'create_card', $claimed ? 'claimed' : 'none', $step );
+    }
+
+    public static function reserve_v3_slug( $slug ) {
+        $faluss_id = self::active_faluss_id();
+        if ( null === $faluss_id || ! class_exists( 'Faluss_Identity_Public_Profile' ) ) { return 'invalid'; }
+        $result = Faluss_Identity_Public_Profile::reserve_public_slug( $faluss_id, $slug );
+        if ( 'claimed' === $result ) {
+            $state = self::current_member_onboarding_state();
+            if ( ! self::record_state( $faluss_id, 'create_card', 'claimed', $state['next_step'] ) ) { return 'invalid'; }
+        }
+        return $result;
     }
 
     /** Advances only the existing ONB-01 row after Link saved canonical data. */
