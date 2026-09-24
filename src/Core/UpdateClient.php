@@ -15,7 +15,7 @@ final class UpdateClient
 
     public static function boot(string $pluginFile): void
     {
-        if (!class_exists(PucFactory::class)) {
+        if (!self::isAvailable()) {
             return;
         }
 
@@ -31,6 +31,11 @@ final class UpdateClient
 
         $checker->addQueryArgFilter([self::class, 'addLicenseToQuery']);
         $checker->addFilter('pre_inject_update', [self::class, 'addLicenseToUpdate']);
+    }
+
+    public static function isAvailable(): bool
+    {
+        return class_exists(PucFactory::class);
     }
 
     /**
