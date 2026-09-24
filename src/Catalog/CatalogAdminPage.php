@@ -39,10 +39,11 @@ final class CatalogAdminPage
         }
 
         $pluginFile = dirname(__DIR__, 2) . '/faluss-platform.php';
-        wp_enqueue_style('faluss-platform-admin', plugins_url('assets/admin.css', $pluginFile), [], '0.1.0');
-        wp_enqueue_style('faluss-platform-catalog', plugins_url('assets/catalog.css', $pluginFile), ['faluss-platform-admin'], '0.1.0');
+        $version = defined('FALUSS_PLATFORM_VERSION') ? (string) constant('FALUSS_PLATFORM_VERSION') : '0.1.0';
+        wp_enqueue_style('faluss-platform-admin', plugins_url('assets/admin.css', $pluginFile), [], $version);
+        wp_enqueue_style('faluss-platform-catalog', plugins_url('assets/catalog.css', $pluginFile), ['faluss-platform-admin'], $version);
         wp_enqueue_media();
-        wp_enqueue_script('faluss-platform-catalog', plugins_url('assets/catalog.js', $pluginFile), ['jquery', 'media-views'], '0.1.0', true);
+        wp_enqueue_script('faluss-platform-catalog', plugins_url('assets/catalog.js', $pluginFile), ['jquery', 'media-views'], $version, true);
     }
 
     public function render(): void

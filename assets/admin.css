@@ -5,7 +5,8 @@
     --faluss-line: #e2e7f0;
     --faluss-accent: #e64b2e;
     --faluss-accent-dark: #bd321c;
-    max-width: 1180px;
+    width: auto;
+    max-width: none;
     margin: 0 20px 40px 0;
     color: var(--faluss-ink);
     font-size: 14px;

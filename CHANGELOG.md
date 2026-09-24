@@ -6,6 +6,14 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Modifié
+
+- Les écrans d'administration Faluss utilisent désormais toute la largeur disponible de WordPress, avec des limites conservées uniquement pour les champs et les blocs qui doivent rester lisibles.
+
+### Corrigé
+
+- Le cache navigateur des feuilles de style Identité visuelle, Catalogue et Connector suit maintenant la version réelle du plugin.
+
 ### Documentation
 
 - Validation de la mise à jour WordPress `0.3.1` sur les deux sites, conservation des données et état opérationnel consignés.

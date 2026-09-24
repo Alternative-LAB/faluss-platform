@@ -31,6 +31,18 @@ final class TokenEngineModule implements Module
 
     public function boot(): void
     {
+        add_action('admin_enqueue_scripts', static function (): void {
+            if (!current_user_can('manage_options')) {
+                return;
+            }
+
+            wp_enqueue_style(
+                'faluss-platform-admin-full-width',
+                plugins_url('assets/admin-full-width.css', dirname(__DIR__, 2) . '/faluss-platform.php'),
+                [],
+                (string) (defined('FALUSS_PLATFORM_VERSION') ? constant('FALUSS_PLATFORM_VERSION') : self::VERSION)
+            );
+        }, 20);
         self::loadCompatibilityLayer();
         if (isset($GLOBALS['wpdb']) && is_object($GLOBALS['wpdb'])) {
             \Token_Engine_Schema::maybe_install();

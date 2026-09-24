@@ -70,7 +70,7 @@ final class ThemeTokensModule implements Module
             return;
         }
 
-        wp_enqueue_style('faluss-platform-admin', plugins_url('assets/admin.css', dirname(__DIR__, 2) . '/faluss-platform.php'), [], '0.1.0');
+        wp_enqueue_style('faluss-platform-admin', plugins_url('assets/admin.css', dirname(__DIR__, 2) . '/faluss-platform.php'), [], (string) (defined('FALUSS_PLATFORM_VERSION') ? constant('FALUSS_PLATFORM_VERSION') : '0.1.0'));
         wp_enqueue_style('wp-color-picker');
         wp_enqueue_script('wp-color-picker');
         wp_add_inline_script('wp-color-picker', <<<'JS'
