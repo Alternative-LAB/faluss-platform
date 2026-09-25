@@ -8,6 +8,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Publications textuelles Fans
 
+- Correction #75 : à 20 pending, autoriser les éditions pending → pending sous quotas horaires/journaliers ; refuser création et approved/rejected → pending sans place libre. Tests de transitions et recette concurrente actualisés, sans nouvelle activation.
+
 - Admission : quotas serveur par créateur (20 pending, 30 créations/éditions par heure glissante, 100 par 24 heures), sérialisés entre requêtes ; retrait et modération restent possibles à quota plein.
 - Idempotence : en-tête UUID v4 obligatoire en création, rejeu sans seconde publication/trace ni quota, conflit de contenu 409 ; association privée transactionnelle en schéma v2, migration additive et fermeture par retrait du flag.
 - Recette étendue : concurrence HTTP et quotas aux frontières, panne de l'association puis nouvelle tentative, fenêtres glissantes, pagination de plus de 20 textes avec créateur suspendu ; aucun média, paiement, moteur Me/Hub ou activation hors instance jetable.

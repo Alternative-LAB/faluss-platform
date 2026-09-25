@@ -404,7 +404,9 @@ final class TextPublicationTest extends TestCase
         foreach (['pendingCount' => [20, 'publication_pending_quota'], 'hourlyCount' => [30, 'publication_hourly_quota'], 'dailyCount' => [100, 'publication_daily_quota']] as $field => [$limit, $code]) {
             $GLOBALS['wpdb']->$field = $limit;
             self::assertSame($code, TextPublicationService::create('Nouveau.', TextPublicationService::CATEGORY, 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb')->get_error_code());
+            $GLOBALS['wpdb']->publication['state'] = 'approved';
             self::assertSame($code, TextPublicationService::change($row['publication_id'], 1, 'edit', 'Révision.')->get_error_code());
+            $GLOBALS['wpdb']->publication['state'] = 'pending';
             self::assertSame($row, $this->create(), 'Replay consumes no quota');
             $GLOBALS['wpdb']->$field = 0;
         }
@@ -414,6 +416,65 @@ final class TextPublicationTest extends TestCase
         $GLOBALS['profile_admin'] = false;
         self::assertSame('withdrawn', TextPublicationService::change($row['publication_id'], 2, 'withdraw')['state']);
         self::assertCount(3, $GLOBALS['wpdb']->audit);
+    }
+
+    public function testPendingEditAtCapacityStillConsumesRateAllowance(): void
+    {
+        $row = $this->create();
+        $GLOBALS['wpdb']->pendingCount = 20;
+        foreach (['hourlyCount' => [30, 'publication_hourly_quota'], 'dailyCount' => [100, 'publication_daily_quota']] as $field => [$limit, $code]) {
+            $GLOBALS['wpdb']->$field = $limit;
+            self::assertSame($code, TextPublicationService::change($row['publication_id'], 1, 'edit', 'Correction.')->get_error_code());
+            self::assertSame($row, $GLOBALS['wpdb']->publication);
+            self::assertCount(1, $GLOBALS['wpdb']->audit);
+            $GLOBALS['wpdb']->$field = 0;
+        }
+        $edited = TextPublicationService::change($row['publication_id'], 1, 'edit', 'Correction.');
+        self::assertIsArray($edited);
+        self::assertSame('pending', $edited['state']);
+        self::assertSame(2, $edited['revision']);
+        self::assertCount(2, $GLOBALS['wpdb']->audit);
+        self::assertSame('edit', $GLOBALS['wpdb']->audit[1][3]);
+    }
+
+    public function testApprovedAndRejectedEditsNeedANewPendingSlot(): void
+    {
+        $row = $this->create();
+        foreach (['approved', 'rejected'] as $state) {
+            $GLOBALS['wpdb']->publication = array_replace($row, ['state' => $state]);
+            $before = $GLOBALS['wpdb']->publication;
+            $auditCount = count($GLOBALS['wpdb']->audit);
+            $GLOBALS['wpdb']->pendingCount = 20;
+            self::assertSame('publication_pending_quota', TextPublicationService::change($row['publication_id'], 1, 'edit', 'Correction.')->get_error_code());
+            self::assertSame($before, $GLOBALS['wpdb']->publication);
+            self::assertCount($auditCount, $GLOBALS['wpdb']->audit);
+            $GLOBALS['wpdb']->pendingCount = 19;
+            $edited = TextPublicationService::change($row['publication_id'], 1, 'edit', 'Correction.');
+            self::assertIsArray($edited);
+            self::assertSame('pending', $edited['state']);
+            self::assertSame(2, $edited['revision']);
+            self::assertCount($auditCount + 1, $GLOBALS['wpdb']->audit);
+        }
+    }
+
+    public function testSerializedCreateAndPendingEditAtCapacityInEitherOrder(): void
+    {
+        $row = $this->create();
+        $GLOBALS['wpdb']->pendingCount = 20;
+        // Both serial orders allowed by the shared creator lock have the same outcome.
+        foreach ([['create', 'edit'], ['edit', 'create']] as $order) {
+            foreach ($order as $action) {
+                if ($action === 'create') {
+                    self::assertSame('publication_pending_quota', TextPublicationService::create('Nouveau.', TextPublicationService::CATEGORY, 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb')->get_error_code());
+                } else {
+                    $row = TextPublicationService::change($row['publication_id'], (int) $row['revision'], 'edit', 'Correction.');
+                    self::assertIsArray($row);
+                    self::assertSame('pending', $row['state']);
+                }
+            }
+        }
+        self::assertCount(3, $GLOBALS['wpdb']->audit);
+        self::assertCount(1, $GLOBALS['wpdb']->requests);
     }
 
     public function testKeyAndLockRequiredAndRequestFailureRollsBackAllWrites(): void

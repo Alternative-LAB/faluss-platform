@@ -32,7 +32,23 @@ Les comptes, textes et liaisons sont synthétiques. Aucun secret n'est versionn�
    `/var/tmp/faluss-v3-wp/wp-cli.phar` ; adapter ce seul chemin sur une autre machine.
    Arrêter ensuite tous les workers et conserver les résultats sans sessions/secrets.
 
-## Résultat de la recette d’admission (25 septembre 2026)
+## Correction du plafond pending : recette actualisée, non réexécutée
+
+La correction de #75 distingue les places en file du débit d’admission. À 20/20,
+le scénario concurrent attend désormais création 429 et édition pending 200,
+exactement une nouvelle trace et toujours 20 places. Les éditions approved/rejected
+sont refusées sans mutation à 20/20, puis admises après libération d’une place.
+La course à 19/20 doit accepter création et édition pending, quel que soit l’ordre.
+Les limites 30/heure et 100/24 h restent applicables à toutes les éditions.
+
+Le script est actualisé, mais cette version **n’a pas été exécutée sur WordPress/MariaDB** :
+le flag local est resté désactivé pour respecter « aucune activation ». Les tests
+unitaires couvrent les transitions et les deux ordres sérialisés ; ils ne sont pas
+une preuve de concurrence HTTP réelle. La recette ci-dessous est historique et
+ne valide pas cette correction. Une nouvelle recette requiert une autorisation
+explicite d’activation sur l’instance locale jetable.
+
+## Résultat historique de la recette d’admission (25 septembre 2026, SHA `930c43a`)
 
 WordPress 7.1.2, PHP 8.5.4, MariaDB 11.8.6 : **87 contrôles REST réussis**,
 via quatre workers PHP et une vraie base InnoDB. Ils comprennent les 45 contrôles

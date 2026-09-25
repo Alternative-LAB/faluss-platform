@@ -32,11 +32,31 @@ finally:
     sql('DROP TRIGGER recipe_fail_request')
 check('same key retries successfully after rollback', new_text('racer', key=failed_key)[0] == 201)
 
+approved = new_text('quota')[1]
+check('prepare approved transition fixture', moderate(approved)[0] == 200)
+rejected = new_text('quota')[1]
+check('prepare rejected transition fixture', moderate(rejected, 'reject', 'needs_revision')[0] == 200)
 quota_rows = [new_text('quota')[1] for _ in range(20)]
 check('twenty pending creations accepted', all(r.get('state') == 'pending' for r in quota_rows))
 check('twenty-first pending creation denied', new_text('quota')[1]['code'] == 'publication_pending_quota')
-check('editing pending at capacity denied', call('quota', 'text-publications/' + quota_rows[0]['publication_id'] + '/edit', {'revision': 1, 'text': 'Révision.'})[0] == 429)
-check('withdrawal works at quota', call('quota', 'text-publications/' + quota_rows[0]['publication_id'] + '/withdraw', {'revision': 1})[0] == 200)
+before = audit_count()
+with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+    creation = pool.submit(new_text, 'quota')
+    edition = pool.submit(call, 'quota', 'text-publications/' + quota_rows[0]['publication_id'] + '/edit', {'revision': 1, 'text': 'Révision.'})
+    created, edited = creation.result(), edition.result()
+check('full queue concurrent creation denied and pending edit allowed', created[0] == 429 and created[1]['code'] == 'publication_pending_quota' and edited[0] == 200 and edited[1]['state'] == 'pending')
+check('full queue pending edit adds exactly one decision and no slot', audit_count() == before + 1 and sql("SELECT COUNT(*) FROM wp_faluss_fans_text_publications WHERE creator_id='" + SESSIONS['quota']['creator_id'] + "' AND state='pending'") == '20')
+for item, expected_state in [(approved, 'approved'), (rejected, 'rejected')]:
+    before = audit_count()
+    status, denied, _ = call('quota', 'text-publications/' + item['publication_id'] + '/edit', {'revision': 2, 'text': 'Nouvelle modération.'})
+    current = call('quota', 'text-publications/' + item['publication_id'] + '/private')[1]
+    check(expected_state + ' edit cannot enter full pending queue', status == 429 and denied['code'] == 'publication_pending_quota' and current['state'] == expected_state and int(current['revision']) == 2 and audit_count() == before)
+check('withdrawal works at quota', call('quota', 'text-publications/' + quota_rows[0]['publication_id'] + '/withdraw', {'revision': 2})[0] == 200)
+# Rejected and approved transitions are admitted once a slot has been freed.
+for item in [rejected, approved]:
+    status, transitioned, _ = call('quota', 'text-publications/' + item['publication_id'] + '/edit', {'revision': 2, 'text': 'Nouvelle modération.'})
+    check('nonpending edit reuses released slot', status == 200 and transitioned['state'] == 'pending')
+    check('withdraw transition fixture to release slot', call('quota', 'text-publications/' + item['publication_id'] + '/withdraw', {'revision': 3})[0] == 200)
 check('admin rejection works at quota', moderate(quota_rows[1], 'reject', 'needs_revision')[0] == 200)
 check('released pending slot can be reused', new_text('quota')[0] == 201)
 
@@ -51,7 +71,7 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
     first = pool.submit(new_text, 'racequota')
     second = pool.submit(call, 'racequota', 'text-publications/' + race_rows[1]['publication_id'] + '/edit', {'revision': 1, 'text': 'Édition concurrente.'})
     mixed = [first.result(), second.result()]
-check('mixed creation and edit cannot overflow pending cap', mixed[0][0] == 201 and mixed[1][0] in [200, 429] and sql("SELECT COUNT(*) FROM wp_faluss_fans_text_publications WHERE creator_id='" + SESSIONS['racequota']['creator_id'] + "' AND state='pending'") == '20')
+check('mixed creation and edit cannot overflow pending cap', mixed[0][0] == 201 and mixed[1][0] == 200 and sql("SELECT COUNT(*) FROM wp_faluss_fans_text_publications WHERE creator_id='" + SESSIONS['racequota']['creator_id'] + "' AND state='pending'") == '20')
 
 # Shared rate allowance across creation and edits; concurrent edits target different rows.
 churn_key = str(uuid.uuid4())

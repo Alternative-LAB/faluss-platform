@@ -145,13 +145,18 @@ Seuils serveur fixes dans `TextPublicationIntake`, non configurables par le clie
 
 | Limite | Créations et éditions concernées | Réponse quand atteinte |
 | --- | --- | --- |
-| 20 textes `pending` par créateur | Toute nouvelle création et toute édition, même celle d'un texte déjà pending | 429 `publication_pending_quota` |
+| 20 textes `pending` par créateur | Nouvelle création ou édition faisant passer un texte approved/rejected à pending | 429 `publication_pending_quota` |
 | 30 admissions sur une heure glissante | Somme des créations et éditions validées | 429 `publication_hourly_quota` |
 | 100 admissions sur 24 heures glissantes | Même somme ; ne se réinitialise pas à minuit | 429 `publication_daily_quota` |
 
 Le contrôle intervient **avant** l'écriture. L'opération atteignant exactement le
 seuil est permise ; la suivante est refusée. Une édition identique reste une
-admission à modérer et compte aussi. L'identité de quota est le profil propriétaire
+admission à modérer et compte aussi dans les limites de débit. À 20/20, une édition
+d'un texte **déjà pending** est autorisée si les limites 30/heure et 100/24 h le
+permettent : elle n'ajoute aucune place. Le serveur utilise l'état persisté lu sous
+verrou de révision, jamais un état fourni par le client. Une création ou une édition
+approved/rejected → pending exige une place libre et échoue sinon en 429, sans
+modifier le texte, sa révision ou le journal. L'identité de quota est le profil propriétaire
 résolu par le serveur, jamais un identifiant envoyé par le navigateur.
 Le retrait du créateur, le rejet et l'approbation administratifs ne consomment
 aucun quota et ne passent pas par cette admission. Retrait/rejet/approbation libèrent
@@ -257,7 +262,12 @@ le texte existant, quatre créations HTTP simultanées avec une clé commune, cl
 différentes à la frontière du quota, éditions concurrentes, rejeux sans double trace,
 fenêtres glissantes et trois parcours paginés comparés à des requêtes SQL indépendantes.
 Les sessions restent synthétiques ; aucun échange Me, paiement, média ni site réel
-de production n'est sollicité. Cette exécution réussit **87 contrôles REST réels**.
+de production n'est sollicité. L’exécution initiale au SHA `930c43a` réussit **87 contrôles REST réels**.
+La correction ultérieure autorisant pending → pending à capacité pleine est testée
+avec des doubles ; sa recette REST est actualisée mais **non réexécutée**, conformément
+à la consigne de ne faire aucune activation. Les 87 contrôles ne valident donc pas
+cette correction. Les scénarios ciblent création concurrente + édition pending à
+20/20 (429/200), refus approved/rejected → pending à 20/20, puis admission à 19/20.
 Détails et résultats dans le README de recette.
 Pas de preuve de charge à grande échelle ou de panne/reconnexion réseau au commit.
 

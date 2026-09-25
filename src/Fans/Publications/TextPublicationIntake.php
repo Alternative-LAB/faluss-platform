@@ -25,13 +25,13 @@ final class TextPublicationIntake
     }
 
     /** Call only after the creator lock and START TRANSACTION, before writing. */
-    public static function check(string $creatorId): ?\WP_Error
+    public static function check(string $creatorId, bool $addsPending = true): ?\WP_Error
     {
         global $wpdb;
         $publications = TextPublicationSchema::table();
         $pending = $wpdb->get_var($wpdb->prepare('SELECT COUNT(*) FROM `' . $publications . '` WHERE creator_id=%s AND state=%s', $creatorId, 'pending'));
         if (self::databaseError() || !is_numeric($pending)) { return self::error('publication_intake_unavailable', 503); }
-        if ((int) $pending >= self::PENDING_LIMIT) { return self::error('publication_pending_quota', 429); }
+        if ($addsPending && (int) $pending >= self::PENDING_LIMIT) { return self::error('publication_pending_quota', 429); }
         $counts = $wpdb->get_row($wpdb->prepare('SELECT COUNT(*) AS daily_count,'
             . ' COALESCE(SUM(d.occurred_at > UTC_TIMESTAMP() - INTERVAL 1 HOUR),0) AS hourly_count'
             . ' FROM `' . TextPublicationSchema::table(true) . '` d INNER JOIN `' . $publications . '` p ON p.publication_id=d.publication_id'

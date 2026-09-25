@@ -109,7 +109,8 @@ final class TextPublicationService
                 return self::error('active_creator_required', 403);
             }
             if ($action === 'edit') {
-                $quota = TextPublicationIntake::check($profile['creator_id']);
+                // Use the locked persisted state, never a client-provided pending count or state.
+                $quota = TextPublicationIntake::check($profile['creator_id'], $row['state'] !== 'pending');
                 if ($quota instanceof \WP_Error) { return $quota; }
             }
             $oldText = $row['body'];
