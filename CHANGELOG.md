@@ -6,9 +6,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
-- Livraison corrective Me V3 préparée ci-dessous ; aucun changement de configuration ni de données à la mise à jour.
-- Sécurisation du paquet privé WordPress : métadonnées de compatibilité, archive à liste blanche et validation CI des chemins et permissions.
-- Correction documentée des propriétaires `www-data` nécessaires au remplacement natif par `Plugin_Upgrader`.
+## [0.5.3] - 2026-09-25
+
+### Corrigé
+
+- Make WordPress plugin updates reliable (`50a0e84`)
 
 ## [0.5.2] - 2026-09-25
 
