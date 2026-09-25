@@ -1,0 +1,24 @@
+{
+  "runtime": "WordPress local, HTTP OTP / captured wp_mail",
+  "cases": [
+    {
+      "case": "published",
+      "destination": "StudioV3",
+      "session": true
+    },
+    {
+      "case": "incomplete-pending",
+      "destination": "/commencer/",
+      "step": "v3_wallpaper",
+      "back": "v3_avatar",
+      "reload_mode": "atomic",
+      "skip": "v3_wallpaper"
+    },
+    {
+      "case": "new",
+      "destination": "/commencer/",
+      "step": "v3_mode"
+    }
+  ],
+  "recorded_at": "2026-09-25T04:40:00.295176+00:00"
+}

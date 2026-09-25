@@ -1,0 +1,126 @@
+{
+  "runtime": "WordPress/MariaDB local",
+  "at": "2026-09-25T04:41:39+00:00",
+  "cases": [
+    {
+      "case": "published",
+      "authenticated": true,
+      "internal_failure_challenge": null,
+      "retained": true,
+      "stages": [
+        "otp_rejected"
+      ]
+    },
+    {
+      "case": "incomplete-active",
+      "authenticated": true,
+      "internal_failure_challenge": null,
+      "retained": true,
+      "stages": [
+        "otp_rejected"
+      ]
+    },
+    {
+      "case": "incomplete-pending",
+      "authenticated": true,
+      "internal_failure_challenge": null,
+      "retained": true,
+      "stages": [
+        "otp_rejected"
+      ]
+    },
+    {
+      "case": "new",
+      "authenticated": true,
+      "internal_failure_challenge": null,
+      "retained": true,
+      "stages": [
+        "otp_rejected"
+      ]
+    },
+    {
+      "case": "suspended",
+      "authenticated": false,
+      "internal_failure_challenge": null,
+      "retained": null,
+      "stages": [
+        "registry_activation"
+      ]
+    },
+    {
+      "case": "registry-failure",
+      "authenticated": true,
+      "internal_failure_challenge": "pending",
+      "retained": true,
+      "stages": [
+        "registry_activation",
+        "otp_rejected"
+      ]
+    },
+    {
+      "case": "new-registry-failure",
+      "authenticated": true,
+      "internal_failure_challenge": "pending",
+      "retained": true,
+      "stages": [
+        "registry_activation",
+        "otp_rejected"
+      ]
+    },
+    {
+      "case": "new-user-hook-failure",
+      "authenticated": true,
+      "internal_failure_challenge": "pending",
+      "retained": true,
+      "stages": [
+        "wp_user",
+        "otp_rejected"
+      ]
+    },
+    {
+      "case": "privileged",
+      "authenticated": false,
+      "internal_failure_challenge": null,
+      "retained": null,
+      "stages": [
+        "privileged_user"
+      ]
+    },
+    {
+      "case": "nonce",
+      "denied": true,
+      "stages": [
+        "nonce"
+      ]
+    },
+    {
+      "case": "cookie",
+      "denied": true,
+      "stages": [
+        "cookie"
+      ]
+    },
+    {
+      "case": "expired",
+      "denied": true,
+      "stages": [
+        "otp_rejected"
+      ]
+    },
+    {
+      "case": "replaced",
+      "denied": true,
+      "stages": [
+        "otp_rejected"
+      ]
+    },
+    {
+      "case": "attempts",
+      "denied": true,
+      "stages": [
+        "otp_rejected",
+        "cookie"
+      ]
+    }
+  ]
+}

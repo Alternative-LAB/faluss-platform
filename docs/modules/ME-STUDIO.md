@@ -1,6 +1,8 @@
-# Studio Faluss V2 natif
+# Studio Faluss V2 et V3 natifs
 
 Le nouveau parcours de création V3, activé séparément, est décrit dans [ONBOARDING-V3.md](ONBOARDING-V3.md).
+
+Depuis 0.5.0, le flag `FALUSS_PLATFORM_ONBOARDING_V3` fournit aussi un éditeur V3 natif indépendant du flag V2, décrit dans [ONBOARDING-V3.md](ONBOARDING-V3.md).
 
 Studio V2 est un module natif et optionnel du Master Plugin sur le rôle `me`. Il ne remplace ni Identity ni Link : il fournit l’interface d’édition et le parcours d’onboarding Atomique, tandis que Link reste l’autorité de composition et l’unique renderer de carte.
 
@@ -18,7 +20,7 @@ Le shortcode, les widgets Elementor, les URLs publiques, les handlers historique
 
 ## Renderer partagé
 
-`Faluss_Link::card_markup_from_presentation()` reste la façade unique. Le profil public, la preview du Studio et la preview de l’onboarding lui fournissent le même profil Identity, la même composition Link et les mêmes blocs. Les conteneurs peuvent adapter la densité, jamais reconstruire une seconde carte HTML.
+`Faluss_Link::card_markup_from_presentation()` reste la façade unique. Le profil public, la preview du Studio et la preview de l’onboarding lui fournissent le même profil Identity, la même composition Link et les mêmes blocs. Les conteneurs V3 réduisent visuellement la même composition à densité standard ; ils ne reconstruisent pas la carte et ne changent pas ses proportions.
 
 Les variantes Atomiques comprennent :
 
@@ -115,3 +117,45 @@ Les tests automatisés couvrent le flag d’activation, les dépendances, le fal
 11. Rejouer le passwordless, la continuité SSO/onboarding, les shortcodes Link, les widgets Elementor et les autres modules du Master Plugin. Distinguer explicitement les résultats du harness des résultats WordPress/MariaDB réels.
 12. Vérifier Chrome et WebKit automatisés en mobile et bureau, puis effectuer une recette manuelle sur Safari réel : WebKit automatisé ne constitue pas une preuve Safari.
 13. Pour le retour arrière, remettre uniquement `FALUSS_PLATFORM_ME_STUDIO_V2` à `false`, charger une nouvelle requête et confirmer le retour au fournisseur Link interne, avec la composition V4 et tous les médias conservés.
+
+
+## Correctif 0.5.1 — écran public et fonctions d’édition
+
+La carte canonique couvre au minimum le viewport dynamique (`100dvh`, repli `100vh`) et s’allonge avec son contenu. Son enveloppe n’ajoute plus de cadre. L’aperçu utilise la même hauteur logique à l’échelle du téléphone ; le rendu Link partagé reste la source du shortcode et du widget Elementor. Le thème Elementor peut encore imposer ses propres marges extérieures : une intégration réelle n’est pas simulée par la preuve DOM.
+
+Le Studio V3 comporte désormais **treize rubriques**. Liens utilise des opérations unitaires, et Collections, Contenus et ordre, Réglages rétablissent les éditions auparavant inaccessibles. L’onboarding conserve ses étapes existantes. La [matrice des fonctions et les résultats ciblés](../evidence/me-v3-viewport/README.md) distinguent les capacités déjà visibles dans l’ancien Studio des helpers historiques non raccordés.
+
+Les actions AJAX `faluss_studio_v3_manage` et `faluss_studio_v3_upload_content` exigent le flag V3, une session et leur nonce propre. Le sujet reste résolu côté serveur. `LinkStudioContract::mutate()` conserve les contrats fermés et la transaction de l’agrégat ; `create_content`, `update_content`, `delete_content` sont limités aux blocs texte/teaser. Les liens et collections réutilisent leurs mutations existantes. Aucune sauvegarde partielle ne remplace le flux complet, aucun curseur d’onboarding n’est modifié.
+
+Un enregistrement recharge la rubrique depuis l’état canonique. Les autres modifications non enregistrées nécessitent un choix explicite avant d’être abandonnées. Un conflit 409 laisse les champs saisis visibles. Les liens historiques non initialisés restent en lecture seule selon le contrat préexistant ; ce correctif ne force aucune migration. Les droits des teasers utilisent le catalogue et la décision serveur existants, sans nouvelle livraison de média protégé.
+
+
+## Studio V3 autonome — 0.5.2
+
+Sous le flag V3 existant, `MeStudioProvider` appelle `StudioV3::render()`.
+Le Studio possède son shell, sa feuille de style et son contrôleur ; il partage les contrôles V3 et les mutations fermées, sans afficher le téléphone ni le panneau d’onboarding.
+
+| Navigation | Rubriques existantes |
+| --- | --- |
+| Liens | Liens, Collections, Contenus et ordre (textes, teasers, ordre de tous les blocs) |
+| Design | Structure, Couleurs, Boutons, Avatar, Fond, Nom, Style des réseaux |
+| Profil | Identité, Réseaux, Réglages (bio/publication, en-tête, layout, thèmes, retrait des médias) |
+| Shop | Indisponible : aucun contrat de boutique membre exposé dans ce périmètre ; aucun produit fictif |
+
+Les URL `v3_section` existantes restent reconnues. L’aperçu est un dialogue natif ouvert à la demande, rendu par Link. Les éditeurs de blocs prévisualisent leur état **enregistré** ; leurs brouillons indépendants ne sont pas implicitement sauvegardés. La sortie compare les champs et l’ordre courant à leur état chargé ; un refus serveur ne réinitialise pas les champs. Une confirmation réussie recharge l’état canonique.
+
+Un compte déconnecté retrouve le lien de connexion ; un compte avec une création inachevée est dirigé vers V3. Une carte volontairement dépubliée après un curseur `complete` reste éditable dans le Studio. Aucun écran V1/V2 ne remplace une erreur V3.
+
+Recette et limites : [0.5.2](../evidence/me-v3-052/README.md). Les paragraphes de recette V2 ci-dessus décrivent le lot historique et ne valent pas preuve de production pour V3.
+
+Le réglage d’alignement historique reste stocké et transmis sans modification, mais V3 présente désormais une composition constamment centrée. Réglages affiche cette décision au lieu de proposer un choix Gauche qui ne serait pas appliqué. Le CSS Link commun (assets 0.4.1) descend le groupe d’identité selon le viewport et le mode de couverture ; aperçu, public, shortcode et Elementor suivent les mêmes règles.
+
+## Navigation dynamique — 0.5.4
+
+Les liens `v3_section` demeurent des destinations serveur autonomes. Le contrôleur intercepte seulement les clics ordinaires internes et charge la même page avec `credentials: same-origin` / `cache: no-store`. Le DOM du Studio et sa configuration JSON de présentation sont relus sans exécuter les scripts de la page reçue. Les mutations restent inchangées. Aucun cache de rubrique ou stockage navigateur des saisies n’est ajouté.
+
+Les deux navigations gardent chacune une pill unique (180 ms, transition désactivée sous `prefers-reduced-motion`). Tab/Entrée restent natifs ; flèches et Home/End déplacent le focus entre les liens disponibles. Shop reste indisponible. Sans JS, les liens rechargent leur destination habituelle.
+
+`pushState` ajoute une entrée après le chargement réussi. `popstate` charge la destination ; une annulation pour saisie non enregistrée restaure l’entrée courante. Les réponses obsolètes sont annulées/ignorées. La zone de saisie est temporairement inerte pendant le chargement ; une sauvegarde ou un upload empêche de changer de rubrique. Une erreur garde champs et URL courants. La sauvegarde confirmée relit l’état canonique et ses nonces ; si cette lecture échoue, l’édition attend une actualisation explicite, sans rejouer la mutation. Seul un état serveur ne contenant plus le Studio (session expirée, fournisseur indisponible) revient à la navigation complète.
+
+Voir [recette locale 0.5.4](../evidence/me-v3-054/README.md). Aucun changement de contrats de données ou de rendu public.

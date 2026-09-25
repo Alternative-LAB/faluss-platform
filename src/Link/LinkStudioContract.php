@@ -7,6 +7,12 @@ namespace Faluss\Platform\Link;
 /** Narrow Studio boundary. The native module never reads Link or Identity tables. */
 final class LinkStudioContract
 {
+    /** @return array<string, mixed> */
+    public static function managementOptions(): array
+    {
+        return \Faluss_Link::studio_v3_management_options();
+    }
+
     public static function available(): bool
     {
         return class_exists('Faluss_Link', false)
@@ -71,9 +77,18 @@ final class LinkStudioContract
      * @param array<string, mixed> $fields
      * @return array<string, mixed>
      */
-    public static function saveOnboardingV3Step(string $step, string $next, array $fields, string $version): array
+    public static function saveOnboardingV3Step(string $step, string $next, array $fields, string $version, string $mode = ''): array
     {
-        return \Faluss_Link::studio_v2_save_onboarding_step($step, $next, $fields, $version);
+        return \Faluss_Link::studio_v2_save_onboarding_step($step, $next, $fields, $version, false, $mode);
+    }
+
+    /**
+     * @param array<string, mixed> $fields
+     * @return array<string, mixed>
+     */
+    public static function saveStudioV3Section(string $section, array $fields, string $version): array
+    {
+        return \Faluss_Link::studio_v2_save_onboarding_step($section, '', $fields, $version, true);
     }
 
     /** @return array<string, mixed> */
