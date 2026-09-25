@@ -55,21 +55,25 @@ modifie aucun code de calcul ni paiement dans #71. Trois projections sont sépar
 | Grandeur | Source et règle | Visibilité |
 | --- | --- | --- |
 | Score du créateur HoF | Achat d'un pack : **0 point**. Cadeau de **300 pièces financées effectivement dépensées = 300 points de session**. Soutien direct de **1 EUR confirmé = 1 point**. | Classement de session ; ce score ne représente jamais le revenu du créateur. |
-| Progression du donateur | Dépense réelle confirmée du donateur, nette des corrections ; jamais le nombre nominal de pièces, le score créateur ou les bonus gratuits. | Projection membre privée par défaut ; seuils et conversion en niveaux à décider. |
+| Progression du donateur | Dépense réelle confirmée consommée, nette des corrections ; jamais au simple achat du pack, ni selon les pièces nominales, le score créateur ou les bonus gratuits. | Pseudo et badge visibles au créateur concerné ; visibilité publique sur consentement. Seuils et conversion en niveaux à décider. |
 | Revenu du créateur | Montants EUR issus des preuves économiques, avec brut, commission, frais, remboursements, réserves et net à reverser distingués. Aucun taux revenu/point implicite. | Statistiques privées du créateur et accès administratifs explicitement autorisés ; aucun montant individuel dans le classement public. |
 
 Un pack acheté ne donne aucun score HoF et ne constitue pas un revenu créateur.
-Pour la progression, choisir encore le moment de comptabilisation : achat du
-pack ou consommation de sa valeur financée. La même dépense ne doit jamais être
-comptée aux deux étapes. Si elle est reconnue à la consommation, le Hub devra
+La progression du badge intervient **lors de la consommation financée**, jamais
+au simple achat du pack. La même dépense ne doit jamais être comptée aux deux
+étapes. Pour les pièces consommées en soutien, le Hub devra
 attester le coût EUR réellement payé et alloué aux pièces dépensées, avec remises
 et lots d'origine ; aucun taux nominal PF/EUR ne remplace cette preuve.
 Un cadeau de 300 pièces ne signifie donc ni 300 EUR de dépense ni 300 EUR de revenu.
 Une preuve de financement seule ne prouve pas une dépense personnelle du donateur.
 
-Pour le soutien direct, 20 EUR confirmés donnent 20 points de session. La règle
-pour les fractions d'euro, la précision et l'arrondi doivent être fixés avant code ;
-les montants source restent des centimes entiers, sans flottants. L'assiette des
+Pour le soutien direct, le calcul utilise des **centièmes de point entiers** :
+1 centime EUR confirmé = 1 centième de point, donc 20 EUR = 2 000 centièmes
+= 20 points et 1,25 EUR = 125 centièmes = 1,25 point. Aucune troncature à l'euro
+ni calcul flottant ; les corrections utilisent la même unité entière. Pour une
+projection commune, 300 points de cadeau sont représentés par 30 000 centièmes,
+sans convertir les pièces en euros. Le soutien direct confirmé constitue une
+consommation immédiate de la dépense réelle pour la progression. L'assiette des
 euros confirmés (taxes, remises et frais) reste à préciser sans remplacer le taux
 produit de 1 point/EUR par l'ancien taux de 1 point/centime.
 
@@ -116,8 +120,12 @@ un domaine ou le général. L'attribution de territoire doit être explicite et
 non dérivée d'une IP. Un fait contribue au plus une fois à une session/dimension.
 Une correction met à jour les sessions concernées, y compris clôturées, avec trace.
 
-La visibilité du membre est privée par défaut. Un pseudonyme public requiert son
-opt-in par surface ; retirer cet opt-in masque la projection sans modifier le fait
+Le **pseudo et le badge du donateur sont visibles pour le créateur concerné**
+par le soutien, via une projection bornée avec contrôle serveur de cette relation.
+Cela n'ouvre ni le ledger, ni l'historique des autres soutiens, ni la dépense globale,
+ni l'identité SSO aux créateurs. Hors de cette relation, les données restent privées.
+La visibilité publique du pseudo et du badge exige un consentement explicite par
+surface ; retirer ce consentement masque la projection publique sans modifier le fait
 comptable. Ne pas exposer un Faluss ID, un montant individuel ou une relation avec
 la catégorie adulte externe dans le classement public. Les règles de classement,
 les seuils, l'assiette précise et la procédure de contestation restent des décisions produit
@@ -160,10 +168,18 @@ La coordination Hub/commerce/Events devra traiter succès partiel, retry, timeou
 réconciliation et compensation avant tout affichage définitif.
 
 Les PF `earned` et `promotional` ne produisent **aucun revenu ni score monétisable
-sans financement explicite**. Un bonus de pack ne devient pas financé parce que
+sans financement explicite**. Les cadeaux gratuits n'en produisent pas non plus,
+sauf financement explicite par **Faluss**, prouvé et alloué à l'opération. Les PF
+`earned` et `promotional` **ne sont pas reclassés**, même dans ce cas : la preuve
+du financement Faluss est distincte de leur classe d'origine, conservée dans le
+ledger Hub et ses compensations. Ce financement n'est ni une conversion gratuite
+en PF `funded`, ni une dépense personnelle du donateur ; il ne fait pas progresser
+son badge. Les effets éventuels sur le score et le revenu exigent un reçu économique
+et une politique dédiée, sans réutiliser un euro déjà alloué à un autre cadeau.
+Un bonus de pack ne devient pas financé parce que
 le pack est payé ; une métadonnée ou un flag ne vaut pas preuve. Un financement
 promotionnel éventuel exige une source économique, une allocation et une politique
-revues ; aucune reclassification automatique ni conversion gratuite n'est admise.
+revues ; aucune reclassification des PF `earned` ou `promotional` n'est admise.
 Par défaut, un mélange de classes non admissibles ne contribue pas au score ;
 l'éligibilité, le refus ou la ventilation du cadeau doivent être décidés et testés.
 Un financement par la plateforme ne compte pas comme dépense réelle du donateur.
@@ -178,17 +194,23 @@ Il faudra versionner sa politique, séparer pièces dépensées, euros confirmé
 dépense réelle et revenu privé, puis ajouter des tests pour :
 
 - pack payé sans score ; 300 pièces financées débitées = 300 points de session ;
-- 20 EUR confirmés = 20 points, sans assimilation au revenu net ;
-- progression sur coût réel et absence de double comptage achat/consommation ;
+- 20 EUR confirmés = 2 000 centièmes de point ; 1,25 EUR = 125 centièmes,
+  remboursement de 0,25 EUR = retrait de 25 centièmes, sans assimilation au revenu net ;
+- progression sur coût réel à la consommation financée, zéro au simple achat du
+  pack et absence de double comptage ; zéro progression pour un cadeau financé par Faluss ;
 - bonus, PF gagnés/promos et financement absent ou forgé sans score monétisable ;
+- cadeau gratuit sans revenu ni score monétisable ; exception Faluss avec preuve
+  allouée, sans reclassification PF ni double utilisation du financement ;
 - cadeau annulé partiellement, remboursement de pack déjà consommé, litige et
   résolution, rejeu, ordre inversé, conflit de révision et sessions clôturées ;
+- pseudo/badge accessibles au seul créateur concerné ; refus pour un autre créateur,
+  consentement et retrait pour l'affichage public, sans exposition du ledger ;
 - projections publiques sans revenu privé, confidentialité des donateurs,
   refus adulte inchangé et absence de tout débit/paiement réel dans la simulation.
 
 Avant implémentation restent ouverts : correspondance pièce/PF `funded`, preuve et
-allocation des lots EUR, traitement des classes mixtes, moment de progression,
-seuils et règles de sessions, fractions/arrondis, assiette du soutien, commission,
+allocation des lots EUR, traitement des classes mixtes et preuve de financement Faluss,
+seuils et règles de sessions, arrondis d'allocation économique, assiette du soutien, commission,
 réserves et protocole de corrections partielles du Hub. Les exemples de score
 ci-dessus sont décidés ; ces paramètres d'exécution ne sont pas encore approuvés.
 

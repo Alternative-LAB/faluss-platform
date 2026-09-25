@@ -46,14 +46,20 @@ Les tests de la PR #53 démontrent la reconnaissance du rôle et l'isolation de 
 Un achat de pack ne produit aucun score HoF. Un cadeau de 300 pièces financées
 effectivement dépensées donne 300 points de session au créateur ; un soutien direct
 donne 1 point par euro confirmé. **Le score affiché n'est pas le revenu du créateur.**
-La progression du donateur repose sur sa dépense réelle, sans compter deux fois
-l'achat du pack et sa consommation ; le revenu EUR appartient aux statistiques
-privées du créateur. Les assiettes, arrondis et le moment de progression restent
+La progression du badge repose sur sa dépense réelle **à la consommation financée**,
+jamais au simple achat du pack. Le pseudo et le badge sont visibles au créateur
+concerné ; leur visibilité publique exige un consentement. Le soutien direct est
+calculé en centièmes de point entiers (125 centimes EUR = 125 centièmes de point).
+Le revenu EUR appartient aux statistiques privées du créateur. Les assiettes et
+les arrondis d'allocation économique restent
 à préciser dans [le contrat des moteurs](FANS-ENGINE-OWNERSHIP.md).
 
 La réutilisation des PF `funded` du Hub est à étudier via un contrat serveur à
 étendre, sans second ledger Fans. Les PF `earned` et `promotional` ne créent ni
-revenu ni score monétisable sans financement explicite. Le contrat définit les
+revenu ni score monétisable sans financement explicite. Les cadeaux gratuits restent
+sans revenu ni score monétisable sauf financement explicite par Faluss ; les PF
+`earned`/`promotional` gardent leur classe, et ce financement ne constitue pas une
+dépense du donateur pour son badge. Le contrat définit les
 corrections, litiges et remboursements à construire ; aucun moteur économique
 n'est ajouté ici. **Le simulateur de #73 doit être adapté avant sa fusion** : son
 ancienne règle en centimes et ses deux totaux identiques ne satisfont pas cette
