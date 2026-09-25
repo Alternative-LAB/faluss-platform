@@ -46,3 +46,5 @@ Les tests de la PR #53 démontrent la reconnaissance du rôle et l'isolation de 
 La matrice des propriétaires, les contrats proposés et les portes de validation sont décrits dans [FANS-ENGINE-OWNERSHIP.md](FANS-ENGINE-OWNERSHIP.md). Ils ne constituent pas des moteurs activés. La référence visuelle Fans reste conceptuelle ; aucun badge de la maquette ne prouve une vérification d'identité.
 
 La [fondation des publications](FANS-PUBLICATIONS.md) contient des politiques pures testées et une projection de teasers ; aucun stockage, upload, route ou média actif.
+
+La [simulation Progression/HoF](PROGRESSION-SIMULATION.md) teste les corrections sur faits fictifs. Elle ne crée ni niveau, badge, session HoF, PF, revenu ou score actif.

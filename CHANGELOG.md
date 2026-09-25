@@ -17,6 +17,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Simulation hors runtime de contributions membre et scores créateur : idempotence, révisions, remboursements et litiges, sans ledger ni score actif.
+
 - Fondation testée des politiques de publications Fans et projection minimale de cinq teasers explicitement sélectionnés ; aucun upload, route média ou transport activé.
 
 - Catalogue Fans opt-in avec deux catégories visibles, fiches structurées et refus serveur de toute tentative d'achat actuelle, API comprise.
