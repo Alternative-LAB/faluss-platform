@@ -2,14 +2,14 @@
 /**
  * Plugin Name: Faluss Platform
  * Description: Modular foundation for the Faluss WordPress ecosystem.
- * Version: 0.5.1
+ * Version: 0.5.2
  * Requires PHP: 8.2
  * Text Domain: faluss-platform
  */
 
 declare(strict_types=1);
 
-define('FALUSS_PLATFORM_VERSION', '0.5.1');
+define('FALUSS_PLATFORM_VERSION', '0.5.2');
 
 if (!defined('ABSPATH')) {
     exit;

@@ -128,3 +128,22 @@ Le Studio V3 comporte désormais **treize rubriques**. Liens utilise des opérat
 Les actions AJAX `faluss_studio_v3_manage` et `faluss_studio_v3_upload_content` exigent le flag V3, une session et leur nonce propre. Le sujet reste résolu côté serveur. `LinkStudioContract::mutate()` conserve les contrats fermés et la transaction de l’agrégat ; `create_content`, `update_content`, `delete_content` sont limités aux blocs texte/teaser. Les liens et collections réutilisent leurs mutations existantes. Aucune sauvegarde partielle ne remplace le flux complet, aucun curseur d’onboarding n’est modifié.
 
 Un enregistrement recharge la rubrique depuis l’état canonique. Les autres modifications non enregistrées nécessitent un choix explicite avant d’être abandonnées. Un conflit 409 laisse les champs saisis visibles. Les liens historiques non initialisés restent en lecture seule selon le contrat préexistant ; ce correctif ne force aucune migration. Les droits des teasers utilisent le catalogue et la décision serveur existants, sans nouvelle livraison de média protégé.
+
+
+## Studio V3 autonome — 0.5.2
+
+Sous le flag V3 existant, `MeStudioProvider` appelle `StudioV3::render()`.
+Le Studio possède son shell, sa feuille de style et son contrôleur ; il partage les contrôles V3 et les mutations fermées, sans afficher le téléphone ni le panneau d’onboarding.
+
+| Navigation | Rubriques existantes |
+| --- | --- |
+| Liens | Liens, Collections, Contenus et ordre (textes, teasers, ordre de tous les blocs) |
+| Design | Structure, Couleurs, Boutons, Avatar, Fond, Nom, Style des réseaux |
+| Profil | Identité, Réseaux, Réglages (bio/publication, en-tête, layout, thèmes, retrait des médias) |
+| Shop | Indisponible : aucun contrat de boutique membre exposé dans ce périmètre ; aucun produit fictif |
+
+Les URL `v3_section` existantes restent reconnues. L’aperçu est un dialogue natif ouvert à la demande, rendu par Link. Les éditeurs de blocs prévisualisent leur état **enregistré** ; leurs brouillons indépendants ne sont pas implicitement sauvegardés. La sortie compare les champs et l’ordre courant à leur état chargé ; un refus serveur ne réinitialise pas les champs. Une confirmation réussie recharge l’état canonique.
+
+Un compte déconnecté retrouve le lien de connexion ; un compte avec une création inachevée est dirigé vers V3. Une carte volontairement dépubliée après un curseur `complete` reste éditable dans le Studio. Aucun écran V1/V2 ne remplace une erreur V3.
+
+Recette et limites : [0.5.2](../evidence/me-v3-052/README.md). Les paragraphes de recette V2 ci-dessus décrivent le lot historique et ne valent pas preuve de production pour V3.

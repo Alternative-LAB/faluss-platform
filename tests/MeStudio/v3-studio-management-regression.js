@@ -4,7 +4,7 @@ const fs = require('fs'), path = require('path'), cp = require('child_process'),
 const {chromium} = require('playwright');
 const root = path.resolve(__dirname, '../..');
 const views = JSON.parse(cp.execFileSync(process.env.FALUSS_PHP, [path.join(__dirname, 'v3-composition-regression.php')], {encoding: 'utf8', env: {...process.env, FALUSS_V3_VIEWS: '1'}}));
-const js = fs.readFileSync(path.join(root, 'assets/me-studio/js/onboarding-v3.js'), 'utf8');
+const js = fs.readFileSync(path.join(root, 'assets/me-studio/js/studio-v3.js'), 'utf8');
 (async () => {
     const browser = await chromium.launch({headless: true, ...(process.env.FALUSS_CHROME ? {executablePath: process.env.FALUSS_CHROME} : {})});
     try {
@@ -17,7 +17,7 @@ const js = fs.readFileSync(path.join(root, 'assets/me-studio/js/onboarding-v3.js
                 return route.fulfill({status: 409, contentType: 'application/json', body: JSON.stringify({success: false, data: {code: 'stale_version'}})});
             }
             if (route.request().url() === 'https://studio.test/') {
-                return route.fulfill({contentType: 'text/html', body: `${views.v3_collections}<script>window.falussOnboardingV3={ajaxUrl:'/ajax',managementNonce:'test-nonce'};</script><script>${js}</script>`});
+                return route.fulfill({contentType: 'text/html', body: `${views.v3_collections}<script>window.falussStudioV3={ajaxUrl:'/ajax',managementNonce:'test-nonce'};</script><script>${js}</script>`});
             }
             return route.abort();
         });
