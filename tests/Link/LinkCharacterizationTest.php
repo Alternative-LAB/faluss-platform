@@ -13,11 +13,11 @@ final class LinkCharacterizationTest extends TestCase
         $target = dirname(__DIR__, 2) . '/assets/link';
         $files = [
             'css/faluss-link-discoveries.css' => 'ef4ff3a1f13f15456d06303694b278461bdbafdbe49bf8bdba57c0ba39872901',
-            'css/faluss-link-immersive.css' => 'dc5196f14b39282f81d42dcff218ef25358148ae4745d7cd8d01950f631821c0',
+            'css/faluss-link-immersive.css' => '5d0fb6c972663e4df7a7bdd1e6f549d8cfc4bbda90b58ccd4a587c20cf937d5c',
             'css/faluss-link-onboarding.css' => '86a31fa5fcd8f712b465291de5bb0f3def5608f792bf89c8bf012f13af30ac4e',
             'css/faluss-link-reward.css' => '40d9584e2f373e3e63e073e5e472e75fc34e56940bb78b763bfcc477c8e24371',
             'css/faluss-link-studio.css' => 'd605c7c6607d73a7f7927cced4aff9edf15670327c1fc64ff8c6a7a9a255e0cc',
-            'css/faluss-link.css' => 'd51156fe26719a4e68b2b9aeaa52f69acdb89961534c02e5636266b89abfcfa4',
+            'css/faluss-link.css' => '7c8cc9833a6bd227381427d4b179f136cda04fd6974458136c0b8de38bbcc45f',
             'js/faluss-link-card.js' => '94cafb8da5c001990dc433bbcdc3bfc201fffd37a3da50c747db8e3ecd5080b6',
             'js/faluss-link-editor.js' => '18a3a4bbdbfc0bf2278c4418bc678fb60d2e0ed412aa6ca8e8d9239c39dc2023',
             'js/faluss-link-immersive.js' => 'cf9b6e9cf7f1c16b91ea53c6da636b4fca252254468e3cfaf4a689c4f14980d2',

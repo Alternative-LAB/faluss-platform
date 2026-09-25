@@ -6,6 +6,26 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+- Livraison corrective Me V3 préparée ci-dessous ; aucun changement de configuration ni de données à la mise à jour.
+
+## [0.5.0] - 2026-09-25
+
+### Ajouté
+
+- Studio V3 natif sous le flag V3, indépendant du flag Studio V2 : dix rubriques, aperçu canonique, sauvegardes ciblées et conflits de version.
+
+### Corrigé
+
+- Composition publique Simple/Atomique et aperçu de même densité ; couverture compacte ou pleine, avatar stable et suppression des décalages immersifs incompatibles.
+- Priorité des choix temporaires sur le thème, bordure d'avatar identique avant/après sauvegarde, contraste serveur des boutons et invalidation immédiate des réponses d'aperçu obsolètes.
+- Panneau mobile, champs à 16 px, clavier sans déplacement de progression, logo du projet, onglets Réseaux masqués et confirmation autonome.
+- Graisse du nom incluse dans la version agrégée pour détecter les éditions concurrentes.
+
+### Compatibilité
+
+- Aucune migration ; données, médias, slug et blocs historiques conservés. Aucun changement au lot Fans, aux rôles ou au SSO.
+- Livraison GitHub uniquement ; validation iPhone/WordPress/Elementor réel laissée à l'utilisateur. Preuves locales dans `docs/evidence/me-v3-correction/`.
+
 ## [0.4.0] - 2026-09-25
 
 ### Ajouté
