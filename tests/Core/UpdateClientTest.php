@@ -25,4 +25,16 @@ final class UpdateClientTest extends TestCase
             UpdateClient::METADATA_URL
         );
     }
+
+    public function testSupportedWordPressMetadataHasAStableFallback(): void
+    {
+        self::assertSame('7.1', UpdateClient::SUPPORTED_WORDPRESS);
+        self::assertSame('7.1.2', UpdateClient::TESTED_WORDPRESS);
+        self::assertSame('8.2', UpdateClient::SUPPORTED_PHP);
+    }
+
+    public function testPluginUpdateCheckerRetainsWordPressRequirementMetadata(): void
+    {
+        self::assertContains('requires', UpdateClient::retainMetadataFields(['slug', 'tested']));
+    }
 }

@@ -3,6 +3,8 @@
  * Plugin Name: Faluss Platform
  * Description: Modular foundation for the Faluss WordPress ecosystem.
  * Version: 0.5.2
+ * Requires at least: 7.1
+ * Tested up to: 7.1.2
  * Requires PHP: 8.2
  * Text Domain: faluss-platform
  */
