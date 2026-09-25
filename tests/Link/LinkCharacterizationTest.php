@@ -17,7 +17,7 @@ final class LinkCharacterizationTest extends TestCase
             'css/faluss-link-onboarding.css' => '86a31fa5fcd8f712b465291de5bb0f3def5608f792bf89c8bf012f13af30ac4e',
             'css/faluss-link-reward.css' => '40d9584e2f373e3e63e073e5e472e75fc34e56940bb78b763bfcc477c8e24371',
             'css/faluss-link-studio.css' => 'd605c7c6607d73a7f7927cced4aff9edf15670327c1fc64ff8c6a7a9a255e0cc',
-            'css/faluss-link.css' => 'd2c08a15095d88654e1067b2da79f01c3ac5e5a486848927a01b486285981b58',
+            'css/faluss-link.css' => '56c71ee1c2bcc09bcbde3824239fb40b6dc8ab0498fe930606dc510369bee4ff',
             'js/faluss-link-card.js' => '94cafb8da5c001990dc433bbcdc3bfc201fffd37a3da50c747db8e3ecd5080b6',
             'js/faluss-link-editor.js' => '18a3a4bbdbfc0bf2278c4418bc678fb60d2e0ed412aa6ca8e8d9239c39dc2023',
             'js/faluss-link-immersive.js' => 'cf9b6e9cf7f1c16b91ea53c6da636b4fca252254468e3cfaf4a689c4f14980d2',

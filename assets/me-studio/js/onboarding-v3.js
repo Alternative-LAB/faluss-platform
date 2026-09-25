@@ -26,22 +26,80 @@
     var studio = root.dataset.studio === 'true';
     var dirty = false;
     var management = root.querySelector('[data-v3-management]');
-    function updateViewportHeight() {
-        // Keep the header on the layout viewport; only lift the panel above the keyboard.
+    var layoutHeight = window.innerHeight;
+    var layoutWidth = window.innerWidth;
+    var collapsedHeight = 300;
+    var keyboardOpen = false;
+    var scrollBeforeKeyboard = 0;
+    var keyboardSpacer = document.createElement('div');
+    keyboardSpacer.dataset.v3KeyboardSpacer = '';
+    keyboardSpacer.setAttribute('aria-hidden', 'true');
+    scroll.appendChild(keyboardSpacer);
+
+    function fitPanel() {
+        if (keyboardOpen || drag) { return; }
+        // Measure intrinsic controls without expanding the sheet or counting the keyboard spacer.
+        scroll.style.flex = '0 0 auto';
+        scroll.style.height = '0px';
+        var contentHeight = scroll.scrollHeight;
+        scroll.style.removeProperty('height');
+        scroll.style.removeProperty('flex');
+        var actions = root.querySelector('.faluss-onboarding-v3__actions');
+        var natural = contentHeight + grabber.offsetHeight + (actions ? actions.offsetHeight : 0) + 2;
+        // Text-entry steps reserve enough visible sheet above a typical overlay keyboard.
+        var textEntry = root.dataset.step === 'v3_identity' || root.dataset.step === 'v3_socials';
+        var minimum = textEntry ? layoutHeight * .64 : 230;
+        collapsedHeight = Math.min(maxHeight(), Math.max(minimum, Math.min(natural, layoutHeight * .66)));
+        root.style.setProperty('--v3-collapsed-height', Math.ceil(collapsedHeight) + 'px');
+    }
+
+    function revealActiveField() {
+        var active = document.activeElement;
+        if (!keyboardOpen || !active || !scroll.contains(active) || !active.matches('input, select, textarea')) { return; }
         var viewport = window.visualViewport;
-        var inset = viewport && viewport.scale === 1 ? Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop) : 0;
-        root.style.setProperty('--v3-keyboard', Math.round(inset) + 'px');
+        var box = scroll.getBoundingClientRect();
+        var visibleBottom = Math.min(box.bottom, viewport ? viewport.offsetTop + viewport.height : layoutHeight) - 10;
+        var visibleTop = box.top + 8;
+        var field = active.getBoundingClientRect();
+        if (field.bottom > visibleBottom) { scroll.scrollTop += field.bottom - visibleBottom; }
+        else if (field.top < visibleTop) { scroll.scrollTop -= visibleTop - field.top; }
+    }
+
+    function updateViewportHeight() {
+        var viewport = window.visualViewport;
+        if (viewport && viewport.scale !== 1) { return; } // Preserve intentional pinch zoom.
+        var inset = viewport ? Math.max(0, layoutHeight - viewport.height - viewport.offsetTop) : 0;
+        var opening = inset > 80;
+        if (!opening || window.innerWidth !== layoutWidth) {
+            layoutHeight = window.innerHeight;
+            layoutWidth = window.innerWidth;
+        }
+        root.style.setProperty('--v3-height', layoutHeight + 'px');
+        if (opening && !keyboardOpen) { scrollBeforeKeyboard = scroll.scrollTop; }
+        var closing = keyboardOpen && !opening;
+        keyboardOpen = opening;
+        root.classList.toggle('is-keyboard-open', keyboardOpen);
+        // Only add scroll range behind the keyboard. The sheet and footer never move.
+        var box = scroll.getBoundingClientRect();
+        var visibleBottom = viewport ? viewport.offsetTop + viewport.height : layoutHeight;
+        keyboardSpacer.style.height = keyboardOpen ? Math.max(0, box.bottom - visibleBottom + 18) + 'px' : '0px';
+        if (closing) { scroll.scrollTop = scrollBeforeKeyboard; }
+        if (!keyboardOpen) { fitPanel(); }
+        if (window.scrollY !== 0) { window.scrollTo(0, 0); }
+        revealActiveField();
     }
     updateViewportHeight();
+    window.addEventListener('resize', updateViewportHeight);
     if (window.visualViewport) {
         window.visualViewport.addEventListener('resize', updateViewportHeight);
         window.visualViewport.addEventListener('scroll', updateViewportHeight);
     }
+    if (document.fonts) { document.fonts.ready.then(fitPanel); }
     function scalePreview() {
         if (!previewHost || !previewHost.firstElementChild) { return; }
         var card = previewHost.firstElementChild;
         card.style.width = '390px';
-        card.style.setProperty('--fl-card-min-height', Math.max(440, window.innerWidth <= 768 ? window.innerHeight * 390 / window.innerWidth : 844) + 'px');
+        card.style.setProperty('--fl-card-min-height', Math.max(440, window.innerWidth <= 768 ? layoutHeight * 390 / window.innerWidth : 844) + 'px');
         card.style.zoom = String(previewHost.clientWidth / 390);
     }
     if (window.ResizeObserver && previewHost) { new ResizeObserver(scalePreview).observe(previewHost); }
@@ -323,6 +381,7 @@
             candidate.hidden = !active;
             candidate.toggleAttribute('inert', !active);
         });
+        fitPanel();
         if (focus) { tab.focus(); }
     }
 
@@ -332,11 +391,12 @@
         panel.style.removeProperty('height');
         grabber.setAttribute('aria-expanded', expanded ? 'true' : 'false');
         grabber.setAttribute('aria-label', expanded ? 'Réduire le panneau' : 'Agrandir le panneau');
-        if (!expanded) { scroll.scrollTop = 0; }
+        if (!expanded && !keyboardOpen) { scroll.scrollTop = 0; }
+        window.requestAnimationFrame(updateViewportHeight);
     }
 
     function panelHeight() { return panel.getBoundingClientRect().height; }
-    function maxHeight() { return root.getBoundingClientRect().height - root.querySelector('.faluss-onboarding-v3__header').getBoundingClientRect().height - (parseFloat(root.style.getPropertyValue('--v3-keyboard')) || 0) - 8; }
+    function maxHeight() { return root.getBoundingClientRect().height - root.querySelector('.faluss-onboarding-v3__header').getBoundingClientRect().height - 8; }
 
     grabber.addEventListener('click', function () {
         if (suppressGrabberClick) { suppressGrabberClick = false; return; }
@@ -355,7 +415,7 @@
         if (!drag) { return; }
         var distance = drag.y - event.clientY;
         if (Math.abs(distance) > 5) { drag.moved = true; }
-        if (drag.moved) { panel.style.height = Math.max(240, Math.min(maxHeight(), drag.height + distance)) + 'px'; }
+        if (drag.moved) { panel.style.height = Math.max(collapsedHeight, Math.min(maxHeight(), drag.height + distance)) + 'px'; }
     });
     function finishDrag() {
         if (!drag) { return; }
@@ -364,19 +424,20 @@
         panel.classList.remove('is-dragging');
         if (moved) {
             suppressGrabberClick = true;
-            setExpanded(panelHeight() > (maxHeight() + 240) / 2);
+            setExpanded(panelHeight() > (maxHeight() + collapsedHeight) / 2);
         }
     }
     grabber.addEventListener('pointerup', finishDrag);
     grabber.addEventListener('pointercancel', finishDrag);
     panel.addEventListener('wheel', function (event) {
+        if (keyboardOpen) { return; }
         if (!expanded && event.deltaY > 0) { event.preventDefault(); setExpanded(true); }
         else if (expanded && scroll.scrollTop <= 0 && event.deltaY < 0) { event.preventDefault(); setExpanded(false); }
     }, { passive: false });
 
     var touchDrag = null;
     panel.addEventListener('touchstart', function (event) {
-        if (event.touches.length === 1 && !event.target.closest('input, select, textarea, button, a')) {
+        if (!keyboardOpen && event.touches.length === 1 && !event.target.closest('input, select, textarea, button, a')) {
             touchDrag = { y: event.touches[0].clientY, height: panelHeight(), moved: false };
         }
     }, { passive: true });
@@ -390,14 +451,14 @@
         touchDrag.moved = true;
         event.preventDefault();
         panel.classList.add('is-dragging');
-        panel.style.height = Math.max(240, Math.min(maxHeight(), touchDrag.height + delta)) + 'px';
+        panel.style.height = Math.max(collapsedHeight, Math.min(maxHeight(), touchDrag.height + delta)) + 'px';
     }, { passive: false });
     panel.addEventListener('touchend', function () {
         if (!touchDrag) { return; }
         var moved = touchDrag.moved;
         touchDrag = null;
         panel.classList.remove('is-dragging');
-        if (moved) { setExpanded(panelHeight() > (maxHeight() + 240) / 2); }
+        if (moved) { setExpanded(panelHeight() > (maxHeight() + collapsedHeight) / 2); }
     }, { passive: true });
 
     root.addEventListener('click', function (event) {
@@ -484,6 +545,7 @@
             var custom = root.querySelector('[data-v3-color="' + event.target.name + '"]');
             if (custom) { custom.dataset.selected = 'false'; }
         }
+        fitPanel();
         schedulePreview();
         scheduleIdentityDraft();
     });
@@ -499,7 +561,7 @@
         submit(root.dataset.step === 'v3_review' ? 'publish' : 'next');
     });
     panel.addEventListener('focusin', function (event) {
-        if (event.target.matches('input, select, textarea')) { setExpanded(true); }
+        if (event.target.matches('input, select, textarea')) { window.requestAnimationFrame(updateViewportHeight); }
     });
     root.querySelector('h1').focus({ preventScroll: true });
 }());

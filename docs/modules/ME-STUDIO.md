@@ -147,3 +147,5 @@ Les URL `v3_section` existantes restent reconnues. L’aperçu est un dialogue n
 Un compte déconnecté retrouve le lien de connexion ; un compte avec une création inachevée est dirigé vers V3. Une carte volontairement dépubliée après un curseur `complete` reste éditable dans le Studio. Aucun écran V1/V2 ne remplace une erreur V3.
 
 Recette et limites : [0.5.2](../evidence/me-v3-052/README.md). Les paragraphes de recette V2 ci-dessus décrivent le lot historique et ne valent pas preuve de production pour V3.
+
+Le réglage d’alignement historique reste stocké et transmis sans modification, mais V3 présente désormais une composition constamment centrée. Réglages affiche cette décision au lieu de proposer un choix Gauche qui ne serait pas appliqué. Le CSS Link commun (assets 0.4.1) descend le groupe d’identité selon le viewport et le mode de couverture ; aperçu, public, shortcode et Elementor suivent les mêmes règles.

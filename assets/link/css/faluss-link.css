@@ -126,3 +126,13 @@ body.faluss-identity-public-route .faluss-link-card--canonical {margin:0;max-wid
 
 /* Full-page host shares the canonical canvas; only the content has a reading width. */
 body.faluss-identity-public-route .faluss-link-card--canonical > .faluss-link-card__body {max-width:560px;margin-inline:auto}
+
+/* V3 composition is centered in every host; saved legacy alignment is retained.
+   Stable viewport units keep this spacing unchanged when the keyboard overlays the editor. */
+.faluss-link-card.faluss-link-card--canonical {--fl-identity-top:clamp(64px,12svh,104px)}
+.faluss-link-card.faluss-link-card--canonical.faluss-link-card--cover-yes {--fl-identity-top:clamp(80px,16svh,140px)}
+.faluss-link-card.faluss-link-card--canonical.faluss-link-card--cover-yes.faluss-link-card--wallpaper-cover {--fl-identity-top:clamp(96px,20svh,168px)}
+.faluss-link-card.faluss-link-card--canonical.faluss-link-card--cover-yes .faluss-link-card__body,.faluss-link-card.faluss-link-card--canonical.faluss-link-card--cover-no .faluss-link-card__body {padding-top:var(--fl-identity-top);text-align:center}
+.faluss-link-card.faluss-link-card--canonical .faluss-link-card__avatar {margin-inline:auto}
+.faluss-link-card.faluss-link-card--canonical .faluss-link-card__name,.faluss-link-card.faluss-link-card--canonical .faluss-link-card__handle {text-align:center}
+.faluss-link-card.faluss-link-card--canonical .faluss-link-card__social {justify-content:center}

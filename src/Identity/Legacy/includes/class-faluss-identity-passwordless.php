@@ -403,7 +403,7 @@ final class Faluss_Identity_Passwordless {
         } catch ( Throwable $exception ) {
             $wpdb->query( 'ROLLBACK' );
             // WP user/meta caches can have been filled before a rolled-back insert.
-            // A user_register hook may throw before wp_insert_user returns its ID.
+            // A user_register hook may throw before the local insert returns its ID.
             if ( ! $touched_user instanceof WP_User && null !== $email ) { $touched_user = get_user_by( 'email', $email ); }
             if ( $touched_user instanceof WP_User ) {
                 clean_user_cache( $touched_user );

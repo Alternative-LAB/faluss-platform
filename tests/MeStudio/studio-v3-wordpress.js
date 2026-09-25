@@ -19,7 +19,21 @@ await page.goto(fixture.studio+'?v3_section=v3_identity');await page.locator('[n
 await Promise.all([page.waitForEvent('load'),page.locator('[data-v3-primary]').click()]);assert.equal(await page.locator('[name=display_name]').inputValue(),'Camille enregistrée');await page.locator('.faluss-studio-v3__bottom a').filter({hasText:'Design'}).click();await page.waitForURL(/v3_colors/);await page.reload();assert.deepEqual(dialogs,[]);
 
 await page.locator('[data-studio-preview-open]').click();await page.locator('dialog').waitFor({state:'visible'});assert.equal(await page.locator('.faluss-onboarding-v3__phone').count(),0);await page.screenshot({path:'docs/evidence/me-v3-052/full-preview-390.png'});await page.locator('[data-studio-preview-close]').click();
-for(const url of [base+'/'+fixture.slug+'/',fixture.shortcode,fixture.elementor]){await page.goto(url);assert.match(await page.locator('.faluss-link-card').innerText(),/Camille enregistrée/);}
+async function centeredCard() {
+ const card=page.locator('.faluss-link-card--canonical').first();
+ const geometry=await card.evaluate(e=>{
+  const name=e.querySelector('.faluss-link-card__name'),handle=e.querySelector('.faluss-link-card__handle'),social=e.querySelector('.faluss-link-card__social'),avatar=e.querySelector('.faluss-link-card__avatar');
+  const body=e.querySelector('.faluss-link-card__body'),b=body.getBoundingClientRect(),a=avatar?.getBoundingClientRect();
+  return {name:getComputedStyle(name).textAlign,handle:getComputedStyle(handle).textAlign,social:social?getComputedStyle(social).justifyContent:null,avatarOffset:a?.width?Math.abs(a.x+a.width/2-b.x-b.width/2):null,padding:parseFloat(getComputedStyle(body).paddingTop)};
+ });
+ assert.equal(geometry.name,'center');assert.equal(geometry.handle,'center');if(geometry.social)assert.equal(geometry.social,'center');assert(geometry.avatarOffset===null||geometry.avatarOffset<1);assert(geometry.padding>=64);
+ return geometry;
+}
+const composition=[];
+await page.locator('[data-studio-preview-open]').click();composition.push({host:'preview',...await centeredCard()});await page.locator('[data-studio-preview-close]').click();
+for(const [host,url] of [['public',base+'/'+fixture.slug+'/'],['shortcode',fixture.shortcode],['elementor',fixture.elementor]]){await page.goto(url);assert.match(await page.locator('.faluss-link-card').innerText(),/Camille enregistrée/);composition.push({host,...await centeredCard()});}
+assert(composition.every(c=>c.padding===composition[0].padding),'Same canonical spacing in every host');
+fs.writeFileSync('docs/evidence/me-v3-052/composition-local.json',JSON.stringify(composition,null,2));
 await page.goto(fixture.studio+'?v3_section=v3_identity');
 const concurrent=await context.newPage();await concurrent.goto(fixture.studio+'?v3_section=v3_identity');await concurrent.locator('[name=display_name]').fill('Camille autre session');await Promise.all([concurrent.waitForEvent('load'),concurrent.locator('[data-v3-primary]').click()]);
 await page.locator('[name=display_name]').fill('Valeur conservée après conflit');const responsePromise=page.waitForResponse(r=>r.url().includes('admin-ajax.php')&&r.request().postData()?.includes('faluss_studio_v3_save'));await page.locator('[data-v3-primary]').click();const conflict=await responsePromise;assert.equal(conflict.status(),409);const conflictBody=await conflict.json();assert.equal(conflictBody.data.code,'stale_version');await page.locator('[data-v3-error]').waitFor({state:'visible'});assert.equal(await page.locator('[name=display_name]').inputValue(),'Valeur conservée après conflit');

@@ -60,7 +60,7 @@ final class LinkModuleTest extends TestCase
         self::assertTrue(class_exists('Faluss_Link_Events_Runtime', false));
         self::assertSame('4', \Faluss_Link_Schema::VERSION);
         self::assertSame('faluss_link_schema_version', \Faluss_Link_Schema::OPTION);
-        self::assertSame('0.4.0', LinkModule::VERSION);
+        self::assertSame('0.4.1', LinkModule::VERSION);
         $moduleSource = file_get_contents(dirname(__DIR__, 2) . '/src/Link/LinkModule.php');
         self::assertIsString($moduleSource);
         self::assertStringContainsString('Faluss_Link_Schema::maybe_install();', $moduleSource);

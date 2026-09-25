@@ -22,7 +22,7 @@ final class IdentityCharacterizationTest extends TestCase
             'class-faluss-identity-navigation.php' => 'a28c6b56e7d7093164da35fc1b5aa1e1941d41535e8b490d4a876860c0b8f9ae',
             'class-faluss-identity-onboarding-elementor-widget.php' => 'e22059042b83a245154b784570db3a1c05a4e4907d75f40da7a65d99a51c32af',
             'class-faluss-identity-onboarding.php' => '009b55fc513feb83ad6115a9af8dc797183a665889159059ea7862e9b37fe2f6',
-            'class-faluss-identity-passwordless.php' => '69be6832c9766c0803d08a4065b76a7c0b0fc6674da2ec90910bf485a154388c',
+            'class-faluss-identity-passwordless.php' => '3d1aa52e40bf0303cae7e494fc7ebe27f2a3acbd874b0e33e85b6c11a2501fe7',
             'class-faluss-identity-plugin.php' => 'a8ff95f0bf076b0ee36cdcea3104215a1b7e43045225d4cb72ec02e221217ffa',
             'class-faluss-identity-public-profile-elementor-widgets.php' => '9b10d26e71ccecb4784f959e51775bb89b83bac5a400d9e6364de69472a30aa3',
             'class-faluss-identity-public-profile.php' => 'c91efb6619368e79e44d4c74cbe3c25b90068843895b5bde266e12efef0923a2',
