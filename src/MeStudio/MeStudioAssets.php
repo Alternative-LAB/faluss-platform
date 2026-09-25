@@ -63,6 +63,9 @@ final class MeStudioAssets
         }
         wp_localize_script(self::ONBOARDING_V3_SCRIPT, 'falussOnboardingV3', [
             'ajaxUrl' => admin_url('admin-ajax.php'),
+            'managementNonce' => wp_create_nonce('faluss_studio_v3_manage'),
+            'contentNonce' => wp_create_nonce('faluss_studio_v3_upload_content'),
+            'studioNonce' => wp_create_nonce('faluss_studio_v3_save'),
             'transitionNonce' => wp_create_nonce('faluss_onboarding_v3_transition'),
             'identityDraftNonce' => wp_create_nonce('faluss_onboarding_v3_identity_draft'),
             'previewNonce' => wp_create_nonce('faluss_onboarding_v3_preview'),
@@ -73,6 +76,29 @@ final class MeStudioAssets
         wp_enqueue_style(self::CARD_STYLE);
         wp_enqueue_style(self::ONBOARDING_V3_STYLE);
         wp_enqueue_script(self::ONBOARDING_V3_SCRIPT);
+    }
+
+    public static function enqueueStudioV3(): void
+    {
+        self::register();
+        $file = dirname(__DIR__, 2) . '/faluss-platform.php';
+        wp_enqueue_style('faluss-studio-v3', plugins_url('assets/me-studio/css/studio-v3.css', $file), [self::CARD_STYLE], MeStudioModule::VERSION);
+        wp_enqueue_script('faluss-studio-v3', plugins_url('assets/me-studio/js/studio-v3.js', $file), [], MeStudioModule::VERSION, true);
+        wp_localize_script('faluss-studio-v3', 'falussStudioV3', self::studioV3Config());
+    }
+
+    /** @return array<string, string> Fresh credentials for the server-rendered Studio view. */
+    public static function studioV3Config(): array
+    {
+        return [
+            'ajaxUrl' => admin_url('admin-ajax.php'),
+            'managementNonce' => wp_create_nonce('faluss_studio_v3_manage'),
+            'contentNonce' => wp_create_nonce('faluss_studio_v3_upload_content'),
+            'studioNonce' => wp_create_nonce('faluss_studio_v3_save'),
+            'previewNonce' => wp_create_nonce('faluss_onboarding_v3_preview'),
+            'avatarNonce' => wp_create_nonce('faluss_onboarding_v3_upload_avatar'),
+            'coverNonce' => wp_create_nonce('faluss_onboarding_v3_upload_cover'),
+        ];
     }
 
     private static function register(): void

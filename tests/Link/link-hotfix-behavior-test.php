@@ -63,6 +63,7 @@ class WP_Post {
 function get_post( $id ) { return wp_attachment_is_image( $id ) ? new WP_Post() : null; }
 
 final class Faluss_Link_Schema {
+    public static function composition_ready() { return ! empty( $GLOBALS['fl_test_composition_ready'] ); }
     public static function table() { return 'wp_faluss_link_cards'; }
     public static function blocks_table() { return 'wp_faluss_link_blocks'; }
 }
@@ -182,7 +183,7 @@ fl_hotfix_assert( false !== strpos( $editor, 'if (state) { hydrateCanonicalBlock
 fl_hotfix_assert( false === strpos( $editor, 'new FormData(form[0])' ) && false === strpos( $editor, 'if (studio.data(\'falussLinkSaving\')) { return' ), 'A full form or active-save early return may not drive Studio persistence.' );
 fl_hotfix_assert( false !== strpos( $onboarding, 'applyOnboardingTheme' ) && false !== strpos( $source, 'self::theme_picker( $preferences )' ), 'Onboarding must expose and persist the canonical theme selector.' );
 fl_hotfix_assert( false === strpos( $source, "studio_empty_state( 'collection' )" ) && false !== strpos( $source, "array( 'links', 'collections' )" ), 'The generic Empty State helper must accept only the two real empty-panel kinds.' );
-fl_hotfix_assert( false !== strpos( $link_bootstrap, "VERSION = '0.4.0'" ) && false !== strpos( $portal_bootstrap, "VERSION = '0.1.24'" ), 'FL-HOTFIX-01.3 behavior must remain present while Link and Portal advance independently.' );
+fl_hotfix_assert( false !== strpos( $link_bootstrap, "VERSION = '0.4.1'" ) && false !== strpos( $portal_bootstrap, "VERSION = '0.1.24'" ), 'FL-HOTFIX-01.3 behavior must remain present while Link and Portal advance independently.' );
 
 global $wpdb, $fl_hotfix_fail_stage, $fl_hotfix_permalink;
 $fl_hotfix_fail_stage = '';

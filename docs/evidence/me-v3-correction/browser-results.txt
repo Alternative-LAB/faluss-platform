@@ -1,0 +1,8 @@
+chromium 320: tabs, expand/scroll, 16px fields, keyboard inset/header OK
+chromium 390: tabs, expand/scroll, 16px fields, keyboard inset/header OK
+chromium 768: tabs, expand/scroll, 16px fields, keyboard inset/header OK
+chromium: repeated wallpaper transitions, Simple/Atomic, public/preview geometry OK
+webkit 320: tabs, expand/scroll, 16px fields, keyboard inset/header OK
+webkit 390: tabs, expand/scroll, 16px fields, keyboard inset/header OK
+webkit 768: tabs, expand/scroll, 16px fields, keyboard inset/header OK
+webkit: repeated wallpaper transitions, Simple/Atomic, public/preview geometry OK

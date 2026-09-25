@@ -18,17 +18,96 @@
     var draftRevision = 0;
     var draftQueue = Promise.resolve();
     var pending = false;
+    var uploading = false;
     var expanded = false;
     var drag = null;
     var suppressGrabberClick = false;
 
+    var studio = root.dataset.studio === 'true';
+    var dirty = false;
+    var management = root.querySelector('[data-v3-management]');
+    var layoutHeight = window.innerHeight;
+    var layoutWidth = window.innerWidth;
+    var collapsedHeight = 300;
+    var keyboardOpen = false;
+    var scrollBeforeKeyboard = 0;
+    var keyboardSpacer = document.createElement('div');
+    keyboardSpacer.dataset.v3KeyboardSpacer = '';
+    keyboardSpacer.setAttribute('aria-hidden', 'true');
+    scroll.appendChild(keyboardSpacer);
+
+    function fitPanel() {
+        if (keyboardOpen || drag) { return; }
+        // Measure intrinsic controls without expanding the sheet or counting the keyboard spacer.
+        scroll.style.flex = '0 0 auto';
+        scroll.style.height = '0px';
+        var contentHeight = scroll.scrollHeight;
+        scroll.style.removeProperty('height');
+        scroll.style.removeProperty('flex');
+        var actions = root.querySelector('.faluss-onboarding-v3__actions');
+        var natural = contentHeight + grabber.offsetHeight + (actions ? actions.offsetHeight : 0) + 2;
+        // Text-entry steps reserve enough visible sheet above a typical overlay keyboard.
+        var textEntry = root.dataset.step === 'v3_identity' || root.dataset.step === 'v3_socials';
+        var minimum = textEntry ? layoutHeight * .64 : 230;
+        collapsedHeight = Math.min(maxHeight(), Math.max(minimum, Math.min(natural, layoutHeight * .66)));
+        root.style.setProperty('--v3-collapsed-height', Math.ceil(collapsedHeight) + 'px');
+    }
+
+    function revealActiveField() {
+        var active = document.activeElement;
+        if (!keyboardOpen || !active || !scroll.contains(active) || !active.matches('input, select, textarea')) { return; }
+        var viewport = window.visualViewport;
+        var box = scroll.getBoundingClientRect();
+        var visibleBottom = Math.min(box.bottom, viewport ? viewport.offsetTop + viewport.height : layoutHeight) - 10;
+        var visibleTop = box.top + 8;
+        var field = active.getBoundingClientRect();
+        var delta = field.bottom > visibleBottom ? field.bottom - visibleBottom : Math.min(0, field.top - visibleTop);
+        if (Math.abs(delta) > 1) { scroll.scrollTo({ top: scroll.scrollTop + delta, behavior: 'instant' }); }
+    }
+
     function updateViewportHeight() {
-        if (window.visualViewport) {
-            root.style.setProperty('--v3-height', Math.round(window.visualViewport.height) + 'px');
+        var viewport = window.visualViewport;
+        if (viewport && viewport.scale !== 1) { return; } // Preserve intentional pinch zoom.
+        var inset = viewport ? Math.max(0, layoutHeight - viewport.height - viewport.offsetTop) : 0;
+        var opening = inset > 80;
+        if (!opening || window.innerWidth !== layoutWidth) {
+            layoutHeight = window.innerHeight;
+            layoutWidth = window.innerWidth;
         }
+        root.style.setProperty('--v3-height', layoutHeight + 'px');
+        if (opening && !keyboardOpen) { scrollBeforeKeyboard = scroll.scrollTop; }
+        var closing = keyboardOpen && !opening;
+        keyboardOpen = opening;
+        root.classList.toggle('is-keyboard-open', keyboardOpen);
+        // Only add scroll range behind the keyboard. The sheet and footer never move.
+        var box = scroll.getBoundingClientRect();
+        var visibleBottom = viewport ? viewport.offsetTop + viewport.height : layoutHeight;
+        keyboardSpacer.style.height = keyboardOpen ? Math.max(0, box.bottom - visibleBottom + 18) + 'px' : '0px';
+        if (closing) { scroll.scrollTo({ top: scrollBeforeKeyboard, behavior: 'instant' }); }
+        if (!keyboardOpen) { fitPanel(); }
+        revealActiveField();
     }
     updateViewportHeight();
-    if (window.visualViewport) { window.visualViewport.addEventListener('resize', updateViewportHeight); }
+    var viewportFrame = 0;
+    function scheduleViewportUpdate() {
+        if (viewportFrame) { return; }
+        viewportFrame = window.requestAnimationFrame(function () { viewportFrame = 0; updateViewportHeight(); });
+    }
+    window.addEventListener('resize', scheduleViewportUpdate);
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', scheduleViewportUpdate);
+        // Safari owns visual-viewport panning. Never answer its scroll with another scroll.
+    }
+    if (document.fonts) { document.fonts.ready.then(fitPanel); }
+    function scalePreview() {
+        if (!previewHost || !previewHost.firstElementChild) { return; }
+        var card = previewHost.firstElementChild;
+        card.style.width = '390px';
+        card.style.setProperty('--fl-card-min-height', Math.max(440, window.innerWidth <= 768 ? layoutHeight * 390 / window.innerWidth : 844) + 'px');
+        card.style.zoom = String(previewHost.clientWidth / 390);
+    }
+    if (window.ResizeObserver && previewHost) { new ResizeObserver(scalePreview).observe(previewHost); }
+    scalePreview();
 
     function notice(message, failed) {
         if (error) { error.textContent = failed ? message : ''; error.hidden = !failed; }
@@ -121,6 +200,7 @@
                 if (revision !== previewRevision) { return; }
                 if (!payload.success || !payload.data || !payload.data.preview_html) { throw new Error(serverError(payload, 'preview_failed')); }
                 previewHost.innerHTML = payload.data.preview_html;
+                scalePreview();
                 if (status) { status.textContent = 'Aperçu à jour.'; }
             }).catch(function (failure) {
                 if (failure.name !== 'AbortError' && revision === previewRevision) { notice(failure.message || 'Aperçu indisponible.', true); }
@@ -128,12 +208,15 @@
     }
 
     function schedulePreview() {
+        if (management) { return; }
+        ++previewRevision;
+        if (previewRequest) { previewRequest.abort(); }
         window.clearTimeout(timer);
         timer = window.setTimeout(preview, 120);
     }
 
     function saveIdentityDraftNow() {
-        if (root.dataset.step !== 'v3_identity') { return Promise.resolve(); }
+        if (studio || root.dataset.step !== 'v3_identity') { return Promise.resolve(); }
         window.clearTimeout(draftTimer);
         var revision = ++draftRevision;
         var snapshot = JSON.stringify(fields());
@@ -149,7 +232,7 @@
     }
 
     function scheduleIdentityDraft() {
-        if (root.dataset.step !== 'v3_identity') { return; }
+        if (studio || root.dataset.step !== 'v3_identity') { return; }
         window.clearTimeout(draftTimer);
         ++draftRevision;
         draftTimer = window.setTimeout(function () {
@@ -160,7 +243,7 @@
     }
 
     function submit(direction) {
-        if (pending) { return; }
+        if (pending || uploading) { return; }
         pending = true;
         window.clearTimeout(draftTimer);
         ++draftRevision;
@@ -169,11 +252,13 @@
         notice(direction === 'publish' ? 'Publication…' : 'Enregistrement…', false);
         var action = direction === 'publish' ? 'faluss_onboarding_v3_publish' : 'faluss_onboarding_v3_transition';
         var nonce = direction === 'publish' ? config.publishNonce : config.transitionNonce;
+        if (studio) { action = 'faluss_studio_v3_save'; nonce = config.studioNonce; }
         var payload = direction === 'publish' ? { version: root.dataset.version || '' } : {
             step: root.dataset.step || '', direction: direction, version: root.dataset.version || '', fields: JSON.stringify(fields())
         };
         draftQueue.catch(function () {}).then(function () { return post(action, nonce, payload); }).then(function (response) {
             if (!response.success) { throw new Error(serverError(response, direction === 'publish' ? 'publish_failed' : 'save_failed')); }
+            dirty = false;
             window.location.reload();
         }).catch(function (failure) {
             notice(failure.message || 'Action impossible. Réessayez.', true);
@@ -196,7 +281,9 @@
         data.append('action', action);
         data.append('nonce', nonce || '');
         data.append(kind, file, file.name);
+        uploading = true;
         input.disabled = true;
+        dirty = true;
         notice('Envoi de l’image…', false);
         fetch(config.ajaxUrl, { method: 'POST', credentials: 'same-origin', body: data }).then(function (response) {
             return response.text().then(function (raw) {
@@ -219,7 +306,71 @@
             schedulePreview();
         }).catch(function (failure) {
             notice(failure.message || 'Envoi impossible.', true);
-        }).finally(function () { input.disabled = false; });
+        }).finally(function () { uploading = false; input.disabled = false; });
+    }
+
+    function itemId() {
+        return window.crypto.randomUUID();
+    }
+
+    function saveItem(editor, removal) {
+        if (pending || uploading) { return; }
+        if (Array.from(root.querySelectorAll('[data-v3-editor][data-dirty]')).some(function (other) { return other !== editor; })) {
+            if (!window.confirm('Enregistrer cet élément et abandonner les modifications non enregistrées des autres éléments ?')) { return; }
+        }
+        if (removal && !window.confirm(removal === 'dissolve_collection' ? 'Dissoudre cette collection et conserver ses contenus ?' : 'Supprimer cet élément ?')) { return; }
+        var values = {};
+        var mutation = removal || editor.dataset.mutation;
+        if (!removal) {
+            editor.querySelectorAll('[data-field]').forEach(function (field) { values[field.dataset.field] = field.value; });
+        }
+        if (editor.dataset.id) { values.block_id = editor.dataset.id; }
+        if (mutation.indexOf('create_') === 0) { values.block_id = itemId(); }
+        if (mutation === 'create_collection') { values.description_block_id = itemId(); }
+        if (mutation === 'reorder_blocks') { values.block_ids = Array.from(editor.querySelectorAll('[data-block-id]')).map(function (row) { return row.dataset.blockId; }); }
+        pending = true;
+        editor.querySelectorAll('button').forEach(function (button) { button.disabled = true; });
+        notice('Enregistrement…', false);
+        post('faluss_studio_v3_manage', config.managementNonce, {
+            mutation: mutation, version: root.dataset.version || '', fields: JSON.stringify(values)
+        }).then(function (response) {
+            if (!response.success) { throw new Error(serverError(response, 'save_failed')); }
+            dirty = false;
+            window.location.reload();
+        }).catch(function (failure) {
+            notice(failure.message || 'Enregistrement impossible.', true);
+            pending = false;
+            editor.querySelectorAll('button').forEach(function (button) { button.disabled = false; });
+        });
+    }
+
+    function uploadContent(input) {
+        if (pending || uploading) { return; }
+        var file = input.files && input.files[0];
+        if (!file) { return; }
+        if (!/^(image\/jpeg|image\/png|image\/gif|image\/webp)$/.test(file.type) || file.size > 8 * 1024 * 1024) {
+            notice('Choisissez une image JPEG, PNG, GIF ou WebP de 8 Mo maximum.', true); return;
+        }
+        var editor = input.closest('[data-v3-editor]');
+        var data = new FormData();
+        data.append('action', 'faluss_studio_v3_upload_content');
+        data.append('nonce', config.contentNonce || '');
+        data.append('content_image', file, file.name);
+        uploading = true; input.disabled = true;
+        notice('Envoi de l’image…', false);
+        fetch(config.ajaxUrl, {method: 'POST', credentials: 'same-origin', body: data}).then(function (response) {
+            return response.text().then(function (raw) {
+                var result;
+                try { result = JSON.parse(raw); } catch (ignored) { throw new Error('Réponse serveur illisible (HTTP ' + response.status + ').'); }
+                result.httpStatus = response.status; return result;
+            });
+        }).then(function (result) {
+            if (!result.success || !result.data || !result.data.id) { throw new Error(serverError(result, 'upload_failed')); }
+            editor.querySelector('[data-field="attachment_id"]').value = result.data.id;
+            editor.dataset.dirty = 'true'; dirty = true;
+            notice('Image prête. Enregistre cet élément pour l’appliquer à ta carte.', false);
+        }).catch(function (failure) { notice(failure.message, true); })
+            .finally(function () { uploading = false; input.disabled = false; });
     }
 
     function activateTab(tab, focus) {
@@ -234,6 +385,7 @@
             candidate.hidden = !active;
             candidate.toggleAttribute('inert', !active);
         });
+        fitPanel();
         if (focus) { tab.focus(); }
     }
 
@@ -243,7 +395,8 @@
         panel.style.removeProperty('height');
         grabber.setAttribute('aria-expanded', expanded ? 'true' : 'false');
         grabber.setAttribute('aria-label', expanded ? 'Réduire le panneau' : 'Agrandir le panneau');
-        if (!expanded) { scroll.scrollTop = 0; }
+        if (!expanded && !keyboardOpen) { scroll.scrollTop = 0; }
+        window.requestAnimationFrame(updateViewportHeight);
     }
 
     function panelHeight() { return panel.getBoundingClientRect().height; }
@@ -266,7 +419,7 @@
         if (!drag) { return; }
         var distance = drag.y - event.clientY;
         if (Math.abs(distance) > 5) { drag.moved = true; }
-        if (drag.moved) { panel.style.height = Math.max(240, Math.min(maxHeight(), drag.height + distance)) + 'px'; }
+        if (drag.moved) { panel.style.height = Math.max(collapsedHeight, Math.min(maxHeight(), drag.height + distance)) + 'px'; }
     });
     function finishDrag() {
         if (!drag) { return; }
@@ -275,19 +428,20 @@
         panel.classList.remove('is-dragging');
         if (moved) {
             suppressGrabberClick = true;
-            setExpanded(panelHeight() > (maxHeight() + 240) / 2);
+            setExpanded(panelHeight() > (maxHeight() + collapsedHeight) / 2);
         }
     }
     grabber.addEventListener('pointerup', finishDrag);
     grabber.addEventListener('pointercancel', finishDrag);
     panel.addEventListener('wheel', function (event) {
+        if (keyboardOpen) { return; }
         if (!expanded && event.deltaY > 0) { event.preventDefault(); setExpanded(true); }
         else if (expanded && scroll.scrollTop <= 0 && event.deltaY < 0) { event.preventDefault(); setExpanded(false); }
     }, { passive: false });
 
     var touchDrag = null;
     panel.addEventListener('touchstart', function (event) {
-        if (event.touches.length === 1 && !event.target.closest('input, select, textarea, button, a')) {
+        if (!keyboardOpen && event.touches.length === 1 && !event.target.closest('input, select, textarea, button, a')) {
             touchDrag = { y: event.touches[0].clientY, height: panelHeight(), moved: false };
         }
     }, { passive: true });
@@ -301,18 +455,36 @@
         touchDrag.moved = true;
         event.preventDefault();
         panel.classList.add('is-dragging');
-        panel.style.height = Math.max(240, Math.min(maxHeight(), touchDrag.height + delta)) + 'px';
+        panel.style.height = Math.max(collapsedHeight, Math.min(maxHeight(), touchDrag.height + delta)) + 'px';
     }, { passive: false });
     panel.addEventListener('touchend', function () {
         if (!touchDrag) { return; }
         var moved = touchDrag.moved;
         touchDrag = null;
         panel.classList.remove('is-dragging');
-        if (moved) { setExpanded(panelHeight() > (maxHeight() + 240) / 2); }
+        if (moved) { setExpanded(panelHeight() > (maxHeight() + collapsedHeight) / 2); }
     }, { passive: true });
 
     root.addEventListener('click', function (event) {
         var target = event.target;
+        var editor = target.closest('[data-v3-editor]');
+        if (editor) {
+            if (target.closest('[data-v3-save-item]')) { saveItem(editor, ''); return; }
+            var remove = target.closest('[data-v3-delete-item]');
+            if (remove) { saveItem(editor, remove.dataset.v3DeleteItem); return; }
+            if (target.closest('[data-v3-remove-image]')) {
+                editor.querySelector('[data-field="attachment_id"]').value = '0';
+                var image = editor.querySelector('img'); if (image) { image.remove(); }
+                editor.dataset.dirty = 'true'; dirty = true; return;
+            }
+            var order = target.closest('[data-v3-order]');
+            if (order) {
+                var row = order.closest('[data-block-id]');
+                if (order.dataset.v3Order === 'up' && row.previousElementSibling) { row.parentNode.insertBefore(row, row.previousElementSibling); }
+                if (order.dataset.v3Order === 'down' && row.nextElementSibling) { row.parentNode.insertBefore(row.nextElementSibling, row); }
+                order.focus(); editor.dataset.dirty = 'true'; dirty = true; return;
+            }
+        }
         if (target.closest('[data-v3-back]')) { submit('back'); return; }
         if (target.closest('[data-v3-skip]')) { submit('skip'); return; }
         var tab = target.closest('[data-v3-tab]');
@@ -348,6 +520,20 @@
         event.preventDefault(); activateTab(tabs[index], true);
     });
     root.addEventListener('change', function (event) {
+        if (event.target.matches('[data-v3-section]')) {
+            if (dirty && !window.confirm('Quitter cette rubrique sans enregistrer les modifications ?')) { event.target.value = root.dataset.step; return; }
+            var url = new URL(window.location.href);
+            url.searchParams.set('v3_section', event.target.value);
+            window.location.assign(url.href);
+            return;
+        }
+        dirty = true;
+        if (management) {
+            var editor = event.target.closest('[data-v3-editor]');
+            if (editor) { editor.dataset.dirty = 'true'; }
+            if (event.target.matches('[data-v3-content-upload]')) { uploadContent(event.target); }
+            return;
+        }
         if (event.target.matches('[data-v3-upload]')) { upload(event.target); return; }
         if (event.target.matches('[data-v3-network-choice]')) {
             var row = event.target.closest('[data-network]');
@@ -363,20 +549,23 @@
             var custom = root.querySelector('[data-v3-color="' + event.target.name + '"]');
             if (custom) { custom.dataset.selected = 'false'; }
         }
+        fitPanel();
         schedulePreview();
         scheduleIdentityDraft();
     });
     root.addEventListener('input', function (event) {
+        if (management) { var editor = event.target.closest('[data-v3-editor]'); if (editor) { editor.dataset.dirty = 'true'; dirty = true; } return; }
         if (event.target.matches('[data-v3-upload]')) { return; }
         if (event.target.matches('[data-v3-color]')) { event.target.dataset.selected = 'true'; }
-        if (event.target.matches('input, select')) { schedulePreview(); scheduleIdentityDraft(); }
+        if (event.target.matches('input, select')) { dirty = true; schedulePreview(); scheduleIdentityDraft(); }
     });
     panel.addEventListener('submit', function (event) {
         event.preventDefault();
+        if (management) { var editor = event.target.closest('[data-v3-editor]') || document.activeElement.closest('[data-v3-editor]'); if (editor) { saveItem(editor, ''); } return; }
         submit(root.dataset.step === 'v3_review' ? 'publish' : 'next');
     });
     panel.addEventListener('focusin', function (event) {
-        if (event.target.matches('input, select, textarea')) { setExpanded(true); }
+        if (event.target.matches('input, select, textarea')) { updateViewportHeight(); }
     });
     root.querySelector('h1').focus({ preventScroll: true });
 }());

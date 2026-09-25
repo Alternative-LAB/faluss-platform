@@ -54,40 +54,11 @@ jobs:
 
       - name: Build plugin archive
         if: steps.version.outputs.publish == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          package_root="$(mktemp -d)"
-          mkdir -p "$package_root/faluss-platform"
-          rsync -a \
-            --exclude='.git' \
-            --exclude='.github' \
-            --exclude='.cache' \
-            --exclude='tests' \
-            --exclude='node_modules' \
-            --exclude='phpstan' \
-            --exclude='phpunit.xml' \
-            --exclude='phpstan.neon' \
-            ./ "$package_root/faluss-platform/"
-          (cd "$package_root" && zip -qr "$RUNNER_TEMP/faluss-platform.zip" faluss-platform)
+        run: bash scripts/build-release.sh "$RUNNER_TEMP/faluss-platform.zip"
 
       - name: Verify production archive
         if: steps.version.outputs.publish == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          archive="$RUNNER_TEMP/faluss-platform.zip"
-          unzip -Z1 "$archive" > "$RUNNER_TEMP/archive-entries.txt"
-          for path in \
-            faluss-platform/faluss-platform.php \
-            faluss-platform/vendor/autoload.php \
-            faluss-platform/vendor/yahnis-elsts/plugin-update-checker/load-v5p7.php \
-            faluss-platform/vendor/stripe/stripe-php/init.php; do
-            grep -Fxq "$path" "$RUNNER_TEMP/archive-entries.txt" || {
-              echo "Required package file is missing: $path" >&2
-              exit 1
-            }
-          done
+        run: python3 scripts/validate-release.py "$RUNNER_TEMP/faluss-platform.zip"
 
       - name: Tag verified release
         if: steps.version.outputs.publish == 'true' && github.ref_type == 'branch'

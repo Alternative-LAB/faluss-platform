@@ -20,6 +20,9 @@ final class OnboardingV3
 
     public static function register(): void
     {
+        add_action('wp_ajax_faluss_studio_v3_manage', [self::class, 'manageStudio']);
+        add_action('wp_ajax_faluss_studio_v3_upload_content', [self::class, 'uploadContent']);
+        add_action('wp_ajax_faluss_studio_v3_save', [self::class, 'saveStudio']);
         add_action('wp_ajax_faluss_onboarding_v3_transition', [self::class, 'transition']);
         add_action('wp_ajax_faluss_onboarding_v3_identity_draft', [self::class, 'identityDraft']);
         add_action('wp_ajax_faluss_onboarding_v3_preview', [self::class, 'preview']);
@@ -32,6 +35,14 @@ final class OnboardingV3
     public static function sequence(string $mode): array
     {
         return array_merge(self::COMMON, $mode === 'atomic' ? self::ATOMIC : [], ['v3_review']);
+    }
+
+    /** @param array<string, mixed> $preferences */
+    public static function mode(string $cursor, array $preferences): string
+    {
+        if (str_starts_with($cursor, 'wizard_atomic_') || str_ends_with($cursor, '_atomic')) { return 'atomic'; }
+        if (str_ends_with($cursor, '_simple')) { return 'simple'; }
+        return ($preferences['structure'] ?? 'simple') === 'atomic' ? 'atomic' : 'simple';
     }
 
     /** @param array<string, mixed> $profile */
@@ -66,8 +77,10 @@ final class OnboardingV3
         return in_array($step, self::sequence($mode), true) ? $step : 'v3_review';
     }
 
-    public static function render(): string
+    public static function render(bool $studio = false): string
     {
+        if ($studio) { return StudioV3::render(); }
+        if (!is_user_logged_in()) { return self::login(); }
         MeStudioAssets::enqueueOnboardingV3();
         $context = IdentityContract::onboardingV3Context();
         $state = LinkStudioContract::state();
@@ -76,9 +89,7 @@ final class OnboardingV3
         }
         $profile = is_array($state['profile'] ?? null) ? $state['profile'] : [];
         $preferences = is_array($state['preferences'] ?? null) ? $state['preferences'] : [];
-        $mode = str_ends_with((string) ($context['step'] ?? ''), '_atomic') ? 'atomic'
-            : (str_ends_with((string) ($context['step'] ?? ''), '_simple') ? 'simple'
-                : (($preferences['structure'] ?? 'simple') === 'atomic' ? 'atomic' : 'simple'));
+        $mode = self::mode((string) ($context['step'] ?? ''), $preferences);
         $step = self::step((string) ($context['step'] ?? ''), $mode, $profile);
         $steps = self::sequence($mode);
         $index = array_search($step, $steps, true);
@@ -91,17 +102,20 @@ final class OnboardingV3
                 ? $preview['preview_html'] : (string) ($state['preview_html'] ?? ''));
         $slug = (string) (($profile['public_slug'] ?? '') ?: ($draft['public_slug'] ?? ''));
         $controlsState = $state;
+        $controlsState['studio'] = false;
         $controlsState['profile'] = array_replace($profile, $draft);
         $controlsState['canonical_slug'] = (string) ($profile['public_slug'] ?? '');
+        if ($step === 'v3_success') { return self::confirmation($slug); }
         ob_start();
         ?>
-        <section class="faluss-onboarding-v3" data-faluss-onboarding-v3 data-step="<?php echo esc_attr($step); ?>" data-mode="<?php echo esc_attr($mode); ?>" data-version="<?php echo esc_attr((string) ($state['version'] ?? '')); ?>">
+        <section class="faluss-onboarding-v3" data-faluss-onboarding-v3 data-studio="false" data-step="<?php echo esc_attr($step); ?>" data-mode="<?php echo esc_attr($mode); ?>" data-version="<?php echo esc_attr((string) ($state['version'] ?? '')); ?>">
             <header class="faluss-onboarding-v3__header">
                 <button class="faluss-onboarding-v3__back" type="button" data-v3-back aria-label="Retour" <?php echo $step === 'v3_mode' || $step === 'v3_success' ? 'hidden' : ''; ?>>←</button>
+
                 <div class="faluss-onboarding-v3__progress" role="progressbar" aria-label="Progression" aria-valuemin="1" aria-valuemax="<?php echo count($steps); ?>" aria-valuenow="<?php echo $index === false ? count($steps) : $index + 1; ?>">
                     <?php foreach ($steps as $number => $_) : ?><span <?php echo $index !== false && $number <= $index ? 'class="is-complete"' : ''; ?>></span><?php endforeach; ?>
                 </div>
-                <strong aria-label="Faluss">F</strong>
+                <img class="faluss-onboarding-v3__logo" src="<?php echo esc_url(plugins_url('assets/link/images/faluss-onboarding-header-logo.png', dirname(__DIR__, 2) . '/faluss-platform.php')); ?>" alt="Faluss Me">
             </header>
             <div class="faluss-onboarding-v3__stage" aria-label="Aperçu de votre Faluss">
                 <div class="faluss-onboarding-v3__phone"><div class="faluss-onboarding-v3__phone-screen" data-v3-preview><?php echo $previewHtml; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Link returns escaped canonical card markup. ?></div></div>
@@ -115,7 +129,7 @@ final class OnboardingV3
                 </div>
                 <footer class="faluss-onboarding-v3__actions">
                     <?php if (in_array($step, ['v3_socials', 'v3_links', 'v3_avatar', 'v3_wallpaper', 'v3_network_style'], true)) : ?><button type="button" class="faluss-onboarding-v3__skip" data-v3-skip>Passer</button><?php endif; ?>
-                    <?php if ($step !== 'v3_success') : ?><button type="submit" class="faluss-onboarding-v3__primary" data-v3-primary><?php echo esc_html($step === 'v3_review' ? 'Publier mon Faluss' : 'Continuer'); ?> <span aria-hidden="true">→</span></button><?php endif; ?>
+                    <?php if ($step !== 'v3_success') : ?><button type="submit" class="faluss-onboarding-v3__primary" data-v3-primary><?php echo esc_html($step === 'v3_identity' && empty($controlsState['canonical_slug']) ? 'Revendiquer mon identifiant' : ($step === 'v3_review' ? 'Publier mon Faluss' : 'Continuer')); ?> <span aria-hidden="true">→</span></button><?php endif; ?>
                 </footer>
             </form>
         </section>
@@ -124,12 +138,12 @@ final class OnboardingV3
     }
 
     /** @param array<string, mixed> $state */
-    private static function controls(string $step, string $mode, array $state, string $slug): void
+    public static function controls(string $step, string $mode, array $state, string $slug): void
     {
         $profile = is_array($state['profile'] ?? null) ? $state['profile'] : [];
         $prefs = is_array($state['preferences'] ?? null) ? $state['preferences'] : [];
         $titles = [
-            'v3_mode' => 'Choisis ton rythme', 'v3_identity' => 'Ton identité', 'v3_socials' => 'Tes réseaux',
+            'v3_mode' => !empty($state['studio']) ? 'Structure de ta carte' : 'Choisis ton rythme', 'v3_identity' => (empty($state['canonical_slug']) ? 'Revendique ton identifiant' : 'Ton identité'), 'v3_socials' => 'Tes réseaux',
             'v3_links' => 'Tes liens', 'v3_colors' => 'Couleurs', 'v3_buttons' => 'Boutons',
             'v3_avatar' => 'Photo de profil', 'v3_wallpaper' => 'Image de fond', 'v3_name' => 'Ton nom',
             'v3_network_style' => 'Tes réseaux', 'v3_review' => 'Dernier regard',
@@ -143,7 +157,7 @@ final class OnboardingV3
                 </div><p class="faluss-onboarding-v3__hint">Simple : l’essentiel, tout de suite. Atomique : personnalise chaque détail après tes liens.</p><?php
                 break;
             case 'v3_identity':
-                ?><p>C’est le visage de ton link.</p>
+                ?><p><?php echo empty($state['canonical_slug']) ? 'Choisis ton adresse Faluss avant de personnaliser ta carte. Sa disponibilité est vérifiée lors de la réservation.' : 'Ton identifiant est réservé. Tu peux modifier ton nom et ta photo.'; ?></p>
                 <label>Nom affiché<input name="display_name" maxlength="80" required value="<?php echo esc_attr((string) ($profile['display_name'] ?? '')); ?>"></label>
                 <label>@identifiant<input name="public_slug" maxlength="40" pattern="[a-z0-9][a-z0-9-]{1,39}" required value="<?php echo esc_attr($slug); ?>" <?php echo (string) ($state['canonical_slug'] ?? '') !== '' ? 'readonly' : ''; ?>></label>
                 <label>Photo de profil · facultative<input type="file" accept="image/jpeg,image/png,image/gif,image/webp" data-v3-upload="avatar"></label>
@@ -185,7 +199,7 @@ final class OnboardingV3
                 <div data-v3-tab-panel="texture" hidden inert><?php self::choices('button_texture', ['smooth' => 'Lisse', 'grain' => 'Granulée', 'camo' => 'Camo'], (string) ($prefs['button_texture'] ?? 'smooth')); ?></div><?php
                 break;
             case 'v3_avatar':
-                ?><label>Importer une photo · facultatif<input type="file" accept="image/jpeg,image/png,image/gif,image/webp" data-v3-upload="avatar"></label><input type="hidden" name="avatar_attachment_id" value="<?php echo (int) ($profile['avatar_attachment_id'] ?? 0); ?>">
+                ?><?php if (!empty($profile['avatar_attachment_id'])) { echo wp_get_attachment_image((int) $profile['avatar_attachment_id'], 'thumbnail', false, ['class' => 'faluss-onboarding-v3__retained-avatar', 'alt' => 'Photo retenue']); } ?><label>Remplacer la photo · facultatif<input type="file" accept="image/jpeg,image/png,image/gif,image/webp" data-v3-upload="avatar"></label><input type="hidden" name="avatar_attachment_id" value="<?php echo (int) ($profile['avatar_attachment_id'] ?? 0); ?>">
                 <?php self::tabs('avatar', ['shape' => 'Forme', 'effects' => 'Effets']); ?>
                 <div data-v3-tab-panel="shape"><?php self::choices('avatar_shape', ['round' => 'Rond', 'rounded' => 'Arrondi', 'square' => 'Carré'], (string) ($prefs['avatar_shape'] ?? 'round')); ?></div>
                 <div data-v3-tab-panel="effects" hidden inert><?php self::choices('avatar_effect', ['none' => 'Aucun', 'border' => 'Bordure', 'shadow' => 'Ombre', 'both' => 'Les deux'], (string) ($prefs['avatar_effect'] ?? 'border')); ?></div><?php
@@ -205,7 +219,7 @@ final class OnboardingV3
             case 'v3_network_style':
                 self::tabs('network-style', ['style' => 'Style', 'color' => 'Couleur']);
                 ?><div data-v3-tab-panel="style"><?php self::choices('social_style', ['brand-light' => 'Marques claires', 'brand-dark' => 'Marques sombres', 'outline-dark' => 'Contours noirs', 'outline-light' => 'Contours blancs', 'mono-dark' => 'Monochrome sombre', 'mono-light' => 'Monochrome clair'], (string) ($prefs['social_style'] ?? 'brand-light')); ?></div>
-                <div data-v3-tab-panel="color"><?php self::colors('social_color', (string) ($prefs['social_color'] ?: '#080808')); ?></div><?php
+                <div data-v3-tab-panel="color" hidden inert><?php self::colors('social_color', (string) ($prefs['social_color'] ?? '')); ?></div><?php
                 break;
             case 'v3_review':
                 ?><p>Vérifie ton aperçu avant de publier. Tu pourras encore modifier ta carte dans le Studio.</p>
@@ -241,13 +255,62 @@ final class OnboardingV3
 
     private static function colors(string $name, string $selected): void
     {
+        $nullable = $name === 'social_color';
         $palette = ['#FFFFFF', '#E5E5E5', '#DED4E4', '#FFE1E5', '#FF515B', '#FFD3BD', '#ADB8A8', '#292929'];
-        ?><div class="faluss-onboarding-v3__colors"><?php foreach ($palette as $color) : ?><label><input type="radio" name="<?php echo esc_attr($name); ?>" value="<?php echo esc_attr($color); ?>" <?php checked(strtoupper($selected), $color); ?>><span style="--v3-swatch:<?php echo esc_attr($color); ?>"></span></label><?php endforeach; ?><label class="faluss-onboarding-v3__custom">Autre<input type="color" data-v3-color="<?php echo esc_attr($name); ?>" value="<?php echo esc_attr($selected); ?>" <?php echo !in_array(strtoupper($selected), $palette, true) ? 'data-selected="true"' : ''; ?>></label></div><?php
+        ?><div class="faluss-onboarding-v3__colors"><?php if ($nullable) : ?><label><input type="radio" name="social_color" value="" <?php checked($selected, ''); ?>><span style="--v3-swatch:#fff">Auto</span></label><?php endif; ?><?php foreach ($palette as $color) : ?><label><input type="radio" name="<?php echo esc_attr($name); ?>" value="<?php echo esc_attr($color); ?>" <?php checked(strtoupper($selected), $color); ?>><span style="--v3-swatch:<?php echo esc_attr($color); ?>"></span></label><?php endforeach; ?><label class="faluss-onboarding-v3__custom">Autre<input type="color" data-v3-color="<?php echo esc_attr($name); ?>" value="<?php echo esc_attr($selected !== '' ? $selected : '#080808'); ?>" <?php echo $selected !== '' && !in_array(strtoupper($selected), $palette, true) ? 'data-selected="true"' : ''; ?>></label></div><?php
     }
 
-    private static function unavailable(string $code): string
+    public static function login(): string
+    {
+        $url = IdentityContract::loginUrl('create_card', home_url('/mon-faluss/'));
+        return '<section class="faluss-onboarding-v3__unavailable"><h1>Retrouve ton Faluss</h1><p>Connecte-toi pour reprendre ta création ou ouvrir ton Studio.</p><a href="' . esc_url($url ?: home_url('/login/')) . '">Se connecter</a></section>';
+    }
+
+    public static function unavailable(string $code): string
     {
         return '<section class="faluss-onboarding-v3__unavailable" role="alert"><h1>Création temporairement indisponible</h1><p>Votre brouillon est conservé. Réessayez dans un instant.</p><code>' . esc_html($code) . '</code><a href="">Réessayer</a></section>';
+    }
+
+    private static function confirmation(string $slug): string
+    {
+        ob_start(); ?>
+        <section class="faluss-v3-confirmation">
+            <h1>Ton Faluss est en ligne</h1><p>Ton lien est prêt à être partagé.</p>
+            <p><a href="<?php echo esc_url(home_url('/' . $slug . '/')); ?>"><?php echo esc_html(home_url('/' . $slug . '/')); ?></a></p>
+            <div class="faluss-onboarding-v3__success-actions"><a class="faluss-onboarding-v3__primary" href="<?php echo esc_url(home_url('/' . $slug . '/')); ?>">Voir mon Faluss</a><a class="faluss-onboarding-v3__secondary" href="<?php echo esc_url(home_url('/mon-faluss/')); ?>">Ouvrir le Studio</a></div>
+        </section>
+        <?php return (string) ob_get_clean();
+    }
+
+    public static function manageStudio(): void
+    {
+        self::verify('faluss_studio_v3_manage');
+        // The Link contract rejects unknown mutation names and fields. Never accept a subject ID.
+        $request = self::postedFields();
+        $request['mutation'] = self::text('mutation');
+        $request['aggregate_version'] = self::text('version');
+        $result = LinkStudioContract::mutate(wp_slash($request));
+        if (empty($result['ok'])) { self::failure((string) ($result['code'] ?? 'save_failed'), (int) ($result['status'] ?? 422)); }
+        wp_send_json_success($result);
+    }
+
+    public static function uploadContent(): void
+    {
+        self::verify('faluss_studio_v3_upload_content');
+        LinkStudioContract::uploadImage('content_image', 'faluss_studio_v3_upload_content');
+    }
+
+    public static function saveStudio(): void
+    {
+        self::verify('faluss_studio_v3_save');
+        $step = self::text('step');
+        if (!in_array($step, array_merge(self::COMMON, self::ATOMIC), true)) { self::failure('invalid_step', 422); }
+        $fields = self::postedFields();
+        // Identity alone reserves the immutable slug during onboarding.
+        if ($step === 'v3_identity') { unset($fields['public_slug']); }
+        $result = LinkStudioContract::saveStudioV3Section($step, $fields, self::text('version'));
+        if (empty($result['ok'])) { self::failure((string) ($result['code'] ?? 'save_failed'), (int) ($result['status'] ?? 422)); }
+        wp_send_json_success($result);
     }
 
     public static function transition(): void
@@ -256,9 +319,7 @@ final class OnboardingV3
         $context = IdentityContract::onboardingV3Context();
         $state = LinkStudioContract::state();
         if (empty($context['available']) || is_wp_error($state)) { self::failure('unavailable', 503); }
-        $mode = str_ends_with((string) ($context['step'] ?? ''), '_atomic') ? 'atomic'
-            : (str_ends_with((string) ($context['step'] ?? ''), '_simple') ? 'simple'
-                : (($state['preferences']['structure'] ?? 'simple') === 'atomic' ? 'atomic' : 'simple'));
+        $mode = self::mode((string) ($context['step'] ?? ''), (array) ($state['preferences'] ?? []));
         $step = self::step((string) ($context['step'] ?? ''), $mode, (array) ($state['profile'] ?? []));
         if ($step !== self::text('step') || $step === 'v3_success' || !hash_equals((string) ($state['version'] ?? ''), self::text('version'))) { self::failure('stale_version', 409); }
         $direction = self::text('direction');
@@ -290,7 +351,7 @@ final class OnboardingV3
         } else {
             $fields = self::contractFields($step, $fields, $state, $direction === 'skip');
         }
-        $result = LinkStudioContract::saveOnboardingV3Step($step, $target, $fields, (string) ($state['version'] ?? ''));
+        $result = LinkStudioContract::saveOnboardingV3Step($step, $target, $fields, (string) ($state['version'] ?? ''), $mode);
         if (empty($result['ok'])) { self::failure((string) ($result['code'] ?? 'save_failed'), (int) ($result['status'] ?? 422)); }
         if (str_starts_with($step, 'v3_identity_')) { IdentityContract::clearOnboardingV3IdentityDraft(); }
         wp_send_json_success(['step' => $target, 'version' => $result['state']['version'] ?? '']);

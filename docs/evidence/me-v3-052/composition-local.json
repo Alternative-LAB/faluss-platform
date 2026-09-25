@@ -1,0 +1,34 @@
+[
+  {
+    "host": "preview",
+    "name": "center",
+    "handle": "center",
+    "social": "center",
+    "avatarOffset": null,
+    "padding": 101.28
+  },
+  {
+    "host": "public",
+    "name": "center",
+    "handle": "center",
+    "social": "center",
+    "avatarOffset": null,
+    "padding": 101.28
+  },
+  {
+    "host": "shortcode",
+    "name": "center",
+    "handle": "center",
+    "social": "center",
+    "avatarOffset": null,
+    "padding": 101.28
+  },
+  {
+    "host": "elementor",
+    "name": "center",
+    "handle": "center",
+    "social": "center",
+    "avatarOffset": null,
+    "padding": 101.28
+  }
+]

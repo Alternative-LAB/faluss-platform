@@ -10,7 +10,7 @@ use LogicException;
 
 final class LinkModule implements Module
 {
-    public const VERSION = '0.4.0';
+    public const VERSION = '0.4.1';
 
     public static function activate(): void
     {
