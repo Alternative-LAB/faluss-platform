@@ -28,13 +28,14 @@ final class StudioProviderRegistry
     /** @param callable(): string $fallback */
     public static function renderStudio(callable $fallback): string
     {
+        $v3 = defined('FALUSS_PLATFORM_ONBOARDING_V3') && constant('FALUSS_PLATFORM_ONBOARDING_V3') === true;
         if (self::$active === null) {
-            return $fallback();
+            return $v3 ? self::v3Unavailable() : $fallback();
         }
         try {
             return self::$active->renderStudio($fallback);
         } catch (Throwable) {
-            return $fallback();
+            return $v3 ? self::v3Unavailable() : $fallback();
         }
     }
 

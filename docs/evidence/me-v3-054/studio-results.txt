@@ -1,0 +1,8 @@
+chromium 320: one document; direct URL, dynamic main/context navigation, persistent pills, keyboard, history + dirty cancel, restored values, canonical save/read, 409, GET 503, stale response, Shop and reduced motion OK
+chromium 390: busy save/upload + failed canonical read retry verified; one document; direct URL, dynamic main/context navigation, persistent pills, keyboard, history + dirty cancel, restored values, canonical save/read, 409, GET 503, stale response, Shop and reduced motion OK
+chromium 768: one document; direct URL, dynamic main/context navigation, persistent pills, keyboard, history + dirty cancel, restored values, canonical save/read, 409, GET 503, stale response, Shop and reduced motion OK
+chromium: native link fallback without JavaScript OK
+webkit 320: one document; direct URL, dynamic main/context navigation, persistent pills, keyboard, history + dirty cancel, restored values, canonical save/read, 409, GET 503, stale response, Shop and reduced motion OK
+webkit 390: busy save/upload + failed canonical read retry verified; one document; direct URL, dynamic main/context navigation, persistent pills, keyboard, history + dirty cancel, restored values, canonical save/read, 409, GET 503, stale response, Shop and reduced motion OK
+webkit 768: one document; direct URL, dynamic main/context navigation, persistent pills, keyboard, history + dirty cancel, restored values, canonical save/read, 409, GET 503, stale response, Shop and reduced motion OK
+webkit: native link fallback without JavaScript OK
