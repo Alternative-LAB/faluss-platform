@@ -59,12 +59,17 @@ final class TextPublicationRest
         if ($data === null || !in_array($data['decision'], ['approve', 'reject'], true)) { return self::response(self::badInput()); }
         return self::response(TextPublicationService::change($r->get_param('publication_id'), $data['revision'], $data['decision'], null, $data['reason']));
     }
-    public static function publicList(): \WP_REST_Response { return self::response(TextPublicationService::listing('public')); }
-    public static function ownList(): \WP_REST_Response { return self::response(TextPublicationService::listing('own')); }
-    public static function queue(): \WP_REST_Response { return self::response(TextPublicationService::listing('queue')); }
+    public static function publicList(\WP_REST_Request $r): \WP_REST_Response { return self::page($r, 'public'); }
+    public static function ownList(\WP_REST_Request $r): \WP_REST_Response { return self::page($r, 'own'); }
+    public static function queue(\WP_REST_Request $r): \WP_REST_Response { return self::page($r, 'queue'); }
     public static function publicGet(\WP_REST_Request $r): \WP_REST_Response { return self::response(TextPublicationService::get($r->get_param('publication_id'))); }
     public static function privateGet(\WP_REST_Request $r): \WP_REST_Response { return self::response(TextPublicationService::get($r->get_param('publication_id'), true)); }
     public static function decisions(\WP_REST_Request $r): \WP_REST_Response { return self::response(TextPublicationService::decisions($r->get_param('publication_id'))); }
+
+    private static function page(\WP_REST_Request $r, string $scope): \WP_REST_Response
+    {
+        return self::response(TextPublicationService::listing($scope, $r->get_param('per_page') ?? 20, $r->get_param('cursor')));
+    }
 
     /**
      * @param list<string> $keys

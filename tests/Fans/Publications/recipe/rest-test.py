@@ -57,13 +57,13 @@ for data in [{**payload, 'category': 'external_adult_delivery_right'}, {**payloa
     check('invalid category/ownership/media/access/HTML rejected', call('owner', 'text-publications', data)[0] == 400)
 row = create(); path = 'text-publications/' + row['publication_id']
 check('pending detail hidden', call('anon', path)[0] == 404)
-check('pending absent from public list', call('anon', 'text-publications')[1] == [])
+check('pending absent from public list', call('anon', 'text-publications')[1]['items'] == [])
 check('private owner can read', call('owner', path + '/private')[0] == 200)
 for suffix, data in [('/private', None), ('/edit', {'revision': 1, 'text': 'Usurpation.'}), ('/withdraw', {'revision': 1}),
                      ('/moderate', {'revision': 1, 'decision': 'approve', 'reason': 'allowed_text'}), ('/decisions', None)]:
     check('other owner denied ' + suffix, call('other', path + suffix, data)[0] == 403)
 check('non-admin queue denied', call('owner', 'text-publications/moderation')[0] == 403)
-check('admin queue contains pending', len(call('admin', 'text-publications/moderation')[1]) == 1)
+check('admin queue contains pending', len(call('admin', 'text-publications/moderation')[1]['items']) == 1)
 check('approval without explicit allowed-text decision denied', moderate(row, reason='')[0] == 400)
 
 # A genuine SQL failure must roll back both publication and journal, on InnoDB.
@@ -99,7 +99,7 @@ check('rejected revision can be corrected pending review', status == 200 and row
 status, row, _ = moderate(row)
 cid = SESSIONS['owner']['creator_id']
 check('admin suspends profile', call('admin', 'creators/' + cid + '/status', {'status': 'suspended'})[0] == 200)
-check('suspension hides public detail and listing', call('anon', path)[0] == 404 and call('anon', 'text-publications')[1] == [])
+check('suspension hides public detail and listing', call('anon', path)[0] == 404 and call('anon', 'text-publications')[1]['items'] == [])
 check('suspended owner edit denied', call('owner', path + '/edit', {'revision': int(row['revision']), 'text': 'Texte.'})[0] == 403)
 status, withdrawn, _ = call('owner', path + '/withdraw', {'revision': int(row['revision'])})
 check('suspended owner can withdraw and purge', status == 200 and withdrawn['state'] == 'withdrawn' and withdrawn['body'] == '')

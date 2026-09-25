@@ -29,9 +29,13 @@ Les comptes, textes et liaisons sont synthétiques. Aucun secret n'est versionn�
    `/var/tmp/faluss-v3-wp/wp-cli.phar` ; adapter ce seul chemin sur une autre machine.
    Arrêter ensuite tous les workers et conserver les résultats sans sessions/secrets.
 
-## Résultat constaté le 25 septembre 2026
+## Résultat initial constaté le 25 septembre 2026 (SHA `9d5f2eb`)
 
 WordPress 7.1.2, PHP 8.5.4, MariaDB 11.8.6 : **45 contrôles réussis**.
+Cette preuve précède la pagination. Le script lit désormais les listes dans
+`items`, mais n'a pas été rejoué pour la correction de pagination, sans activation
+de flag. Les nouveaux tests de pagination sont des tests PHPUnit simulés, pas
+une nouvelle recette WordPress/MariaDB.
 
 - Auteur actif/lié uniquement ; nonce obligatoire ; admin non créateur refusé en création.
 - Catégorie adulte externe, propriétaire forgé, média, accès verrouillé et HTML refusés.

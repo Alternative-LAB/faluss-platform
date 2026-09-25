@@ -23,6 +23,9 @@ final class TextPublicationDb extends CreatorProfileDb
 {
     public ?array $publication = null;
     public array $audit = [];
+    public array $publications = [];
+    public array $profiles = [];
+    public int $pageQueries = 0;
     public bool $failAudit = false;
     private ?array $snapshot = null;
     public bool $suppressed = false;
@@ -33,6 +36,20 @@ final class TextPublicationDb extends CreatorProfileDb
 
     public function get_results(string $query, mixed $output = null): array
     {
+        if (str_starts_with($query, 'SELECT publication_id,updated_at FROM')) {
+            ++$this->pageQueries;
+            $args = end($this->prepared)['args'];
+            $field = str_contains($query, 'WHERE creator_id=') ? 'creator_id' : 'state';
+            $ascending = str_contains($query, 'updated_at ASC');
+            $rows = array_values(array_filter($this->publications, static function ($row) use ($args, $field, $ascending) {
+                if ($row[$field] !== $args[0]) { return false; }
+                if (count($args) === 1) { return true; }
+                $comparison = [$row['updated_at'], $row['publication_id']] <=> [$args[1], $args[3]];
+                return $ascending ? $comparison > 0 : $comparison < 0;
+            }));
+            usort($rows, static fn ($a, $b) => ($ascending ? 1 : -1) * ([$a['updated_at'], $a['publication_id']] <=> [$b['updated_at'], $b['publication_id']]));
+            return array_map(static fn ($row) => array_intersect_key($row, array_flip(['publication_id', 'updated_at'])), array_slice($rows, 0, 50));
+        }
         $schema = null;
         foreach (FansSsoSchema::schema() as $definition) {
             if (str_contains($query, $definition['suffix'])) { $schema = $definition; }
@@ -61,7 +78,13 @@ final class TextPublicationDb extends CreatorProfileDb
     }
     public function get_row(string $query, mixed $output = null): ?array
     {
-        if (str_starts_with($query, 'SELECT * FROM `wp_faluss_fans_text_publications')) { return $this->publication; }
+        if (str_starts_with($query, 'SELECT * FROM `wp_faluss_fans_text_publications')) {
+            return $this->publications !== [] ? ($this->publications[end($this->prepared)['args'][0]] ?? null) : $this->publication;
+        }
+        if (str_contains($query, 'WHERE creator_id') && str_contains($query, 'faluss_fans_creator_profiles') && $this->profiles !== []) {
+            $profile = $this->profiles[end($this->prepared)['args'][0]] ?? null;
+            return $profile !== null && $profile['status'] === 'active' ? $profile : null;
+        }
         return parent::get_row($query, $output);
     }
     public function query(string $query): int|false
@@ -213,4 +236,122 @@ final class TextPublicationTest extends TestCase
         self::assertFalse(TextPublicationRest::publicPermission());
         self::assertInstanceOf(\WP_Error::class, TextPublicationService::create('Texte.', TextPublicationService::CATEGORY));
     }
+    /** 185 rows, ties in timestamps, three owners, including 60 newest but invisible texts. */
+    private function paginationFixture(): void
+    {
+        $db = $GLOBALS['wpdb'];
+        foreach ([1 => 'active', 2 => 'active', 3 => 'suspended'] as $n => $status) {
+            $id = sprintf('%08d-1111-4111-8111-111111111111', $n);
+            $db->profiles[$id] = [...$db->profile, 'creator_id' => $id, 'status' => $status];
+        }
+        $db->profile = array_values($db->profiles)[0];
+        for ($i = 1; $i <= 185; ++$i) {
+            $owner = $i <= 60 ? 3 : ($i <= 105 ? 1 + $i % 2 : ($i <= 175 ? 1 + $i % 3 : 1));
+            $id = sprintf('%08d-2222-4222-8222-222222222222', $i);
+            $day = $i <= 60 ? 26 : 25;
+            $db->publications[$id] = ['publication_id' => $id, 'creator_id' => sprintf('%08d-1111-4111-8111-111111111111', $owner),
+                'revision' => 1, 'body' => 'Texte synthétique.', 'category' => TextPublicationService::CATEGORY,
+                'state' => $i <= 105 ? 'approved' : ($i <= 175 ? 'pending' : ($i % 2 ? 'withdrawn' : 'rejected')),
+                'created_at' => '2026-09-24 00:00:00', 'updated_at' => sprintf('2026-09-%02d 00:00:%02d', $day, intdiv($i, 8))];
+        }
+    }
+
+    private function collectPages(string $scope, int $size = 20): array
+    {
+        $cursor = null; $ids = []; $pages = 0;
+        do {
+            $page = TextPublicationService::listing($scope, (string) $size, $cursor);
+            self::assertIsArray($page);
+            self::assertSame(['items', 'next_cursor'], array_keys($page));
+            self::assertLessThanOrEqual($size, count($page['items']));
+            if ($page['next_cursor'] !== null) { self::assertCount($size, $page['items']); }
+            foreach ($page['items'] as $item) {
+                if ($scope === 'public') {
+                    self::assertSame(['publication_id', 'creator_id', 'revision', 'body', 'updated_at'], array_keys($item));
+                }
+                $ids[] = $item['publication_id'];
+            }
+            $cursor = $page['next_cursor'];
+            self::assertLessThan(20, ++$pages, 'Pagination must terminate');
+        } while ($cursor !== null);
+        self::assertSame($ids, array_values(array_unique($ids)), 'No duplicates across pages');
+        return $ids;
+    }
+
+    private function expectedIds(string $scope): array
+    {
+        $db = $GLOBALS['wpdb'];
+        $rows = array_values(array_filter($db->publications, static fn ($row) => match ($scope) {
+            'public' => $row['state'] === 'approved' && $db->profiles[$row['creator_id']]['status'] === 'active',
+            'queue' => $row['state'] === 'pending',
+            'own' => $row['creator_id'] === $db->profile['creator_id'],
+        }));
+        usort($rows, static fn ($a, $b) => ($scope === 'queue' ? 1 : -1) * ([$a['updated_at'], $a['publication_id']] <=> [$b['updated_at'], $b['publication_id']]));
+        return array_column($rows, 'publication_id');
+    }
+
+    public function testPublicPagesAreRecentFullAndSkipSuspendedCreatorsAcrossCandidateBatches(): void
+    {
+        $this->paginationFixture();
+        $expected = $this->expectedIds('public');
+        self::assertCount(45, $expected);
+        self::assertSame($expected, $this->collectPages('public'));
+        self::assertGreaterThan(3, $GLOBALS['wpdb']->pageQueries);
+        $GLOBALS['wpdb']->publications[$expected[0]]['state'] = 'withdrawn';
+        self::assertSame($this->expectedIds('public'), $this->collectPages('public'));
+        // Suspend the second creator after an initial traversal, then start a fresh one.
+        $second = array_keys($GLOBALS['wpdb']->profiles)[1];
+        $GLOBALS['wpdb']->profiles[$second]['status'] = 'suspended';
+        self::assertSame($this->expectedIds('public'), $this->collectPages('public'));
+        // All invisible yields a genuinely empty page, not an endless continuation.
+        $first = array_keys($GLOBALS['wpdb']->profiles)[0];
+        $GLOBALS['wpdb']->profiles[$first]['status'] = 'suspended';
+        self::assertSame(['items' => [], 'next_cursor' => null], TextPublicationService::listing('public'));
+    }
+
+    public function testEntireModerationQueueAndOwnHistoryAreReachableWithoutGaps(): void
+    {
+        $this->paginationFixture();
+        self::assertGreaterThan(20, count($this->expectedIds('own')));
+        self::assertSame($this->expectedIds('own'), $this->collectPages('own'));
+        self::assertInstanceOf(\WP_Error::class, TextPublicationService::listing('queue'));
+        $GLOBALS['profile_admin'] = true;
+        self::assertCount(70, $this->expectedIds('queue'));
+        self::assertSame($this->expectedIds('queue'), $this->collectPages('queue'));
+        self::assertSame($this->expectedIds('queue'), $this->collectPages('queue', 7));
+    }
+
+    public function testPaginationBoundsCursorValidationAndPermissions(): void
+    {
+        $this->paginationFixture();
+        foreach ([0, 21, 1000000, -1, 1.5, true, [], '01', '2e1', ''] as $size) {
+            self::assertSame('invalid_publication_page', TextPublicationService::listing('public', $size)->get_error_code());
+        }
+        foreach (['', [], str_repeat('a', 1000), 'v2.public.2026-09-25T00:00:00.11111111-1111-4111-8111-111111111111',
+            'v1.public.2026-02-31T00:00:00.11111111-1111-4111-8111-111111111111'] as $cursor) {
+            self::assertSame('invalid_publication_page', TextPublicationService::listing('public', 20, $cursor)->get_error_code());
+        }
+        $cursor = TextPublicationService::listing('public', 1)['next_cursor'];
+        self::assertNotNull($cursor);
+        self::assertSame('invalid_publication_page', TextPublicationService::listing('own', 20, $cursor)->get_error_code());
+        $GLOBALS['profile_linked'] = false;
+        self::assertInstanceOf(\WP_Error::class, TextPublicationService::listing('own'));
+    }
+
+    public function testRestListsForwardPageSizeAndCursorAndKeepNoStore(): void
+    {
+        $this->paginationFixture();
+        $GLOBALS['profile_admin'] = true;
+        foreach (['public' => 'publicList', 'own' => 'ownList', 'queue' => 'queue'] as $scope => $callback) {
+            $first = TextPublicationRest::$callback(new \WP_REST_Request(['per_page' => '3']));
+            self::assertSame(200, $first->status);
+            self::assertCount(3, $first->data['items']);
+            self::assertSame('private, no-store, max-age=0', $first->headers['Cache-Control']);
+            $next = TextPublicationRest::$callback(new \WP_REST_Request(['per_page' => '3', 'cursor' => $first->data['next_cursor']]));
+            self::assertSame(array_slice($this->expectedIds($scope), 3, 3), array_column($next->data['items'], 'publication_id'));
+            self::assertSame(400, TextPublicationRest::$callback(new \WP_REST_Request(['per_page' => '21']))->status);
+            self::assertSame(400, TextPublicationRest::$callback(new \WP_REST_Request(['cursor' => 'invalid']))->status);
+        }
+    }
+
 }

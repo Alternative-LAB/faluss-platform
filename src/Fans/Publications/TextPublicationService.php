@@ -133,30 +133,76 @@ final class TextPublicationService
         return array_intersect_key($row, array_flip(['publication_id', 'creator_id', 'revision', 'body', 'updated_at']));
     }
 
-    /** @return list<array<string,mixed>>|\WP_Error */
-    public static function listing(string $scope): array|\WP_Error
+    /** @return array{items:list<array<string,mixed>>,next_cursor:?string}|\WP_Error */
+    public static function listing(string $scope, mixed $perPage = 20, mixed $cursor = null): array|\WP_Error
     {
         if (!TextPublicationsModule::available()) { return self::error('publications_unavailable', 503); }
+        if (!in_array($scope, ['public', 'own', 'queue'], true)
+            || (!is_int($perPage) && !(is_string($perPage) && preg_match('/^[1-9][0-9]?$/D', $perPage) === 1))
+            || (int) $perPage < 1 || (int) $perPage > 20
+        ) { return self::error('invalid_publication_page', 400); }
+        $position = self::pagePosition($cursor, $scope);
+        if ($position === false) { return self::error('invalid_publication_page', 400); }
         global $wpdb;
         $table = TextPublicationSchema::table();
         if ($scope === 'queue') {
             if (!current_user_can('manage_options')) { return self::error('publication_forbidden', 403); }
-            $sql = $wpdb->prepare('SELECT publication_id FROM `' . $table . '` WHERE state=%s ORDER BY updated_at,publication_id LIMIT 20', 'pending');
+            $filter = 'state=%s'; $args = ['pending'];
         } elseif ($scope === 'own') {
             $profile = CreatorProfileService::own();
             if ($profile === null) { return self::error('publication_forbidden', 403); }
-            $sql = $wpdb->prepare('SELECT publication_id FROM `' . $table . '` WHERE creator_id=%s ORDER BY updated_at,publication_id LIMIT 20', $profile['creator_id']);
+            $filter = 'creator_id=%s'; $args = [$profile['creator_id']];
         } else {
-            $sql = $wpdb->prepare('SELECT publication_id FROM `' . $table . '` WHERE state=%s ORDER BY updated_at,publication_id LIMIT 20', 'approved');
+            $filter = 'state=%s'; $args = ['approved'];
         }
-        $rows = $wpdb->get_results($sql, 'ARRAY_A');
-        if (!is_array($rows)) { return self::error('publications_unavailable', 503); }
-        $result = [];
-        foreach ($rows as $item) {
-            $value = self::get($item['publication_id'] ?? null, $scope !== 'public');
-            if (is_array($value)) { $result[] = $value; }
+        $direction = $scope === 'queue' ? 'ASC' : 'DESC';
+        $operator = $scope === 'queue' ? '>' : '<';
+        $result = []; $lastVisible = null;
+        // Filter through the profile owner's public contract, not its private tables.
+        // Bounded batches and a visible lookahead fill pages even across suspended creators.
+        while (true) {
+            $where = $filter; $parameters = $args;
+            if ($position !== null) {
+                $where .= ' AND (updated_at ' . $operator . ' %s OR (updated_at=%s AND publication_id ' . $operator . ' %s))';
+                array_push($parameters, $position['updated_at'], $position['updated_at'], $position['publication_id']);
+            }
+            $rows = $wpdb->get_results($wpdb->prepare('SELECT publication_id,updated_at FROM `' . $table . '` WHERE '
+                . $where . ' ORDER BY updated_at ' . $direction . ',publication_id ' . $direction . ' LIMIT 50', ...$parameters), 'ARRAY_A');
+            if (!is_array($rows)) { return self::error('publications_unavailable', 503); }
+            foreach ($rows as $item) {
+                if (!self::validId($item['publication_id'] ?? null) || !is_string($item['updated_at'] ?? null)) {
+                    return self::error('publications_unavailable', 503);
+                }
+                $position = ['updated_at' => $item['updated_at'], 'publication_id' => $item['publication_id']];
+                $value = self::get($item['publication_id'], $scope !== 'public');
+                if ($value instanceof \WP_Error) {
+                    if (($value->get_error_data()['status'] ?? null) === 503) { return $value; }
+                    continue;
+                }
+                // A row can leave the queue between the candidate query and its fresh read.
+                if ($scope === 'queue' && $value['state'] !== 'pending') { continue; }
+                if (count($result) === (int) $perPage) {
+                    return ['items' => $result, 'next_cursor' => $lastVisible];
+                }
+                $result[] = $value;
+                $lastVisible = 'v1.' . $scope . '.' . str_replace(' ', 'T', $position['updated_at']) . '.' . $position['publication_id'];
+            }
+            if (count($rows) < 50) { return ['items' => $result, 'next_cursor' => null]; }
         }
-        return $result;
+    }
+
+    /** @return array{updated_at:string,publication_id:string}|null|false */
+    private static function pagePosition(mixed $cursor, string $scope): array|null|false
+    {
+        if ($cursor === null) { return null; }
+        if (!is_string($cursor) || strlen($cursor) > 90
+            || preg_match('/^v1\.(public|own|queue)\.([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2})\.([0-9a-f-]{36})$/D', $cursor, $matches) !== 1
+            || $matches[1] !== $scope || !self::validId($matches[3])
+        ) { return false; }
+        $date = str_replace('T', ' ', $matches[2]);
+        $parsed = \DateTimeImmutable::createFromFormat('!Y-m-d H:i:s', $date, new \DateTimeZone('UTC'));
+        if ($parsed === false || $parsed->format('Y-m-d H:i:s') !== $date) { return false; }
+        return ['updated_at' => $date, 'publication_id' => $matches[3]];
     }
 
     /** @return list<array<string,mixed>>|\WP_Error */

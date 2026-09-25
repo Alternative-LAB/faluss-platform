@@ -8,6 +8,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Publications textuelles Fans
 
+- Correction #74 : pagination des listes publique, personnelle et de modération (1–20 résultats, curseur déterministe date/UUID), textes publics récents en tête et exclusion des éléments invisibles avant remplissage de la page ; contrat REST enveloppé `items` / `next_cursor`, tests de parcours sur 185 textes et trois créateurs.
+
 - Ajout : module local opt-in, brouillons textuels privés du créateur SSO actif, édition soumise à nouvelle revue, approbation/rejet administratif avec trace et retrait propriétaire.
 - Technique : deux tables InnoDB privées, révisions concurrentes, journal et mutation atomiques, nonce REST, propriété résolue côté serveur et réponse publique limitée au texte approuvé d'un profil actif.
 - Compatibilité : aucun média WordPress, accès verrouillé, teaser Me, paiement, score, cron ou dépendance runtime ajouté ; rôle Fans et flags nécessaires à l'activation. Retour arrière par retrait du flag, données conservées.

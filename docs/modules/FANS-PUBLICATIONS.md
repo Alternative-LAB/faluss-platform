@@ -80,14 +80,14 @@ rendre le texte comme texte, jamais comme HTML. Aucun import de contenu distant.
 
 | Route relative | Permission | Données / effet |
 | --- | --- | --- |
-| `GET /text-publications` | Publique | Au plus 20 textes approuvés actuellement visibles |
+| `GET /text-publications` | Publique | Page de textes approuvés actuellement visibles, plus récents d'abord |
 | `GET /text-publications/{id}` | Publique | Texte approuvé et profil actif, sinon 404 |
 | `POST /text-publications` | Auteur SSO actif + nonce | `text`, `category=hosted_allowed_content` ; 201 pending |
-| `GET /text-publications/mine` | Auteur SSO + nonce | Au plus 20 textes privés de son profil |
+| `GET /text-publications/mine` | Auteur SSO + nonce | Pages de tous ses textes, tous états, plus récemment modifiés d'abord |
 | `GET /text-publications/{id}/private` | Propriétaire ou admin + nonce | Révision courante privée |
 | `POST /text-publications/{id}/edit` | Propriétaire actif + nonce | `text`, `revision` ; pending |
 | `POST /text-publications/{id}/withdraw` | Propriétaire + nonce | `revision` ; withdrawn, texte effacé |
-| `GET /text-publications/moderation` | Admin + nonce | Au plus 20 pending |
+| `GET /text-publications/moderation` | Admin + nonce | Pages de toute la file pending, plus anciennes révisions en attente d'abord |
 | `POST /text-publications/{id}/moderate` | Admin + nonce | `revision`, `decision=approve|reject`, `reason` |
 | `GET /text-publications/{id}/decisions` | Admin + nonce | 100 dernières traces, sans texte |
 
@@ -98,12 +98,42 @@ public et les valeurs conservées par Fans ; aucune donnée de droit client n'es
 Réponses `private, no-store, max-age=0` : un cache serveur/CDN ne doit pas passer outre.
 Après commit d'un retrait ou d'une suspension, une nouvelle lecture est masquée ;
 des octets déjà lus ou affichés avant le commit ne peuvent pas être rappelés.
-Les listes sont bornées sans pagination dans ce premier lot ; un client conserve
-l'UUID renvoyé à la création pour retrouver un élément hors de cette première page.
+Les trois listes acceptent `per_page` (entier de 1 à 20, défaut 20) et `cursor`
+(absent pour la première page). Elles retournent désormais
+`{"items": [...], "next_cursor": "..."}` plutôt qu'un tableau brut.
+`next_cursor=null` marque la fin ; sinon transmettre ce curseur tel quel dans la
+requête suivante sur la même liste. Exemple :
+`GET /text-publications?per_page=20&cursor=<curseur-URL-encodé>`.
+Valeur de taille, date, UUID, version ou portée de curseur invalide : HTTP 400.
+Les permissions et nonces restent requis sur **chaque** page privée ; un curseur
+n'est ni un secret, ni une autorisation, ni une preuve de propriété.
+
+Le tri déterministe utilise le couple `(updated_at, publication_id)`, décroissant
+pour le public et le créateur, croissant pour la modération. Pour un texte public,
+`updated_at` correspond à sa dernière approbation ; l'UUID départage les égalités
+à la seconde. Le curseur `v1` contient la portée et ce couple pour le dernier
+élément rendu, sans acteur, propriétaire WordPress, total privé ou donnée cachée.
+La recherche avance strictement après ce couple, sans pagination par offset.
+
+Une page publique contient jusqu'à `per_page` **textes visibles**, pas autant de
+candidats SQL : profil relu via son contrat public, politique d'accès et validité
+du texte vérifiées avant de compter un élément. Les textes suspendus, retirés ou
+refusés ne prennent pas une place ; la recherche continue jusqu'à remplir la page
+ou épuiser les candidats. Un élément visible supplémentaire détermine s'il existe
+une page suivante, sans être consommé par le curseur de la page courante.
+Les lectures SQL sont faites par lots de 50 et la réponse est bornée à 20 ; le
+nombre total de lots dépend des textes masqués. Ce n'est pas une borne constante
+de travail ni une preuve de performance à grande échelle.
+
+Sur un jeu inchangé, les pages successives ne dupliquent ni n'omettent d'éléments,
+y compris aux dates identiques. Aucun instantané inter-requêtes n'est conservé :
+modération, édition ou changement de statut peuvent modifier l'ensemble ou son
+ordre pendant le parcours. Recommencer à la première page pour un parcours frais.
+Le retrait et la suspension restent prioritaires sur tout ancien curseur.
 POST création n'est pas idempotent : ne pas relancer aveuglément une requête dont
 l'issue réseau est inconnue. Les modifications sont protégées par leur révision.
 Pas d'écran d'édition/modération ajouté : parcours REST seulement, état du module
-dans l'administration commune. Les quotas, pagination et ergonomie restent à traiter.
+dans l'administration commune. Les quotas et l'ergonomie restent à traiter.
 
 ## Activation et retour arrière
 
@@ -127,7 +157,14 @@ Tests PHPUnit : transitions, propriété, révisions périmées, catégories int
 nonces, schéma absent, rollback du journal, suspension, purge et isolation Me/Hub.
 Ils utilisent un modèle de base simulé, distinct de la recette réelle ci-dessous.
 
-Recette locale du 25 septembre 2026 : WordPress 7.1.2, PHP 8.5.4, MariaDB 11.8.6,
+Correction de pagination : fixture PHPUnit de 185 textes, trois créateurs dont un
+suspendu (60 textes approuvés masqués en tête), 45 textes initialement publics et
+70 textes en attente. Parcours exhaustifs public/propriétaire/modération, dates
+égales, pages pleines, fin exacte, retrait et nouvelle suspension, bornes et curseurs
+invalides, permissions et adaptation REST sont testés. Aucun flag ni site n'est
+activé pour cette correction ; pas de nouvelle recette WordPress/MariaDB.
+
+Recette locale initiale du 25 septembre 2026 (avant pagination, SHA `9d5f2eb`) : WordPress 7.1.2, PHP 8.5.4, MariaDB 11.8.6,
 deux tables InnoDB, serveur PHP à quatre workers, cookies et nonces WordPress réels.
 **45 contrôles REST réels réussis**, dont panne SQL par trigger puis rollback,
 deux éditions concurrentes (200/409), données publiques limitées, suspension,
