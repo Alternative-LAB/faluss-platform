@@ -6,6 +6,14 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Publications textuelles Fans
+
+- Ajout : module local opt-in, brouillons textuels privés du créateur SSO actif, édition soumise à nouvelle revue, approbation/rejet administratif avec trace et retrait propriétaire.
+- Technique : deux tables InnoDB privées, révisions concurrentes, journal et mutation atomiques, nonce REST, propriété résolue côté serveur et réponse publique limitée au texte approuvé d'un profil actif.
+- Compatibilité : aucun média WordPress, accès verrouillé, teaser Me, paiement, score, cron ou dépendance runtime ajouté ; rôle Fans et flags nécessaires à l'activation. Retour arrière par retrait du flag, données conservées.
+- Vérification : tests unitaires d'échec et d'isolation ; 45 contrôles REST WordPress/MariaDB locaux, incluant panne du journal, écritures concurrentes et rollback du flag (HTTP loopback, sans nouveau test SSO Me ni TLS).
+- Documentation : état des PR #67–73 fusionnées et anciennes PR remplacées dans FANS.md ; contrat des textes, limites de modération humaine et chantiers médias/Me.
+
 ### Documentation
 
 - Précisions HoF : badge à la consommation financée, pseudo/badge visibles au créateur concerné et publics sur consentement, soutien direct en centièmes de point entiers ; cadeaux gratuits sans revenu ni score monétisable sauf financement Faluss, sans reclassification PF.

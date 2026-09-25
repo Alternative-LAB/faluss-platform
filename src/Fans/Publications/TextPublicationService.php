@@ -1,0 +1,185 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Faluss\Platform\Fans\Publications;
+
+use Faluss\Platform\Fans\Profiles\CreatorProfileService;
+
+final class TextPublicationService
+{
+    public const CATEGORY = 'hosted_allowed_content';
+
+    public static function validId(mixed $id): bool
+    {
+        return is_string($id) && preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/D', $id) === 1;
+    }
+
+    private static function validText(mixed $text): bool
+    {
+        return is_string($text) && strlen($text) <= 32000 && preg_match('//u', $text) === 1
+            && preg_match_all('/./us', $text) <= 8000 && trim($text) !== ''
+            && preg_match('/[<>\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/u', $text) === 0;
+    }
+
+    /** @return array<string,mixed>|\WP_Error */
+    public static function create(mixed $text, mixed $category): array|\WP_Error
+    {
+        if (!TextPublicationsModule::available()) { return self::error('publications_unavailable', 503); }
+        $profile = CreatorProfileService::own();
+        if ($profile === null || $profile['status'] !== 'active') { return self::error('active_creator_required', 403); }
+        if ($category !== self::CATEGORY || !self::validText($text)) { return self::error('invalid_text_publication', 400); }
+        $id = wp_generate_uuid4();
+        if (!self::validId($id)) { return self::error('publication_id_unavailable', 503); }
+        global $wpdb;
+        // WordPress otherwise logs failing SQL verbatim, including private text.
+        $previousSuppress = $wpdb->suppress_errors(true);
+        try {
+            if ($wpdb->query('START TRANSACTION') === false) { return self::error('publication_write_failed', 503); }
+            $now = gmdate('Y-m-d H:i:s');
+            $row = ['publication_id' => $id, 'creator_id' => $profile['creator_id'], 'revision' => 1,
+                'body' => $text, 'state' => 'pending', 'category' => self::CATEGORY, 'created_at' => $now, 'updated_at' => $now];
+            $ok = $wpdb->query($wpdb->prepare('INSERT INTO `' . TextPublicationSchema::table() . '`'
+                . ' (publication_id,creator_id,revision,body,state,category,created_at,updated_at) VALUES (%s,%s,%d,%s,%s,%s,%s,%s)',
+                $id, $profile['creator_id'], 1, $text, 'pending', self::CATEGORY, $now, $now));
+            if ($ok !== 1 || !self::audit($row, 'create', 'awaiting_review', $text) || $wpdb->query('COMMIT') === false) {
+                return self::error('publication_write_failed', 503);
+            }
+            return $row;
+        } finally {
+            $wpdb->query('ROLLBACK');
+            $wpdb->suppress_errors($previousSuppress);
+        }
+    }
+
+    /** @return array<string,mixed>|\WP_Error */
+    public static function change(mixed $id, mixed $revision, string $action, mixed $text = null, mixed $reason = null): array|\WP_Error
+    {
+        if (!TextPublicationsModule::available()) { return self::error('publications_unavailable', 503); }
+        if (!self::validId($id) || !is_int($revision) || $revision < 1 || $revision >= 2147483647
+            || !in_array($action, ['edit', 'withdraw', 'approve', 'reject'], true)
+            || ($action === 'edit' && !self::validText($text))
+            || ($action === 'approve' && $reason !== 'allowed_text')
+            || ($action === 'reject' && !in_array($reason, ['prohibited_content', 'needs_revision'], true))
+        ) { return self::error('invalid_publication_change', 400); }
+        $moderation = in_array($action, ['approve', 'reject'], true);
+        $profile = $moderation ? null : CreatorProfileService::own();
+        if (($moderation && !current_user_can('manage_options')) || (!$moderation && $profile === null)) {
+            return self::error('publication_forbidden', 403);
+        }
+        global $wpdb;
+        $previousSuppress = $wpdb->suppress_errors(true);
+        try {
+            if ($wpdb->query('START TRANSACTION') === false) { return self::error('publication_write_failed', 503); }
+            $row = self::read($id, true);
+            if ($row === null) { return self::error('publication_not_found', 404); }
+            if (!$moderation && $row['creator_id'] !== $profile['creator_id']) {
+                return self::error('publication_forbidden', 403);
+            }
+            if ((int) $row['revision'] !== $revision) { return self::error('publication_revision_conflict', 409); }
+            if (!in_array($row['state'], ['pending', 'approved', 'rejected'], true)
+                || ($action === 'approve' && $row['state'] !== 'pending')
+                || ($action === 'reject' && !in_array($row['state'], ['pending', 'approved'], true))) {
+                return self::error('publication_state_conflict', 409);
+            }
+            // Withdrawal remains possible after profile suspension. Every exposure checks the profile again.
+            if (in_array($action, ['edit', 'approve'], true) && CreatorProfileService::publicById($row['creator_id']) === null) {
+                return self::error('active_creator_required', 403);
+            }
+            $oldText = $row['body'];
+            $row['body'] = $action === 'edit' ? $text : (in_array($action, ['withdraw', 'reject'], true) ? '' : $oldText);
+            $row['state'] = match ($action) { 'edit' => 'pending', 'approve' => 'approved', 'reject' => 'rejected', default => 'withdrawn' };
+            $row['revision'] = $revision + 1;
+            $row['updated_at'] = gmdate('Y-m-d H:i:s');
+            if ($wpdb->query($wpdb->prepare('UPDATE `' . TextPublicationSchema::table() . '` SET body=%s,state=%s,revision=%d,updated_at=%s'
+                . ' WHERE publication_id=%s AND revision=%d', $row['body'], $row['state'], $row['revision'], $row['updated_at'], $id, $revision)) !== 1
+                || !self::audit($row, $action, $moderation ? $reason : ($action === 'edit' ? 'awaiting_review' : 'creator_withdrawal'), $action === 'edit' ? $text : $oldText)
+                || $wpdb->query('COMMIT') === false
+            ) { return self::error('publication_write_failed', 503); }
+            return $row;
+        } finally {
+            $wpdb->query('ROLLBACK');
+            $wpdb->suppress_errors($previousSuppress);
+        }
+    }
+
+    /** @return array<string,mixed>|null */
+    private static function read(string $id, bool $lock = false): ?array
+    {
+        global $wpdb;
+        $row = $wpdb->get_row($wpdb->prepare('SELECT * FROM `' . TextPublicationSchema::table() . '` WHERE publication_id=%s' . ($lock ? ' FOR UPDATE' : ''), $id), 'ARRAY_A');
+        return is_array($row) && self::validId($row['creator_id'] ?? null)
+            && self::validId($row['publication_id'] ?? null) && ($row['category'] ?? null) === self::CATEGORY
+            && is_string($row['body'] ?? null) && isset($row['revision'], $row['state'], $row['created_at'], $row['updated_at']) ? $row : null;
+    }
+
+    /** @return array<string,mixed>|\WP_Error */
+    public static function get(mixed $id, bool $private = false): array|\WP_Error
+    {
+        if (!TextPublicationsModule::available()) { return self::error('publications_unavailable', 503); }
+        if (!self::validId($id) || ($row = self::read($id)) === null) { return self::error('publication_not_found', 404); }
+        if ($private) {
+            $profile = CreatorProfileService::own();
+            if (!current_user_can('manage_options') && ($profile === null || $profile['creator_id'] !== $row['creator_id'])) {
+                return self::error('publication_forbidden', 403);
+            }
+            return $row;
+        }
+        if (!PublicationAccessPolicy::originalAllowed(CreatorProfileService::publicById($row['creator_id']) !== null,
+            $row['state'] === 'approved' ? 'published' : $row['state'],
+            $row['state'] === 'approved' ? 'approved' : 'pending', $row['category'], 'free', false)
+            || !self::validText($row['body'])
+        ) { return self::error('publication_not_found', 404); }
+        return array_intersect_key($row, array_flip(['publication_id', 'creator_id', 'revision', 'body', 'updated_at']));
+    }
+
+    /** @return list<array<string,mixed>>|\WP_Error */
+    public static function listing(string $scope): array|\WP_Error
+    {
+        if (!TextPublicationsModule::available()) { return self::error('publications_unavailable', 503); }
+        global $wpdb;
+        $table = TextPublicationSchema::table();
+        if ($scope === 'queue') {
+            if (!current_user_can('manage_options')) { return self::error('publication_forbidden', 403); }
+            $sql = $wpdb->prepare('SELECT publication_id FROM `' . $table . '` WHERE state=%s ORDER BY updated_at,publication_id LIMIT 20', 'pending');
+        } elseif ($scope === 'own') {
+            $profile = CreatorProfileService::own();
+            if ($profile === null) { return self::error('publication_forbidden', 403); }
+            $sql = $wpdb->prepare('SELECT publication_id FROM `' . $table . '` WHERE creator_id=%s ORDER BY updated_at,publication_id LIMIT 20', $profile['creator_id']);
+        } else {
+            $sql = $wpdb->prepare('SELECT publication_id FROM `' . $table . '` WHERE state=%s ORDER BY updated_at,publication_id LIMIT 20', 'approved');
+        }
+        $rows = $wpdb->get_results($sql, 'ARRAY_A');
+        if (!is_array($rows)) { return self::error('publications_unavailable', 503); }
+        $result = [];
+        foreach ($rows as $item) {
+            $value = self::get($item['publication_id'] ?? null, $scope !== 'public');
+            if (is_array($value)) { $result[] = $value; }
+        }
+        return $result;
+    }
+
+    /** @return list<array<string,mixed>>|\WP_Error */
+    public static function decisions(mixed $id): array|\WP_Error
+    {
+        if (!TextPublicationsModule::available()) { return self::error('publications_unavailable', 503); }
+        if (!current_user_can('manage_options') || !self::validId($id)) { return self::error('publication_forbidden', 403); }
+        global $wpdb;
+        $rows = $wpdb->get_results($wpdb->prepare('SELECT * FROM `' . TextPublicationSchema::table(true) . '` WHERE publication_id=%s ORDER BY revision DESC LIMIT 100', $id), 'ARRAY_A');
+        return is_array($rows) ? array_values($rows) : self::error('publications_unavailable', 503);
+    }
+
+    /** @param array<string,mixed> $row */
+    private static function audit(array $row, string $action, string $reason, string $text): bool
+    {
+        global $wpdb;
+        return $wpdb->query($wpdb->prepare('INSERT INTO `' . TextPublicationSchema::table(true) . '`'
+            . ' (publication_id,revision,actor_id,action,reason,text_hash,occurred_at) VALUES (%s,%d,%d,%s,%s,%s,%s)',
+            $row['publication_id'], $row['revision'], get_current_user_id(), $action, $reason, hash('sha256', $text), $row['updated_at'])) === 1;
+    }
+
+    private static function error(string $code, int $status): \WP_Error
+    {
+        return new \WP_Error($code, 'Publication indisponible.', ['status' => $status]);
+    }
+}

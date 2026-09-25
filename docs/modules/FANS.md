@@ -5,11 +5,15 @@
 | Lot | État | Portée |
 | --- | --- | --- |
 | Admission du rôle, PR #53 | Implémenté et fusionné | `FALUSS_PLATFORM_ROLE='fans'` donne accès à l'administration commune ; les modules Me et Hub et leurs hooks d'activation restent isolés, y compris Link avec un flag erroné. |
-| Client SSO Fans, PR #54 | Implémenté sur la branche précédente, opt-in, non activé sur un site réel | Client distinct de celui du Hub, deux tables locales, état navigateur, PKCE S256, échange avec Me et session WordPress locale. Voir [FANS-SSO.md](FANS-SSO.md). |
-| Profils créateurs structurés, PR #55 | Implémenté sur la branche précédente, opt-in, non activé sur un site réel | Statut `active` limité à l'approbation de publication, `identity_verified=false` dans l'API. La vérification d'identité et la condition de vente du créateur restent à implémenter. Aucun texte libre, média ou upload. Voir [FANS-PROFILES.md](FANS-PROFILES.md). |
-| Followers, PR #56 | Implémenté sur la branche précédente, opt-in, non activé sur un site réel | Suivi/retrait idempotents d'un profil actif par un membre SSO lié ; seul le nombre est public. Blocage, signalements, suppression de compte et rétention restent à traiter avant une expérience sociale complète. Voir [FANS-FOLLOWERS.md](FANS-FOLLOWERS.md). |
-| Catalogue store structuré | Implémenté dans cette PR dépendante, opt-in, non activé sur un site réel | Deux catégories visibles et classables ; fiches adultes liées à un créateur masquées sans consentement explicite, fiches sans contenu ni prix, tentative d'achat refusée côté serveur et API. Voir [FANS-STORE.md](FANS-STORE.md). |
-| Publications, messagerie, commandes et droits | Contractuel seulement | Aucun de ces domaines, stockage, route, transaction, paiement, achat effectif ou droit n'est implémenté ici. |
+| Client SSO Fans, PR #67 (remplace #54) | Fusionné, opt-in, sans activation de production | Client distinct de celui du Hub, deux tables locales, état navigateur, PKCE S256, échange avec Me et session WordPress locale. Voir [FANS-SSO.md](FANS-SSO.md). |
+| Profils créateurs structurés, PR #68 (remplace #55) | Fusionné, opt-in, sans activation de production | Statut `active` limité à l'approbation de publication, `identity_verified=false` dans l'API. La vérification d'identité et la condition de vente du créateur restent à implémenter. Aucun texte libre, média ou upload dans le profil. Voir [FANS-PROFILES.md](FANS-PROFILES.md). |
+| Followers, PR #69 (remplace #56) | Fusionné, opt-in, sans activation de production | Suivi/retrait idempotents d'un profil actif par un membre SSO lié ; seul le nombre est public. Blocage, signalements, suppression de compte et rétention restent à traiter avant une expérience sociale complète. Voir [FANS-FOLLOWERS.md](FANS-FOLLOWERS.md). |
+| Catalogue store structuré, PR #70 (remplace #57) | Fusionné, opt-in, sans activation de production | Deux catégories visibles et classables ; fiches adultes liées à un créateur masquées sans consentement explicite, fiches sans contenu ni prix, tentative d'achat refusée côté serveur et API. Voir [FANS-STORE.md](FANS-STORE.md). |
+| Contrats des moteurs, PR #71 (remplace #64) | Documentation fusionnée, pas de moteur économique | Décisions HoF, PF financés, consentement et corrections conservées. |
+| Politiques publications/teasers, PR #72 (remplace #65) | Classes pures fusionnées | Politique d'accès réutilisée par le moteur texte ; projection Me toujours inactive. |
+| Simulateur, PR #73 (remplace #66) | Fusionné, hors runtime | Contrat v2 et refus d'auto-soutien sur UUID fictifs, sans ledger ni revenu calculé. |
+| Publications textuelles, lot présent | Implémenté dans cette PR brouillon, opt-in désactivé par défaut | Tables privées, auteur SSO propriétaire au profil actif, modération humaine avec journal transactionnel, révisions, retrait et masquage à la suspension. Recette REST locale ; aucun média. Voir [FANS-PUBLICATIONS.md](FANS-PUBLICATIONS.md). |
+| Médias, messagerie, commandes et droits | Contractuel seulement | Aucun upload, paiement, achat effectif, droit ou accès verrouillé ; pas de projection Me active. |
 
 Le choix du rôle, du client confidentiel Me, de son secret et du flag Fans appartient à une configuration de site hors Git. Aucun site de production n'est configuré, activé, migré ou déployé par cette PR.
 
@@ -34,12 +38,12 @@ Aucun contenu adulte ne doit être hébergé ou envoyé par Fans, y compris dans
 
 ## Étapes et preuves avant ouverture
 
-1. **Fondation Fans** : le client SSO Me, les comptes locaux non privilégiés, les tests de rejeu et de session et un profil créateur structuré sont implémentés par deux PR dépendantes. La recette locale a vérifié tables InnoDB, création/liaison directe, permissions REST, approbation du profil et retrait des flags. Valider encore le callback HTTP exact, le parcours Me, les cookies et les courses réelles avant activation réelle. Les champs éditoriaux du profil exigeraient un contrat de modération distinct.
-2. **Social et contenu** : les profils structurés et le suivi de base sont implémentés dans deux PR dépendantes. Publications, messagerie, blocage, signalement, retrait et rétention restent à construire avec permissions côté serveur et garde contre tout contenu adulte. Tester les uploads, messages, API, accès directs, changements de visibilité et tentatives de contournement ; confirmer le comportement sur WordPress et les surfaces utilisées.
+1. **Fondation Fans** : SSO et profils sont fusionnés par #67 et #68. Les preuves et limites SSO, dont les recettes HTTPS locales antérieures, sont détaillées dans [FANS-SSO.md](FANS-SSO.md). La recette texte ne refait pas l'échange avec Me : elle utilise des liaisons synthétiques et de vraies sessions WordPress. Les champs éditoriaux du profil exigeraient un contrat de modération distinct.
+2. **Social et contenu** : profils et suivi local sont fusionnés. Le lot présent ajoute uniquement les textes modérés et leur retrait. Médias, messagerie, blocage, signalement, suppression de compte, rétention automatique et outillage de modération restent à construire. La quarantaine privée et la revue humaine ne garantissent pas la détection de tout contenu interdit ; aucune ouverture de production n'est autorisée par cette recette.
 3. **Contenu autorisé hébergé** : la catégorie est classable, sans contenu ni vente. Obtenir la validation du prestataire pour ce modèle de plateforme ; terminer les contrats publication autorisée, commande, paiement, remboursement et droits, puis tester les doublons, webhooks, échecs, annulations et accès après révocation. Une recette de bout en bout et un rollback vérifié précèdent l'ouverture.
 4. **Droits à livraison adulte externe** : la catégorie est présentée sans achat possible ; les fiches nominatives restent masquées en l'absence de consentement explicite du créateur et l'API existante refuse. Définir et tester le recueil du consentement avant publication. Prouver à nouveau par tests serveur et API que tous les chemins de commande et de délivrance futurs refusent. Obtenir l'acceptation explicite du prestataire pour ce parcours distinct. Toute ouverture commerciale sera un lot séparé avec revue du contrat de livraison externe, du refus par défaut, des contrôles de contenu et des parcours de paiement et de remboursement.
 
-Les tests de la PR #53 démontrent la reconnaissance du rôle et l'isolation de ses hooks. Ceux des PR SSO, profils, followers et catalogue ajoutent des preuves unitaires. Une recette locale jetable WordPress/MariaDB a vérifié les cinq tables Fans InnoDB sans table Link malgré son flag, la création/liaison SSO directe avec échec et nouvelle tentative, les permissions REST des profils, la fiche adulte masquée, les refus 403/503 de l'API actuelle et la fermeture des routes après retrait des flags. L'échange réseau avec Me, le navigateur, les routes Followers en HTTP et les courses réelles restent à tester. Les refus actuels ne prouvent pas ceux des commandes, paiements ou droits, qui restent à construire.
+Les tests de la PR #53 démontrent la reconnaissance du rôle et l'isolation de ses hooks. Les lots fusionnés SSO, profils, followers et catalogue ajoutent des preuves unitaires. Les recettes locales directes puis HTTPS ont vérifié les tables InnoDB sans table Link malgré son flag, création/liaison SSO et concurrence, permissions REST des profils, fiche adulte masquée, refus 403/503 de l'API actuelle et retrait des flags ; voir [la preuve SSO HTTP](../evidence/fans-local/SSO-HTTP.md) et [le contrat catalogue](FANS-STORE.md). Le lot texte ajoute sa propre recette locale REST décrite dans [FANS-PUBLICATIONS.md](FANS-PUBLICATIONS.md). Ces preuves ne couvrent pas le navigateur physique, les extensions tierces ni l'ouverture de production. Les refus actuels ne prouvent pas ceux des commandes, paiements ou droits, qui restent à construire.
 
 ## Décision HoF — contractuelle, sans activation
 
@@ -62,7 +66,7 @@ sans revenu ni score monétisable sauf financement explicite par Faluss ; les PF
 dépense du donateur pour son badge. Le contrat définit les
 corrections, litiges et remboursements à construire ; aucun moteur économique
 n'est ajouté ici. **Le simulateur de #73 est adapté au contrat v2** :
-la v2 proposée sépare les unités de score et de dépense ; sa politique reste limitée
+la v2 fusionnée sépare les unités de score et de dépense ; sa politique reste limitée
 aux fixtures documentées. Les refus adultes 403 et hébergés 503 restent inchangés,
 sans paiement.
 
@@ -70,6 +74,6 @@ sans paiement.
 
 La matrice des propriétaires, les contrats proposés et les portes de validation sont décrits dans [FANS-ENGINE-OWNERSHIP.md](FANS-ENGINE-OWNERSHIP.md). Ils ne constituent pas des moteurs activés. La référence visuelle Fans reste conceptuelle ; aucun badge de la maquette ne prouve une vérification d'identité.
 
-La [fondation des publications](FANS-PUBLICATIONS.md) contient des politiques pures testées et une projection de teasers ; aucun stockage, upload, route ou média actif.
+La [fondation des publications](FANS-PUBLICATIONS.md) comprend maintenant un moteur local de textes modérés, désactivé par défaut, et les politiques pures existantes. Les originaux médias, publications verrouillées et teasers Me restent sans route active ni transport.
 
 La [simulation Progression/HoF v2](PROGRESSION-SIMULATION.md), adaptée dans #73 avec refus de l'auto-soutien sur les identités fictives, sépare score en centièmes de point et dépense consommée en centimes EUR. Elle teste les corrections sur fixtures, y compris les sessions clôturées ; le financement Faluss reste non pris en charge faute de politique allouée. Elle ne crée ni niveau, badge, session HoF active, PF, revenu ou score persistant.
