@@ -26,7 +26,9 @@ namespace {
     if (!class_exists('WP_REST_Response')) {
         final class WP_REST_Response
         {
+            public array $headers = [];
             public function __construct(public mixed $data, public int $status = 200) {}
+            public function header(string $name, string $value): void { $this->headers[$name] = $value; }
         }
     }
 }

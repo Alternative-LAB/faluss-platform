@@ -8,7 +8,7 @@ flowchart LR
     Bootstrap --> Role{Rôle du site}
     Role -->|me| Me[Modules compatibles me]
     Role -->|hub| Hub[Modules compatibles hub]
-    Role -->|fans| Fans[Administration, SSO, profils, followers et catalogue optionnels]
+    Role -->|fans| Fans[Administration, SSO, profils, followers, catalogue et textes optionnels]
     Me --> Registry[Registre de modules]
     Hub --> Registry
     Fans --> Registry
@@ -31,7 +31,7 @@ Un module implémente `Faluss\Platform\Core\Module` et déclare :
 - les identifiants de ses dépendances ;
 - sa méthode `boot()`.
 
-Le registre vérifie les doublons, l’absence de dépendance, l’incompatibilité de rôle et les cycles avant le chargement. Le module `theme-tokens` est la première migration optionnelle ; chaque module suivant fait l’objet d’une PR distincte et de tests ciblés. Les domaines [Faluss Fans](modules/FANS.md) au-delà des profils, du suivi minimal et du catalogue sans achat restent contractuels et ne sont pas chargés par l'admission du rôle ou les autres modules.
+Le registre vérifie les doublons, l’absence de dépendance, l’incompatibilité de rôle et les cycles avant le chargement. Le module `theme-tokens` est la première migration optionnelle ; chaque module suivant fait l’objet d’une PR distincte et de tests ciblés. [Faluss Fans](modules/FANS.md) admet des modules optionnels SSO, profils, suivi minimal, catalogue sans achat et textes modérés. Le moteur texte dépend du contrat public des profils et de la politique d'accès existante, avec son propre stockage privé et flag. Médias, messagerie, commandes et droits restent contractuels ; l'admission du rôle ne les charge pas.
 
 ## Cohabitation et rollback
 

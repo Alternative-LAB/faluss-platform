@@ -218,6 +218,7 @@ final class DashboardModule implements Module
             'identity-client' => ['label' => 'Client Identity', 'description' => 'Connecte faluss.com à l’autorité d’identité via OAuth et PKCE.', 'short' => 'IC'],
             'fans-sso' => ['label' => 'Client SSO Fans', 'description' => 'Établit une session locale Fans depuis une preuve de Faluss Me.', 'short' => 'FS'],
             'fans-creator-profiles' => ['label' => 'Profils créateurs Fans', 'description' => 'Gère les profils créateurs structurés et leur publication approuvée.', 'short' => 'FC'],
+            'fans-text-publications' => ['label' => 'Textes Fans', 'description' => 'Gère les textes privés et leur modération avant lecture publique.', 'short' => 'FT'],
             'fans-followers' => ['label' => 'Followers Fans', 'description' => 'Gère les abonnements locaux aux profils créateurs approuvés.', 'short' => 'FF'],
             'fans-store-catalog' => ['label' => 'Catalogue Fans', 'description' => 'Classe les fiches commerciales sans ouvrir les achats ni les paiements.', 'short' => 'SC'],
             'link' => ['label' => 'Faluss Link', 'description' => 'Gère les cartes publiques, leur édition, les médias et les découvertes.', 'short' => 'FL'],
