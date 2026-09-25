@@ -8,6 +8,24 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 - Livraison corrective Me V3 préparée ci-dessous ; aucun changement de configuration ni de données à la mise à jour.
 
+## [0.5.1] - 2026-09-25
+
+### Corrigé
+
+- Fond de la carte canonique prolongé jusqu’au bas du viewport et du contenu, sans bordure ni arrondi extérieur ; mêmes règles pour l’aperçu et les intégrations Link.
+- Éditions perdues dans le Studio V3 rétablies : collections, contenus texte/média, suppression/visibilité/image des liens, ordre complet, bio/publication et réglages avancés.
+- Paramètres de transition de couverture appliqués par le renderer commun ; cache des assets invalidé.
+
+### Ajouté
+
+- Rubriques natives Collections, Contenus et ordre, Réglages ; mutations unitaires de contenus dans l’agrégat Link existant, avec contrôle de version et ownership média.
+- Une régression de page entière à 390 × 844, une preuve visuelle locale et une matrice de correspondance ancien Studio/V3.
+
+### Compatibilité
+
+- Aucune migration, aucun changement de flag ni intervention WordPress. Les versions et l’ordre des blocs restent canoniques ; une suppression doit être explicite.
+- Recette réelle WordPress/Elementor/téléphone non exécutée. Résultats et limites : `docs/evidence/me-v3-viewport/README.md`.
+
 ## [0.5.0] - 2026-09-25
 
 ### Ajouté

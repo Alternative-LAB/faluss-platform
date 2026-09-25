@@ -117,7 +117,7 @@ final class MeStudioContractTest extends TestCase
         foreach (['texture-grain', 'texture-camo', 'avatar-shape-rounded', 'avatar-effect-both', 'wallpaper-cover', 'wallpaper-effect-gradient', 'links-mode-image-grid', 'social-style-solid-custom'] as $selector) {
             self::assertStringContainsString($selector, $card);
         }
-        self::assertStringContainsString('transparent 45%', $card);
+        self::assertStringContainsString('var(--fl-hero-transition-position),var(--fl-page-background) 100%)', $card);
         self::assertStringContainsString('mask-image:none', $card);
         self::assertStringContainsString('@media (max-width: 480px)', $card);
         self::assertStringContainsString('@media (prefers-reduced-motion: reduce)', $card);

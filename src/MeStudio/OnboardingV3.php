@@ -20,6 +20,8 @@ final class OnboardingV3
 
     public static function register(): void
     {
+        add_action('wp_ajax_faluss_studio_v3_manage', [self::class, 'manageStudio']);
+        add_action('wp_ajax_faluss_studio_v3_upload_content', [self::class, 'uploadContent']);
         add_action('wp_ajax_faluss_studio_v3_save', [self::class, 'saveStudio']);
         add_action('wp_ajax_faluss_onboarding_v3_transition', [self::class, 'transition']);
         add_action('wp_ajax_faluss_onboarding_v3_identity_draft', [self::class, 'identityDraft']);
@@ -81,7 +83,7 @@ final class OnboardingV3
             : (str_ends_with((string) ($context['step'] ?? ''), '_simple') ? 'simple'
                 : (($preferences['structure'] ?? 'simple') === 'atomic' ? 'atomic' : 'simple'));
         $step = self::step((string) ($context['step'] ?? ''), $mode, $profile);
-        $sections = ['v3_mode' => 'Structure', 'v3_identity' => 'Identité', 'v3_socials' => 'Réseaux', 'v3_links' => 'Liens', 'v3_colors' => 'Couleurs', 'v3_buttons' => 'Boutons', 'v3_avatar' => 'Avatar', 'v3_wallpaper' => 'Fond', 'v3_name' => 'Nom', 'v3_network_style' => 'Style des réseaux'];
+        $sections = ['v3_mode' => 'Structure', 'v3_identity' => 'Identité', 'v3_socials' => 'Réseaux', 'v3_links' => 'Liens', 'v3_colors' => 'Couleurs', 'v3_buttons' => 'Boutons', 'v3_avatar' => 'Avatar', 'v3_wallpaper' => 'Fond', 'v3_name' => 'Nom', 'v3_network_style' => 'Style des réseaux', 'v3_collections' => 'Collections', 'v3_contents' => 'Contenus et ordre', 'v3_settings' => 'Réglages'];
         if ($studio) {
             $mode = ($preferences['structure'] ?? 'simple') === 'atomic' ? 'atomic' : 'simple';
             $requested = isset($_GET['v3_section']) && is_string($_GET['v3_section']) ? sanitize_key(wp_unslash($_GET['v3_section'])) : 'v3_identity';
@@ -120,13 +122,13 @@ final class OnboardingV3
             <form class="faluss-onboarding-v3__panel" data-v3-panel novalidate>
                 <button class="faluss-onboarding-v3__grabber" type="button" data-v3-grabber aria-label="Agrandir le panneau" aria-expanded="false"><span></span></button>
                 <div class="faluss-onboarding-v3__scroll" data-v3-scroll>
-                    <?php self::controls($step, $mode, $controlsState, $slug); ?>
+                    <?php if ($studio && StudioV3Management::handles($step)) { StudioV3Management::render($step, $state); } else { self::controls($step, $mode, $controlsState, $slug); } ?>
                     <p class="faluss-onboarding-v3__error" data-v3-error role="alert" hidden></p>
                     <p class="faluss-onboarding-v3__status" data-v3-status role="status" aria-live="polite"></p>
                 </div>
                 <footer class="faluss-onboarding-v3__actions">
                     <?php if (!$studio && in_array($step, ['v3_socials', 'v3_links', 'v3_avatar', 'v3_wallpaper', 'v3_network_style'], true)) : ?><button type="button" class="faluss-onboarding-v3__skip" data-v3-skip>Passer</button><?php endif; ?>
-                    <?php if ($step !== 'v3_success') : ?><button type="submit" class="faluss-onboarding-v3__primary" data-v3-primary><?php echo esc_html($studio ? 'Enregistrer' : ($step === 'v3_identity' && empty($controlsState['canonical_slug']) ? 'Revendiquer mon identifiant' : ($step === 'v3_review' ? 'Publier mon Faluss' : 'Continuer'))); ?> <span aria-hidden="true">→</span></button><?php endif; ?>
+                    <?php if ($step !== 'v3_success' && !($studio && StudioV3Management::handles($step))) : ?><button type="submit" class="faluss-onboarding-v3__primary" data-v3-primary><?php echo esc_html($studio ? 'Enregistrer' : ($step === 'v3_identity' && empty($controlsState['canonical_slug']) ? 'Revendiquer mon identifiant' : ($step === 'v3_review' ? 'Publier mon Faluss' : 'Continuer'))); ?> <span aria-hidden="true">→</span></button><?php endif; ?>
                 </footer>
             </form>
         </section>
@@ -271,6 +273,24 @@ final class OnboardingV3
             <div class="faluss-onboarding-v3__success-actions"><a class="faluss-onboarding-v3__primary" href="<?php echo esc_url(home_url('/' . $slug . '/')); ?>">Voir mon Faluss</a><a class="faluss-onboarding-v3__secondary" href="<?php echo esc_url(home_url('/mon-faluss/')); ?>">Ouvrir le Studio</a></div>
         </section>
         <?php return (string) ob_get_clean();
+    }
+
+    public static function manageStudio(): void
+    {
+        self::verify('faluss_studio_v3_manage');
+        // The Link contract rejects unknown mutation names and fields. Never accept a subject ID.
+        $request = self::postedFields();
+        $request['mutation'] = self::text('mutation');
+        $request['aggregate_version'] = self::text('version');
+        $result = LinkStudioContract::mutate(wp_slash($request));
+        if (empty($result['ok'])) { self::failure((string) ($result['code'] ?? 'save_failed'), (int) ($result['status'] ?? 422)); }
+        wp_send_json_success($result);
+    }
+
+    public static function uploadContent(): void
+    {
+        self::verify('faluss_studio_v3_upload_content');
+        LinkStudioContract::uploadImage('content_image', 'faluss_studio_v3_upload_content');
     }
 
     public static function saveStudio(): void

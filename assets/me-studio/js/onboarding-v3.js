@@ -25,6 +25,7 @@
 
     var studio = root.dataset.studio === 'true';
     var dirty = false;
+    var management = root.querySelector('[data-v3-management]');
     function updateViewportHeight() {
         // Keep the header on the layout viewport; only lift the panel above the keyboard.
         var viewport = window.visualViewport;
@@ -40,6 +41,7 @@
         if (!previewHost || !previewHost.firstElementChild) { return; }
         var card = previewHost.firstElementChild;
         card.style.width = '390px';
+        card.style.setProperty('--fl-card-min-height', Math.max(440, window.innerWidth <= 768 ? window.innerHeight * 390 / window.innerWidth : 844) + 'px');
         card.style.zoom = String(previewHost.clientWidth / 390);
     }
     if (window.ResizeObserver && previewHost) { new ResizeObserver(scalePreview).observe(previewHost); }
@@ -144,6 +146,7 @@
     }
 
     function schedulePreview() {
+        if (management) { return; }
         ++previewRevision;
         if (previewRequest) { previewRequest.abort(); }
         window.clearTimeout(timer);
@@ -244,6 +247,70 @@
         }).finally(function () { uploading = false; input.disabled = false; });
     }
 
+    function itemId() {
+        return window.crypto.randomUUID();
+    }
+
+    function saveItem(editor, removal) {
+        if (pending || uploading) { return; }
+        if (Array.from(root.querySelectorAll('[data-v3-editor][data-dirty]')).some(function (other) { return other !== editor; })) {
+            if (!window.confirm('Enregistrer cet élément et abandonner les modifications non enregistrées des autres éléments ?')) { return; }
+        }
+        if (removal && !window.confirm(removal === 'dissolve_collection' ? 'Dissoudre cette collection et conserver ses contenus ?' : 'Supprimer cet élément ?')) { return; }
+        var values = {};
+        var mutation = removal || editor.dataset.mutation;
+        if (!removal) {
+            editor.querySelectorAll('[data-field]').forEach(function (field) { values[field.dataset.field] = field.value; });
+        }
+        if (editor.dataset.id) { values.block_id = editor.dataset.id; }
+        if (mutation.indexOf('create_') === 0) { values.block_id = itemId(); }
+        if (mutation === 'create_collection') { values.description_block_id = itemId(); }
+        if (mutation === 'reorder_blocks') { values.block_ids = Array.from(editor.querySelectorAll('[data-block-id]')).map(function (row) { return row.dataset.blockId; }); }
+        pending = true;
+        editor.querySelectorAll('button').forEach(function (button) { button.disabled = true; });
+        notice('Enregistrement…', false);
+        post('faluss_studio_v3_manage', config.managementNonce, {
+            mutation: mutation, version: root.dataset.version || '', fields: JSON.stringify(values)
+        }).then(function (response) {
+            if (!response.success) { throw new Error(serverError(response, 'save_failed')); }
+            dirty = false;
+            window.location.reload();
+        }).catch(function (failure) {
+            notice(failure.message || 'Enregistrement impossible.', true);
+            pending = false;
+            editor.querySelectorAll('button').forEach(function (button) { button.disabled = false; });
+        });
+    }
+
+    function uploadContent(input) {
+        if (pending || uploading) { return; }
+        var file = input.files && input.files[0];
+        if (!file) { return; }
+        if (!/^(image\/jpeg|image\/png|image\/gif|image\/webp)$/.test(file.type) || file.size > 8 * 1024 * 1024) {
+            notice('Choisissez une image JPEG, PNG, GIF ou WebP de 8 Mo maximum.', true); return;
+        }
+        var editor = input.closest('[data-v3-editor]');
+        var data = new FormData();
+        data.append('action', 'faluss_studio_v3_upload_content');
+        data.append('nonce', config.contentNonce || '');
+        data.append('content_image', file, file.name);
+        uploading = true; input.disabled = true;
+        notice('Envoi de l’image…', false);
+        fetch(config.ajaxUrl, {method: 'POST', credentials: 'same-origin', body: data}).then(function (response) {
+            return response.text().then(function (raw) {
+                var result;
+                try { result = JSON.parse(raw); } catch (ignored) { throw new Error('Réponse serveur illisible (HTTP ' + response.status + ').'); }
+                result.httpStatus = response.status; return result;
+            });
+        }).then(function (result) {
+            if (!result.success || !result.data || !result.data.id) { throw new Error(serverError(result, 'upload_failed')); }
+            editor.querySelector('[data-field="attachment_id"]').value = result.data.id;
+            editor.dataset.dirty = 'true'; dirty = true;
+            notice('Image prête. Enregistre cet élément pour l’appliquer à ta carte.', false);
+        }).catch(function (failure) { notice(failure.message, true); })
+            .finally(function () { uploading = false; input.disabled = false; });
+    }
+
     function activateTab(tab, focus) {
         var group = tab.parentNode;
         group.querySelectorAll('[role="tab"]').forEach(function (candidate) {
@@ -335,6 +402,24 @@
 
     root.addEventListener('click', function (event) {
         var target = event.target;
+        var editor = target.closest('[data-v3-editor]');
+        if (editor) {
+            if (target.closest('[data-v3-save-item]')) { saveItem(editor, ''); return; }
+            var remove = target.closest('[data-v3-delete-item]');
+            if (remove) { saveItem(editor, remove.dataset.v3DeleteItem); return; }
+            if (target.closest('[data-v3-remove-image]')) {
+                editor.querySelector('[data-field="attachment_id"]').value = '0';
+                var image = editor.querySelector('img'); if (image) { image.remove(); }
+                editor.dataset.dirty = 'true'; dirty = true; return;
+            }
+            var order = target.closest('[data-v3-order]');
+            if (order) {
+                var row = order.closest('[data-block-id]');
+                if (order.dataset.v3Order === 'up' && row.previousElementSibling) { row.parentNode.insertBefore(row, row.previousElementSibling); }
+                if (order.dataset.v3Order === 'down' && row.nextElementSibling) { row.parentNode.insertBefore(row.nextElementSibling, row); }
+                order.focus(); editor.dataset.dirty = 'true'; dirty = true; return;
+            }
+        }
         if (target.closest('[data-v3-back]')) { submit('back'); return; }
         if (target.closest('[data-v3-skip]')) { submit('skip'); return; }
         var tab = target.closest('[data-v3-tab]');
@@ -378,6 +463,12 @@
             return;
         }
         dirty = true;
+        if (management) {
+            var editor = event.target.closest('[data-v3-editor]');
+            if (editor) { editor.dataset.dirty = 'true'; }
+            if (event.target.matches('[data-v3-content-upload]')) { uploadContent(event.target); }
+            return;
+        }
         if (event.target.matches('[data-v3-upload]')) { upload(event.target); return; }
         if (event.target.matches('[data-v3-network-choice]')) {
             var row = event.target.closest('[data-network]');
@@ -397,12 +488,14 @@
         scheduleIdentityDraft();
     });
     root.addEventListener('input', function (event) {
+        if (management) { var editor = event.target.closest('[data-v3-editor]'); if (editor) { editor.dataset.dirty = 'true'; dirty = true; } return; }
         if (event.target.matches('[data-v3-upload]')) { return; }
         if (event.target.matches('[data-v3-color]')) { event.target.dataset.selected = 'true'; }
         if (event.target.matches('input, select')) { dirty = true; schedulePreview(); scheduleIdentityDraft(); }
     });
     panel.addEventListener('submit', function (event) {
         event.preventDefault();
+        if (management) { var editor = event.target.closest('[data-v3-editor]') || document.activeElement.closest('[data-v3-editor]'); if (editor) { saveItem(editor, ''); } return; }
         submit(root.dataset.step === 'v3_review' ? 'publish' : 'next');
     });
     panel.addEventListener('focusin', function (event) {
