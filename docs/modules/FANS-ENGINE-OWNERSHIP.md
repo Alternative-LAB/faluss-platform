@@ -184,13 +184,16 @@ Par défaut, un mélange de classes non admissibles ne contribue pas au score ;
 l'éligibilité, le refus ou la ventilation du cadeau doivent être décidés et testés.
 Un financement par la plateforme ne compte pas comme dépense réelle du donateur.
 
-### Porte obligatoire pour la PR #73 et tests futurs
+### Adaptation de la PR #73 et portes futures
 
-**Le simulateur de #73 doit être adapté avant sa fusion.** Son état actuel
+**Le simulateur de #73 est adapté au contrat v2 avec refus de l'auto-soutien.** Son état initial
 `fans.support-simulation/1.0.0` convertit les centimes nets en deux totaux identiques
 (`member_contributions`, `creator_scores`) pour `eur_support` et `funded_support`.
-Cette règle ne satisfait pas la décision HoF. #71 ne modifie pas la branche #73.
-Il faudra versionner sa politique, séparer pièces dépensées, euros confirmés,
+Cette règle ne satisfait pas la décision HoF. #71 ne modifiait pas la branche #73.
+La [v2 de #73](PROGRESSION-SIMULATION.md) sépare les unités, sans moteur
+actif ; le financement Faluss et l'allocation des remboursements de packs restent
+hors simulation faute de politique définie. Les futurs moteurs exigeront leurs propres revues et preuves.
+Le contrat exige de versionner la politique, séparer pièces dépensées, euros confirmés,
 dépense réelle et revenu privé, puis ajouter des tests pour :
 
 - pack payé sans score ; 300 pièces financées débitées = 300 points de session ;
@@ -277,7 +280,7 @@ spécifique avant une éventuelle ouverture de ce parcours.
 1. #67–#70 fusionnées : fondations isolées ; aucune activation commerciale.
 2. Politiques de publications/teasers : tests de refus, limite cinq, retrait,
    autorisation du créateur ; puis stockage privé, quarantaine, upload et recette WP.
-3. Progression/HoF : adapter impérativement #73 à cette décision avant sa fusion,
+3. Progression/HoF : adaptation v2 du simulateur #73 et refus de l'auto-soutien,
    avec tests sur faits fictifs ; puis producteur
    Events authentifié, stockage/idempotence et concurrence MariaDB avant scores.
 4. Pro : admission de rôle isolée, module d'offres et tests ; projections signées
