@@ -117,3 +117,14 @@ Les tests automatisés couvrent le flag d’activation, les dépendances, le fal
 11. Rejouer le passwordless, la continuité SSO/onboarding, les shortcodes Link, les widgets Elementor et les autres modules du Master Plugin. Distinguer explicitement les résultats du harness des résultats WordPress/MariaDB réels.
 12. Vérifier Chrome et WebKit automatisés en mobile et bureau, puis effectuer une recette manuelle sur Safari réel : WebKit automatisé ne constitue pas une preuve Safari.
 13. Pour le retour arrière, remettre uniquement `FALUSS_PLATFORM_ME_STUDIO_V2` à `false`, charger une nouvelle requête et confirmer le retour au fournisseur Link interne, avec la composition V4 et tous les médias conservés.
+
+
+## Correctif 0.5.1 — écran public et fonctions d’édition
+
+La carte canonique couvre au minimum le viewport dynamique (`100dvh`, repli `100vh`) et s’allonge avec son contenu. Son enveloppe n’ajoute plus de cadre. L’aperçu utilise la même hauteur logique à l’échelle du téléphone ; le rendu Link partagé reste la source du shortcode et du widget Elementor. Le thème Elementor peut encore imposer ses propres marges extérieures : une intégration réelle n’est pas simulée par la preuve DOM.
+
+Le Studio V3 comporte désormais **treize rubriques**. Liens utilise des opérations unitaires, et Collections, Contenus et ordre, Réglages rétablissent les éditions auparavant inaccessibles. L’onboarding conserve ses étapes existantes. La [matrice des fonctions et les résultats ciblés](../evidence/me-v3-viewport/README.md) distinguent les capacités déjà visibles dans l’ancien Studio des helpers historiques non raccordés.
+
+Les actions AJAX `faluss_studio_v3_manage` et `faluss_studio_v3_upload_content` exigent le flag V3, une session et leur nonce propre. Le sujet reste résolu côté serveur. `LinkStudioContract::mutate()` conserve les contrats fermés et la transaction de l’agrégat ; `create_content`, `update_content`, `delete_content` sont limités aux blocs texte/teaser. Les liens et collections réutilisent leurs mutations existantes. Aucune sauvegarde partielle ne remplace le flux complet, aucun curseur d’onboarding n’est modifié.
+
+Un enregistrement recharge la rubrique depuis l’état canonique. Les autres modifications non enregistrées nécessitent un choix explicite avant d’être abandonnées. Un conflit 409 laisse les champs saisis visibles. Les liens historiques non initialisés restent en lecture seule selon le contrat préexistant ; ce correctif ne force aucune migration. Les droits des teasers utilisent le catalogue et la décision serveur existants, sans nouvelle livraison de média protégé.

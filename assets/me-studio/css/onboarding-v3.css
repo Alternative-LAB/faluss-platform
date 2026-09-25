@@ -27,7 +27,7 @@ html:has([data-faluss-onboarding-v3]),body:has([data-faluss-onboarding-v3]) {ove
 .faluss-onboarding-v3__logo {width:38px;height:38px;object-fit:contain;}
 .faluss-onboarding-v3__phone {width:220px;height:465px;min-height:0;border-width:5px;border-radius:30px;}
 .faluss-onboarding-v3__phone-screen {overflow-y:auto;overscroll-behavior:none;}
-.faluss-onboarding-v3__phone-screen .faluss-link-card {min-height:440px;max-width:none;}
+.faluss-onboarding-v3__phone-screen .faluss-link-card {min-height:var(--fl-card-min-height,844px);max-width:none;}
 .faluss-onboarding-v3__panel {bottom:var(--v3-keyboard,0px);height:clamp(340px,49dvh,440px);max-height:calc(100dvh - 76px - env(safe-area-inset-top,0px) - var(--v3-keyboard,0px));}
 .faluss-onboarding-v3__panel.is-expanded {height:calc(100dvh - 76px - env(safe-area-inset-top,0px) - var(--v3-keyboard,0px));}
 .faluss-onboarding-v3__scroll {padding-bottom:8px;overscroll-behavior:none;}
@@ -46,3 +46,14 @@ html:has([data-faluss-onboarding-v3]),body:has([data-faluss-onboarding-v3]) {ove
 .faluss-v3-confirmation .faluss-onboarding-v3__success-actions a {display:flex;align-items:center;justify-content:center;font-size:16px;min-height:48px;}
 .faluss-v3-confirmation p {overflow-wrap:anywhere;}
 @media(max-width:350px){.faluss-onboarding-v3__phone {width:205px;}.faluss-onboarding-v3__panel {height:49dvh;min-height:320px;}.faluss-onboarding-v3__choices {gap:6px;}}
+
+.faluss-studio-v3__editor {border:1px solid #ddd;border-radius:12px;padding:14px;margin:12px 0}
+.faluss-studio-v3__editor summary {font-weight:700;cursor:pointer;overflow-wrap:anywhere}
+.faluss-studio-v3__editor[open] summary {margin-bottom:16px}
+.faluss-studio-v3__editor textarea {box-sizing:border-box;width:100%;min-height:100px;font:inherit;font-size:16px;border:1px solid #ddd;border-radius:8px;padding:10px}
+.faluss-studio-v3__editor img {max-width:96px;max-height:96px;object-fit:cover}
+.faluss-studio-v3__editor button {margin-top:8px}
+.faluss-studio-v3__editor ol {padding:0;list-style:none}
+.faluss-studio-v3__editor li {display:flex;align-items:center;gap:8px;padding:8px 0}
+.faluss-studio-v3__editor li span {flex:1;min-width:0;overflow-wrap:anywhere}
+.faluss-studio-v3__editor li button {flex:none;min-width:40px;min-height:40px}

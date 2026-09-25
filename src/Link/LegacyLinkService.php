@@ -82,9 +82,9 @@ final class Faluss_Link {
     }
 
     public static function assets() {
-        wp_register_style( 'faluss-me-studio-v2-card', plugins_url( 'assets/me-studio/css/card-v2.css', FALUSS_LINK_FILE ), array(), '3.1.0' );
-        wp_register_style( self::STYLE, plugins_url( 'assets/link/css/faluss-link.css', FALUSS_LINK_FILE ), array( 'faluss-me-studio-v2-card' ), '3.1.0' );
-        wp_register_style( self::IMMERSIVE_STYLE, plugins_url( 'assets/link/css/faluss-link-immersive.css', FALUSS_LINK_FILE ), array( self::STYLE ), '3.1.0' );
+        wp_register_style( 'faluss-me-studio-v2-card', plugins_url( 'assets/me-studio/css/card-v2.css', FALUSS_LINK_FILE ), array(), '3.1.1' );
+        wp_register_style( self::STYLE, plugins_url( 'assets/link/css/faluss-link.css', FALUSS_LINK_FILE ), array( 'faluss-me-studio-v2-card' ), '3.1.1' );
+        wp_register_style( self::IMMERSIVE_STYLE, plugins_url( 'assets/link/css/faluss-link-immersive.css', FALUSS_LINK_FILE ), array( self::STYLE ), '3.1.1' );
         wp_register_style( self::STUDIO_STYLE, plugins_url( 'assets/link/css/faluss-link-studio.css', FALUSS_LINK_FILE ), array( self::STYLE, self::IMMERSIVE_STYLE ), FALUSS_LINK_VERSION );
         wp_register_style( self::REWARD_STYLE, plugins_url( 'assets/link/css/faluss-link-reward.css', FALUSS_LINK_FILE ), array(), FALUSS_LINK_VERSION );
         wp_register_style( self::DISCOVERIES_STYLE, plugins_url( 'assets/link/css/faluss-link-discoveries.css', FALUSS_LINK_FILE ), array(), FALUSS_LINK_VERSION );
@@ -703,6 +703,10 @@ final class Faluss_Link {
         return array( 'fonts' => self::onboarding_name_fonts(), 'weights' => array( '400' => 'Normal', '700' => 'Fort' ), 'colors' => self::NAME_COLORS );
     }
 
+    public static function studio_v3_management_options() {
+        return array( 'themes' => self::catalog_themes_for_client( self::current_faluss_id() ), 'rights' => self::teaser_entitlement_choices(), 'fonts' => self::onboarding_name_fonts(), 'treatments' => self::NAME_TREATMENTS );
+    }
+
     /** Closed request contracts: browser state outside the selected mutation is rejected. */
     private static function studio_mutation_request( $post ) {
         $contracts = array(
@@ -714,6 +718,9 @@ final class Faluss_Link {
             'create_link'          => array( 'block_id', 'label', 'url', 'collection_id', 'attachment_id', 'visibility' ),
             'update_link'          => array( 'block_id', 'label', 'url', 'attachment_id', 'visibility' ),
             'delete_link'          => array( 'block_id' ),
+            'create_content'       => array( 'block_id', 'type', 'value', 'attachment_id', 'title', 'text', 'format', 'access_mode', 'entitlement_code' ),
+            'update_content'       => array( 'block_id', 'type', 'value', 'attachment_id', 'title', 'text', 'format', 'access_mode', 'entitlement_code' ),
+            'delete_content'       => array( 'block_id' ),
             'create_collection'    => array( 'block_id', 'description_block_id', 'name', 'description' ),
             'update_collection'    => array( 'block_id', 'name', 'description' ),
             'dissolve_collection'  => array( 'block_id' ),
@@ -738,7 +745,7 @@ final class Faluss_Link {
     /** One member aggregate, one MariaDB transaction, one commit owner. */
     private static function run_studio_mutation( $faluss_id, $request ) {
         global $wpdb;
-        $block_mutations = array( 'create_link', 'update_link', 'delete_link', 'create_collection', 'update_collection', 'dissolve_collection', 'reorder_blocks' );
+        $block_mutations = array( 'create_content', 'update_content', 'delete_content', 'create_link', 'update_link', 'delete_link', 'create_collection', 'update_collection', 'dissolve_collection', 'reorder_blocks' );
         if ( ! \Faluss\Platform\Link\LinkIdentityAdapter::studioAvailable() || false === $wpdb->query( 'START TRANSACTION' ) ) {
             return array( 'ok' => false, 'status' => 503, 'code' => 'transaction_unavailable', 'message' => __( 'La sauvegarde transactionnelle est indisponible.', 'faluss-link' ) );
         }
@@ -856,6 +863,7 @@ final class Faluss_Link {
             'profile' => array( 'public_slug' => (string) ( $profile['public_slug'] ?? '' ), 'display_name' => (string) ( $profile['display_name'] ?? '' ), 'bio' => (string) ( $profile['bio'] ?? '' ), 'avatar_attachment_id' => (int) ( $profile['avatar_attachment_id'] ?? 0 ), 'publication_status' => (string) ( $profile['publication_status'] ?? 'draft' ) ),
             'preferences' => $client_preferences,
             'blocks' => $blocks,
+            'collections' => array_values( $collections ),
             'links_html' => self::studio_links_panel_html( $blocks ),
             'collections_html' => $collections_html,
             'collection_html' => $collection_html,
@@ -1044,6 +1052,27 @@ final class Faluss_Link {
         $blocks = self::stored_blocks( $faluss_id )['blocks'];
         $by_id = array(); foreach ( $blocks as $index => $block ) { $by_id[ $block['block_id'] ] = $index; }
         $id = strtolower( (string) ( $payload['block_id'] ?? '' ) );
+        if ( in_array( $mutation, array( 'create_content', 'update_content', 'delete_content' ), true ) ) {
+            $existing = isset( $by_id[ $id ] ) ? $blocks[ $by_id[ $id ] ] : null;
+            if ( 'create_content' === $mutation ) {
+                if ( count( $blocks ) >= 32 || ! self::valid_block_id( $id ) || null !== $existing ) { return false; }
+            } elseif ( null === $existing || ! in_array( $existing['type'], array( 'text', 'media_teaser' ), true ) ) { return false; }
+            if ( 'delete_content' === $mutation ) {
+                if ( ! self::mutation_checkpoint( 'before_block_delete' ) || 1 !== (int) $wpdb->delete( $table, array( 'faluss_id' => $faluss_id, 'block_id' => $id, 'block_type' => $existing['type'] ), array( '%s', '%s', '%s' ) ) ) { return false; }
+                return self::write_block_order_in_transaction( $faluss_id, array_values( array_diff( array_keys( $by_id ), array( $id ) ) ) );
+            }
+            foreach ( $payload as $value ) { if ( ! is_scalar( $value ) ) { return false; } }
+            $candidate = array_replace( $existing ?? array(), $payload );
+            $type = $candidate['type'] ?? '';
+            if ( ! in_array( $type, array( 'text', 'media_teaser' ), true ) || ( null !== $existing && $type !== $existing['type'] ) ) { return false; }
+            if ( 'media_teaser' === $type ) {
+                if ( ! isset( self::TEASER_FORMATS[ $candidate['format'] ?? '' ], self::TEASER_ACCESS_MODES[ $candidate['access_mode'] ?? '' ] ) ) { return false; }
+                if ( 'entitlement' === $candidate['access_mode'] && '' === self::entitlement_code( $candidate['entitlement_code'] ?? '' ) ) { return false; }
+            }
+            $block = self::normalise_block( $candidate, true );
+            if ( ! $block ) { return false; }
+            return null === $existing ? self::insert_block_in_transaction( $faluss_id, $block, count( $blocks ) + 1 ) : self::update_block_payload_in_transaction( $faluss_id, $block );
+        }
         if ( 'create_link' === $mutation ) {
             if ( count( $blocks ) >= 32 || ! self::valid_block_id( $id ) || isset( $by_id[ $id ] ) ) { return false; }
             $block = self::normalise_block( array( 'block_id' => $id, 'type' => 'link', 'label' => $payload['label'] ?? '', 'url' => $payload['url'] ?? '', 'attachment_id' => $payload['attachment_id'] ?? 0, 'visibility' => $payload['visibility'] ?? 'all' ), true );

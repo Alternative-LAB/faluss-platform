@@ -7,6 +7,12 @@ namespace Faluss\Platform\Link;
 /** Narrow Studio boundary. The native module never reads Link or Identity tables. */
 final class LinkStudioContract
 {
+    /** @return array<string, mixed> */
+    public static function managementOptions(): array
+    {
+        return \Faluss_Link::studio_v3_management_options();
+    }
+
     public static function available(): bool
     {
         return class_exists('Faluss_Link', false)
