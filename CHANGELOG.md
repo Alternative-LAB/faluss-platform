@@ -19,6 +19,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Fondation testée des politiques de publications Fans et projection minimale de cinq teasers explicitement sélectionnés ; aucun upload, route média ou transport activé.
+
 - Catalogue Fans opt-in avec deux catégories visibles, fiches structurées et refus serveur de toute tentative d'achat actuelle, API comprise.
 - Fiches adultes associées à un créateur masquées sans consentement explicite ; refus d'achat 403/503 fondé sur la catégorie stockée, y compris après changement.
 - Suivi Fans opt-in : relation locale idempotente, retrait et compteur public sans identité de follower.
