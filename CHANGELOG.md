@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Documentation
+
+- Matrice des propriétaires Fans/Me/Hub/Pro, limites des moteurs existants et contrats de publication, progression, cosmétiques, Max et commerce fermé.
+
 ### Ajouté
 
 - Catalogue Fans opt-in avec deux catégories visibles, fiches structurées et refus serveur de toute tentative d'achat actuelle, API comprise.
