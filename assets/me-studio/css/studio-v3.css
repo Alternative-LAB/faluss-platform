@@ -26,3 +26,16 @@ body:has(.faluss-studio-v3){margin:0;background:#f4f4f4}
 /* The Studio is a full member workspace, including when hosted by a WP shortcode. */
 html:has(.faluss-studio-v3),body:has(.faluss-studio-v3){height:100%;overflow:hidden}
 .faluss-studio-v3{position:fixed;z-index:1000;inset:0;overflow-y:auto;overscroll-behavior:contain}
+
+/* Keep real links as the no-JavaScript fallback. One persistent pill per navigation. */
+.faluss-studio-v3__tabs{position:relative;isolation:isolate;padding-block:4px}
+.faluss-studio-v3__bottom{isolation:isolate}
+.faluss-studio-v3 nav [data-studio-pill]{position:absolute;left:0;z-index:-1;border-radius:999px;background:#f4f4f4;pointer-events:none}
+.faluss-studio-v3 .faluss-studio-v3__bottom [data-studio-pill]{background:var(--v3-coral)}
+.faluss-studio-v3 nav.is-motion-ready [data-studio-pill]{transition:transform .18s ease-out,width .18s ease-out}
+.faluss-studio-v3__tabs.is-enhanced [aria-current]{border-color:transparent}
+.faluss-studio-v3__bottom.is-enhanced a{background:transparent}
+.faluss-studio-v3 nav.is-enhanced a{position:relative}
+.faluss-studio-v3__tabs a{border-radius:999px}
+.faluss-studio-v3__workspace[aria-busy=true]{cursor:progress}
+@media(prefers-reduced-motion:reduce){.faluss-studio-v3 nav.is-motion-ready [data-studio-pill]{transition:none}}

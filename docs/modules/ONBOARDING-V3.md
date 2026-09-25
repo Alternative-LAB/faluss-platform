@@ -69,3 +69,7 @@ Les conditions derrière `studio_unavailable` sont distinguées par le hook serv
 La composition canonique V3 centre constamment avatar, nom, handle et réseaux dans tous les hôtes. Son espacement supérieur utilise des unités de viewport stables : sans couverture `clamp(64px,12svh,104px)`, compacte `clamp(80px,16svh,140px)`, pleine couverture `clamp(96px,20svh,168px)`. Ce calibrage descend le groupe tout en bornant la marge pour conserver le premier lien visible sur la fixture mobile. Aucun champ enregistré n’est réécrit ; la préférence historique d’alignement reste conservée.
 
 Au 25 septembre, seul le média Instagram a été ajouté au catalogue par le propriétaire. Les autres médias absents sont attendus, sans icône de substitution. Son nouveau compte Hub SSO atteint Dernier regard, publication non testée ; son compte provisoire reste bloqué à la validation OTP. Ces constats sont distincts de la recette locale.
+
+## Focus immédiat — 0.5.4
+
+Le champ actif est révélé par `scrollTo({behavior: 'instant'})` sur le seul contenu interne. Les événements `visualViewport.resize` sont regroupés dans la prochaine frame sans temporisation ; les événements `visualViewport.scroll` ne déclenchent plus de correction. Aucun `window.scrollTo` ne répond au panoramique natif de Safari. La géométrie validée en 0.5.2 et les hauteurs par étape restent inchangées. Le CSS de ce shell neutralise le smooth scroll de l’hôte. [Tests ciblés](../evidence/me-v3-054/README.md) avec rafales d’événements et smooth scroll injecté ; sensation iPhone physique à confirmer par le propriétaire.

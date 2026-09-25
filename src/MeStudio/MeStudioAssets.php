@@ -84,7 +84,13 @@ final class MeStudioAssets
         $file = dirname(__DIR__, 2) . '/faluss-platform.php';
         wp_enqueue_style('faluss-studio-v3', plugins_url('assets/me-studio/css/studio-v3.css', $file), [self::CARD_STYLE], MeStudioModule::VERSION);
         wp_enqueue_script('faluss-studio-v3', plugins_url('assets/me-studio/js/studio-v3.js', $file), [], MeStudioModule::VERSION, true);
-        wp_localize_script('faluss-studio-v3', 'falussStudioV3', [
+        wp_localize_script('faluss-studio-v3', 'falussStudioV3', self::studioV3Config());
+    }
+
+    /** @return array<string, string> Fresh credentials for the server-rendered Studio view. */
+    public static function studioV3Config(): array
+    {
+        return [
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'managementNonce' => wp_create_nonce('faluss_studio_v3_manage'),
             'contentNonce' => wp_create_nonce('faluss_studio_v3_upload_content'),
@@ -92,7 +98,7 @@ final class MeStudioAssets
             'previewNonce' => wp_create_nonce('faluss_onboarding_v3_preview'),
             'avatarNonce' => wp_create_nonce('faluss_onboarding_v3_upload_avatar'),
             'coverNonce' => wp_create_nonce('faluss_onboarding_v3_upload_cover'),
-        ]);
+        ];
     }
 
     private static function register(): void
