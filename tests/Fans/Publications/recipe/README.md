@@ -32,21 +32,40 @@ Les comptes, textes et liaisons sont synthétiques. Aucun secret n'est versionn�
    `/var/tmp/faluss-v3-wp/wp-cli.phar` ; adapter ce seul chemin sur une autre machine.
    Arrêter ensuite tous les workers et conserver les résultats sans sessions/secrets.
 
-## Correction du plafond pending : recette actualisée, non réexécutée
+## Correction du plafond pending : recette réelle du 25 septembre 2026
 
-La correction de #75 distingue les places en file du débit d’admission. À 20/20,
-le scénario concurrent attend désormais création 429 et édition pending 200,
-exactement une nouvelle trace et toujours 20 places. Les éditions approved/rejected
-sont refusées sans mutation à 20/20, puis admises après libération d’une place.
-La course à 19/20 doit accepter création et édition pending, quel que soit l’ordre.
-Les limites 30/heure et 100/24 h restent applicables à toutes les éditions.
+Exécution du code **`e76e873c8843e2488ec14149bcbe5c95a4d15a78`** :
+**96 contrôles WordPress/MariaDB REST réussis**, avec WordPress 7.1.2,
+PHP 8.5.4 et MariaDB 11.8.6. Quatre workers PHP, sessions et nonces WordPress,
+HTTP réel sur `127.0.0.1:8113`, base synthétique dédiée et HTTP sortant bloqué.
+Les contrôles PHPUnit simulés ne sont pas inclus dans ces 96 résultats.
 
-Le script est actualisé, mais cette version **n’a pas été exécutée sur WordPress/MariaDB** :
-le flag local est resté désactivé pour respecter « aucune activation ». Les tests
-unitaires couvrent les transitions et les deux ordres sérialisés ; ils ne sont pas
-une preuve de concurrence HTTP réelle. La recette ci-dessous est historique et
-ne valide pas cette correction. Une nouvelle recette requiert une autorisation
-explicite d’activation sur l’instance locale jetable.
+| Cas exercé | Résultat observé |
+| --- | --- |
+| 20/20, création concurrente avec édition d’un texte déjà pending | Création 429 `publication_pending_quota`, édition 200 ; exactement une nouvelle décision, toujours 20 places |
+| 20/20, édition approved → pending | 429 ; état, révision et journal inchangés |
+| 20/20, édition rejected → pending | 429 ; état, révision et journal inchangés |
+| 19/20 après retrait, édition approved ou rejected → pending | 200 pending pour chacun ; retrait entre les deux essais pour libérer la place |
+| 19/20, création concurrente avec édition pending | 201 et 200 ; 20 places finales |
+| 19/20, quatre créations concurrentes avec clés distinctes | Une 201, trois 429 |
+
+Les contrôles d’idempotence, de limites 30/heure et 100/24 h, de rollback SQL,
+de permissions, de suspension et des trois paginations passent aussi. Les fenêtres
+quotidiennes utilisent des horodatages synthétiques déplacés, sans attendre 24 h.
+La pagination parcourt 32 textes publics visibles, 25 textes du propriétaire et
+44 éléments de modération, avec 22 textes approuvés d’un créateur suspendu exclus.
+Fin de recette : 106 publications, 306 décisions et 106 associations idempotentes.
+
+**Activation temporaire de test uniquement** : le flag texte a été activé sur
+l’instance locale jetable pour cette recette, puis désactivé. Les routes renvoient
+404 après fermeture, le journal est conservé ; la relecture indépendante de la
+configuration confirme `false`. Le serveur et ses workers sont arrêtés, aucun
+processus n’écoute sur le port 8113. Cette activation locale ne constitue pas une
+activation en production : aucune intervention sur `fans.faluss.me`, Me ou Hub,
+aucun déploiement, aucune ouverture de paiement et aucune fusion.
+
+La preuve historique ci-dessous reste distincte. Les limites de transport et de
+charge décrites en fin de document restent applicables à cette nouvelle exécution.
 
 ## Résultat historique de la recette d’admission (25 septembre 2026, SHA `930c43a`)
 

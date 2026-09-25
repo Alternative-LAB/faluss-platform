@@ -8,7 +8,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Publications textuelles Fans
 
-- Correction #75 : à 20 pending, autoriser les éditions pending → pending sous quotas horaires/journaliers ; refuser création et approved/rejected → pending sans place libre. Tests de transitions et recette concurrente actualisés, sans nouvelle activation.
+- Correction #75 : à 20 pending, autoriser les éditions pending → pending sous quotas horaires/journaliers ; refuser création et approved/rejected → pending sans place libre. Tests de transitions et recette concurrente vérifiés : 96 contrôles REST WordPress/MariaDB réels sur le code e76e873, activation temporaire locale uniquement, flag ensuite désactivé et serveur arrêté.
 
 - Admission : quotas serveur par créateur (20 pending, 30 créations/éditions par heure glissante, 100 par 24 heures), sérialisés entre requêtes ; retrait et modération restent possibles à quota plein.
 - Idempotence : en-tête UUID v4 obligatoire en création, rejeu sans seconde publication/trace ni quota, conflit de contenu 409 ; association privée transactionnelle en schéma v2, migration additive et fermeture par retrait du flag.

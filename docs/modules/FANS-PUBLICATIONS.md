@@ -263,11 +263,13 @@ différentes à la frontière du quota, éditions concurrentes, rejeux sans doub
 fenêtres glissantes et trois parcours paginés comparés à des requêtes SQL indépendantes.
 Les sessions restent synthétiques ; aucun échange Me, paiement, média ni site réel
 de production n'est sollicité. L’exécution initiale au SHA `930c43a` réussit **87 contrôles REST réels**.
-La correction ultérieure autorisant pending → pending à capacité pleine est testée
-avec des doubles ; sa recette REST est actualisée mais **non réexécutée**, conformément
-à la consigne de ne faire aucune activation. Les 87 contrôles ne valident donc pas
-cette correction. Les scénarios ciblent création concurrente + édition pending à
-20/20 (429/200), refus approved/rejected → pending à 20/20, puis admission à 19/20.
+La correction pending → pending à capacité pleine a ensuite été exécutée sur le
+code `e76e873` : **96 contrôles REST réels réussis**. Création concurrente + édition
+pending à 20/20 : 429/200, une seule décision et 20 places ; à 19/20 : 201/200.
+Les transitions approved/rejected → pending sont refusées sans mutation à 20/20,
+puis admises à 19/20. L’activation temporaire concerne uniquement l’instance locale
+jetable : flag désactivé, routes fermées et serveur arrêté après recette ; aucune
+activation sur `fans.faluss.me`, Me ou Hub et aucun déploiement.
 Détails et résultats dans le README de recette.
 Pas de preuve de charge à grande échelle ou de panne/reconnexion réseau au commit.
 
