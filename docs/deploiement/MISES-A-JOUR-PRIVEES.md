@@ -34,8 +34,10 @@ ZIP. Le même workflow accepte encore un tag `v*` créé manuellement, à condit
 qu'il corresponde exactement à l'en-tête `Version` de `faluss-platform.php`.
 Il installe les dépendances de production, construit une archive dont le dossier
 racine est `faluss-platform`, puis l'envoie avec le secret GitHub Actions
-`WP_UPDATE_UPLOAD_TOKEN`. Le workflow vérifie la présence de l'autoloader et
-des deux dépendances de production dans l'archive avant l'envoi.
+`WP_UPDATE_UPLOAD_TOKEN`. Le script de build inclut uniquement le code, les
+assets, les contrats, les licences tierces et les dépendances de production.
+La CI vérifie la racine, les chemins, les symlinks, les modes `755/644`, les
+fichiers obligatoires et la cohérence des métadonnées WordPress avant l'envoi.
 
 Pour préparer une publication depuis GitHub CLI :
 
@@ -66,19 +68,22 @@ installé dans WordPress.
 
 Après publication, vérifier que le serveur retourne `401` sans licence, des
 métadonnées avec une licence autorisée, puis effectuer la mise à jour depuis
-l'administration WordPress. Avant l'installation, vérifier que **Faluss →
+ l'administration WordPress. Avant l'installation, vérifier que **Faluss →
 Mises à jour privées** ne signale pas l'absence du client et sauvegarder la base
-et le dossier du plugin. Si l'erreur `upgrade-temp-backup` apparaît, conserver
-les traces puis restaurer la sauvegarde avant un nouvel essai. WP-CLI n'est pas
-installé sur les conteneurs Faluss actuels. Pour revenir en arrière avant la
-publication, fermer la PR de release ; après installation, restaurer la
-sauvegarde du site concerné.
+et le dossier du plugin. Le dossier installé doit appartenir à `www-data:www-data` ;
+le script `scripts/repair-wordpress-ownership.sh` réalise cette réparation
+initiale avec une sauvegarde vérifiée. Si l'erreur `upgrade-temp-backup` apparaît,
+conserver les traces puis restaurer la sauvegarde avant un nouvel essai. Pour
+revenir en arrière avant la publication, fermer la PR de release ; après
+installation, restaurer la sauvegarde du site concerné.
 Les packages déjà publiés restent immuables ; leur suppression est une opération
 serveur distincte.
 
 L'incident d'installation incomplète `0.3.0`, les contrôles des dossiers et les
 limites du diagnostic de l'erreur de déplacement sont consignés dans
 `docs/incidents/2026-09-24-installation-incomplete.md`.
+La cause racine des droits et la recette native `Plugin_Upgrader` sont décrites
+dans `docs/incidents/2026-09-25-wordpress-update-root-cause.md`.
 
 Un appel PHP direct à `Plugin_Upgrader::upgrade()` ne reproduit pas tout le
 parcours interactif de WordPress. Un lanceur scripté doit utiliser trois
