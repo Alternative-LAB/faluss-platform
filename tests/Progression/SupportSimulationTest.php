@@ -14,7 +14,7 @@ final class SupportSimulationTest extends TestCase
     {
         $paid = $this->fact();
         $refund = array_replace($paid, ['revision' => 2, 'refunded_cents' => 300]);
-        $disputed = array_replace($paid, ['revision' => 3, 'status' => 'disputed']);
+        $disputed = array_replace($refund, ['revision' => 3, 'status' => 'disputed']);
         $net = SupportSimulation::project([$paid, $paid, $refund]);
         self::assertSame(700, $net['member_contributions'][$paid['member']]);
         self::assertSame(700, $net['creator_scores'][$paid['creator']]);
@@ -59,6 +59,15 @@ final class SupportSimulationTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
         SupportSimulation::project([array_replace($this->fact(), ['refunded_cents' => 1001])]);
+    }
+
+    public function testNewRevisionCannotEraseAnEarlierRefund(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        SupportSimulation::project([
+            array_replace($this->fact(), ['revision' => 3]),
+            array_replace($this->fact(), ['revision' => 2, 'refunded_cents' => 300]),
+        ]);
     }
 
     /** @return array<string,mixed> */

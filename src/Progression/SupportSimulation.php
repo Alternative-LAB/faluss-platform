@@ -48,6 +48,16 @@ final class SupportSimulation
             }
             $latest[$key] = $row;
         }
+        foreach ($revisions as $history) {
+            ksort($history);
+            $refunded = 0;
+            foreach ($history as $snapshot) {
+                if ($snapshot['refunded_cents'] < $refunded) {
+                    throw new InvalidArgumentException('Decreased cumulative refund.');
+                }
+                $refunded = $snapshot['refunded_cents'];
+            }
+        }
         $members = [];
         $creators = [];
         foreach ($latest as $row) {

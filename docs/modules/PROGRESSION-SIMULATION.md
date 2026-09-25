@@ -31,7 +31,8 @@ Le dernier numéro de révision gagne indépendamment de l'ordre réseau ; un do
 identique ne compte qu'une fois. Une même révision avec un contenu différent
 rejette le lot. Membre, créateur, catégorie, origine, montant initial et date
 d'origine sont immuables à travers les corrections. Aucun transfert implicite de
-score ou réécriture du bénéficiaire n'est possible.
+score ou réécriture du bénéficiaire n'est possible. Les remboursements cumulatifs
+ne peuvent pas diminuer entre révisions, même reçues dans l'ordre inverse.
 
 Pour la simulation seulement : `confirmed` avec source `eur_support` ou
 `funded_support`, catégorie hébergée autorisée, produit `amount-refunded` unités.
@@ -47,10 +48,10 @@ ne sont ni un wallet, ni un revenu, ni un droit, ni un classement public.
 
 ## Tests et limites
 
-Six tests / 20 assertions : rejeu, ordre inversé, remboursement partiel/complet,
+Sept tests / 21 assertions : rejeu, ordre inversé, remboursement partiel/complet,
 litige puis résolution, sources PF/cosmétique exclues, paiement non confirmé,
 catégorie adulte, conflit de révision, bénéficiaire modifié, faux claim de preuve,
-remboursement supérieur au montant. PHPStan ciblé et lint sans erreur.
+remboursement supérieur au montant ou cumul qui diminue. PHPStan ciblé et lint sans erreur.
 
 Les tests s'exécutent en mémoire. **Aucune concurrence SQL ni livraison Events
 réelle n'est prouvée pour cette simulation.** Ils ne complètent pas les preuves
