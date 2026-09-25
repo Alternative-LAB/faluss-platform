@@ -12,6 +12,7 @@ namespace {
                 public array $data = []
             ) {}
             public function get_error_code(): string { return $this->code; }
+            public function get_error_data(): array { return $this->data; }
         }
     }
     if (!class_exists('WP_REST_Request')) {
