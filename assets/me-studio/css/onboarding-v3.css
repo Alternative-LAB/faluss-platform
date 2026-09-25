@@ -1,7 +1,7 @@
-body:has(.faluss-onboarding-v3){margin:0;background:#fffdf7}
+body:has(.faluss-onboarding-v3){margin:0;background:#FFFDF5}
 .faluss-onboarding-v3,.faluss-onboarding-v3 *{box-sizing:border-box}
-.faluss-onboarding-v3{--v3-ink:#12161b;--v3-muted:#646a70;--v3-coral:#f54955;--v3-border:#e2e2df;position:relative;isolation:isolate;width:100%;min-height:0;height:var(--v3-height,100dvh);max-height:var(--v3-height,100dvh);overflow:hidden;background:#fffdf7;color:var(--v3-ink);font-family:Outfit,system-ui,sans-serif}
-.faluss-onboarding-v3__header{position:absolute;z-index:4;inset:env(safe-area-inset-top,0px) 0 auto;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:14px;height:68px;padding:6px max(18px,env(safe-area-inset-right,0px)) 6px max(18px,env(safe-area-inset-left,0px));background:#fffdf7}
+.faluss-onboarding-v3{--v3-ink:#12161b;--v3-muted:#646a70;--v3-coral:#f54955;--v3-border:#e2e2df;position:relative;isolation:isolate;width:100%;min-height:0;height:var(--v3-height,100dvh);max-height:var(--v3-height,100dvh);overflow:hidden;background:#FFFDF5;color:var(--v3-ink);font-family:Outfit,system-ui,sans-serif}
+.faluss-onboarding-v3__header{position:absolute;z-index:4;inset:env(safe-area-inset-top,0px) 0 auto;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:14px;height:68px;padding:6px max(18px,env(safe-area-inset-right,0px)) 6px max(18px,env(safe-area-inset-left,0px));background:#FFFDF5}
 .faluss-onboarding-v3__header strong{font-size:23px;text-align:center}.faluss-onboarding-v3__back{width:44px;height:44px;border:0;background:transparent;color:var(--v3-ink);font:inherit;font-size:27px;cursor:pointer}.faluss-onboarding-v3__back[hidden]{visibility:hidden;display:block}
 .faluss-onboarding-v3__progress{display:flex;justify-content:center;gap:4px}.faluss-onboarding-v3__progress span{width:min(10vw,38px);height:5px;border-radius:99px;background:#d2d2d2}.faluss-onboarding-v3__progress .is-complete{background:var(--v3-coral)}
 .faluss-onboarding-v3__stage{position:absolute;inset:68px 0 0;display:flex;justify-content:center;align-items:flex-start;padding:10px 15px 0;overflow:hidden;background:linear-gradient(162deg,#f4f4f4 56%,#fff 100%)}
@@ -19,3 +19,30 @@ body:has(.faluss-onboarding-v3){margin:0;background:#fffdf7}
 
 .faluss-onboarding-v3__scroll h1:focus{outline:none}
 @media(max-height:600px){.faluss-onboarding-v3__phone{height:60dvh;min-height:0}.faluss-onboarding-v3__panel{height:min(70dvh,350px)}}
+
+/* Viewport shell is fixed; the keyboard changes only the available panel space. */
+html:has([data-faluss-onboarding-v3]),body:has([data-faluss-onboarding-v3]) {overflow:hidden;overscroll-behavior:none;}
+.faluss-onboarding-v3 {position:fixed;inset:0;height:100dvh;max-height:none;z-index:1000;background:#FFFDF5;}
+.faluss-onboarding-v3__stage {background:#FFFDF5;padding-top:4px;}
+.faluss-onboarding-v3__logo {width:38px;height:38px;object-fit:contain;}
+.faluss-onboarding-v3__phone {width:220px;height:465px;min-height:0;border-width:5px;border-radius:30px;}
+.faluss-onboarding-v3__phone-screen {overflow-y:auto;overscroll-behavior:none;}
+.faluss-onboarding-v3__phone-screen .faluss-link-card {min-height:440px;max-width:none;}
+.faluss-onboarding-v3__panel {bottom:var(--v3-keyboard,0px);height:clamp(340px,49dvh,440px);max-height:calc(100dvh - 76px - env(safe-area-inset-top,0px) - var(--v3-keyboard,0px));}
+.faluss-onboarding-v3__panel.is-expanded {height:calc(100dvh - 76px - env(safe-area-inset-top,0px) - var(--v3-keyboard,0px));}
+.faluss-onboarding-v3__scroll {padding-bottom:8px;overscroll-behavior:none;}
+.faluss-onboarding-v3__scroll input:not([type=checkbox]):not([type=radio]):not([type=color]),.faluss-onboarding-v3__scroll select,.faluss-studio-v3__navigation select {font-size:16px;}
+.faluss-onboarding-v3__actions {padding-bottom:max(8px,env(safe-area-inset-bottom,0px));padding-top:8px;}
+.faluss-onboarding-v3__primary {min-height:46px;border-radius:14px;}
+.faluss-onboarding-v3__retained-avatar {width:52px;height:52px;object-fit:cover;border-radius:50%;float:left;margin:0 12px 8px 0;}
+.faluss-onboarding-v3__choices span {min-height:64px;}
+.faluss-onboarding-v3__colors {margin:10px 0;gap:10px;}
+.faluss-onboarding-v3 [hidden] {display:none;}
+.faluss-onboarding-v3__back[hidden] {display:block;visibility:hidden;}
+.faluss-studio-v3__navigation {display:flex;align-items:center;gap:8px;font-size:14px;}
+.faluss-studio-v3__navigation select {min-width:0;max-width:100%;min-height:44px;background:#fff;border:1px solid #ddd;border-radius:10px;}
+.faluss-v3-confirmation {--v3-coral:#f54955;--v3-ink:#080808;--v3-border:#ddd;max-width:600px;margin:12vh auto;padding:24px;background:#FFFDF5;text-align:center;font-family:Outfit,system-ui,sans-serif;}
+.faluss-v3-confirmation .faluss-onboarding-v3__success-actions {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+.faluss-v3-confirmation .faluss-onboarding-v3__success-actions a {display:flex;align-items:center;justify-content:center;font-size:16px;min-height:48px;}
+.faluss-v3-confirmation p {overflow-wrap:anywhere;}
+@media(max-width:350px){.faluss-onboarding-v3__phone {width:205px;}.faluss-onboarding-v3__panel {height:49dvh;min-height:320px;}.faluss-onboarding-v3__choices {gap:6px;}}

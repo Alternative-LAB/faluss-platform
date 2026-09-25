@@ -97,3 +97,29 @@
 .faluss-link-card__name--strong{--fl-name-weight-fallback:800;--fl-name-tracking-fallback:-.045em}
 .faluss-link-card__name--editorial{--fl-name-weight-fallback:500;--fl-name-tracking-fallback:-.065em}
 .faluss-link-card .faluss-link-card__name{font-weight:var(--fl-name-weight,var(--fl-name-weight-fallback,800));letter-spacing:var(--fl-name-tracking,var(--fl-name-tracking-fallback,-.045em))}
+
+/* Canonical geometry is identical in public, shortcode, Elementor and previews.
+   The editor scales this 390px composition; it never switches density. */
+.faluss-link-card.faluss-link-card--canonical {max-width:560px;min-height:440px;background:var(--fl-page-background);}
+.faluss-link-card.faluss-link-card--canonical .faluss-link-card__body {min-height:440px;margin:0;padding:40px 24px 32px;background:transparent;transform:none;will-change:auto;}
+.faluss-link-card.faluss-link-card--canonical .faluss-link-card__cover {position:absolute;inset:0 0 auto;height:300px;min-height:0;max-height:none;background:var(--fl-page-background);}
+.faluss-link-card.faluss-link-card--canonical.faluss-link-card--wallpaper-cover .faluss-link-card__cover {height:100%;inset:0;}
+.faluss-link-card.faluss-link-card--canonical .faluss-link-card__cover img {height:100%;width:100%;object-fit:cover;mask-image:none;transform:none;will-change:auto;}
+.faluss-link-card.faluss-link-card--canonical .faluss-link-card__cover::after {inset:0;background:none;}
+.faluss-link-card.faluss-link-card--canonical.faluss-link-card--wallpaper-effect-gradient .faluss-link-card__cover::after {background:linear-gradient(to bottom,transparent 45%,var(--fl-page-background) 100%);}
+.faluss-link-card.faluss-link-card--canonical .faluss-link-card__avatar {width:86px;height:86px;margin-top:0;margin-bottom:14px;flex-shrink:0;}
+.faluss-link-card.faluss-link-card--canonical .faluss-link-card__name {margin:0 0 5px;font-size:28px;line-height:1.1;font-family:var(--fl-name-font);font-weight:var(--fl-name-weight);color:var(--fl-name-color);}
+.faluss-link-card.faluss-link-card--canonical .faluss-link-card__handle {font-size:14px;}
+.faluss-link-card.faluss-link-card--canonical .faluss-link-card__social {margin:20px 0;gap:10px;}
+.faluss-link-card.faluss-link-card--canonical .faluss-link-card__social[hidden],.faluss-link-card.faluss-link-card--canonical [hidden] {display:none;}
+.faluss-link-card.faluss-link-card--canonical .faluss-link-card__content-blocks {width:100%;max-width:none;margin-top:16px;padding-top:0;border-top:0;}
+.faluss-link-card.faluss-link-card--canonical .faluss-link-card__link {min-height:48px;padding:13px 17px;font-size:16px;line-height:1.3;background:var(--fl-action);color:var(--fl-action-text);border-color:var(--fl-action);}
+.faluss-link-card.faluss-link-card--canonical .faluss-link-card__link:hover {filter:brightness(.94);}
+body.faluss-identity-public-route:has(.faluss-link-card--canonical),html:has(body.faluss-identity-public-route .faluss-link-card--canonical) {background:#FFFDF5;}
+body.faluss-identity-public-route .faluss-link-card--canonical {margin-inline:auto;min-height:440px;}
+
+.faluss-link-card.faluss-link-card--canonical.faluss-link-card--cover-yes .faluss-link-card__avatar {margin-top:0;}
+.faluss-link-card.faluss-link-card--canonical.faluss-link-card--cover-yes .faluss-link-card__body,.faluss-link-card.faluss-link-card--canonical.faluss-link-card--cover-no .faluss-link-card__body {margin-top:0;padding:40px 24px 32px;min-height:440px;background:transparent;}
+.faluss-link-card.faluss-link-card--canonical.faluss-link-card--links-outline .faluss-link-card__link {border-radius:0;}
+.faluss-link-card.faluss-link-card--canonical.faluss-link-card--links-solid .faluss-link-card__link {border-radius:999px;}
+.faluss-link-card.faluss-link-card--canonical.faluss-link-card--links-light .faluss-link-card__link {border-radius:14px;}

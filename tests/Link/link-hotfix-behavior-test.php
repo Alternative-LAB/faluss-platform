@@ -63,6 +63,7 @@ class WP_Post {
 function get_post( $id ) { return wp_attachment_is_image( $id ) ? new WP_Post() : null; }
 
 final class Faluss_Link_Schema {
+    public static function composition_ready() { return ! empty( $GLOBALS['fl_test_composition_ready'] ); }
     public static function table() { return 'wp_faluss_link_cards'; }
     public static function blocks_table() { return 'wp_faluss_link_blocks'; }
 }

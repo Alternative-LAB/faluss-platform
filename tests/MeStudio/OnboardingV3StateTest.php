@@ -58,11 +58,12 @@ final class OnboardingV3StateTest extends TestCase
     }
 
     #[RunInSeparateProcess]
-    public function testV3AloneKeepsStudioV2Inactive(): void
+    public function testV3AloneNeverFallsBackToTheHistoricalStudio(): void
     {
         define('FALUSS_PLATFORM_ONBOARDING_V3', true);
         $provider = new MeStudioProvider(StudioBlockProviderRegistry::shared());
-        self::assertSame('<main>Studio Link</main>', $provider->renderStudio(static fn (): string => '<main>Studio Link</main>'));
+        StudioProviderRegistry::register($provider);
+        self::assertStringContainsString('faluss-onboarding-v3__unavailable', StudioProviderRegistry::renderStudio(static fn (): string => '<main>Studio Link</main>'));
         self::assertSame('', $provider->renderStudioExtension([]));
     }
 }

@@ -32,7 +32,7 @@ Le serveur exige un nonce, une session membre, le curseur courant et la version 
 
 ## Activation et retour arrière
 
-Sur un staging représentatif uniquement, migrer Link V4 par la procédure documentée dans [ME-STUDIO.md](ME-STUDIO.md), puis définir dans la configuration non versionnée :
+Les prérequis restent Link V4 (procédure documentée dans [ME-STUDIO.md](ME-STUDIO.md)), puis les flags suivants définis dans la configuration non versionnée :
 
 ```php
 define('FALUSS_PLATFORM_ROLE', 'me');
@@ -44,7 +44,14 @@ define('FALUSS_PLATFORM_APPS_REGISTRY', true);
 define('FALUSS_PLATFORM_ONBOARDING_V3', true);
 ```
 
-Le flag V3 seul charge le fournisseur Me Studio sans activer son Studio V2. Sur une installation où `FALUSS_PLATFORM_ME_STUDIO_V2` vaut déjà `true`, laisser ce flag en place pendant la recette : V3 prend la priorité pour l'onboarding et Studio V2 reste disponible pour l'édition. Si le fournisseur ou Link sont indisponibles pendant V3, une erreur récupérable remplace l'écran ; V1/V2 ne sont pas rendus sous le panneau V3. Pour revenir au parcours historique sur une nouvelle requête, mettre uniquement `FALUSS_PLATFORM_ONBOARDING_V3` à `false` : l'onboarding V2 reprend si son flag est actif, sinon Link reprend son parcours interne. Les données et médias déjà enregistrés restent dans leurs tables propriétaires.
+Le flag V3 charge désormais le Studio V3 **et** l'onboarding V3, indépendamment de `FALUSS_PLATFORM_ME_STUDIO_V2`. Le Studio propose dix rubriques natives via `/mon-faluss/` : structure, identité, réseaux, liens, couleurs, boutons, avatar, fond, nom et style des réseaux. Chaque rubrique relit l'agrégat Link et sauvegarde uniquement ses champs, avec nonce et version agrégée. La transaction conserve les autres préférences, les blocs non présentés, les médias et le slug ; elle ne déplace pas le curseur d'onboarding. Le slug est revendiqué exclusivement via Identity avant le design et reste immuable. Une indisponibilité du fournisseur V3 affiche une erreur récupérable, sans présenter le Studio historique comme V3.
+
+La carte conserve une densité standard dans tous les contextes. Le téléphone réduit une composition de 390 px par `zoom` CSS, sans changer ses proportions ; son contenu reste défilable. Les décalages du mode immersif sont exclus de la carte canonique. Les styles de variantes sont chargés par Link même lorsque le Studio est désactivé. Les aperçus donnent aux champs temporaires la même priorité sur le thème que la sauvegarde ; une modification invalide immédiatement la réponse précédente. Le dernier regard relit l'état enregistré. La confirmation est une page autonome avec URL et deux liens, sans panneau ni progression.
+
+Le shell de l'éditeur est fixe. `visualViewport` ne redimensionne pas l'en-tête : il relève le panneau au-dessus du clavier. Les champs ont une taille de 16 px, sans restriction du zoom volontaire. Le panneau s'agrandit avant le défilement interne. La couleur des boutons détermine côté serveur un texte noir ou blanc contrasté.
+
+Pour revenir au parcours précédent, désactiver uniquement le flag V3 : Studio V2 reprend si son flag est actif, sinon le fournisseur historique. Les données restent conservées. Cette livraison ne modifie aucun flag. L'utilisateur installe le ZIP et effectue sa recette réelle ; aucun staging n'est utilisé pour cette livraison.
+
 
 ## Vérification avant activation
 

@@ -1,6 +1,8 @@
-# Studio Faluss V2 natif
+# Studio Faluss V2 et V3 natifs
 
 Le nouveau parcours de création V3, activé séparément, est décrit dans [ONBOARDING-V3.md](ONBOARDING-V3.md).
+
+Depuis 0.5.0, le flag `FALUSS_PLATFORM_ONBOARDING_V3` fournit aussi un éditeur V3 natif indépendant du flag V2, décrit dans [ONBOARDING-V3.md](ONBOARDING-V3.md).
 
 Studio V2 est un module natif et optionnel du Master Plugin sur le rôle `me`. Il ne remplace ni Identity ni Link : il fournit l’interface d’édition et le parcours d’onboarding Atomique, tandis que Link reste l’autorité de composition et l’unique renderer de carte.
 
@@ -18,7 +20,7 @@ Le shortcode, les widgets Elementor, les URLs publiques, les handlers historique
 
 ## Renderer partagé
 
-`Faluss_Link::card_markup_from_presentation()` reste la façade unique. Le profil public, la preview du Studio et la preview de l’onboarding lui fournissent le même profil Identity, la même composition Link et les mêmes blocs. Les conteneurs peuvent adapter la densité, jamais reconstruire une seconde carte HTML.
+`Faluss_Link::card_markup_from_presentation()` reste la façade unique. Le profil public, la preview du Studio et la preview de l’onboarding lui fournissent le même profil Identity, la même composition Link et les mêmes blocs. Les conteneurs V3 réduisent visuellement la même composition à densité standard ; ils ne reconstruisent pas la carte et ne changent pas ses proportions.
 
 Les variantes Atomiques comprennent :
 
