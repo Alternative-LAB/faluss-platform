@@ -61,3 +61,6 @@ html:has([data-faluss-onboarding-v3]),body:has([data-faluss-onboarding-v3]) {ove
 body:has([data-faluss-onboarding-v3]){position:fixed;inset:0;width:100%;overflow-anchor:none}
 .faluss-onboarding-v3.is-keyboard-open .faluss-onboarding-v3__scroll{overflow-y:auto;scroll-behavior:auto;overflow-anchor:none}
 .faluss-onboarding-v3 [data-v3-keyboard-spacer]{height:0;pointer-events:none;flex:none}
+
+/* Focus correction is instantaneous even when the host enables smooth scrolling. */
+html:has([data-faluss-onboarding-v3]),body:has([data-faluss-onboarding-v3]),.faluss-onboarding-v3 .faluss-onboarding-v3__scroll{scroll-behavior:auto}

@@ -18,7 +18,7 @@ function pageHtml(step, studio=false) {
  return `<!doctype html><meta name="viewport" content="width=device-width, initial-scale=1"><style>${css}</style><section class="faluss-onboarding-v3" data-faluss-onboarding-v3 data-step="${step}" data-studio="${studio}" data-version="test"><header class="faluss-onboarding-v3__header"><button data-v3-back>←</button>${studio?'<label>Studio<select data-v3-section><option>Identité</option></select></label>':'<div class="faluss-onboarding-v3__progress"><span></span><span></span><span></span></div>'}<img class="faluss-onboarding-v3__logo" src="data:image/png;base64,${fs.readFileSync(path.join(root,'assets/link/images/faluss-onboarding-header-logo.png')).toString('base64')}" alt="Faluss Me"></header><div class="faluss-onboarding-v3__stage"><div class="faluss-onboarding-v3__phone"><div class="faluss-onboarding-v3__phone-screen" data-v3-preview>${illustrate(cards['atomic-compact-gradient'])}</div></div></div><form class="faluss-onboarding-v3__panel" data-v3-panel><button type="button" class="faluss-onboarding-v3__grabber" data-v3-grabber><span></span></button><div class="faluss-onboarding-v3__scroll" data-v3-scroll>${controls.atomic[step]}<p data-v3-error hidden></p><p data-v3-status></p></div><footer class="faluss-onboarding-v3__actions"><button class="faluss-onboarding-v3__primary" data-v3-primary>${studio?'Enregistrer':'Continuer'}</button></footer></form></section><script>window.falussOnboardingV3={ajaxUrl:'https://local.invalid/ajax'};window.fetch=()=>Promise.resolve({status:200,text:()=>Promise.resolve(JSON.stringify({success:true,data:{preview_html:${JSON.stringify(cards['atomic-compact-gradient'])}}}))});</script><script>${js}</script>`;
 }
 (async()=>{
- const out=path.join(root,'docs/evidence/me-v3-052');fs.mkdirSync(out,{recursive:true});
+ const out=path.join(root,'docs/evidence/me-v3-054');fs.mkdirSync(out,{recursive:true});
  const results=[];
  for(const [engine,type,options] of [['chromium',chromium,{executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'}],['webkit',webkit,{}]]) {
   const browser=await type.launch({headless:true,...options});
@@ -57,20 +57,37 @@ function pageHtml(step, studio=false) {
       if(input) await input.focus();
       await page.evaluate(()=>new Promise(requestAnimationFrame));
       assert.deepEqual(await geometry(),before,`${engine} ${width} ${step}: focus moved sheet`);
-      await page.evaluate(h=>{Object.defineProperty(visualViewport,'height',{configurable:true,value:h});visualViewport.dispatchEvent(new Event('resize'));},keyboardHeight);
+      const correction = await page.evaluate(async h=>{
+       const scroll=document.querySelector('[data-v3-scroll]');
+       scroll.style.scrollBehavior='smooth'; // Host theme / inline animation must not delay correction.
+       const native=scroll.scrollTo.bind(scroll),win=window.scrollTo,scrollYDescriptor=Object.getOwnPropertyDescriptor(window,'scrollY');
+       let calls=0,windowCalls=0;
+       scroll.scrollTo=function(options){calls++;native(options);};window.scrollTo=()=>windowCalls++;
+       Object.defineProperty(window,'scrollY',{configurable:true,value:40});
+       Object.defineProperty(visualViewport,'height',{configurable:true,value:h});
+       for(let i=0;i<50;i++){visualViewport.dispatchEvent(new Event('resize'));visualViewport.dispatchEvent(new Event('scroll'));}
+       await new Promise(requestAnimationFrame);
+       const top=scroll.scrollTop;
+       for(let i=0;i<50;i++)visualViewport.dispatchEvent(new Event('scroll'));
+       await new Promise(requestAnimationFrame);
+       const stable=scroll.scrollTop===top;
+       Object.defineProperty(window,'scrollY',scrollYDescriptor);window.scrollTo=win;scroll.scrollTo=native;
+       return {calls,windowCalls,stable};
+      },keyboardHeight);
+      assert(correction.calls<=1 && correction.windowCalls===0 && correction.stable,'One instant internal correction per frame; no viewport scroll feedback');
       assert.deepEqual(await geometry(),before,`${engine} ${width} ${step}: keyboard moved outer geometry`);
       assert.equal(await page.evaluate(()=>scrollY),0);
       if(input) {
        const r=await input.boundingBox(),box=await page.locator('[data-v3-scroll]').boundingBox();
        assert(r.y>=box.y && r.y+r.height<=keyboardHeight,`${engine} ${width} ${step}: active field hidden ${JSON.stringify({r,box})}`);
       }
-      await page.evaluate(()=>{delete visualViewport.height;visualViewport.dispatchEvent(new Event('resize'));});
+      await page.evaluate(async()=>{delete visualViewport.height;visualViewport.dispatchEvent(new Event('resize'));await new Promise(requestAnimationFrame);});
       assert.deepEqual(await geometry(),before,`${engine} ${width} ${step}: close did not restore geometry`);
       if(engine==='chromium'&&width===390&&height===844&&!manual)await page.screenshot({path:path.join(out,'onboarding-'+step+'-390.png')});
      }
     }
     assert(heights.v3_review<heights.v3_identity,'Sparse Review sheet must fit its smaller content');
-    assert.deepEqual(errors,[]);results.push(`${engine} ${width}x${height}: tabs, expand then full scroll, 16px fields; Identity/Networks/Review focus, simulated overlay keyboard, close and manual expansion preserve panel/header/footer; active fields visible; heights ${JSON.stringify(heights)}`);
+    assert.deepEqual(errors,[]);results.push(`${engine} ${width}x${height}: tabs, expand then full scroll, 16px fields; Identity/Networks/Review focus with 50 resize/scroll events: instant internal correction, zero window scroll; simulated overlay keyboard, close and manual expansion preserve panel/header/footer; active fields visible; heights ${JSON.stringify(heights)}`);
     await page.close();
    }
    const stalePage=await browser.newPage({viewport:{width:390,height:844}});

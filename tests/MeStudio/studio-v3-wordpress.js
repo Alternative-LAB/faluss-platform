@@ -1,6 +1,11 @@
 // Real disposable WordPress fixture; captured local email, never a production mailbox.
 'use strict';
 const {chromium}=require('playwright'),fs=require('fs'),assert=require('assert/strict');
+async function saveAndRead(page) {
+ await page.locator('[data-v3-panel]').evaluate(e=>e.dataset.recipeRead='old');
+ await page.locator('[data-v3-primary]').click();
+ await page.waitForFunction(()=>!document.querySelector('[data-v3-panel]').hasAttribute('data-recipe-read'));
+}
 const fixture=JSON.parse(fs.readFileSync(process.env.FALUSS_LOCAL_FIXTURE,'utf8'));const base=new URL(fixture.studio).origin;if(new URL(base).hostname!=='127.0.0.1'){throw new Error('Local fixture only');}
 (async()=>{const browser=await chromium.launch({executablePath:process.env.FALUSS_CHROME,headless:true});try{
 const context=await browser.newContext({viewport:{width:390,height:844}});await context.route('**/*',route=>new URL(route.request().url()).hostname==='127.0.0.1'?route.continue():route.abort());const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push({route:new URL(page.url()).pathname,message:e.message}));
@@ -16,7 +21,7 @@ await page.setViewportSize({width:390,height:844});await page.goto(fixture.studi
 let dialogs=[];page.on('dialog',async d=>{dialogs.push(d.type());await d.dismiss();});
 const initialName=await page.locator('[name=display_name]').inputValue(); await page.locator('[name=display_name]').fill('Camille modifiée');await page.locator('[name=display_name]').fill(initialName);await page.locator('.faluss-studio-v3__bottom a').filter({hasText:'Design'}).click();await page.waitForURL(/v3_colors/);assert.deepEqual(dialogs,[]);
 await page.goto(fixture.studio+'?v3_section=v3_identity');await page.locator('[name=display_name]').fill('Camille enregistrée');
-await Promise.all([page.waitForEvent('load'),page.locator('[data-v3-primary]').click()]);assert.equal(await page.locator('[name=display_name]').inputValue(),'Camille enregistrée');await page.locator('.faluss-studio-v3__bottom a').filter({hasText:'Design'}).click();await page.waitForURL(/v3_colors/);await page.reload();assert.deepEqual(dialogs,[]);
+await saveAndRead(page);assert.equal(await page.locator('[name=display_name]').inputValue(),'Camille enregistrée');await page.locator('.faluss-studio-v3__bottom a').filter({hasText:'Design'}).click();await page.waitForURL(/v3_colors/);await page.reload();assert.deepEqual(dialogs,[]);
 
 await page.locator('[data-studio-preview-open]').click();await page.locator('dialog').waitFor({state:'visible'});assert.equal(await page.locator('.faluss-onboarding-v3__phone').count(),0);await page.screenshot({path:'docs/evidence/me-v3-052/full-preview-390.png'});await page.locator('[data-studio-preview-close]').click();
 async function centeredCard() {
@@ -35,7 +40,7 @@ for(const [host,url] of [['public',base+'/'+fixture.slug+'/'],['shortcode',fixtu
 assert(composition.every(c=>c.padding===composition[0].padding),'Same canonical spacing in every host');
 fs.writeFileSync('docs/evidence/me-v3-052/composition-local.json',JSON.stringify(composition,null,2));
 await page.goto(fixture.studio+'?v3_section=v3_identity');
-const concurrent=await context.newPage();await concurrent.goto(fixture.studio+'?v3_section=v3_identity');await concurrent.locator('[name=display_name]').fill('Camille autre session');await Promise.all([concurrent.waitForEvent('load'),concurrent.locator('[data-v3-primary]').click()]);
+const concurrent=await context.newPage();await concurrent.goto(fixture.studio+'?v3_section=v3_identity');await concurrent.locator('[name=display_name]').fill('Camille autre session');await saveAndRead(concurrent);
 await page.locator('[name=display_name]').fill('Valeur conservée après conflit');const responsePromise=page.waitForResponse(r=>r.url().includes('admin-ajax.php')&&r.request().postData()?.includes('faluss_studio_v3_save'));await page.locator('[data-v3-primary]').click();const conflict=await responsePromise;assert.equal(conflict.status(),409);const conflictBody=await conflict.json();assert.equal(conflictBody.data.code,'stale_version');await page.locator('[data-v3-error]').waitFor({state:'visible'});assert.equal(await page.locator('[name=display_name]').inputValue(),'Valeur conservée après conflit');
 await page.locator('.faluss-studio-v3__bottom a').filter({hasText:'Design'}).click();assert.equal(dialogs.length,1);assert.match(page.url(),/v3_identity/);
 fs.writeFileSync('docs/evidence/me-v3-052/conflict.json',JSON.stringify({at:new Date().toISOString(),http:conflict.status(),body:conflictBody},null,2));

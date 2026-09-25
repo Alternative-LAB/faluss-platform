@@ -41,7 +41,7 @@ final class StudioV3
         $name = (string) ($profile['display_name'] ?? '');
         ob_start();
         ?>
-        <section class="faluss-studio-v3" data-faluss-studio-v3 data-studio="true" data-step="<?php echo esc_attr($section); ?>" data-mode="<?php echo esc_attr($mode); ?>" data-version="<?php echo esc_attr((string) ($state['version'] ?? '')); ?>">
+        <section class="faluss-studio-v3" data-faluss-studio-v3 data-studio-config="<?php echo esc_attr((string) wp_json_encode(MeStudioAssets::studioV3Config())); ?>" data-studio="true" data-step="<?php echo esc_attr($section); ?>" data-mode="<?php echo esc_attr($mode); ?>" data-version="<?php echo esc_attr((string) ($state['version'] ?? '')); ?>">
             <header class="faluss-studio-v3__header">
                 <a href="<?php echo esc_url(home_url('/')); ?>" aria-label="Accueil Faluss">←</a>
                 <strong>Studio</strong>

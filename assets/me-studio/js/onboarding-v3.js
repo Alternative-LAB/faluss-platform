@@ -61,8 +61,8 @@
         var visibleBottom = Math.min(box.bottom, viewport ? viewport.offsetTop + viewport.height : layoutHeight) - 10;
         var visibleTop = box.top + 8;
         var field = active.getBoundingClientRect();
-        if (field.bottom > visibleBottom) { scroll.scrollTop += field.bottom - visibleBottom; }
-        else if (field.top < visibleTop) { scroll.scrollTop -= visibleTop - field.top; }
+        var delta = field.bottom > visibleBottom ? field.bottom - visibleBottom : Math.min(0, field.top - visibleTop);
+        if (Math.abs(delta) > 1) { scroll.scrollTo({ top: scroll.scrollTop + delta, behavior: 'instant' }); }
     }
 
     function updateViewportHeight() {
@@ -83,16 +83,20 @@
         var box = scroll.getBoundingClientRect();
         var visibleBottom = viewport ? viewport.offsetTop + viewport.height : layoutHeight;
         keyboardSpacer.style.height = keyboardOpen ? Math.max(0, box.bottom - visibleBottom + 18) + 'px' : '0px';
-        if (closing) { scroll.scrollTop = scrollBeforeKeyboard; }
+        if (closing) { scroll.scrollTo({ top: scrollBeforeKeyboard, behavior: 'instant' }); }
         if (!keyboardOpen) { fitPanel(); }
-        if (window.scrollY !== 0) { window.scrollTo(0, 0); }
         revealActiveField();
     }
     updateViewportHeight();
-    window.addEventListener('resize', updateViewportHeight);
+    var viewportFrame = 0;
+    function scheduleViewportUpdate() {
+        if (viewportFrame) { return; }
+        viewportFrame = window.requestAnimationFrame(function () { viewportFrame = 0; updateViewportHeight(); });
+    }
+    window.addEventListener('resize', scheduleViewportUpdate);
     if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', updateViewportHeight);
-        window.visualViewport.addEventListener('scroll', updateViewportHeight);
+        window.visualViewport.addEventListener('resize', scheduleViewportUpdate);
+        // Safari owns visual-viewport panning. Never answer its scroll with another scroll.
     }
     if (document.fonts) { document.fonts.ready.then(fitPanel); }
     function scalePreview() {
@@ -561,7 +565,7 @@
         submit(root.dataset.step === 'v3_review' ? 'publish' : 'next');
     });
     panel.addEventListener('focusin', function (event) {
-        if (event.target.matches('input, select, textarea')) { window.requestAnimationFrame(updateViewportHeight); }
+        if (event.target.matches('input, select, textarea')) { updateViewportHeight(); }
     });
     root.querySelector('h1').focus({ preventScroll: true });
 }());

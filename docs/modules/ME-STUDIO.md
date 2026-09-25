@@ -149,3 +149,13 @@ Un compte déconnecté retrouve le lien de connexion ; un compte avec une créat
 Recette et limites : [0.5.2](../evidence/me-v3-052/README.md). Les paragraphes de recette V2 ci-dessus décrivent le lot historique et ne valent pas preuve de production pour V3.
 
 Le réglage d’alignement historique reste stocké et transmis sans modification, mais V3 présente désormais une composition constamment centrée. Réglages affiche cette décision au lieu de proposer un choix Gauche qui ne serait pas appliqué. Le CSS Link commun (assets 0.4.1) descend le groupe d’identité selon le viewport et le mode de couverture ; aperçu, public, shortcode et Elementor suivent les mêmes règles.
+
+## Navigation dynamique — 0.5.4
+
+Les liens `v3_section` demeurent des destinations serveur autonomes. Le contrôleur intercepte seulement les clics ordinaires internes et charge la même page avec `credentials: same-origin` / `cache: no-store`. Le DOM du Studio et sa configuration JSON de présentation sont relus sans exécuter les scripts de la page reçue. Les mutations restent inchangées. Aucun cache de rubrique ou stockage navigateur des saisies n’est ajouté.
+
+Les deux navigations gardent chacune une pill unique (180 ms, transition désactivée sous `prefers-reduced-motion`). Tab/Entrée restent natifs ; flèches et Home/End déplacent le focus entre les liens disponibles. Shop reste indisponible. Sans JS, les liens rechargent leur destination habituelle.
+
+`pushState` ajoute une entrée après le chargement réussi. `popstate` charge la destination ; une annulation pour saisie non enregistrée restaure l’entrée courante. Les réponses obsolètes sont annulées/ignorées. La zone de saisie est temporairement inerte pendant le chargement ; une sauvegarde ou un upload empêche de changer de rubrique. Une erreur garde champs et URL courants. La sauvegarde confirmée relit l’état canonique et ses nonces ; si cette lecture échoue, l’édition attend une actualisation explicite, sans rejouer la mutation. Seul un état serveur ne contenant plus le Studio (session expirée, fournisseur indisponible) revient à la navigation complète.
+
+Voir [recette locale 0.5.4](../evidence/me-v3-054/README.md). Aucun changement de contrats de données ou de rendu public.

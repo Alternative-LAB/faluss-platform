@@ -125,7 +125,7 @@
     }
 
     function saveItem(editor, removal) {
-        if (pending || uploading) { return; }
+        if (pending || uploading || navigating) { return; }
         if (Array.from(root.querySelectorAll('[data-v3-editor]')).filter(editorDirty).some(function (other) { return other !== editor; })) {
             if (!window.confirm('Enregistrer cet élément et abandonner les modifications non enregistrées des autres éléments ?')) { return; }
         }
@@ -146,8 +146,7 @@
             mutation: mutation, version: root.dataset.version || '', fields: JSON.stringify(values)
         }).then(function (response) {
             if (!response.success) { throw new Error(serverError(response, 'save_failed')); }
-            leaving = true;
-            window.location.reload();
+            return reloadCanonical();
         }).catch(function (failure) {
             notice(failure.message || 'Enregistrement impossible.', true);
             pending = false;
@@ -156,7 +155,7 @@
     }
 
     function uploadContent(input) {
-        if (pending || uploading) { return; }
+        if (pending || uploading || navigating) { return; }
         var file = input.files && input.files[0];
         if (!file) { return; }
         if (!/^(image\/jpeg|image\/png|image\/gif|image\/webp)$/.test(file.type) || file.size > 8 * 1024 * 1024) {
@@ -205,9 +204,13 @@
             return [field.dataset.field, field.value];
         }).concat(Array.from(editor.querySelectorAll('[data-block-id]')).map(function (row) { return row.dataset.blockId; })));
     }
-    var baselines = new Map();
-    root.querySelectorAll('[data-v3-editor]').forEach(function (editor) { baselines.set(editor, editorSnapshot(editor)); });
-    var baseline = JSON.stringify(fields());
+    var baselines = new Map(), baseline;
+    function resetBaselines() {
+        baselines.clear();
+        root.querySelectorAll('[data-v3-editor]').forEach(function (editor) { baselines.set(editor, editorSnapshot(editor)); });
+        baseline = JSON.stringify(fields());
+    }
+    resetBaselines();
     function editorDirty(editor) { return editorSnapshot(editor) !== baselines.get(editor); }
     function isDirty() {
         return management ? Array.from(baselines.keys()).some(editorDirty) : JSON.stringify(fields()) !== baseline;
@@ -224,7 +227,7 @@
             }).catch(function (failure) { if (failure.name !== 'AbortError') { notice(failure.message, true); dialog.close(); } });
     }
     function save() {
-        if (pending || uploading) { return; }
+        if (pending || uploading || navigating) { return; }
         pending = true;
         var button = root.querySelector('[data-v3-primary]');
         button.disabled = true;
@@ -233,15 +236,171 @@
             .then(function (response) {
                 if (!response.success) { throw new Error(serverError(response, 'save_failed')); }
                 // Only a confirmed server response clears the navigation guard.
-                leaving = true;
-                window.location.reload();
+                return reloadCanonical();
             }).catch(function (failure) { notice(failure.message, true); pending = false; button.disabled = false; });
     }
+    var navigationRequest = null, navigationRevision = 0, navigating = false, needsCanonical = false;
+    var currentUrl = window.location.href;
+    var historyKey = 'falussStudioV3';
+    var historyIndex = history.state && history.state[historyKey] ? history.state[historyKey].index : 0;
+    var restoringHistory = false;
+    function historyState(index) {
+        var state = Object.assign({}, history.state);
+        state[historyKey] = { index: index };
+        return state;
+    }
+    history.replaceState(historyState(historyIndex), '', currentUrl);
+
+    function positionPill(nav) {
+        var active = nav.querySelector('[aria-current]');
+        if (!active) { return; }
+        var pill = nav.querySelector('[data-studio-pill]');
+        if (!pill) {
+            pill = document.createElement('span');
+            pill.dataset.studioPill = '';
+            pill.setAttribute('aria-hidden', 'true');
+            nav.appendChild(pill);
+            nav.classList.add('is-enhanced');
+        }
+        pill.style.width = active.offsetWidth + 'px';
+        pill.style.height = active.offsetHeight + 'px';
+        pill.style.top = active.offsetTop + 'px';
+        pill.style.transform = 'translateX(' + active.offsetLeft + 'px)';
+        window.requestAnimationFrame(function () { nav.classList.add('is-motion-ready'); });
+    }
+    function showActiveTab(nav) {
+        var active = nav.querySelector('[aria-current]');
+        if (!active) { return; }
+        var left = active.offsetLeft, right = left + active.offsetWidth;
+        if (left < nav.scrollLeft) { nav.scrollTo({left: left, behavior: 'instant'}); }
+        else if (right > nav.scrollLeft + nav.clientWidth) { nav.scrollTo({left: right - nav.clientWidth, behavior: 'instant'}); }
+    }
+    function updateNav(selector, next) {
+        var nav = root.querySelector(selector), source = next.querySelector(selector);
+        var pill = nav.querySelector('[data-studio-pill]');
+        // Retain the same indicator node and its previous geometry across content swaps.
+        nav.replaceChildren.apply(nav, Array.from(source.childNodes).concat(pill ? [pill] : []));
+        showActiveTab(nav);
+        positionPill(nav);
+    }
+    function restoreHistory() {
+        var target = history.state && history.state[historyKey];
+        if (target && target.index !== historyIndex) {
+            restoringHistory = true;
+            history.go(historyIndex - target.index);
+        }
+    }
+    function canLeave() {
+        return !pending && !uploading && (!isDirty() || window.confirm('Quitter cette rubrique sans enregistrer les modifications ?'));
+    }
+    function applyView(next, focusArea) {
+        var nextConfig = next.dataset.studioConfig ? JSON.parse(next.dataset.studioConfig) : config;
+        if (previewRequest) { previewRequest.abort(); }
+        if (dialog.open) { dialog.close(); }
+        ['.faluss-studio-v3__header', '.faluss-studio-v3__member'].forEach(function (selector) {
+            root.querySelector(selector).replaceWith(next.querySelector(selector));
+        });
+        updateNav('.faluss-studio-v3__tabs', next);
+        updateNav('.faluss-studio-v3__bottom', next);
+        panel.replaceWith(next.querySelector('[data-v3-panel]'));
+        ['step', 'mode', 'version', 'studioConfig'].forEach(function (key) { root.dataset[key] = next.dataset[key] || ''; });
+        panel = root.querySelector('[data-v3-panel]');
+        error = root.querySelector('[data-v3-error]');
+        status = root.querySelector('[data-v3-status]');
+        management = root.querySelector('[data-v3-management]');
+        previewHost.replaceChildren.apply(previewHost, Array.from(next.querySelector('[data-v3-preview]').childNodes));
+        config = nextConfig;
+        needsCanonical = false;
+        resetBaselines();
+        root.scrollTo({ top: 0, behavior: 'instant' });
+        var focus = focusArea ? root.querySelector('.faluss-studio-v3__' + focusArea + ' [aria-current]') : panel.querySelector('h1');
+        if (focus) { if (!focusArea) { focus.tabIndex = -1; } focus.focus({preventScroll: true}); }
+    }
+    function loadSection(url, options) {
+        options = options || {};
+        if (navigationRequest) { navigationRequest.abort(); }
+        navigationRequest = new AbortController();
+        var revision = ++navigationRevision;
+        navigating = true;
+        panel.inert = true;
+        panel.setAttribute('aria-busy', 'true');
+        return fetch(url, {credentials: 'same-origin', cache: 'no-store', signal: navigationRequest.signal})
+            .then(function (response) {
+                if (!response.ok) { throw new Error('Navigation indisponible (HTTP ' + response.status + '). Réessayez.'); }
+                return response.text();
+            }).then(function (html) {
+                if (revision !== navigationRevision) { return; }
+                var doc = new DOMParser().parseFromString(html, 'text/html');
+                var next = doc.querySelector('[data-faluss-studio-v3]');
+                if (!next || !next.querySelector('[data-v3-panel]')) {
+                    // A lost session or unavailable provider uses the normal server destination.
+                    leaving = true; window.location.assign(url); return;
+                }
+                applyView(next, options.focusArea);
+                if (options.historyIndex !== undefined) { historyIndex = options.historyIndex; }
+                else if (!options.replace) { historyIndex += 1; history.pushState(historyState(historyIndex), '', url); }
+                currentUrl = url;
+            }).catch(function (failure) {
+                if (failure.name === 'AbortError' || revision !== navigationRevision) { return; }
+                if (options.historyIndex !== undefined) { restoreHistory(); }
+                notice(needsCanonical ? 'Enregistré. La relecture est indisponible ; actualise la rubrique avant de poursuivre.' : (failure.message || 'Navigation indisponible. Réessayez.'), true);
+                if (needsCanonical && error) {
+                    var retry = document.createElement('button');
+                    retry.type = 'button'; retry.dataset.studioRefresh = ''; retry.textContent = 'Actualiser la rubrique';
+                    error.appendChild(retry);
+                }
+            }).finally(function () {
+                if (revision !== navigationRevision) { return; }
+                navigating = false; panel.inert = false; panel.removeAttribute('aria-busy');
+            });
+    }
+    function reloadCanonical() {
+        // A confirmed save is clean; a failed read never pretends it was rolled back.
+        needsCanonical = true;
+        resetBaselines();
+        return loadSection(currentUrl, {replace: true}).finally(function () {
+            pending = false;
+            if (needsCanonical) {
+                panel.querySelectorAll('input, select, textarea, button:not([data-studio-refresh])').forEach(function (control) { control.disabled = true; });
+            }
+        });
+    }
+    window.addEventListener('popstate', function () {
+        if (restoringHistory) { restoringHistory = false; return; }
+        var state = history.state && history.state[historyKey];
+        if (!state) { return; }
+        if (!canLeave()) {
+            if (!pending && !uploading) {
+                if (navigationRequest) { navigationRequest.abort(); }
+                navigationRevision += 1; navigating = false; panel.inert = false; panel.removeAttribute('aria-busy');
+            }
+            restoreHistory(); return;
+        }
+        loadSection(window.location.href, {historyIndex: state.index});
+    });
+    function positionNavigation() {
+        root.querySelectorAll('.faluss-studio-v3__tabs, .faluss-studio-v3__bottom').forEach(function (nav) { showActiveTab(nav); positionPill(nav); });
+    }
+    positionNavigation();
+    if (window.ResizeObserver) { new ResizeObserver(positionNavigation).observe(root); }
+    if (document.fonts) { document.fonts.ready.then(positionNavigation); }
+
     root.addEventListener('click', function (event) {
         var target = event.target;
-        var navigation = target.closest('[data-studio-navigate], .faluss-studio-v3__header a');
-        if (navigation) {
-            if (pending || uploading || (isDirty() && !window.confirm('Quitter cette rubrique sans enregistrer les modifications ?'))) { event.preventDefault(); return; }
+        if (target.closest('[data-studio-refresh]')) { if (!navigating) { reloadCanonical(); } return; }
+        var navigation = target.closest('[data-studio-navigate]');
+        if (navigation && event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+            var destination = new URL(navigation.href, window.location.href);
+            if (destination.origin === window.location.origin && destination.pathname === window.location.pathname) {
+                event.preventDefault();
+                if (destination.href === currentUrl && !navigating) { return; }
+                if (!canLeave()) { return; }
+                loadSection(destination.href, {focusArea: navigation.closest('.faluss-studio-v3__bottom') ? 'bottom' : 'tabs'});
+                return;
+            }
+        }
+        if (target.closest('.faluss-studio-v3__header a')) {
+            if (!canLeave()) { event.preventDefault(); return; }
             leaving = true;
         }
         if (target.closest('[data-studio-preview-open]')) { dialog.showModal(); refreshPreview(); return; }
@@ -268,6 +427,16 @@
         }
     });
     root.addEventListener('keydown', function (event) {
+        var link = event.target.closest('[data-studio-navigate]');
+        if (link && /^(ArrowLeft|ArrowRight|Home|End)$/.test(event.key)) {
+            var links = Array.from(link.parentNode.querySelectorAll('[data-studio-navigate]'));
+            var next = links.indexOf(link);
+            if (event.key === 'ArrowLeft') { next = (next + links.length - 1) % links.length; }
+            if (event.key === 'ArrowRight') { next = (next + 1) % links.length; }
+            if (event.key === 'Home') { next = 0; }
+            if (event.key === 'End') { next = links.length - 1; }
+            event.preventDefault(); links[next].focus({preventScroll: true}); return;
+        }
         var tab = event.target.closest('[data-v3-tab]');
         if (!tab || !/^(ArrowLeft|ArrowRight|Home|End)$/.test(event.key)) { return; }
         var tabs = Array.prototype.slice.call(tab.parentNode.querySelectorAll('[data-v3-tab]'));
@@ -297,7 +466,8 @@
         }
         refreshPreview();
     });
-    panel.addEventListener('submit', function (event) {
+    root.addEventListener('submit', function (event) {
+        if (event.target !== panel) { return; }
         event.preventDefault();
         if (management) {
             var editor = document.activeElement.closest('[data-v3-editor]');
@@ -307,7 +477,4 @@
     window.addEventListener('beforeunload', function (event) {
         if (!leaving && (isDirty() || pending || uploading)) { event.preventDefault(); event.returnValue = ''; }
     });
-    // Keep the active contextual destination visible without moving the document.
-    var activeTab = root.querySelector('.faluss-studio-v3__tabs [aria-current]');
-    if (activeTab) { activeTab.parentNode.scrollLeft = activeTab.offsetLeft - activeTab.parentNode.offsetLeft - 16; }
 }());

@@ -6,6 +6,21 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+- Retouches de fluidité V3 uniquement, détaillées dans 0.5.4.
+
+## [0.5.4] - 2026-09-25
+
+### Corrigé
+
+- Repositionnement du champ actif de l’onboarding explicitement instantané : événements de taille regroupés par frame, aucune correction du scroll de la fenêtre en réponse au défilement de Safari. Ancrage du panneau et clavier superposé conservés.
+- Navigation principale et contextuelle du Studio sans rechargement de document, avec pill persistante animée ; liens directs, historique, clavier, sélection active et repli natif conservés. Mouvement supprimé selon la préférence système.
+- Relecture canonique après sauvegarde sans rechargement complet ; erreurs et conflits conservent les saisies, chargements obsolètes annulés. Une relecture en échec après sauvegarde se retente sans répéter la mutation.
+
+### Compatibilité
+
+- Assets Me Studio 3.2.1. Aucune modification de carte publique, données, contrats de mutation, parcours, Fans ou flags. Aucune intervention WordPress ; essais navigateur locaux, sensation réelle iPhone à vérifier par le propriétaire.
+
+
 ## [0.5.3] - 2026-09-25
 
 ### Corrigé
