@@ -6,6 +6,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Documentation
+
+- Précisions HoF : badge à la consommation financée, pseudo/badge visibles au créateur concerné et publics sur consentement, soutien direct en centièmes de point entiers ; cadeaux gratuits sans revenu ni score monétisable sauf financement Faluss, sans reclassification PF.
+- Décision HoF : pack sans score, cadeau de 300 pièces financées dépensées = 300 points de session, soutien direct = 1 point par euro confirmé ; distinction progression sur dépense réelle et revenu EUR privé, étude PF Hub sans second ledger et adaptation obligatoire du simulateur #73 avant fusion.
+- Matrice des propriétaires Fans/Me/Hub/Pro, limites des moteurs existants et contrats de publication, progression, cosmétiques, Max et commerce fermé.
 ### Vérifié
 
 - Recette REST HTTPS du catalogue et des profils : permissions, fiches adultes masquées, refus 403/503 et changement de catégorie.
