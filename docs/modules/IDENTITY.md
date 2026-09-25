@@ -53,3 +53,12 @@ Ces contrôles réels ne sont pas exécutés par les tests statiques du dépôt 
 Pour revenir en arrière, remettre d’abord `FALUSS_PLATFORM_IDENTITY` à `false`, charger une nouvelle requête sans les classes Platform, puis réactiver l’ancien plugin Faluss Identity contre les mêmes tables et options. Ne supprimer, renommer, fusionner ou réécrire aucune donnée. La remise en service de deux autorités dans une même requête est interdite.
 
 La bascule de production a été réalisée le 23 septembre 2026 après correction de l'issue #31. Les huit tables, quatre profils, quatre profils publics, trois clients OAuth et les compteurs d'audit ont été conservés. Link consomme le contrat Identity Platform et les routes publiques, login et OAuth répondent sans seconde autorité active.
+
+
+## Passwordless : transaction de reprise (0.5.2)
+
+La lecture verrouillée du challenge, la vérification OTP, la création/relecture du compte WP, l’activation Registry et la consommation du challenge appartiennent à une transaction unique. L’ouverture de session reste postérieure au commit. Un échec interne annule les écritures et purge les caches WP utilisateur/meta touchés ; la preuve liée au navigateur reste utilisable jusqu’à son expiration. Les comptes privilégiés ou suspendus restent refusés ; les garde-fous de code remplacé, expiré, consommé et cinq essais restent actifs. Aucune logique SSO n’est changée.
+
+`faluss_identity_passwordless_diagnostic` émet uniquement un nom d’étape borné côté serveur : nonce, cookie, format, challenge, vérification, transaction, WP, Registry ou préférences. Les erreurs après preuve valide sont aussi enregistrées dans l’audit Identity existant, avec son horodatage et sa rétention ; aucune adresse, OTP, cookie, ID de compte ou exception brute n’est ajouté. Les diagnostics nonce/cookie/format ne créent pas de nouvelles lignes d’audit ; l’événement historique `passwordless_code_rejected` reste conservé pour les refus de challenge. Le navigateur reçoit toujours le refus générique. L’audit existant `passwordless_session_opened` distingue l’établissement réussi de session ; la destination reste calculée par les contrats existants.
+
+La recette locale distingue publié, inachevé actif, inachevé pending et nouveau ; elle ne confirme pas la cause de l’incident rapporté en production. Voir [preuves 0.5.2](../evidence/me-v3-052/README.md).

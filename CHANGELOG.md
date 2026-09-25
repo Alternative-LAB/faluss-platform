@@ -15,6 +15,85 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 - Création de compte Fans et liaison SSO atomiques sur InnoDB, avec verrouillage concurrent, rollback et invalidation du cache utilisateur en cas d'échec de liaison.
 
+## [0.5.4] - 2026-09-25
+
+### Corrigé
+
+- Repositionnement du champ actif de l’onboarding explicitement instantané : événements de taille regroupés par frame, aucune correction du scroll de la fenêtre en réponse au défilement de Safari. Ancrage du panneau et clavier superposé conservés.
+- Navigation principale et contextuelle du Studio sans rechargement de document, avec pill persistante animée ; liens directs, historique, clavier, sélection active et repli natif conservés. Mouvement supprimé selon la préférence système.
+- Relecture canonique après sauvegarde sans rechargement complet ; erreurs et conflits conservent les saisies, chargements obsolètes annulés. Une relecture en échec après sauvegarde se retente sans répéter la mutation.
+
+### Compatibilité
+
+- Assets Me Studio 3.2.1. Aucune modification de carte publique, données, contrats de mutation, parcours, Fans ou flags. Aucune intervention WordPress ; essais navigateur locaux, sensation réelle iPhone à vérifier par le propriétaire.
+
+
+## [0.5.3] - 2026-09-25
+
+### Corrigé
+
+- Make WordPress plugin updates reliable (`50a0e84`)
+
+## [0.5.2] - 2026-09-25
+
+### Corrigé
+
+- Consommation de l’OTP et établissement WP/Registry réunis dans une transaction : une panne interne conserve la preuve valide pour une nouvelle tentative, sans réactiver une identité suspendue.
+- Reprise des anciens curseurs Atomiques avec conservation du mode dans la transaction du curseur ; une session expirée présente la connexion.
+- Alerte de sortie du Studio fondée sur les valeurs réellement modifiées ; confirmation serveur avant rechargement, champs conservés après refus de sauvegarde.
+
+- Panneau d’onboarding ancré en bas sous le clavier, focus sans expansion automatique, champ actif révélé par le seul défilement interne et hauteur initiale adaptée aux contrôles.
+- Composition V3 centrée et groupe d’identité descendu avec un espacement borné commun à l’aperçu, au public, au shortcode et à Elementor ; préférences historiques conservées.
+
+### Modifié
+
+- Studio V3 autonome : navigation Liens / Shop / Design / Profil, rubriques contextuelles, formulaire en pleine page et aperçu complet à la demande. Les treize éditeurs 0.5.1 restent accessibles ; Shop est explicitement indisponible, sans commerce fictif.
+
+### Ajouté
+
+- Diagnostics serveur bornés des étapes passwordless et des prérequis Studio ; aucune donnée personnelle ou secret transmis dans ces diagnostics.
+- Régression transactionnelle OTP, recette WordPress/MariaDB/Elementor locale, parcours HTTP OTP, preuves mobiles et conflit HTTP 409 : `docs/evidence/me-v3-052/README.md`.
+
+### Compatibilité
+
+- Aucune migration, aucune intervention sur les sites ou leurs flags. Fond public pleine page 0.5.1, SSO et Fans conservés. La cause exacte de l’incident OTP de production reste non établie ; iPhone physique et configuration Elementor de production restent à valider par le propriétaire.
+
+## [0.5.1] - 2026-09-25
+
+### Corrigé
+
+- Fond de la carte canonique prolongé jusqu’au bas du viewport et du contenu, sans bordure ni arrondi extérieur ; mêmes règles pour l’aperçu et les intégrations Link.
+- Éditions perdues dans le Studio V3 rétablies : collections, contenus texte/média, suppression/visibilité/image des liens, ordre complet, bio/publication et réglages avancés.
+- Paramètres de transition de couverture appliqués par le renderer commun ; cache des assets invalidé.
+
+### Ajouté
+
+- Rubriques natives Collections, Contenus et ordre, Réglages ; mutations unitaires de contenus dans l’agrégat Link existant, avec contrôle de version et ownership média.
+- Une régression de page entière à 390 × 844, une preuve visuelle locale et une matrice de correspondance ancien Studio/V3.
+
+### Compatibilité
+
+- Aucune migration, aucun changement de flag ni intervention WordPress. Les versions et l’ordre des blocs restent canoniques ; une suppression doit être explicite.
+- Recette réelle WordPress/Elementor/téléphone non exécutée. Résultats et limites : `docs/evidence/me-v3-viewport/README.md`.
+
+## [0.5.0] - 2026-09-25
+
+### Ajouté
+
+- Studio V3 natif sous le flag V3, indépendant du flag Studio V2 : dix rubriques, aperçu canonique, sauvegardes ciblées et conflits de version.
+
+### Corrigé
+
+- Composition publique Simple/Atomique et aperçu de même densité ; couverture compacte ou pleine, avatar stable et suppression des décalages immersifs incompatibles.
+- Priorité des choix temporaires sur le thème, bordure d'avatar identique avant/après sauvegarde, contraste serveur des boutons et invalidation immédiate des réponses d'aperçu obsolètes.
+- Panneau mobile, champs à 16 px, clavier sans déplacement de progression, logo du projet, onglets Réseaux masqués et confirmation autonome.
+- Graisse du nom incluse dans la version agrégée pour détecter les éditions concurrentes.
+
+### Compatibilité
+
+- Aucune migration ; données, médias, slug et blocs historiques conservés. Aucun changement au lot Fans, aux rôles ou au SSO.
+- Livraison GitHub uniquement ; validation iPhone/WordPress/Elementor réel laissée à l'utilisateur. Preuves locales dans `docs/evidence/me-v3-correction/`.
+
 ## [0.4.0] - 2026-09-25
 
 ### Ajouté

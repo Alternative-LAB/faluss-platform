@@ -99,7 +99,7 @@ final class MeStudioContractTest extends TestCase
     public function testSharedCardCompositionCoversAtomicVisualRules(): void
     {
         $link = $this->source('src/Link/LegacyLinkService.php');
-        $card = $this->source('assets/me-studio/css/card-v2.css');
+        $card = $this->source('assets/me-studio/css/card-v2.css') . $this->source('assets/link/css/faluss-link.css');
         $studio = $this->source('assets/me-studio/css/studio-v2.css');
         $editor = $this->source('assets/link/js/faluss-link-editor.js');
 
@@ -114,19 +114,18 @@ final class MeStudioContractTest extends TestCase
         self::assertStringContainsString("if ( 'media_teaser' === \$block['type'] )", $link);
         self::assertStringContainsString('faluss-link-card__media-teaser', $link);
         self::assertStringContainsString("length < 32", $editor);
-        foreach (['texture-grain', 'texture-camo', 'avatar-shape-rounded', 'avatar-effect-both', 'wallpaper-cover', 'wallpaper-effect-gradient', 'wallpaper-effect-none', 'links-mode-image-grid', 'social-style-solid-custom'] as $selector) {
+        foreach (['texture-grain', 'texture-camo', 'avatar-shape-rounded', 'avatar-effect-both', 'wallpaper-cover', 'wallpaper-effect-gradient', 'links-mode-image-grid', 'social-style-solid-custom'] as $selector) {
             self::assertStringContainsString($selector, $card);
         }
-        self::assertStringContainsString('inset: 58% 0 0', $card);
-        self::assertStringContainsString('mask-image: none', $card);
-        self::assertStringContainsString('--fl-v2-compact-cover-height', $card);
+        self::assertStringContainsString('var(--fl-hero-transition-position),var(--fl-page-background) 100%)', $card);
+        self::assertStringContainsString('mask-image:none', $card);
         self::assertStringContainsString('@media (max-width: 480px)', $card);
         self::assertStringContainsString('@media (prefers-reduced-motion: reduce)', $card);
-        self::assertStringContainsString('.faluss-link-card--structure-atomic', $card);
+        self::assertStringContainsString('.faluss-link-card--canonical', $card);
         self::assertStringNotContainsString("\n.faluss-link-card {", $card);
-        self::assertStringNotContainsString("\n.faluss-link-card__", $card);
-        self::assertStringNotContainsString("\n.faluss-link-card .", $card);
-        self::assertStringNotContainsString('!important', $card);
+        self::assertStringNotContainsString("\n.faluss-link-card__", $this->source('assets/me-studio/css/card-v2.css'));
+        self::assertStringNotContainsString("\n.faluss-link-card .", $this->source('assets/me-studio/css/card-v2.css'));
+        self::assertStringNotContainsString('!important', $this->source('assets/me-studio/css/card-v2.css'));
         self::assertStringContainsString('.faluss-link-studio[data-faluss-studio="v2"] .faluss-link-studio__topbar', $studio);
         self::assertStringContainsString('position: sticky', $studio);
         self::assertStringContainsString('transition: none', $studio);

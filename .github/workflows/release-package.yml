@@ -1,0 +1,28 @@
+name: Release package
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Validate WordPress archive
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer:v2
+      - name: Install production dependencies
+        run: composer install --no-dev --prefer-dist --no-interaction --no-progress --classmap-authoritative
+      - name: Archive validator tests
+        run: python3 -m unittest discover -s tests/Release -p 'test_*.py'
+      - name: Build and validate archive
+        run: bash scripts/build-release.sh "$RUNNER_TEMP/faluss-platform.zip"

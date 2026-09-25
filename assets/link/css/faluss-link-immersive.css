@@ -1,4 +1,4 @@
-.faluss-link-card--presentation-immersive {
+.faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) {
   --fl-page: var(--fl-page-background, var(--fl-canvas));
   width: 100%;
   max-width:none;
@@ -56,19 +56,19 @@ body.faluss-identity-public-route > .faluss-identity-profile-page {
 }
 
 /* The Elementor header owns its overlay treatment. The immersive route never outranks it. */
-body.faluss-identity-public-route .faluss-link-card--presentation-immersive {
+body.faluss-identity-public-route .faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) {
   min-height: 100vh;
   min-height: 100svh;
 }
 
-.faluss-link-card--presentation-immersive .faluss-link-card__cover {
+.faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) .faluss-link-card__cover {
   /* svh is stable while Safari expands or collapses its browser chrome. */
   height: clamp(32rem, 92vh, 54rem);
   height: clamp(32rem, 92svh, 54rem);
   background: var(--fl-hero-transition-color, var(--fl-page));
 }
 
-.faluss-link-card--presentation-immersive .faluss-link-card__cover img {
+.faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) .faluss-link-card__cover img {
   height: calc(100% + 3rem);
   transform: translate3d(0, var(--fl-immersive-depth, 0px), 0) scale(1.05);
   transform-origin: center top;
@@ -76,7 +76,7 @@ body.faluss-identity-public-route .faluss-link-card--presentation-immersive {
   will-change: transform;
 }
 
-.faluss-link-card--presentation-immersive .faluss-link-card__cover::after {
+.faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) .faluss-link-card__cover::after {
   background: linear-gradient(
     180deg,
     var(--fl-hero-overlay-top, rgba(8, 8, 8, .08)) 0%,
@@ -87,7 +87,7 @@ body.faluss-identity-public-route .faluss-link-card--presentation-immersive {
   opacity: 1;
 }
 
-.faluss-link-card--presentation-immersive .faluss-link-card__body {
+.faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) .faluss-link-card__body {
   margin-top: -21rem;
   padding:
     max(8rem, calc(env(safe-area-inset-top, 0px) + 4.5rem))
@@ -100,24 +100,24 @@ body.faluss-identity-public-route .faluss-link-card--presentation-immersive {
   will-change: transform;
 }
 
-.faluss-link-card--presentation-immersive .faluss-link-card__name {
+.faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) .faluss-link-card__name {
   max-width: min(100%, 42rem);
   font-size: clamp(2.5rem, 9vw, 5.5rem);
 }
 
-.faluss-link-card--presentation-immersive .faluss-link-card__links {
+.faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) .faluss-link-card__links {
   max-width: 44rem;
   margin-top: 2rem;
   padding-top: 1.5rem;
   border-top: 1px solid var(--fl-border);
 }
 
-.faluss-link-card--presentation-immersive .faluss-link-card__link {
+.faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) .faluss-link-card__link {
   min-height: 3.5rem;
   padding: 1rem 1.4rem;
 }
 
-.faluss-link-card--presentation-immersive .faluss-link-card__social {
+.faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) .faluss-link-card__social {
   position: relative;
   z-index: 4;
   display: flex;
@@ -126,7 +126,7 @@ body.faluss-identity-public-route .faluss-link-card--presentation-immersive {
   opacity: 1;
 }
 
-.faluss-link-card--presentation-immersive.faluss-link-card--cover-no .faluss-link-card__body {
+.faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical).faluss-link-card--cover-no .faluss-link-card__body {
   min-height: 100vh;
   min-height: 100svh;
   margin-top: 0;
@@ -134,15 +134,15 @@ body.faluss-identity-public-route .faluss-link-card--presentation-immersive {
   background: var(--fl-page);
 }
 
-.faluss-link-card--presentation-immersive.faluss-link-card--cover-yes.faluss-link-card--avatar-yes .faluss-link-card__avatar {
+.faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical).faluss-link-card--cover-yes.faluss-link-card--avatar-yes .faluss-link-card__avatar {
   margin-top: -5rem;
 }
 
-.faluss-link-card--presentation-immersive.faluss-link-card--cover-no.faluss-link-card--avatar-yes .faluss-link-card__avatar {
+.faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical).faluss-link-card--cover-no.faluss-link-card--avatar-yes .faluss-link-card__avatar {
   margin-bottom: 1.25rem;
 }
 
-.faluss-link-card--presentation-immersive.faluss-link-card--align-center .faluss-link-card__availability {
+.faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical).faluss-link-card--align-center .faluss-link-card__availability {
   width: max-content;
   margin-right: auto;
   margin-left: auto;
@@ -156,35 +156,35 @@ body.faluss-identity-public-route .faluss-link-card--presentation-immersive {
     overflow: visible;
   }
 
-  .faluss-link-card--presentation-immersive .faluss-link-card__social a,
-  .faluss-link-card--presentation-immersive .faluss-link-card__social--inline a {
+  .faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) .faluss-link-card__social a,
+  .faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) .faluss-link-card__social--inline a {
     width: 44px;
     height: 44px;
   }
 }
 
 @media (min-width: 800px) {
-  .faluss-link-card--presentation-immersive .faluss-link-card__body {
+  .faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) .faluss-link-card__body {
     padding-inline: max(8vw, calc((100% - 72rem) / 2));
   }
 
-  .faluss-link-card--presentation-immersive .faluss-link-card__cover {
+  .faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) .faluss-link-card__cover {
     height: min(80vh, 54rem);
     height: min(80svh, 54rem);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .faluss-link-card--presentation-immersive .faluss-link-card__cover img {
+  .faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) .faluss-link-card__cover img {
     transform: none;
     will-change: auto;
   }
 
-  .faluss-link-card--presentation-immersive .faluss-link-card__body {
+  .faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) .faluss-link-card__body {
     transform: none;
     will-change: auto;
   }
 }
-.faluss-link-card--presentation-immersive .faluss-link-card__content-blocks{max-width:44rem;margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--fl-border)}.faluss-link-card--presentation-immersive .faluss-link-card__section-title{margin-top:1.8rem;padding-top:1.8rem;font-size:clamp(1.2rem,4vw,1.65rem)}.faluss-link-card--presentation-immersive .faluss-link-card__content-text{max-width:42rem;font-size:1rem}
-.faluss-link-card--presentation-immersive .faluss-link-card__media-teaser{max-width:44rem;margin-top:1.5rem}.faluss-link-card--presentation-immersive .faluss-link-card__media-teaser>img{aspect-ratio:16/9}.faluss-link-card--presentation-immersive .faluss-link-card__media-teaser-copy{padding:clamp(1rem,3vw,1.5rem)}.faluss-link-card--presentation-immersive .faluss-link-card__media-teaser-copy h3{font-size:clamp(1.15rem,4vw,1.5rem)}
-.faluss-link-card--presentation-immersive .faluss-link-card__media-teaser--format-landscape>img{aspect-ratio:16/9}.faluss-link-card--presentation-immersive .faluss-link-card__media-teaser--format-portrait>img{aspect-ratio:4/5}.faluss-link-card--presentation-immersive .faluss-link-card__media-teaser--format-square>img{aspect-ratio:1/1}.faluss-link-card--presentation-immersive .faluss-link-card__media-teaser--image-only{background:transparent}
+.faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) .faluss-link-card__content-blocks{max-width:44rem;margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--fl-border)}.faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) .faluss-link-card__section-title{margin-top:1.8rem;padding-top:1.8rem;font-size:clamp(1.2rem,4vw,1.65rem)}.faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) .faluss-link-card__content-text{max-width:42rem;font-size:1rem}
+.faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) .faluss-link-card__media-teaser{max-width:44rem;margin-top:1.5rem}.faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) .faluss-link-card__media-teaser>img{aspect-ratio:16/9}.faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) .faluss-link-card__media-teaser-copy{padding:clamp(1rem,3vw,1.5rem)}.faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) .faluss-link-card__media-teaser-copy h3{font-size:clamp(1.15rem,4vw,1.5rem)}
+.faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) .faluss-link-card__media-teaser--format-landscape>img{aspect-ratio:16/9}.faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) .faluss-link-card__media-teaser--format-portrait>img{aspect-ratio:4/5}.faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) .faluss-link-card__media-teaser--format-square>img{aspect-ratio:1/1}.faluss-link-card--presentation-immersive:not(.faluss-link-card--canonical) .faluss-link-card__media-teaser--image-only{background:transparent}
