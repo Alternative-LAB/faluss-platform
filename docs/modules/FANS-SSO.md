@@ -61,3 +61,8 @@ Les tests automatisés couvrent les noms et rôles isolés, le schéma partiel f
 Une recette locale jetable WordPress 7.1.2/MariaDB 11.8 a confirmé l'installation des tables Fans InnoDB avec un flag Link erroné sans table Link, puis, en injectant un échec SQL sur l'insertion de liaison, le rollback de `wp_users` et `wp_usermeta`, la nouvelle tentative réussie dans le même processus et la conservation d'un compte préexistant après un échec de liaison. Cette recette invoquait le service SSO dans WordPress ; elle n'a pas exercé l'aller-retour HTTP réel avec Me, le navigateur, les cookies ni une concurrence simultanée réelle.
 
 Avant une activation réelle, vérifier encore sur un site WordPress/MariaDB de test : le client confidentiel Me et son URI enregistrée, une autorisation et un échange HTTP réussis, un code expiré ou rejoué, la collision d'e-mail, les cookies dans le navigateur et la durée de session. Faire un essai de rollback par retrait du flag et des règles de réécriture, sans supprimer les liaisons. La recette locale ci-dessus couvre seulement les tables et la création/liaison directe ; aucun déploiement de production n'est réalisé par cette PR.
+
+
+### Complément HTTP local du 25 septembre 2026
+
+La [recette HTTPS locale](../evidence/fans-local/SSO-HTTP.md) complète la première recette de service : vrai serveur Me, callback et cookies curl, rejeu, expiration, collision, rollback/retry et deux callbacks simultanés ont été exercés. La session Me initiale reste une fixture ; OTP, navigateurs physiques, cache persistant et extensions tierces ne sont pas couverts. Aucun déploiement n’est déduit de ces résultats.
