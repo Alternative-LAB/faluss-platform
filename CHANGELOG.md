@@ -6,6 +6,9 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Documentation
+
+- Matrice des propriétaires Fans/Me/Hub/Pro, limites des moteurs existants et contrats de publication, progression, cosmétiques, Max et commerce fermé.
 ### Vérifié
 
 - Recette REST HTTPS du catalogue et des profils : permissions, fiches adultes masquées, refus 403/503 et changement de catégorie.
