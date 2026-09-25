@@ -58,7 +58,7 @@ namespace Faluss\Platform\Fans\Profiles {
         $GLOBALS['profile_routes'][$namespace . $route] = $args;
     }
 
-    final class CreatorProfileDb
+    class CreatorProfileDb
     {
         public string $prefix = 'wp_';
         public string $last_error = '';
@@ -89,7 +89,7 @@ namespace Faluss\Platform\Fans\Profiles {
                 return null;
             }
             $last = end($this->prepared);
-            if (str_contains($query, 'WHERE wp_user_id') && ($last['args'][0] ?? null) !== 17) {
+            if (str_contains($query, 'WHERE wp_user_id') && ($last['args'][0] ?? null) !== $this->profile['wp_user_id']) {
                 return null;
             }
             if (str_contains($query, 'WHERE creator_id') && ($last['args'][0] ?? null) !== $this->profile['creator_id']) {
