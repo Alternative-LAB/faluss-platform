@@ -8,6 +8,30 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 - Livraison corrective Me V3 préparée ci-dessous ; aucun changement de configuration ni de données à la mise à jour.
 
+## [0.5.2] - 2026-09-25
+
+### Corrigé
+
+- Consommation de l’OTP et établissement WP/Registry réunis dans une transaction : une panne interne conserve la preuve valide pour une nouvelle tentative, sans réactiver une identité suspendue.
+- Reprise des anciens curseurs Atomiques avec conservation du mode dans la transaction du curseur ; une session expirée présente la connexion.
+- Alerte de sortie du Studio fondée sur les valeurs réellement modifiées ; confirmation serveur avant rechargement, champs conservés après refus de sauvegarde.
+
+- Panneau d’onboarding ancré en bas sous le clavier, focus sans expansion automatique, champ actif révélé par le seul défilement interne et hauteur initiale adaptée aux contrôles.
+- Composition V3 centrée et groupe d’identité descendu avec un espacement borné commun à l’aperçu, au public, au shortcode et à Elementor ; préférences historiques conservées.
+
+### Modifié
+
+- Studio V3 autonome : navigation Liens / Shop / Design / Profil, rubriques contextuelles, formulaire en pleine page et aperçu complet à la demande. Les treize éditeurs 0.5.1 restent accessibles ; Shop est explicitement indisponible, sans commerce fictif.
+
+### Ajouté
+
+- Diagnostics serveur bornés des étapes passwordless et des prérequis Studio ; aucune donnée personnelle ou secret transmis dans ces diagnostics.
+- Régression transactionnelle OTP, recette WordPress/MariaDB/Elementor locale, parcours HTTP OTP, preuves mobiles et conflit HTTP 409 : `docs/evidence/me-v3-052/README.md`.
+
+### Compatibilité
+
+- Aucune migration, aucune intervention sur les sites ou leurs flags. Fond public pleine page 0.5.1, SSO et Fans conservés. La cause exacte de l’incident OTP de production reste non établie ; iPhone physique et configuration Elementor de production restent à valider par le propriétaire.
+
 ## [0.5.1] - 2026-09-25
 
 ### Corrigé

@@ -38,8 +38,8 @@ const illustrate = html => html.replaceAll('https://faluss.test/media/77.jpg', i
                 return node && node.closest('.faluss-link-card--canonical');
             })), 'The card must cover the bottom of the whole document, including both corners');
             if (length === 'short') {
-                const out = path.join(root, 'docs/evidence/me-v3-viewport'); fs.mkdirSync(out, {recursive: true});
-                await page.screenshot({path: path.join(out, 'public-390.png'), fullPage: true});
+                const out = path.join(root, 'docs/evidence/me-v3-052'); fs.mkdirSync(out, {recursive: true});
+                await page.screenshot({path: path.join(out, 'public-whole-page-390.png'), fullPage: true});
             }
         }
         console.log('Whole public page 390×844: short/overflowing content, viewport/document bottom, corners, no frame or horizontal overflow: OK');

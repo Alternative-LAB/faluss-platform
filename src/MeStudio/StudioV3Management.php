@@ -127,7 +127,7 @@ final class StudioV3Management
         self::end();
         self::start('save_header', 'En-tête et réseaux');
         foreach (['available' => 'Disponible', 'avatar_visible' => 'Afficher l’avatar'] as $key => $label) { self::select($key, $label, ['0' => 'Non', '1' => 'Oui'], $prefs[$key] ?? 0); }
-        self::select('alignment', 'Alignement', ['left' => 'Gauche', 'center' => 'Centre'], $prefs['alignment'] ?? 'center');
+        echo '<p>Composition V3 centrée</p><input type="hidden" data-field="alignment" value="' . esc_attr($prefs['alignment'] ?? 'center') . '">';
         self::select('social_layout', 'Disposition des réseaux', ['inline' => 'Ligne', 'bubbles' => 'Bulles'], $prefs['social_layout'] ?? 'inline');
         $fonts = [];
         foreach ((array) $options['fonts'] as $key => $font) { $fonts[$key] = $font['label']; }

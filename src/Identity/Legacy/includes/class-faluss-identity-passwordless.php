@@ -261,16 +261,13 @@ final class Faluss_Identity_Passwordless {
     }
 
     private static function verify_code_result() {
-        if ( ! self::valid_nonce( 'faluss_identity_verify_code' ) ) { return null; }
-        $otp = isset( $_POST['otp'] ) ? (string) wp_unslash( $_POST['otp'] ) : '';
+        if ( ! self::valid_nonce( 'faluss_identity_verify_code' ) ) { self::diagnostic( 'nonce' ); return null; }
+        $otp = isset( $_POST['otp'] ) && is_string( $_POST['otp'] ) ? wp_unslash( $_POST['otp'] ) : '';
         $state = self::read_cookie_state();
-        if ( ! self::is_valid_otp( $otp ) || null === $state ) { return null; }
-        $email = self::consume_valid_otp( $state, $otp );
-        $user = null === $email ? null : self::establish_local_identity( $email );
-        if ( ! $user instanceof WP_User || self::is_privileged_user( $user ) ) {
-            self::clear_cookie();
-            return null;
-        }
+        if ( ! self::is_valid_otp( $otp ) || null === $state ) { self::diagnostic( null === $state ? 'cookie' : 'format' ); return null; }
+        $user = self::consume_valid_otp( $state, $otp );
+        // A rolled-back internal failure leaves this browser's pending proof retryable.
+        if ( ! $user instanceof WP_User && ! self::has_active_challenge() ) { self::clear_cookie(); }
         return $user;
     }
 
@@ -351,63 +348,68 @@ final class Faluss_Identity_Passwordless {
     }
 
     /**
-     * Atomically records every failed OTP and consumes the one successful OTP.
-     * @return string|null Verified email only for the immediate local session.
+     * OTP consumption and local identity establishment commit together.
+     * Invalid proofs still commit their attempt counter; an internal failure
+     * rolls back the valid proof and all identity changes before any session.
+     * @return WP_User|null
      */
     private static function consume_valid_otp( $state, $otp ) {
         global $wpdb;
         $tables = Faluss_Identity_Schema::get_table_names();
         $browser_hash = self::secret_hash( $state['browser_secret'], 'browser' );
-        if ( empty( $tables['challenges'] ) || null === $browser_hash ) {
-            return null;
-        }
-
+        if ( empty( $tables['challenges'] ) || null === $browser_hash ) { self::diagnostic( 'challenge_schema' ); return null; }
         $challenge_hash = hash( 'sha256', $state['challenge'] );
-        if ( false === $wpdb->query( 'START TRANSACTION' ) ) {
-            return null;
-        }
+        if ( false === $wpdb->query( 'START TRANSACTION' ) ) { self::diagnostic( 'transaction_start' ); return null; }
+        $touched_user = null;
+        $email = null;
+        $stage = 'challenge_read';
         try {
             $row = $wpdb->get_row(
                 $wpdb->prepare(
                     'SELECT id, email, otp_hash, attempt_count, status, expires_at FROM ' . self::quote_identifier( $tables['challenges'] ) . ' WHERE challenge_hash = %s AND browser_fingerprint_hash = %s FOR UPDATE',
-                    $challenge_hash,
-                    $browser_hash
-                ),
-                ARRAY_A
+                    $challenge_hash, $browser_hash
+                ), ARRAY_A
             );
-            $valid = is_array( $row )
-                && 'pending' === $row['status']
+            if ( ! empty( $wpdb->last_error ) ) { throw new RuntimeException( 'challenge_read' ); }
+            $valid = is_array( $row ) && 'pending' === $row['status']
                 && self::is_future_utc( $row['expires_at'] )
                 && (int) $row['attempt_count'] < self::MAX_OTP_ATTEMPTS
                 && wp_check_password( $otp, $row['otp_hash'] );
-
             if ( ! $valid ) {
+                $stage = 'otp_attempt';
                 if ( is_array( $row ) && 'pending' === $row['status'] && (int) $row['attempt_count'] < self::MAX_OTP_ATTEMPTS ) {
                     $attempts = (int) $row['attempt_count'] + 1;
                     $status = $attempts >= self::MAX_OTP_ATTEMPTS ? 'locked' : 'pending';
-                    $wpdb->query( $wpdb->prepare( 'UPDATE ' . self::quote_identifier( $tables['challenges'] ) . ' SET attempt_count = %d, status = %s WHERE id = %d', $attempts, $status, (int) $row['id'] ) );
+                    if ( false === $wpdb->query( $wpdb->prepare( 'UPDATE ' . self::quote_identifier( $tables['challenges'] ) . ' SET attempt_count = %d, status = %s WHERE id = %d', $attempts, $status, (int) $row['id'] ) ) ) { throw new RuntimeException( 'otp_attempt' ); }
                 }
-                $wpdb->query( 'COMMIT' );
+                if ( false === $wpdb->query( 'COMMIT' ) ) { throw new RuntimeException( 'otp_attempt' ); }
                 self::record_audit( 'passwordless_code_rejected' );
+                self::diagnostic( is_array( $row ) ? 'otp_rejected' : 'challenge_missing' );
                 return null;
             }
-
-            $consumed = $wpdb->query(
-                $wpdb->prepare(
-                    'UPDATE ' . self::quote_identifier( $tables['challenges'] ) . ' SET status = %s, consumed_at = %s WHERE id = %d AND status = %s AND consumed_at IS NULL',
-                    'consumed',
-                    current_time( 'mysql', true ),
-                    (int) $row['id'],
-                    'pending'
-                )
-            );
-            if ( 1 !== $consumed || false === $wpdb->query( 'COMMIT' ) ) {
-                $wpdb->query( 'ROLLBACK' );
-                return null;
-            }
-            return self::normalize_email( $row['email'] );
-        } catch ( Exception $exception ) {
+            $stage = 'local_identity';
+            $email = self::normalize_email( $row['email'] );
+            $user = null === $email ? null : self::establish_local_identity( $email, $touched_user, $stage );
+            if ( ! $user instanceof WP_User ) { throw new RuntimeException( 'local_identity' ); }
+            $stage = 'otp_consume';
+            $consumed = $wpdb->query( $wpdb->prepare(
+                'UPDATE ' . self::quote_identifier( $tables['challenges'] ) . ' SET status = %s, consumed_at = %s WHERE id = %d AND status = %s AND consumed_at IS NULL',
+                'consumed', current_time( 'mysql', true ), (int) $row['id'], 'pending'
+            ) );
+            if ( 1 !== $consumed ) { throw new RuntimeException( 'otp_consume' ); }
+            $stage = 'transaction_commit';
+            if ( false === $wpdb->query( 'COMMIT' ) ) { throw new RuntimeException( 'transaction_commit' ); }
+            return $user;
+        } catch ( Throwable $exception ) {
             $wpdb->query( 'ROLLBACK' );
+            // WP user/meta caches can have been filled before a rolled-back insert.
+            // A user_register hook may throw before the local insert returns its ID.
+            if ( ! $touched_user instanceof WP_User && null !== $email ) { $touched_user = get_user_by( 'email', $email ); }
+            if ( $touched_user instanceof WP_User ) {
+                clean_user_cache( $touched_user );
+                wp_cache_delete( $touched_user->ID, 'user_meta' );
+            }
+            self::diagnostic( $stage );
             return null;
         }
     }
@@ -492,34 +494,31 @@ final class Faluss_Identity_Passwordless {
         return null;
     }
 
-    /**
-     * WordPress user creation/recovery and active Faluss profile creation share
-     * one database transaction. The OTP has already been consumed at this
-     * point, so every error fails closed without creating a session.
-     */
-    private static function establish_local_identity( $email ) {
-        global $wpdb;
+    /** Participates in the OTP owner's transaction; never starts or commits one. */
+    private static function establish_local_identity( $email, &$touched_user, &$stage ) {
+        $stage = 'wp_user';
+        $user = self::find_or_create_safe_user( $email );
+        $touched_user = $user;
+        if ( ! $user instanceof WP_User ) { return null; }
+        $stage = 'privileged_user';
+        if ( self::is_privileged_user( $user ) ) { return null; }
+        $stage = 'registry_activation';
+        // Registry promotes pending identities only; suspended identities remain denied.
+        if ( null === Faluss_Identity_Registry::activate_for_wp_user( $user->ID ) ) { return null; }
+        $stage = 'front_preferences';
+        Faluss_Identity_Front_Preferences::enforce_for_user( $user );
+        return $user;
+    }
 
-        if ( false === $wpdb->query( 'START TRANSACTION' ) ) {
-            return null;
+    /** Bounded server-only stages. Never include request values or exception text. */
+    private static function diagnostic( $stage ) {
+        $allowed = array( 'nonce', 'cookie', 'format', 'challenge_schema', 'transaction_start', 'challenge_read', 'challenge_missing', 'otp_attempt', 'otp_rejected', 'local_identity', 'wp_user', 'privileged_user', 'registry_activation', 'front_preferences', 'otp_consume', 'transaction_commit' );
+        if ( ! in_array( $stage, $allowed, true ) ) { $stage = 'local_identity'; }
+        // Unbound anonymous input must not create unbounded audit rows.
+        if ( in_array( $stage, array( 'local_identity', 'wp_user', 'privileged_user', 'registry_activation', 'front_preferences', 'otp_consume', 'transaction_commit' ), true ) ) {
+            self::record_audit( 'passwordless_failed_' . $stage );
         }
-        try {
-            $user = self::find_or_create_safe_user( $email );
-            $identity = $user instanceof WP_User && ! self::is_privileged_user( $user )
-                ? Faluss_Identity_Registry::activate_for_wp_user( $user->ID )
-                : null;
-            if ( $user instanceof WP_User && null !== $identity ) {
-                Faluss_Identity_Front_Preferences::enforce_for_user( $user );
-            }
-            if ( ! $user instanceof WP_User || null === $identity || false === $wpdb->query( 'COMMIT' ) ) {
-                $wpdb->query( 'ROLLBACK' );
-                return null;
-            }
-            return $user;
-        } catch ( Exception $exception ) {
-            $wpdb->query( 'ROLLBACK' );
-            return null;
-        }
+        do_action( 'faluss_identity_passwordless_diagnostic', $stage );
     }
 
     private static function is_privileged_user( $user ) {
@@ -639,7 +638,7 @@ final class Faluss_Identity_Passwordless {
     }
 
     private static function valid_nonce( $action ) {
-        return isset( $_POST['faluss_identity_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['faluss_identity_nonce'] ) ), $action );
+        return isset( $_POST['faluss_identity_nonce'] ) && is_string( $_POST['faluss_identity_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['faluss_identity_nonce'] ) ), $action );
     }
 
     private static function normalize_email( $email ) {

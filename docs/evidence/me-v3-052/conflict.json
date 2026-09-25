@@ -1,0 +1,10 @@
+{
+  "at": "2026-09-25T05:02:55.857Z",
+  "http": 409,
+  "body": {
+    "success": false,
+    "data": {
+      "code": "stale_version"
+    }
+  }
+}

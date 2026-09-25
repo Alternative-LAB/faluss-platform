@@ -77,9 +77,9 @@ final class LinkStudioContract
      * @param array<string, mixed> $fields
      * @return array<string, mixed>
      */
-    public static function saveOnboardingV3Step(string $step, string $next, array $fields, string $version): array
+    public static function saveOnboardingV3Step(string $step, string $next, array $fields, string $version, string $mode = ''): array
     {
-        return \Faluss_Link::studio_v2_save_onboarding_step($step, $next, $fields, $version);
+        return \Faluss_Link::studio_v2_save_onboarding_step($step, $next, $fields, $version, false, $mode);
     }
 
     /**

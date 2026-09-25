@@ -83,7 +83,7 @@ function assert(value, message) { if (!value) { throw new Error(message); } }
         await page.locator('[data-v3-network-url]').first().focus();
         const keyboard = await page.evaluate(() => ({ expanded: document.querySelector('[data-v3-panel]').classList.contains('is-expanded'),
             actionBottom: document.querySelector('[data-v3-primary]').getBoundingClientRect().bottom }));
-        assert(keyboard.expanded && keyboard.actionBottom <= 501, 'Short viewport focus obscured action');
+        assert(!keyboard.expanded && keyboard.actionBottom <= 501, 'Focus must not expand the anchored sheet');
         results.push({ keyboardViewport: 500, keyboard });
         await context.close();
         console.log(JSON.stringify(results, null, 2));

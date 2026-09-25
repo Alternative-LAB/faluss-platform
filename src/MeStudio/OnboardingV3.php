@@ -37,6 +37,14 @@ final class OnboardingV3
         return array_merge(self::COMMON, $mode === 'atomic' ? self::ATOMIC : [], ['v3_review']);
     }
 
+    /** @param array<string, mixed> $preferences */
+    public static function mode(string $cursor, array $preferences): string
+    {
+        if (str_starts_with($cursor, 'wizard_atomic_') || str_ends_with($cursor, '_atomic')) { return 'atomic'; }
+        if (str_ends_with($cursor, '_simple')) { return 'simple'; }
+        return ($preferences['structure'] ?? 'simple') === 'atomic' ? 'atomic' : 'simple';
+    }
+
     /** @param array<string, mixed> $profile */
     public static function step(string $cursor, string $mode, array $profile = []): string
     {
@@ -71,49 +79,42 @@ final class OnboardingV3
 
     public static function render(bool $studio = false): string
     {
+        if ($studio) { return StudioV3::render(); }
+        if (!is_user_logged_in()) { return self::login(); }
         MeStudioAssets::enqueueOnboardingV3();
         $context = IdentityContract::onboardingV3Context();
         $state = LinkStudioContract::state();
-        if ((!$studio && empty($context['available'])) || is_wp_error($state)) {
+        if (empty($context['available']) || is_wp_error($state)) {
             return self::unavailable(is_wp_error($state) ? (string) $state->get_error_code() : 'identity_unavailable');
         }
         $profile = is_array($state['profile'] ?? null) ? $state['profile'] : [];
         $preferences = is_array($state['preferences'] ?? null) ? $state['preferences'] : [];
-        $mode = str_ends_with((string) ($context['step'] ?? ''), '_atomic') ? 'atomic'
-            : (str_ends_with((string) ($context['step'] ?? ''), '_simple') ? 'simple'
-                : (($preferences['structure'] ?? 'simple') === 'atomic' ? 'atomic' : 'simple'));
+        $mode = self::mode((string) ($context['step'] ?? ''), $preferences);
         $step = self::step((string) ($context['step'] ?? ''), $mode, $profile);
-        $sections = ['v3_mode' => 'Structure', 'v3_identity' => 'Identité', 'v3_socials' => 'Réseaux', 'v3_links' => 'Liens', 'v3_colors' => 'Couleurs', 'v3_buttons' => 'Boutons', 'v3_avatar' => 'Avatar', 'v3_wallpaper' => 'Fond', 'v3_name' => 'Nom', 'v3_network_style' => 'Style des réseaux', 'v3_collections' => 'Collections', 'v3_contents' => 'Contenus et ordre', 'v3_settings' => 'Réglages'];
-        if ($studio) {
-            $mode = ($preferences['structure'] ?? 'simple') === 'atomic' ? 'atomic' : 'simple';
-            $requested = isset($_GET['v3_section']) && is_string($_GET['v3_section']) ? sanitize_key(wp_unslash($_GET['v3_section'])) : 'v3_identity';
-            $step = isset($sections[$requested]) ? $requested : 'v3_identity';
-        }
         $steps = self::sequence($mode);
         $index = array_search($step, $steps, true);
-        $draft = !$studio && in_array($step, ['v3_mode', 'v3_identity'], true) ? IdentityContract::onboardingV3IdentityDraft() : [];
+        $draft = in_array($step, ['v3_mode', 'v3_identity'], true) ? IdentityContract::onboardingV3IdentityDraft() : [];
         if ((string) ($profile['public_slug'] ?? '') !== '') { unset($draft['public_slug']); }
         $preview = LinkStudioContract::previewOnboardingV3($draft);
-        $previewHtml = ($studio || in_array($step, ['v3_review', 'v3_success'], true))
+        $previewHtml = in_array($step, ['v3_review', 'v3_success'], true)
             ? (string) ($state['preview_html'] ?? '')
             : (!is_wp_error($preview) && is_string($preview['preview_html'] ?? null)
                 ? $preview['preview_html'] : (string) ($state['preview_html'] ?? ''));
         $slug = (string) (($profile['public_slug'] ?? '') ?: ($draft['public_slug'] ?? ''));
         $controlsState = $state;
-        $controlsState['studio'] = $studio;
+        $controlsState['studio'] = false;
         $controlsState['profile'] = array_replace($profile, $draft);
         $controlsState['canonical_slug'] = (string) ($profile['public_slug'] ?? '');
-        if (!$studio && $step === 'v3_success') { return self::confirmation($slug); }
+        if ($step === 'v3_success') { return self::confirmation($slug); }
         ob_start();
         ?>
-        <section class="faluss-onboarding-v3" data-faluss-onboarding-v3 data-studio="<?php echo $studio ? 'true' : 'false'; ?>" data-step="<?php echo esc_attr($step); ?>" data-mode="<?php echo esc_attr($mode); ?>" data-version="<?php echo esc_attr((string) ($state['version'] ?? '')); ?>">
+        <section class="faluss-onboarding-v3" data-faluss-onboarding-v3 data-studio="false" data-step="<?php echo esc_attr($step); ?>" data-mode="<?php echo esc_attr($mode); ?>" data-version="<?php echo esc_attr((string) ($state['version'] ?? '')); ?>">
             <header class="faluss-onboarding-v3__header">
-                <button class="faluss-onboarding-v3__back" type="button" data-v3-back aria-label="Retour" <?php echo $studio || $step === 'v3_mode' || $step === 'v3_success' ? 'hidden' : ''; ?>>←</button>
-                <?php if ($studio) : ?><label class="faluss-studio-v3__navigation">Studio<select data-v3-section aria-label="Rubrique du Studio"><?php foreach ($sections as $key => $label) : ?><option value="<?php echo esc_attr($key); ?>" <?php selected($step, $key); ?>><?php echo esc_html($label); ?></option><?php endforeach; ?></select></label><?php else : ?>
+                <button class="faluss-onboarding-v3__back" type="button" data-v3-back aria-label="Retour" <?php echo $step === 'v3_mode' || $step === 'v3_success' ? 'hidden' : ''; ?>>←</button>
+
                 <div class="faluss-onboarding-v3__progress" role="progressbar" aria-label="Progression" aria-valuemin="1" aria-valuemax="<?php echo count($steps); ?>" aria-valuenow="<?php echo $index === false ? count($steps) : $index + 1; ?>">
                     <?php foreach ($steps as $number => $_) : ?><span <?php echo $index !== false && $number <= $index ? 'class="is-complete"' : ''; ?>></span><?php endforeach; ?>
                 </div>
-                <?php endif; ?>
                 <img class="faluss-onboarding-v3__logo" src="<?php echo esc_url(plugins_url('assets/link/images/faluss-onboarding-header-logo.png', dirname(__DIR__, 2) . '/faluss-platform.php')); ?>" alt="Faluss Me">
             </header>
             <div class="faluss-onboarding-v3__stage" aria-label="Aperçu de votre Faluss">
@@ -122,13 +123,13 @@ final class OnboardingV3
             <form class="faluss-onboarding-v3__panel" data-v3-panel novalidate>
                 <button class="faluss-onboarding-v3__grabber" type="button" data-v3-grabber aria-label="Agrandir le panneau" aria-expanded="false"><span></span></button>
                 <div class="faluss-onboarding-v3__scroll" data-v3-scroll>
-                    <?php if ($studio && StudioV3Management::handles($step)) { StudioV3Management::render($step, $state); } else { self::controls($step, $mode, $controlsState, $slug); } ?>
+                    <?php self::controls($step, $mode, $controlsState, $slug); ?>
                     <p class="faluss-onboarding-v3__error" data-v3-error role="alert" hidden></p>
                     <p class="faluss-onboarding-v3__status" data-v3-status role="status" aria-live="polite"></p>
                 </div>
                 <footer class="faluss-onboarding-v3__actions">
-                    <?php if (!$studio && in_array($step, ['v3_socials', 'v3_links', 'v3_avatar', 'v3_wallpaper', 'v3_network_style'], true)) : ?><button type="button" class="faluss-onboarding-v3__skip" data-v3-skip>Passer</button><?php endif; ?>
-                    <?php if ($step !== 'v3_success' && !($studio && StudioV3Management::handles($step))) : ?><button type="submit" class="faluss-onboarding-v3__primary" data-v3-primary><?php echo esc_html($studio ? 'Enregistrer' : ($step === 'v3_identity' && empty($controlsState['canonical_slug']) ? 'Revendiquer mon identifiant' : ($step === 'v3_review' ? 'Publier mon Faluss' : 'Continuer'))); ?> <span aria-hidden="true">→</span></button><?php endif; ?>
+                    <?php if (in_array($step, ['v3_socials', 'v3_links', 'v3_avatar', 'v3_wallpaper', 'v3_network_style'], true)) : ?><button type="button" class="faluss-onboarding-v3__skip" data-v3-skip>Passer</button><?php endif; ?>
+                    <?php if ($step !== 'v3_success') : ?><button type="submit" class="faluss-onboarding-v3__primary" data-v3-primary><?php echo esc_html($step === 'v3_identity' && empty($controlsState['canonical_slug']) ? 'Revendiquer mon identifiant' : ($step === 'v3_review' ? 'Publier mon Faluss' : 'Continuer')); ?> <span aria-hidden="true">→</span></button><?php endif; ?>
                 </footer>
             </form>
         </section>
@@ -137,7 +138,7 @@ final class OnboardingV3
     }
 
     /** @param array<string, mixed> $state */
-    private static function controls(string $step, string $mode, array $state, string $slug): void
+    public static function controls(string $step, string $mode, array $state, string $slug): void
     {
         $profile = is_array($state['profile'] ?? null) ? $state['profile'] : [];
         $prefs = is_array($state['preferences'] ?? null) ? $state['preferences'] : [];
@@ -259,7 +260,13 @@ final class OnboardingV3
         ?><div class="faluss-onboarding-v3__colors"><?php if ($nullable) : ?><label><input type="radio" name="social_color" value="" <?php checked($selected, ''); ?>><span style="--v3-swatch:#fff">Auto</span></label><?php endif; ?><?php foreach ($palette as $color) : ?><label><input type="radio" name="<?php echo esc_attr($name); ?>" value="<?php echo esc_attr($color); ?>" <?php checked(strtoupper($selected), $color); ?>><span style="--v3-swatch:<?php echo esc_attr($color); ?>"></span></label><?php endforeach; ?><label class="faluss-onboarding-v3__custom">Autre<input type="color" data-v3-color="<?php echo esc_attr($name); ?>" value="<?php echo esc_attr($selected !== '' ? $selected : '#080808'); ?>" <?php echo $selected !== '' && !in_array(strtoupper($selected), $palette, true) ? 'data-selected="true"' : ''; ?>></label></div><?php
     }
 
-    private static function unavailable(string $code): string
+    public static function login(): string
+    {
+        $url = IdentityContract::loginUrl('create_card', home_url('/mon-faluss/'));
+        return '<section class="faluss-onboarding-v3__unavailable"><h1>Retrouve ton Faluss</h1><p>Connecte-toi pour reprendre ta création ou ouvrir ton Studio.</p><a href="' . esc_url($url ?: home_url('/login/')) . '">Se connecter</a></section>';
+    }
+
+    public static function unavailable(string $code): string
     {
         return '<section class="faluss-onboarding-v3__unavailable" role="alert"><h1>Création temporairement indisponible</h1><p>Votre brouillon est conservé. Réessayez dans un instant.</p><code>' . esc_html($code) . '</code><a href="">Réessayer</a></section>';
     }
@@ -312,9 +319,7 @@ final class OnboardingV3
         $context = IdentityContract::onboardingV3Context();
         $state = LinkStudioContract::state();
         if (empty($context['available']) || is_wp_error($state)) { self::failure('unavailable', 503); }
-        $mode = str_ends_with((string) ($context['step'] ?? ''), '_atomic') ? 'atomic'
-            : (str_ends_with((string) ($context['step'] ?? ''), '_simple') ? 'simple'
-                : (($state['preferences']['structure'] ?? 'simple') === 'atomic' ? 'atomic' : 'simple'));
+        $mode = self::mode((string) ($context['step'] ?? ''), (array) ($state['preferences'] ?? []));
         $step = self::step((string) ($context['step'] ?? ''), $mode, (array) ($state['profile'] ?? []));
         if ($step !== self::text('step') || $step === 'v3_success' || !hash_equals((string) ($state['version'] ?? ''), self::text('version'))) { self::failure('stale_version', 409); }
         $direction = self::text('direction');
@@ -346,7 +351,7 @@ final class OnboardingV3
         } else {
             $fields = self::contractFields($step, $fields, $state, $direction === 'skip');
         }
-        $result = LinkStudioContract::saveOnboardingV3Step($step, $target, $fields, (string) ($state['version'] ?? ''));
+        $result = LinkStudioContract::saveOnboardingV3Step($step, $target, $fields, (string) ($state['version'] ?? ''), $mode);
         if (empty($result['ok'])) { self::failure((string) ($result['code'] ?? 'save_failed'), (int) ($result['status'] ?? 422)); }
         if (str_starts_with($step, 'v3_identity_')) { IdentityContract::clearOnboardingV3IdentityDraft(); }
         wp_send_json_success(['step' => $target, 'version' => $result['state']['version'] ?? '']);

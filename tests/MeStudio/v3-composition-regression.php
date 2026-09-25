@@ -98,11 +98,14 @@ fl_hotfix_assert($mutate('save_header', ['available' => 1, 'avatar_visible' => 1
 fl_hotfix_assert($mutate('save_atomic_design', ['links_mode' => 'image-grid', 'link_width' => 'compact'])['ok'], 'Restore link layout');
 fl_hotfix_assert($mutate('save_appearance', ['hero_transition_color' => '#82206B', 'hero_transition_intensity' => 60, 'hero_transition_position' => 75])['ok'], 'Restore cover transition');
 
+$legacyMode = \Faluss\Platform\MeStudio\OnboardingV3::mode('wizard_atomic_wallpaper', ['structure' => 'simple']);
+fl_hotfix_assert($legacyMode === 'atomic', 'Historical Atomic cursor takes precedence over default preferences');
 $studioViews = [];
 foreach (['v3_mode', 'v3_identity', 'v3_socials', 'v3_links', 'v3_colors', 'v3_buttons', 'v3_avatar', 'v3_wallpaper', 'v3_name', 'v3_network_style', 'v3_collections', 'v3_contents', 'v3_settings'] as $section) {
     $_GET['v3_section'] = $section;
-    $studioViews[$section] = \Faluss\Platform\MeStudio\OnboardingV3::render(true);
+    $studioViews[$section] = \Faluss\Platform\MeStudio\StudioV3::render();
     fl_hotfix_assert(str_contains($studioViews[$section], 'data-studio="true"'), 'Native Studio renders ' . $section);
+    fl_hotfix_assert(!str_contains($studioViews[$section], 'data-v3-section') && !str_contains($studioViews[$section], '__phone') && str_contains($studioViews[$section], '<dialog'), 'Independent Studio navigation and on-demand preview');
 }
 $confirmation = (new ReflectionMethod(\Faluss\Platform\MeStudio\OnboardingV3::class, 'confirmation'))->invoke(null, 'membre');
 fl_hotfix_assert(!str_contains($confirmation, 'data-v3-panel') && !str_contains($confirmation, 'progressbar') && str_contains($confirmation, 'Ouvrir le Studio'), 'Confirmation is outside the onboarding shell');

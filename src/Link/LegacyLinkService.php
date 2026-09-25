@@ -433,7 +433,16 @@ final class Faluss_Link {
 
     /** Native Studio read model. No storage or Identity internals cross this boundary. */
     public static function studio_v2_state() {
-        if ( ! is_user_logged_in() || ! self::identity_ready() || ! \Faluss\Platform\Link\LinkIdentityAdapter::studioAvailable() || ! Faluss_Link_Schema::composition_ready() ) { return new WP_Error( 'studio_unavailable' ); }
+        $unavailable = '';
+        if ( ! is_user_logged_in() ) { $unavailable = 'session'; }
+        elseif ( ! self::identity_ready() ) { $unavailable = 'identity_schema'; }
+        elseif ( ! \Faluss\Platform\Link\LinkIdentityAdapter::studioAvailable() ) { $unavailable = 'identity_contract'; }
+        elseif ( ! Faluss_Link_Schema::composition_ready() ) { $unavailable = 'composition_schema'; }
+        if ( '' !== $unavailable ) {
+            // Server-only prerequisite, without member data or a more revealing browser response.
+            do_action( 'faluss_link_studio_diagnostic', $unavailable );
+            return new WP_Error( 'studio_unavailable' );
+        }
         $faluss_id = self::current_faluss_id();
         if ( ! self::valid_faluss_id( $faluss_id ) ) { return new WP_Error( 'identity_unavailable' ); }
         $state = self::canonical_studio_state( $faluss_id );
@@ -495,7 +504,7 @@ final class Faluss_Link {
     }
 
     /** One transaction owns the Atomic step data and the Identity resume cursor. */
-    public static function studio_v2_save_onboarding_step( $step, $next_step, $fields, $aggregate_version, $editing = false ) {
+    public static function studio_v2_save_onboarding_step( $step, $next_step, $fields, $aggregate_version, $editing = false, $resume_structure = '' ) {
         global $wpdb;
         $contracts = array(
             'wizard_structure' => array( 'structure' ),
@@ -521,6 +530,7 @@ final class Faluss_Link {
             'v3_network_style' => array( 'social_style', 'social_color' ),
             'v3_review' => array(),
         );
+        if ( '' !== $resume_structure && ( $editing || ! in_array( $resume_structure, array( 'simple', 'atomic' ), true ) ) ) { return array( 'ok' => false, 'status' => 422, 'code' => 'invalid_step' ); }
         $step = sanitize_key( (string) $step ); $next_step = sanitize_key( (string) $next_step ); $fields = is_array( $fields ) ? $fields : array();
         $aggregate_version = strtolower( sanitize_text_field( (string) $aggregate_version ) );
         if ( ! is_user_logged_in() || ! isset( $contracts[ $step ] ) || array_diff( array_keys( $fields ), $contracts[ $step ] ) || array_diff( $contracts[ $step ], array_keys( $fields ) ) || 1 !== preg_match( '/^[0-9a-f]{64}$/D', $aggregate_version ) || ! Faluss_Link_Schema::composition_ready() ) { return array( 'ok' => false, 'status' => 422, 'code' => 'invalid_step' ); }
@@ -554,6 +564,8 @@ final class Faluss_Link {
                 return array( 'ok' => false, 'status' => 409, 'code' => 'stale_version', 'state' => self::canonical_studio_state( $faluss_id ) );
             }
             $preference_fields = $fields;
+            // Commit the server-derived historical mode together with data and the V3 cursor.
+            if ( '' !== $resume_structure ) { $preference_fields['structure'] = $resume_structure; }
             if ( array_key_exists( 'display_name', $preference_fields ) ) {
                 $name = $preference_fields['display_name']; unset( $preference_fields['display_name'] );
                 if ( ! \Faluss\Platform\Link\LinkIdentityAdapter::persistStudioProfileInTransaction( $faluss_id, array( 'display_name' => $name ) ) ) { throw new RuntimeException( 'display_name' ); }

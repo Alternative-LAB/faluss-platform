@@ -20,16 +20,16 @@ body:has(.faluss-onboarding-v3){margin:0;background:#FFFDF5}
 .faluss-onboarding-v3__scroll h1:focus{outline:none}
 @media(max-height:600px){.faluss-onboarding-v3__phone{height:60dvh;min-height:0}.faluss-onboarding-v3__panel{height:min(70dvh,350px)}}
 
-/* Viewport shell is fixed; the keyboard changes only the available panel space. */
+/* Stable layout viewport: the software keyboard overlays the bottom-anchored sheet. */
 html:has([data-faluss-onboarding-v3]),body:has([data-faluss-onboarding-v3]) {overflow:hidden;overscroll-behavior:none;}
-.faluss-onboarding-v3 {position:fixed;inset:0;height:100dvh;max-height:none;z-index:1000;background:#FFFDF5;}
+.faluss-onboarding-v3 {position:fixed;inset:0;height:var(--v3-height,100dvh);max-height:none;z-index:1000;background:#FFFDF5;}
 .faluss-onboarding-v3__stage {background:#FFFDF5;padding-top:4px;}
 .faluss-onboarding-v3__logo {width:38px;height:38px;object-fit:contain;}
 .faluss-onboarding-v3__phone {width:220px;height:465px;min-height:0;border-width:5px;border-radius:30px;}
 .faluss-onboarding-v3__phone-screen {overflow-y:auto;overscroll-behavior:none;}
 .faluss-onboarding-v3__phone-screen .faluss-link-card {min-height:var(--fl-card-min-height,844px);max-width:none;}
-.faluss-onboarding-v3__panel {bottom:var(--v3-keyboard,0px);height:clamp(340px,49dvh,440px);max-height:calc(100dvh - 76px - env(safe-area-inset-top,0px) - var(--v3-keyboard,0px));}
-.faluss-onboarding-v3__panel.is-expanded {height:calc(100dvh - 76px - env(safe-area-inset-top,0px) - var(--v3-keyboard,0px));}
+.faluss-onboarding-v3__panel {bottom:0;height:var(--v3-collapsed-height,auto);max-height:calc(var(--v3-height,100dvh) - 76px - env(safe-area-inset-top,0px));}
+.faluss-onboarding-v3__panel.is-expanded {height:calc(var(--v3-height,100dvh) - 76px - env(safe-area-inset-top,0px));}
 .faluss-onboarding-v3__scroll {padding-bottom:8px;overscroll-behavior:none;}
 .faluss-onboarding-v3__scroll input:not([type=checkbox]):not([type=radio]):not([type=color]),.faluss-onboarding-v3__scroll select,.faluss-studio-v3__navigation select {font-size:16px;}
 .faluss-onboarding-v3__actions {padding-bottom:max(8px,env(safe-area-inset-bottom,0px));padding-top:8px;}
@@ -45,7 +45,7 @@ html:has([data-faluss-onboarding-v3]),body:has([data-faluss-onboarding-v3]) {ove
 .faluss-v3-confirmation .faluss-onboarding-v3__success-actions {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
 .faluss-v3-confirmation .faluss-onboarding-v3__success-actions a {display:flex;align-items:center;justify-content:center;font-size:16px;min-height:48px;}
 .faluss-v3-confirmation p {overflow-wrap:anywhere;}
-@media(max-width:350px){.faluss-onboarding-v3__phone {width:205px;}.faluss-onboarding-v3__panel {height:49dvh;min-height:320px;}.faluss-onboarding-v3__choices {gap:6px;}}
+@media(max-width:350px){.faluss-onboarding-v3__phone {width:205px;}.faluss-onboarding-v3__choices {gap:6px;}}
 
 .faluss-studio-v3__editor {border:1px solid #ddd;border-radius:12px;padding:14px;margin:12px 0}
 .faluss-studio-v3__editor summary {font-weight:700;cursor:pointer;overflow-wrap:anywhere}
@@ -57,3 +57,7 @@ html:has([data-faluss-onboarding-v3]),body:has([data-faluss-onboarding-v3]) {ove
 .faluss-studio-v3__editor li {display:flex;align-items:center;gap:8px;padding:8px 0}
 .faluss-studio-v3__editor li span {flex:1;min-width:0;overflow-wrap:anywhere}
 .faluss-studio-v3__editor li button {flex:none;min-width:40px;min-height:40px}
+
+body:has([data-faluss-onboarding-v3]){position:fixed;inset:0;width:100%;overflow-anchor:none}
+.faluss-onboarding-v3.is-keyboard-open .faluss-onboarding-v3__scroll{overflow-y:auto;scroll-behavior:auto;overflow-anchor:none}
+.faluss-onboarding-v3 [data-v3-keyboard-spacer]{height:0;pointer-events:none;flex:none}

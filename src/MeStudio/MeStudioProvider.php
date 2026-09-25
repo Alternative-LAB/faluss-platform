@@ -21,7 +21,7 @@ final class MeStudioProvider implements StudioProvider
 
     public function renderStudio(callable $fallback): string
     {
-        if (OnboardingV3::enabled()) { return OnboardingV3::render(true); }
+        if (OnboardingV3::enabled()) { return StudioV3::render(); }
         if (!self::studioV2Enabled()) {
             return $fallback();
         }

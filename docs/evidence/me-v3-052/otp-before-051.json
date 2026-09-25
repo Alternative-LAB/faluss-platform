@@ -1,0 +1,66 @@
+[
+  {
+    "case": "published",
+    "issued": true,
+    "verified": true,
+    "challenge": "consumed",
+    "studio": "ready",
+    "step": "complete",
+    "retained": true,
+    "stages": []
+  },
+  {
+    "case": "incomplete-active",
+    "issued": true,
+    "verified": true,
+    "challenge": "consumed",
+    "studio": "ready",
+    "step": "wizard_atomic_wallpaper",
+    "retained": true,
+    "stages": []
+  },
+  {
+    "case": "incomplete-pending",
+    "issued": true,
+    "verified": true,
+    "challenge": "consumed",
+    "studio": "ready",
+    "step": "wizard_atomic_wallpaper",
+    "retained": true,
+    "stages": []
+  },
+  {
+    "case": "new",
+    "issued": true,
+    "verified": true,
+    "challenge": "consumed",
+    "studio": "ready",
+    "step": "choice",
+    "retained": true,
+    "stages": []
+  },
+  {
+    "case": "suspended",
+    "issued": true,
+    "verified": false,
+    "challenge": "consumed",
+    "studio": null,
+    "step": "",
+    "retained": false,
+    "stages": []
+  },
+  {
+    "case": "registry-retry",
+    "verified": false
+  },
+  {
+    "case": "registry-failure",
+    "issued": true,
+    "verified": false,
+    "challenge": "consumed",
+    "studio": null,
+    "step": "",
+    "retained": false,
+    "stages": []
+  }
+]
