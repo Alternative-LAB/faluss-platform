@@ -123,6 +123,11 @@ final class SupportSimulation
         ) {
             throw new InvalidArgumentException('Invalid support state.');
         }
+        if (in_array($fact['source'], ['funded_coin_gift', 'direct_eur_support'], true)
+            && $fact['member'] === $fact['creator']
+        ) {
+            throw new InvalidArgumentException('Self-support is not allowed.');
+        }
         if ($fact['source'] === 'free_gift') {
             if ($fact['funding'] === 'faluss') {
                 throw new InvalidArgumentException('Faluss funded gift allocation policy remains undefined.');

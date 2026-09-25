@@ -9,6 +9,18 @@ badge ou revenu n'est créé. Il ne faut pas brancher ce calcul sur des données
 `owner`, `funding` et la référence d'allocation sont des descriptions de fixture,
 **pas des preuves authentifiées**. Aucun champ `verified=true` n'est accepté.
 
+Pour `funded_coin_gift` et `direct_eur_support`, des UUID `member` et `creator`
+identiques font rejeter le lot avec `InvalidArgumentException` (auto-soutien),
+avant toute projection, quel que soit l'état du fait. Dans les fixtures, ces
+champs désignent deux identités fictives comparables. Cette égalité ne remplace
+pas la vérification de l'identité Faluss réelle par le futur moteur Fans : il
+devra résoudre côté serveur le propriétaire du profil créateur et le donateur
+via les contrats autorisés, comparer leurs `faluss_id` canoniques et refuser en
+l'absence de preuve. L'UUID public du profil créateur est distinct du `faluss_id`
+et du `wp_user_id` ; comparer directement ces identifiants de domaines différents
+ne détecterait pas l'auto-soutien. Ni e-mail, ni pseudo, ni claim client ne suffisent.
+Cette règle n'ajoute aucune exposition publique des identités SSO.
+
 ## Unités et sources distinctes
 
 Les sorties privées sont `creator_score_centipoints` par créateur (centièmes de
@@ -92,12 +104,14 @@ Les tests couvrent unités distinctes, pack puis cadeau sans double comptage,
 allocation EUR indépendante du score, soutien fractionnaire, remboursements partiels
 et complets, litige/résolution, rejeu, ordre inverse, session clôturée et bornes,
 tranche réutilisée, conflits de révision, mutations interdites, remboursements
-régressifs, classe/funding incohérents, cadeaux gratuits et refus adulte.
+régressifs, classe/funding incohérents, cadeaux gratuits, refus adulte et
+auto-soutien refusé séparément pour les deux sources monétisables.
 Ils s'exécutent en mémoire : aucune concurrence SQL, livraison Events, preuve de
 paiement, recette WordPress réelle ou sécurité de transport n'est démontrée.
 
 Avant un moteur actif : reçus Hub/prestataire authentifiés, stockage transactionnel,
 réconciliation et compensation, admission réseau, résolveur de droits et politiques
 de visibilité (pseudo/badge au créateur concerné, public sur consentement).
-La revue de #73 reste obligatoire avant fusion. Rollback : retirer ces classes et
+La correction d'auto-soutien complète l'adaptation v2 de #73 ; les limites
+d'intégration ci-dessus restent applicables. Rollback : retirer ces classes et
 tests ; aucune donnée, migration ou configuration réelle à modifier.

@@ -10,6 +10,22 @@ use PHPUnit\Framework\TestCase;
 
 final class SupportSimulationTest extends TestCase
 {
+    public function testFundedCoinGiftRejectsTheSameDonorAndCreatorIdentity(): void
+    {
+        $gift = $this->gift();
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Self-support is not allowed.');
+        SupportSimulation::project([array_replace($gift, ['creator' => $gift['member']])]);
+    }
+
+    public function testDirectEuroSupportRejectsTheSameDonorAndCreatorIdentity(): void
+    {
+        $support = $this->direct();
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Self-support is not allowed.');
+        SupportSimulation::project([array_replace($support, ['creator' => $support['member']])]);
+    }
+
     public function testUnitsPackAndConsumedAllocationNeverDoubleCount(): void
     {
         $gift = $this->gift();
