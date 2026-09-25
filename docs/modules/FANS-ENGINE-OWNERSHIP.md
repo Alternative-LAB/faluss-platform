@@ -186,11 +186,14 @@ Un financement par la plateforme ne compte pas comme dépense réelle du donateu
 
 ### Porte obligatoire pour la PR #73 et tests futurs
 
-**Le simulateur de #73 doit être adapté avant sa fusion.** Son état actuel
+**L'adaptation du simulateur de #73 doit être revue avant sa fusion.** Son état initial
 `fans.support-simulation/1.0.0` convertit les centimes nets en deux totaux identiques
 (`member_contributions`, `creator_scores`) pour `eur_support` et `funded_support`.
-Cette règle ne satisfait pas la décision HoF. #71 ne modifie pas la branche #73.
-Il faudra versionner sa politique, séparer pièces dépensées, euros confirmés,
+Cette règle ne satisfait pas la décision HoF. #71 ne modifiait pas la branche #73.
+La [v2 proposée dans #73](PROGRESSION-SIMULATION.md) sépare les unités, sans moteur
+actif ; le financement Faluss et l'allocation des remboursements de packs restent
+hors simulation faute de politique définie. La porte de revue reste obligatoire.
+Le contrat exige de versionner la politique, séparer pièces dépensées, euros confirmés,
 dépense réelle et revenu privé, puis ajouter des tests pour :
 
 - pack payé sans score ; 300 pièces financées débitées = 300 points de session ;

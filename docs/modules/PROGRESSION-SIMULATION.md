@@ -1,72 +1,103 @@
-# Progression / HoF — simulation hors runtime
+# Progression / HoF — simulation hors runtime v2
 
-## Implémenté
+## Implémenté et frontière
 
-`Progression\SupportSimulation` calcule une **simulation** déterministe à partir
-de faits fictifs complets. Elle n'est enregistrée dans aucun module, route, hook,
-consumer Events ou cron. Aucun score durable, niveau, badge, paiement, revenu,
-PF ou entitlement n'est écrit. Son résultat contient `simulation=true` et une
-politique explicitement nommée `fans.support-simulation/1.0.0`.
+`Progression\SupportSimulation` est un calcul pur sur fixtures fictives. La politique
+`fans.support-simulation/2.0.0` remplace v1, qui est rejetée sans conversion implicite.
+Aucun module, hook, route, paiement, ledger, session HoF active, score persistant,
+badge ou revenu n'est créé. Il ne faut pas brancher ce calcul sur des données client :
+`owner`, `funding` et la référence d'allocation sont des descriptions de fixture,
+**pas des preuves authentifiées**. Aucun champ `verified=true` n'est accepté.
 
-Cette fondation teste l'idempotence et les corrections proposées avant un moteur
-actif. Elle ne constitue pas une preuve de paiement et ne doit pas être appelée
-directement par une API recevant des données utilisateur.
+## Unités et sources distinctes
 
-## Faits de simulation v1
+Les sorties privées sont `creator_score_centipoints` par créateur (centièmes de
+point entiers) et `donor_consumed_eur_cents` par donateur (centimes EUR entiers).
+Aucune sortie revenu : un score ne permet jamais de déduire un revenu créateur.
 
-L'ensemble des champs est fermé : `version`, `owner`, `reference`, `revision`,
-`member`, `creator`, `category`, `source`, `amount_cents`, `refunded_cents`,
-`status`, `occurred_at`. Seul `owner=faluss-fans` et `version=1.0.0` sont admis.
-Références et sujets sont des UUID opaques fictifs ; montants EUR en centimes
-entiers, positifs, plafonnés, remboursement cumulatif borné par le montant.
+| Source v2 | Fixture admissible | Score | Dépense consommée |
+| --- | --- | --- | --- |
+| `pack_purchase` | `funding=donor`, classe `funded`, quantité et prix du pack | 0 | 0, même payé ; progression seulement à la consommation |
+| `funded_coin_gift` | `funding=donor`, classe `funded`, pièces débitées et allocation EUR distincte | pièces nettes × 100 | allocation EUR nette fournie par la fixture |
+| `direct_eur_support` | `funding=donor`, classe `none`, zéro pièce | centimes EUR nets = centièmes de point | centimes EUR nets |
+| `free_gift` | `funding=none`, classe `none`, `earned` ou `promotional`, zéro EUR | 0 | 0 |
 
-Les références sont distinctes : référence transaction, sujet membre privé et
-identifiant créateur. Les valeurs `member` ne doivent jamais sortir vers un
-classement public. Le champ `owner` seul n'authentifie aucune source ; une future
-intégration devra vérifier le producteur fermé, la signature et l'autorité métier
-avant tout effet. Ajouter `verified=true` est rejeté, pas accepté comme preuve.
+Exemples : 300 pièces et une allocation fictive de 725 centimes donnent **30 000
+centièmes de point et 725 centimes de dépense**. 725 n'est ni un tarif ni un taux :
+une fixture à 999 centimes produit le même score et une dépense de 999. Un soutien
+de 1,25 EUR donne **125 centièmes de point et 125 centimes**. Pack puis cadeau ne
+comptent la dépense qu'une fois. Aucun flottant, taux PF/EUR, commission ou assiette
+fiscale n'est calculé. Une catégorie adulte ou un état non confirmé produit zéro.
 
-Chaque référence possède des instantanés cumulatifs versionnés, et non des deltas.
-Le dernier numéro de révision gagne indépendamment de l'ordre réseau ; un doublon
-identique ne compte qu'une fois. Une même révision avec un contenu différent
-rejette le lot. Membre, créateur, catégorie, origine, montant initial et date
-d'origine sont immuables à travers les corrections. Aucun transfert implicite de
-score ou réécriture du bénéficiaire n'est possible. Les remboursements cumulatifs
-ne peuvent pas diminuer entre révisions, même reçues dans l'ordre inverse.
+## Forme fermée des fixtures
 
-Pour la simulation seulement : `confirmed` avec source `eur_support` ou
-`funded_support`, catégorie hébergée autorisée, produit `amount-refunded` unités.
-La valeur EUR d'un soutien funded devra provenir de son propriétaire économique,
-jamais d'un solde PF ou d'un taux inventé. `pf_purchase`, `earned_pf`,
-`promotional_pf`, `cosmetic`, catégorie adulte et états `pending`, `failed`,
-`refunded`, `disputed` produisent zéro. Le litige suspend toute contribution ;
-une nouvelle révision officielle devra confirmer une restitution éventuelle.
+Chaque instantané contient exactement : `version=2.0.0`, `owner=faluss-fans`,
+`reference`, `revision`, `member`, `creator`, `category`, `source`, `economic_class`,
+`funding`, `allocation_reference`, `coins`, `amount_cents`, `refunded_coins`,
+`refunded_cents`, `status`, `occurred_at` (UTC Unix).
+Références, membre et créateur sont des UUID fictifs ; `allocation_reference` est
+un UUID de **tranche consommée** pour un cadeau financé, sinon null. Deux références
+métier ne peuvent utiliser la même tranche, même si elles sont en litige.
+Des tranches différentes d'un même pack exigent des UUID différents. Le simulateur
+ne constitue pas le registre de ces tranches et ne vérifie pas leur provision réelle.
 
-Deux projections privées restent séparées : contribution par membre et score
-par créateur. Même si leur total est identique dans cette politique de test, elles
-ne sont ni un wallet, ni un revenu, ni un droit, ni un classement public.
+Quantités, montants et remboursements sont des entiers entre 0 et 2 147 483 647,
+révision et date strictement positives ; les remboursements sont bornés par leurs
+origines. Au plus 10 000 faits par appel. Les états sont `pending`, `confirmed`,
+`failed`, `refunded`, `disputed`. Les seules catégories sont celles du catalogue.
+Une classe earned/promotional ne peut pas être déclarée comme cadeau funded.
 
-## Tests et limites
+## Révisions, corrections et sessions fictives
 
-Sept tests / 21 assertions : rejeu, ordre inversé, remboursement partiel/complet,
-litige puis résolution, sources PF/cosmétique exclues, paiement non confirmé,
-catégorie adulte, conflit de révision, bénéficiaire modifié, faux claim de preuve,
-remboursement supérieur au montant ou cumul qui diminue. PHPStan ciblé et lint sans erreur.
+Clé métier : propriétaire + référence. Les instantanés de remboursement sont
+cumulatifs, pas des deltas. Même révision identique = rejeu sans effet ; contenu
+différent = erreur. La révision la plus récente gagne indépendamment de l'ordre
+d'arrivée. Seuls état, révision et remboursements peuvent changer ; bénéficiaires,
+date d'origine, source, classe, financement et allocation restent immuables.
+Les remboursements de pièces et d'euros ne peuvent pas diminuer entre révisions.
 
-Les tests s'exécutent en mémoire. **Aucune concurrence SQL ni livraison Events
-réelle n'est prouvée pour cette simulation.** Ils ne complètent pas les preuves
-SSO/REST par une prétendue recette commerciale.
+Pour un cadeau de 300 pièces / 725 centimes, une fixture corrigeant 100 pièces et
+200 centimes produit 20 000 centièmes / 525 centimes : l'allocation de remboursement
+est fournie, jamais calculée par proportion depuis le score. Un soutien direct
+125 centimes, remboursé de 25, laisse 100 centièmes et 100 centimes. Un état
+`refunded` ou `disputed` met les deux projections à zéro ; une nouvelle révision
+confirmée peut rétablir le net après litige, sans effacer les remboursements.
 
-Avant le moteur actif : approuver assiette, seuils de niveau/badge, visibilité,
-règles de sessions et corrections ; construire stockage transactionnel et reçus,
-autorités productrices, admission Federation/Events/Apps Registry, consumer fermé,
-réconciliation, conflits et retards réseau. HoF doit ajouter sessions UTC bornées,
-domaines et portées locale/nationale/internationale, appartenance consentie,
-correction des sessions closes et séparation affichage privé/public.
+Le paramètre facultatif `session={start,end,closed}` sélectionne le score sur
+`[start,end[` selon la date d'origine. `closed` décrit une fixture, pas une session
+persistée : une correction plus récente recalcule aussi une session clôturée.
+La dépense du donateur reste cumulée hors de cette fenêtre. Aucun moteur de sessions,
+classement territorial ou procédure de clôture n'est ajouté. Sans fenêtre, le score
+porte sur tout le lot. Aucun pseudonyme, badge ou donnée publique n'est projeté.
 
-Les projections Me/Pro, rôle Pro, module d'offres, catalogue cosmétique commun et
-Max restent les lots décrits dans [la matrice](FANS-ENGINE-OWNERSHIP.md). Aucun
-paramètre produit encore à décider n'est transformé ici en score actif.
+## Décisions encore ouvertes et scénarios non simulés
 
-Rollback : retirer le simulateur ; aucune donnée persistante, migration ou
-configuration de production à modifier.
+Un cadeau gratuit avec `funding=faluss` est **explicitement rejeté comme non pris
+en charge**, pas assimilé à une opération non financée : les preuves, allocations
+et règles de score du financement Faluss restent à définir. Cela ne retire pas
+l'exception produit prévue par [le contrat des moteurs](FANS-ENGINE-OWNERSHIP.md).
+Aucune reclassification des PF earned/promotional ; aucun montant financé par
+Faluss ne doit devenir une dépense personnelle du donateur.
+
+Restent hors simulation : allocation économique d'un pack/remise, réconciliation
+entre packs et tranches, remboursement d'un pack déjà consommé et propagation à
+tous ses cadeaux, classes mixtes, réserves, commission, financement Faluss et
+assiette du soutien. Les fixtures de cadeaux doivent déjà contenir les corrections
+allouées par le propriétaire économique ; rembourser seulement la fixture pack
+ne corrige pas automatiquement les cadeaux. Aucun taux ni ventilation n'est inventé.
+
+## Tests et limites des preuves
+
+Les tests couvrent unités distinctes, pack puis cadeau sans double comptage,
+allocation EUR indépendante du score, soutien fractionnaire, remboursements partiels
+et complets, litige/résolution, rejeu, ordre inverse, session clôturée et bornes,
+tranche réutilisée, conflits de révision, mutations interdites, remboursements
+régressifs, classe/funding incohérents, cadeaux gratuits et refus adulte.
+Ils s'exécutent en mémoire : aucune concurrence SQL, livraison Events, preuve de
+paiement, recette WordPress réelle ou sécurité de transport n'est démontrée.
+
+Avant un moteur actif : reçus Hub/prestataire authentifiés, stockage transactionnel,
+réconciliation et compensation, admission réseau, résolveur de droits et politiques
+de visibilité (pseudo/badge au créateur concerné, public sur consentement).
+La revue de #73 reste obligatoire avant fusion. Rollback : retirer ces classes et
+tests ; aucune donnée, migration ou configuration réelle à modifier.

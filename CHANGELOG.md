@@ -19,7 +19,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
-- Simulation hors runtime de contributions membre et scores créateur : idempotence, révisions, remboursements et litiges, sans ledger ni score actif.
+- Simulation hors runtime v2 : score créateur en centièmes de point, dépense donateur consommée en centimes EUR, packs sans effet, allocations de cadeaux explicites, remboursements et corrections de sessions fictives clôturées ; aucun revenu calculé ni ledger actif.
 
 - Fondation testée des politiques de publications Fans et projection minimale de cinq teasers explicitement sélectionnés ; aucun upload, route média ou transport activé.
 

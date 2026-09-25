@@ -61,9 +61,10 @@ sans revenu ni score monétisable sauf financement explicite par Faluss ; les PF
 `earned`/`promotional` gardent leur classe, et ce financement ne constitue pas une
 dépense du donateur pour son badge. Le contrat définit les
 corrections, litiges et remboursements à construire ; aucun moteur économique
-n'est ajouté ici. **Le simulateur de #73 doit être adapté avant sa fusion** : son
-ancienne règle en centimes et ses deux totaux identiques ne satisfont pas cette
-décision. Les refus adultes 403 et hébergés 503 restent inchangés, sans paiement.
+n'est ajouté ici. **L'adaptation du simulateur de #73 doit être revue avant sa fusion** :
+la v2 proposée sépare les unités de score et de dépense ; sa politique reste limitée
+aux fixtures documentées. Les refus adultes 403 et hébergés 503 restent inchangés,
+sans paiement.
 
 ## Prochains moteurs
 
@@ -71,4 +72,4 @@ La matrice des propriétaires, les contrats proposés et les portes de validatio
 
 La [fondation des publications](FANS-PUBLICATIONS.md) contient des politiques pures testées et une projection de teasers ; aucun stockage, upload, route ou média actif.
 
-La [simulation Progression/HoF](PROGRESSION-SIMULATION.md) teste les corrections sur faits fictifs. Elle ne crée ni niveau, badge, session HoF, PF, revenu ou score actif.
+La [simulation Progression/HoF v2](PROGRESSION-SIMULATION.md), adaptée dans #73 et encore à revoir avant fusion, sépare score en centièmes de point et dépense consommée en centimes EUR. Elle teste les corrections sur fixtures, y compris les sessions clôturées ; le financement Faluss reste non pris en charge faute de politique allouée. Elle ne crée ni niveau, badge, session HoF active, PF, revenu ou score persistant.
