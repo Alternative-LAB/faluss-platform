@@ -1,12 +1,18 @@
-# Faluss Fans — admission et contrats à construire
+# Faluss Fans — état des lots et contrats
 
-## État de ce lot
+## État vérifié dans le code
 
-`FALUSS_PLATFORM_ROLE='fans'` est admis par le socle. Seule l'administration commune se charge. Aucun module Fans, route, shortcode, table, option métier, cron, paiement, contenu ou droit n'est créé. Les flags des modules Me et Hub ne rendent pas ces modules compatibles avec Fans. Le hook d'activation Link doit ignorer Fans même si `FALUSS_PLATFORM_LINK === true` par erreur. Le choix du rôle appartient à la configuration du site, hors Git ; cette PR ne configure ni n'active un site réel.
+| Lot | État | Portée |
+| --- | --- | --- |
+| Admission du rôle, PR #53 | Implémenté et fusionné | `FALUSS_PLATFORM_ROLE='fans'` donne accès à l'administration commune ; les modules Me et Hub et leurs hooks d'activation restent isolés, y compris Link avec un flag erroné. |
+| Client SSO Fans | Implémenté dans cette PR, opt-in, non activé sur un site réel | Client distinct de celui du Hub, deux tables locales, état navigateur, PKCE S256, échange avec Me et session WordPress locale. Voir [FANS-SSO.md](FANS-SSO.md). |
+| Profils, publications, followers, messagerie, store, commandes et droits | Contractuel seulement | Aucun de ces domaines, stockage, route, transaction, achat ou droit n'est implémenté ici. |
 
-## Frontières des lots suivants
+Le choix du rôle, du client confidentiel Me, de son secret et du flag Fans appartient à une configuration de site hors Git. Aucun site de production n'est configuré, activé, migré ou déployé par cette PR.
 
-Fans sera propriétaire de ses profils créateurs, publications, relations de suivi, messagerie, catalogue de vente, commandes et droits locaux. Chaque personne aura un compte WordPress local et une liaison au `faluss_id` opaque ; ni l'adresse e-mail ni le `wp_user_id` d'un autre site ne serviront de clé de rapprochement ou de droit. Le client SSO Fans consommera le code d'autorisation à usage unique de Me, PKCE S256 et l'échange serveur à serveur selon le contrat Identity ; il n'émettra pas d'identité ni de session centrale.
+## Frontières des domaines métier
+
+Fans sera propriétaire de ses profils créateurs, publications, relations de suivi, messagerie, catalogue de vente, commandes et droits locaux. Chaque personne aura un compte WordPress local et une liaison au `faluss_id` opaque ; ni l'adresse e-mail ni le `wp_user_id` d'un autre site ne serviront de clé de rapprochement ou de droit. Le client SSO Fans consomme le code d'autorisation à usage unique de Me, PKCE S256 et l'échange serveur à serveur selon le contrat Identity ; il n'émet pas d'identité ni de session centrale.
 
 Hub conservera ses données et décisions propres. Fans intégrera les façades publiques validées de Federation, Events et Apps Registry sans copier leur transport, outbox, validation ou modèle de composition. Ces modules ne déclarent aujourd'hui que `me` et `hub` : leur éventuelle admission sur `fans`, leurs identités de nœud, leurs politiques de pair et leurs contrats de lecture devront être ajoutés et testés dans des PR séparées. Aucune dépendance implicite à leurs classes internes ou tables n'est autorisée.
 
@@ -25,9 +31,9 @@ Aucun contenu adulte ne doit être hébergé ou envoyé par Fans, y compris dans
 
 ## Étapes et preuves avant ouverture
 
-1. **Fondation Fans** : client SSO Me, comptes locaux non privilégiés, séparation des profils et rôles, contrôle des collisions de hooks/routes/tables/options, tests de rejeu et de sessions. Valider sur une instance WordPress de test ; définir le rollback avant activation.
+1. **Fondation Fans** : le client SSO Me, les comptes locaux non privilégiés et les tests de rejeu et de session sont implémentés dans cette PR. Valider encore sur une instance WordPress et MariaDB de test le callback exact, les tables InnoDB, le parcours Me et le retour arrière avant activation réelle. Les profils métier restent à construire.
 2. **Social et contenu** : profils, publications, followers et messagerie avec permissions côté serveur, blocage, retrait, rétention et garde contre tout contenu adulte. Tester les uploads, messages, API, accès directs, changements de visibilité et tentatives de contournement ; confirmer le comportement sur WordPress et les surfaces utilisées.
 3. **Contenu autorisé hébergé** : obtenir la validation du prestataire pour ce modèle de plateforme ; terminer les contrats catalogue, commande, paiement, remboursement et droits, puis tester les doublons, webhooks, échecs, annulations et accès après révocation. Une recette de bout en bout et un rollback vérifié précèdent l'ouverture.
 4. **Droits à livraison adulte externe** : présenter la catégorie sans achat possible ; prouver par tests serveur et API que tous les chemins de commande et de délivrance refusent. Obtenir l'acceptation explicite du prestataire pour ce parcours distinct. Toute ouverture commerciale sera un lot séparé avec revue du contrat de livraison externe, du refus par défaut, des contrôles de contenu et des parcours de paiement et de remboursement.
 
-Les tests de cette PR démontrent seulement la reconnaissance du rôle, l'administration locale et l'isolation des modules et hooks d'activation. Ils ne valent ni recette WordPress réelle, ni accord du prestataire, ni autorisation de vente ou de déploiement.
+Les tests de la PR #53 démontrent la reconnaissance du rôle et l'isolation de ses hooks. Ceux du présent lot ajoutent des preuves unitaires du client SSO et une recette locale jetable WordPress/MariaDB pour le schéma et la création/liaison directe. L'échange réseau avec Me et le navigateur n'ont pas été exercés. Aucun test de vente n'existe encore puisqu'aucun service de vente n'est implémenté ; ce verrou devra être prouvé par tests serveur et API dans le lot commerce.

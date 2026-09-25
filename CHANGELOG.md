@@ -6,7 +6,18 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
-- Retouches de fluidité V3 uniquement, détaillées dans 0.5.4.
+### Vérifié
+
+- Recette SSO HTTPS Me/Fans sur deux WordPress/MariaDB jetables : cookies, rejeu, expiration, collision, rollback/retry et callbacks concurrents ; limites navigateur et OTP documentées.
+
+### Ajouté
+
+- Client SSO Fans opt-in avec tables, état navigateur, PKCE S256, échange confidentiel avec Me et session locale limitée aux subscribers liés.
+- Contrat d'activation, rollback et preuves restantes pour le SSO Fans, indépendamment des domaines métier et commerciaux.
+
+### Corrigé
+
+- Création de compte Fans et liaison SSO atomiques sur InnoDB, avec verrouillage concurrent, rollback et invalidation du cache utilisateur en cas d'échec de liaison.
 
 ## [0.5.4] - 2026-09-25
 

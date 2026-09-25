@@ -216,6 +216,7 @@ final class DashboardModule implements Module
             'token-engine-connector' => ['label' => 'Connecteur Token Engine', 'description' => 'Relie faluss.me au moteur de droits, de solde et de récompenses de faluss.com.', 'short' => 'TE'],
             'identity' => ['label' => 'Identité', 'description' => 'Gère les profils, le passwordless et l’autorité d’identité de faluss.me.', 'short' => 'ID'],
             'identity-client' => ['label' => 'Client Identity', 'description' => 'Connecte faluss.com à l’autorité d’identité via OAuth et PKCE.', 'short' => 'IC'],
+            'fans-sso' => ['label' => 'Client SSO Fans', 'description' => 'Établit une session locale Fans depuis une preuve de Faluss Me.', 'short' => 'FS'],
             'link' => ['label' => 'Faluss Link', 'description' => 'Gère les cartes publiques, leur édition, les médias et les découvertes.', 'short' => 'FL'],
             'me-studio' => ['label' => 'Me Studio', 'description' => 'Fournit l’interface Studio moderne pour créer et personnaliser une carte.', 'short' => 'MS'],
             'portal' => ['label' => 'Portail membre', 'description' => 'Affiche l’espace membre et orchestre ses applications et services.', 'short' => 'PM'],

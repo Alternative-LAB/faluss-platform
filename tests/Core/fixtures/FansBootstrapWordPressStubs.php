@@ -34,4 +34,9 @@ namespace {
     {
         $GLOBALS['fans_test_actions'][$hook][] = $callback;
     }
+
+    function flush_rewrite_rules(bool $hard = true): void
+    {
+        unset($hard);
+    }
 }

@@ -14,7 +14,7 @@ define('FALUSS_PLATFORM_ROLE', 'me'); // 'hub' sur faluss.com, 'fans' sur un sit
 
 Le socle n’active que le module d’administration : il ne remplace aucun plugin en production. Voir [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
-Le rôle `fans` n'admet pour l'instant que cette administration commune. Les domaines et portes commerciales envisagés sont décrits dans [`docs/modules/FANS.md`](docs/modules/FANS.md) ; aucune vente ou fonction Fans n'est activée par ce rôle.
+Le rôle `fans` admet l'administration commune et un [client SSO optionnel et isolé du Hub](docs/modules/FANS-SSO.md), sans activation automatique. L'état des domaines et portes commerciales est détaillé dans [`docs/modules/FANS.md`](docs/modules/FANS.md) ; aucune vente n'est activée par ce rôle ou par le SSO.
 
 Le module optionnel des jetons visuels de `faluss.me` est décrit dans [`docs/modules/THEME-TOKENS.md`](docs/modules/THEME-TOKENS.md). Il reste désactivé sans activation explicite.
 
