@@ -48,13 +48,16 @@ final class FansRoleIsolationTest extends TestCase
     private function assertTextModuleIsolated(string $role): void
     {
         define('FALUSS_PLATFORM_ROLE', $role);
-        foreach (['FALUSS_PLATFORM_FANS_SSO', 'FALUSS_PLATFORM_FANS_CREATOR_PROFILES', 'FALUSS_PLATFORM_FANS_TEXT_PUBLICATIONS'] as $flag) { define($flag, true); }
+        foreach (['FALUSS_PLATFORM_FANS_SSO', 'FALUSS_PLATFORM_FANS_CREATOR_PROFILES', 'FALUSS_PLATFORM_FANS_TEXT_PUBLICATIONS', 'FALUSS_PLATFORM_FANS_IMAGES'] as $flag) { define($flag, true); }
         // No WordPress database exists here: touching schema installation would fail the test.
         $module = new \Faluss\Platform\Fans\Publications\TextPublicationsModule();
         self::assertSame([SiteRole::Fans], $module->roles());
         self::assertSame(['fans-creator-profiles'], $module->dependencies());
         self::assertFalse($module::enabled());
         $module::activate();
+        $images = new \Faluss\Platform\Fans\Images\ImagesModule();
+        self::assertFalse($images::enabled());
+        $images::activate();
     }
 
     public function testOnlyTheSiteAdministrationCanBootWhenEveryExistingModuleIsRegistered(): void
@@ -99,7 +102,7 @@ final class FansRoleIsolationTest extends TestCase
         }
 
         require dirname(__DIR__, 2) . '/faluss-platform.php';
-        self::assertCount(12, $GLOBALS['fans_test_activation_hooks']);
+        self::assertCount(13, $GLOBALS['fans_test_activation_hooks']);
         self::assertSame([
             SubscriptionsModule::class,
             TokenEngineModule::class,
@@ -113,6 +116,7 @@ final class FansRoleIsolationTest extends TestCase
             FollowersModule::class,
             StoreCatalogModule::class,
             \Faluss\Platform\Fans\Publications\TextPublicationsModule::class,
+            \Faluss\Platform\Fans\Images\ImagesModule::class,
         ], array_map(static fn (array $callback): string => $callback[0], $GLOBALS['fans_test_activation_hooks']));
         self::assertCount(5, $GLOBALS['fans_test_deactivation_hooks']);
         self::assertCount(1, $GLOBALS['fans_test_actions']['plugins_loaded']);

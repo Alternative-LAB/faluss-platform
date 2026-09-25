@@ -6,6 +6,12 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Quarantaine privée des images Fans
+
+- Premier moteur JPEG/PNG opt-in : validation réelle et réencodage, stockage POSIX privé hors racines web avec attestation d’hébergement, quotas sérialisés et aucun accès public même après approbation.
+- REST authentifié : soumission SSO, octets administrateur seulement, décisions versionnées, retrait et révocation avant suppression, reprise explicite du nettoyage après panne. Deux tables privées additives, aucune médiathèque, projection Me, vidéo ou vente.
+- Documentation des limites avant réception multipart, des responsabilités de l’hébergeur et des politiques de rétention restant à décider ; recette WordPress/MariaDB locale dédiée.
+
 ### Publications textuelles Fans
 
 - Correction #75 : à 20 pending, autoriser les éditions pending → pending sous quotas horaires/journaliers ; refuser création et approved/rejected → pending sans place libre. Tests de transitions et recette concurrente vérifiés : 96 contrôles REST WordPress/MariaDB réels sur le code e76e873, activation temporaire locale uniquement, flag ensuite désactivé et serveur arrêté.
