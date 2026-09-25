@@ -36,3 +36,7 @@ Les futurs panier, commande, paiement, webhook et délivrance **n'existent pas**
 et ne sont pas couverts. Le contrôle du fichier privé, la modération des médias,
 le retrait du consentement et la vérification d'identité vendeur sont des lots
 à construire. Cette recette ne constitue aucune autorisation commerciale.
+
+## Retrait des flags après la recette
+
+Les quatre flags Fans ont ensuite été remis à false dans la seule configuration jetable. De nouvelles requêtes HTTPS ont confirmé : creators et store/categories en 404, formulaire SSO absent ; le nombre de tables Fans et de liaisons reste identique avant/après. Les serveurs HTTP de recette ont été arrêtés. Les sessions déjà émises ne sont pas révoquées par un flag ; cette limite reste inchangée.
