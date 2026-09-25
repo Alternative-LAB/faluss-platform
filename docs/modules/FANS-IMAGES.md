@@ -30,7 +30,16 @@ Configuration hors Git obligatoire :
 - `FALUSS_FANS_IMAGE_PRIVATE_ROOT` : répertoire POSIX dédié à ce site, chemin absolu
   canonique, hors ABSPATH, WP_CONTENT_DIR et DOCUMENT_ROOT (ni ancêtre ni descendant).
 - Répertoire précréé mode **0700**, propriétaire UID effectif PHP, sans symlink ;
-  ancêtres non modifiables par groupe/autres, sauf répertoire sticky tel que /var/tmp.
+  Chaque ancêtre, **racine `/` comprise**, doit être un répertoire réel possédé
+  exclusivement par **UID 0 (root) ou l’UID effectif du processus PHP**. Aucun autre
+  propriétaire n’est admis, même avec un mode 0755 : il peut renommer/remplacer ses
+  descendants. Les écritures groupe/autres sont refusées, sauf sticky **avec l’un
+  de ces mêmes propriétaires de confiance** (ex. /var/tmp appartenant à root).
+  Un répertoire sticky possédé par un autre UID est donc aussi refusé. Le dossier
+  final reste exclusivement possédé par PHP et mode 0700 ; aucune exception sticky.
+  Les processus partageant l’UID PHP et root font partie de la frontière de confiance.
+  Ces contrôles POSIX ne valident ni ACL supplémentaires ni modification privilégiée
+  du montage : leur audit demeure une responsabilité de l’hébergeur.
   Chaque fichier opaque UUID `.bin` est créé exclusivement, mode **0600**, fichier
   régulier sans symlink ni hardlink. Aucun chemin ou nom source n’est stocké ou renvoyé.
 - `FALUSS_FANS_IMAGE_STORAGE_ATTESTED=true` uniquement après vérification par

@@ -8,6 +8,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Quarantaine privée des images Fans
 
+- Correction #76 : tous les ancêtres du stockage, racine comprise, exigent UID root ou UID PHP ; refus d’un propriétaire tiers même en 0755 ou sticky. Contrat et tests de stockage actualisés.
+
 - Premier moteur JPEG/PNG opt-in : validation réelle et réencodage, stockage POSIX privé hors racines web avec attestation d’hébergement, quotas sérialisés et aucun accès public même après approbation.
 - REST authentifié : soumission SSO, octets administrateur seulement, décisions versionnées, retrait et révocation avant suppression, reprise explicite du nettoyage après panne. Deux tables privées additives, aucune médiathèque, projection Me, vidéo ou vente.
 - Documentation des limites avant réception multipart, des responsabilités de l’hébergeur et des politiques de rétention restant à décider ; recette WordPress/MariaDB locale dédiée.

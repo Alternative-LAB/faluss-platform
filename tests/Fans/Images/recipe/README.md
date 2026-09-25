@@ -35,6 +35,37 @@ Les tests PHPUnit (7 tests / 50 assertions ciblés) ne sont pas inclus dans ce t
   administratif les supprime. Aucun fichier restant en quarantaine en fin de recette.
 - Flag images désactivé, routes fermées ; serveur et ses quatre workers arrêtés.
 
+## Correction des propriétaires des ancêtres — 26 septembre 2026
+
+**22 contrôles WordPress/MariaDB HTTP réels réussis**, en complément des 59
+contrôles initiaux ci-dessus. Script ciblé `ownership-test.py`, même instance/base
+jetable, mais serveur et quatre workers PHP sous **UID www-data**, sans privilège
+root ; parent hostile possédé par **UID nobody**, distinct de root et de PHP.
+
+- Parent 0755 appartenant à un tiers : upload 503 `private_storage_required`, aucun
+  fichier. Même refus pour un parent tiers sticky 1777 et un grand-parent tiers
+  0755 au-dessus d’un parent immédiat appartenant à PHP.
+- Parents root ou PHP, mode 0755 : upload 201, lecture admin 200, retrait et
+  suppression réussis. Les mêmes propriétaires avec sticky 1777 sont autorisés.
+- Parent root 0777 non sticky : refus 503, aucun fichier.
+- Tous les cas gardent le dossier final propriétaire PHP, mode 0700. Le test
+  unitaire couvre aussi `/` par le prédicat commun, les modes 0700/1755 et les
+  entrées qui ne sont pas des répertoires ; il ne remplace pas ces contrôles HTTP.
+
+Exécuter en root local : `python3 <repo>/tests/Fans/Images/recipe/ownership-test.py`.
+Le script vérifie le nom de base et la cible du symlink plugin, prépare uniquement
+`/var/tmp/faluss-image-owner-cases` et un répertoire temporaire dédié, renouvelle
+les sessions synthétiques et utilise un compte MariaDB socket **temporaire**
+www-data limité à cette base. Il refuse d’écraser un compte existant du même nom.
+Prévoir des quotas créateur disponibles (ou une base jetable réinitialisée).
+
+Après recette : flag images false, routes 404, configuration DB/root privée
+restaurée, compte MariaDB temporaire supprimé, serveur/workers arrêtés et fixtures
+de dossiers supprimées uniquement lorsqu’elles sont vides. Aucun accès ni activation
+sur un site de production. La validation POSIX ne prouve toujours pas l’absence
+**d’alias HTTP, de montage public ou de sauvegarde publique** : attestation et audit
+de l’hébergeur restent obligatoires.
+
 ## Préparation et exécution
 
 **Uniquement sur l’instance locale jetable**, jamais sur un site existant contenant

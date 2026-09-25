@@ -18,6 +18,23 @@ final class ImageStorageTest extends TestCase
         self::assertNull(ImageStorage::root());
         self::assertFalse(ImageService::publicAllowed());
     }
+    public function testEveryAncestorRequiresATrustedOwnerEvenWhenNotWorldWritable(): void
+    {
+        foreach ([0755, 0700, 01777, 01755] as $mode) {
+            self::assertFalse(ImageStorage::trustedAncestor(2002, 0040000 | $mode, 1001));
+        }
+        foreach ([0, 1001] as $owner) {
+            foreach ([0755, 0700, 01777, 01755] as $mode) {
+                self::assertTrue(ImageStorage::trustedAncestor($owner, 0040000 | $mode, 1001));
+            }
+            foreach ([0777, 0775, 0733] as $mode) {
+                self::assertFalse(ImageStorage::trustedAncestor($owner, 0040000 | $mode, 1001));
+            }
+        }
+        self::assertFalse(ImageStorage::trustedAncestor(0, 0100755, 1001));
+        self::assertFalse(ImageStorage::trustedAncestor(0, 0120777, 1001));
+    }
+
     public function testMalformedUnsupportedAndOversizedBytes(): void
     {
         foreach (['', '<svg xmlns="http://www.w3.org/2000/svg"></svg>', 'GIF89a', "\x89PNG\r\n\x1a\n", str_repeat('x', ImageStorage::INPUT_LIMIT + 1)] as $data) {

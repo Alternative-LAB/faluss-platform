@@ -27,12 +27,21 @@ final class ImageStorage
             if ($web === false || $root === $web || str_starts_with($root . '/', rtrim($web, '/') . '/')
                 || str_starts_with($web . '/', $root . '/')) { return null; }
         }
-        // Ancestors must not be replaceable by another unprivileged user (sticky /tmp allowed).
-        for ($dir = dirname($root); $dir !== '/'; $dir = dirname($dir)) {
-            $mode = fileperms($dir);
-            if ($mode === false || (($mode & 0022) !== 0 && ($mode & 01000) === 0)) { return null; }
+        // Trust only root and this PHP UID, including owners of sticky ancestors.
+        for ($dir = dirname($root); ; $dir = dirname($dir)) {
+            $stat = @lstat($dir);
+            if (!is_array($stat) || !self::trustedAncestor($stat['uid'], $stat['mode'], posix_geteuid())) { return null; }
+            if ($dir === '/') { break; }
         }
         return $root;
+    }
+
+    /** A sticky bit cannot make an untrusted directory owner safe. */
+    public static function trustedAncestor(int $owner, int $mode, int $phpUid): bool
+    {
+        return ($mode & 0170000) === 0040000
+            && in_array($owner, [0, $phpUid], true)
+            && (($mode & 0022) === 0 || ($mode & 01000) !== 0);
     }
 
     public static function validId(string $id): bool
