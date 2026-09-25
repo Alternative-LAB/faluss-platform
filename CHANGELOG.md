@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Vérifié
+
+- Recette SSO HTTPS Me/Fans sur deux WordPress/MariaDB jetables : cookies, rejeu, expiration, collision, rollback/retry et callbacks concurrents ; limites navigateur et OTP documentées.
+
 ### Ajouté
 
 - Profils créateurs Fans opt-in : identifiant public opaque, catégorie fermée, approbation et suspension, routes REST à permissions explicites sans champ libre ni média.
