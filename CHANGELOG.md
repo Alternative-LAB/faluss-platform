@@ -8,6 +8,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Documentation
 
+- Décision HoF : pack sans score, cadeau de 300 pièces financées dépensées = 300 points de session, soutien direct = 1 point par euro confirmé ; distinction progression sur dépense réelle et revenu EUR privé, étude PF Hub sans second ledger et adaptation obligatoire du simulateur #73 avant fusion.
 - Matrice des propriétaires Fans/Me/Hub/Pro, limites des moteurs existants et contrats de publication, progression, cosmétiques, Max et commerce fermé.
 ### Vérifié
 
