@@ -8,6 +8,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Publications textuelles Fans
 
+- Admission : quotas serveur par créateur (20 pending, 30 créations/éditions par heure glissante, 100 par 24 heures), sérialisés entre requêtes ; retrait et modération restent possibles à quota plein.
+- Idempotence : en-tête UUID v4 obligatoire en création, rejeu sans seconde publication/trace ni quota, conflit de contenu 409 ; association privée transactionnelle en schéma v2, migration additive et fermeture par retrait du flag.
+- Recette étendue : concurrence HTTP et quotas aux frontières, panne de l'association puis nouvelle tentative, fenêtres glissantes, pagination de plus de 20 textes avec créateur suspendu ; aucun média, paiement, moteur Me/Hub ou activation hors instance jetable.
+
 - Correction #74 : pagination des listes publique, personnelle et de modération (1–20 résultats, curseur déterministe date/UUID), textes publics récents en tête et exclusion des éléments invisibles avant remplissage de la page ; contrat REST enveloppé `items` / `next_cursor`, tests de parcours sur 185 textes et trois créateurs.
 
 - Ajout : module local opt-in, brouillons textuels privés du créateur SSO actif, édition soumise à nouvelle revue, approbation/rejet administratif avec trace et retrait propriétaire.

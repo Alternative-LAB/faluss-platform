@@ -27,6 +27,20 @@ final class TextPublicationDb extends CreatorProfileDb
     public array $profiles = [];
     public int $pageQueries = 0;
     public bool $failAudit = false;
+    public bool $failRequest = false;
+    public bool $lockAvailable = true;
+    public bool $failQuota = false;
+    public array $requests = [];
+    public int $pendingCount = 0;
+    public int $hourlyCount = 0;
+    public int $dailyCount = 0;
+    public function get_var(string $query): mixed
+    {
+        if (str_contains($query, 'GET_LOCK')) { return $this->lockAvailable ? 1 : 0; }
+        if (str_contains($query, 'RELEASE_LOCK')) { return 1; }
+        if (str_starts_with($query, 'SELECT COUNT(*)')) { return $this->failQuota ? null : $this->pendingCount; }
+        return parent::get_var($query);
+    }
     private ?array $snapshot = null;
     public bool $suppressed = false;
     public function suppress_errors(bool $value = true): bool
@@ -55,10 +69,10 @@ final class TextPublicationDb extends CreatorProfileDb
             if (str_contains($query, $definition['suffix'])) { $schema = $definition; }
         }
         if (str_contains($query, 'faluss_fans_text_')) {
-            $audit = str_contains($query, 'text_decisions');
+            $audit = str_contains($query, 'text_requests') ? 'requests' : str_contains($query, 'text_decisions');
             $schema = ['columns' => array_map(static fn ($type) => ['type' => $type, 'null' => false], TextPublicationSchema::columns($audit)),
-                'indexes' => $audit ? ['PRIMARY' => [true, ['publication_id', 'revision']]]
-                    : ['PRIMARY' => [true, ['publication_id']], 'creator_id' => [false, ['creator_id']]]];
+                'indexes' => $audit === 'requests' ? ['PRIMARY' => [true, ['creator_id', 'key_hash']]] : ($audit ? ['PRIMARY' => [true, ['publication_id', 'revision']]]
+                    : ['PRIMARY' => [true, ['publication_id']], 'creator_id' => [false, ['creator_id']]])];
         }
         if ($schema !== null && str_starts_with($query, 'SHOW FULL COLUMNS')) {
             $rows = [];
@@ -78,6 +92,13 @@ final class TextPublicationDb extends CreatorProfileDb
     }
     public function get_row(string $query, mixed $output = null): ?array
     {
+        if (str_starts_with($query, 'SELECT request_hash,publication_id')) {
+            $args = end($this->prepared)['args'];
+            return $this->requests[$args[0] . $args[1]] ?? null;
+        }
+        if (str_starts_with($query, 'SELECT COUNT(*) AS daily_count')) {
+            return ['hourly_count' => $this->hourlyCount, 'daily_count' => $this->dailyCount];
+        }
         if (str_starts_with($query, 'SELECT * FROM `wp_faluss_fans_text_publications')) {
             return $this->publications !== [] ? ($this->publications[end($this->prepared)['args'][0]] ?? null) : $this->publication;
         }
@@ -90,10 +111,15 @@ final class TextPublicationDb extends CreatorProfileDb
     public function query(string $query): int|false
     {
         $args = end($this->prepared)['args'] ?? [];
-        if ($query === 'START TRANSACTION') { $this->snapshot = [$this->publication, $this->audit]; return 1; }
+        if ($query === 'START TRANSACTION') { $this->snapshot = [$this->publication, $this->audit, $this->requests]; return 1; }
         if ($query === 'COMMIT') { $this->snapshot = null; return 1; }
         if ($query === 'ROLLBACK') {
-            if ($this->snapshot !== null) { [$this->publication, $this->audit] = $this->snapshot; $this->snapshot = null; }
+            if ($this->snapshot !== null) { [$this->publication, $this->audit, $this->requests] = $this->snapshot; $this->snapshot = null; }
+            return 1;
+        }
+        if (str_starts_with($query, 'INSERT INTO `wp_faluss_fans_text_requests')) {
+            if ($this->failRequest) { return false; }
+            $this->requests[$args[0] . $args[1]] = ['request_hash' => $args[2], 'publication_id' => $args[3]];
             return 1;
         }
         if (str_starts_with($query, 'INSERT INTO `wp_faluss_fans_text_decisions')) {
@@ -140,7 +166,7 @@ final class TextPublicationTest extends TestCase
     }
     private function create(): array
     {
-        $row = TextPublicationService::create('Un texte de création.', TextPublicationService::CATEGORY);
+        $row = TextPublicationService::create('Un texte de création.', TextPublicationService::CATEGORY, 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
         self::assertIsArray($row);
         return $row;
     }
@@ -171,7 +197,7 @@ final class TextPublicationTest extends TestCase
     public function testAuditFailureRollsBackCreationAndApproval(): void
     {
         $GLOBALS['wpdb']->failAudit = true;
-        self::assertInstanceOf(\WP_Error::class, TextPublicationService::create('Texte.', TextPublicationService::CATEGORY));
+        self::assertInstanceOf(\WP_Error::class, TextPublicationService::create('Texte.', TextPublicationService::CATEGORY, 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'));
         self::assertNull($GLOBALS['wpdb']->publication);
         $GLOBALS['wpdb']->failAudit = false;
         $id = $this->create()['publication_id'];
@@ -219,12 +245,12 @@ final class TextPublicationTest extends TestCase
             self::assertInstanceOf(\WP_Error::class, TextPublicationService::create('Texte.', $category));
         }
         foreach (['', '<img src="x">', "\0", str_repeat('é', 8001), "\xff"] as $text) {
-            self::assertInstanceOf(\WP_Error::class, TextPublicationService::create($text, TextPublicationService::CATEGORY));
+            self::assertInstanceOf(\WP_Error::class, TextPublicationService::create($text, TextPublicationService::CATEGORY, 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'));
         }
         $GLOBALS['wpdb']->profile['status'] = 'pending';
-        self::assertInstanceOf(\WP_Error::class, TextPublicationService::create('Texte.', TextPublicationService::CATEGORY));
+        self::assertInstanceOf(\WP_Error::class, TextPublicationService::create('Texte.', TextPublicationService::CATEGORY, 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'));
         $GLOBALS['wpdb']->profile['status'] = 'active'; $GLOBALS['profile_linked'] = false;
-        self::assertInstanceOf(\WP_Error::class, TextPublicationService::create('Texte.', TextPublicationService::CATEGORY));
+        self::assertInstanceOf(\WP_Error::class, TextPublicationService::create('Texte.', TextPublicationService::CATEGORY, 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'));
         self::assertNull($GLOBALS['wpdb']->publication);
     }
     public function testNonceAndSchemaAreMandatory(): void
@@ -234,7 +260,7 @@ final class TextPublicationTest extends TestCase
         self::assertFalse(TextPublicationRest::adminPermission(new \WP_REST_Request([], ['X-WP-Nonce' => 'valid-nonce'])));
         $GLOBALS['text_options'] = [];
         self::assertFalse(TextPublicationRest::publicPermission());
-        self::assertInstanceOf(\WP_Error::class, TextPublicationService::create('Texte.', TextPublicationService::CATEGORY));
+        self::assertInstanceOf(\WP_Error::class, TextPublicationService::create('Texte.', TextPublicationService::CATEGORY, 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'));
     }
     /** 185 rows, ties in timestamps, three owners, including 60 newest but invisible texts. */
     private function paginationFixture(): void
@@ -352,6 +378,68 @@ final class TextPublicationTest extends TestCase
             self::assertSame(400, TextPublicationRest::$callback(new \WP_REST_Request(['per_page' => '21']))->status);
             self::assertSame(400, TextPublicationRest::$callback(new \WP_REST_Request(['cursor' => 'invalid']))->status);
         }
+    }
+
+    public function testIdempotentCreateReplaysCurrentStateAndRejectsDifferentContent(): void
+    {
+        $row = $this->create();
+        self::assertSame($row, $this->create());
+        self::assertCount(1, $GLOBALS['wpdb']->audit);
+        self::assertCount(1, $GLOBALS['wpdb']->requests);
+        self::assertSame('idempotency_conflict', TextPublicationService::create('Autre texte.', TextPublicationService::CATEGORY, 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa')->get_error_code());
+        TextPublicationService::change($row['publication_id'], 1, 'withdraw');
+        $GLOBALS['wpdb']->pendingCount = 20;
+        $GLOBALS['wpdb']->hourlyCount = 30;
+        $GLOBALS['wpdb']->profile['status'] = 'suspended';
+        $replay = $this->create();
+        self::assertSame($row['publication_id'], $replay['publication_id']);
+        self::assertSame('withdrawn', $replay['state']);
+        self::assertSame('', $replay['body']);
+        self::assertCount(2, $GLOBALS['wpdb']->audit);
+    }
+
+    public function testQuotaCoversCreationAndEditionButNotRemovalOrRejection(): void
+    {
+        $row = $this->create();
+        foreach (['pendingCount' => [20, 'publication_pending_quota'], 'hourlyCount' => [30, 'publication_hourly_quota'], 'dailyCount' => [100, 'publication_daily_quota']] as $field => [$limit, $code]) {
+            $GLOBALS['wpdb']->$field = $limit;
+            self::assertSame($code, TextPublicationService::create('Nouveau.', TextPublicationService::CATEGORY, 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb')->get_error_code());
+            self::assertSame($code, TextPublicationService::change($row['publication_id'], 1, 'edit', 'Révision.')->get_error_code());
+            self::assertSame($row, $this->create(), 'Replay consumes no quota');
+            $GLOBALS['wpdb']->$field = 0;
+        }
+        $GLOBALS['wpdb']->pendingCount = 20; $GLOBALS['wpdb']->hourlyCount = 30;
+        $GLOBALS['profile_admin'] = true;
+        self::assertSame('rejected', TextPublicationService::change($row['publication_id'], 1, 'reject', null, 'needs_revision')['state']);
+        $GLOBALS['profile_admin'] = false;
+        self::assertSame('withdrawn', TextPublicationService::change($row['publication_id'], 2, 'withdraw')['state']);
+        self::assertCount(3, $GLOBALS['wpdb']->audit);
+    }
+
+    public function testKeyAndLockRequiredAndRequestFailureRollsBackAllWrites(): void
+    {
+        foreach ([null, '', 'invalid', [], str_repeat('a', 200)] as $key) {
+            self::assertSame('invalid_idempotency_key', TextPublicationService::create('Texte.', TextPublicationService::CATEGORY, $key)->get_error_code());
+        }
+        $GLOBALS['wpdb']->lockAvailable = false;
+        self::assertSame('publication_intake_unavailable', TextPublicationService::create('Texte.', TextPublicationService::CATEGORY, 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa')->get_error_code());
+        $GLOBALS['wpdb']->lockAvailable = true; $GLOBALS['wpdb']->failRequest = true;
+        self::assertInstanceOf(\WP_Error::class, TextPublicationService::create('Texte.', TextPublicationService::CATEGORY, 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'));
+        self::assertNull($GLOBALS['wpdb']->publication);
+        self::assertSame([], $GLOBALS['wpdb']->audit);
+        self::assertSame([], $GLOBALS['wpdb']->requests);
+        $GLOBALS['wpdb']->failRequest = false;
+        self::assertIsArray($this->create());
+    }
+
+    public function testAdmissionFailsClosedWithoutQuotaReadOrSchemaUpgrade(): void
+    {
+        $GLOBALS['wpdb']->failQuota = true;
+        self::assertSame('publication_intake_unavailable', TextPublicationService::create('Texte.', TextPublicationService::CATEGORY, 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa')->get_error_code());
+        self::assertNull($GLOBALS['wpdb']->publication);
+        self::assertSame([], $GLOBALS['wpdb']->requests);
+        $GLOBALS['text_options'][TextPublicationSchema::OPTION] = '1';
+        self::assertFalse(TextPublicationsModule::available());
     }
 
 }

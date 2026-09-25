@@ -8,18 +8,21 @@ namespace Faluss\Platform\Fans\Publications;
 final class TextPublicationSchema
 {
     public const OPTION = 'faluss_fans_text_publications_schema_version';
-    public const VERSION = '1';
+    public const VERSION = '2';
 
-    public static function table(bool $audit = false): ?string
+    public static function table(bool|string $audit = false): ?string
     {
         global $wpdb;
         return is_string($wpdb->prefix ?? null) && preg_match('/^[A-Za-z0-9_]+$/D', $wpdb->prefix) === 1
-            ? $wpdb->prefix . ($audit ? 'faluss_fans_text_decisions' : 'faluss_fans_text_publications') : null;
+            ? $wpdb->prefix . ($audit === 'requests' ? 'faluss_fans_text_requests' : ($audit ? 'faluss_fans_text_decisions' : 'faluss_fans_text_publications')) : null;
     }
 
     /** @return array<string,string> */
-    public static function columns(bool $audit): array
+    public static function columns(bool|string $audit): array
     {
+        if ($audit === 'requests') {
+            return ['creator_id' => 'char(36)', 'key_hash' => 'char(64)', 'request_hash' => 'char(64)', 'publication_id' => 'char(36)'];
+        }
         return $audit ? [
             'publication_id' => 'char(36)', 'revision' => 'bigint(20) unsigned',
             'actor_id' => 'bigint(20) unsigned', 'action' => 'varchar(16)',
@@ -33,7 +36,7 @@ final class TextPublicationSchema
 
     public static function ready(): bool
     {
-        return get_option(self::OPTION) === self::VERSION && self::verify(false) && self::verify(true);
+        return get_option(self::OPTION) === self::VERSION && self::verify(false) && self::verify(true) && self::verify('requests');
     }
 
     public static function installOrVerify(): bool
@@ -47,7 +50,7 @@ final class TextPublicationSchema
             return false;
         }
         try {
-            foreach ([false, true] as $audit) {
+            foreach ([false, true, 'requests'] as $audit) {
                 $table = self::table($audit);
                 $found = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table));
                 if ($found === null) {
@@ -56,7 +59,7 @@ final class TextPublicationSchema
                     foreach (self::columns($audit) as $name => $type) {
                         $columns[] = '`' . $name . '` ' . $type . ' NOT NULL';
                     }
-                    $columns[] = $audit ? 'PRIMARY KEY (publication_id,revision)' : 'PRIMARY KEY (publication_id)';
+                    $columns[] = $audit === 'requests' ? 'PRIMARY KEY (creator_id,key_hash)' : ($audit ? 'PRIMARY KEY (publication_id,revision)' : 'PRIMARY KEY (publication_id)');
                     if (!$audit) { $columns[] = 'KEY creator_id (creator_id)'; }
                     if ($wpdb->query('CREATE TABLE `' . $table . '` (' . implode(',', $columns)
                         . ') ENGINE=InnoDB ' . $wpdb->get_charset_collate()) === false) { return false; }
@@ -70,7 +73,7 @@ final class TextPublicationSchema
         }
     }
 
-    private static function verify(bool $audit): bool
+    private static function verify(bool|string $audit): bool
     {
         global $wpdb;
         $table = self::table($audit);
@@ -95,6 +98,7 @@ final class TextPublicationSchema
         }
         $expected = $audit ? ['PRIMARY' => ['unique' => true, 'columns' => [1 => 'publication_id', 2 => 'revision']]]
             : ['PRIMARY' => ['unique' => true, 'columns' => [1 => 'publication_id']], 'creator_id' => ['unique' => false, 'columns' => [1 => 'creator_id']]];
+        if ($audit === 'requests') { $expected = ['PRIMARY' => ['unique' => true, 'columns' => [1 => 'creator_id', 2 => 'key_hash']]]; }
         foreach ($indexes as &$index) { ksort($index['columns']); }
         unset($index);
         ksort($indexes); ksort($expected);

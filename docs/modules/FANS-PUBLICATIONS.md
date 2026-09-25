@@ -10,17 +10,21 @@ expiration de cinq minutes. Les scénarios positifs et négatifs couvrent gratui
 verrouillé sans/avec droit, suspension, retrait, modération, catégorie interdite,
 consentement absent, sélection étrangère, doublon, six éléments et champs privés.
 
-Le lot présent ajoute `fans-text-publications` dans le Master Plugin, exclusivement
+Le lot #74 a ajouté `fans-text-publications` dans le Master Plugin, exclusivement
 sur Fans. Il réutilise la politique pour la lecture du texte gratuit. Les chemins
 réservés par `TeaserProjection` restent non enregistrés : aucune consommation par Me,
 aucun média, original verrouillé, paiement, score ou teaser actif.
 
 ## Stockage privé et modération humaine
 
-Deux tables InnoDB version 1 : `${prefix}faluss_fans_text_publications` conserve
+Le schéma v2 conserve les deux tables InnoDB de la v1 : `${prefix}faluss_fans_text_publications` conserve
 l'UUID public, le créateur public, la révision, le texte courant, l'état, la catégorie
 fixe et les dates ; `${prefix}faluss_fans_text_decisions` conserve UUID/révision,
 acteur WordPress, action, motif fermé, SHA-256 du texte concerné et date UTC.
+Il ajoute `${prefix}faluss_fans_text_requests` : clé primaire composée du créateur
+et du SHA-256 de la clé d'idempotence, empreinte de la requête et UUID de publication.
+Aucun texte ni clé brute dans cette troisième table ; aucune donnée de celle-ci
+n'est exposée dans les réponses publiques ou les listes privées.
 Le journal n'enregistre pas le texte ni une copie des anciennes versions.
 Les rejets et retraits effacent le texte courant, en conservant les décisions.
 Aucun post, attachment, répertoire public, index de recherche WordPress, flux RSS
@@ -82,7 +86,7 @@ rendre le texte comme texte, jamais comme HTML. Aucun import de contenu distant.
 | --- | --- | --- |
 | `GET /text-publications` | Publique | Page de textes approuvés actuellement visibles, plus récents d'abord |
 | `GET /text-publications/{id}` | Publique | Texte approuvé et profil actif, sinon 404 |
-| `POST /text-publications` | Auteur SSO actif + nonce | `text`, `category=hosted_allowed_content` ; 201 pending |
+| `POST /text-publications` | Auteur SSO + nonce ; profil actif pour nouvelle création | `Idempotency-Key` UUID v4 obligatoire ; `text`, `category=hosted_allowed_content` ; 201 pending ou état courant lors d'un rejeu |
 | `GET /text-publications/mine` | Auteur SSO + nonce | Pages de tous ses textes, tous états, plus récemment modifiés d'abord |
 | `GET /text-publications/{id}/private` | Propriétaire ou admin + nonce | Révision courante privée |
 | `POST /text-publications/{id}/edit` | Propriétaire actif + nonce | `text`, `revision` ; pending |
@@ -130,17 +134,94 @@ y compris aux dates identiques. Aucun instantané inter-requêtes n'est conserv�
 modération, édition ou changement de statut peuvent modifier l'ensemble ou son
 ordre pendant le parcours. Recommencer à la première page pour un parcours frais.
 Le retrait et la suspension restent prioritaires sur tout ancien curseur.
-POST création n'est pas idempotent : ne pas relancer aveuglément une requête dont
-l'issue réseau est inconnue. Les modifications sont protégées par leur révision.
+La création est idempotente selon le contrat ci-dessous. Les modifications restent
+protégées par leur révision : rejouer une édition déjà appliquée renvoie 409.
 Pas d'écran d'édition/modération ajouté : parcours REST seulement, état du module
-dans l'administration commune. Les quotas et l'ergonomie restent à traiter.
+dans l'administration commune. L'ergonomie reste à traiter.
+
+## Admission par créateur et concurrence
+
+Seuils serveur fixes dans `TextPublicationIntake`, non configurables par le client :
+
+| Limite | Créations et éditions concernées | Réponse quand atteinte |
+| --- | --- | --- |
+| 20 textes `pending` par créateur | Toute nouvelle création et toute édition, même celle d'un texte déjà pending | 429 `publication_pending_quota` |
+| 30 admissions sur une heure glissante | Somme des créations et éditions validées | 429 `publication_hourly_quota` |
+| 100 admissions sur 24 heures glissantes | Même somme ; ne se réinitialise pas à minuit | 429 `publication_daily_quota` |
+
+Le contrôle intervient **avant** l'écriture. L'opération atteignant exactement le
+seuil est permise ; la suivante est refusée. Une édition identique reste une
+admission à modérer et compte aussi. L'identité de quota est le profil propriétaire
+résolu par le serveur, jamais un identifiant envoyé par le navigateur.
+Le retrait du créateur, le rejet et l'approbation administratifs ne consomment
+aucun quota et ne passent pas par cette admission. Retrait/rejet/approbation libèrent
+une place pending, mais n'effacent pas les admissions de la fenêtre horaire/journalière.
+Les textes refusés ou retirés ne permettent donc pas de contourner les limites de débit.
+
+Un verrou MariaDB par créateur, commun à création et édition, est acquis **avant**
+`START TRANSACTION`, et libéré après commit/rollback. Il sérialise la lecture des
+quotas et l'écriture, y compris entre workers HTTP. Le verrou de révision sur la
+publication reste ensuite utilisé pour les éditions. Échec/attente supérieure à
+cinq secondes pour le verrou ou erreur de lecture des compteurs : 503, sans écriture.
+La modération et le retrait restent indépendants de ce verrou d'admission ; une
+décision concurrente peut provoquer un refus conservateur, pas un dépassement.
+
+Les compteurs proviennent des tables du domaine, sans transient, cache partagé ni
+nouveau ledger : nombre de pending et décisions `create`/`edit` reliées au créateur.
+Les nouvelles traces sont datées par `UTC_TIMESTAMP()` MariaDB, comme les fenêtres
+de calcul à borne inférieure exclusive (`occurred_at > maintenant - durée`).
+Les traces anormalement futures restent comptées par prudence. Une transaction annulée n'ajoute aucune
+admission. Les erreurs de quota ne promettent pas de `Retry-After` : la place pending
+dépend d'un retrait ou d'une décision ; éviter toute boucle de nouvelles tentatives.
+
+## Idempotence de la création
+
+Envoyer un en-tête `Idempotency-Key` contenant un UUID v4 aléatoire, en minuscules,
+sans donnée personnelle, pour chaque **nouvelle intention de création**. Conserver
+cette clé et le JSON original jusqu'à résolution d'une réponse perdue. La clé est
+scopée au créateur ; un autre créateur n'accède jamais à son résultat.
+
+Le serveur compare une empreinte SHA-256 de la catégorie canonique et des octets
+UTF-8 exacts du texte (pas de normalisation Unicode ou d'espaces). Publication,
+première décision et association clé/empreinte/UUID sont validées dans **une seule
+transaction InnoDB**. Une contrainte unique protège aussi le couple créateur/clé.
+Un échec d'écriture du journal ou de l'association annule les trois écritures ;
+la même clé peut alors être réessayée. Deux requêtes concurrentes identiques ne
+créent ni deuxième publication, ni deuxième trace.
+
+| Situation | Résultat REST |
+| --- | --- |
+| Nouvelle clé, texte valide et quota disponible | 201, publication pending |
+| Même clé et même texte/catégorie | 201, **état courant** de la publication existante, sans nouvelle admission ni trace |
+| Même clé, texte différent valide | 409 `idempotency_conflict`, aucune écriture |
+| Clé absente, non UUID v4 minuscule ou mal formée | 400 `invalid_idempotency_key` |
+| Quota atteint | 429 avec le code du seuil concerné |
+| Stockage, verrou ou journal indisponible | 503, admission fermée |
+
+Le rejeu est recherché avant les quotas et avant la condition de profil actif
+nécessaire à une **nouvelle** création. Un propriétaire toujours lié au SSO peut
+donc retrouver son texte même à quota plein ou après suspension. Il doit toujours
+fournir sa session et son nonce. Une édition, un rejet ou un retrait intervenus
+depuis la création sont conservés ; un rejeu ne restaure jamais un texte effacé et
+ne republie rien. Une association orpheline échoue en 503, sans recréation silencieuse.
+Le service direct exige aussi la clé : ce contrôle ne dépend pas uniquement du REST.
+
+Les associations n'expirent pas et ne sont pas purgées dans ce lot, afin de ne pas
+rouvrir une ancienne clé à la création. Seuls les hashes et l'UUID sont retenus.
+Une future politique de suppression de compte/rétention devra préserver cette
+protection ou documenter une nouvelle durée de garantie. Aucun mécanisme de purge
+automatique ni limite globale multi-créateurs n'est ajouté ici.
 
 ## Activation et retour arrière
 
 Opt-in serveur hors Git : rôle `fans`, SSO configuré et flag SSO, flag profils,
 schémas SSO/profils valides, puis `FALUSS_PLATFORM_FANS_TEXT_PUBLICATIONS=true`.
-Une activation/réactivation explicitement autorisée installe les deux tables et
-écrit `faluss_fans_text_publications_schema_version=1` après vérification exacte.
+Une activation/réactivation explicitement autorisée installe/vérifie les trois tables et
+écrit `faluss_fans_text_publications_schema_version=2` après vérification exacte.
+La migration v1 → v2 est additive : les textes et décisions v1 restent inchangés ;
+leurs admissions récentes participent aux quotas, mais aucune clé n'est inventée
+pour les créations historiques. Une v1 non migrée ferme le module v2 ; aucune
+migration ne se produit au simple chargement d'une requête.
 Un schéma absent, incompatible ou non InnoDB ferme le module ; aucun rattrapage
 destructif automatique. La réactivation vérifie les tables existantes sans les vider.
 Sur Me/Hub, même un flag erroné n'installe pas ces tables.
@@ -150,6 +231,10 @@ tables et journal sont conservés. Pas de désinstallation destructive, migratio
 de `wp_posts`, cron, projection Me ou paiement. Ce lot laisse le flag absent en
 production et la PR en brouillon. Seule l'instance locale jetable l'a activé,
 puis désactivé pour vérifier le retour arrière.
+Conserver aussi les associations d'idempotence. Ne pas réactiver l'ancien moteur
+v1 ni abaisser manuellement l'option de version pour contourner l'admission : cela
+supprimerait les garanties de quotas/rejeu. Le retour arrière sûr consiste à fermer
+le flag, conserver les trois tables, puis livrer une correction revue.
 
 ## Preuves et limites de recette
 
@@ -162,7 +247,19 @@ suspendu (60 textes approuvés masqués en tête), 45 textes initialement public
 70 textes en attente. Parcours exhaustifs public/propriétaire/modération, dates
 égales, pages pleines, fin exacte, retrait et nouvelle suspension, bornes et curseurs
 invalides, permissions et adaptation REST sont testés. Aucun flag ni site n'est
-activé pour cette correction ; pas de nouvelle recette WordPress/MariaDB.
+activé pour cette correction initiale. La recette d'admission ci-dessous vérifie
+désormais aussi cette pagination en WordPress/MariaDB réels.
+
+Lot admission : tests unitaires d'idempotence, conflit, échec d'association, quotas
+sur créations/éditions, opérations de retrait/rejet à quota plein et fermeture sans
+lecture de quota ou sans migration. Recette étendue : migration v1 → v2 conservant
+le texte existant, quatre créations HTTP simultanées avec une clé commune, clés
+différentes à la frontière du quota, éditions concurrentes, rejeux sans double trace,
+fenêtres glissantes et trois parcours paginés comparés à des requêtes SQL indépendantes.
+Les sessions restent synthétiques ; aucun échange Me, paiement, média ni site réel
+de production n'est sollicité. Cette exécution réussit **87 contrôles REST réels**.
+Détails et résultats dans le README de recette.
+Pas de preuve de charge à grande échelle ou de panne/reconnexion réseau au commit.
 
 Recette locale initiale du 25 septembre 2026 (avant pagination, SHA `9d5f2eb`) : WordPress 7.1.2, PHP 8.5.4, MariaDB 11.8.6,
 deux tables InnoDB, serveur PHP à quatre workers, cookies et nonces WordPress réels.

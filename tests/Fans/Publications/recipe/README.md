@@ -14,7 +14,10 @@ Les comptes, textes et liaisons sont synthétiques. Aucun secret n'est versionn�
    (43 caractères base64url), rôle `fans`. Activer uniquement les flags SSO, profils,
    et `FALUSS_PLATFORM_FANS_TEXT_PUBLICATIONS` sur cette instance jetable, puis le plugin.
    Installer les permaliens `/%postname%/`. Désactiver cron et les requêtes HTTP externes.
-3. Exécuter `wp eval-file <repo>/tests/Fans/Publications/recipe/fixture.php` sur
+3. Installer ou vérifier explicitement le schéma v2 dans cette instance locale avant
+   la fixture : trois tables InnoDB, dont `faluss_fans_text_requests`. La migration
+   v1 → v2 ajoute cette table et conserve publications et journal.
+   Exécuter `wp eval-file <repo>/tests/Fans/Publications/recipe/fixture.php` sur
    cette instance. Elle utilise les contrats publics de profil et prépare uniquement
    les liaisons SSO synthétiques ; elle ne simule pas une preuve réseau Me.
    Les cookies/nonces restent dans `/var/tmp/faluss-text-publications-proof/sessions.json`,
@@ -29,33 +32,49 @@ Les comptes, textes et liaisons sont synthétiques. Aucun secret n'est versionn�
    `/var/tmp/faluss-v3-wp/wp-cli.phar` ; adapter ce seul chemin sur une autre machine.
    Arrêter ensuite tous les workers et conserver les résultats sans sessions/secrets.
 
-## Résultat initial constaté le 25 septembre 2026 (SHA `9d5f2eb`)
+## Résultat de la recette d’admission (25 septembre 2026)
 
-WordPress 7.1.2, PHP 8.5.4, MariaDB 11.8.6 : **45 contrôles réussis**.
-Cette preuve précède la pagination. Le script lit désormais les listes dans
-`items`, mais n'a pas été rejoué pour la correction de pagination, sans activation
-de flag. Les nouveaux tests de pagination sont des tests PHPUnit simulés, pas
-une nouvelle recette WordPress/MariaDB.
+WordPress 7.1.2, PHP 8.5.4, MariaDB 11.8.6 : **87 contrôles REST réussis**,
+via quatre workers PHP et une vraie base InnoDB. Ils comprennent les 45 contrôles
+initiaux de #74 (SHA `9d5f2eb`) et les nouveaux scénarios d’admission/pagination.
+Les tests PHPUnit avec doubles ne sont pas comptés dans ces 87 contrôles.
 
-- Auteur actif/lié uniquement ; nonce obligatoire ; admin non créateur refusé en création.
-- Catégorie adulte externe, propriétaire forgé, média, accès verrouillé et HTML refusés.
-- Pending absent de la liste et du détail publics ; privé réservé au propriétaire/admin.
-- Administration seule pour file, décision et traces ; approbation explicite requise.
-- Trigger SQL d'échec du journal : création entièrement annulée, approbation annulée,
-  révision pending intacte et pas d'exposition publique ; trigger retiré en `finally`.
-- Approbation et réponse publique sur liste blanche, avec `no-store`.
-- Deux requêtes HTTP simultanées d'édition à la même révision : une 200, une 409,
-  une seule trace nouvelle ; édition cachée et modération périmée refusée.
-- Rejet purgeant le texte, hash et acteur conservés, correction soumise à revue.
-- Suspension masquant les lectures ; retrait possible malgré suspension ;
-  réactivation ne restaurant pas un texte retiré.
-- Tables InnoDB ; aucune pièce jointe ; retrait du flag fermant les routes et
-  conservant le journal. Le chargement initial de la nouvelle configuration a
-  nécessité une nouvelle requête : le script attend au plus cinq secondes pour
-  cette relecture, distincte du retrait transactionnel d'un texte.
+- Sessions WordPress, nonces, propriété, modération, accès privés/publics, refus
+  des catégories interdites et des médias, suspension et retrait.
+- Migration locale v1 → v2 : une publication préexistante conservée avant remise
+  à zéro des seules tables texte de cette base synthétique pour la recette.
+- Quatre créations simultanées avec une même clé : une publication et une trace ;
+  rejeu après réponse perdue, conflit de contenu (409), clé invalide/absente (400).
+- Trigger SQL temporaire faisant échouer l’association idempotente : transaction
+  annulée sans publication ni trace orpheline ; nouvelle tentative réussie.
+- Limite de 20 textes pending ; quatre créations différentes pour la dernière
+  place : une 201 et trois 429. Course création/édition sous le même verrou.
+- Limite horaire de 30 créations et éditions cumulées : deux éditions concurrentes
+  pour la dernière admission, une acceptée et une 429 ; création suivante refusée.
+- Limite quotidienne de 100 admissions. Les horodatages synthétiques du journal
+  sont déplacés de deux heures puis de 25 heures pour tester les fenêtres ;
+  cette partie ne prétend pas avoir attendu 24 heures réelles.
+- Retrait et rejet possibles à quota atteint ; rejeu sans nouvelle admission,
+  y compris après retrait (texte vide, aucune résurrection).
+- Pagination publique sur 32 textes visibles, 22 textes approuvés d’un créateur
+  suspendu exclus ; 25 publications du propriétaire et 44 éléments de modération.
+  Pages successives comparées à un oracle SQL indépendant : ordre déterministe,
+  pages remplies, aucun doublon ni omission dans ces jeux inchangés.
+- Trois tables InnoDB, 104 publications et 104 associations idempotentes en fin
+  de recette ; aucune pièce jointe. Flag texte désactivé à la fin, routes fermées,
+  journal conservé. La relecture du flag peut demander une nouvelle requête
+  (attente bornée à cinq secondes), distincte du retrait transactionnel d’un texte.
+
+La fixture réutilise les comptes synthétiques nommés et renouvelle leurs sessions.
+Pour rejouer intégralement, repartir d’une base jetable vierge ou remettre à zéro
+explicitement **uniquement les trois tables texte de cette base dédiée**, réactiver
+le flag local, vérifier le schéma puis relancer la fixture. Les seuils de production
+ne sont pas modifiés pour les tests. Les triggers sont retirés en `finally`.
 
 Limites : pas de preuve navigateur/TLS/CDN, pas de nouvel échange SSO avec Me,
-pas de recette médias/Me (inexistants), pas de test de charge, de panne réseau au
-commit ni de moteur de détection de contenu interdit. La revue humaine et les
-procédures de purge/rétention avant ouverture restent indispensables. Les tests
-PHPUnit utilisent des doubles ; ils ne sont pas comptés parmi ces 45 contrôles.
+pas de recette médias/Me (inexistants), pas de test de charge, de perte de connexion
+SQL au commit ni de bascule multi-serveur. Le rejeu HTTP vérifie la récupération
+d’une réponse perdue après commit, pas une interruption physique au milieu du commit.
+La revue humaine, la rétention/purge et la protection globale contre un abus réparti
+sur plusieurs créateurs restent à définir avant ouverture. Aucun filtre ne garantit
+la détection de tout contenu interdit. Aucun flag hors instance jetable n’est activé.
