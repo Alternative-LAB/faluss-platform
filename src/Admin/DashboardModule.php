@@ -218,6 +218,7 @@ final class DashboardModule implements Module
             'identity-client' => ['label' => 'Client Identity', 'description' => 'Connecte faluss.com à l’autorité d’identité via OAuth et PKCE.', 'short' => 'IC'],
             'fans-sso' => ['label' => 'Client SSO Fans', 'description' => 'Établit une session locale Fans depuis une preuve de Faluss Me.', 'short' => 'FS'],
             'fans-creator-profiles' => ['label' => 'Profils créateurs Fans', 'description' => 'Gère les profils créateurs structurés et leur publication approuvée.', 'short' => 'FC'],
+            'fans-followers' => ['label' => 'Followers Fans', 'description' => 'Gère les abonnements locaux aux profils créateurs approuvés.', 'short' => 'FF'],
             'link' => ['label' => 'Faluss Link', 'description' => 'Gère les cartes publiques, leur édition, les médias et les découvertes.', 'short' => 'FL'],
             'me-studio' => ['label' => 'Me Studio', 'description' => 'Fournit l’interface Studio moderne pour créer et personnaliser une carte.', 'short' => 'MS'],
             'portal' => ['label' => 'Portail membre', 'description' => 'Affiche l’espace membre et orchestre ses applications et services.', 'short' => 'PM'],
