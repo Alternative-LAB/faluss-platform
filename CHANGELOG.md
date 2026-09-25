@@ -8,6 +8,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Vérifié
 
+- Recette REST HTTPS du catalogue et des profils : permissions, fiches adultes masquées, refus 403/503 et changement de catégorie.
+
 - Recette SSO HTTPS Me/Fans sur deux WordPress/MariaDB jetables : cookies, rejeu, expiration, collision, rollback/retry et callbacks concurrents ; limites navigateur et OTP documentées.
 
 ### Ajouté
