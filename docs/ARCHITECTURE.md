@@ -1,6 +1,6 @@
 # Architecture initiale
 
-`faluss-platform` est un plugin WordPress modulaire. Le site choisit explicitement son rôle via `FALUSS_PLATFORM_ROLE`, dont les seules valeurs autorisées sont `me`, `hub` et `fans`. Le rôle `fans` admet l'administration commune et, après opt-in et vérification de son schéma, son [client SSO propre](modules/FANS-SSO.md). Les modules Me et Hub restent limités à leurs rôles déclarés.
+`faluss-platform` est un plugin WordPress modulaire. Le site choisit explicitement son rôle via `FALUSS_PLATFORM_ROLE`, dont les seules valeurs autorisées sont `me`, `hub` et `fans`. Le rôle `fans` admet l'administration commune, un [client SSO propre](modules/FANS-SSO.md) et des [profils créateurs structurés](modules/FANS-PROFILES.md), chacun après opt-in et vérification de son schéma. Les modules Me et Hub restent limités à leurs rôles déclarés.
 
 ```mermaid
 flowchart LR
@@ -8,7 +8,7 @@ flowchart LR
     Bootstrap --> Role{Rôle du site}
     Role -->|me| Me[Modules compatibles me]
     Role -->|hub| Hub[Modules compatibles hub]
-    Role -->|fans| Fans[Administration commune et client SSO optionnel]
+    Role -->|fans| Fans[Administration, SSO et profils optionnels]
     Me --> Registry[Registre de modules]
     Hub --> Registry
     Fans --> Registry
@@ -31,7 +31,7 @@ Un module implémente `Faluss\Platform\Core\Module` et déclare :
 - les identifiants de ses dépendances ;
 - sa méthode `boot()`.
 
-Le registre vérifie les doublons, l’absence de dépendance, l’incompatibilité de rôle et les cycles avant le chargement. Le module `theme-tokens` est la première migration optionnelle ; chaque module suivant fait l’objet d’une PR distincte et de tests ciblés. Les domaines métier [Faluss Fans](modules/FANS.md) restent contractuels et ne sont pas chargés par l'admission du rôle ou par le client SSO.
+Le registre vérifie les doublons, l’absence de dépendance, l’incompatibilité de rôle et les cycles avant le chargement. Le module `theme-tokens` est la première migration optionnelle ; chaque module suivant fait l’objet d’une PR distincte et de tests ciblés. Les domaines [Faluss Fans](modules/FANS.md) au-delà des profils structurés restent contractuels et ne sont pas chargés par l'admission du rôle, le SSO ou les profils.
 
 ## Cohabitation et rollback
 
