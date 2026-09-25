@@ -17,11 +17,12 @@ if (!TextPublicationsModule::available() || !TextPublicationSchema::installOrVer
 }
 $sessions = [];
 global $wpdb;
-foreach (['owner', 'other', 'pending', 'unlinked'] as $name) {
-    $id = wp_insert_user(['user_login' => 'recipe_' . $name, 'user_pass' => wp_generate_password(40),
+foreach (['owner', 'other', 'pending', 'unlinked', 'quota', 'churn', 'racer', 'racequota', 'daily'] as $name) {
+    $existing = get_user_by('login', 'recipe_' . $name);
+    $id = $existing ? $existing->ID : wp_insert_user(['user_login' => 'recipe_' . $name, 'user_pass' => wp_generate_password(40),
         'user_email' => $name . '@example.test', 'role' => 'subscriber']);
     if (is_wp_error($id)) { throw new RuntimeException('Use a fresh database for the recipe'); }
-    if ($name !== 'unlinked') {
+    if ($name !== 'unlinked' && !$existing) {
         $wpdb->insert(FansSsoSchema::tables()['links'], ['wp_user_id' => $id, 'faluss_id' => wp_generate_uuid4(),
             'created_at' => gmdate('Y-m-d H:i:s'), 'last_proved_at' => gmdate('Y-m-d H:i:s')]);
     }

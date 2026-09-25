@@ -23,32 +23,52 @@ final class TextPublicationService
     }
 
     /** @return array<string,mixed>|\WP_Error */
-    public static function create(mixed $text, mixed $category): array|\WP_Error
+    public static function create(mixed $text, mixed $category, mixed $key = null): array|\WP_Error
     {
         if (!TextPublicationsModule::available()) { return self::error('publications_unavailable', 503); }
         $profile = CreatorProfileService::own();
-        if ($profile === null || $profile['status'] !== 'active') { return self::error('active_creator_required', 403); }
+        if ($profile === null) { return self::error('active_creator_required', 403); }
         if ($category !== self::CATEGORY || !self::validText($text)) { return self::error('invalid_text_publication', 400); }
-        $id = wp_generate_uuid4();
-        if (!self::validId($id)) { return self::error('publication_id_unavailable', 503); }
+        if (!self::validId($key)) { return self::error('invalid_idempotency_key', 400); }
         global $wpdb;
         // WordPress otherwise logs failing SQL verbatim, including private text.
+        $lock = TextPublicationIntake::lock($profile['creator_id']);
+        if ($lock === null) { return self::error('publication_intake_unavailable', 503); }
         $previousSuppress = $wpdb->suppress_errors(true);
         try {
             if ($wpdb->query('START TRANSACTION') === false) { return self::error('publication_write_failed', 503); }
+            $requestHash = hash('sha256', $category . "\0" . $text);
+            $existing = $wpdb->get_row($wpdb->prepare('SELECT request_hash,publication_id FROM `' . TextPublicationSchema::table('requests')
+                . '` WHERE creator_id=%s AND key_hash=%s', $profile['creator_id'], hash('sha256', $key)), 'ARRAY_A');
+            if ($wpdb->last_error !== '') { return self::error('publication_write_failed', 503); }
+            if (is_array($existing)) {
+                if (!hash_equals((string) $existing['request_hash'], $requestHash)) { return self::error('idempotency_conflict', 409); }
+                $replay = self::read((string) $existing['publication_id']);
+                return $replay !== null && $replay['creator_id'] === $profile['creator_id'] ? $replay : self::error('publication_write_failed', 503);
+            }
+            if ($profile['status'] !== 'active') { return self::error('active_creator_required', 403); }
+            $quota = TextPublicationIntake::check($profile['creator_id']);
+            if ($quota instanceof \WP_Error) { return $quota; }
+            $id = wp_generate_uuid4();
+            if (!self::validId($id)) { return self::error('publication_id_unavailable', 503); }
             $now = gmdate('Y-m-d H:i:s');
             $row = ['publication_id' => $id, 'creator_id' => $profile['creator_id'], 'revision' => 1,
                 'body' => $text, 'state' => 'pending', 'category' => self::CATEGORY, 'created_at' => $now, 'updated_at' => $now];
             $ok = $wpdb->query($wpdb->prepare('INSERT INTO `' . TextPublicationSchema::table() . '`'
                 . ' (publication_id,creator_id,revision,body,state,category,created_at,updated_at) VALUES (%s,%s,%d,%s,%s,%s,%s,%s)',
                 $id, $profile['creator_id'], 1, $text, 'pending', self::CATEGORY, $now, $now));
-            if ($ok !== 1 || !self::audit($row, 'create', 'awaiting_review', $text) || $wpdb->query('COMMIT') === false) {
+            if ($ok !== 1 || !self::audit($row, 'create', 'awaiting_review', $text)
+                || $wpdb->query($wpdb->prepare('INSERT INTO `' . TextPublicationSchema::table('requests')
+                    . '` (creator_id,key_hash,request_hash,publication_id) VALUES (%s,%s,%s,%s)',
+                    $profile['creator_id'], hash('sha256', $key), $requestHash, $id)) !== 1
+                || $wpdb->query('COMMIT') === false) {
                 return self::error('publication_write_failed', 503);
             }
             return $row;
         } finally {
             $wpdb->query('ROLLBACK');
             $wpdb->suppress_errors($previousSuppress);
+            TextPublicationIntake::release($lock);
         }
     }
 
@@ -68,6 +88,8 @@ final class TextPublicationService
             return self::error('publication_forbidden', 403);
         }
         global $wpdb;
+        $lock = $action === 'edit' ? TextPublicationIntake::lock($profile['creator_id']) : null;
+        if ($action === 'edit' && $lock === null) { return self::error('publication_intake_unavailable', 503); }
         $previousSuppress = $wpdb->suppress_errors(true);
         try {
             if ($wpdb->query('START TRANSACTION') === false) { return self::error('publication_write_failed', 503); }
@@ -86,6 +108,11 @@ final class TextPublicationService
             if (in_array($action, ['edit', 'approve'], true) && CreatorProfileService::publicById($row['creator_id']) === null) {
                 return self::error('active_creator_required', 403);
             }
+            if ($action === 'edit') {
+                // Use the locked persisted state, never a client-provided pending count or state.
+                $quota = TextPublicationIntake::check($profile['creator_id'], $row['state'] !== 'pending');
+                if ($quota instanceof \WP_Error) { return $quota; }
+            }
             $oldText = $row['body'];
             $row['body'] = $action === 'edit' ? $text : (in_array($action, ['withdraw', 'reject'], true) ? '' : $oldText);
             $row['state'] = match ($action) { 'edit' => 'pending', 'approve' => 'approved', 'reject' => 'rejected', default => 'withdrawn' };
@@ -100,6 +127,7 @@ final class TextPublicationService
         } finally {
             $wpdb->query('ROLLBACK');
             $wpdb->suppress_errors($previousSuppress);
+            if ($lock !== null) { TextPublicationIntake::release($lock); }
         }
     }
 
@@ -220,8 +248,8 @@ final class TextPublicationService
     {
         global $wpdb;
         return $wpdb->query($wpdb->prepare('INSERT INTO `' . TextPublicationSchema::table(true) . '`'
-            . ' (publication_id,revision,actor_id,action,reason,text_hash,occurred_at) VALUES (%s,%d,%d,%s,%s,%s,%s)',
-            $row['publication_id'], $row['revision'], get_current_user_id(), $action, $reason, hash('sha256', $text), $row['updated_at'])) === 1;
+            . ' (publication_id,revision,actor_id,action,reason,text_hash,occurred_at) VALUES (%s,%d,%d,%s,%s,%s,UTC_TIMESTAMP())',
+            $row['publication_id'], $row['revision'], get_current_user_id(), $action, $reason, hash('sha256', $text))) === 1;
     }
 
     private static function error(string $code, int $status): \WP_Error

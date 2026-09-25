@@ -4,7 +4,9 @@ import json
 import subprocess
 import urllib.request
 import urllib.error
+import urllib.parse
 import time
+import uuid
 from pathlib import Path
 
 ROOT = Path('/var/tmp/faluss-text-publications-recipe')
@@ -20,13 +22,15 @@ def check(label, condition):
     checks += 1
     print('PASS ' + label)
 
-def call(who, route, data=None, nonce=True):
+def call(who, route, data=None, nonce=True, key=None):
     headers = {'Host': 'text.local.test'}
     if who in SESSIONS:
         s = SESSIONS[who]
         headers['Cookie'] = s['cookie_name'] + '=' + s['cookie']
         if nonce:
             headers['X-WP-Nonce'] = s['nonce']
+    if data is not None and route == 'text-publications' and key is not False:
+        headers['Idempotency-Key'] = key if key is not None else str(uuid.uuid4())
     if data is not None:
         headers['Content-Type'] = 'application/json'
     req = urllib.request.Request(BASE + route, None if data is None else json.dumps(data).encode(), headers)
@@ -107,6 +111,8 @@ call('admin', 'creators/' + cid + '/status', {'status': 'active'})
 check('reactivation never restores withdrawn text', call('anon', path)[0] == 404 and moderate(withdrawn)[0] == 409)
 check('no posts or media created', sql("SELECT COUNT(*) FROM wp_posts WHERE post_type='attachment'") == '0')
 check('both text tables InnoDB', sql("SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('wp_faluss_fans_text_publications','wp_faluss_fans_text_decisions') AND ENGINE='InnoDB'") == '2')
+
+exec((Path(__file__).parent / 'intake-test.py').read_text())
 
 count = sql('SELECT COUNT(*) FROM wp_faluss_fans_text_decisions')
 subprocess.run(['php', '/var/tmp/faluss-v3-wp/wp-cli.phar', '--allow-root', '--path=' + str(ROOT), 'config', 'set', 'FALUSS_PLATFORM_FANS_TEXT_PUBLICATIONS', 'false', '--raw', '--quiet'], check=True)

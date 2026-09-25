@@ -41,7 +41,7 @@ final class TextPublicationRest
     public static function create(\WP_REST_Request $r): \WP_REST_Response
     {
         $data = self::input($r, ['text', 'category']);
-        return self::response($data === null ? self::badInput() : TextPublicationService::create($data['text'], $data['category']), 201);
+        return self::response($data === null ? self::badInput() : TextPublicationService::create($data['text'], $data['category'], $r->get_header('Idempotency-Key')), 201);
     }
     public static function edit(\WP_REST_Request $r): \WP_REST_Response
     {
