@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Faluss\Platform\Fans\Publications;
 
+use Faluss\Platform\Fans\Images\PublicationImageReference;
 use Faluss\Platform\Fans\Profiles\CreatorProfileService;
 
 final class TextPublicationService
@@ -73,11 +74,13 @@ final class TextPublicationService
     }
 
     /** @return array<string,mixed>|\WP_Error */
-    public static function change(mixed $id, mixed $revision, string $action, mixed $text = null, mixed $reason = null): array|\WP_Error
+    public static function change(mixed $id, mixed $revision, string $action, mixed $text = null, mixed $reason = null, mixed $imageId = null, mixed $imageRevision = null): array|\WP_Error
     {
         if (!TextPublicationsModule::available()) { return self::error('publications_unavailable', 503); }
         if (!self::validId($id) || !is_int($revision) || $revision < 1 || $revision >= 2147483647
-            || !in_array($action, ['edit', 'withdraw', 'approve', 'reject'], true)
+            || !in_array($action, ['edit', 'image', 'withdraw', 'approve', 'reject'], true)
+            || ($action === 'image' && !(($imageId === null && $imageRevision === null)
+                || (self::validId($imageId) && is_int($imageRevision) && $imageRevision > 0 && $imageRevision < 2147483647)))
             || ($action === 'edit' && !self::validText($text))
             || ($action === 'approve' && $reason !== 'allowed_text')
             || ($action === 'reject' && !in_array($reason, ['prohibited_content', 'needs_revision'], true))
@@ -88,8 +91,9 @@ final class TextPublicationService
             return self::error('publication_forbidden', 403);
         }
         global $wpdb;
-        $lock = $action === 'edit' ? TextPublicationIntake::lock($profile['creator_id']) : null;
-        if ($action === 'edit' && $lock === null) { return self::error('publication_intake_unavailable', 503); }
+        $admission = in_array($action, ['edit', 'image'], true);
+        $lock = $admission ? TextPublicationIntake::lock($profile['creator_id']) : null;
+        if ($admission && $lock === null) { return self::error('publication_intake_unavailable', 503); }
         $previousSuppress = $wpdb->suppress_errors(true);
         try {
             if ($wpdb->query('START TRANSACTION') === false) { return self::error('publication_write_failed', 503); }
@@ -105,22 +109,31 @@ final class TextPublicationService
                 return self::error('publication_state_conflict', 409);
             }
             // Withdrawal remains possible after profile suspension. Every exposure checks the profile again.
-            if (in_array($action, ['edit', 'approve'], true) && CreatorProfileService::publicById($row['creator_id']) === null) {
+            if (in_array($action, ['edit', 'image', 'approve'], true) && CreatorProfileService::publicById($row['creator_id']) === null) {
                 return self::error('active_creator_required', 403);
             }
-            if ($action === 'edit') {
+            if ($admission) {
                 // Use the locked persisted state, never a client-provided pending count or state.
                 $quota = TextPublicationIntake::check($profile['creator_id'], $row['state'] !== 'pending');
                 if ($quota instanceof \WP_Error) { return $quota; }
             }
+            if ($action === 'image') {
+                if (!self::validText($row['body'])) { return self::error('invalid_text_publication', 400); }
+                if ($imageId !== null && !PublicationImageReference::eligible($imageId, $row['creator_id'], $imageRevision, true)) {
+                    return self::error('publication_image_unavailable', 409);
+                }
+                if ($wpdb->query($wpdb->prepare('INSERT INTO `' . TextPublicationSchema::table('images')
+                    . '` (publication_id,revision,image_id,image_revision) VALUES (%s,%d,%s,%d)',
+                    $id, $revision + 1, $imageId ?? '', $imageRevision ?? 0)) !== 1) { return self::error('publication_write_failed', 503); }
+            }
             $oldText = $row['body'];
             $row['body'] = $action === 'edit' ? $text : (in_array($action, ['withdraw', 'reject'], true) ? '' : $oldText);
-            $row['state'] = match ($action) { 'edit' => 'pending', 'approve' => 'approved', 'reject' => 'rejected', default => 'withdrawn' };
+            $row['state'] = match ($action) { 'edit', 'image' => 'pending', 'approve' => 'approved', 'reject' => 'rejected', default => 'withdrawn' };
             $row['revision'] = $revision + 1;
             $row['updated_at'] = gmdate('Y-m-d H:i:s');
             if ($wpdb->query($wpdb->prepare('UPDATE `' . TextPublicationSchema::table() . '` SET body=%s,state=%s,revision=%d,updated_at=%s'
                 . ' WHERE publication_id=%s AND revision=%d', $row['body'], $row['state'], $row['revision'], $row['updated_at'], $id, $revision)) !== 1
-                || !self::audit($row, $action, $moderation ? $reason : ($action === 'edit' ? 'awaiting_review' : 'creator_withdrawal'), $action === 'edit' ? $text : $oldText)
+                || !self::audit($row, $action === 'image' ? 'edit' : $action, $action === 'image' ? 'image_association' : ($moderation ? $reason : ($action === 'edit' ? 'awaiting_review' : 'creator_withdrawal')), $action === 'edit' ? $text : $oldText)
                 || $wpdb->query('COMMIT') === false
             ) { return self::error('publication_write_failed', 503); }
             return $row;
@@ -151,6 +164,7 @@ final class TextPublicationService
             if (!current_user_can('manage_options') && ($profile === null || $profile['creator_id'] !== $row['creator_id'])) {
                 return self::error('publication_forbidden', 403);
             }
+            $row['image_id'] = self::imageReference($row);
             return $row;
         }
         if (!PublicationAccessPolicy::originalAllowed(CreatorProfileService::publicById($row['creator_id']) !== null,
@@ -159,6 +173,20 @@ final class TextPublicationService
             || !self::validText($row['body'])
         ) { return self::error('publication_not_found', 404); }
         return array_intersect_key($row, array_flip(['publication_id', 'creator_id', 'revision', 'body', 'updated_at']));
+    }
+
+    /** Private projection only; revalidate every reference through the image owner contract.
+     * @param array<string,mixed> $row
+     */
+    private static function imageReference(array $row): ?string
+    {
+        if (!in_array($row['state'], ['pending', 'approved'], true)) { return null; }
+        global $wpdb;
+        $reference = $wpdb->get_row($wpdb->prepare('SELECT image_id,image_revision FROM `' . TextPublicationSchema::table('images')
+            . '` WHERE publication_id=%s AND revision<=%d ORDER BY revision DESC LIMIT 1', $row['publication_id'], $row['revision']), 'ARRAY_A');
+        if (!is_array($reference) || $wpdb->last_error !== '' || !self::validId($reference['image_id'] ?? null)) { return null; }
+        return PublicationImageReference::eligible($reference['image_id'], $row['creator_id'], (int) $reference['image_revision'])
+            ? $reference['image_id'] : null;
     }
 
     /** @return array{items:list<array<string,mixed>>,next_cursor:?string}|\WP_Error */

@@ -8,18 +8,21 @@ namespace Faluss\Platform\Fans\Publications;
 final class TextPublicationSchema
 {
     public const OPTION = 'faluss_fans_text_publications_schema_version';
-    public const VERSION = '2';
+    public const VERSION = '3';
 
     public static function table(bool|string $audit = false): ?string
     {
         global $wpdb;
         return is_string($wpdb->prefix ?? null) && preg_match('/^[A-Za-z0-9_]+$/D', $wpdb->prefix) === 1
-            ? $wpdb->prefix . ($audit === 'requests' ? 'faluss_fans_text_requests' : ($audit ? 'faluss_fans_text_decisions' : 'faluss_fans_text_publications')) : null;
+            ? $wpdb->prefix . ($audit === 'images' ? 'faluss_fans_text_images' : ($audit === 'requests' ? 'faluss_fans_text_requests' : ($audit ? 'faluss_fans_text_decisions' : 'faluss_fans_text_publications'))) : null;
     }
 
     /** @return array<string,string> */
     public static function columns(bool|string $audit): array
     {
+        if ($audit === 'images') {
+            return ['publication_id' => 'char(36)', 'revision' => 'bigint(20) unsigned', 'image_id' => 'char(36)', 'image_revision' => 'bigint(20) unsigned'];
+        }
         if ($audit === 'requests') {
             return ['creator_id' => 'char(36)', 'key_hash' => 'char(64)', 'request_hash' => 'char(64)', 'publication_id' => 'char(36)'];
         }
@@ -36,7 +39,7 @@ final class TextPublicationSchema
 
     public static function ready(): bool
     {
-        return get_option(self::OPTION) === self::VERSION && self::verify(false) && self::verify(true) && self::verify('requests');
+        return get_option(self::OPTION) === self::VERSION && self::verify(false) && self::verify(true) && self::verify('requests') && self::verify('images');
     }
 
     public static function installOrVerify(): bool
@@ -50,7 +53,7 @@ final class TextPublicationSchema
             return false;
         }
         try {
-            foreach ([false, true, 'requests'] as $audit) {
+            foreach ([false, true, 'requests', 'images'] as $audit) {
                 $table = self::table($audit);
                 $found = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table));
                 if ($found === null) {

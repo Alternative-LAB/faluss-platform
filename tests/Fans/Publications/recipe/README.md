@@ -14,9 +14,10 @@ Les comptes, textes et liaisons sont synthétiques. Aucun secret n'est versionn�
    (43 caractères base64url), rôle `fans`. Activer uniquement les flags SSO, profils,
    et `FALUSS_PLATFORM_FANS_TEXT_PUBLICATIONS` sur cette instance jetable, puis le plugin.
    Installer les permaliens `/%postname%/`. Désactiver cron et les requêtes HTTP externes.
-3. Installer ou vérifier explicitement le schéma v2 dans cette instance locale avant
+3. Installer ou vérifier explicitement le schéma courant v3 dans cette instance locale avant
    la fixture : trois tables InnoDB, dont `faluss_fans_text_requests`. La migration
-   v1 → v2 ajoute cette table et conserve publications et journal.
+   v1 → v2 ajoute cette table et conserve publications et journal. La v3 ajoute
+   le journal privé des références Images ; voir la [recette dédiée](IMAGE-ASSOCIATION.md).
    Exécuter `wp eval-file <repo>/tests/Fans/Publications/recipe/fixture.php` sur
    cette instance. Elle utilise les contrats publics de profil et prépare uniquement
    les liaisons SSO synthétiques ; elle ne simule pas une preuve réseau Me.

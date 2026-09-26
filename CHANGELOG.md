@@ -6,6 +6,12 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Associations privées entre images et textes Fans
+
+- Référence privée à une image approuvée du même créateur SSO actif ; ajout, remplacement et détachement soumis à nouvelle modération, quotas et révision du texte.
+- Contrat Images limité à une éligibilité serveur, verrou InnoDB et journal atomique ; révocation après retrait de l’image/texte ou suspension, sans octet ni métadonnée d’image dans l’API publique.
+- Schéma texte v3 additif, contrats et recette locale HTTP concurrente documentés ; aucune diffusion, projection Me, activation en production ou ouverture commerciale.
+
 ### Quarantaine privée des images Fans
 
 - Correction #76 : tous les ancêtres du stockage, racine comprise, exigent UID root ou UID PHP ; refus d’un propriétaire tiers même en 0755 ou sticky. Contrat et tests de stockage actualisés.
