@@ -14,7 +14,7 @@ Les écrans conceptuels ne prouvent aucun droit, paiement ou badge de vérificat
 | Identity / SSO | Me : identité, preuve, codes ; chaque client : compte WP et session locale | Hub, Fans ; Pro à préparer | OAuth confidentiel, PKCE S256, UUID opaque | Me existant ; client Fans #67 fusionné, distinct des adaptateurs Hub |
 | Créateurs | Fans : profil, admission, suspension | Fans ; projections autorisées Me | `CreatorProfileService`, REST Fans v1 | #68 fusionnée ; `active` = publication approuvée, `identity_verified=false` ; vérification vendeur absente |
 | Relations sociales | Fans : follow et futures décisions de blocage/signalement | Fans | `FollowersService`, REST Fans v1 | #69 fusionnée, locale ; blocage, signalement, suppression et rétention à construire |
-| Publications et fichiers | Fans : contenu, modération, sélection teaser, accès au fichier | Fans ; Me reçoit une projection bornée | `fans.creator-teasers` v1 proposé | Moteur et transport non implémentés |
+| Publications et fichiers | Fans : contenu, modération, sélection teaser, accès au fichier | Fans ; Me reçoit une projection bornée | `fans.creator-teasers` v1 proposé | Textes locaux fusionnés ; images en quarantaine privée dans le lot présent, sans diffusion ; transport teaser non implémenté |
 | Messagerie / bibliothèque | Fans : conversations, pièces jointes, collection de références et droits locaux | Fans | Contrats à implémenter, aucun accès par simple SSO | Absents |
 | Catalogue / commandes | Fans : fiches, commandes, preuves, droits, remboursements, revenus EUR | Fans | Catalogue REST v1 ; futurs contrats commerce distincts | #70 fusionnée : deux catégories, achats fermés ; commandes et reversements absents |
 | Progression membre | Moteur commun Progression : faits acceptés, corrections, niveaux | Fans en premier ; autres dérivés ensuite | `faluss.member-progression` v1 proposé | Contrat ; pas de score actif ni de stockage |
@@ -32,8 +32,11 @@ ni la relation métier, ni une autorisation d'accès à un contenu.
 ## Publications et projections Me
 
 Fans garde les fichiers privés hors URL publique WordPress et toute décision
-d'accès. Avant de recevoir un octet, un futur upload doit vérifier le membre lié,
-le profil autorisé, le nonce, les quotas et le type/taille ; stockage en quarantaine,
+d'accès. Avant conservation en quarantaine, le moteur vérifie le membre lié, le profil
+autorisé, le nonce, les quotas et le type/taille réels. Sur multipart WordPress,
+proxy et PHP peuvent recevoir/tamponner le corps avant ces contrôles ; les limites
+en amont et temporaires privés relèvent de l’hébergement. Voir [FANS-IMAGES.md](FANS-IMAGES.md).
+Stockage en quarantaine,
 analyse et modération précèdent toute publication. Une simple déclaration
 « autorisé » du navigateur ne constitue pas une validation. Aucun contenu adulte
 dans un original, aperçu, teaser, message ou pièce jointe. Un contenu inconnu,
