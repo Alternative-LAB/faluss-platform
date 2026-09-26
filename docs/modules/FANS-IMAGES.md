@@ -187,3 +187,7 @@ consommateur. L’image doit être approuvée, de révision exacte et appartenir
 créateur actif du texte. Son retrait/rejet ou la suspension rendent la référence
 inutilisable à la lecture suivante ; l’approbation du texte ne change jamais
 les permissions de lecture des octets. Aucune URL ni diffusion n’est ajoutée.
+
+## Administration
+
+Le [panel de modération Fans](FANS-MODERATION.md) propose un parcours manuel sur ces API existantes, sous permissions et nonces, sans modifier leurs motifs, révisions ou décisions métier.

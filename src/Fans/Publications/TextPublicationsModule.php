@@ -38,6 +38,7 @@ final class TextPublicationsModule implements Module
     {
         if (self::available()) {
             TextPublicationRest::register();
+            \Faluss\Platform\Fans\Moderation\ModerationPanel::register();
             if (\Faluss\Platform\Fans\Images\ImageDisplayDerivative::enabled()) { PublicationImageRest::register(); }
         }
     }
