@@ -2,10 +2,12 @@
 
 ## Statut et frontière
 
-Premier moteur local d’images du Master Plugin, PR brouillon depuis `8b074d6`.
-Aucune diffusion publique, même après approbation : `PublicationAccessPolicy`
-reçoit l’état non publiable `quarantined`. Aucun lien avec les publications texte,
-la médiathèque WordPress, les profils illustrés, Me, Hub, un teaser, une vidéo,
+Moteur local de quarantaine du Master Plugin, fusionné par #76, opt-in fermé.
+Aucune diffusion du PNG de quarantaine, même après approbation : sa politique
+conserve l’état non publiable `quarantined`. #77 a ajouté les références privées
+aux textes. Le [lot de diffusion JPEG](FANS-IMAGE-DELIVERY.md) est distinct, avec
+son propre flag fermé et ses contrôles par demande ; il ne sert jamais ce fichier.
+Aucun lien avec la médiathèque WordPress, les profils illustrés, Me, Hub, un teaser, une vidéo,
 la messagerie, un paiement ou un droit commercial. Les contenus adultes restent
 interdits ; aucune catégorie `external_adult_delivery_right` n’est admise ici.
 
@@ -173,8 +175,9 @@ Un refus ou retrait tente immédiatement l’effacement du fichier, sans effacer
 trace. Aucun stockage volontaire de contenu interdit à titre d’archive de revue.
 
 Preuves et limites : [recette locale](../../tests/Fans/Images/recipe/README.md).
-La diffusion publique, les teasers Me et les autres médias nécessitent des lots et
-contrats distincts : cette approbation n’autorise pas leur branchement ultérieur.
+La diffusion de dérivés exige le flag et le [contrat distinct](FANS-IMAGE-DELIVERY.md).
+Les teasers Me et autres médias restent à construire ; aucune approbation de
+quarantaine seule ne les autorise.
 
 ## Références depuis les textes
 

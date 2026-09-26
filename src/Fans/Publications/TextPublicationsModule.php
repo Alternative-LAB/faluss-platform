@@ -36,6 +36,9 @@ final class TextPublicationsModule implements Module
     }
     public function boot(): void
     {
-        if (self::available()) { TextPublicationRest::register(); }
+        if (self::available()) {
+            TextPublicationRest::register();
+            if (\Faluss\Platform\Fans\Images\ImageDisplayDerivative::enabled()) { PublicationImageRest::register(); }
+        }
     }
 }

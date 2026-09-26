@@ -6,6 +6,13 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Affichage optionnel d’images Fans
+
+- Dérivé JPEG en mémoire, redimensionné et distinct du PNG de quarantaine ; aucun fichier dérivé persistant, original, chemin public ou métadonnée privée exposé.
+- Route Fans révisionnée sous flag de diffusion distinct fermé par défaut ; texte public, profil actif, association courante et image approuvée du même propriétaire revérifiés sous transaction à chaque demande.
+- Révocation à la demande suivante, réponses no-store sans cache partagé, verrou de génération, refus des pannes et des accès forgés ; aucun teaser Me, CDN public, paiement ou activation de production.
+- Contrats d’hébergement/rétention et recette WordPress/MariaDB locale : 77 contrôles HTTP réels réussis, trois flags locaux désactivés et workers arrêtés après tests.
+
 ### Associations privées entre images et textes Fans
 
 - Référence privée à une image approuvée du même créateur SSO actif ; ajout, remplacement et détachement soumis à nouvelle modération, quotas et révision du texte.

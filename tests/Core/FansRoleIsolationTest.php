@@ -48,7 +48,7 @@ final class FansRoleIsolationTest extends TestCase
     private function assertTextModuleIsolated(string $role): void
     {
         define('FALUSS_PLATFORM_ROLE', $role);
-        foreach (['FALUSS_PLATFORM_FANS_SSO', 'FALUSS_PLATFORM_FANS_CREATOR_PROFILES', 'FALUSS_PLATFORM_FANS_TEXT_PUBLICATIONS', 'FALUSS_PLATFORM_FANS_IMAGES'] as $flag) { define($flag, true); }
+        foreach (['FALUSS_PLATFORM_FANS_SSO', 'FALUSS_PLATFORM_FANS_CREATOR_PROFILES', 'FALUSS_PLATFORM_FANS_TEXT_PUBLICATIONS', 'FALUSS_PLATFORM_FANS_IMAGES', 'FALUSS_PLATFORM_FANS_IMAGE_DELIVERY'] as $flag) { define($flag, true); }
         // No WordPress database exists here: touching schema installation would fail the test.
         $module = new \Faluss\Platform\Fans\Publications\TextPublicationsModule();
         self::assertSame([SiteRole::Fans], $module->roles());
@@ -58,6 +58,8 @@ final class FansRoleIsolationTest extends TestCase
         $images = new \Faluss\Platform\Fans\Images\ImagesModule();
         self::assertFalse($images::enabled());
         $images::activate();
+        self::assertFalse(\Faluss\Platform\Fans\Images\ImageDisplayDerivative::enabled());
+        self::assertFalse(\Faluss\Platform\Fans\Publications\PublicationImageRest::permission());
     }
 
     public function testOnlyTheSiteAdministrationCanBootWhenEveryExistingModuleIsRegistered(): void

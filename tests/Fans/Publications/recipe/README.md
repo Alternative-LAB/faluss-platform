@@ -114,3 +114,6 @@ d’une réponse perdue après commit, pas une interruption physique au milieu d
 La revue humaine, la rétention/purge et la protection globale contre un abus réparti
 sur plusieurs créateurs restent à définir avant ouverture. Aucun filtre ne garantit
 la détection de tout contenu interdit. Aucun flag hors instance jetable n’est activé.
+
+La [recette de diffusion JPEG](IMAGE-DISPLAY.md) est séparée : flag distinct,
+rendu en mémoire et contrôles HTTP de révocation, concurrence et stockage.
