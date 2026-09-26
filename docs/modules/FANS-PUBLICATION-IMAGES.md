@@ -5,9 +5,10 @@
 Une publication textuelle peut référencer **une image**, approuvée dans la
 quarantaine Fans et appartenant au même profil créateur. Le même créateur peut
 réutiliser cette image sur plusieurs de ses textes. Aucun octet n’est copié,
-aucune URL générée, aucun attachment WordPress créé. Aucune diffusion, y compris
-sur Me, n’est introduite. L’approbation du texte ne vaut jamais autorisation de
-lecture de son image. Les catégories du texte restent limitées à
+aucune URL générée, aucun attachment WordPress créé. Le lot #77 n’introduit aucune diffusion. Le
+[lot JPEG séparé](FANS-IMAGE-DELIVERY.md) ajoute une route Fans sous flag distinct,
+sans teaser Me ni lecture du fichier de quarantaine. L’approbation du texte seule
+ne suffit pas à autoriser un dérivé et n’ouvre jamais le fichier de quarantaine. Les catégories du texte restent limitées à
 `hosted_allowed_content` ; le droit adulte externe n’est pas une publication.
 
 `TextPublicationService` réutilise le SSO, `CreatorProfileService::own()` et la
@@ -60,7 +61,7 @@ chemin, hash de fichier, taille, URL ou octet. Les réponses d’écriture conse
 leur projection texte ; relire le GET privé pour l’association courante.
 **Les GET publics et leur liste gardent exactement les cinq champs texte** :
 `publication_id`, `creator_id`, `revision`, `body`, `updated_at`. Même l’existence
-d’une image n’y est pas indiquée. Les octets restent accessibles seulement à
+d’une image n’y est pas indiquée. Les octets de quarantaine restent accessibles seulement à
 l’administrateur Fans autorisé avec nonce via le parcours de quarantaine existant.
 
 Chaque lecture privée réévalue l’état Images et le profil. Après commit du retrait
@@ -70,7 +71,7 @@ pas le texte approuvé : seul son lien devient inutilisable. Une réactivation d
 profil peut rendre une référence toujours approuvée à nouveau éligible ; elle ne
 restaure jamais une image ou un texte retiré. Une réponse déjà lue avant révocation
 ne peut être rappelée. Réponses `private, no-store` ; aucun cache CDN ne doit les
-conserver. Le futur moteur de diffusion devra relire ses propres autorisations :
+conserver. Le moteur JPEG optionnel relit ses propres autorisations à chaque demande :
 ni cet UUID ni une ancienne réponse privée ne constituent un droit aux octets.
 
 ## Transaction, quota et trace
@@ -125,7 +126,8 @@ Les tests locaux ne prouvent ni la détection de tout contenu interdit, ni la s�
 des alias HTTP de l’hébergeur, ni la diffusion future. Le contrat de stockage privé
 et ses limites restent ceux de [FANS-IMAGES.md](FANS-IMAGES.md).
 
-Avant diffusion : contrat d’accès aux octets, consentements/modération appropriés,
-révocation et caches, formats dérivés, hébergement et rétention, recettes propres.
+Avant activation de la diffusion : valider les consentements/modérations,
+l’hébergement, les caches et la rétention selon le [contrat JPEG](FANS-IMAGE-DELIVERY.md).
+Sa recette locale ne constitue pas une activation de production.
 Avant teaser Me : sélection explicite et contrat de projection/révocation, transport
 et tests Me distincts. Aucun paiement, commande ou score n’est ajouté.

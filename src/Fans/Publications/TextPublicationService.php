@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Faluss\Platform\Fans\Publications;
 
 use Faluss\Platform\Fans\Images\PublicationImageReference;
+use Faluss\Platform\Fans\Images\ImageDisplayDerivative;
 use Faluss\Platform\Fans\Profiles\CreatorProfileService;
 
 final class TextPublicationService
@@ -167,12 +168,57 @@ final class TextPublicationService
             $row['image_id'] = self::imageReference($row);
             return $row;
         }
-        if (!PublicationAccessPolicy::originalAllowed(CreatorProfileService::publicById($row['creator_id']) !== null,
-            $row['state'] === 'approved' ? 'published' : $row['state'],
-            $row['state'] === 'approved' ? 'approved' : 'pending', $row['category'], 'free', false)
-            || !self::validText($row['body'])
-        ) { return self::error('publication_not_found', 404); }
+        if (!self::publicReadable($row)) { return self::error('publication_not_found', 404); }
         return array_intersect_key($row, array_flip(['publication_id', 'creator_id', 'revision', 'body', 'updated_at']));
+    }
+
+    /** @param array<string,mixed> $row */
+    private static function publicReadable(array $row, bool $lockProfile = false): bool
+    {
+        return self::validText($row['body']) && PublicationAccessPolicy::originalAllowed(
+            CreatorProfileService::publicById($row['creator_id'], $lockProfile) !== null,
+            $row['state'] === 'approved' ? 'published' : $row['state'],
+            $row['state'] === 'approved' ? 'approved' : 'pending', $row['category'], 'free', false);
+    }
+
+    /** @phpstan-impure Reads the last operation's database error. */
+    private static function databaseError(): bool
+    {
+        global $wpdb;
+        return $wpdb->last_error !== '';
+    }
+
+    /** Each request authorizes a specific public text revision before generating any bytes. */
+    public static function displayImage(mixed $id, mixed $revision): string|\WP_Error
+    {
+        if (!TextPublicationsModule::available() || !ImageDisplayDerivative::enabled()
+            || !self::validId($id) || !is_int($revision) || $revision < 1 || $revision >= 2147483647) {
+            return self::error('display_not_found', 404);
+        }
+        global $wpdb;
+        // One generation per site; no queue of expensive anonymous GD operations.
+        $lock = 'fans_display_' . substr(hash('sha256', (string) TextPublicationSchema::table()), 0, 40);
+        if ((int) $wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s,0)', $lock)) !== 1) { return self::error('display_busy', 503); }
+        $suppressed = $wpdb->suppress_errors(true);
+        try {
+            if ($wpdb->query('START TRANSACTION') === false) { return self::error('display_unavailable', 503); }
+            $row = self::read($id, true);
+            if (self::databaseError()) { return self::error('display_unavailable', 503); }
+            if ($row === null || (int) $row['revision'] !== $revision || !self::publicReadable($row, true)) {
+                return self::error('display_not_found', 404);
+            }
+            $reference = $wpdb->get_row($wpdb->prepare('SELECT image_id,image_revision FROM `' . TextPublicationSchema::table('images')
+                . '` WHERE publication_id=%s AND revision<=%d ORDER BY revision DESC LIMIT 1 FOR UPDATE', $id, $revision), 'ARRAY_A');
+            if (self::databaseError()) { return self::error('display_unavailable', 503); }
+            if (!is_array($reference) || !self::validId($reference['image_id'] ?? null)) { return self::error('display_not_found', 404); }
+            $bytes = ImageDisplayDerivative::forPublication($reference['image_id'], $row['creator_id'], (int) $reference['image_revision']);
+            if ($bytes instanceof \WP_Error) { return $bytes; }
+            if ($wpdb->query('COMMIT') === false) { return self::error('display_unavailable', 503); }
+            return $bytes;
+        } finally {
+            $wpdb->query('ROLLBACK'); $wpdb->suppress_errors($suppressed);
+            $wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)', $lock));
+        }
     }
 
     /** Private projection only; revalidate every reference through the image owner contract.

@@ -31,7 +31,7 @@ Un module implémente `Faluss\Platform\Core\Module` et déclare :
 - les identifiants de ses dépendances ;
 - sa méthode `boot()`.
 
-Le registre vérifie les doublons, l’absence de dépendance, l’incompatibilité de rôle et les cycles avant le chargement. Le module `theme-tokens` est la première migration optionnelle ; chaque module suivant fait l’objet d’une PR distincte et de tests ciblés. [Faluss Fans](modules/FANS.md) admet des modules optionnels SSO, profils, suivi minimal, catalogue sans achat et textes modérés. Le moteur texte dépend du contrat public des profils et de la politique d'accès existante, avec son propre stockage privé et flag. Médias, messagerie, commandes et droits restent contractuels ; l'admission du rôle ne les charge pas.
+Le registre vérifie les doublons, l’absence de dépendance, l’incompatibilité de rôle et les cycles avant le chargement. Le module `theme-tokens` est la première migration optionnelle ; chaque module suivant fait l’objet d’une PR distincte et de tests ciblés. [Faluss Fans](modules/FANS.md) admet des modules optionnels SSO, profils, suivi minimal, catalogue sans achat et textes modérés. Le moteur texte dépend du contrat public des profils et de la politique d'accès existante, avec son propre stockage privé et flag. La quarantaine d’images et ses associations privées sont fusionnées. Le [dérivé JPEG Fans](modules/FANS-IMAGE-DELIVERY.md) est un lot brouillon sous flag distinct, sans original public ni teaser Me. Autres médias, messagerie, commandes et droits restent contractuels ; l’admission du rôle ne les charge pas.
 
 ## Cohabitation et rollback
 

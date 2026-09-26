@@ -331,3 +331,14 @@ Le consommateur devra encore échapper le libellé à son point de rendu.
 La projection pure peut être retirée sans migration ; le moteur texte conserve
 ses données privées lors du rollback décrit ci-dessus. Catalog Me et les adaptateurs
 Identity Hub restent inchangés.
+
+## Affichage optionnel d’un dérivé image
+
+Le [lot JPEG Fans](FANS-IMAGE-DELIVERY.md) ajoute une route GET distincte portant
+la révision du texte. Il réutilise exactement la même politique de visibilité,
+puis revalide sous transaction le profil, l’association et l’image approuvée du
+même créateur. Le flag de diffusion est fermé par défaut ; l’approbation d’un
+texte et le flag de quarantaine ne suffisent pas. Le JSON public texte conserve
+ses cinq champs, sans UUID d’image, chemin ou métadonnée privée. Aucun original
+ou teaser Me n’est servi. Édition, remplacement, retrait et suspension restent
+prioritaires sur toute ancienne URL ; voir le contrat et la recette dédiés.

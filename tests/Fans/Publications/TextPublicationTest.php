@@ -580,4 +580,37 @@ final class TextPublicationTest extends TestCase
         self::assertInstanceOf(\WP_Error::class, TextPublicationService::change($id, 2, 'image', null, null, $image, 2));
         self::assertIsArray(TextPublicationService::change($id, 2, 'withdraw'));
     }
+
+    public function testDeliveryIsOptInAndRejectsEveryNonpublicTextState(): void
+    {
+        $row = $this->create(); $db = $GLOBALS['wpdb']; $id = $row['publication_id'];
+        self::assertFalse(PublicationImageRest::permission());
+        self::assertSame(404, TextPublicationService::displayImage($id, 1)->get_error_data()['status']);
+        define('FALUSS_PLATFORM_FANS_IMAGE_DELIVERY', true);
+        self::assertTrue(PublicationImageRest::permission());
+        foreach (['pending', 'rejected', 'withdrawn'] as $state) {
+            $db->publication['state'] = $state;
+            self::assertSame(404, TextPublicationService::displayImage($id, 1)->get_error_data()['status']);
+        }
+        $db->publication['state'] = 'approved';
+        self::assertSame(404, TextPublicationService::displayImage($id, 2)->get_error_data()['status']);
+        self::assertSame(404, TextPublicationService::displayImage($id, 1)->get_error_data()['status'], 'No association');
+        $db->references[] = ['image_id' => 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', 'image_revision' => 2];
+        $db->image = ['creator_id' => $row['creator_id'], 'state' => 'approved', 'revision' => 2, 'file_hash' => str_repeat('a',64)];
+        foreach (['pending', 'rejected', 'withdrawn'] as $state) {
+            $db->image['state'] = $state;
+            self::assertSame(404, TextPublicationService::displayImage($id, 1)->get_error_data()['status']);
+        }
+        $db->image['state'] = 'approved'; $db->image['creator_id'] = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+        self::assertSame(404, TextPublicationService::displayImage($id, 1)->get_error_data()['status']);
+        $db->image['creator_id'] = $row['creator_id']; $db->image['revision'] = 3;
+        self::assertSame(404, TextPublicationService::displayImage($id, 1)->get_error_data()['status']);
+        $db->image['revision'] = 2; $db->profile['status'] = 'suspended';
+        self::assertSame(404, TextPublicationService::displayImage($id, 1)->get_error_data()['status']);
+        $db->profile['status'] = 'active';
+        self::assertSame(503, TextPublicationService::displayImage($id, 1)->get_error_data()['status'], 'No attested private storage: no source fallback');
+        $db->lockAvailable = false;
+        self::assertSame('display_busy', TextPublicationService::displayImage($id, 1)->get_error_code());
+        self::assertFalse($db->suppressed);
+    }
 }

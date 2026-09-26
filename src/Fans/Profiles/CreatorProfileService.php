@@ -84,8 +84,11 @@ final class CreatorProfileService
         return self::profile($row);
     }
 
-    /** @return array{creator_id:string,category:string,status:string,identity_verified:false,created_at:string,updated_at:string}|null */
-    public static function publicById(mixed $creatorId): ?array
+    /**
+     * With $lock=true, the server caller must own the enclosing InnoDB transaction.
+     * @return array{creator_id:string,category:string,status:string,identity_verified:false,created_at:string,updated_at:string}|null
+     */
+    public static function publicById(mixed $creatorId, bool $lock = false): ?array
     {
         $table = CreatorProfileSchema::table();
         if (!self::validId($creatorId) || $table === null || !CreatorProfileSchema::ready()) {
@@ -94,7 +97,7 @@ final class CreatorProfileService
         global $wpdb;
         $row = $wpdb->get_row($wpdb->prepare(
             'SELECT creator_id, category, status, created_at, updated_at FROM ' . self::quote($table)
-                . ' WHERE creator_id = %s AND status = %s LIMIT 1',
+                . ' WHERE creator_id = %s AND status = %s LIMIT 1' . ($lock ? ' FOR UPDATE' : ''),
             $creatorId,
             'active'
         ), 'ARRAY_A');
