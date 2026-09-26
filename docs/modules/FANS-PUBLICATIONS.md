@@ -13,11 +13,13 @@ consentement absent, sélection étrangère, doublon, six éléments et champs p
 Le lot #74 a ajouté `fans-text-publications` dans le Master Plugin, exclusivement
 sur Fans. Il réutilise la politique pour la lecture du texte gratuit. Les chemins
 réservés par `TeaserProjection` restent non enregistrés : aucune consommation par Me,
-aucun média, original verrouillé, paiement, score ou teaser actif.
+aucune diffusion de média, original verrouillé, paiement, score ou teaser actif.
+Le lot d’association ajoute uniquement une référence privée à une image déjà
+approuvée, via [son contrat distinct](FANS-PUBLICATION-IMAGES.md).
 
 ## Stockage privé et modération humaine
 
-Le schéma v2 conserve les deux tables InnoDB de la v1 : `${prefix}faluss_fans_text_publications` conserve
+Le schéma v3 conserve les deux tables InnoDB de la v1 : `${prefix}faluss_fans_text_publications` conserve
 l'UUID public, le créateur public, la révision, le texte courant, l'état, la catégorie
 fixe et les dates ; `${prefix}faluss_fans_text_decisions` conserve UUID/révision,
 acteur WordPress, action, motif fermé, SHA-256 du texte concerné et date UTC.
@@ -221,11 +223,14 @@ automatique ni limite globale multi-créateurs n'est ajouté ici.
 
 Opt-in serveur hors Git : rôle `fans`, SSO configuré et flag SSO, flag profils,
 schémas SSO/profils valides, puis `FALUSS_PLATFORM_FANS_TEXT_PUBLICATIONS=true`.
-Une activation/réactivation explicitement autorisée installe/vérifie les trois tables et
-écrit `faluss_fans_text_publications_schema_version=2` après vérification exacte.
+Une activation/réactivation explicite installe/vérifie les quatre tables et
+écrit `faluss_fans_text_publications_schema_version=3` après vérification exacte.
+La v3 ajoute le journal privé des [associations image–texte](FANS-PUBLICATION-IMAGES.md),
+sans modifier les trois tables v2. Toute association attend une nouvelle modération ;
+aucune référence ou métadonnée d’image ne figure dans les réponses publiques.
 La migration v1 → v2 est additive : les textes et décisions v1 restent inchangés ;
 leurs admissions récentes participent aux quotas, mais aucune clé n'est inventée
-pour les créations historiques. Une v1 non migrée ferme le module v2 ; aucune
+pour les créations historiques. Une v1/v2 non migrée ferme le module v3 ; aucune
 migration ne se produit au simple chargement d'une requête.
 Un schéma absent, incompatible ou non InnoDB ferme le module ; aucun rattrapage
 destructif automatique. La réactivation vérifie les tables existantes sans les vider.
@@ -239,7 +244,7 @@ puis désactivé pour vérifier le retour arrière.
 Conserver aussi les associations d'idempotence. Ne pas réactiver l'ancien moteur
 v1 ni abaisser manuellement l'option de version pour contourner l'admission : cela
 supprimerait les garanties de quotas/rejeu. Le retour arrière sûr consiste à fermer
-le flag, conserver les trois tables, puis livrer une correction revue.
+le flag, conserver les quatre tables, puis livrer une correction revue.
 
 ## Preuves et limites de recette
 

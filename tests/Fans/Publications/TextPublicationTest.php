@@ -7,11 +7,13 @@ namespace Faluss\Platform\Fans\Publications;
 use Faluss\Platform\Fans\Profiles\CreatorProfileDb;
 use Faluss\Platform\Fans\Profiles\CreatorProfileSchema;
 use Faluss\Platform\Fans\Sso\FansSsoSchema;
+use Faluss\Platform\Fans\Images\ImageSchema;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 
 require_once dirname(__DIR__) . '/Profiles/CreatorProfileTest.php';
+require_once __DIR__ . '/image-reference-stubs.php';
 
 function get_option(string $key, mixed $default = false): mixed { return $GLOBALS['text_options'][$key] ?? $default; }
 function get_current_user_id(): int { return $GLOBALS['fans_sso_current_user']; }
@@ -31,6 +33,9 @@ final class TextPublicationDb extends CreatorProfileDb
     public bool $lockAvailable = true;
     public bool $failQuota = false;
     public array $requests = [];
+    public array $references = [];
+    public ?array $image = null;
+    public bool $failReference = false;
     public int $pendingCount = 0;
     public int $hourlyCount = 0;
     public int $dailyCount = 0;
@@ -69,10 +74,15 @@ final class TextPublicationDb extends CreatorProfileDb
             if (str_contains($query, $definition['suffix'])) { $schema = $definition; }
         }
         if (str_contains($query, 'faluss_fans_text_')) {
-            $audit = str_contains($query, 'text_requests') ? 'requests' : str_contains($query, 'text_decisions');
+            $audit = str_contains($query, 'text_images') ? 'images' : (str_contains($query, 'text_requests') ? 'requests' : str_contains($query, 'text_decisions'));
             $schema = ['columns' => array_map(static fn ($type) => ['type' => $type, 'null' => false], TextPublicationSchema::columns($audit)),
                 'indexes' => $audit === 'requests' ? ['PRIMARY' => [true, ['creator_id', 'key_hash']]] : ($audit ? ['PRIMARY' => [true, ['publication_id', 'revision']]]
                     : ['PRIMARY' => [true, ['publication_id']], 'creator_id' => [false, ['creator_id']]])];
+        }
+        if (str_contains($query, 'wp_faluss_fans_images') || str_contains($query, 'wp_faluss_fans_image_decisions')) {
+            $audit = str_contains($query, 'image_decisions');
+            $schema = ['columns' => array_map(static fn ($type) => ['type' => $type, 'null' => false], ImageSchema::columns($audit)),
+                'indexes' => $audit ? ['PRIMARY' => [true, ['image_id', 'revision']]] : ['PRIMARY' => [true, ['image_id']], 'creator_id' => [false, ['creator_id']]]];
         }
         if ($schema !== null && str_starts_with($query, 'SHOW FULL COLUMNS')) {
             $rows = [];
@@ -92,6 +102,8 @@ final class TextPublicationDb extends CreatorProfileDb
     }
     public function get_row(string $query, mixed $output = null): ?array
     {
+        if (str_starts_with($query, 'SELECT creator_id,state,revision')) { return $this->image; }
+        if (str_starts_with($query, 'SELECT image_id,image_revision')) { return $this->references === [] ? null : end($this->references); }
         if (str_starts_with($query, 'SELECT request_hash,publication_id')) {
             $args = end($this->prepared)['args'];
             return $this->requests[$args[0] . $args[1]] ?? null;
@@ -111,10 +123,15 @@ final class TextPublicationDb extends CreatorProfileDb
     public function query(string $query): int|false
     {
         $args = end($this->prepared)['args'] ?? [];
-        if ($query === 'START TRANSACTION') { $this->snapshot = [$this->publication, $this->audit, $this->requests]; return 1; }
+        if ($query === 'START TRANSACTION') { $this->snapshot = [$this->publication, $this->audit, $this->requests, $this->references]; return 1; }
         if ($query === 'COMMIT') { $this->snapshot = null; return 1; }
         if ($query === 'ROLLBACK') {
-            if ($this->snapshot !== null) { [$this->publication, $this->audit, $this->requests] = $this->snapshot; $this->snapshot = null; }
+            if ($this->snapshot !== null) { [$this->publication, $this->audit, $this->requests, $this->references] = $this->snapshot; $this->snapshot = null; }
+            return 1;
+        }
+        if (str_starts_with($query, 'INSERT INTO `wp_faluss_fans_text_images')) {
+            if ($this->failReference) { return false; }
+            $this->references[] = ['publication_id' => $args[0], 'revision' => $args[1], 'image_id' => $args[2], 'image_revision' => $args[3]];
             return 1;
         }
         if (str_starts_with($query, 'INSERT INTO `wp_faluss_fans_text_requests')) {
@@ -148,12 +165,13 @@ final class TextPublicationTest extends TestCase
     {
         \Faluss\Platform\Fans\Sso\fans_sso_reset();
         define('FALUSS_PLATFORM_ROLE', 'fans');
-        foreach (['FALUSS_PLATFORM_FANS_SSO', 'FALUSS_PLATFORM_FANS_CREATOR_PROFILES', 'FALUSS_PLATFORM_FANS_TEXT_PUBLICATIONS'] as $flag) { define($flag, true); }
+        foreach (['FALUSS_PLATFORM_FANS_SSO', 'FALUSS_PLATFORM_FANS_CREATOR_PROFILES', 'FALUSS_PLATFORM_FANS_TEXT_PUBLICATIONS', 'FALUSS_PLATFORM_FANS_IMAGES'] as $flag) { define($flag, true); }
         define('FALUSS_FANS_SSO_CLIENT_ID', 'fans-test-client');
         define('FALUSS_FANS_SSO_CLIENT_SECRET', str_repeat('s', 43));
         $GLOBALS['wpdb'] = new TextPublicationDb();
         $GLOBALS['profile_options'] = [CreatorProfileSchema::OPTION => CreatorProfileSchema::VERSION];
         $GLOBALS['fans_sso_options'] = [FansSsoSchema::OPTION => FansSsoSchema::VERSION];
+        $GLOBALS['image_options'] = [ImageSchema::OPTION => ImageSchema::VERSION];
         $GLOBALS['text_options'] = [TextPublicationSchema::OPTION => TextPublicationSchema::VERSION];
         $GLOBALS['profile_admin'] = false;
         $GLOBALS['profile_linked'] = true;
@@ -503,4 +521,63 @@ final class TextPublicationTest extends TestCase
         self::assertFalse(TextPublicationsModule::available());
     }
 
+
+    public function testImageReferenceApprovalOwnershipRevocationAndPublicIsolation(): void
+    {
+        $db = $GLOBALS['wpdb']; $row = $this->create(); $id = $row['publication_id'];
+        $image = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+        $db->image = ['creator_id' => $row['creator_id'], 'state' => 'pending', 'revision' => 2];
+        foreach (['pending', 'rejected', 'withdrawn'] as $state) {
+            $db->image['state'] = $state;
+            self::assertSame('publication_image_unavailable', TextPublicationService::change($id, 1, 'image', null, null, $image, 2)->get_error_code());
+        }
+        $db->image['state'] = 'approved';
+        $db->image['creator_id'] = $image;
+        self::assertInstanceOf(\WP_Error::class, TextPublicationService::change($id, 1, 'image', null, null, $image, 2));
+        $db->image['creator_id'] = $row['creator_id'];
+        self::assertInstanceOf(\WP_Error::class, TextPublicationService::change($id, 1, 'image', null, null, $image, 1));
+        self::assertSame('pending', TextPublicationService::change($id, 1, 'image', null, null, $image, 2)['state']);
+        self::assertSame($image, TextPublicationService::get($id, true)['image_id']);
+        self::assertSame('publication_revision_conflict', TextPublicationService::change($id, 1, 'image', null, null, $image, 2)->get_error_code());
+        $GLOBALS['profile_admin'] = true;
+        self::assertSame('approved', TextPublicationService::change($id, 2, 'approve', null, 'allowed_text')['state']);
+        self::assertSame(['publication_id', 'creator_id', 'revision', 'body', 'updated_at'], array_keys(TextPublicationService::get($id)));
+        $GLOBALS['profile_admin'] = false;
+        $db->image['state'] = 'withdrawn';
+        self::assertNull(TextPublicationService::get($id, true)['image_id']);
+        self::assertIsArray(TextPublicationService::get($id), 'Image revocation does not grant or revoke text access');
+        $db->image['state'] = 'approved'; $db->profile['status'] = 'suspended';
+        self::assertNull(TextPublicationService::get($id, true)['image_id']);
+        $db->profile['status'] = 'active';
+        self::assertSame('pending', TextPublicationService::change($id, 3, 'image')['state']);
+        self::assertNull(TextPublicationService::get($id, true)['image_id']);
+        self::assertInstanceOf(\WP_Error::class, TextPublicationService::get($id));
+        self::assertSame('image_association', $db->audit[3][4]);
+        self::assertSame('edit', $db->audit[3][3]);
+        TextPublicationService::change($id, 4, 'withdraw');
+        self::assertNull(TextPublicationService::get($id, true)['image_id']);
+    }
+
+    public function testAssociationFailureRollsBackAndUsesExistingAdmissionLimits(): void
+    {
+        $db = $GLOBALS['wpdb']; $row = $this->create(); $id = $row['publication_id'];
+        $image = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+        $db->image = ['creator_id' => $row['creator_id'], 'state' => 'approved', 'revision' => 2];
+        foreach (['failReference', 'failAudit'] as $failure) {
+            $db->$failure = true;
+            self::assertInstanceOf(\WP_Error::class, TextPublicationService::change($id, 1, 'image', null, null, $image, 2));
+            self::assertSame($row, $db->publication); self::assertSame([], $db->references); self::assertCount(1, $db->audit);
+            $db->$failure = false;
+        }
+        $db->pendingCount = 20; $db->publication['state'] = 'approved';
+        self::assertSame('publication_pending_quota', TextPublicationService::change($id, 1, 'image', null, null, $image, 2)->get_error_code());
+        $db->publication['state'] = 'pending'; $db->hourlyCount = 30;
+        self::assertSame('publication_hourly_quota', TextPublicationService::change($id, 1, 'image', null, null, $image, 2)->get_error_code());
+        $db->hourlyCount = 0;
+        self::assertIsArray(TextPublicationService::change($id, 1, 'image', null, null, $image, 2));
+        $GLOBALS['image_options'] = [];
+        self::assertNull(TextPublicationService::get($id, true)['image_id']);
+        self::assertInstanceOf(\WP_Error::class, TextPublicationService::change($id, 2, 'image', null, null, $image, 2));
+        self::assertIsArray(TextPublicationService::change($id, 2, 'withdraw'));
+    }
 }

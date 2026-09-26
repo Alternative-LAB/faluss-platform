@@ -175,3 +175,12 @@ trace. Aucun stockage volontaire de contenu interdit à titre d’archive de rev
 Preuves et limites : [recette locale](../../tests/Fans/Images/recipe/README.md).
 La diffusion publique, les teasers Me et les autres médias nécessitent des lots et
 contrats distincts : cette approbation n’autorise pas leur branchement ultérieur.
+
+## Références depuis les textes
+
+Le [contrat image–publication](FANS-PUBLICATION-IMAGES.md) ajoute une éligibilité
+serveur via `PublicationImageReference`, sans accès aux tables Images par le
+consommateur. L’image doit être approuvée, de révision exacte et appartenir au
+créateur actif du texte. Son retrait/rejet ou la suspension rendent la référence
+inutilisable à la lecture suivante ; l’approbation du texte ne change jamais
+les permissions de lecture des octets. Aucune URL ni diffusion n’est ajoutée.

@@ -19,6 +19,7 @@ final class TextPublicationRest
             ['/text-publications/moderation', 'GET', 'queue', 'adminPermission'],
             [$id, 'GET', 'publicGet', 'publicPermission'],
             [$id . '/private', 'GET', 'privateGet', 'privatePermission'],
+            [$id . '/image', 'POST', 'image', 'memberPermission'],
             [$id . '/edit', 'POST', 'edit', 'memberPermission'],
             [$id . '/withdraw', 'POST', 'withdraw', 'memberPermission'],
             [$id . '/moderate', 'POST', 'moderate', 'adminPermission'],
@@ -47,6 +48,12 @@ final class TextPublicationRest
     {
         $data = self::input($r, ['text', 'revision']);
         return self::response($data === null ? self::badInput() : TextPublicationService::change($r->get_param('publication_id'), $data['revision'], 'edit', $data['text']));
+    }
+    public static function image(\WP_REST_Request $r): \WP_REST_Response
+    {
+        $data = self::input($r, ['revision', 'image_id', 'image_revision']);
+        return self::response($data === null ? self::badInput() : TextPublicationService::change($r->get_param('publication_id'),
+            $data['revision'], 'image', null, null, $data['image_id'], $data['image_revision']));
     }
     public static function withdraw(\WP_REST_Request $r): \WP_REST_Response
     {
