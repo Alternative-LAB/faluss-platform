@@ -60,6 +60,10 @@ final class FansRoleIsolationTest extends TestCase
         $images::activate();
         self::assertFalse(\Faluss\Platform\Fans\Images\ImageDisplayDerivative::enabled());
         self::assertFalse(\Faluss\Platform\Fans\Publications\PublicationImageRest::permission());
+        self::assertFalse(\Faluss\Platform\Fans\Moderation\ModerationPanel::allowed());
+        // With accidental flags on Me/Hub, no panel/menu/preview hook may be registered.
+        // add_action is intentionally absent in this process.
+        $module->boot();
     }
 
     public function testOnlyTheSiteAdministrationCanBootWhenEveryExistingModuleIsRegistered(): void

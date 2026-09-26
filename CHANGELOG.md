@@ -6,6 +6,13 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Panel de modération Fans
+
+- Sous-page administrative paginée textes/quarantaine, contexte, motifs explicites, journaux et décisions confirmées côté serveur ; formulaires utilisables sans JavaScript.
+- Examen PNG privé par POST authentifié sans URL publique ou cache partagé, contrôle de l’association et de la révision ; conflits et pannes affichés sans réussite anticipée.
+- Interface Faluss responsive #FFFDF5, cartes blanches et Outfit locale sous OFL ; contrats, tests d’isolation et recette HTTP WordPress/MariaDB documentés.
+- Aucun nouveau schéma, moteur, flag ouvert, interface créateur, teaser Me, paiement, déploiement ou release.
+
 ### Affichage optionnel d’images Fans
 
 - Dérivé JPEG en mémoire, redimensionné et distinct du PNG de quarantaine ; aucun fichier dérivé persistant, original, chemin public ou métadonnée privée exposé.

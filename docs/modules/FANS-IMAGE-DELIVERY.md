@@ -5,7 +5,7 @@
 Le Master Plugin peut servir un **dérivé JPEG** d’une image associée à un texte
 publiquement lisible sur le rôle **Fans uniquement**. Le flag distinct
 `FALUSS_PLATFORM_FANS_IMAGE_DELIVERY` est absent/false par défaut. Aucune activation
-de production n’accompagne cette PR brouillon. Le flag de quarantaine
+de production n’a accompagné #78, désormais fusionnée. Le flag de quarantaine
 `FALUSS_PLATFORM_FANS_IMAGES` ne suffit jamais à ouvrir cette route.
 
 Le dérivé est créé **en mémoire à chaque demande**, dans un nouveau raster GD,
