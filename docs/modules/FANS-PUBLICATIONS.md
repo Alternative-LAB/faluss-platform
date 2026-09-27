@@ -342,3 +342,7 @@ texte et le flag de quarantaine ne suffisent pas. Le JSON public texte conserve
 ses cinq champs, sans UUID d’image, chemin ou métadonnée privée. Aucun original
 ou teaser Me n’est servi. Édition, remplacement, retrait et suspension restent
 prioritaires sur toute ancienne URL ; voir le contrat et la recette dédiés.
+
+## Administration
+
+Le [panel de modération Fans](FANS-MODERATION.md) propose un parcours manuel sur ces API existantes, sous permissions et nonces, sans modifier leurs motifs, révisions ou décisions métier.

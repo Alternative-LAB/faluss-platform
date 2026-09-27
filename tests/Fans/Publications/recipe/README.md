@@ -117,3 +117,7 @@ la détection de tout contenu interdit. Aucun flag hors instance jetable n’est
 
 La [recette de diffusion JPEG](IMAGE-DISPLAY.md) est séparée : flag distinct,
 rendu en mémoire et contrôles HTTP de révocation, concurrence et stockage.
+
+## Panel de modération
+
+Voir [MODERATION-PANEL.md](MODERATION-PANEL.md) pour la recette HTTP et navigateur, les permissions, les décisions concurrentes et le retour arrière local.
