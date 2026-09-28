@@ -61,11 +61,14 @@ classement/session/dimension. Les corrections concernent toutes ces projections.
 
 Achat, attribution et remboursement PF ne créditent jamais de PC, même par badge,
 seuil ou événement dérivé. Les PC gagnés servent aux cosmétiques ; propriétaire,
-sources et barèmes non décidés : gain et consommation fermés. Les PF `earned` et
+sources et barèmes non décidés : gain et consommation fermés. Intentions produit : daily reward et ramassage
+quotidien sur le profil d’un créateur attribueraient des PC au fan, sans
+propriétaire technique, barème, plafond ou date d’activation fixés. Les claims
+Hub/Me restent des PF historiques, sans renommage ni migration de solde. Les PF `earned` et
 `promotional` historiques restent inchangés, ne deviennent ni PC ni PF éligibles
 au nouveau HoF. Aucun financement ajouté ne contourne cette exclusion.
 
-**1 PF attribué = 1 point HoF est une proposition à valider.** Aucune équivalence
+**1 PF attribué = 1 point HoF est une recommandation d’Axiome, proposition à valider explicitement.** Aucune équivalence
 EUR dans le contrat de score. Le soutien EUR direct du simulateur historique
 n’est pas une source du nouveau HoF. Aucun score actif avant ratio et politique
 approuvés. Un éventuel badge de soutien reste distinct des PC, sans montant ni
@@ -180,8 +183,10 @@ paiement et délivrance commerciale fermés. Aucun taux de commission n’est ac
 par ce contrat. Validation prestataire et vérification vendeur distincte nécessaires
 avant toute vente autorisée ; elles n’ouvrent pas le parcours adulte externe.
 
-Proposition : archiver la catégorie adulte externe sans effacer ses identifiants,
-fiches ni décisions. Aucun archivage exécuté ; 403 et masquage nominatif conservés.
+Cible : retirer la catégorie adulte externe et ses anciennes fiches du Shop et
+de la découverte publics, même actuellement classables. Conserver identifiants
+et historique pour l’administration. Archivage effectif dans un lot distinct ;
+aucune suppression ou migration ici, 403 et masquage nominatif conservés.
 Voir [Store](FANS-STORE.md).
 
 ## Séquence de lots et portes de validation

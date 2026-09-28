@@ -5,7 +5,7 @@
 L’[ADR 0018](../adr/0018-fans-pf-pc-hof-v3.md), `fans.economy-contract/3.0.0`,
 remplace le modèle produit pour la cible. Cette page décrit **le code v2 inchangé**,
 pas la nouvelle règle de score. Ses exemples EUR et son ratio de pièces ne valent
-pas approbation du ratio proposé **1 PF attribué = 1 point HoF**. Aucun moteur actif.
+pas approbation du ratio **1 PF attribué = 1 point HoF**, recommandation d’Axiome proposée mais non validée. Aucun moteur actif.
 
 La cible exige pack sans score, attribution attestée de PF achetés, plusieurs
 classements pour une consommation unique et zéro PC pour achat/attribution/remboursement
@@ -14,6 +14,11 @@ Pas de soutien EUR direct dans le nouveau score. L’éventuel badge reste disti
 des PC, sans montant affiché ni récompense PC dérivée. Aucun wallet ou montant
 financier dans l’API ou l’interface créateur. Un score public peut permettre une
 estimation économique indirecte : aucune garantie contraire.
+
+Intentions produit PC : daily reward et ramassage quotidien sur le profil d’un
+créateur attribueraient des PC au fan, sans propriétaire technique, barème,
+plafond ou date d’activation fixés. Aucun de ces parcours n’est simulé ou activé
+ici. Les claims Hub/Me restent en PF historiques, sans renommage ni migration.
 
 L’adaptation du simulateur est un lot séparé : version nouvelle, tests de ces
 invariants, fan-out multi-classements et corrections sans double dépense. PC,

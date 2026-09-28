@@ -23,7 +23,17 @@ Cette ADR remplace pour la cible Fans les règles économiques de #71 : soutien 
 
 ## Proposition à valider, sans effet exécutable
 
-**1 PF attribué = 1 point HoF** est une proposition, pas une règle acceptée ni un taux déjà implémenté pour la cible. Le contrat de score ne contient aucune équivalence EUR. Tant que le ratio et la politique de classement ne sont pas approuvés, aucun score HoF de production n'est calculé. Un futur format entier versionné devra éviter les flottants ; il ne doit pas reprendre implicitement l'équivalence EUR du simulateur v2.
+**1 PF attribué = 1 point HoF** est une recommandation d’Axiome à valider explicitement par le produit, donc une proposition, pas une règle acceptée ni un taux déjà implémenté pour la cible. Le contrat de score ne contient aucune équivalence EUR. Tant que le ratio et la politique de classement ne sont pas approuvés, aucun score HoF de production n'est calculé. Un futur format entier versionné devra éviter les flottants ; il ne doit pas reprendre implicitement l'équivalence EUR du simulateur v2.
+
+## Intentions produit PC — sans activation
+
+Dans la cible, le **daily reward** et le **ramassage quotidien sur le profil d’un
+créateur** attribueraient des **PC au fan**. Ce sont des intentions produit :
+propriétaire technique, barèmes, plafonds et date d’activation ne sont pas fixés.
+Ces parcours restent fermés jusqu’à leur contractualisation et autorisation.
+Les claims Hub/Me existants distribuent des PF historiques : ils ne sont pas
+renommés en PC, aucun solde n’est migré et leur comportement reste inchangé.
+Acheter, attribuer ou rembourser des PF ne génère jamais de PC, même indirectement.
 
 ## Frontières des propriétaires
 
@@ -51,11 +61,11 @@ La façade actuelle ne fournit que statut et claim quotidien Hub ; pack, support
 | Allocation et remboursements partiels, insuffisance de solde, coordination des autorités | Remboursement partiel et ouverture économique qui en dépend |
 | Sort des titres et cosmétiques après correction | Attribution définitive de récompenses de classement |
 | Vendeur contractuel Shop, responsabilités et traitement financier hors surfaces créateur | Vente, paiement, commande et délivrance commerciale |
-| Valider l'archivage de la catégorie adulte externe | Nouvelle offre commerciale de cette catégorie, toujours refusée |
+| Définir le lot distinct d’archivage effectif adulte externe | Modification du catalogue et de la découverte ; achat toujours refusé |
 
 ## Shop et historique adulte externe
 
-Proposition : **archiver** `external_adult_delivery_right`, conserver identifiants, fiches, décisions et traces, sans effacer l'historique ni transformer ces fiches en produits autorisés. L'archivage n'est pas exécuté. La catégorie existante reste classable ; fiches nominatives masquées sans consentement, achat refusé **403** ; contenu hébergé encore fermé **503**. Aucun contenu adulte dans Fans, messages compris. Aucun accord prestataire ne lève automatiquement le refus. Aucun futur panier, webhook ou droit n'est déclaré protégé avant son implémentation et ses tests propres.
+Cible retenue : **retirer `external_adult_delivery_right` et ses anciennes fiches du Shop et de la découverte publics**, même si elles sont actuellement classables. Conserver leurs identifiants, fiches, décisions et traces pour l’administration, sans effacer l’historique ni les transformer en produits autorisés. L’archivage effectif fera l’objet d’un lot distinct ; aucune suppression ou migration dans #80. Dans le code inchangé, la catégorie reste actuellement classable ; fiches nominatives masquées sans consentement, achat refusé **403** ; contenu hébergé encore fermé **503**. Aucun contenu adulte dans Fans, messages compris. Aucun accord prestataire ne lève automatiquement le refus. Aucun futur panier, webhook ou droit n'est déclaré protégé avant son implémentation et ses tests propres.
 
 ## Vérification attendue et retour arrière
 
