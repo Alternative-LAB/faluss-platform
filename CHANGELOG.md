@@ -6,6 +6,13 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Simulateur Fans HoF v3 hors runtime
+
+- Calcul pur distinct : pack zéro, 1 PF acheté/attesté/attribué = 1 point, multi-projections sans seconde consommation et delta PC toujours nul.
+- Fixtures de révisions, corrections partielles/totales, litiges et sessions clôturées ; sources non achetées, auto-attribution et conflits refusés.
+- Contrat versionné et tests dédiés ; v2 et tests historiques inchangés. Aucun moteur, hook, route, ledger, flag ou capacité de remboursement Token Engine ajouté.
+
+
 ### Contrats Fans PF / PC / HoF v3
 
 - ADR 0018 versionnée : règles acquises PF/PC, multi-classements sans double dépense, absence de finances côté créateur et décision produit validée : 1 PF acheté, attesté et effectivement attribué = 1 point HoF, sans équivalence EUR ; pack seul sans score.

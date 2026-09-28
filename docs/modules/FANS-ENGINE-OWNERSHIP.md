@@ -111,15 +111,17 @@ fermés. Une correction de session clôturée doit réviser le classement d’or
 avec trace, sans déplacer la contribution dans une session courante. Les règles
 complètes et portes figurent dans l’ADR. Aucun crédit PC lié à ces opérations.
 
-### Simulateur historique et futur lot distinct
+### Simulateur historique et v3 distincte
 
 Le [simulateur v2](PROGRESSION-SIMULATION.md) et ses tests restent inchangés :
 ils décrivent des fixtures historiques, dont soutien EUR direct et dépense EUR.
 Ils ne valident pas le contrat v3 et ne doivent pas être raccordés au runtime.
-Un lot séparé devra tester : pack zéro, PF sans PC aux trois étapes et via dérivés,
-multi-classements sans double consommation, refus `earned`/`promotional`, identité
-réelle, corrections/rejeux, absence de finances dans l’API créateur et Shop sans
-récompense implicite. Aucune adaptation de code dans ce lot 1.
+La [v3 hors runtime](FANS-HOF-SIMULATION-V3.md) ajoute des fixtures distinctes pour
+pack zéro, PF sans PC aux trois étapes et via dérivés,
+multi-classements sans double consommation, refus `earned`/`promotional`, auto-attribution entre UUID fictifs et corrections/rejeux. Identité réelle, API
+créateur sans finances et Shop sans récompense implicite restent à vérifier dans
+leurs futurs moteurs. Le lot documentaire initial n’adaptait aucun code ; cette
+v3 ne modifie pas le simulateur v2 et n’ouvre aucun moteur.
 
 ## Cosmétiques et Max
 
@@ -192,7 +194,7 @@ Voir [Store](FANS-STORE.md).
 ## Séquence de lots et portes de validation
 
 1. Présent lot : ADR v3 et alignement documentaire uniquement.
-2. Lot séparé : adaptation du simulateur, sans runtime ; ratio validé ; politiques de classement, protocole PF et autres portes restent fermés.
+2. Simulateur v3 distinct sur fixtures, sans runtime ; ratio validé ; politiques de classement, protocole PF et autres portes restent fermés.
 3. Contrats propriétaires PF/PC, consommation et corrections ; capacités manquantes bloquantes.
 4. Moteurs, stockage, concurrence et recettes réelles dans des PR dédiées ; aucun second ledger PF.
 5. Shop autorisé après vendeur contractuel et autres portes ; social complet et messages séparés.
