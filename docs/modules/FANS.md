@@ -61,7 +61,7 @@ projeter la même attribution, sans seconde dépense PF. Achat, attribution et
 remboursement PF : aucun crédit PC, direct ou dérivé. Les anciens PF `earned`
 et `promotional` ne deviennent ni PC ni PF éligibles au nouveau HoF.
 
-**1 PF attribué = 1 point HoF est une recommandation d’Axiome, proposition à valider explicitement**, sans équivalence EUR.
+**1 PF acheté, attesté et effectivement attribué = 1 point HoF est une décision produit validée**, sans équivalence EUR. Les politiques de classement, le protocole PF et les autres parcours restent fermés.
 Aucun wallet ni montant financier dans l’interface ou l’API créateur, même privée.
 Le score public peut permettre une estimation économique indirecte ; ce n’est pas
 un revenu et aucune impossibilité d’estimation n’est promise. Un éventuel badge

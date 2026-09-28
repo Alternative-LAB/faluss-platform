@@ -21,9 +21,9 @@ Cette ADR remplace pour la cible Fans les règles économiques de #71 : soutien 
 7. Un éventuel badge de soutien reste distinct des PC, sans montant affiché et sans récompense PC dérivée. Pseudo/badge accessibles au seul créateur concerné via une relation vérifiée ; public sur consentement révocable. Les critères du badge restent à valider, donc son calcul demeure fermé.
 8. Identités réelles résolues côté serveur, auto-attribution refusée, reçus authentifiés et absence de preuve = refus. L'égalité d'UUID fictifs du simulateur ne remplace pas cette vérification.
 
-## Proposition à valider, sans effet exécutable
+## Décision produit validée, sans activation
 
-**1 PF attribué = 1 point HoF** est une recommandation d’Axiome à valider explicitement par le produit, donc une proposition, pas une règle acceptée ni un taux déjà implémenté pour la cible. Le contrat de score ne contient aucune équivalence EUR. Tant que le ratio et la politique de classement ne sont pas approuvés, aucun score HoF de production n'est calculé. Un futur format entier versionné devra éviter les flottants ; il ne doit pas reprendre implicitement l'équivalence EUR du simulateur v2.
+**1 PF acheté, attesté et effectivement attribué = 1 point HoF** est une décision produit validée. L’achat du pack seul donne zéro point ; aucune équivalence EUR n’entre dans le calcul du score. Cette décision ne constitue pas une implémentation : politiques de classement, protocole PF et autres parcours restent fermés jusqu’à leurs validations propres. Un futur format entier versionné devra éviter les flottants ; il ne doit pas reprendre l’équivalence EUR du simulateur v2.
 
 ## Intentions produit PC — sans activation
 
@@ -54,7 +54,6 @@ La façade actuelle ne fournit que statut et claim quotidien Hub ; pack, support
 
 | Décision attendue | Parcours fermé jusque-là |
 | --- | --- |
-| Valider ou remplacer le ratio proposé 1 PF = 1 point | Calcul du nouveau score actif |
 | Propriétaire PC, sources gagnantes, barèmes, plafonds, fraude, expiration et corrections | Gain/dépense PC et acquisition de cosmétiques |
 | Devenir des anciens claims Me/Hub et PF historiques | Toute nouvelle conversion, reprise ou extinction de claims ; les implémentations existantes sont préservées |
 | Sessions, dimensions, multi-classements, suspensions et critères du badge | Classements actifs, sessions et badge calculé |

@@ -4,8 +4,11 @@
 
 L’[ADR 0018](../adr/0018-fans-pf-pc-hof-v3.md), `fans.economy-contract/3.0.0`,
 remplace le modèle produit pour la cible. Cette page décrit **le code v2 inchangé**,
-pas la nouvelle règle de score. Ses exemples EUR et son ratio de pièces ne valent
-pas approbation du ratio **1 PF attribué = 1 point HoF**, recommandation d’Axiome proposée mais non validée. Aucun moteur actif.
+pas la nouvelle règle de score. La décision produit est désormais validée : **1 PF acheté, attesté et effectivement
+attribué = 1 point HoF** ; pack seul : zéro point, aucune équivalence EUR dans le
+score cible. Les exemples EUR du code v2 ne constituent pas une implémentation
+de cette décision. Politiques de classement, protocole PF et autres parcours
+restent fermés. Aucun moteur actif.
 
 La cible exige pack sans score, attribution attestée de PF achetés, plusieurs
 classements pour une consommation unique et zéro PC pour achat/attribution/remboursement

@@ -19,7 +19,7 @@ Aucun moteur économique, changement Token Engine, migration ou activation.
 | Messagerie / bibliothèque | Fans : conversations, pièces jointes, collection de références et droits locaux | Fans | Contrats à implémenter, aucun accès par simple SSO | Absents |
 | Catalogue / commandes | Fans : fiches et futurs contrats de commandes/droits ; vendeur contractuel à décider | Fans | Catalogue REST v1 ; futurs contrats commerce distincts | #70 fusionnée : deux catégories, achats fermés ; commandes et reversements absents |
 | PC / progression membre | Propriétaire et barèmes PC à décider | Fans ; cosmétiques futurs | Contrat v3 documentaire ; pas de source PF | Gain, consommation et moteur PC fermés |
-| HoF | Fans : faits attestés et projections de classement ; Hub : consommation PF | Fans | Contrat v3 ; ratio proposé, sessions à décider | Aucun score persistant ni moteur actif |
+| HoF | Fans : faits attestés et projections de classement ; Hub : consommation PF | Fans | Contrat v3 ; ratio validé, sessions à décider | Aucun score persistant ni moteur actif |
 | PF | Hub / Token Engine : ledger, classe économique et compensation | Fans via un contrat serveur à étendre ; Me/Hub actuels | Contrat PF existant, jamais accès direct aux tables | Implémenté sur Hub ; aucun débit cosmétique ou soutien Fans |
 | Cosmétiques | Catalogue commun proposé ; propriétaire PC et droits à décider ; dérivé : rendu | Fans en premier, Me compatible | Futur `faluss.cosmetics` v1 distinct de Catalog thèmes | Catalog actuel garde `faluss_catalog_card_themes` et `faluss-link` ; nouveau catalogue absent |
 | Faluss Max | Hub / Subscriptions : abonnement et entitlement ; application : fonction exposée | Fans, Pro ; autres dérivés ensuite | Projection de fonctionnalités versionnée à ajouter | Abonnements existants ; offre Max et droits dérivés non implémentés |
@@ -68,10 +68,10 @@ Hub/Me restent des PF historiques, sans renommage ni migration de solde. Les PF 
 `promotional` historiques restent inchangés, ne deviennent ni PC ni PF éligibles
 au nouveau HoF. Aucun financement ajouté ne contourne cette exclusion.
 
-**1 PF attribué = 1 point HoF est une recommandation d’Axiome, proposition à valider explicitement.** Aucune équivalence
+**1 PF acheté, attesté et effectivement attribué = 1 point HoF est une décision produit validée.** Aucune équivalence
 EUR dans le contrat de score. Le soutien EUR direct du simulateur historique
-n’est pas une source du nouveau HoF. Aucun score actif avant ratio et politique
-approuvés. Un éventuel badge de soutien reste distinct des PC, sans montant ni
+n’est pas une source du nouveau HoF. Aucun score actif avant validation des politiques de classement, du protocole PF
+et des autres portes. Un éventuel badge de soutien reste distinct des PC, sans montant ni
 récompense PC dérivée ; son calcul reste fermé tant que ses critères manquent.
 Pseudo/badge : relation créateur vérifiée, visibilité publique sur consentement.
 
@@ -192,7 +192,7 @@ Voir [Store](FANS-STORE.md).
 ## Séquence de lots et portes de validation
 
 1. Présent lot : ADR v3 et alignement documentaire uniquement.
-2. Lot séparé : adaptation du simulateur, sans runtime ; politique et ratio validés avant score actif.
+2. Lot séparé : adaptation du simulateur, sans runtime ; ratio validé ; politiques de classement, protocole PF et autres portes restent fermés.
 3. Contrats propriétaires PF/PC, consommation et corrections ; capacités manquantes bloquantes.
 4. Moteurs, stockage, concurrence et recettes réelles dans des PR dédiées ; aucun second ledger PF.
 5. Shop autorisé après vendeur contractuel et autres portes ; social complet et messages séparés.

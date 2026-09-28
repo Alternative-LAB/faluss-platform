@@ -8,9 +8,9 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Contrats Fans PF / PC / HoF v3
 
-- ADR 0018 versionnée : règles acquises PF/PC, multi-classements sans double dépense, absence de finances côté créateur et ratio 1 PF = 1 point explicitement proposé.
+- ADR 0018 versionnée : règles acquises PF/PC, multi-classements sans double dépense, absence de finances côté créateur et décision produit validée : 1 PF acheté, attesté et effectivement attribué = 1 point HoF, sans équivalence EUR ; pack seul sans score.
 - Alignement Fans, ownership, progression et Shop ; simulateur v2 identifié comme historique, parcours non arbitrés fermés et cible d’archivage adulte externe hors Shop/découverte publics, historique administratif conservé, sans exécution ici.
-- Intentions PC : daily reward et ramassage quotidien sur profil créateur, sans barème, propriétaire technique, plafond ou activation ; claims PF historiques inchangés. Ratio HoF maintenu comme proposition d’Axiome, non validée.
+- Intentions PC : daily reward et ramassage quotidien sur profil créateur, sans barème, propriétaire technique, plafond ou activation ; claims PF historiques inchangés. Politiques de classement, protocole PF et autres parcours maintenus fermés.
 - Aucun moteur, migration, paiement, UI, activation ou changement du Token Engine.
 
 
