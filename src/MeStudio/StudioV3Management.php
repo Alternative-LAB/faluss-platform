@@ -22,6 +22,9 @@ final class StudioV3Management
         $blocks = (array) ($state['blocks'] ?? []);
         $collections = (array) ($state['collections'] ?? []);
         if ($section === 'v3_links') {
+            self::start('save_atomic_design', 'Disposition des liens');
+            self::select('links_mode', 'Disposition', ['neutral' => 'Liste', 'image-grid' => 'Images · vedette puis deux colonnes'], $state['preferences']['links_mode'] ?? 'neutral');
+            self::end('Enregistrer la disposition');
             foreach ($blocks as $block) {
                 if ($block['type'] === 'link') { self::link($block); }
             }

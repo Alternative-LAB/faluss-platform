@@ -64,3 +64,10 @@ body:has([data-faluss-onboarding-v3]){position:fixed;inset:0;width:100%;overflow
 
 /* Focus correction is instantaneous even when the host enables smooth scrolling. */
 html:has([data-faluss-onboarding-v3]),body:has([data-faluss-onboarding-v3]),.faluss-onboarding-v3 .faluss-onboarding-v3__scroll{scroll-behavior:auto}
+
+/* Keyboard overlays a stable layout viewport. Safari panning changes only its origin. */
+.faluss-onboarding-v3 {transform:translateY(var(--v3-viewport-top,0px))}
+.faluss-onboarding-v3.is-keyboard-open .faluss-onboarding-v3__panel {height:max(var(--v3-collapsed-height),var(--v3-keyboard-min-height));transition:none}
+.faluss-onboarding-v3.is-keyboard-open .faluss-onboarding-v3__panel.is-expanded {height:calc(var(--v3-height) - 76px - env(safe-area-inset-top,0px))}
+.faluss-onboarding-v3__replacement {clear:both;margin-bottom:12px}
+.faluss-onboarding-v3__replacement summary {cursor:pointer;min-height:36px}

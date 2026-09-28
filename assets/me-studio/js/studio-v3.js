@@ -40,7 +40,7 @@
         var names = {
             v3_mode: ['structure'], v3_identity: ['display_name', 'public_slug', 'avatar_attachment_id'],
             v3_colors: ['page_background', 'button_color'], v3_buttons: ['link_style', 'button_texture'],
-            v3_avatar: ['avatar_attachment_id', 'avatar_shape', 'avatar_effect'],
+            v3_avatar: ['avatar_attachment_id', 'avatar_shape', 'avatar_effect', 'avatar_visible'],
             v3_wallpaper: ['cover_attachment_id', 'wallpaper_size', 'wallpaper_effect'],
             v3_name: ['name_font', 'name_weight', 'name_color'],
             v3_network_style: ['social_style', 'social_color']
@@ -113,6 +113,13 @@
             if (!payload.success || !payload.data || !payload.data.id) { throw new Error(serverError(payload, 'upload_failed')); }
             var hidden = root.querySelector('[name="' + kind + '_attachment_id"]');
             if (hidden) { hidden.value = payload.data.id; }
+            if (kind === 'avatar') {
+                var retained = panel.querySelector('.faluss-onboarding-v3__retained-avatar');
+                if (!retained) { retained = document.createElement('img'); retained.className = 'faluss-onboarding-v3__retained-avatar'; input.closest('label').before(retained); }
+                var localUrl = URL.createObjectURL(file);
+                retained.onload = function () { URL.revokeObjectURL(localUrl); };
+                retained.removeAttribute('srcset'); retained.src = localUrl; retained.alt = 'Photo retenue';
+            }
             notice('Image prête.', false);
             refreshPreview();
         }).catch(function (failure) {
@@ -177,6 +184,11 @@
         }).then(function (result) {
             if (!result.success || !result.data || !result.data.id) { throw new Error(serverError(result, 'upload_failed')); }
             editor.querySelector('[data-field="attachment_id"]').value = result.data.id;
+            var image = editor.querySelector('img');
+            if (!image) { image = document.createElement('img'); input.closest('label').before(image); }
+            var localUrl = URL.createObjectURL(file);
+            image.onload = function () { URL.revokeObjectURL(localUrl); };
+            image.removeAttribute('srcset'); image.src = localUrl; image.alt = 'Image retenue';
 
             notice('Image prête. Enregistre cet élément pour l’appliquer à ta carte.', false);
         }).catch(function (failure) { notice(failure.message, true); })
@@ -275,11 +287,40 @@
         if (left < nav.scrollLeft) { nav.scrollTo({left: left, behavior: 'instant'}); }
         else if (right > nav.scrollLeft + nav.clientWidth) { nav.scrollTo({left: right - nav.clientWidth, behavior: 'instant'}); }
     }
+    var groups = JSON.parse(root.dataset.studioGroups || '{}');
+    var committedSelection = [];
+    function captureSelection() {
+        committedSelection = Array.from(root.querySelectorAll('nav [data-studio-navigate]')).map(function (a) { return [a, a.hasAttribute('aria-current')]; });
+    }
+    function restoreSelection() {
+        committedSelection.forEach(function (entry) { entry[0].toggleAttribute('aria-current', entry[1]); if (entry[1]) { entry[0].setAttribute('aria-current', 'page'); } });
+        positionNavigation();
+    }
+    function selectDestination(url) {
+        var section = new URL(url, currentUrl).searchParams.get('v3_section');
+        var group = Object.keys(groups).find(function (key) { return Object.prototype.hasOwnProperty.call(groups[key], section); });
+        root.querySelectorAll('nav').forEach(function (nav) {
+            var links = Array.from(nav.querySelectorAll('[data-studio-navigate]'));
+            var selected = links.find(function (a) {
+                var target = new URL(a.href).searchParams.get('v3_section');
+                return nav.classList.contains('faluss-studio-v3__bottom') ? group && Object.prototype.hasOwnProperty.call(groups[group], target) : target === section;
+            });
+            if (!selected) { return; }
+            links.forEach(function (a) { if (a === selected) { a.setAttribute('aria-current', 'page'); } else { a.removeAttribute('aria-current'); } });
+            showActiveTab(nav); positionPill(nav);
+        });
+    }
     function updateNav(selector, next) {
         var nav = root.querySelector(selector), source = next.querySelector(selector);
         var pill = nav.querySelector('[data-studio-pill]');
         // Retain the same indicator node and its previous geometry across content swaps.
-        nav.replaceChildren.apply(nav, Array.from(source.childNodes).concat(pill ? [pill] : []));
+        var currentLinks = Array.from(nav.querySelectorAll('a'));
+        var nextLinks = Array.from(source.querySelectorAll('a'));
+        if (currentLinks.length === nextLinks.length && currentLinks.every(function (a, i) { return a.href === nextLinks[i].href; })) {
+            currentLinks.forEach(function (a, i) { if (nextLinks[i].hasAttribute('aria-current')) { a.setAttribute('aria-current', 'page'); } else { a.removeAttribute('aria-current'); } });
+        } else {
+            nav.replaceChildren.apply(nav, Array.from(source.childNodes).concat(pill ? [pill] : []));
+        }
         showActiveTab(nav);
         positionPill(nav);
     }
@@ -302,6 +343,7 @@
         });
         updateNav('.faluss-studio-v3__tabs', next);
         updateNav('.faluss-studio-v3__bottom', next);
+        captureSelection();
         panel.replaceWith(next.querySelector('[data-v3-panel]'));
         ['step', 'mode', 'version', 'studioConfig'].forEach(function (key) { root.dataset[key] = next.dataset[key] || ''; });
         panel = root.querySelector('[data-v3-panel]');
@@ -321,6 +363,7 @@
         if (navigationRequest) { navigationRequest.abort(); }
         navigationRequest = new AbortController();
         var revision = ++navigationRevision;
+        selectDestination(url);
         navigating = true;
         panel.inert = true;
         panel.setAttribute('aria-busy', 'true');
@@ -342,6 +385,7 @@
                 currentUrl = url;
             }).catch(function (failure) {
                 if (failure.name === 'AbortError' || revision !== navigationRevision) { return; }
+                restoreSelection();
                 if (options.historyIndex !== undefined) { restoreHistory(); }
                 notice(needsCanonical ? 'Enregistré. La relecture est indisponible ; actualise la rubrique avant de poursuivre.' : (failure.message || 'Navigation indisponible. Réessayez.'), true);
                 if (needsCanonical && error) {
@@ -374,7 +418,7 @@
                 if (navigationRequest) { navigationRequest.abort(); }
                 navigationRevision += 1; navigating = false; panel.inert = false; panel.removeAttribute('aria-busy');
             }
-            restoreHistory(); return;
+            restoreSelection(); restoreHistory(); return;
         }
         loadSection(window.location.href, {historyIndex: state.index});
     });
@@ -382,6 +426,7 @@
         root.querySelectorAll('.faluss-studio-v3__tabs, .faluss-studio-v3__bottom').forEach(function (nav) { showActiveTab(nav); positionPill(nav); });
     }
     positionNavigation();
+    captureSelection();
     if (window.ResizeObserver) { new ResizeObserver(positionNavigation).observe(root); }
     if (document.fonts) { document.fonts.ready.then(positionNavigation); }
 

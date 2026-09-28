@@ -31,10 +31,10 @@ function home_url( $path = '' ) { return 'https://faluss.test' . $path; }
 function admin_url( $path = '' ) { return 'https://faluss.test/wp-admin/' . ltrim( $path, '/' ); }
 function plugins_url( $path = '' ) { return 'https://faluss.test/wp-content/plugins/faluss-platform/' . ltrim( $path, '/' ); }
 function get_permalink() { global $fl_hotfix_permalink; return $fl_hotfix_permalink ?: 'https://faluss.test/studio/'; }
-function add_query_arg( $args, $url ) { return $url . ( false === strpos( $url, '?' ) ? '?' : '&' ) . http_build_query( $args ); }
+function add_query_arg( $args, $url, $base = null ) { if ( null !== $base ) { $args = array( $args => $url ); $url = $base; } return $url . ( false === strpos( $url, '?' ) ? '?' : '&' ) . http_build_query( $args ); }
 function wp_generate_uuid4() { static $suffix = 100; ++$suffix; return '99999999-9999-4999-8999-' . str_pad( (string) $suffix, 12, '0', STR_PAD_LEFT ); }
 function wp_unique_id( $prefix = '' ) { static $id = 0; return $prefix . ++$id; }
-function wp_attachment_is_image( $id ) { return 77 === (int) $id; }
+function wp_attachment_is_image( $id ) { return in_array( (int) $id, $GLOBALS['fl_test_owned_images'] ?? array( 77 ), true ); }
 function wp_get_attachment_image_url( $id ) { return wp_attachment_is_image( $id ) ? 'https://faluss.test/media/' . (int) $id . '.jpg' : ''; }
 function wp_get_attachment_image( $id, $size, $icon = false, $attributes = array() ) { return wp_attachment_is_image( $id ) ? '<img src="https://faluss.test/media/' . (int) $id . '.jpg" alt="">' : ''; }
 function is_user_logged_in() { return true; }

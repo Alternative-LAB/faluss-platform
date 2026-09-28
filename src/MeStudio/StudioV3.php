@@ -41,7 +41,7 @@ final class StudioV3
         $name = (string) ($profile['display_name'] ?? '');
         ob_start();
         ?>
-        <section class="faluss-studio-v3" data-faluss-studio-v3 data-studio-config="<?php echo esc_attr((string) wp_json_encode(MeStudioAssets::studioV3Config())); ?>" data-studio="true" data-step="<?php echo esc_attr($section); ?>" data-mode="<?php echo esc_attr($mode); ?>" data-version="<?php echo esc_attr((string) ($state['version'] ?? '')); ?>">
+        <section class="faluss-studio-v3" data-faluss-studio-v3 data-studio-config="<?php echo esc_attr((string) wp_json_encode(MeStudioAssets::studioV3Config())); ?>" data-studio="true" data-studio-groups="<?php echo esc_attr((string) wp_json_encode(self::GROUPS)); ?>" data-step="<?php echo esc_attr($section); ?>" data-mode="<?php echo esc_attr($mode); ?>" data-version="<?php echo esc_attr((string) ($state['version'] ?? '')); ?>">
             <header class="faluss-studio-v3__header">
                 <a href="<?php echo esc_url(home_url('/')); ?>" aria-label="Accueil Faluss">←</a>
                 <strong>Studio</strong>
@@ -57,6 +57,7 @@ final class StudioV3
             </nav>
             <form class="faluss-studio-v3__workspace" data-v3-panel novalidate>
                 <div data-v3-scroll>
+                    <?php if ($section === 'v3_avatar') : ?><label>Afficher la photo<select name="avatar_visible"><option value="1" <?php selected((string) ($state['preferences']['avatar_visible'] ?? 1), '1'); ?>>Oui</option><option value="0" <?php selected((string) ($state['preferences']['avatar_visible'] ?? 1), '0'); ?>>Non</option></select></label><?php endif; ?>
                     <?php if (StudioV3Management::handles($section)) { StudioV3Management::render($section, $state); } else { OnboardingV3::controls($section, $mode, $state, $slug); } ?>
                 </div>
                 <p data-v3-error role="alert" hidden></p><p data-v3-status role="status" aria-live="polite"></p>

@@ -129,10 +129,15 @@ body.faluss-identity-public-route .faluss-link-card--canonical > .faluss-link-ca
 
 /* V3 composition is centered in every host; saved legacy alignment is retained.
    Stable viewport units keep this spacing unchanged when the keyboard overlays the editor. */
-.faluss-link-card.faluss-link-card--canonical {--fl-identity-top:clamp(64px,12svh,104px)}
-.faluss-link-card.faluss-link-card--canonical.faluss-link-card--cover-yes {--fl-identity-top:clamp(80px,16svh,140px)}
-.faluss-link-card.faluss-link-card--canonical.faluss-link-card--cover-yes.faluss-link-card--wallpaper-cover {--fl-identity-top:clamp(96px,20svh,168px)}
+.faluss-link-card.faluss-link-card--canonical {--fl-identity-top:clamp(52px,calc(var(--fl-composition-height,100svh) * .10),88px)}
+.faluss-link-card.faluss-link-card--canonical.faluss-link-card--cover-yes {--fl-identity-top:clamp(64px,calc(var(--fl-composition-height,100svh) * .13),116px)}
+.faluss-link-card.faluss-link-card--canonical.faluss-link-card--cover-yes.faluss-link-card--wallpaper-cover {--fl-identity-top:clamp(76px,calc(var(--fl-composition-height,100svh) * .16),138px)}
 .faluss-link-card.faluss-link-card--canonical.faluss-link-card--cover-yes .faluss-link-card__body,.faluss-link-card.faluss-link-card--canonical.faluss-link-card--cover-no .faluss-link-card__body {padding-top:var(--fl-identity-top);text-align:center}
 .faluss-link-card.faluss-link-card--canonical .faluss-link-card__avatar {margin-inline:auto}
 .faluss-link-card.faluss-link-card--canonical .faluss-link-card__name,.faluss-link-card.faluss-link-card--canonical .faluss-link-card__handle {text-align:center}
 .faluss-link-card.faluss-link-card--canonical .faluss-link-card__social {justify-content:center}
+
+.faluss-link-card.faluss-link-card--canonical.faluss-link-card--cover-yes.faluss-link-card--avatar-no .faluss-link-card__body {padding-top:calc(var(--fl-identity-top) + clamp(72px,calc(var(--fl-composition-height,100svh) * .12),100px))}
+.faluss-link-card.faluss-link-card--canonical .faluss-link-card__cover {overflow:hidden}
+.faluss-link-card.faluss-link-card--canonical.faluss-link-card--wallpaper-cover.faluss-link-card--wallpaper-effect-gradient .faluss-link-card__cover::after {background:linear-gradient(to bottom,transparent 0%,color-mix(in srgb,var(--fl-hero-transition-color) var(--fl-hero-transition-intensity),transparent) min(var(--fl-hero-transition-position),calc(var(--fl-identity-top) + 190px)),var(--fl-page-background) min(100%,calc(var(--fl-identity-top) + 290px)))}
+@media(prefers-reduced-motion:no-preference){.faluss-link-card.faluss-link-card--canonical[data-faluss-card-context="public"] .faluss-link-card__cover img {transform:translate3d(0,var(--fl-immersive-depth,0px),0) scale(var(--fl-wallpaper-scale,1));transform-origin:center top;will-change:transform}}

@@ -2,7 +2,7 @@
 // Browser integration of the real PHP views; HTTP/persistence are simulated, no WordPress access.
 const fs=require('fs'),path=require('path'),cp=require('child_process'),assert=require('assert/strict');
 const {chromium,webkit}=require('playwright');
-const root=path.resolve(__dirname,'../..'),out=path.join(root,'docs/evidence/me-v3-054');
+const root=path.resolve(__dirname,'../..'),out=path.join(root,process.env.FALUSS_EVIDENCE_DIR || 'docs/evidence/me-v3-054');
 const views=JSON.parse(cp.execFileSync(process.env.FALUSS_PHP,[path.join(__dirname,'v3-composition-regression.php')],{encoding:'utf8',env:{...process.env,FALUSS_V3_VIEWS:'1'}}));
 const css=fs.readFileSync(path.join(root,'assets/me-studio/css/studio-v3.css'),'utf8');
 const js=fs.readFileSync(path.join(root,'assets/me-studio/js/studio-v3.js'),'utf8');
@@ -46,13 +46,25 @@ const js=fs.readFileSync(path.join(root,'assets/me-studio/js/studio-v3.js'),'utf
     const name=page.locator('[name=display_name]'),initial=await name.inputValue();
     await page.evaluate(()=>window.bottomPill=document.querySelector('.faluss-studio-v3__bottom [data-studio-pill]'));
     await name.fill('Non enregistré');await bottom('Design').click();assert.equal(confirmationCount,1);assert.equal(await name.inputValue(),'Non enregistré');
-    await name.fill(initial);await bottom('Design').click();await step('v3_colors');assert.equal(confirmationCount,1);
+    await name.fill(initial);
+    let releaseNav;holdRead=new Promise(r=>releaseNav=r);
+    await page.evaluate(()=>window.designAnchor=[...document.querySelectorAll('.faluss-studio-v3__bottom a')].find(a=>a.textContent==='Design'));
+    await bottom('Design').click();
+    assert.equal(await bottom('Design').getAttribute('aria-current'),'page','Root selection reacts before HTTP returns');
+    assert.equal(await name.inputValue(),initial,'Old content remains visible during request');
+    assert(await page.locator('.faluss-studio-v3__bottom [data-studio-pill]').evaluate(e=>e.getAnimations().some(a=>a.transitionProperty==='transform')),'Root pill moves before HTTP returns');
+    releaseNav();holdRead=null;await step('v3_colors');assert.equal(confirmationCount,1);
+    assert(await page.evaluate(()=>window.designAnchor===[...document.querySelectorAll('.faluss-studio-v3__bottom a')].find(a=>a.textContent==='Design')),'Root links are not rebuilt');
     assert.equal(await page.evaluate(()=>window.bottomPill===document.querySelector('.faluss-studio-v3__bottom [data-studio-pill]')),true);
     assert(await page.locator('.faluss-studio-v3__bottom [data-studio-pill]').evaluate(e=>e.getAnimations().some(a=>a.transitionProperty==='transform')),'Bottom pill actually transitions');
     assert.equal(await page.locator('.faluss-studio-v3__bottom [data-studio-pill]').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(237, 67, 67)');
     const transform=await page.locator('.faluss-studio-v3__bottom [data-studio-pill]').evaluate(e=>e.style.transform);assert.notEqual(transform,'translateX(0px)');
     assert.match(await page.locator('.faluss-studio-v3__bottom [data-studio-pill]').evaluate(e=>getComputedStyle(e).transitionProperty),/transform/);
-    await tab('Nom').click();await step('v3_name');assert.match(page.url(),/v3_name/);
+    holdRead=new Promise(r=>releaseNav=r);await tab('Nom').click();
+    assert.equal(await tab('Nom').getAttribute('aria-current'),'page','Context selection reacts before HTTP returns');
+    assert.equal(await page.locator('[data-faluss-studio-v3]').getAttribute('data-step'),'v3_colors');
+    assert(await page.locator('.faluss-studio-v3__tabs [data-studio-pill]').evaluate(e=>e.getAnimations().some(a=>a.transitionProperty==='transform')));
+    releaseNav();holdRead=null;await step('v3_name');assert.match(page.url(),/v3_name/);
     assert(await page.locator('.faluss-studio-v3__tabs [data-studio-pill]').evaluate(e=>e.getAnimations().some(a=>a.transitionProperty==='transform')),'Context pill actually transitions');
     await page.goBack();await step('v3_colors');await page.goForward();await step('v3_name');
     await bottom('Profil').click();await step('v3_identity');await name.fill('Brouillon conservé');
@@ -75,12 +87,23 @@ const js=fs.readFileSync(path.join(root,'assets/me-studio/js/studio-v3.js'),'utf
      allow=true;await bottom('Design').click();await step('v3_colors');await bottom('Profil').click();await step('v3_identity');allow=false;
     }
     const prior=confirmationCount;await bottom('Liens').click();await step('v3_links');assert.equal(confirmationCount,prior);
+    if(width===390){
+     const layout=page.locator('[data-mutation=save_atomic_design]').first();await layout.locator('summary').click();await layout.locator('[data-field=links_mode]').selectOption('image-grid');await layout.locator('[data-v3-save-item]').click();await page.waitForFunction(()=>!document.querySelector('[data-v3-panel]').inert);
+     assert.equal(JSON.parse(posts.at(-1).get('fields')).links_mode,'image-grid');
+     const imageEditor=page.locator('[data-mutation=create_link]');await imageEditor.locator('summary').click();
+     await imageEditor.locator('[data-v3-content-upload]').setInputFiles({name:'fixture.png',mimeType:'image/png',buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aB1cAAAAASUVORK5CYII=','base64')});
+     await page.waitForFunction(()=>document.querySelector('[data-mutation=create_link] [data-field=attachment_id]').value==='78');
+     assert.match(await imageEditor.locator('img').getAttribute('src'),/^blob:/);await imageEditor.locator('[data-v3-remove-image]').click();assert.equal(await imageEditor.locator('[data-field=attachment_id]').inputValue(),'0');assert.equal(await imageEditor.locator('img').count(),0);
+     await bottom('Design').click();await step('v3_colors');await tab('Avatar').click();await step('v3_avatar');
+     await page.locator('[name=avatar_visible]').selectOption('0');await page.locator('[data-v3-primary]').click();await page.waitForFunction(()=>!document.querySelector('[data-v3-panel]').inert);assert.equal(JSON.parse(posts.at(-1).get('fields')).avatar_visible,'0');
+     await bottom('Liens').click();await step('v3_links');
+    }
     await tab('Collections').click();await step('v3_collections');
     const editor=page.locator('[data-mutation=create_collection]');await editor.locator('summary').click();await editor.locator('[data-field=name]').fill('Collection');
     failSave=true;await editor.locator('[data-v3-save-item]').click();await page.locator('[data-v3-error]').waitFor({state:'visible'});
     assert.equal(posts.at(-1).get('action'),'faluss_studio_v3_manage');assert.equal(await editor.locator('[data-field=name]').inputValue(),'Collection');
     allow=true;failRead=true;await bottom('Profil').click();await page.waitForFunction(()=>document.querySelector('[data-v3-error]').textContent.includes('503'));
-    assert.equal(await editor.locator('[data-field=name]').inputValue(),'Collection');assert.match(page.url(),/v3_collections/);
+    assert.equal(await editor.locator('[data-field=name]').inputValue(),'Collection');assert.match(page.url(),/v3_collections/);assert.equal(await bottom('Liens').getAttribute('aria-current'),'page','Failure restores root selection');assert.equal(await tab('Collections').getAttribute('aria-current'),'page');
     failRead=false;failSave=false;await bottom('Profil').click();await step('v3_identity');
     delayRead=true;await bottom('Design').click();await bottom('Liens').click();await step('v3_links');await page.waitForTimeout(200);await step('v3_links');delayRead=false;
     await bottom('Liens').focus();await page.keyboard.press('ArrowRight');assert.equal(await page.locator(':focus').innerText(),'Design');await page.keyboard.press('Enter');await step('v3_colors');
@@ -94,7 +117,7 @@ const js=fs.readFileSync(path.join(root,'assets/me-studio/js/studio-v3.js'),'utf
     }
     if(width===390)await page.screenshot({path:path.join(out,engine+'-studio-design-390.png')});
     await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await page.locator('.faluss-studio-v3__bottom [data-studio-pill]').evaluate(e=>getComputedStyle(e).transitionDuration),'0s');
-    results.push(`${engine} ${width}: ${width===390?'busy save/upload + failed canonical read retry verified; ':''}one document; direct URL, dynamic main/context navigation, persistent pills, keyboard, history + dirty cancel, restored values, canonical save/read, 409, GET 503, stale response, Shop and reduced motion OK`);
+    results.push(`${engine} ${width}: ${width===390?'busy save/upload + failed canonical read retry verified; ':''}one document; direct URL, immediate selection/pills before delayed HTTP at both levels, persistent anchors, keyboard, history + dirty cancel, restored values, canonical save/read, 409, GET 503, stale response, Shop and reduced motion OK`);
     await context.close();
    }
    const context=await browser.newContext({javaScriptEnabled:false});await context.route('**/*',r=>{

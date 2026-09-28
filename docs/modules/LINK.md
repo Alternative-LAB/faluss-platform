@@ -82,3 +82,10 @@ Pas de migration ni de changement de flag. Un retour à un ZIP antérieur réint
 - Scan ciblé des lignes ajoutées pour secrets usuels et `git diff --check` : succès.
 
 - Premier passage CI Linux : les 276 tests PHPUnit et 4 130 assertions passent, y compris les empreintes Token Engine. Le contrat ONB-01 attendait encore le lien de connexion de la récompense retirée : son assertion Link est adaptée, sans changement Identity et en conservant le test du retour historique `claim_reward` et du retour teaser.
+
+
+## Rendu canonique — corrections 0.6.2
+
+La carte partagée par l'aperçu, le public, le shortcode et Elementor conserve ses données. La composition d'identité est légèrement remontée de manière responsive, avec réserve compensatoire lorsque l'avatar est masqué. Une couleur de fond explicitement enregistrée gouverne aussi le dégradé, sauf `hero_transition_color` explicitement présent dans les surcharges du membre. Le noir de palette vaut `#000000`, sans migration du gris historique.
+
+Le wallpaper canonique public reçoit un défilement/zoom arrière discret, sans modification du cadrage au repos et désactivé sous `prefers-reduced-motion`. Les aperçus ne déclenchent pas ce mouvement. `links_mode=image-grid` réutilise les images des liens et les pictogrammes configurés, conserve ordre/collections/visibilité et les replis sans image ; le mode liste demeure inchangé. Les préférences d'avatar sont appliquées au conteneur et à l'image. [Recette ciblée et limites](../evidence/me-v3-062/README.md).

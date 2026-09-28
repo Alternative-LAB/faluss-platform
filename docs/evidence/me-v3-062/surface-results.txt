@@ -1,0 +1,6 @@
+chromium 320: avatar 3 shapes x 4 effects, hide/restore, exact black/explicit fade, Compact/Cover with/without photo, image grid/fallback/order/visibility, resting crop, public motion/reduced motion OK
+chromium 390: avatar 3 shapes x 4 effects, hide/restore, exact black/explicit fade, Compact/Cover with/without photo, image grid/fallback/order/visibility, resting crop, public motion/reduced motion OK
+chromium 768: avatar 3 shapes x 4 effects, hide/restore, exact black/explicit fade, Compact/Cover with/without photo, image grid/fallback/order/visibility, resting crop, public motion/reduced motion OK
+webkit 320: avatar 3 shapes x 4 effects, hide/restore, exact black/explicit fade, Compact/Cover with/without photo, image grid/fallback/order/visibility, resting crop, public motion/reduced motion OK
+webkit 390: avatar 3 shapes x 4 effects, hide/restore, exact black/explicit fade, Compact/Cover with/without photo, image grid/fallback/order/visibility, resting crop, public motion/reduced motion OK
+webkit 768: avatar 3 shapes x 4 effects, hide/restore, exact black/explicit fade, Compact/Cover with/without photo, image grid/fallback/order/visibility, resting crop, public motion/reduced motion OK

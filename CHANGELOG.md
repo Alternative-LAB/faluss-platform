@@ -6,6 +6,21 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+## [0.6.2] - 2026-09-29
+
+### Corrigé
+
+- Aperçu V3 rempli jusqu'au bas du téléphone, formes et effets de l'avatar respectés, remplacement facultatif visible et préférence existante de masquage accessible dans Design → Avatar.
+- Panneau d'onboarding compensant l'origine du viewport Safari sans défilement de la page ; champ actif révélé instantanément à l'intérieur et ancrage bas conservé.
+- Noir exact, dégradé suivant le fond choisi sauf transition explicite, composition responsive légèrement remontée et mouvement discret du wallpaper public respectant la réduction des animations.
+- Sélection et pill du Studio réactives avant la réponse réseau, navigation conservée et restauration visuelle sur échec.
+- Disposition des liens illustrés accessible dans Liens : première tuile vedette, grille de deux colonnes, images et pictogrammes du catalogue, replis et cycle ajout/remplacement/retrait.
+
+### Compatibilité et vérification
+
+- Aucun nouveau type de lien, migration, flag, règle économique ou modification des modules Identity/SSO, Fans, Hub et Token Engine/PF. Les données et images existantes sont conservées ; l'ancien gris reste inchangé pour les membres qui l'ont enregistré.
+- Recette locale ciblée Chromium/WebKit et transactions avec doubles WordPress documentées dans `docs/evidence/me-v3-062/README.md`. La sensation réelle sur Safari iPhone et l'intégration WordPress/Elementor restent à vérifier après installation par le propriétaire.
+
 ## [0.6.1] - 2026-09-29
 
 ### Supprimé
