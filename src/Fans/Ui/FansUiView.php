@@ -10,6 +10,7 @@ final class FansUiView
     private const NAV = [
         'visitor' => [
             ['explorer', 'Explorer', 'compass', 'explorer'],
+            ['hof', 'HoF', 'trophy', 'hof'],
         ],
         'fan' => [
             ['accueil', 'Accueil', 'home', 'accueil'],
@@ -33,6 +34,7 @@ final class FansUiView
     /** @var array<string,array{string,string,string,string}> */
     private const PAGES = [
         'visitor:explorer' => ['Découvrir', 'Explorer les créateurs', 'explorer', 'La découverte est en préparation : aucun nom public ni portrait approuvé n’est encore fourni.'],
+        'visitor:hof' => ['Hall of Fame', 'Le Hall of Fame', 'hof', 'Le moteur HoF n’est pas disponible. Aucune session, aucun rang ni aucun point ne peut être affiché.'],
         'fan:accueil' => ['Espace Fans', 'Bienvenue dans votre espace', 'accueil', 'Les parcours Fans s’ouvrent progressivement. Explorer permet de consulter les profils créateurs publiés.'],
         'fan:explorer' => ['Découvrir', 'Explorer les créateurs', 'explorer', 'Seuls les profils approuvés sont visibles. Les noms et portraits ne sont pas encore disponibles.'],
         'fan:hof' => ['Hall of Fame', 'Le Hall of Fame', 'hof', 'Les sessions et les scores HoF persistants ne sont pas disponibles. Aucun point n’est affiché.'],

@@ -29,4 +29,4 @@
 @media(prefers-reduced-motion:reduce){.fu-app *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 .fu-discovery-note{max-width:760px;margin:0 0 22px;padding:14px 18px;border-left:3px solid var(--fu-accent);background:#15221d;color:#d2dfd8;font-size:14px}
 .fu-app[data-fans-role=visitor] .fu-rail__caption{color:#93ad9e}
-@media(max-width:700px){.fu-app[data-fans-role=visitor] .fu-nav{grid-template-columns:1fr}.fu-app[data-fans-role=visitor] .fu-nav__item{flex-direction:row;gap:8px}}
+@media(max-width:700px){.fu-app[data-fans-role=visitor] .fu-nav{grid-template-columns:repeat(2,minmax(0,1fr))}.fu-app[data-fans-role=visitor] .fu-nav__item{flex-direction:row;gap:8px}}

@@ -24,6 +24,7 @@ final class FansUiRoutes
     {
         add_action('init', [self::class, 'rewrite'], 20);
         add_filter('query_vars', [self::class, 'queryVars']);
+        add_filter('show_admin_bar', [self::class, 'adminBarVisible']);
         add_action('template_redirect', [self::class, 'handle'], 1);
     }
 
@@ -56,7 +57,7 @@ final class FansUiRoutes
 
     public static function accessStatus(string $role, string $view, bool $linked, bool $hasCreatorProfile): int
     {
-        if ($view === 'explorer' || $view === 'public-profile') {
+        if (in_array($view, ['explorer', 'hof', 'public-profile'], true)) {
             return 200;
         }
         if (!$linked) {
@@ -78,6 +79,25 @@ final class FansUiRoutes
 
         return is_string($expected) && is_string($actual)
             && rtrim($expected, '/') === rtrim($actual, '/');
+    }
+
+    public static function adminBarVisible(bool $show): bool
+    {
+        $view = get_query_var(self::VIEW_VAR);
+        $creatorId = get_query_var(self::CREATOR_VAR);
+        if ($view === 'public-profile' && is_string($creatorId)) {
+            $canonical = home_url('/faluss-fans/creators/' . $creatorId);
+        } else {
+            $role = get_query_var(self::ROLE_VAR);
+            if (!is_string($role) || !is_string($view) || !self::validView($role, $view)) {
+                return $show;
+            }
+            $canonical = self::url($role, $view);
+        }
+
+        return self::isCanonicalPath($canonical, (string) ($_SERVER['REQUEST_URI'] ?? ''))
+            ? $show && current_user_can('manage_options')
+            : $show;
     }
 
     public static function handle(): void
@@ -110,9 +130,7 @@ final class FansUiRoutes
 
         $linked = FansSsoService::currentLinkedSubject() !== null;
         $ownProfile = $linked && $profilesEnabled ? CreatorProfileService::own() : null;
-        if ($publicProfile) {
-            $role = !$linked ? 'visitor' : ($ownProfile === null ? 'fan' : 'creator');
-        } elseif ($view === 'explorer') {
+        if ($publicProfile || $view === 'explorer' || $view === 'hof') {
             $role = !$linked ? 'visitor' : ($ownProfile === null ? 'fan' : 'creator');
         } else {
             $access = self::accessStatus($role, $view, $linked, $ownProfile !== null);

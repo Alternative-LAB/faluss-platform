@@ -10,16 +10,21 @@ visuelle finale de la PR sur l’environnement cible.
 | Parcours réel | Ordinateur 1440 × 900 | Mobile 390 × 844 |
 | --- | --- | --- |
 | Invité : Explorer | [Capture](real-wp-explorer-guest-desktop.png) | [Capture](real-wp-explorer-guest-mobile.png) |
+| Invité : HoF public, moteur indisponible | [Capture](real-wp-hof-guest-desktop.png) | [Capture](real-wp-hof-guest-mobile.png) |
 | Invité : profil public actif | [Capture](real-wp-profile-guest-desktop.png) | [Capture](real-wp-profile-guest-mobile.png) |
-| Créateur lié : Explorer | [Capture](real-wp-explorer-creator-desktop.png) | — |
-| Créateur lié : Créer, quatre choix fermés | — | [Capture](real-wp-creer-creator-mobile.png) |
+| Créateur lié : Explorer, sans barre WordPress | [Capture](real-wp-explorer-creator-desktop.png) | — |
+| Créateur lié : Créer, quatre choix fermés et sans barre WordPress | — | [Capture](real-wp-creer-creator-mobile.png) |
 
 La recette réelle a aussi vérifié le compte WordPress non lié, le Fan lié,
 les permissions des espaces personnels, les assets et le statut HTTP **de la
-page** ainsi que du REST pour
-les profils suspendu, retiré et inexistant. Les UUID servent aux liens et ne
-sont pas visibles. Aucun nom public ou portrait n’étant fourni par l’API, les
-fiches disent explicitement que la découverte reste provisoire.
+page** ainsi que du REST pour les profils suspendu, retiré et inexistant.
+La lecture HoF répond 200 pour l’invité, tandis que la session et les
+classements lui répondent 403. Sur les pages Fans, la barre WordPress est
+absente pour les membres ordinaires et présente pour l’administrateur ;
+elle reste disponible sur les autres pages selon la préférence du membre.
+Les UUID servent aux liens et ne sont pas visibles. Aucun nom public ou
+portrait n’étant fourni par l’API, les fiches disent explicitement que la
+découverte reste provisoire.
 
 Les captures sans préfixe `real-wp-` sont issues du routeur synthétique qui
 simule l’API pour les cas vides et en erreur, le focus clavier et la navigation

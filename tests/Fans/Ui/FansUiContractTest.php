@@ -17,6 +17,10 @@ namespace Faluss\Platform\Fans\Ui {
     function status_header(int $status): void {}
     function wp_head(): void {}
     function wp_footer(): void {}
+    function get_query_var(string $name): mixed { return $GLOBALS['fans_ui_query'][$name] ?? ''; }
+    function current_user_can(string $capability): bool { return $capability === 'manage_options' && ($GLOBALS['fans_ui_admin'] ?? false); }
+    function add_action(string $hook, callable $callback, int $priority = 10): void {}
+    function add_filter(string $hook, callable $callback): void { $GLOBALS['fans_ui_filters'][$hook] = $callback; }
     function esc_html(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); }
     function esc_attr(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); }
     function esc_url(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); }
@@ -32,6 +36,9 @@ namespace Faluss\Platform\Fans\Ui {
                 define('FALUSS_PLATFORM_VERSION', 'test');
             }
             $GLOBALS['fans_ui_rewrites'] = [];
+            $GLOBALS['fans_ui_query'] = [];
+            $GLOBALS['fans_ui_filters'] = [];
+            $GLOBALS['fans_ui_admin'] = false;
         }
 
         public function testDistinctRoutesAndDeniedCreatorAccess(): void
@@ -60,6 +67,10 @@ namespace Faluss\Platform\Fans\Ui {
             self::assertSame(200, FansUiRoutes::accessStatus('fan', 'explorer', false, false));
             self::assertSame(200, FansUiRoutes::accessStatus('creator', 'explorer', false, false));
             self::assertSame(200, FansUiRoutes::accessStatus('fan', 'public-profile', false, false));
+            self::assertSame(200, FansUiRoutes::accessStatus('fan', 'hof', false, false));
+            self::assertSame(200, FansUiRoutes::accessStatus('creator', 'hof', false, false));
+            self::assertSame(403, FansUiRoutes::accessStatus('fan', 'hof/session', false, false));
+            self::assertSame(403, FansUiRoutes::accessStatus('fan', 'classements', false, false));
             self::assertSame(403, FansUiRoutes::accessStatus('fan', 'accueil', false, false));
             self::assertSame(403, FansUiRoutes::accessStatus('creator', 'creer', false, true));
             self::assertSame(404, FansUiRoutes::accessStatus('creator', 'creer', true, false));
@@ -100,9 +111,36 @@ namespace Faluss\Platform\Fans\Ui {
             self::assertStringNotContainsString('€', $html);
             self::assertStringContainsString('Sans nom public ni portrait', $html);
             $visitor = $this->render('visitor', 'explorer');
-            self::assertSame(1, substr_count($visitor, 'class="fu-nav__item'));
+            self::assertSame(2, substr_count($visitor, 'class="fu-nav__item'));
             self::assertStringContainsString('href="https://fans.example.test/faluss-fans/fan/explorer"', $visitor);
+            self::assertStringContainsString('href="https://fans.example.test/faluss-fans/fan/hof"', $visitor);
             self::assertStringNotContainsString('faluss-fans/visitor/', $visitor);
+        }
+
+        public function testPublicHofShowsAnHonestUnavailableState(): void
+        {
+            $html = $this->render('visitor', 'hof');
+            self::assertSame(2, substr_count($html, 'class="fu-nav__item'));
+            self::assertStringContainsString('aria-label="HoF"', $html);
+            self::assertStringContainsString('Aucune session, aucun rang ni aucun point', $html);
+            self::assertStringContainsString('Parcours indisponible', $html);
+            self::assertStringNotContainsString('<form', $html);
+            self::assertStringNotContainsString('€', $html);
+        }
+
+        public function testAdminBarIsHiddenOnlyForOrdinaryMembersOnCanonicalFansPages(): void
+        {
+            FansUiRoutes::register();
+            self::assertSame([FansUiRoutes::class, 'adminBarVisible'], $GLOBALS['fans_ui_filters']['show_admin_bar']);
+            $GLOBALS['fans_ui_query'] = [FansUiRoutes::ROLE_VAR => 'fan', FansUiRoutes::VIEW_VAR => 'hof'];
+            $_SERVER['REQUEST_URI'] = '/faluss-fans/fan/hof';
+            self::assertFalse(FansUiRoutes::adminBarVisible(true));
+            $GLOBALS['fans_ui_admin'] = true;
+            self::assertTrue(FansUiRoutes::adminBarVisible(true));
+            self::assertFalse(FansUiRoutes::adminBarVisible(false));
+            $GLOBALS['fans_ui_admin'] = false;
+            $_SERVER['REQUEST_URI'] = '/unrelated-page';
+            self::assertTrue(FansUiRoutes::adminBarVisible(true));
         }
 
         private function render(string $role, string $view): string

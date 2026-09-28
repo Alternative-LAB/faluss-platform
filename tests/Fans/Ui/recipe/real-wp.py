@@ -2,6 +2,7 @@
 
 import http.client
 import http.server
+import json
 import os
 import secrets
 import shutil
@@ -121,8 +122,9 @@ def main():
         ]:
             run(*wp, 'config', 'set', name, value, *(['--raw'] if raw else []), '--quiet', capture_output=True)
         base = f'https://127.0.0.1:{HTTPS_PORT}'
+        admin_password = secrets.token_hex(24)
         run(*wp, 'core', 'install', '--url=' + base, '--title=Fans UI Local Recipe',
-            '--admin_user=recipe_admin', '--admin_password=' + secrets.token_hex(24),
+            '--admin_user=recipe_admin', '--admin_password=' + admin_password,
             '--admin_email=recipe_admin@example.test', '--skip-email', capture_output=True)
         run(*wp, 'rewrite', 'structure', '/%postname%/', capture_output=True)
         run(*wp, 'plugin', 'activate', 'faluss-platform', capture_output=True)
@@ -134,6 +136,11 @@ def main():
         if ready != '1:1:1':
             raise RuntimeError('WordPress modules are not ready: ' + ready)
         run(*wp, 'eval-file', str(REPO / 'tests/Fans/Ui/recipe/real-wp-fixture.php'), capture_output=True)
+        fixture_path = root / 'fans-ui-recipe-fixture.json'
+        fixture = json.loads(fixture_path.read_text())
+        fixture['admin'] = {'login': 'recipe_admin', 'password': admin_password}
+        fixture_path.write_text(json.dumps(fixture))
+        fixture_path.chmod(0o600)
 
         (root / 'router.php').write_text("""<?php
 $_SERVER['HTTPS'] = 'on';
@@ -160,7 +167,7 @@ require __DIR__ . '/index.php';
         script = subprocess.check_output(['wslpath', '-w', str(REPO / 'tests/Fans/Ui/recipe/real-wp-browser.cjs')], text=True).strip()
         env = {**os.environ, 'NODE_PATH': NODE_PATH,
                'WSLENV': ':'.join(filter(None, [os.environ.get('WSLENV'), 'NODE_PATH']))}
-        run(NODE, script, input=(root / 'fans-ui-recipe-fixture.json').read_text(), env=env)
+        run(NODE, script, input=fixture_path.read_text(), env=env)
         print('PASS disposable WordPress 7.1.2 / MariaDB 11.8.6 / Chrome recipe; local flags only.', flush=True)
     finally:
         if proxy:
