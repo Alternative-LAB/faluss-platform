@@ -6,6 +6,15 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Contrat Fans ↔ Hub pour PF achetés
+
+- Revue depuis le code propriétaire : conflits de payload non garantis par l’idempotence historique, verrous non équivalents à une réservation par lot, reprise après COMMIT ambigu et limites des compensations. Rectificatif : validation du responsable Hub requise avant implémentation, pas avant fusion de la proposition documentaire, qui reste non ratifiée.
+
+- Draft versionné 0.1.0 et plan de réconciliation par lots : preuve/allocation, réservation, confirmation unique, reçu authentifié proposé et reprises après timeout.
+- Faux serveur de contrat uniquement sous tests : rejets, idempotence, conflits, entrelacement de réservations, pannes et corrections de lots ; limites de preuve explicites.
+- Dépendance Hub bloquée, validation propriétaire requise, compensation partielle indisponible. Aucun Token Engine, claim historique, moteur, API, ledger, migration ou flag modifié.
+
+
 ### Simulateur Fans HoF v3 hors runtime
 
 - Calcul pur distinct : pack zéro, 1 PF acheté/attesté/attribué = 1 point, multi-projections sans seconde consommation et delta PC toujours nul.
