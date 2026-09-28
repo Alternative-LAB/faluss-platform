@@ -6,6 +6,13 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Contrats Fans PF / PC / HoF v3
+
+- ADR 0018 versionnée : règles acquises PF/PC, multi-classements sans double dépense, absence de finances côté créateur et ratio 1 PF = 1 point explicitement proposé.
+- Alignement Fans, ownership, progression et Shop ; simulateur v2 identifié comme historique, parcours non arbitrés fermés et archivage adulte externe proposé sans effacement.
+- Aucun moteur, migration, paiement, UI, activation ou changement du Token Engine.
+
+
 ### Panel de modération Fans
 
 - Sous-page administrative paginée textes/quarantaine, contexte, motifs explicites, journaux et décisions confirmées côté serveur ; formulaires utilisables sans JavaScript.
