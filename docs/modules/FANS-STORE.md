@@ -1,43 +1,95 @@
-# Store Fans — catégories visibles et achats fermés
+# Store Fans — archives privées et achats fermés
 
 ## Portée implémentée
 
-Le module opt-in `fans-store-catalog` dépend des profils créateurs Fans. Il expose deux catégories canoniques distinctes et classables : `hosted_allowed_content` (« Contenu autorisé hébergé par Fans ») et `external_adult_delivery_right` (« Droit à une livraison adulte externe »). Un administrateur peut créer pour un profil actif une fiche structurée contenant uniquement UUID de produit, UUID de créateur, catégorie, visibilité et date. La fiche n'a ni texte libre, image, fichier, aperçu, URL de livraison, prix ni donnée de paiement. Le catalogue ne contient aucun contenu adulte et n'en transmet pas. La **catégorie** adulte reste visible et classable ; une **fiche** qui associe un créateur à cette catégorie est créée `hidden` et exclue des lectures publiques, car aucun mécanisme de consentement explicite du créateur n'existe encore.
+Le module opt-in `fans-store-catalog` dépend des profils créateurs Fans. Seule
+`hosted_allowed_content` est exposée dans la taxonomie publique. La catégorie
+historique `external_adult_delivery_right` et ses anciennes fiches sont archivées :
+aucune création, republication ou conversion en produit autorisé par les API.
+Un administrateur peut consulter les archives, sans possibilité de les restaurer.
+Les UUID, clés d'idempotence, catégories, visibilités et dates historiques restent
+inchangés en base. Aucun contenu adulte n'est stocké ou transmis par ce catalogue.
 
-La table InnoDB `${prefix}faluss_fans_store_catalog` possède une clé primaire sur le produit, une clé unique d'idempotence et des index de catégorie/visibilité et de créateur. La clé d'idempotence de l'administration n'apparaît pas dans les réponses publiques. L'option `faluss_fans_store_catalog_schema_version=1` est écrite après vérification exacte. Le flag `FALUSS_PLATFORM_FANS_STORE_CATALOG=true` est fourni hors Git ; le module exige le rôle Fans, le SSO, les profils et leurs schémas prêts. Une activation ou réactivation contrôlée installe la table. Retirer le flag ferme les routes mais conserve les fiches pour retour arrière. Aucun site réel n'est activé par cette PR.
+Les fiches structurées n'ont ni texte libre, image, fichier, aperçu, URL de livraison,
+prix, commande ou donnée de paiement. Ce lot n'ajoute aucune de ces fonctionnalités.
 
-## API `faluss-fans/v1`
+## Schéma v2 et activation contrôlée
+
+Une seule colonne additive `archived tinyint(1) NOT NULL DEFAULT 0` est ajoutée à
+`${prefix}faluss_fans_store_catalog` (InnoDB). À l'installation contrôlée, toutes les
+fiches `external_adult_delivery_right` reçoivent `archived=1`. Aucun autre champ
+n'est modifié ; aucun enregistrement ni historique n'est effacé. Il n'existe pas
+de journal de décisions Store distinct dans le schéma v1 ; ce lot n'en invente pas.
+Le marqueur conserve le refus même si la catégorie d'une ancienne fiche est ensuite
+changée en base. Il n'existe aucune route de modification de catégorie ou du marqueur.
+Un opérateur ayant un accès SQL peut altérer les données : le marqueur n'est pas une
+protection contre un administrateur de base malveillant.
+
+L'option `faluss_fans_store_catalog_schema_version=2` n'est écrite qu'après
+vérification exacte du schéma et marquage réussi. Le verrou d'installation existant
+sérialise les activations. L'ALTER n'est pas transactionnel : si le marquage échoue,
+la colonne peut déjà exister ; le module reste fermé (version 1), une nouvelle
+activation reprend le marquage sans recréer la colonne. Aucun upgrade au boot.
+Une ancienne version de schéma ne passe pas `ready()` : pas de routes Store.
+
+L'activation exige rôle Fans, flags SSO/profils/catalogue, configuration et schémas
+prêts. Ces flags restent fermés hors de l'instance locale jetable de recette. Une
+future activation réelle exige une opération contrôlée et une autorisation distincte.
+
+## Contrat REST `faluss-fans/v1`
 
 | Route | Permission | Résultat |
 | --- | --- | --- |
-| `GET /store/categories` | Public | Les deux catégories avec libellés contrôlés et `purchasable=false`. |
-| `GET /store/products` avec filtre `category` optionnel | Public | Au plus 20 fiches hébergées visibles de créateurs encore actifs ; filtre adulte valide mais liste vide en l'absence de consentement. |
-| `GET /store/products/{product_id}` | Public | Fiche hébergée visible d'un créateur encore actif ou 404 ; fiche adulte masquée, même si sa visibilité stockée est changée. |
-| `POST /store/products` | `manage_options`, nonce REST et `Idempotency-Key` UUID | Crée une fiche structurée pour un profil actif ; fiche adulte toujours `hidden`. Même clé et mêmes données donnent la même fiche, conflit de clé refusé. |
-| `POST /store/products/{product_id}/purchase` | Public, pour que toute requête atteigne le refus serveur | `403 external_adult_purchase_blocked` pour la catégorie adulte externe, même masquée ; `503 hosted_purchase_not_open` pour le contenu hébergé ; aucun effet de bord. |
+| `GET /store/categories` | Public | Uniquement contenu hébergé autorisé, `purchasable=false`. |
+| `GET /store/products` | Public | Au plus 20 fiches hébergées visibles, profil actif ; archive et catégorie adulte exclues en SQL avant LIMIT. |
+| Filtre `category` | Public | Absent ou `hosted_allowed_content` ; catégorie adulte, inconnue ou tableau forgé : 400 `invalid_category`. |
+| `GET /store/products/{product_id}` | Public | 404 pour toute archive ou fiche adulte, même avec visibilité forcée ou catégorie changée ; fiche permise si profil actif. |
+| `POST /store/products` | `manage_options`, nonce REST, `Idempotency-Key` UUID | Fiche hébergée pour profil actif ; adulte : 403 `category_archived`, même avec visibilité/marqueur forgés. Rejeu d'une ancienne archive : refus, jamais remise en ligne. |
+| `POST /store/products/{product_id}/purchase` | Public, refus obligatoire | Archive ou catégorie adulte : 403 `external_adult_purchase_blocked` ; hébergé : 503 `hosted_purchase_not_open` ; inconnu : 404. Catégorie envoyée par le client ignorée. |
+| `GET /store/admin/archive` | `manage_options` ET nonce `wp_rest` | `{items,next_cursor}` ; 20 éléments maximum, ordre UUID croissant, curseur exclusif UUID ; curseur invalide 400. |
+| `GET /store/admin/archive/{product_id}` | Même permission | Archive, même si créateur suspendu ; fiche non archivée/inconnue : 404. |
 
-Le refus est dans `PurchaseGate`, appelé par le service utilisé par l'API. Le service relit la catégorie stockée par identifiant de produit, même pour une fiche masquée : un changement de catégorie ne contourne donc pas les codes 403/503. Un flag d'acceptation supposé pour la catégorie adulte n'est pas lu ; le refus reste codé côté serveur. Les fiches ne constituent ni produits payables, ni commandes, ni droits. Il n'existe actuellement aucune route de panier, checkout, paiement, administration de commande, webhook, reprise ou délivrance. Ces futurs chemins devront chacun recevoir leur garde serveur et leurs tests de refus adulte avant fusion ; ils ne sont pas protégés aujourd'hui puisqu'ils n'existent pas.
+Les réponses d'archive comportent UUID produit/créateur, catégorie/libellé,
+visibilité/date conservées et `archived=true`, sans clé d'idempotence. Réponses
+privées `Cache-Control: private, no-store, max-age=0`, `Vary: Cookie, X-WP-Nonce`.
+Aucune route PUT/PATCH/POST de remise en ligne n'existe. Le service contrôle aussi
+la capacité administrative indépendamment de la permission REST.
 
-## Portes avant toute vente
+La découverte du catalogue utilise ces listes/détails/filtres. Le module n'inscrit
+ni type de post WordPress, ni index de recherche, ni compteur/facette séparé, ni
+projection Me/Hub. Les paramètres de recherche ou de comptage non pris en charge
+ne réintroduisent pas les archives ; la liste filtrée reste la seule source publique.
+Aucun total des archives n'est publié. Tout futur index, recherche ou compteur devra
+reprendre cette exclusion avant agrégation et disposer de ses propres tests.
 
-Pour le **contenu autorisé hébergé**, obtenir la validation explicite du prestataire pour ce modèle de plateforme, puis ajouter contenu conforme, prix, commandes, paiement, remboursements et droits dans des PR revues et testées. Le flag du catalogue ne vaut pas validation commerciale. Avant toute utilisation réelle des fiches administratives, vérifier aussi le consentement du créateur à la catégorie affichée ; ce flux n'est pas automatisé ici. Vérifier sur WordPress/MariaDB et avec le prestataire avant activation de vente.
+## Refus d'achat et limites
 
-Pour la **livraison adulte externe**, le refus demeure 403 et les fiches nominatives restent masquées sans consentement. L’[ADR 0018](../adr/0018-fans-pf-pc-hof-v3.md) retient pour cible le **retrait de la catégorie et de ses anciennes fiches du Shop et de la découverte publics**, même actuellement classables. Conserver leurs identifiants et leur historique pour l’administration, sans reclassement en produits autorisés. L’archivage effectif fera l’objet d’un lot distinct : aucune suppression, migration ou modification de route dans #80. Aucun accord prestataire ou flag ne lève automatiquement le refus. Aucun contenu adulte dans Fans, messagerie comprise.
+`PurchaseGate` reste inchangé. Le service relit le produit et impose la catégorie
+interdite au garde d'achat quand son marqueur est archivé. Aucune acceptation supposée
+de prestataire ou flag ne lève ce refus. Le contenu hébergé reste fermé 503.
+Il n'existe ni panier, checkout, paiement, webhook, commande, droit ou délivrance.
+Les futurs chemins devront recevoir leurs propres gardes et tests ; les refus actuels
+ne prouvent pas leur sécurité. Le vendeur contractuel et les autres portes de
+l'[ADR 0018](../adr/0018-fans-pf-pc-hof-v3.md) restent ouverts à décision : parcours fermés.
+Aucun score ou PC implicite du Shop, aucun wallet ou montant financier côté créateur.
+Le Token Engine et les claims historiques sont inchangés.
 
-Les tests actuels couvrent les libellés et catégories, l'idempotence et les permissions de création, la fiche adulte masquée malgré création administrative ou changement de catégorie, le refus côté service et API pour les deux catégories et l'absence de champ de contenu ou de livraison. Une recette locale jetable WordPress/MariaDB a confirmé les catégories publiques, la fiche adulte `hidden` et 404 en lecture publique, puis 403 pour sa tentative d'achat et 503 pour le contenu hébergé ; après changement de catégorie en base, l'API renvoie 403 et masque la fiche. Le retrait des flags a fermé les routes en conservant les cinq tables Fans. Ces résultats ne prouvent ni les chemins de commande, paiement ou droit futurs, ni une validation de prestataire ou un déploiement réel. Le lot commandes/droits devra tester panier, checkout, API, administration, webhook, reprise, catégorie changée et droit ancien avant toute ouverture.
+## Retour arrière
 
-## Cible Shop — contrat v3, parcours commerciaux fermés
+1. Fermer `FALUSS_PLATFORM_FANS_STORE_CATALOG` avant toute intervention : routes fermées.
+2. Conserver table, colonne, marqueurs et option ; ne pas remettre l'option à 1,
+   supprimer la colonne ou convertir les catégories. Aucune désactivation ne les efface.
+3. Préférer une correction en avant. L'ancien code v1 vérifie exactement six colonnes :
+   avec la colonne additive, il échoue fermé. Un retour binaire ne permet donc pas de
+   réactiver l'ancien catalogue ; une adaptation compatible doit être revue séparément.
+4. Avant future réouverture du seul catalogue autorisé, revérifier le schéma, les
+   archives et les refus 403/503. Aucune procédure de désarchivage n'est fournie.
 
-Le Shop cible couvre uniquement contenus, prestations, services et produits autorisés.
-Cette taxonomie n’est pas implémentée par les deux catégories historiques ci-dessus.
-Un achat, remboursement, webhook, commande ou droit Shop n’ajoute aucun score HoF
-ou PC implicitement. Aucun wallet ou montant financier dans l’interface ou l’API
-destinée au créateur, même privée. Le vendeur contractuel, les responsabilités et
-le traitement financier hors de ces surfaces restent à décider ; vente, paiement,
-commande et délivrance commerciale restent fermés. Les futurs chemins devront
-avoir leurs propres gardes et tests ; les refus actuels ne prouvent pas leur sécurité.
+## Preuves
 
-Aucune conversion PF/PC, aucun taux de commission ou revenu issu du score n’est
-acquis. Le score public peut permettre une estimation économique indirecte.
-L’ADR définit les corrections et les arbitrages ; le Token Engine et ses limites
-de compensation partielle restent inchangés. Ce lot ne modifie ni schéma ni API.
+Tests ciblés Store : catégories, créations/idempotence, permissions/nonce, archives
+après suspension, catégorie/visibilité forgées, migration interrompue/reprise.
+[Recette WordPress/MariaDB réelle](../../tests/Fans/Store/recipe/README.md) :
+50 fiches synthétiques, migration v1→v2 avec panne, API HTTP et pagination administrative.
+Ces preuves locales ne sont ni validation d'un hébergeur réel, ni activation, ni
+recette de moteurs commerciaux futurs.

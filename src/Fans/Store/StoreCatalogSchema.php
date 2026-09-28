@@ -7,7 +7,7 @@ namespace Faluss\Platform\Fans\Store;
 final class StoreCatalogSchema
 {
     public const OPTION = 'faluss_fans_store_catalog_schema_version';
-    public const VERSION = '1';
+    public const VERSION = '2';
 
     public static function table(): ?string
     {
@@ -46,7 +46,19 @@ final class StoreCatalogSchema
             } elseif ($found !== $table) {
                 return false;
             }
+            // Additive archive marker: retain every original field and identifier.
+            if (self::verify($table, false)) {
+                if ($wpdb->query('ALTER TABLE ' . self::quote($table) . ' ADD COLUMN `archived` tinyint(1) NOT NULL DEFAULT 0') === false) {
+                    return false;
+                }
+            }
             if (!self::verify($table)) {
+                return false;
+            }
+            if ($wpdb->query($wpdb->prepare(
+                'UPDATE ' . self::quote($table) . ' SET archived = 1 WHERE category = %s AND archived = 0',
+                PurchaseGate::EXTERNAL_ADULT
+            )) === false) {
                 return false;
             }
             update_option(self::OPTION, self::VERSION, false);
@@ -66,6 +78,7 @@ final class StoreCatalogSchema
             . '`category` varchar(32) NOT NULL, '
             . '`visibility` varchar(16) NOT NULL, '
             . '`created_at` datetime NOT NULL, '
+            . '`archived` tinyint(1) NOT NULL DEFAULT 0, '
             . 'PRIMARY KEY (`product_id`), '
             . 'UNIQUE KEY `request_key_unique` (`request_key`), '
             . 'KEY `category_visibility` (`category`, `visibility`), '
@@ -73,7 +86,7 @@ final class StoreCatalogSchema
             . ') ENGINE=InnoDB ' . $collate;
     }
 
-    private static function verify(string $table): bool
+    private static function verify(string $table, bool $archiveColumn = true): bool
     {
         global $wpdb;
         if (!self::databaseReady($wpdb)) {
@@ -91,6 +104,9 @@ final class StoreCatalogSchema
             'visibility' => 'varchar(16)',
             'created_at' => 'datetime',
         ];
+        if ($archiveColumn) {
+            $expectedColumns['archived'] = 'tinyint(1)';
+        }
         $columns = $wpdb->get_results('SHOW FULL COLUMNS FROM ' . self::quote($table), 'ARRAY_A');
         if (!is_array($columns) || count($columns) !== count($expectedColumns)) {
             return false;
@@ -98,7 +114,7 @@ final class StoreCatalogSchema
         foreach ($columns as $column) {
             if (!is_array($column)
                 || !isset($expectedColumns[$column['Field'] ?? ''])
-                || strtolower((string) ($column['Type'] ?? '')) !== $expectedColumns[$column['Field']]
+                || strtolower((string) ($column['Type'] ?? '')) !== ($expectedColumns[$column['Field']] ?? null)
                 || ($column['Null'] ?? '') !== 'NO'
                 || ($column['Extra'] ?? '') !== ''
             ) {

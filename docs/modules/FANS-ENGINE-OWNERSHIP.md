@@ -165,13 +165,12 @@ politiques et sans adapter les vérifications d'identité fermées des moteurs.
 
 ## Commerce fermé et décisions avant comptabilité
 
-`external_adult_delivery_right` reste classable et visible comme catégorie ; toute
-fiche nominative est masquée faute de consentement. #70 ne possède aucun mécanisme
-de consentement : il masque toutes ces fiches côté serveur, même si la base dit
-`visible`. L'achat actuel répond 403. `hosted_allowed_content` répond 503 tant que
-le commerce est fermé. Les futurs panier, commande, paiement, webhook, attribution
-de droit et délivrance devront chacun refuser la catégorie adulte et vérifier
-leur propre garde. Ils ne sont pas réputés protégés par la seule route #70.
+`external_adult_delivery_right` est désormais archivée hors du catalogue public.
+Le [Store v2](FANS-STORE.md) conserve les fiches pour consultation administrative
+privée, sans conversion ni suppression. Création et republication refusées ; achat
+403, y compris ancienne référence dont la catégorie aurait été changée.
+`hosted_allowed_content` répond 503 tant que le commerce reste fermé. Les futurs
+panier, commande, paiement, webhook et délivrance nécessiteront leurs propres gardes.
 
 Les commandes autorisées futures exigent prix figé, devise et centimes entiers,
 clé d'idempotence métier, preuve du prestataire, transitions transactionnelles,
@@ -185,11 +184,8 @@ paiement et délivrance commerciale fermés. Aucun taux de commission n’est ac
 par ce contrat. Validation prestataire et vérification vendeur distincte nécessaires
 avant toute vente autorisée ; elles n’ouvrent pas le parcours adulte externe.
 
-Cible : retirer la catégorie adulte externe et ses anciennes fiches du Shop et
-de la découverte publics, même actuellement classables. Conserver identifiants
-et historique pour l’administration. Archivage effectif dans un lot distinct ;
-aucune suppression ou migration ici, 403 et masquage nominatif conservés.
-Voir [Store](FANS-STORE.md).
+L'archivage effectif est implémenté dans le lot Store v2 distinct du contrat v3.
+Il ne ratifie ni protocole économique ni activation. Voir [Store](FANS-STORE.md).
 
 ## Séquence de lots et portes de validation
 

@@ -60,11 +60,13 @@ La façade actuelle ne fournit que statut et claim quotidien Hub ; pack, support
 | Allocation et remboursements partiels, insuffisance de solde, coordination des autorités | Remboursement partiel et ouverture économique qui en dépend |
 | Sort des titres et cosmétiques après correction | Attribution définitive de récompenses de classement |
 | Vendeur contractuel Shop, responsabilités et traitement financier hors surfaces créateur | Vente, paiement, commande et délivrance commerciale |
-| Définir le lot distinct d’archivage effectif adulte externe | Modification du catalogue et de la découverte ; achat toujours refusé |
+| Activer éventuellement le catalogue autorisé après revue de l’archivage Store v2 | Activation réelle fermée ; achat toujours refusé |
 
 ## Shop et historique adulte externe
 
 Cible retenue : **retirer `external_adult_delivery_right` et ses anciennes fiches du Shop et de la découverte publics**, même si elles sont actuellement classables. Conserver leurs identifiants, fiches, décisions et traces pour l’administration, sans effacer l’historique ni les transformer en produits autorisés. L’archivage effectif fera l’objet d’un lot distinct ; aucune suppression ou migration dans #80. Dans le code inchangé, la catégorie reste actuellement classable ; fiches nominatives masquées sans consentement, achat refusé **403** ; contenu hébergé encore fermé **503**. Aucun contenu adulte dans Fans, messages compris. Aucun accord prestataire ne lève automatiquement le refus. Aucun futur panier, webhook ou droit n'est déclaré protégé avant son implémentation et ses tests propres.
+
+Mise en œuvre ultérieure : le [Store v2](../modules/FANS-STORE.md) réalise maintenant cet archivage dans un lot distinct de #80. La description du code inchangé ci-dessus est historique : catégorie et fiches sont désormais retirées des surfaces publiques, conservées en administration, sans conversion ni suppression. Aucun flag ouvert.
 
 ## Vérification attendue et retour arrière
 
