@@ -76,8 +76,8 @@ Propriétaire/barèmes PC, anciens claims, sessions/suspensions, remboursements
 partiels, titres après correction et vendeur Shop : décisions requises, parcours
 correspondants fermés. Le Token Engine reste inchangé ; sa compensation standard
 intégrale et unique ne fournit pas les compensations partielles successives.
-Le simulateur v2 reste historique, non conforme à cette cible ; son adaptation
-appartient à un prochain lot. Voir [ownership](FANS-ENGINE-OWNERSHIP.md).
+Le simulateur v2 reste historique, non conforme à cette cible ; une
+[v3 de fixtures distincte](FANS-HOF-SIMULATION-V3.md) est maintenant disponible hors runtime. Voir [ownership](FANS-ENGINE-OWNERSHIP.md).
 
 ## Prochains moteurs
 
@@ -86,3 +86,10 @@ La matrice des propriétaires, les contrats proposés et les portes de validatio
 La [fondation des publications](FANS-PUBLICATIONS.md) comprend maintenant un moteur local de textes modérés, désactivé par défaut, et les politiques pures existantes. Les originaux médias, publications verrouillées et teasers Me restent sans route active ni transport.
 
 La [simulation Progression/HoF v2](PROGRESSION-SIMULATION.md), adaptée dans #73 avec refus de l'auto-soutien sur les identités fictives, sépare score en centièmes de point et dépense consommée en centimes EUR. Elle teste les corrections sur fixtures, y compris les sessions clôturées ; le financement Faluss reste non pris en charge faute de politique allouée. Elle ne crée ni niveau, badge, session HoF active, PF, revenu ou score persistant.
+
+## Simulateur HoF v3 hors runtime
+
+La [v3 distincte](FANS-HOF-SIMULATION-V3.md) calcule sur fixtures le ratio validé,
+les projections multiples et les corrections, avec zéro PC. Elle ne remplace ni
+ne recalcule la v2 historique. Aucun protocole PF, remboursement réel, politique
+de victoire/suspension, API créateur ou activation ; les portes économiques restent fermées.
