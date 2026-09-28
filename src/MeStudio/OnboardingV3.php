@@ -199,7 +199,7 @@ final class OnboardingV3
                 <div data-v3-tab-panel="texture" hidden inert><?php self::choices('button_texture', ['smooth' => 'Lisse', 'grain' => 'Granulée', 'camo' => 'Camo'], (string) ($prefs['button_texture'] ?? 'smooth')); ?></div><?php
                 break;
             case 'v3_avatar':
-                ?><?php if (!empty($profile['avatar_attachment_id'])) { echo wp_get_attachment_image((int) $profile['avatar_attachment_id'], 'thumbnail', false, ['class' => 'faluss-onboarding-v3__retained-avatar', 'alt' => 'Photo retenue']); } ?><label>Remplacer la photo · facultatif<input type="file" accept="image/jpeg,image/png,image/gif,image/webp" data-v3-upload="avatar"></label><input type="hidden" name="avatar_attachment_id" value="<?php echo (int) ($profile['avatar_attachment_id'] ?? 0); ?>">
+                ?><?php if (!empty($profile['avatar_attachment_id'])) { echo wp_get_attachment_image((int) $profile['avatar_attachment_id'], 'thumbnail', false, ['class' => 'faluss-onboarding-v3__retained-avatar', 'alt' => 'Photo retenue']); } ?><details class="faluss-onboarding-v3__replacement"><summary>Remplacer la photo · facultatif</summary><label>Nouvelle photo<input type="file" accept="image/jpeg,image/png,image/gif,image/webp" data-v3-upload="avatar"></label></details><input type="hidden" name="avatar_attachment_id" value="<?php echo (int) ($profile['avatar_attachment_id'] ?? 0); ?>">
                 <?php self::tabs('avatar', ['shape' => 'Forme', 'effects' => 'Effets']); ?>
                 <div data-v3-tab-panel="shape"><?php self::choices('avatar_shape', ['round' => 'Rond', 'rounded' => 'Arrondi', 'square' => 'Carré'], (string) ($prefs['avatar_shape'] ?? 'round')); ?></div>
                 <div data-v3-tab-panel="effects" hidden inert><?php self::choices('avatar_effect', ['none' => 'Aucun', 'border' => 'Bordure', 'shadow' => 'Ombre', 'both' => 'Les deux'], (string) ($prefs['avatar_effect'] ?? 'border')); ?></div><?php
@@ -256,7 +256,7 @@ final class OnboardingV3
     private static function colors(string $name, string $selected): void
     {
         $nullable = $name === 'social_color';
-        $palette = ['#FFFFFF', '#E5E5E5', '#DED4E4', '#FFE1E5', '#FF515B', '#FFD3BD', '#ADB8A8', '#292929'];
+        $palette = ['#FFFFFF', '#E5E5E5', '#DED4E4', '#FFE1E5', '#FF515B', '#FFD3BD', '#ADB8A8', '#000000'];
         ?><div class="faluss-onboarding-v3__colors"><?php if ($nullable) : ?><label><input type="radio" name="social_color" value="" <?php checked($selected, ''); ?>><span style="--v3-swatch:#fff">Auto</span></label><?php endif; ?><?php foreach ($palette as $color) : ?><label><input type="radio" name="<?php echo esc_attr($name); ?>" value="<?php echo esc_attr($color); ?>" <?php checked(strtoupper($selected), $color); ?>><span style="--v3-swatch:<?php echo esc_attr($color); ?>"></span></label><?php endforeach; ?><label class="faluss-onboarding-v3__custom">Autre<input type="color" data-v3-color="<?php echo esc_attr($name); ?>" value="<?php echo esc_attr($selected !== '' ? $selected : '#080808'); ?>" <?php echo $selected !== '' && !in_array(strtoupper($selected), $palette, true) ? 'data-selected="true"' : ''; ?>></label></div><?php
     }
 

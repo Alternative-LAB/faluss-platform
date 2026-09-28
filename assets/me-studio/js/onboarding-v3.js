@@ -68,13 +68,16 @@
     function updateViewportHeight() {
         var viewport = window.visualViewport;
         if (viewport && viewport.scale !== 1) { return; } // Preserve intentional pinch zoom.
-        var inset = viewport ? Math.max(0, layoutHeight - viewport.height - viewport.offsetTop) : 0;
-        var opening = inset > 80;
+        var focused = scroll.contains(document.activeElement) && document.activeElement.matches('input, select, textarea');
+        var opening = !!viewport && (focused || keyboardOpen) && layoutHeight - viewport.height > 100;
         if (!opening || window.innerWidth !== layoutWidth) {
             layoutHeight = window.innerHeight;
             layoutWidth = window.innerWidth;
         }
         root.style.setProperty('--v3-height', layoutHeight + 'px');
+        // Follow Safari's visual origin without scrolling the document back against it.
+        root.style.setProperty('--v3-viewport-top', (viewport ? viewport.offsetTop : 0) + 'px');
+        root.style.setProperty('--v3-keyboard-min-height', Math.min(maxHeight(), (viewport ? layoutHeight - viewport.height : 0) + 148) + 'px');
         if (opening && !keyboardOpen) { scrollBeforeKeyboard = scroll.scrollTop; }
         var closing = keyboardOpen && !opening;
         keyboardOpen = opening;
@@ -96,14 +99,16 @@
     window.addEventListener('resize', scheduleViewportUpdate);
     if (window.visualViewport) {
         window.visualViewport.addEventListener('resize', scheduleViewportUpdate);
-        // Safari owns visual-viewport panning. Never answer its scroll with another scroll.
+        window.visualViewport.addEventListener('scroll', scheduleViewportUpdate);
+        // Only translate the fixed shell and scroll its contents. Never answer its scroll with another scroll.
     }
     if (document.fonts) { document.fonts.ready.then(fitPanel); }
     function scalePreview() {
         if (!previewHost || !previewHost.firstElementChild) { return; }
         var card = previewHost.firstElementChild;
         card.style.width = '390px';
-        card.style.setProperty('--fl-card-min-height', Math.max(440, window.innerWidth <= 768 ? layoutHeight * 390 / window.innerWidth : 844) + 'px');
+        card.style.setProperty('--fl-card-min-height', Math.ceil(previewHost.clientHeight * 390 / previewHost.clientWidth) + 'px');
+        card.style.setProperty('--fl-composition-height', (previewHost.clientHeight * 390 / previewHost.clientWidth) + 'px');
         card.style.zoom = String(previewHost.clientWidth / 390);
     }
     if (window.ResizeObserver && previewHost) { new ResizeObserver(scalePreview).observe(previewHost); }
@@ -296,6 +301,13 @@
             if (!payload.success || !payload.data || !payload.data.id) { throw new Error(serverError(payload, 'upload_failed')); }
             var hidden = root.querySelector('[name="' + kind + '_attachment_id"]');
             if (hidden) { hidden.value = payload.data.id; }
+            if (kind === 'avatar') {
+                var retained = panel.querySelector('.faluss-onboarding-v3__retained-avatar');
+                if (!retained) { retained = document.createElement('img'); retained.className = 'faluss-onboarding-v3__retained-avatar'; input.closest('label').before(retained); }
+                var localUrl = URL.createObjectURL(file);
+                retained.onload = function () { URL.revokeObjectURL(localUrl); };
+                retained.removeAttribute('srcset'); retained.src = localUrl; retained.alt = 'Photo retenue';
+            }
             if (kind === 'avatar' && root.dataset.step === 'v3_identity') {
                 return saveIdentityDraftNow().then(function () {
                     notice('Image prête.', false);
@@ -498,7 +510,7 @@
             var row = document.createElement('div');
             row.className = 'faluss-onboarding-v3__link'; row.dataset.v3Link = ''; row.dataset.id = id;
             row.innerHTML = '<label>Libellé<input data-v3-link-label maxlength="80"></label><label>URL HTTPS<input type="url" data-v3-link-url maxlength="2048" placeholder="https://"></label><div><button type="button" data-v3-move="up" aria-label="Monter ce lien">↑</button><button type="button" data-v3-move="down" aria-label="Descendre ce lien">↓</button></div>';
-            list.appendChild(row); row.querySelector('input').focus(); setExpanded(true); return;
+            list.appendChild(row); setExpanded(true); row.querySelector('input').focus({preventScroll: true}); return;
         }
         var move = target.closest('[data-v3-move]');
         if (move) {

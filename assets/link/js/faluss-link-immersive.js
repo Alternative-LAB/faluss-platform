@@ -15,7 +15,7 @@
 
     function update() {
         frame = 0;
-        if (!isPublicProfileRoute()) {
+        if (!cards.length) {
             return;
         }
         cards.forEach(function (card) {
@@ -24,7 +24,11 @@
             if (!cover || rect.bottom < 0 || rect.top > window.innerHeight) {
                 return;
             }
-            var depth = Math.max(-24, Math.min(24, -rect.top * 0.12));
+            var canonical = card.classList.contains('faluss-link-card--canonical');
+            if (!canonical && !isPublicProfileRoute()) { return; }
+            var progress = Math.min(1, Math.max(0, -rect.top) / Math.max(1, cover.offsetHeight));
+            var depth = canonical ? progress * 8 : Math.max(-24, Math.min(24, -rect.top * 0.12));
+            if (canonical) { cover.style.setProperty('--fl-wallpaper-scale', (1 - progress * .025).toFixed(4)); }
             var panelDepth = Math.max(-10, Math.min(0, rect.top * 0.035));
             cover.style.setProperty('--fl-immersive-depth', depth.toFixed(2) + 'px');
             card.style.setProperty('--fl-immersive-panel-depth', panelDepth.toFixed(2) + 'px');
@@ -46,13 +50,10 @@
     }
 
     function initialize(root) {
-        if (!isPublicProfileRoute()) {
-            return;
-        }
         var scope = root && root.jquery ? root[0] : (root || document);
-        var candidates = scope.querySelectorAll ? scope.querySelectorAll('.faluss-link-card--presentation-immersive') : [];
+        var candidates = scope.querySelectorAll ? scope.querySelectorAll('.faluss-link-card--presentation-immersive, .faluss-link-card--canonical[data-faluss-card-context="public"]') : [];
         Array.prototype.forEach.call(candidates, function (card) {
-            if (card.dataset.falussLinkImmersiveReady) {
+            if (card.dataset.falussLinkImmersiveReady || card.dataset.falussCardContext && card.dataset.falussCardContext !== 'public') {
                 return;
             }
             card.dataset.falussLinkImmersiveReady = '1';

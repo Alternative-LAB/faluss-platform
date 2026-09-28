@@ -12,7 +12,7 @@ use Faluss\Platform\Link\StudioProviderRegistry;
 
 final class MeStudioModule implements Module
 {
-    public const VERSION = '3.2.1';
+    public const VERSION = '3.2.2';
 
     public function id(): string
     {

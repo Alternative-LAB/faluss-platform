@@ -18,7 +18,7 @@ function pageHtml(step, studio=false) {
  return `<!doctype html><meta name="viewport" content="width=device-width, initial-scale=1"><style>${css}</style><section class="faluss-onboarding-v3" data-faluss-onboarding-v3 data-step="${step}" data-studio="${studio}" data-version="test"><header class="faluss-onboarding-v3__header"><button data-v3-back>←</button>${studio?'<label>Studio<select data-v3-section><option>Identité</option></select></label>':'<div class="faluss-onboarding-v3__progress"><span></span><span></span><span></span></div>'}<img class="faluss-onboarding-v3__logo" src="data:image/png;base64,${fs.readFileSync(path.join(root,'assets/link/images/faluss-onboarding-header-logo.png')).toString('base64')}" alt="Faluss Me"></header><div class="faluss-onboarding-v3__stage"><div class="faluss-onboarding-v3__phone"><div class="faluss-onboarding-v3__phone-screen" data-v3-preview>${illustrate(cards['atomic-compact-gradient'])}</div></div></div><form class="faluss-onboarding-v3__panel" data-v3-panel><button type="button" class="faluss-onboarding-v3__grabber" data-v3-grabber><span></span></button><div class="faluss-onboarding-v3__scroll" data-v3-scroll>${controls.atomic[step]}<p data-v3-error hidden></p><p data-v3-status></p></div><footer class="faluss-onboarding-v3__actions"><button class="faluss-onboarding-v3__primary" data-v3-primary>${studio?'Enregistrer':'Continuer'}</button></footer></form></section><script>window.falussOnboardingV3={ajaxUrl:'https://local.invalid/ajax'};window.fetch=()=>Promise.resolve({status:200,text:()=>Promise.resolve(JSON.stringify({success:true,data:{preview_html:${JSON.stringify(cards['atomic-compact-gradient'])}}}))});</script><script>${js}</script>`;
 }
 (async()=>{
- const out=path.join(root,'docs/evidence/me-v3-054');fs.mkdirSync(out,{recursive:true});
+ const out=path.join(root,process.env.FALUSS_EVIDENCE_DIR || 'docs/evidence/me-v3-054');fs.mkdirSync(out,{recursive:true});
  const results=[];
  for(const [engine,type,options] of [['chromium',chromium,{executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'}],['webkit',webkit,{}]]) {
   const browser=await type.launch({headless:true,...options});
@@ -75,7 +75,7 @@ function pageHtml(step, studio=false) {
        return {calls,windowCalls,stable};
       },keyboardHeight);
       assert(correction.calls<=1 && correction.windowCalls===0 && correction.stable,'One instant internal correction per frame; no viewport scroll feedback');
-      assert.deepEqual(await geometry(),before,`${engine} ${width} ${step}: keyboard moved outer geometry`);
+      const during=await geometry(); assert.deepEqual(during.header,before.header); assert.equal(during.panel.bottom,before.panel.bottom); assert.deepEqual(during.action,before.action); assert(during.panel.height>=before.panel.height);
       assert.equal(await page.evaluate(()=>scrollY),0);
       if(input) {
        const r=await input.boundingBox(),box=await page.locator('[data-v3-scroll]').boundingBox();
@@ -87,6 +87,29 @@ function pageHtml(step, studio=false) {
      }
     }
     assert(heights.v3_review<heights.v3_identity,'Sparse Review sheet must fit its smaller content');
+    // Safari can pan the visual origin while shrinking its height. Keep the fixed shell
+    // visually anchored, reveal the last link field internally and preserve entered text.
+    await page.setContent(pageHtml('v3_links'));
+    await page.locator('[data-v3-add-link]').click();
+    const field=page.locator('[data-v3-link-url]').last();await field.focus();
+    await page.evaluate(async h=>{
+      Object.defineProperty(visualViewport,'offsetTop',{configurable:true,value:180});
+      Object.defineProperty(visualViewport,'height',{configurable:true,value:h});
+      for(let i=0;i<30;i++){visualViewport.dispatchEvent(new Event('scroll'));visualViewport.dispatchEvent(new Event('resize'));}
+      await new Promise(requestAnimationFrame);await new Promise(requestAnimationFrame);
+    },keyboardHeight);
+    await field.fill('https://example.org/visible');
+    const panned=await page.evaluate(()=>{
+      const rect=s=>document.querySelector(s).getBoundingClientRect();
+      const r=[...document.querySelectorAll('[data-v3-link-url]')].at(-1).getBoundingClientRect();
+      return {top:rect('.faluss-onboarding-v3__header').top-visualViewport.offsetTop,bottom:rect('[data-v3-panel]').bottom-visualViewport.offsetTop,fieldTop:r.top,fieldBottom:r.bottom,visibleBottom:visualViewport.offsetTop+visualViewport.height,scroll:scrollY};
+    });
+    assert.equal(panned.top,0);assert.equal(panned.bottom,height);assert.equal(panned.scroll,0);
+    assert(panned.fieldTop>=180 && panned.fieldBottom<=panned.visibleBottom,JSON.stringify(panned));
+    assert.equal(await field.inputValue(),'https://example.org/visible');
+    await page.evaluate(async()=>{delete visualViewport.offsetTop;delete visualViewport.height;visualViewport.dispatchEvent(new Event('resize'));await new Promise(requestAnimationFrame);});
+    const filled=await page.locator('[data-v3-preview] article').boundingBox(),screen=await page.locator('[data-v3-preview]').boundingBox();
+    assert(filled.height>=screen.height-1,'Selected canvas fills the entire phone, even on short screens');
     assert.deepEqual(errors,[]);results.push(`${engine} ${width}x${height}: tabs, expand then full scroll, 16px fields; Identity/Networks/Review focus with 50 resize/scroll events: instant internal correction, zero window scroll; simulated overlay keyboard, close and manual expansion preserve panel/header/footer; active fields visible; heights ${JSON.stringify(heights)}`);
     await page.close();
    }

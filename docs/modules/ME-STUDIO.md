@@ -159,3 +159,12 @@ Les deux navigations gardent chacune une pill unique (180 ms, transition désact
 `pushState` ajoute une entrée après le chargement réussi. `popstate` charge la destination ; une annulation pour saisie non enregistrée restaure l’entrée courante. Les réponses obsolètes sont annulées/ignorées. La zone de saisie est temporairement inerte pendant le chargement ; une sauvegarde ou un upload empêche de changer de rubrique. Une erreur garde champs et URL courants. La sauvegarde confirmée relit l’état canonique et ses nonces ; si cette lecture échoue, l’édition attend une actualisation explicite, sans rejouer la mutation. Seul un état serveur ne contenant plus le Studio (session expirée, fournisseur indisponible) revient à la navigation complète.
 
 Voir [recette locale 0.5.4](../evidence/me-v3-054/README.md). Aucun changement de contrats de données ou de rendu public.
+
+
+## Ajustements ciblés — 0.6.2
+
+Après acceptation du garde de saisie, les deux navigations déplacent immédiatement sélection et pill. La requête conserve le contenu courant inerte ; les liens de navigation sont gardés tant que leurs destinations restent identiques. Une erreur restaure la sélection validée. Les URL directes, historique, clavier, repli sans JS, réduction des animations et relecture canonique après sauvegarde restent inchangés.
+
+Design → Avatar expose `avatar_visible` dans la transaction existante, sans effacer `avatar_attachment_id`. Ce champ reste facultatif dans le contrat d'édition Avatar, absent du parcours d'onboarding. Liens expose directement `links_mode` et conserve les éditeurs `attachment_id` existants (ajouter, remplacer, retirer). Le rendu illustré donne la première place visible à une vedette puis deux colonnes ; les titres/contenus de collection gardent leur ordre et leurs règles de visibilité. Les médias de plateforme viennent uniquement du catalogue Link configuré. Aucun nouvel état ou droit économique.
+
+[Recette locale 0.6.2](../evidence/me-v3-062/README.md) : transactions et navigateurs, sans accès WordPress/Elementor réel ni téléphone physique.
