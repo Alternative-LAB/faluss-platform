@@ -106,7 +106,7 @@ onb01_assert( false === strpos( $onboarding, 'data-faluss-id=' ) && false === st
 onb01_assert( false !== strpos( $passwordless, 'post_authentication_redirect' ) && false !== strpos( $passwordless, 'is_authorization_return' ) && strpos( $passwordless, 'is_authorization_return' ) < strpos( $passwordless, 'Faluss_Identity_Onboarding::after_passwordless_authentication' ), 'Passwordless keeps SSO local authorization ahead of onboarding routing.' );
 onb01_assert( false !== strpos( $passwordless, 'render_flow_field' ) && false !== strpos( $passwordless, 'onboarding_flow_context' ), 'Passwordless retains the opaque server flow through e-mail and OTP stages.' );
 onb01_assert( false !== strpos( $navigation, 'current_local_return_url' ) && false !== strpos( $navigation, 'my_faluss_url' ) && false !== strpos( $navigation, 'Faluss_Identity_Onboarding::onboarding_url' ), 'Navigation keeps a generic local return while onboarding resolves the member state server-side.' );
-foreach ( array( "'unlock_teaser'", "'claim_reward'", 'LinkIdentityAdapter::loginUrl', 'teaser_login_url', 'daily_reward_login_url' ) as $needle ) {
+foreach ( array( "'unlock_teaser'", 'LinkIdentityAdapter::loginUrl', 'teaser_login_url' ) as $needle ) {
     onb01_assert( false !== strpos( $link, $needle ), 'Faluss Link preserves its card return through a typed onboarding intent: ' . $needle );
 }
 foreach ( array( "'Faluss_Identity_Onboarding', 'register_assets'", 'class-faluss-identity-onboarding-elementor-widget.php', 'migrate_onb01' ) as $needle ) {
@@ -123,3 +123,5 @@ foreach ( array( 'WeakSet', 'data-onboarding-choice', 'faluss_identity_onboardin
 }
 
 echo 'ONB-01 post-authentication integration contract: OK' . PHP_EOL;
+
+onb01_assert( false === strpos( $link, 'daily_reward_login_url' ), 'Retired Link ALB placements no longer create a reward login intent.' );

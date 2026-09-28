@@ -73,10 +73,12 @@ Pas de migration ni de changement de flag. Un retour à un ZIP antérieur réint
 
 ### Résultats locaux du lot
 
-- PHP lint : huit fichiers PHP modifiés/ajoutés, aucun défaut de syntaxe.
+- PHP lint : neuf fichiers PHP modifiés/ajoutés, aucun défaut de syntaxe.
 - PHPStan : aucune erreur.
 - PHPUnit ciblé (`LinkRewardRetirementTest|LinkAdaptersTest|LinkModuleTest|LinkCharacterizationTest|TokenEngineContractTest|PortalAdaptersIntegrationTest`) : **21 tests, 222 assertions, succès**.
 - Contrat `tests/Link/link-hotfix-behavior-test.php` : succès (transactions, rendu en lecture seule, collections).
 - Vérification élargie Link/TokenEngine/Portal/version : 61 tests, 469 assertions ; une comparaison brute d’empreinte Token Engine échoue uniquement dans le checkout CRLF Windows. Le blob Git de `class-token-engine-admin.php` conserve exactement l’empreinte attendue `d07838786693c5bfbb1b6ca422c3096666a13aae0e111369bd375b1596bab195`. La CI Linux reste le contrôle requis pour cette caractérisation ; aucun fichier du moteur n’est modifié.
 - Comparaison à la base : aucun diff dans `src/TokenEngine`, `src/TokenEngineConnector`, `src/Portal`, `src/Fans`, ni dans la région de lecture des droits/teasers de `LegacyLinkService.php`.
 - Scan ciblé des lignes ajoutées pour secrets usuels et `git diff --check` : succès.
+
+- Premier passage CI Linux : les 276 tests PHPUnit et 4 130 assertions passent, y compris les empreintes Token Engine. Le contrat ONB-01 attendait encore le lien de connexion de la récompense retirée : son assertion Link est adaptée, sans changement Identity et en conservant le test du retour historique `claim_reward` et du retour teaser.
