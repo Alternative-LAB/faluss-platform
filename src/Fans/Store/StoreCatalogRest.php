@@ -15,6 +15,13 @@ final class StoreCatalogRest
 
     public static function routes(): void
     {
+        foreach (['/store/admin/archive' => 'archive', '/store/admin/archive/(?P<product_id>[0-9a-f-]{36})' => 'archivedProduct'] as $route => $callback) {
+            register_rest_route('faluss-fans/v1', $route, [
+                'methods' => 'GET',
+                'callback' => [self::class, $callback],
+                'permission_callback' => [CreatorProfileRest::class, 'adminPermission'],
+            ]);
+        }
         register_rest_route('faluss-fans/v1', '/store/categories', [
             'methods' => 'GET',
             'callback' => [self::class, 'categories'],
@@ -44,11 +51,29 @@ final class StoreCatalogRest
         ]);
     }
 
+    public static function archive(\WP_REST_Request $request): \WP_REST_Response
+    {
+        return self::privateResult(StoreCatalogService::archiveList($request->get_param('cursor')));
+    }
+
+    public static function archivedProduct(\WP_REST_Request $request): \WP_REST_Response
+    {
+        return self::privateResult(StoreCatalogService::archivedById($request->get_param('product_id')));
+    }
+
+    /** @param array<string,mixed>|\WP_Error $result */
+    private static function privateResult(array|\WP_Error $result): \WP_REST_Response
+    {
+        $response = $result instanceof \WP_Error ? rest_convert_error_to_response($result) : new \WP_REST_Response($result, 200);
+        $response->header('Cache-Control', 'private, no-store, max-age=0');
+        $response->header('Vary', 'Cookie, X-WP-Nonce');
+        return $response;
+    }
+
     public static function categories(): \WP_REST_Response
     {
         return new \WP_REST_Response([
             ['category' => PurchaseGate::HOSTED, 'label' => PurchaseGate::categoryLabel(PurchaseGate::HOSTED), 'purchasable' => false],
-            ['category' => PurchaseGate::EXTERNAL_ADULT, 'label' => PurchaseGate::categoryLabel(PurchaseGate::EXTERNAL_ADULT), 'purchasable' => false],
         ], 200);
     }
 

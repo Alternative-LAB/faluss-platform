@@ -6,6 +6,13 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Archivage de la catégorie adulte externe Fans
+
+- Retrait de la catégorie et des anciennes fiches des surfaces publiques du catalogue ; créations et remises en ligne refusées côté serveur.
+- Consultation administrative privée paginée, capacité et nonce obligatoires ; identifiants et champs historiques conservés.
+- Schéma Store v2 : un marqueur additif persistant, reprise après échec, aucun effacement ni reclassement. Refus d'achat 403 conservé après changement de catégorie ; contenu hébergé toujours 503.
+- Tests ciblés et recette WordPress/MariaDB locale ; retour arrière fermé documenté. Aucun moteur commercial, Token Engine, Me/Hub ou flag de production modifié.
+
 ### Contrat Fans ↔ Hub pour PF achetés
 
 - Revue depuis le code propriétaire : conflits de payload non garantis par l’idempotence historique, verrous non équivalents à une réservation par lot, reprise après COMMIT ambigu et limites des compensations. Rectificatif : validation du responsable Hub requise avant implémentation, pas avant fusion de la proposition documentaire, qui reste non ratifiée.

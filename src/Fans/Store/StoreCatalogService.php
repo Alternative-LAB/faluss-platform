@@ -8,11 +8,14 @@ use Faluss\Platform\Fans\Profiles\CreatorProfileService;
 
 final class StoreCatalogService
 {
-    /** @return array{product_id:string,creator_id:string,category:string,category_label:string,visibility:string,created_at:string}|\WP_Error */
+    /** @return array{product_id:string,creator_id:string,category:string,category_label:string,visibility:string,created_at:string,archived:bool}|\WP_Error */
     public static function create(mixed $creatorId, mixed $category, mixed $requestKey): array|\WP_Error
     {
         if (!current_user_can('manage_options')) {
             return self::error('admin_required', 403);
+        }
+        if ($category === PurchaseGate::EXTERNAL_ADULT) {
+            return self::error('category_archived', 403);
         }
         if (!self::uuidValid($creatorId)
             || !self::uuidValid($requestKey)
@@ -29,7 +32,7 @@ final class StoreCatalogService
         $existing = self::byRequestKey($table, $requestKey);
         if ($existing !== null) {
             return $existing['creator_id'] === $creatorId && $existing['category'] === $category
-                ? $existing
+                ? ($existing['archived'] ? self::error('category_archived', 403) : $existing)
                 : self::error('request_key_conflict', 409);
         }
         global $wpdb;
@@ -39,9 +42,7 @@ final class StoreCatalogService
             return self::error('product_id_unavailable', 503);
         }
         $now = gmdate('Y-m-d H:i:s');
-        // No creator consent record exists yet for the adult external category.
-        // An administrator's approval alone must not publish that association.
-        $visibility = $category === PurchaseGate::EXTERNAL_ADULT ? 'hidden' : 'visible';
+        $visibility = 'visible';
         $inserted = $wpdb->query($wpdb->prepare(
             'INSERT INTO ' . self::quote($table)
                 . ' (product_id, request_key, creator_id, category, visibility, created_at)'
@@ -57,7 +58,7 @@ final class StoreCatalogService
             $existing = self::byRequestKey($table, $requestKey);
 
             return $existing !== null && $existing['creator_id'] === $creatorId && $existing['category'] === $category
-                ? $existing
+                ? ($existing['archived'] ? self::error('category_archived', 403) : $existing)
                 : self::error('store_unavailable', 503);
         }
 
@@ -68,10 +69,11 @@ final class StoreCatalogService
             'category_label' => (string) PurchaseGate::categoryLabel($category),
             'visibility' => $visibility,
             'created_at' => $now,
+            'archived' => false,
         ];
     }
 
-    /** @return array{product_id:string,creator_id:string,category:string,category_label:string,visibility:string,created_at:string}|null */
+    /** @return array{product_id:string,creator_id:string,category:string,category_label:string,visibility:string,created_at:string,archived:bool}|null */
     public static function publicById(mixed $productId): ?array
     {
         $table = StoreCatalogSchema::table();
@@ -80,7 +82,7 @@ final class StoreCatalogService
         }
         global $wpdb;
         $row = $wpdb->get_row($wpdb->prepare(
-            'SELECT product_id, creator_id, category, visibility, created_at FROM ' . self::quote($table)
+            'SELECT product_id, creator_id, category, visibility, created_at, archived FROM ' . self::quote($table)
                 . ' WHERE product_id = %s AND visibility = %s LIMIT 1',
             $productId,
             'visible'
@@ -88,6 +90,7 @@ final class StoreCatalogService
         $product = self::product($row);
 
         return $product !== null
+            && !$product['archived']
             && $product['visibility'] === 'visible'
             && $product['category'] !== PurchaseGate::EXTERNAL_ADULT
             && CreatorProfileService::publicById($product['creator_id']) !== null
@@ -95,10 +98,10 @@ final class StoreCatalogService
             : null;
     }
 
-    /** @return list<array{product_id:string,creator_id:string,category:string,category_label:string,visibility:string,created_at:string}>|\WP_Error */
+    /** @return list<array{product_id:string,creator_id:string,category:string,category_label:string,visibility:string,created_at:string,archived:bool}>|\WP_Error */
     public static function publicList(mixed $category): array|\WP_Error
     {
-        if ($category !== null && (!is_string($category) || !in_array($category, PurchaseGate::CATEGORIES, true))) {
+        if ($category !== null && $category !== PurchaseGate::HOSTED) {
             return self::error('invalid_category', 400);
         }
         $table = StoreCatalogSchema::table();
@@ -106,11 +109,12 @@ final class StoreCatalogService
             return self::error('store_unavailable', 503);
         }
         global $wpdb;
-        $base = 'SELECT product_id, creator_id, category, visibility, created_at FROM ' . self::quote($table)
-            . ' WHERE visibility = %s';
-        $sql = $category === null
-            ? $wpdb->prepare($base . ' ORDER BY product_id ASC LIMIT 20', 'visible')
-            : $wpdb->prepare($base . ' AND category = %s ORDER BY product_id ASC LIMIT 20', 'visible', $category);
+        // Exclude archived rows before LIMIT, so they never consume public slots.
+        $sql = $wpdb->prepare(
+            'SELECT product_id, creator_id, category, visibility, created_at, archived FROM ' . self::quote($table)
+                . ' WHERE visibility = %s AND category = %s AND archived = 0 ORDER BY product_id ASC LIMIT 20',
+            'visible', PurchaseGate::HOSTED
+        );
         $rows = $wpdb->get_results($sql, 'ARRAY_A');
         if (!is_array($rows)) {
             return self::error('store_unavailable', 503);
@@ -121,7 +125,7 @@ final class StoreCatalogService
             if ($product === null || $product['visibility'] !== 'visible') {
                 return self::error('store_unavailable', 503);
             }
-            if ($product['category'] !== PurchaseGate::EXTERNAL_ADULT
+            if (!$product['archived'] && $product['category'] !== PurchaseGate::EXTERNAL_ADULT
                 && CreatorProfileService::publicById($product['creator_id']) !== null
             ) {
                 $products[] = $product;
@@ -131,16 +135,61 @@ final class StoreCatalogService
         return $products;
     }
 
+    /** @return array<string,mixed>|\WP_Error */
+    public static function archivedById(mixed $productId): array|\WP_Error
+    {
+        if (!current_user_can('manage_options')) {
+            return self::error('admin_required', 403);
+        }
+        $product = self::byId($productId);
+        return $product !== null && $product['archived'] ? $product : self::error('product_not_found', 404);
+    }
+
+    /** @return array{items:list<array<string,mixed>>,next_cursor:?string}|\WP_Error */
+    public static function archiveList(mixed $cursor): array|\WP_Error
+    {
+        if (!current_user_can('manage_options')) {
+            return self::error('admin_required', 403);
+        }
+        if ($cursor !== null && !self::uuidValid($cursor)) {
+            return self::error('invalid_cursor', 400);
+        }
+        $table = StoreCatalogSchema::table();
+        if ($table === null || !StoreCatalogSchema::ready()) {
+            return self::error('store_unavailable', 503);
+        }
+        global $wpdb;
+        $rows = $wpdb->get_results($wpdb->prepare(
+            'SELECT product_id, creator_id, category, visibility, created_at, archived FROM ' . self::quote($table)
+                . ' WHERE (archived = 1 OR category = %s) AND product_id > %s ORDER BY product_id ASC LIMIT 21',
+            PurchaseGate::EXTERNAL_ADULT, $cursor ?? ''
+        ), 'ARRAY_A');
+        if (!is_array($rows)) {
+            return self::error('store_unavailable', 503);
+        }
+        $items = [];
+        foreach ($rows as $row) {
+            $product = self::product($row);
+            if ($product === null || !$product['archived']) {
+                return self::error('store_unavailable', 503);
+            }
+            $items[] = $product;
+        }
+        $more = count($items) > 20;
+        $items = array_slice($items, 0, 20);
+        return ['items' => $items, 'next_cursor' => $more ? $items[19]['product_id'] : null];
+    }
+
     public static function purchase(mixed $productId): \WP_Error
     {
         $product = self::byId($productId);
 
         return $product === null
             ? self::error('product_not_found', 404)
-            : PurchaseGate::refusePurchase($product['category']);
+            : PurchaseGate::refusePurchase($product['archived'] ? PurchaseGate::EXTERNAL_ADULT : $product['category']);
     }
 
-    /** @return array{product_id:string,creator_id:string,category:string,category_label:string,visibility:string,created_at:string}|null */
+    /** @return array{product_id:string,creator_id:string,category:string,category_label:string,visibility:string,created_at:string,archived:bool}|null */
     private static function byId(mixed $productId): ?array
     {
         $table = StoreCatalogSchema::table();
@@ -149,7 +198,7 @@ final class StoreCatalogService
         }
         global $wpdb;
         $row = $wpdb->get_row($wpdb->prepare(
-            'SELECT product_id, creator_id, category, visibility, created_at FROM ' . self::quote($table)
+            'SELECT product_id, creator_id, category, visibility, created_at, archived FROM ' . self::quote($table)
                 . ' WHERE product_id = %s LIMIT 1',
             $productId
         ), 'ARRAY_A');
@@ -157,12 +206,12 @@ final class StoreCatalogService
         return self::product($row);
     }
 
-    /** @return array{product_id:string,creator_id:string,category:string,category_label:string,visibility:string,created_at:string}|null */
+    /** @return array{product_id:string,creator_id:string,category:string,category_label:string,visibility:string,created_at:string,archived:bool}|null */
     private static function byRequestKey(string $table, string $requestKey): ?array
     {
         global $wpdb;
         $row = $wpdb->get_row($wpdb->prepare(
-            'SELECT product_id, creator_id, category, visibility, created_at FROM ' . self::quote($table)
+            'SELECT product_id, creator_id, category, visibility, created_at, archived FROM ' . self::quote($table)
                 . ' WHERE request_key = %s LIMIT 1',
             $requestKey
         ), 'ARRAY_A');
@@ -170,7 +219,7 @@ final class StoreCatalogService
         return self::product($row);
     }
 
-    /** @return array{product_id:string,creator_id:string,category:string,category_label:string,visibility:string,created_at:string}|null */
+    /** @return array{product_id:string,creator_id:string,category:string,category_label:string,visibility:string,created_at:string,archived:bool}|null */
     private static function product(mixed $row): ?array
     {
         if (!is_array($row)
@@ -180,6 +229,7 @@ final class StoreCatalogService
             || !in_array($row['category'], PurchaseGate::CATEGORIES, true)
             || !in_array($row['visibility'] ?? null, ['visible', 'hidden'], true)
             || !is_string($row['created_at'] ?? null)
+            || !in_array($row['archived'] ?? null, [0, 1, '0', '1'], true)
         ) {
             return null;
         }
@@ -191,6 +241,7 @@ final class StoreCatalogService
             'category_label' => (string) PurchaseGate::categoryLabel($row['category']),
             'visibility' => $row['visibility'],
             'created_at' => $row['created_at'],
+            'archived' => (int) $row['archived'] === 1 || $row['category'] === PurchaseGate::EXTERNAL_ADULT,
         ];
     }
 
