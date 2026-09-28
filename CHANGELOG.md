@@ -6,122 +6,49 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
-### Fondations de l’interface Fans V2
-
-- Matrice des huit écrans Fan et dix écrans Créateur, avec capacités réelles et états fermés.
-- Shells sombres responsives, navigation propre à chaque rôle, huit accès Créateur et routes distinctes ; Explorer et profil public consomment uniquement les API de profils approuvés.
-- Explorer et profil public consultables sans SSO, avec navigation publique limitée ; espaces personnels toujours protégés. Les fiches n’affichent plus d’UUID ni de personne fictive, et la page d’un profil absent, suspendu ou retiré répond HTTP 404.
-- Recette WordPress/MariaDB/Chrome locale jetable pour les rôles invité, Fan et Créateur, les styles et les parcours ordinateur/mobile ; captures et matrice mises à jour.
-- Lecture HoF ouverte aux visiteurs avec navigation Explorer + HoF et état indisponible honnête ; espaces personnels toujours soumis au SSO.
-- Barre WordPress masquée aux membres ordinaires sur les pages Fans, conservée pour les administrateurs ; captures Créateur rafraîchies et lot futur `Guest_…`/reprise de compte/retour SSO documenté. Aucun paiement invité ni progression fictive ajouté.
-- Recette locale isolée avec copie physique du plugin et de `vendor`, contrôle de la classe chargée, URL avec slash final et captures Fan/administrateur. Revue locale documentée ; validation visuelle cible avec vrais parcours SSO obligatoire avant activation du flag UI en production.
-- Tous les autres parcours restent explicitement indisponibles, sans score, contenu ou action fictifs. Flag UI désactivé par défaut ; aucun schéma, achat, paiement ou déploiement.
-
-### Archivage de la catégorie adulte externe Fans
-
-- Retrait de la catégorie et des anciennes fiches des surfaces publiques du catalogue ; créations et remises en ligne refusées côté serveur.
-- Consultation administrative privée paginée, capacité et nonce obligatoires ; identifiants et champs historiques conservés.
-- Schéma Store v2 : un marqueur additif persistant, reprise après échec, aucun effacement ni reclassement. Refus d'achat 403 conservé après changement de catégorie ; contenu hébergé toujours 503.
-- Tests ciblés et recette WordPress/MariaDB locale ; retour arrière fermé documenté. Aucun moteur commercial, Token Engine, Me/Hub ou flag de production modifié.
-
-### Contrat Fans ↔ Hub pour PF achetés
-
-- Revue depuis le code propriétaire : conflits de payload non garantis par l’idempotence historique, verrous non équivalents à une réservation par lot, reprise après COMMIT ambigu et limites des compensations. Rectificatif : validation du responsable Hub requise avant implémentation, pas avant fusion de la proposition documentaire, qui reste non ratifiée.
-
-- Draft versionné 0.1.0 et plan de réconciliation par lots : preuve/allocation, réservation, confirmation unique, reçu authentifié proposé et reprises après timeout.
-- Faux serveur de contrat uniquement sous tests : rejets, idempotence, conflits, entrelacement de réservations, pannes et corrections de lots ; limites de preuve explicites.
-- Dépendance Hub bloquée, validation propriétaire requise, compensation partielle indisponible. Aucun Token Engine, claim historique, moteur, API, ledger, migration ou flag modifié.
-
-
-### Simulateur Fans HoF v3 hors runtime
-
-- Calcul pur distinct : pack zéro, 1 PF acheté/attesté/attribué = 1 point, multi-projections sans seconde consommation et delta PC toujours nul.
-- Fixtures de révisions, corrections partielles/totales, litiges et sessions clôturées ; sources non achetées, auto-attribution et conflits refusés.
-- Contrat versionné et tests dédiés ; v2 et tests historiques inchangés. Aucun moteur, hook, route, ledger, flag ou capacité de remboursement Token Engine ajouté.
-
-
-### Contrats Fans PF / PC / HoF v3
-
-- ADR 0018 versionnée : règles acquises PF/PC, multi-classements sans double dépense, absence de finances côté créateur et décision produit validée : 1 PF acheté, attesté et effectivement attribué = 1 point HoF, sans équivalence EUR ; pack seul sans score.
-- Alignement Fans, ownership, progression et Shop ; simulateur v2 identifié comme historique, parcours non arbitrés fermés et cible d’archivage adulte externe hors Shop/découverte publics, historique administratif conservé, sans exécution ici.
-- Intentions PC : daily reward et ramassage quotidien sur profil créateur, sans barème, propriétaire technique, plafond ou activation ; claims PF historiques inchangés. Politiques de classement, protocole PF et autres parcours maintenus fermés.
-- Aucun moteur, migration, paiement, UI, activation ou changement du Token Engine.
-
-
-### Panel de modération Fans
-
-- Sous-page administrative paginée textes/quarantaine, contexte, motifs explicites, journaux et décisions confirmées côté serveur ; formulaires utilisables sans JavaScript.
-- Examen PNG privé par POST authentifié sans URL publique ou cache partagé, contrôle de l’association et de la révision ; conflits et pannes affichés sans réussite anticipée.
-- Interface Faluss responsive #FFFDF5, cartes blanches et Outfit locale sous OFL ; contrats, tests d’isolation et recette HTTP WordPress/MariaDB documentés.
-- Aucun nouveau schéma, moteur, flag ouvert, interface créateur, teaser Me, paiement, déploiement ou release.
-
-### Affichage optionnel d’images Fans
-
-- Dérivé JPEG en mémoire, redimensionné et distinct du PNG de quarantaine ; aucun fichier dérivé persistant, original, chemin public ou métadonnée privée exposé.
-- Route Fans révisionnée sous flag de diffusion distinct fermé par défaut ; texte public, profil actif, association courante et image approuvée du même propriétaire revérifiés sous transaction à chaque demande.
-- Révocation à la demande suivante, réponses no-store sans cache partagé, verrou de génération, refus des pannes et des accès forgés ; aucun teaser Me, CDN public, paiement ou activation de production.
-- Contrats d’hébergement/rétention et recette WordPress/MariaDB locale : 77 contrôles HTTP réels réussis, trois flags locaux désactivés et workers arrêtés après tests.
-
-### Associations privées entre images et textes Fans
-
-- Référence privée à une image approuvée du même créateur SSO actif ; ajout, remplacement et détachement soumis à nouvelle modération, quotas et révision du texte.
-- Contrat Images limité à une éligibilité serveur, verrou InnoDB et journal atomique ; révocation après retrait de l’image/texte ou suspension, sans octet ni métadonnée d’image dans l’API publique.
-- Schéma texte v3 additif, contrats et recette locale HTTP concurrente documentés ; aucune diffusion, projection Me, activation en production ou ouverture commerciale.
-
-### Quarantaine privée des images Fans
-
-- Correction #76 : tous les ancêtres du stockage, racine comprise, exigent UID root ou UID PHP ; refus d’un propriétaire tiers même en 0755 ou sticky. Contrat et tests de stockage actualisés.
-
-- Premier moteur JPEG/PNG opt-in : validation réelle et réencodage, stockage POSIX privé hors racines web avec attestation d’hébergement, quotas sérialisés et aucun accès public même après approbation.
-- REST authentifié : soumission SSO, octets administrateur seulement, décisions versionnées, retrait et révocation avant suppression, reprise explicite du nettoyage après panne. Deux tables privées additives, aucune médiathèque, projection Me, vidéo ou vente.
-- Documentation des limites avant réception multipart, des responsabilités de l’hébergeur et des politiques de rétention restant à décider ; recette WordPress/MariaDB locale dédiée.
-
-### Publications textuelles Fans
-
-- Correction #75 : à 20 pending, autoriser les éditions pending → pending sous quotas horaires/journaliers ; refuser création et approved/rejected → pending sans place libre. Tests de transitions et recette concurrente vérifiés : 96 contrôles REST WordPress/MariaDB réels sur le code e76e873, activation temporaire locale uniquement, flag ensuite désactivé et serveur arrêté.
-
-- Admission : quotas serveur par créateur (20 pending, 30 créations/éditions par heure glissante, 100 par 24 heures), sérialisés entre requêtes ; retrait et modération restent possibles à quota plein.
-- Idempotence : en-tête UUID v4 obligatoire en création, rejeu sans seconde publication/trace ni quota, conflit de contenu 409 ; association privée transactionnelle en schéma v2, migration additive et fermeture par retrait du flag.
-- Recette étendue : concurrence HTTP et quotas aux frontières, panne de l'association puis nouvelle tentative, fenêtres glissantes, pagination de plus de 20 textes avec créateur suspendu ; aucun média, paiement, moteur Me/Hub ou activation hors instance jetable.
-
-- Correction #74 : pagination des listes publique, personnelle et de modération (1–20 résultats, curseur déterministe date/UUID), textes publics récents en tête et exclusion des éléments invisibles avant remplissage de la page ; contrat REST enveloppé `items` / `next_cursor`, tests de parcours sur 185 textes et trois créateurs.
-
-- Ajout : module local opt-in, brouillons textuels privés du créateur SSO actif, édition soumise à nouvelle revue, approbation/rejet administratif avec trace et retrait propriétaire.
-- Technique : deux tables InnoDB privées, révisions concurrentes, journal et mutation atomiques, nonce REST, propriété résolue côté serveur et réponse publique limitée au texte approuvé d'un profil actif.
-- Compatibilité : aucun média WordPress, accès verrouillé, teaser Me, paiement, score, cron ou dépendance runtime ajouté ; rôle Fans et flags nécessaires à l'activation. Retour arrière par retrait du flag, données conservées.
-- Vérification : tests unitaires d'échec et d'isolation ; 45 contrôles REST WordPress/MariaDB locaux, incluant panne du journal, écritures concurrentes et rollback du flag (HTTP loopback, sans nouveau test SSO Me ni TLS).
-- Documentation : état des PR #67–73 fusionnées et anciennes PR remplacées dans FANS.md ; contrat des textes, limites de modération humaine et chantiers médias/Me.
-
-### Documentation
-
-- Précisions HoF : badge à la consommation financée, pseudo/badge visibles au créateur concerné et publics sur consentement, soutien direct en centièmes de point entiers ; cadeaux gratuits sans revenu ni score monétisable sauf financement Faluss, sans reclassification PF.
-- Décision HoF : pack sans score, cadeau de 300 pièces financées dépensées = 300 points de session, soutien direct = 1 point par euro confirmé ; distinction progression sur dépense réelle et revenu EUR privé, étude PF Hub sans second ledger et adaptation v2 du simulateur #73.
-- Simulation v2 : refus de l'auto-soutien pour cadeaux financés et soutiens directs ; contrôle fictif distinct de la résolution serveur des identités Faluss réelles à construire.
-- Matrice des propriétaires Fans/Me/Hub/Pro, limites des moteurs existants et contrats de publication, progression, cosmétiques, Max et commerce fermé.
-### Vérifié
-
-- Recette REST HTTPS du catalogue et des profils : permissions, fiches adultes masquées, refus 403/503 et changement de catégorie.
-
-- Recette SSO HTTPS Me/Fans sur deux WordPress/MariaDB jetables : cookies, rejeu, expiration, collision, rollback/retry et callbacks concurrents ; limites navigateur et OTP documentées.
+## [0.6.0] - 2026-09-28
 
 ### Ajouté
 
-- Simulation hors runtime v2 : score créateur en centièmes de point, dépense donateur consommée en centimes EUR, packs sans effet, allocations de cadeaux explicites, remboursements et corrections de sessions fictives clôturées ; aucun revenu calculé ni ledger actif.
-
-- Fondation testée des politiques de publications Fans et projection minimale de cinq teasers explicitement sélectionnés ; aucun upload, route média ou transport activé.
-
-- Catalogue Fans opt-in avec deux catégories visibles, fiches structurées et refus serveur de toute tentative d'achat actuelle, API comprise.
-- Fiches adultes associées à un créateur masquées sans consentement explicite ; refus d'achat 403/503 fondé sur la catégorie stockée, y compris après changement.
-- Suivi Fans opt-in : relation locale idempotente, retrait et compteur public sans identité de follower.
-- Limites d'ouverture sociale du suivi Fans documentées : blocage, signalements, suppression de compte et rétention à implémenter.
-- Profils créateurs Fans opt-in : identifiant public opaque, catégorie fermée, approbation et suspension, routes REST à permissions explicites sans champ libre ni média.
-- Champ de contrat `identity_verified=false` sur chaque profil Fans ; l'approbation de publication ne constitue pas une vérification d'identité ni une autorisation de vendre.
-- Client SSO Fans opt-in avec tables, état navigateur, PKCE S256, échange confidentiel avec Me et session locale limitée aux subscribers liés.
-- Contrat d'activation, rollback et preuves restantes pour le SSO Fans, indépendamment des domaines métier et commerciaux.
+- Add Fans V2 UI foundations (#84) (`82b6809`)
+- Add an isolated Fans HoF version three simulator (`47d3a4e`)
+- Add the Fans administrative moderation panel (`e089997`)
+- Add opt-in Fans image display derivatives (`a00010c`)
+- Link approved Fans images to private text drafts (`2fd3a7b`)
+- Add private Fans image quarantine (`dcfaa62`)
+- Guard Fans text intake with quotas and idempotency (`930c43a`)
+- Add moderated local Fans text publications (`9d5f2eb`)
+- Prepare Fans publication access and teaser policies (`f5af1d1`)
+- Add closed Fans catalogue with hidden adult listings (`bd50830`)
+- Add local Fans followers with explicit launch limitations (`486bf3b`)
+- Add Fans creator publication approval without identity verification (`d2f65c6`)
+- Add isolated Fans SSO with atomic account linking (`7281659`)
 
 ### Corrigé
 
-- Création de compte Fans et liaison SSO atomiques sur InnoDB, avec verrouillage concurrent, rollback et invalidation du cache utilisateur en cas d'échec de liaison.
+- Reject untrusted owners in image storage ancestors (`3aa240e`)
+- Allow pending text edits at queue capacity (`e76e873`)
+- Paginate Fans publication lists without hidden gaps (`51b6425`)
+- Reject self-support in Fans simulation (`f255e5d`)
+
+### Documentation
+
+- Require Hub ratification before protocol implementation (`9a6556b`)
+- Record the owner-code review and blocked Hub guarantees (`af9e21f`)
+- Define the blocked Fans Hub purchased PF protocol (`98d070e`)
+- Record the approved purchased PF to HoF score rule (`1ab3d36`)
+- Clarify planned PC sources and adult catalog archival (`bf6cb24`)
+- Align Fans PF PC and HoF contracts with version three (`325c93a`)
+- Record real Fans pending quota recipe results (`6503ef9`)
+- Finalize Fans badge and funded gift policy (`62562f3`)
+- Define Fans HoF scoring and funded PF boundaries (`9870832`)
+- Define Fans engine ownership and launch boundaries (`848221b`)
+
+### Modifié
+
+- Archive external adult catalog listings privately (`0c3ec40`)
+- Separate Fans simulated score and consumed spending units (`aca542f`)
+- Simulate corrected support facts without activating scores (`909175a`)
 
 ## [0.5.4] - 2026-09-25
 
