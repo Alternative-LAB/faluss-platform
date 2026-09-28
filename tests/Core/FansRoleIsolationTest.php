@@ -16,6 +16,7 @@ use Faluss\Platform\Fans\Sso\FansSsoModule;
 use Faluss\Platform\Fans\Profiles\CreatorProfilesModule;
 use Faluss\Platform\Fans\Followers\FollowersModule;
 use Faluss\Platform\Fans\Store\StoreCatalogModule;
+use Faluss\Platform\Fans\Ui\FansUiModule;
 use Faluss\Platform\Identity\IdentityModule;
 use Faluss\Platform\IdentityClient\IdentityClientModule;
 use Faluss\Platform\Link\LinkModule;
@@ -48,7 +49,7 @@ final class FansRoleIsolationTest extends TestCase
     private function assertTextModuleIsolated(string $role): void
     {
         define('FALUSS_PLATFORM_ROLE', $role);
-        foreach (['FALUSS_PLATFORM_FANS_SSO', 'FALUSS_PLATFORM_FANS_CREATOR_PROFILES', 'FALUSS_PLATFORM_FANS_TEXT_PUBLICATIONS', 'FALUSS_PLATFORM_FANS_IMAGES', 'FALUSS_PLATFORM_FANS_IMAGE_DELIVERY'] as $flag) { define($flag, true); }
+        foreach (['FALUSS_PLATFORM_FANS_SSO', 'FALUSS_PLATFORM_FANS_CREATOR_PROFILES', 'FALUSS_PLATFORM_FANS_TEXT_PUBLICATIONS', 'FALUSS_PLATFORM_FANS_IMAGES', 'FALUSS_PLATFORM_FANS_IMAGE_DELIVERY', 'FALUSS_PLATFORM_FANS_UI'] as $flag) { define($flag, true); }
         // No WordPress database exists here: touching schema installation would fail the test.
         $module = new \Faluss\Platform\Fans\Publications\TextPublicationsModule();
         self::assertSame([SiteRole::Fans], $module->roles());
@@ -61,6 +62,9 @@ final class FansRoleIsolationTest extends TestCase
         self::assertFalse(\Faluss\Platform\Fans\Images\ImageDisplayDerivative::enabled());
         self::assertFalse(\Faluss\Platform\Fans\Publications\PublicationImageRest::permission());
         self::assertFalse(\Faluss\Platform\Fans\Moderation\ModerationPanel::allowed());
+        self::assertFalse(FansUiModule::available());
+        FansUiModule::activate();
+        (new FansUiModule())->boot();
         // With accidental flags on Me/Hub, no panel/menu/preview hook may be registered.
         // add_action is intentionally absent in this process.
         $module->boot();
@@ -108,7 +112,7 @@ final class FansRoleIsolationTest extends TestCase
         }
 
         require dirname(__DIR__, 2) . '/faluss-platform.php';
-        self::assertCount(13, $GLOBALS['fans_test_activation_hooks']);
+        self::assertCount(14, $GLOBALS['fans_test_activation_hooks']);
         self::assertSame([
             SubscriptionsModule::class,
             TokenEngineModule::class,
@@ -123,6 +127,7 @@ final class FansRoleIsolationTest extends TestCase
             StoreCatalogModule::class,
             \Faluss\Platform\Fans\Publications\TextPublicationsModule::class,
             \Faluss\Platform\Fans\Images\ImagesModule::class,
+            \Faluss\Platform\Fans\Ui\FansUiModule::class,
         ], array_map(static fn (array $callback): string => $callback[0], $GLOBALS['fans_test_activation_hooks']));
         self::assertCount(5, $GLOBALS['fans_test_deactivation_hooks']);
         self::assertCount(1, $GLOBALS['fans_test_actions']['plugins_loaded']);

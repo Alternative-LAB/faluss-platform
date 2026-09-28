@@ -6,6 +6,12 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Fondations de l’interface Fans V2
+
+- Matrice des huit écrans Fan et dix écrans Créateur, avec capacités réelles et états fermés.
+- Shells sombres responsives, navigation propre à chaque rôle, huit accès Créateur et routes distinctes ; Explorer et profil public consomment uniquement les API de profils approuvés.
+- Tous les autres parcours restent explicitement indisponibles, sans score, contenu ou action fictifs. Flag UI désactivé par défaut ; aucun schéma, achat, paiement ou déploiement.
+
 ### Archivage de la catégorie adulte externe Fans
 
 - Retrait de la catégorie et des anciennes fiches des surfaces publiques du catalogue ; créations et remises en ligne refusées côté serveur.

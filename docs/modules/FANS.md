@@ -18,6 +18,7 @@
 | Associations image–texte, PR #77 | Fusionné, sans diffusion par ce seul lot | Référence privée vers une image approuvée du même créateur, nouvelle modération, révisions et révocation. Voir [FANS-PUBLICATION-IMAGES.md](FANS-PUBLICATION-IMAGES.md). |
 | Affichage JPEG Fans, PR #78 | Fusionné, flag distinct fermé | Dérivé en mémoire ; texte, association, image et profil revérifiés par demande. Aucune diffusion sur Me, original ou CDN. Voir [FANS-IMAGE-DELIVERY.md](FANS-IMAGE-DELIVERY.md). |
 | Panel de modération Fans, PR #79 | Fusionné, flags fermés | Sous-page administrative texte/quarantaine, revue privée, décisions et journal via API existantes. Voir [FANS-MODERATION.md](FANS-MODERATION.md). |
+| Interface Fans V2, premier lot | En chantier, opt-in fermé par défaut | Shells Fan/Créateur, routes et découverte de profils approuvés ; autres destinations fermées. Voir [FANS-UI-V2.md](FANS-UI-V2.md). |
 | Autres médias, messagerie, commandes et droits | Contractuel seulement | Aucune vidéo, messagerie, vente ou projection Me active. |
 
 Le choix du rôle, du client confidentiel Me, de son secret et du flag Fans appartient à une configuration de site hors Git. Aucun site de production n'est configuré, activé, migré ou déployé par cette PR.

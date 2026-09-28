@@ -88,6 +88,7 @@ register_activation_hook(
     [\Faluss\Platform\Fans\Publications\TextPublicationsModule::class, 'activate']
 );
 register_activation_hook(__FILE__, [\Faluss\Platform\Fans\Images\ImagesModule::class, 'activate']);
+register_activation_hook(__FILE__, [\Faluss\Platform\Fans\Ui\FansUiModule::class, 'activate']);
 register_deactivation_hook(
     __FILE__,
     [\Faluss\Platform\Subscriptions\SubscriptionsModule::class, 'deactivate']
@@ -127,6 +128,11 @@ add_action('plugins_loaded', static function (): void {
         && \Faluss\Platform\Fans\Sso\FansSsoService::configured()
     ) {
         $registry->register(new \Faluss\Platform\Fans\Sso\FansSsoModule());
+        if (defined('FALUSS_PLATFORM_FANS_UI')
+            && constant('FALUSS_PLATFORM_FANS_UI') === true
+        ) {
+            $registry->register(new \Faluss\Platform\Fans\Ui\FansUiModule());
+        }
         if (defined('FALUSS_PLATFORM_FANS_CREATOR_PROFILES')
             && constant('FALUSS_PLATFORM_FANS_CREATOR_PROFILES') === true
             && \Faluss\Platform\Fans\Profiles\CreatorProfileSchema::ready()
