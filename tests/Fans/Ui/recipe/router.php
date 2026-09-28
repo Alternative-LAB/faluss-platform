@@ -7,7 +7,7 @@ namespace Faluss\Platform\Fans\Sso {
     {
         public static function currentLinkedSubject(): ?array
         {
-            return ($_COOKIE['fans_ui_role'] ?? '') === 'guest' ? null : ['faluss_id' => 'fixture'];
+            return in_array($_COOKIE['fans_ui_role'] ?? '', ['fan', 'creator'], true) ? ['faluss_id' => 'fixture'] : null;
         }
     }
 }
@@ -19,6 +19,11 @@ namespace Faluss\Platform\Fans\Profiles {
         public static function own(): ?array
         {
             return ($_COOKIE['fans_ui_role'] ?? '') === 'creator' ? ['creator_id' => 'fixture'] : null;
+        }
+        public static function publicById(mixed $creatorId): ?array
+        {
+            return in_array($creatorId, [\Faluss\Platform\Fans\Ui\FIXTURE_ID, \Faluss\Platform\Fans\Ui\SECOND_ID], true)
+                ? ['creator_id' => $creatorId] : null;
         }
     }
 }

@@ -51,11 +51,11 @@
     card.append(element('div', 'fu-card__art'));
     const body = element('div', 'fu-card__body');
     body.append(element('p', 'fu-panel__kicker', categories[item.category]));
-    body.append(element('h3', '', 'Profil créateur'));
-    body.append(element('p', 'fu-card__id', item.creator_id));
-    const link = element('a', 'fu-card__link', 'Voir le profil ↗');
+    body.append(element('h3', '', 'Profil sans nom public'));
+    body.append(element('p', '', 'Nom et portrait indisponibles.'));
+    const link = element('a', 'fu-card__link', 'Consulter la fiche ↗');
     link.href = base + encodeURIComponent(item.creator_id);
-    link.setAttribute('aria-label', `Voir le profil créateur ${item.creator_id}`);
+    link.setAttribute('aria-label', `Consulter la fiche publique, catégorie ${categories[item.category]}`);
     body.append(link);
     card.append(body);
     return card;
@@ -85,7 +85,7 @@
       const fragment = document.createDocumentFragment();
       response.data.forEach((item) => fragment.append(creatorCard(item, base)));
       target.append(fragment);
-      status(explorer, `${response.data.length} profil${response.data.length > 1 ? 's' : ''} publié${response.data.length > 1 ? 's' : ''}.`);
+      status(explorer, `${response.data.length} fiche${response.data.length > 1 ? 's' : ''} publique${response.data.length > 1 ? 's' : ''} structurée${response.data.length > 1 ? 's' : ''}. Découverte en préparation.`);
     } catch (error) {
       if (signal.aborted || current !== revision) return;
       target.replaceChildren();
@@ -115,12 +115,13 @@
       }
       if (!validProfile(response.data) || response.data.creator_id !== id) throw new Error('invalid_response');
       const card = element('article', 'fu-panel fu-profile');
-      card.append(element('div', 'fu-profile__glyph', 'F'));
+      const art = element('div', 'fu-profile__glyph');
+      art.setAttribute('aria-hidden', 'true');
+      card.append(art);
       const content = element('div');
       content.append(element('p', 'fu-panel__kicker', categories[response.data.category]));
-      content.append(element('h3', '', 'Profil créateur'));
-      content.append(element('p', '', 'Ce créateur dispose d’un profil public sur Fans.'));
-      content.append(element('p', 'fu-profile__id', response.data.creator_id));
+      content.append(element('h3', '', 'Profil sans nom public'));
+      content.append(element('p', '', 'Cette fiche confirme uniquement la catégorie publique approuvée. Le nom et le portrait ne sont pas disponibles.'));
       card.append(content);
       target.append(card);
       status(profile, 'Profil public chargé.');

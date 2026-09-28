@@ -14,18 +14,18 @@ rôle WordPress privilégié. Le profil public est une seule route canonique com
 | Fan 01 | Hall of Fame — accueil | `/faluss-fans/fan/hof` | Membre Fans lié | Simulateur HoF v3 hors runtime seulement | Shell, navigation | Aucune session, aucun score ni rang affiché |
 | Fan 02 | Session HoF | `/faluss-fans/fan/hof/session` | Membre Fans lié | Aucune session persistante | Shell | Session indisponible, aucune attribution PF |
 | Fan 03 | Classements | `/faluss-fans/fan/classements` | Membre Fans lié | Aucun classement persistant | Shell | Aucun rang ou score inventé |
-| Fan 04 | Profil créateur public | `/faluss-fans/creators/{creator_id}` | Membre Fans lié | `GET /creators/{creator_id}`, profils actifs uniquement | Détail structuré via REST | 404 ou erreur et aucun profil suspendu ; suivi/PC fermés |
+| Fan 04 | Profil créateur public | `/faluss-fans/creators/{creator_id}` | Invité, Fan lié, Créateur lié | `GET /creators/{creator_id}`, profils actifs uniquement | Fiche structurée via REST, sans nom ni portrait approuvé | HTTP 404 sur la page et l’API si absent, suspendu ou retiré ; suivi/PC fermés |
 | Fan 05 | Messagerie | `/faluss-fans/fan/messages` | Membre Fans lié | Aucun moteur de messages | Shell | Aucun fil ni envoi factice |
 | Fan 06 | Accueil Fans | `/faluss-fans/fan/accueil` | Membre Fans lié | Profils structurés publics seulement ; pas de flux assemblé | Shell, lien vers Explorer | Aucun faux flux, chiffre ou récompense |
-| Fan 07 | Explorer | `/faluss-fans/fan/explorer` | Membre Fans lié | `GET /creators`, catégories fermées, au plus 20 profils actifs | Liste et filtres via REST, états vides/erreurs | Si API indisponible, message clair ; pas de portraits ni de recherche simulée |
+| Fan 07 | Explorer | `/faluss-fans/fan/explorer` | Invité, Fan lié, Créateur lié | `GET /creators`, catégories fermées, au plus 20 profils actifs | Fiches structurées et filtres via REST, états vides/erreurs | Découverte provisoire déclarée ; aucun UUID visible, nom, portrait ou recherche simulée |
 | Fan 08 | Espace personnel | `/faluss-fans/fan/espace` | Membre Fans lié | Aucun moteur PC/progression | Shell | Aucun solde ni claim PF renommé PC |
 | Créateur 01 | Hall of Fame — accueil | `/faluss-fans/creator/hof` | Membre lié avec profil créateur | Simulateur v3 hors runtime | Shell | Aucun point HoF, session ni rang inventé |
 | Créateur 02 | Session HoF | `/faluss-fans/creator/hof/session` | Même accès | Aucune session persistante | Shell | Session indisponible |
 | Créateur 03 | Classements | `/faluss-fans/creator/classements` | Même accès | Aucun classement persistant | Shell | Aucun score ou rang inventé |
-| Créateur 04 | Profil public | `/faluss-fans/creators/{creator_id}` | Même route canonique que Fan 04 | `GET /creators/{creator_id}` | Détail public, uniquement si actif | Le profil propre `pending`/`suspended` ne devient pas public |
+| Créateur 04 | Profil public | `/faluss-fans/creators/{creator_id}` | Même route publique que Fan 04 | `GET /creators/{creator_id}` | Fiche publique, uniquement si active | Le profil propre `pending`/`suspended` ne devient pas public |
 | Créateur 05 | Messagerie | `/faluss-fans/creator/messages` | Même accès | Aucun moteur de messages | Shell | Aucun fil ni envoi factice |
 | Créateur 06 | Accueil Fans | `/faluss-fans/creator/accueil` | Même accès | Profil propriétaire via `GET /creators/me`, mais pas de flux agrégé | Shell | Aucun résumé chiffré inventé |
-| Créateur 07 | Explorer | `/faluss-fans/creator/explorer` | Même accès | `GET /creators` | Même composant Explorer, shell Créateur | Filtres limités aux catégories prises en charge |
+| Créateur 07 | Explorer | `/faluss-fans/creator/explorer` | Invité, Fan lié, Créateur lié ; shell selon la liaison réelle | `GET /creators` | Même composant Explorer, navigation publique seule pour l’invité | Filtres limités aux catégories prises en charge |
 | Créateur 08 | Progression | `/faluss-fans/creator/progression` | Même accès | Simulateur v3 hors runtime | Shell | Aucun wallet, montant PF, revenu, score ou rang inventé |
 | Créateur 09 | Créer | `/faluss-fans/creator/creer` | Même accès | Publication texte modérée seulement ; pas de formulaire dans ce lot | Quatre choix distincts, tous fermés dans ce lot | Publication, prestation, service et produit sans action factice |
 | Créateur 10 | Ma boutique | `/faluss-fans/creator/boutique` | Même accès | Catalogue structuré administrateur ; achat refusé 403/503 | Shell | Aucune commande, réservation, panier ou prix |
@@ -41,10 +41,18 @@ de profil n'existe dans le contrat actuel.
 Le shell est opt-in par `FALUSS_PLATFORM_FANS_UI=true`, sur le seul rôle de site
 `fans`, après SSO Fans prêt. Le flag est fermé par défaut. Les routes de gestion
 Créateur exigent un profil local propre, y compris `pending` ou `suspended` ;
-ce statut ne donne jamais accès à un profil public ni à une vente. Un visiteur
-non lié ne voit aucun shell privé. Les lectures Explorer et profil public
-réutilisent les routes REST existantes ; les erreurs et retraits remplacent les
-cartes, sans conserver une réponse périmée.
+ce statut ne donne jamais accès à un profil public ni à une vente. Explorer et
+la fiche publique sont accessibles sans connexion SSO. Un visiteur voit la
+navigation publique Explorer seule ; Fan et Créateur connectés voient leur
+navigation respective. Les lectures réutilisent les routes REST existantes ;
+la page publique vérifie aussi le profil actif avant son rendu et répond 404
+si le profil est inexistant, suspendu ou retiré. Les erreurs et retraits après
+chargement remplacent les cartes, sans conserver une réponse périmée.
+
+L’API ne fournit ni nom public ni portrait. Les UUID restent uniquement dans
+les liens et attributs techniques. Explorer présente donc des fiches de catégorie
+explicitement provisoires, sans prétendre former un catalogue de personnes
+identifiables. Aucun nom, initiale personnelle ou portrait n’est inventé.
 
 Sur un plugin déjà actif, la mise en place contrôlée du flag demande une
 réactivation pour enregistrer les règles de réécriture. Le lot ne change aucune
@@ -52,15 +60,19 @@ configuration de site. Retirer le flag coupe l'enregistrement des routes et
 conserve les données des modules existants ; une désactivation contrôlée du
 plugin rafraîchit les règles. Aucun schéma ou migration n'est ajouté.
 
-Scénarios positifs : un membre lié ouvre chaque route Fan ; un créateur lié
-ouvre les huit accès de sa sidebar ; Explorer affiche les seuls profils actifs
-répondus par l'API ; un profil actif s'ouvre par son UUID public ; le clavier
-atteint chaque lien et indique la destination active. Sur mobile, les huit
-accès Créateur restent nommés et visibles.
+Scénarios positifs : l’invité ouvre les deux routes Explorer et la fiche active
+avec une seule entrée publique ; le Fan lié ouvre Explorer, le profil et ses
+espaces personnels ; le Créateur lié ouvre Explorer, le profil et les huit accès
+de sa sidebar. Explorer affiche les seuls profils actifs répondus par l’API ;
+un profil actif s’ouvre via son lien technique. Le clavier atteint chaque lien
+et indique la destination active. Sur mobile, les huit accès Créateur restent
+nommés et visibles.
 
-Scénarios négatifs : flag/rôle/SSO absents, membre anonyme ou non lié et accès
-Créateur sans profil ne révèlent aucun shell ; `pending`/`suspended` et UUID
-inconnu ne fournissent pas de profil public ; API désactivée, erreur réseau,
+Scénarios négatifs : flag/rôle/SSO absents ferment le module ; l’invité et le
+compte WordPress non lié ne voient aucun espace personnel, tandis que le Fan
+sans profil n’accède pas à la gestion Créateur ;
+`pending`/`suspended`, profil retiré et UUID inconnu donnent 404 sur la page
+elle-même et sur l’API ; API désactivée, erreur réseau,
 réponse mal formée et liste vide montrent des états distincts sans faux contenu ;
 les destinations sans moteur ne proposent aucune mutation ; aucun chemin ne
 transforme PF historiques en PC ni un score HoF en PF ou en revenu.
@@ -79,14 +91,24 @@ transforme PF historiques en PC ni un score HoF en PF ou en revenu.
 
 Ce découpage ne change aucun flag de production, table, paiement ou contrat Hub.
 
-## Recette navigateur locale
+## Recettes navigateur locales
 
-`tests/Fans/Ui/recipe/router.php` fournit un serveur de test pour le shell,
-les permissions simulées et l'API de profils avec UUID synthétiques. Depuis la
-racine du dépôt, lancer `php -S 127.0.0.1:8765 -t .
-tests/Fans/Ui/recipe/router.php`, puis `node tests/Fans/Ui/recipe/browser.cjs`
-avec Playwright dans `NODE_PATH`. Les [captures](../evidence/fans-ui-v2/README.md)
-montrent les vues réellement livrées. La recette vérifie Chrome ordinateur et
-mobile, navigation clavier, route active, filtres, profil public, état vide,
-erreur API et refus d'accès. Elle ne prouve pas l'intégration sur WordPress réel,
-la liaison Me en réseau, Elementor, Safari physique ou les droits en production.
+La recette réelle `tests/Fans/Ui/recipe/real-wp.py` copie le cœur WordPress
+7.1.2 local et le plugin de cette branche dans une base MariaDB jetable. Elle
+requiert WSL root, `php`, `mariadb`, `openssl`, Chrome/Playwright et les assets
+locaux `/var/tmp/faluss-v3-wp/wordpress` et `wp-cli.phar`. Elle active
+SSO, profils et UI **dans cette instance seulement**, avec des liens SSO et profils
+synthétiques ; les autres flags restent fermés. Un proxy HTTPS local permet les
+cookies WordPress réels. Chrome vérifie séparément invité, compte WordPress
+non lié, Fan lié et Créateur lié, les permissions, les statuts HTTP de page et
+REST, les assets CSS/JS et le parcours Explorer → profil public en ordinateur
+et mobile. La recette détruit son site et sa base à la fin. Commande :
+`wsl.exe -u root -- python3 /mnt/c/Users/dylan/OneDrive/Documents/ChatGPT/FALUSS-fans-ui-v2/tests/Fans/Ui/recipe/real-wp.py`.
+Le chemin du checkout et les exécutables Node/Playwright peuvent être adaptés
+par `FANS_UI_NODE` et `FANS_UI_NODE_PATH` dans WSL.
+
+La recette synthétique `router.php` + `browser.cjs` garde les états vide et
+erreur API, le focus clavier et les huit liens Créateur. Les [captures réelles
+et synthétiques](../evidence/fans-ui-v2/README.md) séparent ces deux preuves.
+Ni la liaison Me en réseau, ni Elementor, Safari physique, les droits en
+production ou une validation visuelle humaine finale ne sont prouvés ici.

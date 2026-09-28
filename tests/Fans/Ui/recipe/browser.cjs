@@ -14,7 +14,7 @@ fs.mkdirSync(output, { recursive: true });
     await desktop.addCookies([{ name: 'fans_ui_role', value: 'fan', url: base }]);
     const fan = await desktop.newPage();
     await fan.goto(`${base}/faluss-fans/fan/explorer`);
-    await fan.getByText('2 profils publiés.').waitFor();
+    await fan.getByText('2 fiches publiques structurées. Découverte en préparation.').waitFor();
     assert.equal(await fan.locator('.fu-card').count(), 2);
     assert.equal(await fan.locator('.fu-nav__item[aria-current="page"]').count(), 1);
     assert.equal(await fan.locator('.fu-nav__item').count(), 5);
@@ -24,7 +24,7 @@ fs.mkdirSync(output, { recursive: true });
     await fan.screenshot({ path: path.join(output, 'explorer-desktop.png'), fullPage: true });
 
     await fan.getByRole('button', { name: 'Arts' }).click();
-    await fan.getByText('1 profil publié.').waitFor();
+    await fan.getByText('1 fiche publique structurée. Découverte en préparation.').waitFor();
     assert.equal(await fan.locator('.fu-card').count(), 1);
     await fan.locator('.fu-card__link').click();
     await fan.getByText('Profil public chargé.').waitFor();
@@ -32,9 +32,15 @@ fs.mkdirSync(output, { recursive: true });
     await fan.screenshot({ path: path.join(output, 'profil-public-desktop.png'), fullPage: true });
 
     await desktop.addCookies([{ name: 'fans_ui_role', value: 'guest', url: base }]);
-    const denied = await fan.goto(`${base}/faluss-fans/fan/explorer`);
+    const publicExplorer = await fan.goto(`${base}/faluss-fans/fan/explorer`);
+    assert.equal(publicExplorer.status(), 200);
+    assert.equal(await fan.locator('.fu-nav__item').count(), 1);
+    assert.equal(await fan.locator('.fu-app').getAttribute('data-fans-role'), 'visitor');
+    const denied = await fan.goto(`${base}/faluss-fans/fan/accueil`);
     assert.equal(denied.status(), 403);
     assert.equal(await fan.locator('.fu-app').count(), 0);
+    assert.equal((await fan.goto(`${base}/faluss-fans/creators/123e4567-e89b-42d3-a456-426614174000`)).status(), 200);
+    assert.equal((await fan.goto(`${base}/faluss-fans/creators/123e4567-e89b-42d3-a456-426614174099`)).status(), 404);
     await desktop.addCookies([{ name: 'fans_ui_role', value: 'fan', url: base }]);
     const creatorDenied = await fan.goto(`${base}/faluss-fans/creator/creer`);
     assert.equal(creatorDenied.status(), 404);
@@ -91,7 +97,7 @@ fs.mkdirSync(output, { recursive: true });
     await mobileCreator.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
     assert.equal(await mobileCreator.evaluate(() => window.scrollY > 0), true);
     await mobileCreator.screenshot({ path: path.join(output, 'creer-mobile-bottom.png') });
-    console.log('Browser recipe passed: desktop/mobile, keyboard focus, active tab, permissions, empty/error boundaries, eight creator links.');
+    console.log('Synthetic browser recipe passed: public guest discovery, desktop/mobile, keyboard focus, private permissions, empty/error boundaries, eight creator links.');
   } finally {
     await browser.close();
   }

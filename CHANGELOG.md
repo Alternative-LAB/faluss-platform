@@ -10,6 +10,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 - Matrice des huit écrans Fan et dix écrans Créateur, avec capacités réelles et états fermés.
 - Shells sombres responsives, navigation propre à chaque rôle, huit accès Créateur et routes distinctes ; Explorer et profil public consomment uniquement les API de profils approuvés.
+- Explorer et profil public consultables sans SSO, avec navigation publique limitée ; espaces personnels toujours protégés. Les fiches n’affichent plus d’UUID ni de personne fictive, et la page d’un profil absent, suspendu ou retiré répond HTTP 404.
+- Recette WordPress/MariaDB/Chrome locale jetable pour les rôles invité, Fan et Créateur, les styles et les parcours ordinateur/mobile ; captures et matrice mises à jour.
 - Tous les autres parcours restent explicitement indisponibles, sans score, contenu ou action fictifs. Flag UI désactivé par défaut ; aucun schéma, achat, paiement ou déploiement.
 
 ### Archivage de la catégorie adulte externe Fans

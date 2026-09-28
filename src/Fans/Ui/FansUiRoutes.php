@@ -54,8 +54,11 @@ final class FansUiRoutes
         return in_array($view, self::VIEWS[$role] ?? [], true);
     }
 
-    public static function accessStatus(string $role, bool $linked, bool $hasCreatorProfile): int
+    public static function accessStatus(string $role, string $view, bool $linked, bool $hasCreatorProfile): int
     {
+        if ($view === 'explorer' || $view === 'public-profile') {
+            return 200;
+        }
         if (!$linked) {
             return 403;
         }
@@ -98,18 +101,24 @@ final class FansUiRoutes
         }
 
         self::noStore();
-        $linked = FansSsoService::currentLinkedSubject() !== null;
-        if (!$linked) {
-            wp_die('Connexion Fans requise.', '', ['response' => 403]);
-        }
         $profilesEnabled = defined('FALUSS_PLATFORM_FANS_CREATOR_PROFILES')
             && constant('FALUSS_PLATFORM_FANS_CREATOR_PROFILES') === true
             && CreatorProfileSchema::ready();
-        $ownProfile = $profilesEnabled ? CreatorProfileService::own() : null;
+        if ($publicProfile && (!$profilesEnabled || CreatorProfileService::publicById($creatorId) === null)) {
+            wp_die('Profil public introuvable.', '', ['response' => 404]);
+        }
+
+        $linked = FansSsoService::currentLinkedSubject() !== null;
+        $ownProfile = $linked && $profilesEnabled ? CreatorProfileService::own() : null;
         if ($publicProfile) {
-            $role = $ownProfile === null ? 'fan' : 'creator';
-        } elseif (self::accessStatus($role, true, $ownProfile !== null) === 404) {
-            wp_die('Espace créateur indisponible.', '', ['response' => 404]);
+            $role = !$linked ? 'visitor' : ($ownProfile === null ? 'fan' : 'creator');
+        } elseif ($view === 'explorer') {
+            $role = !$linked ? 'visitor' : ($ownProfile === null ? 'fan' : 'creator');
+        } else {
+            $access = self::accessStatus($role, $view, $linked, $ownProfile !== null);
+            if ($access !== 200) {
+                wp_die($access === 403 ? 'Connexion Fans requise.' : 'Espace créateur indisponible.', '', ['response' => $access]);
+            }
         }
 
         FansUiView::render((string) $role, $view, $publicProfile ? $creatorId : null);

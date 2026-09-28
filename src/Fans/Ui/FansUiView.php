@@ -8,6 +8,9 @@ final class FansUiView
 {
     /** @var array<string,list<array{string,string,string,string}>> */
     private const NAV = [
+        'visitor' => [
+            ['explorer', 'Explorer', 'compass', 'explorer'],
+        ],
         'fan' => [
             ['accueil', 'Accueil', 'home', 'accueil'],
             ['explorer', 'Explorer', 'compass', 'explorer'],
@@ -29,6 +32,7 @@ final class FansUiView
 
     /** @var array<string,array{string,string,string,string}> */
     private const PAGES = [
+        'visitor:explorer' => ['Découvrir', 'Explorer les créateurs', 'explorer', 'La découverte est en préparation : aucun nom public ni portrait approuvé n’est encore fourni.'],
         'fan:accueil' => ['Espace Fans', 'Bienvenue dans votre espace', 'accueil', 'Les parcours Fans s’ouvrent progressivement. Explorer permet de consulter les profils créateurs publiés.'],
         'fan:explorer' => ['Découvrir', 'Explorer les créateurs', 'explorer', 'Seuls les profils approuvés sont visibles. Les noms et portraits ne sont pas encore disponibles.'],
         'fan:hof' => ['Hall of Fame', 'Le Hall of Fame', 'hof', 'Les sessions et les scores HoF persistants ne sont pas disponibles. Aucun point n’est affiché.'],
@@ -46,7 +50,7 @@ final class FansUiView
         'creator:creer' => ['Espace créateur', 'Que souhaitez-vous créer ?', 'creer', 'Chaque type de création sera ouvert lorsque son parcours serveur complet sera disponible.'],
         'creator:boutique' => ['Espace créateur', 'Ma boutique', 'boutique', 'La gestion des offres, les réservations et les commandes ne sont pas encore disponibles.'],
         'creator:mon-profil' => ['Espace créateur', 'Mon profil', 'mon-profil', 'Cet espace de gestion est distinct du profil public. Les outils d’édition ne sont pas encore disponibles.'],
-        'public-profile' => ['Découvrir', 'Profil créateur', 'explorer', 'Ce profil affiche uniquement les informations publiques approuvées.'],
+        'public-profile' => ['Découvrir', 'Profil créateur', 'explorer', 'Fiche publique provisoire : aucun nom ni portrait approuvé n’est encore fourni.'],
     ];
 
     public static function render(string $role, string $view, ?string $creatorId): void
@@ -113,11 +117,11 @@ final class FansUiView
     {
         ?>
         <aside class="fu-rail">
-            <a class="fu-brand" href="<?php echo esc_url(FansUiRoutes::url($role, 'accueil')); ?>" aria-label="Faluss Fans — accueil" title="Faluss Fans — accueil">F</a>
-            <nav class="fu-nav" aria-label="Navigation <?php echo $role === 'creator' ? 'créateur' : 'Fan'; ?>">
+            <a class="fu-brand" href="<?php echo esc_url(FansUiRoutes::url($role === 'visitor' ? 'fan' : $role, $role === 'visitor' ? 'explorer' : 'accueil')); ?>" aria-label="Faluss Fans — <?php echo $role === 'visitor' ? 'Explorer' : 'accueil'; ?>" title="Faluss Fans — <?php echo $role === 'visitor' ? 'Explorer' : 'accueil'; ?>">F</a>
+            <nav class="fu-nav" aria-label="Navigation <?php echo $role === 'creator' ? 'créateur' : ($role === 'visitor' ? 'publique' : 'Fan'); ?>">
                 <?php foreach (self::NAV[$role] as [$view, $label, $icon, $key]) : ?>
                     <a class="fu-nav__item<?php echo $active === $key ? ' is-active' : ''; ?>"
-                       href="<?php echo esc_url(FansUiRoutes::url($role, $view)); ?>"
+                       href="<?php echo esc_url(FansUiRoutes::url($role === 'visitor' ? 'fan' : $role, $view)); ?>"
                        aria-label="<?php echo esc_attr($label); ?>"
                        title="<?php echo esc_attr($label); ?>"<?php echo $active === $key ? ' aria-current="page"' : ''; ?>>
                         <svg aria-hidden="true" viewBox="0 0 24 24"><use href="#fu-icon-<?php echo esc_attr($icon); ?>"></use></svg>
@@ -125,7 +129,7 @@ final class FansUiView
                     </a>
                 <?php endforeach; ?>
             </nav>
-            <span class="fu-rail__caption"><?php echo $role === 'creator' ? 'CRÉATEUR' : 'FAN'; ?></span>
+            <span class="fu-rail__caption"><?php echo $role === 'creator' ? 'CRÉATEUR' : ($role === 'visitor' ? 'DÉCOUVERTE' : 'FAN'); ?></span>
         </aside>
         <svg class="fu-icons" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <symbol id="fu-icon-home" viewBox="0 0 24 24"><path d="m3 11 9-7 9 7v9h-6v-6H9v6H3z"/></symbol>
@@ -144,7 +148,8 @@ final class FansUiView
     {
         ?>
         <section class="fu-content" data-fans-explorer data-api="<?php echo esc_url($api); ?>" data-public-base="<?php echo esc_url($publicBase); ?>" aria-labelledby="fu-explore-title">
-            <div class="fu-section-heading"><div><p class="fu-panel__kicker">Découverte</p><h2 id="fu-explore-title">Créateurs publiés</h2></div></div>
+            <div class="fu-section-heading"><div><p class="fu-panel__kicker">Découverte en préparation</p><h2 id="fu-explore-title">Profils publics structurés</h2></div></div>
+            <p class="fu-discovery-note">Ces fiches indiquent seulement une catégorie approuvée. Sans nom public ni portrait fourni par l’API, elles ne constituent pas encore un catalogue de créateurs identifiable.</p>
             <div class="fu-filters" role="group" aria-label="Filtrer par catégorie">
                 <button type="button" data-category="" aria-pressed="true">Toutes les catégories</button>
                 <button type="button" data-category="arts" aria-pressed="false">Arts</button>
@@ -163,7 +168,7 @@ final class FansUiView
     {
         ?>
         <section class="fu-content" data-fans-profile data-api="<?php echo esc_url($api); ?>" data-creator-id="<?php echo esc_attr($creatorId); ?>" aria-labelledby="fu-profile-title">
-            <a class="fu-back" href="<?php echo esc_url(FansUiRoutes::url($role, 'explorer')); ?>">← Explorer</a>
+            <a class="fu-back" href="<?php echo esc_url(FansUiRoutes::url($role === 'visitor' ? 'fan' : $role, 'explorer')); ?>">← Explorer</a>
             <h2 id="fu-profile-title">Informations publiques</h2>
             <p class="fu-live" data-fans-status role="status" aria-live="polite">Chargement du profil…</p>
             <div data-fans-results></div>

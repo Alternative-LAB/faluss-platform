@@ -57,10 +57,13 @@ namespace Faluss\Platform\Fans\Ui {
                 FansUiRoutes::url('creator', 'creer'),
                 '/?faluss_fans_ui_role=creator&faluss_fans_ui_view=creer'
             ));
-            self::assertSame(403, FansUiRoutes::accessStatus('fan', false, false));
-            self::assertSame(403, FansUiRoutes::accessStatus('creator', false, true));
-            self::assertSame(404, FansUiRoutes::accessStatus('creator', true, false));
-            self::assertSame(200, FansUiRoutes::accessStatus('creator', true, true));
+            self::assertSame(200, FansUiRoutes::accessStatus('fan', 'explorer', false, false));
+            self::assertSame(200, FansUiRoutes::accessStatus('creator', 'explorer', false, false));
+            self::assertSame(200, FansUiRoutes::accessStatus('fan', 'public-profile', false, false));
+            self::assertSame(403, FansUiRoutes::accessStatus('fan', 'accueil', false, false));
+            self::assertSame(403, FansUiRoutes::accessStatus('creator', 'creer', false, true));
+            self::assertSame(404, FansUiRoutes::accessStatus('creator', 'creer', true, false));
+            self::assertSame(200, FansUiRoutes::accessStatus('creator', 'creer', true, true));
         }
 
         public function testCreatorSidebarIsCompleteAccessibleAndDistinctFromFan(): void
@@ -95,6 +98,11 @@ namespace Faluss\Platform\Fans\Ui {
             self::assertStringNotContainsString('<img', $html);
             self::assertStringNotContainsString('PF</', $html);
             self::assertStringNotContainsString('€', $html);
+            self::assertStringContainsString('Sans nom public ni portrait', $html);
+            $visitor = $this->render('visitor', 'explorer');
+            self::assertSame(1, substr_count($visitor, 'class="fu-nav__item'));
+            self::assertStringContainsString('href="https://fans.example.test/faluss-fans/fan/explorer"', $visitor);
+            self::assertStringNotContainsString('faluss-fans/visitor/', $visitor);
         }
 
         private function render(string $role, string $view): string
