@@ -9,7 +9,7 @@
 | Profils créateurs structurés, PR #68 (remplace #55) | Fusionné, opt-in, sans activation de production | Statut `active` limité à l'approbation de publication, `identity_verified=false` dans l'API. La vérification d'identité et la condition de vente du créateur restent à implémenter. Aucun texte libre, média ou upload dans le profil. Voir [FANS-PROFILES.md](FANS-PROFILES.md). |
 | Followers, PR #69 (remplace #56) | Fusionné, opt-in, sans activation de production | Suivi/retrait idempotents d'un profil actif par un membre SSO lié ; seul le nombre est public. Blocage, signalements, suppression de compte et rétention restent à traiter avant une expérience sociale complète. Voir [FANS-FOLLOWERS.md](FANS-FOLLOWERS.md). |
 | Catalogue store structuré, PR #70 (remplace #57) | Fusionné, opt-in, sans activation de production | Deux catégories visibles et classables ; fiches adultes liées à un créateur masquées sans consentement explicite, fiches sans contenu ni prix, tentative d'achat refusée côté serveur et API. Voir [FANS-STORE.md](FANS-STORE.md). |
-| Contrats des moteurs, PR #71 (remplace #64) | Documentation fusionnée, pas de moteur économique | Décisions HoF, PF financés, consentement et corrections conservées. |
+| Contrats des moteurs, PR #71 (remplace #64) | Documentation fusionnée, pas de moteur économique | Historique économique remplacé pour la cible par l’ADR 0018 v3 ; code inchangé. |
 | Politiques publications/teasers, PR #72 (remplace #65) | Classes pures fusionnées | Politique d'accès réutilisée par le moteur texte ; projection Me toujours inactive. |
 | Simulateur, PR #73 (remplace #66) | Fusionné, hors runtime | Contrat v2 et refus d'auto-soutien sur UUID fictifs, sans ledger ni revenu calculé. |
 | Publications textuelles, PR #74 | Fusionné, opt-in désactivé par défaut | Tables privées, auteur SSO propriétaire au profil actif, modération humaine avec journal transactionnel, révisions, retrait et masquage à la suspension, listes paginées. Aucun média. Voir [FANS-PUBLICATIONS.md](FANS-PUBLICATIONS.md). |
@@ -17,7 +17,7 @@
 | Images en quarantaine, PR #76 | Fusionné, opt-in désactivé par défaut | JPEG/PNG normalisés, stockage privé vérifié et attesté, octets réservés aux admins, quotas, retrait/rejet et nettoyage ; aucune diffusion même après approbation. Voir [FANS-IMAGES.md](FANS-IMAGES.md). |
 | Associations image–texte, PR #77 | Fusionné, sans diffusion par ce seul lot | Référence privée vers une image approuvée du même créateur, nouvelle modération, révisions et révocation. Voir [FANS-PUBLICATION-IMAGES.md](FANS-PUBLICATION-IMAGES.md). |
 | Affichage JPEG Fans, PR #78 | Fusionné, flag distinct fermé | Dérivé en mémoire ; texte, association, image et profil revérifiés par demande. Aucune diffusion sur Me, original ou CDN. Voir [FANS-IMAGE-DELIVERY.md](FANS-IMAGE-DELIVERY.md). |
-| Panel de modération Fans | Implémenté dans cette PR brouillon | Sous-page administrative texte/quarantaine, revue privée, décisions et journal via API existantes. Voir [FANS-MODERATION.md](FANS-MODERATION.md). |
+| Panel de modération Fans, PR #79 | Fusionné, flags fermés | Sous-page administrative texte/quarantaine, revue privée, décisions et journal via API existantes. Voir [FANS-MODERATION.md](FANS-MODERATION.md). |
 | Autres médias, messagerie, commandes et droits | Contractuel seulement | Aucune vidéo, messagerie, vente ou projection Me active. |
 
 Le choix du rôle, du client confidentiel Me, de son secret et du flag Fans appartient à une configuration de site hors Git. Aucun site de production n'est configuré, activé, migré ou déployé par cette PR.
@@ -32,48 +32,52 @@ Les contrats à spécifier avant le code métier sont : liaison SSO et session l
 
 ## Catégories et portes commerciales
 
+Le Shop cible est limité aux contenus, prestations, services et produits autorisés. Aucun achat Shop ne produit implicitement de score ou de PC. Le vendeur contractuel reste à décider : vente, commande et délivrance commerciale fermées. Les deux catégories ci-dessous décrivent le code actuel, pas une taxonomie cible complète.
+
 | Catégorie canonique | Présentation permise | Achat et livraison dans ce lot | Condition d'ouverture future |
 | --- | --- | --- | --- |
 | Contenu autorisé hébergé par Fans | Catégorie et fiches structurées visibles, sans contenu ni prix pour l'instant | Tentative d'achat refusée (503), aucune commande ni livraison | Validation explicite du prestataire pour ce modèle de plateforme, contenu autorisé, intégration de paiement et recettes de bout en bout |
-| Droit à une livraison adulte externe | Catégorie distincte, visible et classable ; fiches associées à un créateur masquées tant que son consentement explicite n'existe pas | Tentative d'achat refusée (403) côté serveur et API ; aucun droit délivré ; contenu et livraison hors Fans | Consentement créateur vérifié avant toute publication de fiche, acceptation **explicite** du prestataire pour ce parcours précis, puis PR et activation distinctes après validation |
+| Droit à une livraison adulte externe | Catégorie existante classable ; fiches nominatives masquées sans consentement | Refus serveur et API 403, aucun droit ni contenu adulte | Cible : retrait du Shop et de la découverte publics, historique administratif conservé ; lot d’archivage distinct |
 
-Le catalogue expose une API de tentative d'achat qui refuse toujours les deux catégories. Il n'a ni prix, ni panier, ni checkout, ni création de commande, ni intention de paiement, ni webhook, ni émission de droit. Le refus de l'API actuelle est testé ; il ne prouve pas le comportement des futurs chemins. Avant d'implémenter ces chemins, le service de commande devra imposer une règle centrale **refus par défaut** pour tout achat de droit à une livraison adulte externe : panier, checkout, création de commande, intention de paiement, API, action d'administration, webhook, reprise et émission de droit. Une requête forgée, un changement de catégorie ou une ancienne commande ne devront pas contourner ce refus. Un flag, une réponse client ou une simple validation du modèle général ne constituent pas l'acceptation du parcours adulte externe. La levée du refus exigera un changement serveur explicite, revu et testé après preuve de l'accord du prestataire.
+Le catalogue expose une API de tentative d'achat qui refuse toujours les deux catégories. Il n'a ni prix, ni panier, ni checkout, ni création de commande, ni intention de paiement, ni webhook, ni émission de droit. Le refus de l'API actuelle est testé ; il ne prouve pas le comportement des futurs chemins. Avant d'implémenter ces chemins, le service de commande devra imposer une règle centrale **refus par défaut** pour tout achat de droit à une livraison adulte externe : panier, checkout, création de commande, intention de paiement, API, action d'administration, webhook, reprise et émission de droit. Une requête forgée, un changement de catégorie ou une ancienne commande ne devront pas contourner ce refus. Un flag, une réponse client ou une simple validation du modèle général ne constituent pas l'acceptation du parcours adulte externe. Le refus demeure ; le contrat v3 cible le retrait de la catégorie et de ses anciennes fiches du Shop et de la découverte publics, avec historique administratif conservé, dans un lot distinct.
 
 Aucun contenu adulte ne doit être hébergé ou envoyé par Fans, y compris dans les publications, médias, fichiers, aperçus, messages et pièces jointes. Les contrôles d'upload, de texte, de rendu, d'API et de modération devront être définis avant toute ouverture. La catégorie du droit externe ne doit pas devenir un canal de stockage, de proxy, d'aperçu ou de transmission du contenu livré ailleurs.
 
 ## Étapes et preuves avant ouverture
 
 1. **Fondation Fans** : SSO et profils sont fusionnés par #67 et #68. Les preuves et limites SSO, dont les recettes HTTPS locales antérieures, sont détaillées dans [FANS-SSO.md](FANS-SSO.md). La recette texte ne refait pas l'échange avec Me : elle utilise des liaisons synthétiques et de vraies sessions WordPress. Les champs éditoriaux du profil exigeraient un contrat de modération distinct.
-2. **Social et contenu** : profils et suivi local sont fusionnés. #74 a ajouté les textes modérés, leur retrait et leur pagination. #75 a fiabilisé leur admission avec quotas et idempotence. #76 a ajouté la quarantaine privée d’images. #77 a relié ces images approuvées aux textes par référence privée. #78 a ajouté un dérivé JPEG à la demande, derrière un flag de diffusion distinct, sans activation de production. Médias, messagerie, blocage, signalement, suppression de compte, rétention automatique et procédures humaines de modération restent à construire. Le panel administratif du lot présent ajoute un parcours manuel, sans automate de détection. La quarantaine privée et la revue humaine ne garantissent pas la détection de tout contenu interdit ; aucune ouverture de production n'est autorisée par cette recette.
+2. **Social et contenu** : profils et suivi local sont fusionnés. #74 a ajouté les textes modérés, leur retrait et leur pagination. #75 a fiabilisé leur admission avec quotas et idempotence. #76 a ajouté la quarantaine privée d’images. #77 a relié ces images approuvées aux textes par référence privée. #78 a ajouté un dérivé JPEG à la demande, derrière un flag de diffusion distinct, sans activation de production. Médias, messagerie, blocage, signalement, suppression de compte, rétention automatique et procédures humaines de modération restent à construire. Le panel administratif #79 ajoute un parcours manuel, sans automate de détection. La quarantaine privée et la revue humaine ne garantissent pas la détection de tout contenu interdit ; aucune ouverture de production n'est autorisée par cette recette.
 3. **Contenu autorisé hébergé** : la catégorie est classable, sans contenu ni vente. Obtenir la validation du prestataire pour ce modèle de plateforme ; terminer les contrats publication autorisée, commande, paiement, remboursement et droits, puis tester les doublons, webhooks, échecs, annulations et accès après révocation. Une recette de bout en bout et un rollback vérifié précèdent l'ouverture.
-4. **Droits à livraison adulte externe** : la catégorie est présentée sans achat possible ; les fiches nominatives restent masquées en l'absence de consentement explicite du créateur et l'API existante refuse. Définir et tester le recueil du consentement avant publication. Prouver à nouveau par tests serveur et API que tous les chemins de commande et de délivrance futurs refusent. Obtenir l'acceptation explicite du prestataire pour ce parcours distinct. Toute ouverture commerciale sera un lot séparé avec revue du contrat de livraison externe, du refus par défaut, des contrôles de contenu et des parcours de paiement et de remboursement.
+4. **Droits à livraison adulte externe** : conserver le refus 403 et le masquage des fiches. Cible : retirer catégorie et anciennes fiches du Shop et de la découverte publics, même actuellement classables ; conserver identifiants, décisions et historique pour l’administration. Archivage effectif dans un lot distinct, sans suppression ni migration dans #80.
 
 Les tests de la PR #53 démontrent la reconnaissance du rôle et l'isolation de ses hooks. Les lots fusionnés SSO, profils, followers et catalogue ajoutent des preuves unitaires. Les recettes locales directes puis HTTPS ont vérifié les tables InnoDB sans table Link malgré son flag, création/liaison SSO et concurrence, permissions REST des profils, fiche adulte masquée, refus 403/503 de l'API actuelle et retrait des flags ; voir [la preuve SSO HTTP](../evidence/fans-local/SSO-HTTP.md) et [le contrat catalogue](FANS-STORE.md). Le lot texte ajoute sa propre recette locale REST décrite dans [FANS-PUBLICATIONS.md](FANS-PUBLICATIONS.md). Ces preuves ne couvrent pas le navigateur physique, les extensions tierces ni l'ouverture de production. Les refus actuels ne prouvent pas ceux des commandes, paiements ou droits, qui restent à construire.
 
-## Décision HoF — contractuelle, sans activation
+## Contrat PF / PC / HoF v3 — sans activation
 
-Un achat de pack ne produit aucun score HoF. Un cadeau de 300 pièces financées
-effectivement dépensées donne 300 points de session au créateur ; un soutien direct
-donne 1 point par euro confirmé. **Le score affiché n'est pas le revenu du créateur.**
-La progression du badge repose sur sa dépense réelle **à la consommation financée**,
-jamais au simple achat du pack. Le pseudo et le badge sont visibles au créateur
-concerné ; leur visibilité publique exige un consentement. Le soutien direct est
-calculé en centièmes de point entiers (125 centimes EUR = 125 centièmes de point).
-Le revenu EUR appartient aux statistiques privées du créateur. Les assiettes et
-les arrondis d'allocation économique restent
-à préciser dans [le contrat des moteurs](FANS-ENGINE-OWNERSHIP.md).
+L’[ADR 0018 versionnée](../adr/0018-fans-pf-pc-hof-v3.md) remplace les règles
+économiques historiques de #71 pour la cible. Pack PF : zéro score ; seule
+l’attribution attestée de PF achetés compte. Plusieurs classements peuvent
+projeter la même attribution, sans seconde dépense PF. Achat, attribution et
+remboursement PF : aucun crédit PC, direct ou dérivé. Les anciens PF `earned`
+et `promotional` ne deviennent ni PC ni PF éligibles au nouveau HoF.
 
-La réutilisation des PF `funded` du Hub est à étudier via un contrat serveur à
-étendre, sans second ledger Fans. Les PF `earned` et `promotional` ne créent ni
-revenu ni score monétisable sans financement explicite. Les cadeaux gratuits restent
-sans revenu ni score monétisable sauf financement explicite par Faluss ; les PF
-`earned`/`promotional` gardent leur classe, et ce financement ne constitue pas une
-dépense du donateur pour son badge. Le contrat définit les
-corrections, litiges et remboursements à construire ; aucun moteur économique
-n'est ajouté ici. **Le simulateur de #73 est adapté au contrat v2** :
-la v2 fusionnée sépare les unités de score et de dépense ; sa politique reste limitée
-aux fixtures documentées. Les refus adultes 403 et hébergés 503 restent inchangés,
-sans paiement.
+**1 PF acheté, attesté et effectivement attribué = 1 point HoF est une décision produit validée**, sans équivalence EUR. Les politiques de classement, le protocole PF et les autres parcours restent fermés.
+Aucun wallet ni montant financier dans l’interface ou l’API créateur, même privée.
+Le score public peut permettre une estimation économique indirecte ; ce n’est pas
+un revenu et aucune impossibilité d’estimation n’est promise. Un éventuel badge
+de soutien reste distinct des PC, sans montant affiché ni récompense PC dérivée.
+
+Intentions PC : daily reward et ramassage quotidien sur le profil d’un créateur
+attribueraient des PC au fan, sans propriétaire technique, barème, plafond ou
+date d’activation fixés. Les claims Hub/Me restent en PF historiques, sans
+renommage ni migration. Les parcours PC restent fermés.
+
+Propriétaire/barèmes PC, anciens claims, sessions/suspensions, remboursements
+partiels, titres après correction et vendeur Shop : décisions requises, parcours
+correspondants fermés. Le Token Engine reste inchangé ; sa compensation standard
+intégrale et unique ne fournit pas les compensations partielles successives.
+Le simulateur v2 reste historique, non conforme à cette cible ; son adaptation
+appartient à un prochain lot. Voir [ownership](FANS-ENGINE-OWNERSHIP.md).
 
 ## Prochains moteurs
 

@@ -22,6 +22,22 @@ Le refus est dans `PurchaseGate`, appelé par le service utilisé par l'API. Le 
 
 Pour le **contenu autorisé hébergé**, obtenir la validation explicite du prestataire pour ce modèle de plateforme, puis ajouter contenu conforme, prix, commandes, paiement, remboursements et droits dans des PR revues et testées. Le flag du catalogue ne vaut pas validation commerciale. Avant toute utilisation réelle des fiches administratives, vérifier aussi le consentement du créateur à la catégorie affichée ; ce flux n'est pas automatisé ici. Vérifier sur WordPress/MariaDB et avec le prestataire avant activation de vente.
 
-Pour la **livraison adulte externe**, garder cette catégorie visible mais ses fiches nominatives masquées tant qu'un consentement explicite du créateur n'est pas recueilli, persisté et vérifié côté serveur. Ce mécanisme de consentement sera un lot séparé ; l'approbation administrative du profil ou de la fiche ne le remplace pas. Aucun achat, droit ni transfert de contenu n'est permis. Une acceptation explicite du prestataire pour ce parcours distinct serait nécessaire avant même de proposer une modification du refus. Le contenu adulte reste hors de Fans, y compris publications, fichiers et messagerie. Aucune validation du modèle hébergé, réponse du navigateur, métadonnée de fiche ou option WordPress ne lève le refus.
+Pour la **livraison adulte externe**, le refus demeure 403 et les fiches nominatives restent masquées sans consentement. L’[ADR 0018](../adr/0018-fans-pf-pc-hof-v3.md) retient pour cible le **retrait de la catégorie et de ses anciennes fiches du Shop et de la découverte publics**, même actuellement classables. Conserver leurs identifiants et leur historique pour l’administration, sans reclassement en produits autorisés. L’archivage effectif fera l’objet d’un lot distinct : aucune suppression, migration ou modification de route dans #80. Aucun accord prestataire ou flag ne lève automatiquement le refus. Aucun contenu adulte dans Fans, messagerie comprise.
 
 Les tests actuels couvrent les libellés et catégories, l'idempotence et les permissions de création, la fiche adulte masquée malgré création administrative ou changement de catégorie, le refus côté service et API pour les deux catégories et l'absence de champ de contenu ou de livraison. Une recette locale jetable WordPress/MariaDB a confirmé les catégories publiques, la fiche adulte `hidden` et 404 en lecture publique, puis 403 pour sa tentative d'achat et 503 pour le contenu hébergé ; après changement de catégorie en base, l'API renvoie 403 et masque la fiche. Le retrait des flags a fermé les routes en conservant les cinq tables Fans. Ces résultats ne prouvent ni les chemins de commande, paiement ou droit futurs, ni une validation de prestataire ou un déploiement réel. Le lot commandes/droits devra tester panier, checkout, API, administration, webhook, reprise, catégorie changée et droit ancien avant toute ouverture.
+
+## Cible Shop — contrat v3, parcours commerciaux fermés
+
+Le Shop cible couvre uniquement contenus, prestations, services et produits autorisés.
+Cette taxonomie n’est pas implémentée par les deux catégories historiques ci-dessus.
+Un achat, remboursement, webhook, commande ou droit Shop n’ajoute aucun score HoF
+ou PC implicitement. Aucun wallet ou montant financier dans l’interface ou l’API
+destinée au créateur, même privée. Le vendeur contractuel, les responsabilités et
+le traitement financier hors de ces surfaces restent à décider ; vente, paiement,
+commande et délivrance commerciale restent fermés. Les futurs chemins devront
+avoir leurs propres gardes et tests ; les refus actuels ne prouvent pas leur sécurité.
+
+Aucune conversion PF/PC, aucun taux de commission ou revenu issu du score n’est
+acquis. Le score public peut permettre une estimation économique indirecte.
+L’ADR définit les corrections et les arbitrages ; le Token Engine et ses limites
+de compensation partielle restent inchangés. Ce lot ne modifie ni schéma ni API.

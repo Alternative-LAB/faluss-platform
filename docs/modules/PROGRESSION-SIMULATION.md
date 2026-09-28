@@ -1,5 +1,33 @@
 # Progression / HoF — simulation hors runtime v2
 
+## Statut historique face au contrat v3
+
+L’[ADR 0018](../adr/0018-fans-pf-pc-hof-v3.md), `fans.economy-contract/3.0.0`,
+remplace le modèle produit pour la cible. Cette page décrit **le code v2 inchangé**,
+pas la nouvelle règle de score. La décision produit est désormais validée : **1 PF acheté, attesté et effectivement
+attribué = 1 point HoF** ; pack seul : zéro point, aucune équivalence EUR dans le
+score cible. Les exemples EUR du code v2 ne constituent pas une implémentation
+de cette décision. Politiques de classement, protocole PF et autres parcours
+restent fermés. Aucun moteur actif.
+
+La cible exige pack sans score, attribution attestée de PF achetés, plusieurs
+classements pour une consommation unique et zéro PC pour achat/attribution/remboursement
+PF, même via un badge. `earned`/`promotional` ne deviennent ni PC ni PF éligibles.
+Pas de soutien EUR direct dans le nouveau score. L’éventuel badge reste distinct
+des PC, sans montant affiché ni récompense PC dérivée. Aucun wallet ou montant
+financier dans l’API ou l’interface créateur. Un score public peut permettre une
+estimation économique indirecte : aucune garantie contraire.
+
+Intentions produit PC : daily reward et ramassage quotidien sur le profil d’un
+créateur attribueraient des PC au fan, sans propriétaire technique, barème,
+plafond ou date d’activation fixés. Aucun de ces parcours n’est simulé ou activé
+ici. Les claims Hub/Me restent en PF historiques, sans renommage ni migration.
+
+L’adaptation du simulateur est un lot séparé : version nouvelle, tests de ces
+invariants, fan-out multi-classements et corrections sans double dépense. PC,
+sessions/suspensions, remboursements partiels et titres restent fermés jusqu’aux
+arbitrages de l’ADR ; aucune migration ou adaptation du calcul dans ce lot 1.
+
 ## Implémenté et frontière
 
 `Progression\SupportSimulation` est un calcul pur sur fixtures fictives. La politique
@@ -25,7 +53,7 @@ Cette règle n'ajoute aucune exposition publique des identités SSO.
 
 Les sorties privées sont `creator_score_centipoints` par créateur (centièmes de
 point entiers) et `donor_consumed_eur_cents` par donateur (centimes EUR entiers).
-Aucune sortie revenu : un score ne permet jamais de déduire un revenu créateur.
+Aucune sortie revenu calculé. Cela ne garantit pas l’impossibilité d’une estimation économique indirecte à partir du score public. Ces sorties de fixtures ne sont pas une API destinée au créateur.
 
 | Source v2 | Fixture admissible | Score | Dépense consommée |
 | --- | --- | --- | --- |
@@ -86,8 +114,7 @@ porte sur tout le lot. Aucun pseudonyme, badge ou donnée publique n'est projet�
 
 Un cadeau gratuit avec `funding=faluss` est **explicitement rejeté comme non pris
 en charge**, pas assimilé à une opération non financée : les preuves, allocations
-et règles de score du financement Faluss restent à définir. Cela ne retire pas
-l'exception produit prévue par [le contrat des moteurs](FANS-ENGINE-OWNERSHIP.md).
+et règles de score du financement Faluss restent à définir. L’ancienne exception produit n’est plus une source éligible dans la cible v3 : seuls les PF achetés attestés comptent.
 Aucune reclassification des PF earned/promotional ; aucun montant financé par
 Faluss ne doit devenir une dépense personnelle du donateur.
 
