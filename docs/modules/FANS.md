@@ -93,3 +93,11 @@ La [v3 distincte](FANS-HOF-SIMULATION-V3.md) calcule sur fixtures le ratio valid
 les projections multiples et les corrections, avec zéro PC. Elle ne remplace ni
 ne recalcule la v2 historique. Aucun protocole PF, remboursement réel, politique
 de victoire/suspension, API créateur ou activation ; les portes économiques restent fermées.
+
+## Protocole PF acheté — proposition non opérationnelle
+
+Le [contrat Fans ↔ Hub 0.1.0](FANS-HUB-PURCHASED-PF-CONTRACT.md) et son plan de
+réconciliation sont soumis au propriétaire Hub. Preuves d’achat, réservations,
+consommations, reçus et corrections demandent des capacités propriétaires absentes.
+Faux serveur sous tests uniquement ; aucun accès aux tables Hub, ledger parallèle,
+score persistant ou activation. La compensation partielle reste bloquée.

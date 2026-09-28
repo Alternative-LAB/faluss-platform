@@ -206,3 +206,12 @@ Références relues : modules [Identity](IDENTITY.md), [client Fans](FANS-SSO.md
 historique `Alternative-LAB/faluss`, `docs/POINTS_FALUSS_CONTRACT.md` (PF-02A) et
 `docs/ECONOMY_PROTOCOL.md` (EC-01). Les formulations historiques « futur PF » ne
 remplacent pas l'état implémenté de Token Engine dans Platform.
+
+## Contrat Fans ↔ Hub pour PF achetés — dépendance bloquée
+
+Le [draft versionné 0.1.0](FANS-HUB-PURCHASED-PF-CONTRACT.md) définit les exigences
+proposées de preuve par lot, réservation/confirmation, reçus et réconciliation.
+Validation du propriétaire Hub non obtenue ; aucune API opérationnelle ajoutée.
+La façade reste limitée aux claims quotidiens existants. Les tests sur faux serveur
+ne prouvent ni authentification réelle, concurrence SQL, reprise durable ou capacité
+de compensation partielle. Les claims Me/Hub et le Token Engine sont inchangés.
