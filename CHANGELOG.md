@@ -6,6 +6,16 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+## [0.6.1] - 2026-09-29
+
+### Supprimé
+
+- Retrait de la récompense ALB historique de Faluss Link : shortcode et widget enregistrés mais vides, widget masqué du catalogue Elementor, assets de récompense supprimés et ancien AJAX fermé en HTTP 410 sans appel au Connector.
+
+### Compatibilité
+
+- Les droits des teasers et thèmes, Token Engine, son Connector et les fonctions quotidiennes PF restent conservés. Aucune migration, conversion économique ou modification des données et flags.
+
 ## [0.6.0] - 2026-09-28
 
 ### Ajouté

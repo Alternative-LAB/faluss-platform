@@ -66,9 +66,9 @@ final class LinkAdaptersTest extends TestCase
         self::assertCount(1, LinkCatalogAdapter::themes(true));
 
         self::assertTrue(LinkTokenEngineConnectorAdapter::available());
-        self::assertSame('available', LinkTokenEngineConnectorAdapter::dailyRewardOffer()['state']);
-        self::assertSame('available', LinkTokenEngineConnectorAdapter::dailyRewardStatusForCurrentSubject()['state']);
-        self::assertSame('granted', LinkTokenEngineConnectorAdapter::claimDailyRewardForCurrentSubject()['state']);
+        self::assertSame('faluss_link_daily_reward_retired', LinkTokenEngineConnectorAdapter::dailyRewardOffer()->code);
+        self::assertSame('faluss_link_daily_reward_retired', LinkTokenEngineConnectorAdapter::dailyRewardStatusForCurrentSubject()->code);
+        self::assertSame('faluss_link_daily_reward_retired', LinkTokenEngineConnectorAdapter::claimDailyRewardForCurrentSubject()->code);
         self::assertTrue(LinkTokenEngineConnectorAdapter::subjectHasEntitlement($falussId, 'studio.theme.plus'));
         self::assertSame('studio.theme.plus', LinkTokenEngineConnectorAdapter::entitlementDefinitions()[0]['code']);
     }

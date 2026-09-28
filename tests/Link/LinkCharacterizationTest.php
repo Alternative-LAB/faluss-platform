@@ -15,14 +15,12 @@ final class LinkCharacterizationTest extends TestCase
             'css/faluss-link-discoveries.css' => 'ef4ff3a1f13f15456d06303694b278461bdbafdbe49bf8bdba57c0ba39872901',
             'css/faluss-link-immersive.css' => '5d0fb6c972663e4df7a7bdd1e6f549d8cfc4bbda90b58ccd4a587c20cf937d5c',
             'css/faluss-link-onboarding.css' => '86a31fa5fcd8f712b465291de5bb0f3def5608f792bf89c8bf012f13af30ac4e',
-            'css/faluss-link-reward.css' => '40d9584e2f373e3e63e073e5e472e75fc34e56940bb78b763bfcc477c8e24371',
             'css/faluss-link-studio.css' => 'd605c7c6607d73a7f7927cced4aff9edf15670327c1fc64ff8c6a7a9a255e0cc',
             'css/faluss-link.css' => '56c71ee1c2bcc09bcbde3824239fb40b6dc8ab0498fe930606dc510369bee4ff',
             'js/faluss-link-card.js' => '94cafb8da5c001990dc433bbcdc3bfc201fffd37a3da50c747db8e3ecd5080b6',
             'js/faluss-link-editor.js' => '18a3a4bbdbfc0bf2278c4418bc678fb60d2e0ed412aa6ca8e8d9239c39dc2023',
             'js/faluss-link-immersive.js' => 'cf9b6e9cf7f1c16b91ea53c6da636b4fca252254468e3cfaf4a689c4f14980d2',
             'js/faluss-link-onboarding.js' => '918a6f4c778ec671fd6514bf45944cd60c4925089a7fad26b0e41f4a5a3b34a4',
-            'js/faluss-link-reward.js' => '1aa529f7bac8ea5ff0e4bb9ef634e5a4dce105f2b311e7fed5250e798404683a',
             'images/faluss-onboarding-device.png' => '9f35fe8c4092a6fc0ccd2375f494710bac7fb4796514d02c5d732b0bba8f1c47',
             'images/faluss-onboarding-header-back.svg' => '9836e048a4fd6eca220f2c3f7b870609d8209243d3f1c3cd47a6736c9c9aa38a',
             'images/faluss-onboarding-header-logo.png' => '24d638ffbfd2503f082071065afc668f03d5932b650d861b77febc67b4c6377b',
@@ -62,7 +60,7 @@ final class LinkCharacterizationTest extends TestCase
             'LegacyLinkEventsRuntime.php' => 'ddb578a7e66d0fcf67fd600484fe27b1bb91b4136c2436f66fb9cef44ee0843d',
             'LegacyLinkManifest.php' => '4da011366c5a15387dae6e6c199c5d8268624db5732716b4f6e46ee4a91273c3',
             'LegacyLinkSchema.php' => '7393884b2f8cde76daab6616e98dd4ebf8e62cb1d4b59d851d380afbc3b534eb',
-            'LegacyLinkWidgets.php' => '6c84ac7a657ce6a978549b3b383bf3e975c55c15fce4f3fb9a832c16da36c83b',
+            'LegacyLinkWidgets.php' => 'bf8c7acabea05d0383aee806d315c37de6ce3a3e796032e64dbc405d7f60b96f',
         ];
 
         foreach ($files as $file => $expectedHash) {

@@ -10,53 +10,26 @@ final class LinkTokenEngineConnectorAdapter
 {
     public static function available(): bool
     {
-        return self::hasMethod('daily_reward_offer')
-            && self::hasMethod('daily_reward_status_for_current_subject')
-            && self::hasMethod('claim_daily_reward_for_current_subject')
-            && self::hasMethod('subject_has_entitlement')
+        return self::hasMethod('subject_has_entitlement')
             && self::hasMethod('entitlement_definitions');
     }
 
-    /** @return array<string, mixed>|WP_Error */
-    public static function dailyRewardOffer(): array|WP_Error
+    /** Retired Link-only compatibility entry point; never calls the Connector. */
+    public static function dailyRewardOffer(): WP_Error
     {
-        if (!self::available()) {
-            return new WP_Error('connector_unavailable');
-        }
-
-        $result = self::call('daily_reward_offer');
-
-        return is_array($result) || $result instanceof WP_Error
-            ? $result
-            : new WP_Error('connector_response_invalid');
+        return new WP_Error('faluss_link_daily_reward_retired');
     }
 
-    /** @return array<string, mixed>|WP_Error */
-    public static function dailyRewardStatusForCurrentSubject(): array|WP_Error
+    /** Retired Link-only compatibility entry point; never calls the Connector. */
+    public static function dailyRewardStatusForCurrentSubject(): WP_Error
     {
-        if (!self::available()) {
-            return new WP_Error('connector_unavailable');
-        }
-
-        $result = self::call('daily_reward_status_for_current_subject');
-
-        return is_array($result) || $result instanceof WP_Error
-            ? $result
-            : new WP_Error('connector_response_invalid');
+        return new WP_Error('faluss_link_daily_reward_retired');
     }
 
-    /** @return array<string, mixed>|WP_Error */
-    public static function claimDailyRewardForCurrentSubject(): array|WP_Error
+    /** Retired Link-only compatibility entry point; never calls the Connector. */
+    public static function claimDailyRewardForCurrentSubject(): WP_Error
     {
-        if (!self::available()) {
-            return new WP_Error('connector_unavailable');
-        }
-
-        $result = self::call('claim_daily_reward_for_current_subject');
-
-        return is_array($result) || $result instanceof WP_Error
-            ? $result
-            : new WP_Error('connector_response_invalid');
+        return new WP_Error('faluss_link_daily_reward_retired');
     }
 
     public static function subjectHasEntitlement(string $falussId, string $code): bool
