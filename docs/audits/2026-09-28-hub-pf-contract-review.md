@@ -10,11 +10,14 @@ Le domaine propriétaire est **Hub / Token Engine**, sous `src/TokenEngine` :
 façade Platform, service PF et schéma historiques. Fans reste consommateur.
 Le producteur de preuve économique d’achat doit encore être désigné.
 
-Aucun CODEOWNERS ou équipe Hub n’a été trouvé dans le dépôt et ses équipes GitHub.
-Les administrateurs visibles `Skewmos` et `ALB-Origine` ne sont pas présumés être
-les validateurs du domaine sur cette seule base. **Compte/équipe responsable à
-confirmer par le porteur du projet**, puis demande de revue explicite sur le SHA
-mis à jour. Aucune validation propriétaire reçue à la rédaction ; fusion bloquée.
+## Rectificatif de la porte de fusion
+
+Cette proposition demeure **proposée, non ratifiée par Hub**. Aucun compte ou
+équipe Hub ne doit être désigné artificiellement pour sa fusion documentaire.
+L’approbation du responsable Hub sera exigée **avant l’implémentation du protocole**,
+pas avant la fusion de #82. La revue ciblée ne vaut pas cette approbation.
+Les contrôles et protections ordinaires du dépôt restent requis pour la fusion ;
+toutes les capacités économiques restent fermées.
 
 ## Matrice de revue
 
@@ -58,12 +61,12 @@ La sérialisation confirmation/expiry/libération/litige n’est pas prouvée pa
 tests, ni la survie à un crash, la pagination cohérente, multi-lots ou crypto réelle.
 Ces écarts sont des dépendances explicites, sans changement du Token Engine ici.
 
-Pour approuver **le contrat documentaire**, le propriétaire doit accepter les
-garanties comme exigences futures, confirmer l’autorité de chaque donnée et les
-blocages, ou demander leur révision. Cette approbation ne certifierait pas leur
-disponibilité et n’autoriserait ni moteur, ni paiement, ni flag.
+Avant l’implémentation, le responsable Hub devra ratifier les garanties proposées,
+confirmer l’autorité de chaque donnée et les blocages, ou demander leur révision.
+Cette approbation ne certifiera pas à elle seule leur disponibilité et n’autorisera
+ni paiement ni flag. La fusion de cette proposition documentaire n’est pas une ratification.
 
 Pour toute implémentation ultérieure : lot propriétaire autorisé, contrat réseau
 et capacités réellement livrés, non-régression des claims et recette réelle de
-concurrence/pannes/réconciliation. Fusion de #82 uniquement après approbation
-explicite du propriétaire identifié sur le contenu final et contrôles verts.
+concurrence/pannes/réconciliation. #82 peut être fusionnée après vérification des
+contrôles et protections, en conservant son statut proposé et non ratifié.

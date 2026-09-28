@@ -2,7 +2,7 @@
 
 ## Statut et autorité
 
-- Contrat proposé : **`fans.hub-purchased-pf/0.1.0`** ; état **dépendance Hub bloquée**.
+- Contrat **proposé, non ratifié par Hub** : `fans.hub-purchased-pf/0.1.0` ; état **dépendance Hub bloquée**.
 - Base examinée : `634eee2a8556f4b8458822641a03114e88334c3e`.
 - Référence produit : [ADR 0018](../adr/0018-fans-pf-pc-hof-v3.md).
 - Ce document est soumis au propriétaire Hub ; **sa validation n’est pas obtenue**.
@@ -29,7 +29,9 @@ Aucun renommage PC, conversion de classe ou reprise des anciens soldes. Un solde
 
 Voir la [revue ciblée Hub](../audits/2026-09-28-hub-pf-contract-review.md) pour les
 preuves et la validation encore attendue. Le propriétaire de domaine est Hub /
-Token Engine ; le compte ou l’équipe habilité à approuver reste à désigner.
+Token Engine. L’approbation de son responsable sera requise avant l’implémentation
+du protocole, pas avant la fusion de cette proposition documentaire. Aucun compte
+ou équipe n’est désigné artificiellement ; cette revue ne vaut pas ratification.
 
 L’idempotence existante retrouve une écriture par clé **sans comparer le payload**.
 La détection de conflit par empreinte proposée ci-dessous est donc une capacité
