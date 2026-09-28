@@ -100,7 +100,12 @@ def main():
             return set()
 
         shutil.copytree(CORE, root, dirs_exist_ok=True, symlinks=True, ignore=ignore)
-        (root / 'wp-content/plugins/faluss-platform').symlink_to(REPO, target_is_directory=True)
+        plugin = root / 'wp-content/plugins/faluss-platform'
+        plugin.mkdir()
+        for directory in ('src', 'assets', 'vendor'):
+            shutil.copytree(REPO / directory, plugin / directory, symlinks=False)
+        for filename in ('faluss-platform.php', 'composer.json', 'composer.lock'):
+            shutil.copy2(REPO / filename, plugin / filename)
         (root / 'wp-content/mu-plugins').mkdir(exist_ok=True)
         (root / 'wp-content/mu-plugins/offline.php').write_text(
             "<?php add_filter('pre_http_request', static fn () => new WP_Error('offline', 'Local recipe only.'));\n"
@@ -128,6 +133,16 @@ def main():
             '--admin_email=recipe_admin@example.test', '--skip-email', capture_output=True)
         run(*wp, 'rewrite', 'structure', '/%postname%/', capture_output=True)
         run(*wp, 'plugin', 'activate', 'faluss-platform', capture_output=True)
+        source = run(*wp, 'eval',
+            "echo (new ReflectionClass(\\Faluss\\Platform\\Fans\\Ui\\FansUiRoutes::class))->getFileName();",
+            capture_output=True).stdout.strip()
+        if source != str(plugin / 'src/Fans/Ui/FansUiRoutes.php'):
+            raise RuntimeError('The recipe loaded a class from another checkout.')
+        print('PASS isolated plugin copy: Composer and UI classes use the disposable plugin directory.', flush=True)
+        print('Active theme: ' + run(*wp, 'theme', 'list', '--status=active',
+            '--fields=name,version', '--format=json', capture_output=True).stdout.strip(), flush=True)
+        print('Active plugins: ' + run(*wp, 'plugin', 'list', '--status=active',
+            '--fields=name,version', '--format=json', capture_output=True).stdout.strip(), flush=True)
         ready = run(*wp, 'eval',
                     "echo (int) Faluss\\Platform\\Fans\\Sso\\FansSsoSchema::ready() . ':' . "
                     "(int) Faluss\\Platform\\Fans\\Profiles\\CreatorProfileSchema::ready() . ':' . "

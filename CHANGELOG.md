@@ -14,6 +14,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 - Recette WordPress/MariaDB/Chrome locale jetable pour les rôles invité, Fan et Créateur, les styles et les parcours ordinateur/mobile ; captures et matrice mises à jour.
 - Lecture HoF ouverte aux visiteurs avec navigation Explorer + HoF et état indisponible honnête ; espaces personnels toujours soumis au SSO.
 - Barre WordPress masquée aux membres ordinaires sur les pages Fans, conservée pour les administrateurs ; captures Créateur rafraîchies et lot futur `Guest_…`/reprise de compte/retour SSO documenté. Aucun paiement invité ni progression fictive ajouté.
+- Recette locale isolée avec copie physique du plugin et de `vendor`, contrôle de la classe chargée, URL avec slash final et captures Fan/administrateur. Revue locale documentée ; validation visuelle cible avec vrais parcours SSO obligatoire avant activation du flag UI en production.
 - Tous les autres parcours restent explicitement indisponibles, sans score, contenu ou action fictifs. Flag UI désactivé par défaut ; aucun schéma, achat, paiement ou déploiement.
 
 ### Archivage de la catégorie adulte externe Fans

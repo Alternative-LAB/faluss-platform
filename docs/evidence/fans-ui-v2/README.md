@@ -4,8 +4,10 @@ Les captures `real-wp-*` proviennent de WordPress 7.1.2, MariaDB 11.8.6 et
 Chrome local, avec un profil actif et des comptes de test synthétiques. Seuls
 les flags SSO, profils et UI de cette instance jetable ont été activés. Les
 flags de production restent fermés. Les vues ont été inspectées visuellement
-après la recette automatisée ; cette inspection ne remplace pas la revue
-visuelle finale de la PR sur l’environnement cible.
+après la recette automatisée ; cette inspection ne remplace pas la validation
+visuelle sur `fans.faluss.me` et les vrais parcours SSO, obligatoires avant
+l’activation du flag UI en production. Le [compte rendu de revue](REVIEW-2026-09-28.md)
+précise la configuration locale, les écarts et l’isolation des tests.
 
 | Parcours réel | Ordinateur 1440 × 900 | Mobile 390 × 844 |
 | --- | --- | --- |
@@ -14,6 +16,8 @@ visuelle finale de la PR sur l’environnement cible.
 | Invité : profil public actif | [Capture](real-wp-profile-guest-desktop.png) | [Capture](real-wp-profile-guest-mobile.png) |
 | Créateur lié : Explorer, sans barre WordPress | [Capture](real-wp-explorer-creator-desktop.png) | — |
 | Créateur lié : Créer, quatre choix fermés et sans barre WordPress | — | [Capture](real-wp-creer-creator-mobile.png) |
+| Fan lié : HoF indisponible et navigation personnelle | [Capture](real-wp-hof-fan-desktop.png) | — |
+| Administrateur non lié : HoF public et outils WordPress conservés | [Capture](real-wp-hof-admin-desktop.png) | [Capture](real-wp-hof-admin-mobile.png) |
 
 La recette réelle a aussi vérifié le compte WordPress non lié, le Fan lié,
 les permissions des espaces personnels, les assets et le statut HTTP **de la

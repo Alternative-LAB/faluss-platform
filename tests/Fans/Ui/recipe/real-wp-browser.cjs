@@ -11,10 +11,16 @@ const uuid = /[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12
 
 async function login(page, member) {
   await page.goto(`${base}/wp-login.php`, { waitUntil: 'domcontentloaded' });
+  assert.equal(new URL(await page.locator('#loginform').getAttribute('action')).origin, base, 'Local WordPress login must keep the HTTPS proxy origin');
   await page.locator('#user_login').fill(member.login);
   await page.locator('#user_pass').fill(member.password);
   await page.locator('#wp-submit').click();
-  await page.waitForURL(/wp-admin/);
+  try {
+    await page.waitForURL(/wp-admin/, { waitUntil: 'domcontentloaded' });
+  } catch (error) {
+    const notice = await page.locator('body').innerText();
+    throw new Error(`Local recipe login did not reach wp-admin: ${new URL(page.url()).pathname}; ${notice.slice(0, 600)}`, { cause: error });
+  }
 }
 
 async function status(page, route, expected) {
@@ -79,6 +85,11 @@ async function noAdminBar(page) {
     await guestPage.screenshot({ path: path.join(output, 'real-wp-hof-guest-desktop.png'), fullPage: true });
     await status(guestPage, '/faluss-fans/creator/hof', 200);
     assert.equal(await guestPage.locator('.fu-nav__item').count(), 2);
+    await status(guestPage, '/faluss-fans/fan/explorer/', 200);
+    await status(guestPage, '/faluss-fans/creator/hof/', 200);
+    await status(guestPage, `/faluss-fans/creators/${fixture.active}/`, 200);
+    await status(guestPage, '/faluss-fans/fan/hof/session/', 403);
+    await status(guestPage, '/faluss-fans/fan/accueil/', 403);
     await status(guestPage, '/faluss-fans/fan/hof/session', 403);
     await status(guestPage, '/faluss-fans/fan/classements', 403);
     await status(guestPage, '/faluss-fans/fan/accueil', 403);
@@ -112,7 +123,10 @@ async function noAdminBar(page) {
     await noAdminBar(fanPage);
     await status(fanPage, '/faluss-fans/fan/hof', 200);
     await noAdminBar(fanPage);
+    await fanPage.screenshot({ path: path.join(output, 'real-wp-hof-fan-desktop.png'), fullPage: true });
+    await status(fanPage, '/faluss-fans/fan/accueil/', 200);
     await status(fanPage, '/faluss-fans/creator/creer', 404);
+    await status(fanPage, '/faluss-fans/creator/creer/', 404);
     await status(fanPage, '/faluss-fans/creator/explorer', 200);
     assert.equal(await fanPage.locator('.fu-app').getAttribute('data-fans-role'), 'fan');
     await status(fanPage, '/', 200);
@@ -128,6 +142,8 @@ async function noAdminBar(page) {
     await status(creatorPage, '/faluss-fans/creator/creer', 200);
     await noAdminBar(creatorPage);
     assert.equal(await creatorPage.locator('.fu-choice').count(), 4);
+    await status(creatorPage, '/faluss-fans/creator/creer/', 200);
+    await noAdminBar(creatorPage);
     await status(creatorPage, '/faluss-fans/creator/explorer', 200);
     await creatorPage.getByText('1 fiche publique structurée. Découverte en préparation.').waitFor();
     await noAdminBar(creatorPage);
@@ -162,6 +178,15 @@ async function noAdminBar(page) {
     await status(adminPage, '/faluss-fans/fan/hof', 200);
     assert.equal(await adminPage.locator('#wpadminbar').count(), 1);
     assert.equal(await adminPage.locator('#wp-admin-bar-site-name').isVisible(), true);
+    await adminPage.screenshot({ path: path.join(output, 'real-wp-hof-admin-desktop.png'), fullPage: true });
+    await status(adminPage, '/faluss-fans/creator/creer', 403);
+    const adminMobile = await browser.newContext(mobile);
+    const adminMobilePage = await adminMobile.newPage();
+    await login(adminMobilePage, fixture.admin);
+    await status(adminMobilePage, '/faluss-fans/fan/hof/', 200);
+    assert.equal(await adminMobilePage.locator('#wpadminbar').isVisible(), true);
+    assert.equal(await adminMobilePage.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true);
+    await adminMobilePage.screenshot({ path: path.join(output, 'real-wp-hof-admin-mobile.png'), fullPage: true });
     console.log('PASS Chrome desktop/mobile: stylesheet, no visible UUID or invented portrait, Explorer to public profile, no horizontal overflow.');
     console.log('PASS HoF guest desktop/mobile and admin bar: ordinary members hidden on Fans pages, administrators retain tools.');
     console.log('PASS real WordPress: guest, unlinked user, linked Fan, linked Creator; page and REST 404; assets; desktop/mobile Explorer to profile.');

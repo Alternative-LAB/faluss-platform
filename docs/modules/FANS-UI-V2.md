@@ -84,6 +84,21 @@ Sur les pages Fans, la barre d’administration WordPress est masquée aux membr
 ordinaires, sans changer leur préférence sur les autres pages. Les comptes
 dotés de `manage_options` conservent la barre et leurs outils WordPress.
 
+## Condition avant activation en production
+
+La fusion du socle UI ne valide pas son rendu sur `https://fans.faluss.me` et
+n’autorise ni un déploiement ni l’activation de `FALUSS_PLATFORM_FANS_UI`.
+Avant toute activation du flag UI en production, une validation visuelle sur
+le site cible avec sa configuration WordPress, son thème et Elementor, ainsi
+que de vrais parcours SSO, reste obligatoire. Elle doit couvrir ordinateur et
+mobile, Explorer → profil public, HoF invité, les huit accès Créateur, les
+états indisponibles, la barre WordPress et les accès refusés pour invité,
+Fan lié, Créateur lié et administrateur. Une préproduction fidèle peut préparer
+cette recette ; les captures locales jetables ne prouvent pas le rendu cible.
+
+Le [compte rendu de revue locale](../evidence/fans-ui-v2/REVIEW-2026-09-28.md)
+décrit précisément l’environnement et les limites de la preuve avant fusion.
+
 ## Ordre des PR suivantes
 
 1. Identité provisoire `Guest_…`, récupération après création de compte et
@@ -106,7 +121,9 @@ Le paiement invité reste un chantier contractuel distinct.
 ## Recettes navigateur locales
 
 La recette réelle `tests/Fans/Ui/recipe/real-wp.py` copie le cœur WordPress
-7.1.2 local et le plugin de cette branche dans une base MariaDB jetable. Elle
+7.1.2 local et le plugin de cette branche dans une base MariaDB jetable. Le
+plugin et son `vendor` sont des copies physiques ; une vérification du chemin
+de la classe UI empêche le chargement depuis un autre checkout. Elle
 requiert WSL root, `php`, `mariadb`, `openssl`, Chrome/Playwright et les assets
 locaux `/var/tmp/faluss-v3-wp/wordpress` et `wp-cli.phar`. Elle active
 SSO, profils et UI **dans cette instance seulement**, avec des liens SSO et profils
