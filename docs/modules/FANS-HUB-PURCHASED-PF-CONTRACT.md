@@ -25,6 +25,26 @@ Préserver `20 PF earned` Hub et `75 PF earned` Me, leurs preuves et comportemen
 Aucun renommage PC, conversion de classe ou reprise des anciens soldes. Un solde
 `funded` ne prouve pas à lui seul l’achat et l’allocation nécessaires au nouveau HoF.
 
+### Précisions issues de la revue du code propriétaire
+
+Voir la [revue ciblée Hub](../audits/2026-09-28-hub-pf-contract-review.md) pour les
+preuves et la validation encore attendue. Le propriétaire de domaine est Hub /
+Token Engine ; le compte ou l’équipe habilité à approuver reste à désigner.
+
+L’idempotence existante retrouve une écriture par clé **sans comparer le payload**.
+La détection de conflit par empreinte proposée ci-dessous est donc une capacité
+nouvelle, pas un acquis du ledger actuel. Les verrous sujet/classe et claims ne
+constituent pas un protocole de réservation par lot. Le schéma ne garantit aucun
+rattachement lot/tranche/attribution. Un échec de COMMIT n’est pas une preuve
+d’absence de consommation : état inconnu et rapprochement propriétaire nécessaires.
+La compensation standard peut aussi refuser une restitution faute de solde de
+classe ; elle ne prouve pas un remboursement total de pack déjà consommé.
+
+Les preuves serveur booléennes des claims sont internes à leurs adaptateurs ;
+elles ne sont ni des attestations d’achat réseau ni des signatures réutilisables.
+Le faux serveur ne valide aucune de ces capacités sur Hub réel. L’approbation
+documentaire attendue ne vaudra pas autorisation d’implémentation ou d’activation.
+
 ## Responsabilités proposées à valider par Hub
 
 | Autorité | Responsabilité exclusive |

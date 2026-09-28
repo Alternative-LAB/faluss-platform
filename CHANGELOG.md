@@ -8,6 +8,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Contrat Fans ↔ Hub pour PF achetés
 
+- Revue depuis le code propriétaire : conflits de payload non garantis par l’idempotence historique, verrous non équivalents à une réservation par lot, reprise après COMMIT ambigu et limites des compensations. Validation du propriétaire Hub toujours requise avant fusion.
+
 - Draft versionné 0.1.0 et plan de réconciliation par lots : preuve/allocation, réservation, confirmation unique, reçu authentifié proposé et reprises après timeout.
 - Faux serveur de contrat uniquement sous tests : rejets, idempotence, conflits, entrelacement de réservations, pannes et corrections de lots ; limites de preuve explicites.
 - Dépendance Hub bloquée, validation propriétaire requise, compensation partielle indisponible. Aucun Token Engine, claim historique, moteur, API, ledger, migration ou flag modifié.
