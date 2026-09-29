@@ -69,6 +69,7 @@ final class FansUiView
         $publicBase = home_url('/faluss-fans/creators/');
         wp_enqueue_style('faluss-fans-ui-v2', plugins_url('assets/fans-ui-v2.css', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'));
         wp_enqueue_script('faluss-fans-ui-v2', plugins_url('assets/fans-ui-v2.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true);
+        wp_enqueue_script('faluss-fans-reading', plugins_url('assets/fans-ui-reading.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true);
         status_header($status);
         ?>
 <!doctype html>
@@ -100,6 +101,11 @@ final class FansUiView
         <?php endif; ?>
         <?php if ($view === 'explorer') : ?>
             <?php self::explorer($api, $publicBase); ?>
+            <?php FansUiReading::publications(); ?>
+        <?php elseif ($view === 'accueil') : ?>
+            <?php FansUiReading::home($role); ?>
+        <?php elseif ($view === 'mon-profil') : ?>
+            <?php FansUiReading::ownProfile(); ?>
         <?php elseif ($view === 'public-profile' && $creatorId !== null) : ?>
             <?php self::publicProfile($api, $creatorId, $role); ?>
         <?php elseif ($view === 'creer') : ?>

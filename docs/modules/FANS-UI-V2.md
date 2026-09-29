@@ -9,6 +9,10 @@ rôle WordPress privilégié. Le profil public est une seule route canonique com
 
 ## Matrice avant implémentation
 
+Évolution du chantier 48 h : [accueil, profil propre et lecture publique](FANS-READING-UI.md).
+La matrice ci-dessous conserve l’état initial de #84 ; le suivi actualisé est dans
+[FANS-48H.md](FANS-48H.md).
+
 | Planche | Écran | Route retenue | Accès | API ou capacité présente | Livrable du lot 1 | État fermé si absent |
 | --- | --- | --- | --- | --- | --- | --- |
 | Fan 01 | Hall of Fame — accueil | `/faluss-fans/fan/hof` | Invité, Fan lié, Créateur lié | Simulateur HoF v3 hors runtime seulement | Lecture publique et navigation ; état indisponible | Aucune session, aucun score, rang ou point affiché |
