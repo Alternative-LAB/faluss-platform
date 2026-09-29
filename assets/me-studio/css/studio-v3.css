@@ -39,3 +39,8 @@ html:has(.faluss-studio-v3),body:has(.faluss-studio-v3){height:100%;overflow:hid
 .faluss-studio-v3__tabs a{border-radius:999px}
 .faluss-studio-v3__workspace[aria-busy=true]{cursor:progress}
 @media(prefers-reduced-motion:reduce){.faluss-studio-v3 nav.is-motion-ready [data-studio-pill]{transition:none}}
+
+.faluss-studio-v3__header{position:sticky;top:0;z-index:20;background:#fff}
+.faluss-studio-v3{scroll-padding-top:calc(84px + env(safe-area-inset-top,0px));scroll-padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+.faluss-studio-v3[data-input-modality=pointer] [data-studio-navigate]:focus{outline:none;box-shadow:none}
+.faluss-studio-v3[data-input-modality=keyboard] [data-studio-navigate]:focus{outline:3px solid #7853b3;outline-offset:3px}

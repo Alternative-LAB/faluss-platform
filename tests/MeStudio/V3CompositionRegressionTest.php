@@ -20,4 +20,10 @@ final class V3CompositionRegressionTest extends TestCase
         self::assertSame(0, $status, implode("\n", $output));
         self::assertStringContainsString('V3 surface corrections:', implode("\n", $output));
     }
+    public function testMobileControlsPreserveExistingComposition(): void
+    {
+        exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__DIR__ . '/v3-controls-regression.php') . ' 2>&1', $output, $status);
+        self::assertSame(0, $status, implode("\n", $output));
+        self::assertStringContainsString('V3 controls:', implode("\n", $output));
+    }
 }

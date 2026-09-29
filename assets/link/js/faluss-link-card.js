@@ -41,8 +41,12 @@
     }
     function refresh(card) {
         if (!card || !card.classList || !card.classList.contains('faluss-link-card')) { return; }
+        if (card.dataset.falussCardContext === 'public' && document.body.classList.contains('faluss-identity-public-route')) {
+            var canvas = effectiveSurface(card); document.documentElement.style.setProperty('--fl-public-canvas', canvas);
+            document.querySelectorAll('meta[name=theme-color]').forEach(function (meta) { meta.content = canvas; });
+        }
         card.querySelectorAll('.faluss-link-card__name,.faluss-link-card__section-title').forEach(function (node) { readable(node, '--fl-title-color', surfaceFor(node, card), titleThreshold); });
-        card.querySelectorAll('.faluss-link-card__handle,.faluss-link-card__bio,.faluss-link-card__content-text').forEach(function (node) { readable(node, '--fl-secondary-color', surfaceFor(node, card), editorialThreshold); });
+        card.querySelectorAll('.faluss-link-card__handle,.faluss-link-card__bio,.faluss-link-card__content-text').forEach(function (node) { if (card.dataset.falussSecondaryColor && !node.classList.contains('faluss-link-card__content-text')) { node.style.removeProperty('--fl-secondary-color-resolved'); return; } readable(node, '--fl-secondary-color', surfaceFor(node, card), editorialThreshold); });
         card.querySelectorAll('.faluss-link-card__link').forEach(function (node) { readable(node, '--fl-link-text', surfaceFor(node, card), titleThreshold); });
     }
     function initialize(root) { var scope = root && root.jquery ? root[0] : (root || document); if (!scope.querySelectorAll) { return; } scope.querySelectorAll('.faluss-link-card').forEach(refresh); }

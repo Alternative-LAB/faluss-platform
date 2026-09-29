@@ -156,6 +156,7 @@ final class FL_Hotfix_WPDB {
 }
 
 final class Faluss_Identity_Public_Profile {
+    public static function find_published_by_slug( $slug ) { global $wpdb; return 'published' === ( $wpdb->identity['publication_status'] ?? '' ) && $slug === ( $wpdb->identity['public_slug'] ?? '' ) ? self::studio_profile() : null; }
     public static function lock_studio_profile_in_transaction() { global $wpdb; return $wpdb->identity ?: false; }
     public static function studio_profile() { global $wpdb; $profile = $wpdb->identity; $profile['links'] = json_decode( (string) ( $profile['external_links'] ?? '[]' ), true ) ?: array(); return $profile; }
     public static function persist_external_links_in_transaction( $faluss_id, $links ) { global $wpdb; $wpdb->identity['external_links'] = wp_json_encode( $links ); return ! $wpdb->fail_projection; }

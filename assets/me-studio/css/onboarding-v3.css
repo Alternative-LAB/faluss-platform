@@ -71,3 +71,9 @@ html:has([data-faluss-onboarding-v3]),body:has([data-faluss-onboarding-v3]),.fal
 .faluss-onboarding-v3.is-keyboard-open .faluss-onboarding-v3__panel.is-expanded {height:calc(var(--v3-height) - 76px - env(safe-area-inset-top,0px))}
 .faluss-onboarding-v3__replacement {clear:both;margin-bottom:12px}
 .faluss-onboarding-v3__replacement summary {cursor:pointer;min-height:36px}
+
+/* Edit at full sheet height immediately; its bottom stays fixed behind the keyboard. */
+.faluss-onboarding-v3__panel.is-editing{transition:none}
+.faluss-onboarding-v3.is-keyboard-open .faluss-onboarding-v3__panel{padding-bottom:var(--v3-keyboard-inset,0px)}
+
+.faluss-onboarding-v3.is-keyboard-open .faluss-onboarding-v3__actions{padding-bottom:8px}

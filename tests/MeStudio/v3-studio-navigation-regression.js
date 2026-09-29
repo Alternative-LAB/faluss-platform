@@ -26,6 +26,7 @@ const js=fs.readFileSync(path.join(root,'assets/me-studio/js/studio-v3.js'),'utf
      if(url.pathname==='/wp-admin/admin-ajax.php'){
       const data=new URLSearchParams(req.postData());posts.push(data);if(holdPost)await holdPost;
       if(data.get('action')==='faluss_studio_v3_save'&&!failSave)canonicalName='Nom canonique';
+      if(data.get('action')==='faluss_onboarding_v3_preview')return route.fulfill({contentType:'application/json',body:JSON.stringify({success:true,data:{preview_html:'<article>Canonical preview fixture</article>'}})});
       return route.fulfill({status:failSave?409:200,contentType:'application/json',body:JSON.stringify(failSave?{success:false,data:{code:'stale_version'}}:{success:true,data:{id:78}})});
      }
      if(url.pathname==='/studio/'){
@@ -65,7 +66,14 @@ const js=fs.readFileSync(path.join(root,'assets/me-studio/js/studio-v3.js'),'utf
     assert.equal(await page.locator('[data-faluss-studio-v3]').getAttribute('data-step'),'v3_colors');
     assert(await page.locator('.faluss-studio-v3__tabs [data-studio-pill]').evaluate(e=>e.getAnimations().some(a=>a.transitionProperty==='transform')));
     releaseNav();holdRead=null;await step('v3_name');assert.match(page.url(),/v3_name/);
+    assert.equal(await tab('Nom').evaluate(e=>getComputedStyle(e).outlineStyle),'none','Pointer navigation has no focus ring');
     assert(await page.locator('.faluss-studio-v3__tabs [data-studio-pill]').evaluate(e=>e.getAnimations().some(a=>a.transitionProperty==='transform')),'Context pill actually transitions');
+    if(width===390){
+     await page.locator('[name=secondary_color][value="#FFFFFF"]').locator('..').click();
+     await page.locator('[data-studio-preview-open]').click();await page.locator('[data-v3-preview]').getByText('Canonical preview fixture').waitFor();
+     assert.equal(JSON.parse(posts.at(-1).get('fields')).secondary_color,'#FFFFFF','Shared text colour reaches immediate preview');
+     await page.locator('[data-studio-preview-close]').click();await page.locator('[name=secondary_color][value=""]').locator('..').click();
+    }
     await page.goBack();await step('v3_colors');await page.goForward();await step('v3_name');
     await bottom('Profil').click();await step('v3_identity');await name.fill('Brouillon conservé');
     const beforeBack=page.url();await page.goBack();await page.waitForURL(beforeBack);assert.equal(await name.inputValue(),'Brouillon conservé');
@@ -88,7 +96,11 @@ const js=fs.readFileSync(path.join(root,'assets/me-studio/js/studio-v3.js'),'utf
     }
     const prior=confirmationCount;await bottom('Liens').click();await step('v3_links');assert.equal(confirmationCount,prior);
     if(width===390){
-     const layout=page.locator('[data-mutation=save_atomic_design]').first();await layout.locator('summary').click();await layout.locator('[data-field=links_mode]').selectOption('image-grid');await layout.locator('[data-v3-save-item]').click();await page.waitForFunction(()=>!document.querySelector('[data-v3-panel]').inert);
+     const layout=page.locator('[data-mutation=save_atomic_design]').first();await layout.locator('summary').click();await layout.locator('[data-field=links_mode]').selectOption('image-grid');
+     await layout.locator('[data-field=image_border]').selectOption('solid');await layout.locator('[data-field=image_border_color]').fill('#c94b73');
+     await page.locator('[data-studio-preview-open]').click();await page.locator('[data-v3-preview]').getByText('Canonical preview fixture').waitFor();
+     const previewFields=JSON.parse(posts.at(-1).get('fields'));assert.equal(previewFields.image_border,'solid');assert.equal(previewFields.image_border_color,'#c94b73');
+     await page.locator('[data-studio-preview-close]').click();await layout.locator('[data-v3-save-item]').click();await page.waitForFunction(()=>!document.querySelector('[data-v3-panel]').inert);
      assert.equal(JSON.parse(posts.at(-1).get('fields')).links_mode,'image-grid');
      const imageEditor=page.locator('[data-mutation=create_link]');await imageEditor.locator('summary').click();
      await imageEditor.locator('[data-v3-content-upload]').setInputFiles({name:'fixture.png',mimeType:'image/png',buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aB1cAAAAASUVORK5CYII=','base64')});
@@ -106,7 +118,7 @@ const js=fs.readFileSync(path.join(root,'assets/me-studio/js/studio-v3.js'),'utf
     assert.equal(await editor.locator('[data-field=name]').inputValue(),'Collection');assert.match(page.url(),/v3_collections/);assert.equal(await bottom('Liens').getAttribute('aria-current'),'page','Failure restores root selection');assert.equal(await tab('Collections').getAttribute('aria-current'),'page');
     failRead=false;failSave=false;await bottom('Profil').click();await step('v3_identity');
     delayRead=true;await bottom('Design').click();await bottom('Liens').click();await step('v3_links');await page.waitForTimeout(200);await step('v3_links');delayRead=false;
-    await bottom('Liens').focus();await page.keyboard.press('ArrowRight');assert.equal(await page.locator(':focus').innerText(),'Design');await page.keyboard.press('Enter');await step('v3_colors');
+    await bottom('Liens').focus();await page.keyboard.press('ArrowRight');assert.equal(await page.locator(':focus').innerText(),'Design');assert.equal(await page.locator(':focus').evaluate(e=>getComputedStyle(e).outlineWidth),'3px','Keyboard focus remains visible');await page.keyboard.press('Enter');await step('v3_colors');
     assert.equal(await page.locator('.faluss-studio-v3__bottom [aria-current]').innerText(),'Design');
     assert.equal(await page.locator('.faluss-studio-v3__bottom [aria-disabled=true]').innerText(),'Shop');
     assert.equal(await page.evaluate(()=>documentMarker),marker);assert.equal(documentRequests,1);assert.deepEqual(errors,[]);
@@ -115,9 +127,19 @@ const js=fs.readFileSync(path.join(root,'assets/me-studio/js/studio-v3.js'),'utf
      const rects=await page.locator(selector).evaluate(n=>{const a=n.querySelector('[aria-current]').getBoundingClientRect(),p=n.querySelector('[data-studio-pill]').getBoundingClientRect();return {a:a.x,p:p.x,aw:a.width,pw:p.width};});
      assert(Math.abs(rects.a-rects.p)<1&&Math.abs(rects.aw-rects.pw)<1,'Pill aligns with selected label');
     }
+    if(width===390){
+     await page.evaluate(()=>{const filler=document.createElement('div');filler.style.height='1800px';document.querySelector('[data-v3-panel]').append(filler);document.querySelector('[data-faluss-studio-v3]').scrollTop=800;});
+     for(const height of [844,690,844]){
+      await page.setViewportSize({width,height});
+      assert.equal(Math.round((await page.locator('.faluss-studio-v3__header').boundingBox()).y),0,'Header stays sticky during viewport resize');
+      assert.equal(await page.locator('.faluss-studio-v3__header').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(255, 255, 255)');
+      const nav=await page.locator('.faluss-studio-v3__bottom').boundingBox();assert(Math.abs(nav.y+nav.height-height)<2);
+     }
+     await page.locator('[data-faluss-studio-v3]').evaluate(e=>e.scrollTop=0);
+    }
     if(width===390)await page.screenshot({path:path.join(out,engine+'-studio-design-390.png')});
     await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await page.locator('.faluss-studio-v3__bottom [data-studio-pill]').evaluate(e=>getComputedStyle(e).transitionDuration),'0s');
-    results.push(`${engine} ${width}: ${width===390?'busy save/upload + failed canonical read retry verified; ':''}one document; direct URL, immediate selection/pills before delayed HTTP at both levels, persistent anchors, keyboard, history + dirty cancel, restored values, canonical save/read, 409, GET 503, stale response, Shop and reduced motion OK`);
+    results.push(`${engine} ${width}: ${width===390?'busy save/upload + failed canonical read retry verified; ':''}one document; direct URL, immediate selection/pills before delayed HTTP at both levels, persistent anchors, keyboard, history + dirty cancel, restored values, canonical save/read, 409, GET 503, stale response, pointer ring suppressed, keyboard ring preserved, sticky header + resized viewport, Shop and reduced motion OK`);
     await context.close();
    }
    const context=await browser.newContext({javaScriptEnabled:false});await context.route('**/*',r=>{

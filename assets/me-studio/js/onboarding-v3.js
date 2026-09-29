@@ -30,7 +30,7 @@
     var layoutWidth = window.innerWidth;
     var collapsedHeight = 300;
     var keyboardOpen = false;
-    var scrollBeforeKeyboard = 0;
+
     var keyboardSpacer = document.createElement('div');
     keyboardSpacer.dataset.v3KeyboardSpacer = '';
     keyboardSpacer.setAttribute('aria-hidden', 'true');
@@ -78,15 +78,11 @@
         // Follow Safari's visual origin without scrolling the document back against it.
         root.style.setProperty('--v3-viewport-top', (viewport ? viewport.offsetTop : 0) + 'px');
         root.style.setProperty('--v3-keyboard-min-height', Math.min(maxHeight(), (viewport ? layoutHeight - viewport.height : 0) + 148) + 'px');
-        if (opening && !keyboardOpen) { scrollBeforeKeyboard = scroll.scrollTop; }
-        var closing = keyboardOpen && !opening;
+        root.style.setProperty('--v3-keyboard-inset', (opening ? Math.max(0, layoutHeight - viewport.height) : 0) + 'px');
         keyboardOpen = opening;
         root.classList.toggle('is-keyboard-open', keyboardOpen);
-        // Only add scroll range behind the keyboard. The sheet and footer never move.
-        var box = scroll.getBoundingClientRect();
-        var visibleBottom = viewport ? viewport.offsetTop + viewport.height : layoutHeight;
-        keyboardSpacer.style.height = keyboardOpen ? Math.max(0, box.bottom - visibleBottom + 18) + 'px' : '0px';
-        if (closing) { scroll.scrollTo({ top: scrollBeforeKeyboard, behavior: 'instant' }); }
+        // Reserve the covered bottom inside the anchored sheet; actions stay above the keyboard.
+        keyboardSpacer.style.height = '0px';
         if (!keyboardOpen) { fitPanel(); }
         revealActiveField();
     }
@@ -577,7 +573,11 @@
         submit(root.dataset.step === 'v3_review' ? 'publish' : 'next');
     });
     panel.addEventListener('focusin', function (event) {
-        if (event.target.matches('input, select, textarea')) { updateViewportHeight(); }
+        if (event.target.matches('textarea, select, input:not([type=radio]):not([type=checkbox]):not([type=file]):not([type=color]):not([type=hidden])')) {
+            panel.classList.add('is-editing');
+            setExpanded(true);
+            updateViewportHeight();
+        }
     });
     root.querySelector('h1').focus({ preventScroll: true });
 }());

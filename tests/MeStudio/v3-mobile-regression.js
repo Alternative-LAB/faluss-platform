@@ -42,7 +42,7 @@ function pageHtml(step, studio=false) {
     assert(await page.locator('input[type=url]').first().evaluate(e=>parseFloat(getComputedStyle(e).fontSize)>=16));
     // Keyboard is an overlay: only the internal scroll range may change.
     const heights={};
-    for(const step of ['v3_identity','v3_socials','v3_review']) {
+    for(const step of ['v3_identity','v3_socials','v3_links','v3_review']) {
      await page.setContent(pageHtml(step));
      await page.evaluate(()=>document.fonts.ready);
      const geometry=()=>page.evaluate(()=>{
@@ -51,12 +51,20 @@ function pageHtml(step, studio=false) {
      });
      heights[step]=(await geometry()).panel.height;
      for(const manual of [false,true]) {
+      await page.setContent(pageHtml(step));
+      if(step==='v3_links') {
+       for(let i=0;i<5;i++)await page.locator('[data-v3-add-link]').click();
+       await page.locator('h1').focus();await page.locator('[data-v3-grabber]').click();
+      }
       if(manual) await page.locator('[data-v3-grabber]').click();
       const before=await geometry();
-      const input=step==='v3_identity'?page.locator('[name="display_name"]'):step==='v3_socials'?page.locator('[data-network="instagram"] [data-v3-network-url]'):null;
+      const input=step==='v3_identity'?page.locator('[name="display_name"]'):step==='v3_socials'?page.locator('[data-network="instagram"] [data-v3-network-url]'):step==='v3_links'?page.locator('[data-v3-link-url]').last():null;
       if(input) await input.focus();
       await page.evaluate(()=>new Promise(requestAnimationFrame));
-      assert.deepEqual(await geometry(),before,`${engine} ${width} ${step}: focus moved sheet`);
+      const focused=await geometry();
+      assert.deepEqual(focused.header,before.header);assert.equal(focused.panel.bottom,before.panel.bottom);
+      if(input){assert(await page.locator('[data-v3-panel]').evaluate(e=>e.classList.contains('is-expanded')));assert.equal(await page.locator('[data-v3-panel]').evaluate(e=>getComputedStyle(e).transitionDuration),'0s');}
+
       const correction = await page.evaluate(async h=>{
        const scroll=document.querySelector('[data-v3-scroll]');
        scroll.style.scrollBehavior='smooth'; // Host theme / inline animation must not delay correction.
@@ -75,14 +83,14 @@ function pageHtml(step, studio=false) {
        return {calls,windowCalls,stable};
       },keyboardHeight);
       assert(correction.calls<=1 && correction.windowCalls===0 && correction.stable,'One instant internal correction per frame; no viewport scroll feedback');
-      const during=await geometry(); assert.deepEqual(during.header,before.header); assert.equal(during.panel.bottom,before.panel.bottom); assert.deepEqual(during.action,before.action); assert(during.panel.height>=before.panel.height);
+      const during=await geometry(); assert.deepEqual(during.header,before.header); assert.equal(during.panel.bottom,before.panel.bottom); if(input){assert(during.action.bottom<=keyboardHeight+1);assert(during.action.y>=during.header.bottom);} assert(during.panel.height>=before.panel.height);
       assert.equal(await page.evaluate(()=>scrollY),0);
       if(input) {
        const r=await input.boundingBox(),box=await page.locator('[data-v3-scroll]').boundingBox();
        assert(r.y>=box.y && r.y+r.height<=keyboardHeight,`${engine} ${width} ${step}: active field hidden ${JSON.stringify({r,box})}`);
       }
       await page.evaluate(async()=>{delete visualViewport.height;visualViewport.dispatchEvent(new Event('resize'));await new Promise(requestAnimationFrame);});
-      assert.deepEqual(await geometry(),before,`${engine} ${width} ${step}: close did not restore geometry`);
+      assert.deepEqual(await geometry(),focused,`${engine} ${width} ${step}: close did not restore expanded geometry`);
       if(engine==='chromium'&&width===390&&height===844&&!manual)await page.screenshot({path:path.join(out,'onboarding-'+step+'-390.png')});
      }
     }
@@ -110,7 +118,7 @@ function pageHtml(step, studio=false) {
     await page.evaluate(async()=>{delete visualViewport.offsetTop;delete visualViewport.height;visualViewport.dispatchEvent(new Event('resize'));await new Promise(requestAnimationFrame);});
     const filled=await page.locator('[data-v3-preview] article').boundingBox(),screen=await page.locator('[data-v3-preview]').boundingBox();
     assert(filled.height>=screen.height-1,'Selected canvas fills the entire phone, even on short screens');
-    assert.deepEqual(errors,[]);results.push(`${engine} ${width}x${height}: tabs, expand then full scroll, 16px fields; Identity/Networks/Review focus with 50 resize/scroll events: instant internal correction, zero window scroll; simulated overlay keyboard, close and manual expansion preserve panel/header/footer; active fields visible; heights ${JSON.stringify(heights)}`);
+    assert.deepEqual(errors,[]);results.push(`${engine} ${width}x${height}: tabs, expand then full scroll, 16px fields; Identity/Networks/Links/Review focus with 50 resize/scroll events: instant internal correction, zero window scroll; simulated overlay keyboard, close and manual expansion preserve anchored panel/header; actions visible above keyboard; active fields visible; heights ${JSON.stringify(heights)}`);
     await page.close();
    }
    const stalePage=await browser.newPage({viewport:{width:390,height:844}});

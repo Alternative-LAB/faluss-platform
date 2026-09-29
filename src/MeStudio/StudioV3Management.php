@@ -24,6 +24,7 @@ final class StudioV3Management
         if ($section === 'v3_links') {
             self::start('save_atomic_design', 'Disposition des liens');
             self::select('links_mode', 'Disposition', ['neutral' => 'Liste', 'image-grid' => 'Images · vedette puis deux colonnes'], $state['preferences']['links_mode'] ?? 'neutral');
+            self::imageBorderControls((array) $state['preferences']);
             self::end('Enregistrer la disposition');
             foreach ($blocks as $block) {
                 if ($block['type'] === 'link') { self::link($block); }
@@ -140,6 +141,7 @@ final class StudioV3Management
         self::start('save_atomic_design', 'Présentation des liens');
         self::select('links_mode', 'Disposition', ['neutral' => 'Liste', 'image-grid' => 'Grille d’images'], $prefs['links_mode'] ?? 'neutral');
         self::select('link_width', 'Largeur', ['wide' => 'Large', 'compact' => 'Compacte'], $prefs['link_width'] ?? 'wide');
+        self::imageBorderControls($prefs);
         self::end();
         self::start('save_atomic_design', 'Tous les styles des réseaux');
         self::select('social_style', 'Style', ['brand-light' => 'Marques claires', 'brand-dark' => 'Marques sombres', 'outline-dark' => 'Contours noirs', 'outline-light' => 'Contours blancs', 'mono-dark' => 'Monochrome sombre', 'mono-light' => 'Monochrome clair', 'tint-pink' => 'Teinte rose', 'tint-mint' => 'Teinte menthe', 'solid-custom' => 'Couleur unie'], $prefs['social_style'] ?? 'brand-light');
@@ -193,6 +195,13 @@ final class StudioV3Management
         echo '<label>' . esc_html($label) . '<select data-field="' . esc_attr($key) . '">';
         foreach ($choices as $choice => $text) { echo '<option value="' . esc_attr((string) $choice) . '" ' . selected((string) $value, (string) $choice, false) . '>' . esc_html((string) $text) . '</option>'; }
         echo '</select></label>';
+    }
+
+    /** @param array<string, mixed> $prefs */
+    private static function imageBorderControls(array $prefs): void
+    {
+        self::select('image_border', 'Bordure des liens illustrés', ['none' => 'Désactivée', 'solid' => 'Activée'], $prefs['image_border'] ?? 'none');
+        self::input('image_border_color', 'Couleur de la bordure', $prefs['image_border_color'] ?? '#FFFFFF', 7, 'color');
     }
 
     /** @param array<string, mixed> $block */
