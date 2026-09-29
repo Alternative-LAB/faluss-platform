@@ -158,12 +158,16 @@ namespace Faluss\Platform\Fans\Ui {
         header('Cache-Control: no-store');
         $mode = $_COOKIE['fans_ui_texts'] ?? 'available';
         if ($mode === 'closed' || $mode === 'error') { http_response_code($mode === 'closed' ? 404 : 503); echo '{}'; return true; }
+        $creator = $_GET['creator_id'] ?? null;
+        if ($creator !== null && \Faluss\Platform\Fans\Profiles\CreatorProfileService::publicById($creator) === null) { http_response_code(404); echo '{}'; return true; }
+        $nextCursor = 'fixture-next' . ($creator === null ? '' : '-' . $creator);
+        if (isset($_GET['cursor']) && $_GET['cursor'] !== $nextCursor) { http_response_code(400); echo '{}'; return true; }
         $items = $mode === 'empty' ? [] : [[
-            'publication_id' => FIXTURE_ID, 'creator_id' => FIXTURE_ID, 'revision' => '1',
-            'body' => isset($_GET['cursor']) ? 'Fixture de recette — seconde page.' : "Fixture de recette — texte approuvé.\nLes publications sont rendues comme du texte, sans données de personne.",
+            'publication_id' => $creator ?? FIXTURE_ID, 'creator_id' => $creator ?? FIXTURE_ID, 'revision' => '1',
+            'body' => isset($_GET['cursor']) ? 'Fixture de recette — seconde page.' : ($creator === SECOND_ID ? 'Fixture de recette — texte du second profil.' : "Fixture de recette — texte approuvé.\nLes publications sont rendues comme du texte, sans données de personne."),
             'updated_at' => '2026-09-29 00:00:00',
         ]];
-        echo json_encode(['items' => $items, 'next_cursor' => $mode !== 'empty' && !isset($_GET['cursor']) ? 'fixture-next' : null]);
+        echo json_encode(['items' => $items, 'next_cursor' => $mode !== 'empty' && !isset($_GET['cursor']) ? $nextCursor : null]);
         return true;
     }
     if (str_starts_with($path, '/wp-json/faluss-fans/v1/creators')) {

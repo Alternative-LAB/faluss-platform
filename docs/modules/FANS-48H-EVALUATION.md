@@ -1,7 +1,7 @@
 # Fans — matrice d’évaluation intermédiaire
 
-État du 29 septembre 2026, après les lots #89 à #94 et la lecture d’images du
-lot 7. **Ce n’est pas encore le bilan final des 48 heures.** Version conservée :
+État du 29 septembre 2026, après les lots #89 à #96 et le profil public du
+lot 9. **Ce n’est pas encore le bilan final des 48 heures.** Version conservée :
 0.6.3. Base initiale vérifiée : `ad7c5857a0c1d65c84d8ec56b5fdbbd7dba178af`.
 Les modifications Me/Link postérieures à #84 ont été conservées.
 
@@ -15,8 +15,8 @@ des captures sont des fixtures sous `tests/`, jamais des données produit.
 | Écran/parcours | Route sous `/faluss-fans/` | Classement de l’état | Preuve et limite |
 | --- | --- | --- | --- |
 | Explorer, invité/Fan/Créateur | `fan/explorer`, `creator/explorer` | Fonctionnel et testé pour la lecture structurée ; identité éditoriale requise | Filtres, vide/erreur, catégories et liens testés ; ni nom public ni portrait approuvé disponibles |
-| Profil public | `creators/{uuid}` | Fonctionnel et testé pour sa fiche structurée | Accès invité ; HTTP 404 de la page pour absent/suspendu/retiré ; aucune identité inventée |
-| Textes récents | Sur Explorer et les accueils | Fonctionnel et testé sur adaptateurs | REST public paginé existant ; textes approuvés, rendu texte, curseurs, erreurs et réponses anciennes ; liste globale, pas de filtre auteur |
+| Profil public | `creators/{uuid}` | Fonctionnel et testé pour sa fiche structurée et ses textes approuvés | Accès invité ; pagination par créateur ; HTTP 404 de la page pour absent/suspendu/retiré ; aucune identité inventée |
+| Textes récents | Sur Explorer, les accueils et le profil public | Fonctionnel et testé sur adaptateurs | Liste globale sur accueil/Explorer, filtrée par auteur sur son profil ; curseurs liés au filtre, rendu texte, erreurs et réponses anciennes |
 | Image associée à un texte public | Dans la carte de publication | Fonctionnel et testé sur adaptateurs ; accès et décisions requis avant activation | Dérivé JPEG à la demande, opt-in fermé ; aucun portrait ; description alternative éditoriale et recette d’hébergement requises |
 | HoF | `fan/hof`, `creator/hof` | Interface prête mais service absent | Invité 200 ; aucun rang, session ou point ; moteur et politiques encore requis |
 | Session HoF | `fan/hof/session`, `creator/hof/session` | Interface prête mais service absent | Accès personnel, aucune session à rejoindre |
@@ -61,8 +61,10 @@ des captures sont des fixtures sous `tests/`, jamais des données produit.
 4. **Moteurs absents** : messagerie, progression PC, sessions HoF, réservations,
    gestion commerciale et transactions. Les composants indisponibles ne sont pas
    présentés comme des fonctionnalités terminées.
-5. **Revue des parcours existants à poursuivre** : lecture par auteur et gestion
-   privée des médias. Leur lecture publique à la demande est raccordée, avec les
+5. **Gestion privée des médias à résoudre** : la liste Images expose seulement
+   identifiant, état et révision, sans aperçu autorisé au créateur. Une sélection
+   fiable dans une galerie ne peut pas être prétendue disponible. La lecture par
+   auteur et celle des images publiques à la demande sont raccordées, avec les
    limites du [contrat UI](FANS-PUBLICATION-IMAGE-UI.md). L’admission par catégorie
    est raccordée, sans auto-approbation. Le suivi social minimal
    ne fournit pas blocage/signalement/rétention ; aucune ouverture sociale complète
@@ -82,5 +84,7 @@ des captures sont des fixtures sous `tests/`, jamais des données produit.
 - [Lot 5 : matrice routes/HTTP](../evidence/fans-48h/lot-5/README.md).
 - [Lot 6 : demande de profil](../evidence/fans-48h/lot-6/README.md).
 - [Lot 7 : images publiques](../evidence/fans-48h/lot-7/README.md).
+- [Lot 8 : filtre serveur, PR #96](https://github.com/Alternative-LAB/faluss-platform/pull/96).
+- [Lot 9 : profil et publications](../evidence/fans-48h/lot-9/README.md).
 
 Aucun flag activé, déploiement, release, paiement ou modification des sites.

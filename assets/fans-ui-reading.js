@@ -12,6 +12,7 @@
   const next = root.querySelector('[data-text-next]');
   const refresh = root.querySelector('[data-text-refresh]');
   const id = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+  const creator = root.dataset.creatorId ?? null;
   let cursor = null;
   let controller = null;
   let generation = 0;
@@ -27,6 +28,7 @@
   const validRevision = (value) => (typeof value === 'number' || (typeof value === 'string' && /^[1-9][0-9]{0,9}$/.test(value)))
     && Number.isSafeInteger(Number(value)) && Number(value) > 0 && Number(value) < 2147483647;
   const valid = (item) => item && id.test(item.publication_id) && id.test(item.creator_id)
+    && (creator === null || item.creator_id === creator)
     && validRevision(item.revision)
     && typeof item.body === 'string' && item.body.length > 0 && item.body.length <= 16000
     && typeof item.updated_at === 'string';
@@ -122,6 +124,10 @@
     url.searchParams.set('per_page', '6');
     if (after !== null) url.searchParams.set('cursor', after);
     try {
+      if (creator !== null) {
+        if (!id.test(creator)) throw new Error('invalid');
+        url.searchParams.set('creator_id', creator);
+      }
       const response = await fetch(url, { credentials: 'same-origin', cache: 'no-store', signal });
       if (!response.ok) throw new Error('unavailable');
       const page = await response.json();
@@ -135,9 +141,11 @@
         card.append(node('p', 'Texte approuvé', 'fu-panel__kicker'));
         card.append(node('p', item.body, 'fu-text-body'));
         if (root.dataset.imageDelivery === 'true') imageControl(card, item, current, signal);
-        const link = node('a', 'Voir la fiche de l’auteur ↗', 'fu-link');
-        link.href = root.dataset.publicBase + encodeURIComponent(item.creator_id);
-        card.append(link);
+        if (creator === null) {
+          const link = node('a', 'Voir la fiche de l’auteur ↗', 'fu-link');
+          link.href = root.dataset.publicBase + encodeURIComponent(item.creator_id);
+          card.append(link);
+        }
         fragment.append(card);
       }
       results.replaceChildren(fragment);

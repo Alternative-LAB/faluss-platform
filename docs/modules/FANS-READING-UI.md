@@ -14,10 +14,18 @@ formée et page vide affichent un état explicite. Le texte est rendu comme text
 jamais en HTML. Changement de visibilité/retour navigateur recharge la première
 page et masque les anciennes réponses ; une réponse dépassée ne restaure rien.
 
-La liste publique est globale, pas un fil personnalisé ni une liste filtrée par
-créateur. Le contrat actuel n’offre pas de filtre créateur ; le profil public ne
-doit pas prétendre afficher toutes ses publications. Aucune nouvelle API, aucun
-changement de droits, modération, schéma, média ou flag dans ce lot.
+Explorer et les accueils gardent une liste globale, pas un fil personnalisé.
+Le profil public utilise maintenant le filtre serveur ajouté par #96 : chaque
+page est liée à son `creator_id`, et le navigateur refuse toute réponse contenant
+un texte d’un autre créateur. Aucun identifiant n’est affiché comme nom.
+
+Scénarios du raccordement : Explorer → fiche → publications de ce profil, puis
+page suivante ; invité, Fan lié, Créateur lié et administrateur. Un profil sans
+texte public affiche une liste vide. Une erreur ou une réponse d’un autre auteur
+ne réutilise pas le contenu précédent. Les profils absents/suspendus/retirés
+restent des pages HTTP 404 sans section ni appel de publications.
+Les images éventuelles utilisent le même [parcours à la demande](FANS-PUBLICATION-IMAGE-UI.md),
+sans portrait inventé ni changement de modération, schéma ou flag.
 
 ## Limites
 
@@ -27,7 +35,7 @@ requête. L’UI propose de recommencer le parcours et rafraîchit au retour vis
 aucun polling ni stockage local n’est ajouté. La recette utilise des fixtures
 identifiées comme telles ; aucune donnée fictive n’entre dans le produit.
 
-La mise à jour des nom/portrait, les statistiques sociales, les médias et les
-classements restent indisponibles. La publication/édition de texte est le lot
-suivant. Validation WordPress/Elementor/SSO cible à effectuer par le propriétaire
+La mise à jour des nom/portrait, les statistiques sociales et les classements
+restent indisponibles. La [gestion des textes](FANS-AUTHOR-UI.md) et la lecture des
+images ont leurs preuves séparées. Validation WordPress/Elementor/SSO cible à effectuer par le propriétaire
 avant activation ; aucun accès aux sites dans ce chantier.

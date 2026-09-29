@@ -111,6 +111,7 @@ final class FansUiView
             <?php FansUiReading::ownProfile(); ?>
         <?php elseif ($view === 'public-profile' && $creatorId !== null) : ?>
             <?php self::publicProfile($api, $creatorId, $role); ?>
+            <?php FansUiReading::publications($creatorId); ?>
         <?php elseif ($view === 'creer') : ?>
             <?php self::creationChoices($author !== null && $author->available); ?>
             <?php if ($author !== null) { FansUiAuthorView::render($author); } ?>

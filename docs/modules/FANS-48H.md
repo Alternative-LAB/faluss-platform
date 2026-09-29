@@ -60,11 +60,17 @@ Lot 7 fusionné : [PR #95](https://github.com/Alternative-LAB/faluss-platform/pu
 contrat de diffusion existant, chargement à la demande et refus explicites ;
 [preuves et captures](../evidence/fans-48h/lot-7/README.md).
 
-Lot 8 : filtre de [publications par créateur](FANS-PUBLICATIONS.md#filtre-public-par-créateur),
+Lot 8 fusionné : [PR #96](https://github.com/Alternative-LAB/faluss-platform/pull/96),
+`main` `2683da08abe24991ee434a0f5e3504f62f8f5be7`, CI de branche et de main vertes.
+Filtre de [publications par créateur](FANS-PUBLICATIONS.md#filtre-public-par-créateur),
 contrat serveur préalable au raccordement de la fiche publique. 286 tests / 4 361
 assertions en environnement PHP isolé ; curseurs liés au filtre, suspension entre
 pages, retrait, liste vide, projections publiques et compatibilité v1 vérifiés.
 Aucune interface modifiée dans ce lot ; pas de nouvelle capture requise.
+
+Lot 9 : raccordement du profil public à la liste filtrée du lot 8 ; quatre rôles,
+pagination, refus de réponse étrangère, états vide/erreur et 404 document vérifiés.
+[Captures et preuves](../evidence/fans-48h/lot-9/README.md).
 
 ### Bilan communiqué le 29 septembre vers 22 h (Paris)
 
