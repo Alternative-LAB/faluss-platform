@@ -10,27 +10,34 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
-- Read the public Fans follow count on creator profiles (#101) (`198ea13`)
-- Show creator publications on public Fans profiles (#97) (`43eec96`)
-- Filter public publications by creator with scoped cursors (#96) (`2683da0`)
-- Display approved publication images on demand (#95) (`9062655`)
-- Add native Fans creator admission UI (#94) (`d25a07b`)
-- Add native creator forms for moderated Fans texts (#92) (`e5cf474`)
-- Connect Fans home and reading views to existing services (#91) (`1dfcea4`)
-- Preserve the original Fans route through SSO (#90) (`42123d4`)
-- Prepare Fans ranking and creator navigation (#89) (`70933b5`)
+- Lecture du nombre public de suivis sur les profils, sans ouverture des actions sociales (#101, `198ea13`).
+- Publications approuvées du créateur sur son profil public (#97, `43eec96`).
+- Filtre public par créateur et curseurs liés au filtre (#96, `2683da0`).
+- Lecture à la demande des images de publications approuvées, sous opt-ins existants (#95, `9062655`).
+- Demande native de profil créateur, soumise à approbation administrative (#94, `d25a07b`).
+- Création, édition et retrait des textes via les contrats de modération existants (#92, `e5cf474`).
+- Accueils et lecture Fans raccordés aux services disponibles (#91, `1dfcea4`).
+- Retour vers la route Fans d’origine après connexion Identity Me (#90, `42123d4`).
+- Huit accès Créateur et écran Classement Fans indisponible tant que le contrat et le service PF ne sont pas opérationnels (#89, `70933b5`).
 
 ### Corrigé
 
-- Preserve keyboard focus through Fans text pagination (#103) (`48f0033`)
-- Accept canonical Fans routes with a trailing slash (#100) (`40ee560`)
-- Preserve the selected Fans text through SSO (#99) (`6390576`)
-- Preserve Fans image keyboard focus across browser engines (#98) (`222ab99`)
-- Keep unavailable Fans pages in the role-aware shell (#93) (`cbc2cae`)
+- Continuité du focus clavier pendant la pagination et sa reprise (#103, `48f0033`).
+- Routes canoniques Fans acceptant un slash final unique (#100, `40ee560`).
+- Conservation du texte sélectionné dans le retour SSO, sans sauvegarde du formulaire (#99, `6390576`).
+- Focus clavier conservé pendant la lecture des images (#98, `222ab99`).
+- Pages absentes rendues dans le shell du rôle en conservant le statut HTTP 404 (#93, `cbc2cae`).
 
 ### Documentation
 
-- Consolidate Fans visual coverage and acceptance evidence (#102) (`6cac194`)
+- Matrice d’évaluation et quarante captures ordinateur/mobile avec limites explicites des fixtures (#102, `6cac194`).
+
+### Disponibilité et compatibilité
+
+- Aucun flag de production activé. La mise à jour livre le code ; installation, recette WordPress/Elementor/SSO réelle et activation restent sous le contrôle du propriétaire.
+- HoF, classement PF, progression PC, messagerie et commerce restent indisponibles. Aucune identité publique ou invitée, contribution, session, rang ou progression fictive n’est créé.
+- Aucun second passwordless/SMTP, paiement, migration ou changement des modules Me/Hub/Identity/Link dans ces lots. Les droits et refus serveur restent applicables.
+- Détail des parcours réellement testés et des prérequis d’activation : `docs/modules/FANS-48H-EVALUATION.md`. La publication de cette version ne clôt pas le chantier de 48 heures.
 
 ## [0.6.3] - 2026-09-29
 
