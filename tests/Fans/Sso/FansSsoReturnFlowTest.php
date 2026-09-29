@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Faluss\Platform\Fans\Sso;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 require_once __DIR__ . '/WordPressStubs.php';
 
@@ -48,9 +49,18 @@ final class FansSsoReturnFlowTest extends TestCase
         $_SERVER['REQUEST_METHOD'] = 'POST';
     }
 
-    public function testStartAndCallbackReturnOnlyAfterTheExistingSsoProof(): void
+    /** @return array<string,array{string}> */
+    public static function destinations(): array
     {
-        $target = '/faluss-fans/creator/creer';
+        return [
+            'create' => ['/faluss-fans/creator/creer'],
+            'selected text' => ['/faluss-fans/creator/creer?publication=123e4567-e89b-42d3-a456-426614174000'],
+        ];
+    }
+
+    #[DataProvider('destinations')]
+    public function testStartAndCallbackReturnOnlyAfterTheExistingSsoProof(string $target): void
+    {
         $button = FansSsoService::button(['return_to' => $target]);
         self::assertStringContainsString('name="faluss_fans_return_to" value="' . $target . '"', $button);
         $state = $this->start($target);
@@ -102,6 +112,8 @@ final class FansSsoReturnFlowTest extends TestCase
         parse_str((string) parse_url($redirect, PHP_URL_QUERY), $args);
         self::assertSame('https://fans.example.test/faluss-fans/sso/callback', $args['redirect_uri']);
         self::assertArrayNotHasKey('faluss_fans_return_to', $args);
+        self::assertArrayNotHasKey('publication', $args);
+        self::assertStringNotContainsString('123e4567', $redirect);
         foreach ($GLOBALS['fans_return_cookies'] as $name => [$value]) { $_COOKIE[$name] = $value; }
         return $args['state'];
     }

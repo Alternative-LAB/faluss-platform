@@ -7,6 +7,7 @@ namespace Faluss\Platform\Fans\Ui;
 use Faluss\Platform\Fans\Profiles\CreatorProfileService;
 use Faluss\Platform\Fans\Profiles\CreatorProfileSchema;
 use Faluss\Platform\Fans\Sso\FansSsoService;
+use Faluss\Platform\Fans\Sso\FansSsoReturn;
 
 final class FansUiRoutes
 {
@@ -131,7 +132,12 @@ final class FansUiRoutes
             FansUiView::render($effectiveRole, 'profile-unavailable', null, 404);
             exit;
         }
-        $signIn = $linked ? '' : FansSsoService::button(['return_to' => parse_url($canonical, PHP_URL_PATH)]);
+        $returnTo = parse_url($canonical, PHP_URL_PATH);
+        $query = parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_QUERY);
+        if (!$linked && $role === 'creator' && $view === 'creer' && is_string($query)) {
+            $returnTo = FansSsoReturn::path($returnTo . '?' . $query) ?? $returnTo;
+        }
+        $signIn = $linked ? '' : FansSsoService::button(['return_to' => $returnTo]);
         if ($publicProfile || $view === 'explorer' || $view === 'hof') {
             $role = $effectiveRole;
         } else {

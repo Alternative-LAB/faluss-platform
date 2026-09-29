@@ -54,6 +54,19 @@ fs.mkdirSync(output, { recursive: true });
     assert.equal(await fan.locator('.fu-app').getAttribute('data-fans-role'), 'visitor');
     assert.equal(await fan.locator('input[name="faluss_fans_return_to"]').inputValue(), '/faluss-fans/fan/accueil');
     await fan.screenshot({ path: path.join(output, 'connexion-requise-desktop.png'), fullPage: true });
+    const selectedText = '/faluss-fans/creator/creer?publication=123e4567-e89b-42d3-a456-426614174000';
+    for (const [destination, expected] of [
+      [selectedText, selectedText],
+      [selectedText + '&nonce=discard', '/faluss-fans/creator/creer'],
+      [selectedText + '&publication=123e4567-e89b-42d3-a456-426614174001', '/faluss-fans/creator/creer'],
+      [selectedText.replace('publication=', 'publication[]='), '/faluss-fans/creator/creer'],
+      [selectedText.replace('-42d3-', '-12d3-'), '/faluss-fans/creator/creer'],
+      [selectedText.replace('creator/creer', 'fan/espace'), '/faluss-fans/fan/espace'],
+    ]) {
+      assert.equal((await fan.goto(base + destination)).status(), 403);
+      assert.equal(await fan.locator('input[name="faluss_fans_return_to"]').inputValue(), expected);
+      assert.equal(await fan.locator('textarea, [data-publications]').count(), 0);
+    }
     assert.equal((await fan.goto(`${base}/faluss-fans/creators/123e4567-e89b-42d3-a456-426614174000`)).status(), 200);
     assert.equal((await fan.goto(`${base}/faluss-fans/creators/123e4567-e89b-42d3-a456-426614174099`)).status(), 404);
     await desktop.addCookies([{ name: 'fans_ui_role', value: 'fan', url: base }]);
@@ -160,6 +173,8 @@ fs.mkdirSync(output, { recursive: true });
     assert.equal(await mobileFan.locator('input[name="faluss_fans_return_to"]').inputValue(), '/faluss-fans/fan/classement-fans');
     assert.equal(await mobileFan.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true);
     await mobileFan.screenshot({ path: path.join(output, 'connexion-requise-mobile.png') });
+    assert.equal((await mobileFan.goto(base + selectedText)).status(), 403);
+    assert.equal(await mobileFan.locator('input[name="faluss_fans_return_to"]').inputValue(), selectedText);
     console.log('Synthetic browser recipe passed: public guest discovery, desktop/mobile, keyboard focus, private permissions, empty/error boundaries, eight creator links.');
   } finally {
     await browser.close();

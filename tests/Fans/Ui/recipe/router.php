@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 namespace Faluss\Platform\Fans\Sso {
+    function home_url(string $path): string { return \Faluss\Platform\Fans\Ui\home_url($path); }
     final class FansSsoService
     {
         public static function button(array $attributes): string
@@ -197,6 +198,7 @@ namespace Faluss\Platform\Fans\Ui {
 
     if (!defined('FALUSS_PLATFORM_VERSION')) { define('FALUSS_PLATFORM_VERSION', 'test'); }
     if (!defined('FALUSS_PLATFORM_FANS_CREATOR_PROFILES')) { define('FALUSS_PLATFORM_FANS_CREATOR_PROFILES', true); }
+    require_once $root . '/src/Fans/Sso/FansSsoReturn.php';
     require_once $root . '/src/Fans/Ui/FansUiRoutes.php';
     require_once $root . '/src/Fans/Ui/FansUiView.php';
     require_once $root . '/src/Fans/Ui/FansUiReading.php';

@@ -25,6 +25,30 @@ final class FansSsoReturnTest extends TestCase
         self::assertNull(FansSsoReturn::path('/faluss-fans/fan/explorer'));
     }
 
+    public function testOnlyOneExactPublicationSelectionIsPreserved(): void
+    {
+        $id = '123e4567-e89b-42d3-a456-426614174000';
+        $path = '/faluss-fans/creator/creer?publication=' . $id;
+        self::assertSame($path, FansSsoReturn::path($path));
+        self::assertSame($path, FansSsoReturn::path('/faluss-fans/creator/creer/?publication=' . $id));
+        $state = str_repeat('s', 43);
+        self::assertSame($path, FansSsoReturn::open(FansSsoReturn::seal($path, $state), $state));
+        foreach ([
+            $path . '&publication=' . $id, $path . '&nonce=test', $path . '#fragment',
+            $path . '/', $path . '%0a', '/faluss-fans/fan/explorer?publication=' . $id,
+            '/faluss-fans/creator/creer?publication[]=' . $id,
+            '/faluss-fans/creator/creer?publication=' . strtoupper($id),
+            '/faluss-fans/creator/creer?publication=' . str_replace('-42d3-', '-12d3-', $id),
+            '/faluss-fans/creator/creer?publication=' . str_replace('123e', '%3123e', $id),
+        ] as $candidate) {
+            self::assertNull(FansSsoReturn::path($candidate), $candidate);
+            self::assertNull(FansSsoReturn::seal($candidate, $state), $candidate);
+        }
+        $GLOBALS['fans_sso_home'] = 'https://fans.example.test/community';
+        self::assertSame('/community' . $path, FansSsoReturn::path('/community' . $path));
+        self::assertSame('/community' . $path, FansSsoReturn::open(FansSsoReturn::seal('/community' . $path, $state), $state));
+    }
+
     public function testReturnCannotBeTamperedOrMovedToAnotherLoginState(): void
     {
         $state = str_repeat('s', 43);
