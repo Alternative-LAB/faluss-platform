@@ -37,10 +37,10 @@ final class FansUiView
         'profile-unavailable' => ['Découvrir', 'Profil indisponible', '', 'Ce profil n’est pas public ou n’existe pas.'],
         'creator-unavailable' => ['Votre espace Fans', 'Espace créateur indisponible', '', 'Cet espace nécessite un profil créateur associé à votre compte.'],
         'visitor:connexion' => ['Votre espace Fans', 'Continuer avec Faluss', '', 'Connectez-vous via Faluss Identity pour accéder à cet espace personnel.'],
-        'visitor:explorer' => ['Découvrir', 'Explorer les créateurs', 'explorer', 'La découverte est en préparation : aucun nom public ni portrait approuvé n’est encore fourni.'],
+        'visitor:explorer' => ['Découvrir', 'Explorer les créateurs', 'explorer', 'Découvrez les présentations approuvées. Les profils incomplets restent signalés.'],
         'visitor:hof' => ['Hall of Fame', 'Le Hall of Fame', 'hof', 'Le moteur HoF n’est pas disponible. Aucune session, aucun rang ni aucun point ne peut être affiché.'],
         'fan:accueil' => ['Espace Fans', 'Bienvenue dans votre espace', 'accueil', 'Les parcours Fans s’ouvrent progressivement. Explorer permet de consulter les profils créateurs publiés.'],
-        'fan:explorer' => ['Découvrir', 'Explorer les créateurs', 'explorer', 'Seuls les profils approuvés sont visibles. Les noms et portraits ne sont pas encore disponibles.'],
+        'fan:explorer' => ['Découvrir', 'Explorer les créateurs', 'explorer', 'Découvrez les profils et présentations approuvés par la modération.'],
         'fan:hof' => ['Hall of Fame', 'Le Hall of Fame', 'hof', 'Les sessions et les scores HoF persistants ne sont pas disponibles. Aucun point n’est affiché.'],
         'fan:hof/session' => ['Hall of Fame', 'Session HoF', 'hof', 'Aucune session active ne peut être affichée ou rejointe pour le moment.'],
         'fan:classements' => ['Hall of Fame', 'Classements', 'hof', 'Les classements ne sont pas encore disponibles. Aucun rang n’est estimé.'],
@@ -48,7 +48,7 @@ final class FansUiView
         'fan:messages' => ['Échanges', 'Messages', 'messages', 'La messagerie n’est pas encore disponible. Aucun message ne peut être envoyé.'],
         'fan:espace' => ['Votre espace', 'Espace personnel', 'espace', 'La progression et les gains PC ne sont pas encore disponibles.'],
         'creator:accueil' => ['Espace créateur', 'Votre espace Fans', 'accueil', 'Votre espace rassemble les accès créateur. Les résumés de sessions et de communauté attendent leurs capacités serveur.'],
-        'creator:explorer' => ['Découvrir', 'Explorer les créateurs', 'explorer', 'Seuls les profils approuvés sont visibles. Les noms et portraits ne sont pas encore disponibles.'],
+        'creator:explorer' => ['Découvrir', 'Explorer les créateurs', 'explorer', 'Découvrez les profils et présentations approuvés par la modération.'],
         'creator:hof' => ['Hall of Fame', 'Le Hall of Fame', 'hof', 'Les sessions et le score public en points HoF ne sont pas encore disponibles.'],
         'creator:hof/session' => ['Hall of Fame', 'Session HoF', 'hof', 'Aucune session active ne peut être affichée ou rejointe pour le moment.'],
         'creator:classements' => ['Hall of Fame', 'Classements', 'hof', 'Les classements et les points HoF persistants ne sont pas encore disponibles.'],
@@ -56,11 +56,11 @@ final class FansUiView
         'creator:progression' => ['Espace créateur', 'Progression', 'progression', 'Les points HoF et la progression persistante ne sont pas encore disponibles.'],
         'creator:creer' => ['Espace créateur', 'Que souhaitez-vous créer ?', 'creer', 'Choisissez un format. Les textes passent par la modération ; les autres parcours restent indisponibles.'],
         'creator:boutique' => ['Espace créateur', 'Ma boutique', 'boutique', 'La gestion des offres, les réservations et les commandes ne sont pas encore disponibles.'],
-        'creator:mon-profil' => ['Espace créateur', 'Mon profil', 'mon-profil', 'Cet espace de gestion est distinct du profil public. Les outils d’édition ne sont pas encore disponibles.'],
-        'public-profile' => ['Découvrir', 'Profil créateur', 'explorer', 'Fiche publique provisoire : aucun nom ni portrait approuvé n’est encore fourni.'],
+        'creator:mon-profil' => ['Espace créateur', 'Mon profil', 'mon-profil', 'Gérez votre présentation publique et suivez son état de modération.'],
+        'public-profile' => ['Découvrir', 'Profil créateur', 'explorer', 'Seuls les champs éditoriaux approuvés sont présentés ici.'],
     ];
 
-    public static function render(string $role, string $view, ?string $creatorId, int $status = 200, string $signIn = '', ?FansUiAuthor $author = null, ?FansUiAdmission $admission = null): void
+    public static function render(string $role, string $view, ?string $creatorId, int $status = 200, string $signIn = '', ?FansUiAuthor $author = null, ?FansUiAdmission $admission = null, ?FansUiEditorial $editorial = null): void
     {
         $errorView = in_array($view, ['profile-unavailable', 'creator-unavailable'], true);
         $page = self::PAGES[$view === 'public-profile' || $errorView ? $view : $role . ':' . $view] ?? null;
@@ -73,6 +73,7 @@ final class FansUiView
         wp_enqueue_style('faluss-fans-ui-v2', plugins_url('assets/fans-ui-v2.css', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'));
         wp_enqueue_script('faluss-fans-ui-v2', plugins_url('assets/fans-ui-v2.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true);
         wp_enqueue_script('faluss-fans-reading', plugins_url('assets/fans-ui-reading.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true);
+        if ($editorial !== null) { wp_enqueue_script('faluss-fans-private-images', plugins_url('assets/fans-private-images.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true); }
         status_header($status);
         ?>
 <!doctype html>
@@ -109,6 +110,7 @@ final class FansUiView
             <?php FansUiReading::home($role); ?>
         <?php elseif ($view === 'mon-profil') : ?>
             <?php FansUiReading::ownProfile(); ?>
+            <?php if ($editorial !== null) { FansUiEditorial::render($editorial); } ?>
         <?php elseif ($view === 'public-profile' && $creatorId !== null) : ?>
             <?php self::publicProfile($api, $creatorId, $role); ?>
             <?php FansUiReading::publications($creatorId); ?>
@@ -177,8 +179,8 @@ final class FansUiView
     {
         ?>
         <section class="fu-content" data-fans-explorer data-api="<?php echo esc_url($api); ?>" data-public-base="<?php echo esc_url($publicBase); ?>" aria-labelledby="fu-explore-title">
-            <div class="fu-section-heading"><div><p class="fu-panel__kicker">Découverte en préparation</p><h2 id="fu-explore-title">Profils publics structurés</h2></div></div>
-            <p class="fu-discovery-note">Ces fiches indiquent seulement une catégorie approuvée. Sans nom public ni portrait fourni par l’API, elles ne constituent pas encore un catalogue de créateurs identifiable.</p>
+            <div class="fu-section-heading"><div><p class="fu-panel__kicker">Découvrir</p><h2 id="fu-explore-title">Profils créateurs</h2></div></div>
+            <p class="fu-discovery-note">Les noms, bios et portraits ne sont diffusés qu’après approbation. Une fiche sans présentation approuvée reste explicitement incomplète.</p>
             <div class="fu-filters" role="group" aria-label="Filtrer par catégorie">
                 <button type="button" data-category="" aria-pressed="true">Toutes les catégories</button>
                 <button type="button" data-category="arts" aria-pressed="false">Arts</button>

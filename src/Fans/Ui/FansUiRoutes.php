@@ -156,7 +156,8 @@ final class FansUiRoutes
 
         $author = $role === 'creator' && $view === 'creer' ? FansUiAuthor::load() : null;
         $admission = $role === 'fan' && $view === 'espace' ? FansUiAdmission::load($profilesEnabled) : null;
-        FansUiView::render((string) $role, $view, $publicProfile ? $creatorId : null, $author?->httpStatus() ?? $admission?->httpStatus() ?? 200, $signIn, $author, $admission);
+        $editorial = $role === 'creator' && $view === 'mon-profil' ? FansUiEditorial::load() : null;
+        FansUiView::render((string) $role, $view, $publicProfile ? $creatorId : null, $author?->httpStatus() ?? $admission?->httpStatus() ?? $editorial?->httpStatus() ?? 200, $signIn, $author, $admission, $editorial);
         exit;
     }
 

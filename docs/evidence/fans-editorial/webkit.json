@@ -1,0 +1,20 @@
+{
+  "engine": "26.5",
+  "scope": "Real services + SQL + GD, isolated WordPress adapters; no real WordPress or SSO",
+  "checks": [
+    "owner form",
+    "private preview",
+    "no preapproval diffusion",
+    "guest denied private page",
+    "native moderation",
+    "Explorer → profile",
+    "old portrait revocation",
+    "edit pending",
+    "reject purge",
+    "owner withdraw",
+    "pagehide clear",
+    "no overflow",
+    "no JS errors"
+  ],
+  "screenshots": 8
+}

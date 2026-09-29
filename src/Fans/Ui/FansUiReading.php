@@ -18,7 +18,7 @@ final class FansUiReading
         <section class="fu-content fu-admission" data-fans-private-reading aria-labelledby="fu-admission-title">
             <h2 id="fu-admission-title">Votre profil créateur</h2>
             <p>Demandez un profil dans votre domaine de création. Un administrateur doit approuver sa publication.</p>
-            <p class="fu-footnote">Cette demande ne vérifie pas votre identité et ne donne aucun droit de vente. Aucun nom public ni portrait n’est encore proposé.</p>
+            <p class="fu-footnote">Cette demande ne vérifie pas votre identité et ne donne aucun droit de vente. Votre présentation éditoriale sera gérée séparément après admission.</p>
             <?php if ($model->result !== null) : ?>
                 <?php $status = $model->result->get_status();
                 $message = match (true) {
@@ -90,7 +90,7 @@ final class FansUiReading
                     <div class="fu-profile__glyph" aria-hidden="true"></div>
                     <div><p class="fu-panel__kicker"><?php echo esc_html($categories[$profile['category']]); ?></p>
                         <h3><?php echo esc_html($states[$profile['status']]); ?></h3>
-                        <p>Nom public et portrait indisponibles. Leur édition n’est pas encore proposée.</p>
+                        <p>La présentation ci-dessous est soumise à une modération distincte de l’admission du profil.</p>
                         <?php if ($profile['status'] === 'active') : ?>
                             <a class="fu-link" href="<?php echo esc_url(home_url('/faluss-fans/creators/' . $profile['creator_id'])); ?>">Voir ma fiche publique ↗</a>
                         <?php else : ?>
@@ -112,7 +112,7 @@ final class FansUiReading
                  <?php if ($creatorId !== null) : ?>data-creator-id="<?php echo esc_attr($creatorId); ?>"<?php endif; ?>
                  data-public-base="<?php echo esc_url(home_url('/faluss-fans/creators/')); ?>" aria-labelledby="fu-texts-title">
             <div class="fu-section-heading"><div><p class="fu-panel__kicker">Publications</p><h2 id="fu-texts-title"><?php echo $creatorId === null ? 'Textes publics récents' : 'Publications de ce profil'; ?></h2></div></div>
-            <p class="fu-footnote"><?php echo $creatorId === null ? 'Textes approuvés de la communauté. Les noms publics et portraits des auteurs ne sont pas encore disponibles.' : 'Seuls les textes approuvés de ce profil sont affichés. Son nom public et son portrait restent indisponibles.'; ?></p>
+            <p class="fu-footnote"><?php echo $creatorId === null ? 'Textes approuvés de la communauté. La fiche de chaque auteur présente ses informations publiques disponibles.' : 'Seuls les textes approuvés de ce profil sont affichés.'; ?></p>
             <p class="fu-footnote"><?php echo $images ? 'Une publication peut avoir une image approuvée. Vérifiez sa disponibilité à la demande.' : 'Les images de publications sont indisponibles pour le moment.'; ?></p>
             <p class="fu-live" data-text-status role="status">Chargement des publications…</p>
             <div class="fu-text-grid" data-text-results></div>

@@ -109,7 +109,8 @@ namespace Faluss\Platform\Fans\Ui {
             self::assertStringNotContainsString('<img', $html);
             self::assertStringNotContainsString('PF</', $html);
             self::assertStringNotContainsString('€', $html);
-            self::assertStringContainsString('Sans nom public ni portrait', $html);
+            self::assertStringContainsString('ne sont diffusés qu’après approbation', $html);
+            self::assertStringContainsString('sans présentation approuvée reste explicitement incomplète', $html);
             $visitor = $this->render('visitor', 'explorer');
             self::assertSame(2, substr_count($visitor, 'class="fu-nav__item'));
             self::assertStringContainsString('href="https://fans.example.test/faluss-fans/fan/explorer"', $visitor);

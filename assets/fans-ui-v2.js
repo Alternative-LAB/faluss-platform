@@ -12,6 +12,14 @@
 
   let controller = null;
   let revision = 0;
+  const portraits = new Set();
+  const releasePortraits = () => { portraits.forEach(url => URL.revokeObjectURL(url)); portraits.clear(); };
+  const editorial = (item) => {
+    const value = item.editorial;
+    return value && typeof value.public_name === 'string' && value.public_name.trim().length > 0
+      && [...value.public_name].length <= 80 && typeof value.bio === 'string' && [...value.bio].length <= 1000
+      && Number.isSafeInteger(value.revision) && value.revision > 0 && typeof value.portrait === 'boolean' ? value : null;
+  };
   const element = (tag, className, value) => {
     const node = document.createElement(tag);
     if (className) node.className = className;
@@ -35,6 +43,7 @@
   };
   const begin = () => {
     if (controller) controller.abort();
+    releasePortraits();
     controller = new AbortController();
     revision += 1;
     return { signal: controller.signal, revision };
@@ -46,19 +55,57 @@
     return { data: await response.json() };
   };
 
+  async function portrait(item, output, signal, current) {
+    const data = editorial(item);
+    if (!data?.portrait) return;
+    let objectUrl = null;
+    try {
+      const root = explorer || profile;
+      const url = new URL(`${root.dataset.api.replace(/\/$/, '')}/${item.creator_id}/portrait/${data.revision}`, location.href);
+      if (url.origin !== location.origin || url.search || url.hash) throw new Error('invalid');
+      const response = await fetch(url, { credentials: 'same-origin', cache: 'no-store', redirect: 'error', signal });
+      if (!response.ok || response.headers.get('Content-Type')?.split(';')[0].trim() !== 'image/jpeg'
+          || !response.body || Number(response.headers.get('Content-Length')) > 2097152) throw new Error('unavailable');
+      const reader = response.body.getReader(); const chunks = []; let size = 0;
+      try {
+        while (true) {
+          const part = await reader.read(); if (part.done) break;
+          size += part.value.byteLength;
+          if (size > 2097152 || signal.aborted || current !== revision) throw new Error('invalid');
+          chunks.push(part.value);
+        }
+      } finally { await reader.cancel(); }
+      if (signal.aborted || current !== revision || !output.isConnected) return;
+      objectUrl = URL.createObjectURL(new Blob(chunks, { type: 'image/jpeg' })); portraits.add(objectUrl);
+      const img = element('img'); img.alt = `Portrait public de ${data.public_name}`; img.src = objectUrl;
+      await img.decode();
+      if (signal.aborted || current !== revision || !output.isConnected) return;
+      if (img.naturalWidth > 1280 || img.naturalHeight > 1280) throw new Error('invalid');
+      output.removeAttribute('aria-hidden'); output.classList.add('has-portrait'); output.replaceChildren(img);
+      objectUrl = null;
+    } catch (error) {
+      if (!signal.aborted && current === revision && output.isConnected) {
+        output.removeAttribute('aria-hidden'); output.textContent = 'Portrait indisponible';
+      }
+    } finally {
+      if (objectUrl) { URL.revokeObjectURL(objectUrl); portraits.delete(objectUrl); }
+    }
+  }
+
   function creatorCard(item, base) {
     const card = element('article', 'fu-card');
-    card.append(element('div', 'fu-card__art'));
+    const art = element('div', 'fu-card__art'); card.append(art);
+    const data = editorial(item);
     const body = element('div', 'fu-card__body');
     body.append(element('p', 'fu-panel__kicker', categories[item.category]));
-    body.append(element('h3', '', 'Profil sans nom public'));
-    body.append(element('p', '', 'Nom et portrait indisponibles.'));
+    body.append(element('h3', '', data?.public_name || 'Profil sans nom public'));
+    body.append(element('p', 'fu-card__bio', data ? (data.bio || 'Aucune bio renseignée.') : 'Présentation approuvée indisponible.'));
     const link = element('a', 'fu-card__link', 'Consulter la fiche ↗');
     link.href = base + encodeURIComponent(item.creator_id);
     link.setAttribute('aria-label', `Consulter la fiche publique, catégorie ${categories[item.category]}`);
     body.append(link);
     card.append(body);
-    return card;
+    return { card, art };
   }
 
   async function loadExplorer() {
@@ -83,9 +130,16 @@
       }
       const base = explorer.dataset.publicBase;
       const fragment = document.createDocumentFragment();
-      response.data.forEach((item) => fragment.append(creatorCard(item, base)));
+      const pendingPortraits = response.data.map((item) => {
+        const { card, art } = creatorCard(item, base); fragment.append(card); return { item, art };
+      });
       target.append(fragment);
-      status(explorer, `${response.data.length} fiche${response.data.length > 1 ? 's' : ''} publique${response.data.length > 1 ? 's' : ''} structurée${response.data.length > 1 ? 's' : ''}. Découverte en préparation.`);
+      pendingPortraits.forEach(({ item, art }) => portrait(item, art, signal, current));
+      const complete = response.data.filter(item => editorial(item)).length;
+      const plural = response.data.length > 1 ? 's' : '';
+      status(explorer, complete === 0
+        ? `${response.data.length} fiche${plural} publique${plural} structurée${plural}. Découverte en préparation.`
+        : `${response.data.length} fiche${plural} publique${plural}, dont ${complete} présentation${complete > 1 ? 's' : ''} approuvée${complete > 1 ? 's' : ''}.`);
     } catch (error) {
       if (signal.aborted || current !== revision) return;
       target.replaceChildren();
@@ -120,14 +174,16 @@
       card.append(art);
       const content = element('div');
       content.append(element('p', 'fu-panel__kicker', categories[response.data.category]));
-      content.append(element('h3', '', 'Profil sans nom public'));
-      content.append(element('p', '', 'Catégorie publique approuvée. Le nom et le portrait ne sont pas disponibles.'));
+      const data = editorial(response.data);
+      content.append(element('h3', '', data?.public_name || 'Profil sans nom public'));
+      content.append(element('p', 'fu-profile__bio', data ? (data.bio || 'Aucune bio renseignée.') : 'Présentation approuvée indisponible.'));
       const follows = element('p', 'fu-live', 'Chargement du nombre de suivis…');
       follows.dataset.fansFollowCount = '';
       follows.setAttribute('role', 'status');
       content.append(follows);
       card.append(content);
       target.append(card);
+      portrait(response.data, art, signal, current);
       status(profile, 'Profil public chargé.');
       loadFollowCount(id, follows, signal, current);
     } catch (error) {
@@ -166,6 +222,7 @@
   const refresh = () => { if (explorer) loadExplorer(); else loadProfile(); };
   const clear = () => {
     if (controller) controller.abort();
+    releasePortraits();
     revision += 1;
     const root = explorer || profile;
     results(root).replaceChildren();

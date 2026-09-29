@@ -1,5 +1,10 @@
 # Fans UI V2 — matrice et premier lot
 
+Cette matrice décrit le socle initial. Depuis le lot
+[Identité éditoriale](FANS-EDITORIAL.md), Mon profil permet de soumettre nom,
+bio et portrait à la modération ; Explorer et le profil lisent leur projection
+approuvée. Les mentions d’absence de ces capacités ci-dessous sont historiques.
+
 La planche Fan compte huit écrans et la planche Créateur dix écrans. Elles fixent
 la composition visuelle, jamais les données ni les capacités. Les routes ci-dessous
 sont des chemins WordPress sous `faluss-fans/`, distincts des routes REST et du

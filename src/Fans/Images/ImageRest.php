@@ -19,7 +19,8 @@ final class ImageRest
         foreach ([['/images', 'POST', 'submit', 'member'], ['/images', 'GET', 'listing', 'privatePermission'],
             [$id . '/bytes', 'GET', 'bytes', 'admin'], [$id . '/decisions', 'GET', 'decisions', 'admin'],
             [$id . '/moderate', 'POST', 'moderate', 'admin'], [$id . '/withdraw', 'POST', 'withdraw', 'member'],
-            ['/images/cleanup', 'POST', 'cleanup', 'admin']] as [$route, $method, $callback, $permission]) {
+            ['/images/cleanup', 'POST', 'cleanup', 'admin'], ['/images/portraits', 'GET', 'portraitCandidates', 'member'],
+            [$id . '/preview/(?P<revision>[1-9][0-9]{0,9})', 'GET', 'ownerPreview', 'member']] as [$route, $method, $callback, $permission]) {
             register_rest_route('faluss-fans/v1', $route, ['methods' => $method, 'callback' => [self::class, $callback], 'permission_callback' => [self::class, $permission]]);
         }
     }
@@ -39,6 +40,19 @@ final class ImageRest
     }
     public static function listing(\WP_REST_Request $r): \WP_REST_Response
     { return self::response(ImageService::listing(is_string($r->get_param('cursor')) ? $r->get_param('cursor') : '')); }
+    public static function portraitCandidates(): \WP_REST_Response { return self::response(ImageService::portraitCandidates()); }
+    public static function ownerPreview(\WP_REST_Request $r): \WP_REST_Response
+    {
+        $data = ImageService::ownerPreview((string) $r->get_param('image_id'), (int) $r->get_param('revision'));
+        $response = self::response($data);
+        if (is_string($data)) {
+            $response->header('Content-Type', 'image/jpeg');
+            $response->header('Content-Disposition', 'inline; filename="private-preview.jpg"');
+            $response->header('Content-Security-Policy', "sandbox; default-src 'none'");
+            $response->header('Cross-Origin-Resource-Policy', 'same-origin');
+        }
+        return $response;
+    }
     public static function bytes(\WP_REST_Request $r): \WP_REST_Response
     {
         $data = ImageService::bytes((string) $r->get_param('image_id'));
@@ -52,6 +66,11 @@ final class ImageRest
     }
     public static function serve(bool $served, \WP_HTTP_Response $response, \WP_REST_Request $request): bool
     {
+        if (!$served && preg_match('#^/faluss-fans/v1/images/[0-9a-f-]{36}/preview/[1-9][0-9]{0,9}$#D', $request->get_route()) === 1
+            && $response->get_status() === 200 && is_string($response->get_data()) && ($response->get_headers()['Content-Type'] ?? '') === 'image/jpeg') {
+            echo $response->get_data();
+            return true;
+        }
         if (!$served && preg_match('#^/faluss-fans/v1/images/[0-9a-f-]{36}/bytes$#D', $request->get_route()) === 1
             && $response->get_status() === 200 && is_string($response->get_data()) && ($response->get_headers()['Content-Type'] ?? '') === 'image/png') {
             echo $response->get_data(); // Validated PNG only, through the authenticated no-store adapter.

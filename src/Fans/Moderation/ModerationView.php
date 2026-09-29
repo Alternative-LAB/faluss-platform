@@ -24,6 +24,7 @@ final class ModerationView
             <nav aria-label="Modération Fans">
                 <a href="<?php echo esc_url(self::url(false)); ?>" <?php echo !$images ? 'aria-current="page"' : ''; ?>>Textes en attente</a>
                 <a href="<?php echo esc_url(self::url(true)); ?>" <?php echo $images ? 'aria-current="page"' : ''; ?>>Quarantaine images</a>
+                <?php if (\Faluss\Platform\Fans\Profiles\EditorialModule::available()): ?><a href="<?php echo esc_url(EditorialModerationView::url()); ?>">Présentations</a><?php endif; ?>
             </nav>
             <p class="fm-warning">La revue humaine reste nécessaire : aucun filtre ne garantit la détection de tout contenu interdit. Un profil actif n’est pas une identité vérifiée.</p>
             <?php if ($result !== null): ?>
@@ -100,7 +101,7 @@ final class ModerationView
         <?php
     }
 
-    private static function previewForm(string $image, string $publication = '', string $revision = ''): void
+    public static function previewForm(string $image, string $publication = '', string $revision = ''): void
     {
         ?>
         <form class="fm-preview" method="post" target="_blank" rel="noopener noreferrer" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">

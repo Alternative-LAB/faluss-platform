@@ -112,6 +112,38 @@ final class ImageService
     public static function publicAllowed(): bool
     { return PublicationAccessPolicy::originalAllowed(true, 'quarantined', 'approved', 'hosted_allowed_content', 'free', false); }
 
+    /** Approved owner images, bounded by the existing five-live-images quota. @return mixed */
+    public static function portraitCandidates(): mixed
+    {
+        $profile = CreatorProfileService::own();
+        if ($profile === null) { return self::error('image_forbidden', 403); }
+        return self::locked(static function () use ($profile): array|\WP_Error {
+            global $wpdb;
+            $rows = $wpdb->get_results($wpdb->prepare('SELECT image_id,revision,state FROM `' . ImageSchema::table()
+                . '` WHERE creator_id=%s AND state=%s ORDER BY image_id LIMIT 5', $profile['creator_id'], 'approved'), 'ARRAY_A');
+            return is_array($rows) && $wpdb->last_error === '' ? ['items' => $rows] : self::error('image_read_failed');
+        });
+    }
+
+    /** Private bounded derivative; approval is not required, ownership and active profile are. */
+    public static function ownerPreview(string $id, int $revision): string|\WP_Error
+    {
+        $profile = CreatorProfileService::own();
+        if ($profile === null) { return self::error('image_forbidden', 403); }
+        return self::locked(static function () use ($profile, $id, $revision): string|\WP_Error {
+            global $wpdb;
+            if ($wpdb->query('START TRANSACTION') === false) { return self::error('image_read_failed'); }
+            if (CreatorProfileService::publicById($profile['creator_id'], true) === null) { return self::error('image_not_found', 404); }
+            $row = ImageStorage::validId($id) ? self::row($id) : null;
+            if ($row === null || $row['creator_id'] !== $profile['creator_id'] || (int) $row['revision'] !== $revision
+                || !in_array($row['state'], ['pending', 'approved'], true)) { return self::error('image_not_found', 404); }
+            $root = ImageStorage::root();
+            $source = $root === null ? null : ImageStorage::read($root, $id, $row['file_hash']);
+            $jpeg = $source === null ? null : ImageDisplayDerivative::render($source);
+            return $jpeg ?? self::error('image_storage_unavailable');
+        });
+    }
+
     /** @return array<string,mixed>|\WP_Error */
     public static function listing(string $cursor = ''): array|\WP_Error
     {
