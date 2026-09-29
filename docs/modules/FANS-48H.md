@@ -54,9 +54,17 @@ Lot 6 fusionné : [PR #94](https://github.com/Alternative-LAB/faluss-platform/pu
 284 tests / 4 262 assertions, parcours sans JavaScript et régressions de rôles ;
 [preuves et captures](../evidence/fans-48h/lot-6/README.md).
 
-Lot 7 : [lecture des images de publications](FANS-PUBLICATION-IMAGE-UI.md),
+Lot 7 fusionné : [PR #95](https://github.com/Alternative-LAB/faluss-platform/pull/95),
+`main` `9062655bb84afc4fb3e03b9879c239d34bdb0ac7`, CI de branche et de main vertes.
+[Lecture des images de publications](FANS-PUBLICATION-IMAGE-UI.md),
 contrat de diffusion existant, chargement à la demande et refus explicites ;
 [preuves et captures](../evidence/fans-48h/lot-7/README.md).
+
+Lot 8 : filtre de [publications par créateur](FANS-PUBLICATIONS.md#filtre-public-par-créateur),
+contrat serveur préalable au raccordement de la fiche publique. 286 tests / 4 361
+assertions en environnement PHP isolé ; curseurs liés au filtre, suspension entre
+pages, retrait, liste vide, projections publiques et compatibilité v1 vérifiés.
+Aucune interface modifiée dans ce lot ; pas de nouvelle capture requise.
 
 ### Bilan communiqué le 29 septembre vers 22 h (Paris)
 

@@ -6,6 +6,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Fans — publications publiques d’un créateur
+
+- Filtre public `creator_id` avant pagination, avec projection et modération existantes ; profil absent ou suspendu refusé sans détail privé.
+- Curseur filtré lié au créateur, sans modifier les curseurs globaux v1 ni permettre de choisir le propriétaire des listes privées.
+
 ### Fans — lecture des images de publications
 
 - Affichage à la demande des dérivés JPEG via le contrat public existant, uniquement si ses opt-ins sont déjà disponibles ; aucun portrait inventé.

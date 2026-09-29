@@ -59,11 +59,14 @@ final class TextPublicationDb extends CreatorProfileDb
             ++$this->pageQueries;
             $args = end($this->prepared)['args'];
             $field = str_contains($query, 'WHERE creator_id=') ? 'creator_id' : 'state';
+            $creatorFilter = str_contains($query, 'AND creator_id=');
             $ascending = str_contains($query, 'updated_at ASC');
-            $rows = array_values(array_filter($this->publications, static function ($row) use ($args, $field, $ascending) {
+            $rows = array_values(array_filter($this->publications, static function ($row) use ($args, $field, $creatorFilter, $ascending) {
                 if ($row[$field] !== $args[0]) { return false; }
-                if (count($args) === 1) { return true; }
-                $comparison = [$row['updated_at'], $row['publication_id']] <=> [$args[1], $args[3]];
+                if ($creatorFilter && $row['creator_id'] !== $args[1]) { return false; }
+                $offset = $creatorFilter ? 2 : 1;
+                if (count($args) === $offset) { return true; }
+                $comparison = [$row['updated_at'], $row['publication_id']] <=> [$args[$offset], $args[$offset + 2]];
                 return $ascending ? $comparison > 0 : $comparison < 0;
             }));
             usort($rows, static fn ($a, $b) => ($ascending ? 1 : -1) * ([$a['updated_at'], $a['publication_id']] <=> [$b['updated_at'], $b['publication_id']]));
@@ -300,11 +303,11 @@ final class TextPublicationTest extends TestCase
         }
     }
 
-    private function collectPages(string $scope, int $size = 20): array
+    private function collectPages(string $scope, int $size = 20, ?string $creatorId = null): array
     {
         $cursor = null; $ids = []; $pages = 0;
         do {
-            $page = TextPublicationService::listing($scope, (string) $size, $cursor);
+            $page = TextPublicationService::listing($scope, (string) $size, $cursor, $creatorId);
             self::assertIsArray($page);
             self::assertSame(['items', 'next_cursor'], array_keys($page));
             self::assertLessThanOrEqual($size, count($page['items']));
@@ -312,6 +315,7 @@ final class TextPublicationTest extends TestCase
             foreach ($page['items'] as $item) {
                 if ($scope === 'public') {
                     self::assertSame(['publication_id', 'creator_id', 'revision', 'body', 'updated_at'], array_keys($item));
+                    if ($creatorId !== null) { self::assertSame($creatorId, $item['creator_id']); }
                 }
                 $ids[] = $item['publication_id'];
             }
@@ -351,6 +355,53 @@ final class TextPublicationTest extends TestCase
         $first = array_keys($GLOBALS['wpdb']->profiles)[0];
         $GLOBALS['wpdb']->profiles[$first]['status'] = 'suspended';
         self::assertSame(['items' => [], 'next_cursor' => null], TextPublicationService::listing('public'));
+    }
+
+    public function testPublicCreatorFilterKeepsOnlyItsApprovedTextsAndBindsEveryCursor(): void
+    {
+        $this->paginationFixture();
+        $db = $GLOBALS['wpdb'];
+        [$first, $second] = array_keys($db->profiles);
+        $expected = array_values(array_filter($this->expectedIds('public'), static fn ($id) => $db->publications[$id]['creator_id'] === $first));
+        self::assertGreaterThan(20, count($expected));
+        self::assertSame($expected, $this->collectPages('public', 5, $first));
+        $page = TextPublicationService::listing('public', 2, null, $first);
+        self::assertStringStartsWith('v2.public.' . $first . '.', $page['next_cursor']);
+        $global = TextPublicationService::listing('public', 2)['next_cursor'];
+        foreach ([[$page['next_cursor'], $second], [$page['next_cursor'], null], [$global, $first]] as [$cursor, $filter]) {
+            self::assertSame('invalid_publication_page', TextPublicationService::listing('public', 2, $cursor, $filter)->get_error_code());
+        }
+        $db->publications[$expected[2]]['state'] = 'withdrawn';
+        $following = TextPublicationService::listing('public', 2, $page['next_cursor'], $first);
+        self::assertSame(array_slice($expected, 3, 2), array_column($following['items'], 'publication_id'));
+        $db->profiles[$first]['status'] = 'suspended';
+        self::assertSame(404, TextPublicationService::listing('public', 2, $page['next_cursor'], $first)->get_error_data()['status']);
+        $db->profiles[$first]['status'] = 'active';
+        foreach ($db->publications as &$row) { if ($row['creator_id'] === $first) { $row['state'] = 'pending'; } }
+        unset($row);
+        self::assertSame(['items' => [], 'next_cursor' => null], TextPublicationService::listing('public', 2, null, $first));
+    }
+
+    public function testRestCreatorFilterIsPublicOnlyAndNeverChangesPrivateOwnership(): void
+    {
+        $this->paginationFixture();
+        [$first, $second, $suspended] = array_keys($GLOBALS['wpdb']->profiles);
+        $GLOBALS['profile_linked'] = false;
+        $GLOBALS['fans_sso_logged_in'] = false;
+        $response = TextPublicationRest::publicList(new \WP_REST_Request(['creator_id' => $second, 'per_page' => '3']));
+        self::assertSame(200, $response->status);
+        self::assertCount(3, $response->data['items']);
+        self::assertSame([$second], array_values(array_unique(array_column($response->data['items'], 'creator_id'))));
+        self::assertSame('private, no-store, max-age=0', $response->headers['Cache-Control']);
+        foreach (['', [], true, 17, 'AAAAAAAA-AAAA-4AAA-8AAA-AAAAAAAAAAAA', "' OR 1=1"] as $invalid) {
+            self::assertSame(400, TextPublicationRest::publicList(new \WP_REST_Request(['creator_id' => $invalid]))->status);
+        }
+        foreach ([$suspended, '99999999-1111-4111-8111-111111111111'] as $absent) {
+            self::assertSame(404, TextPublicationRest::publicList(new \WP_REST_Request(['creator_id' => $absent]))->status);
+        }
+        foreach (['ownList', 'queue'] as $callback) {
+            self::assertSame(400, TextPublicationRest::$callback(new \WP_REST_Request(['creator_id' => $second]))->status);
+        }
     }
 
     public function testEntireModerationQueueAndOwnHistoryAreReachableWithoutGaps(): void
