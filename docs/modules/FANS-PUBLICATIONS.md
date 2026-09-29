@@ -114,6 +114,25 @@ Valeur de taille, date, UUID, version ou portée de curseur invalide : HTTP 400.
 Les permissions et nonces restent requis sur **chaque** page privée ; un curseur
 n'est ni un secret, ni une autorisation, ni une preuve de propriété.
 
+### Filtre public par créateur
+
+La liste publique accepte aussi `creator_id`, UUID v4 public d’un profil actif.
+Ce filtre de lecture ne définit jamais un propriétaire pour une écriture. Les
+listes privée et de modération refusent ce paramètre (400). Sans filtre, le
+contrat et les curseurs v1 restent inchangés.
+
+Scénarios : parcourir tous les textes approuvés du profil choisi, sans doublon
+aux dates identiques ; profil actif sans texte = page vide. Profil absent ou
+suspendu = 404 neutre. Texte retiré, en attente ou d’un autre créateur = exclu.
+Une révision de profil entre deux pages est revérifiée lors de la nouvelle lecture.
+
+Le curseur filtré v2 inclut le créateur public et le couple de pagination. Il doit
+être rejoué avec le même `creator_id`. Changer de créateur, enlever le filtre,
+passer un curseur global v1, une valeur non UUID ou une portée privée échoue en
+400. La projection reste limitée aux cinq champs publics, sans compteur privé.
+Le filtre est SQL avant la pagination, puis chaque texte est relu par le contrat
+public existant. Il ne donne pas accès à la quarantaine ni aux textes en attente.
+
 Le tri déterministe utilise le couple `(updated_at, publication_id)`, décroissant
 pour le public et le créateur, croissant pour la modération. Pour un texte public,
 `updated_at` correspond à sa dernière approbation ; l'UUID départage les égalités

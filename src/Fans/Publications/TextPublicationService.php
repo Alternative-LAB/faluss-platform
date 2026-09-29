@@ -236,15 +236,20 @@ final class TextPublicationService
     }
 
     /** @return array{items:list<array<string,mixed>>,next_cursor:?string}|\WP_Error */
-    public static function listing(string $scope, mixed $perPage = 20, mixed $cursor = null): array|\WP_Error
+    public static function listing(string $scope, mixed $perPage = 20, mixed $cursor = null, mixed $creatorId = null): array|\WP_Error
     {
         if (!TextPublicationsModule::available()) { return self::error('publications_unavailable', 503); }
         if (!in_array($scope, ['public', 'own', 'queue'], true)
             || (!is_int($perPage) && !(is_string($perPage) && preg_match('/^[1-9][0-9]?$/D', $perPage) === 1))
             || (int) $perPage < 1 || (int) $perPage > 20
+            || ($creatorId !== null && ($scope !== 'public' || !is_string($creatorId) || !self::validId($creatorId)))
         ) { return self::error('invalid_publication_page', 400); }
-        $position = self::pagePosition($cursor, $scope);
+        $prefix = $creatorId === null ? 'v1.' . $scope . '.' : 'v2.public.' . $creatorId . '.';
+        $position = self::pagePosition($cursor, $prefix);
         if ($position === false) { return self::error('invalid_publication_page', 400); }
+        if ($creatorId !== null && CreatorProfileService::publicById($creatorId) === null) {
+            return self::error('publication_not_found', 404);
+        }
         global $wpdb;
         $table = TextPublicationSchema::table();
         if ($scope === 'queue') {
@@ -256,6 +261,7 @@ final class TextPublicationService
             $filter = 'creator_id=%s'; $args = [$profile['creator_id']];
         } else {
             $filter = 'state=%s'; $args = ['approved'];
+            if ($creatorId !== null) { $filter .= ' AND creator_id=%s'; $args[] = $creatorId; }
         }
         $direction = $scope === 'queue' ? 'ASC' : 'DESC';
         $operator = $scope === 'queue' ? '>' : '<';
@@ -283,28 +289,29 @@ final class TextPublicationService
                 }
                 // A row can leave the queue between the candidate query and its fresh read.
                 if ($scope === 'queue' && $value['state'] !== 'pending') { continue; }
+                if ($creatorId !== null && $value['creator_id'] !== $creatorId) { continue; }
                 if (count($result) === (int) $perPage) {
                     return ['items' => $result, 'next_cursor' => $lastVisible];
                 }
                 $result[] = $value;
-                $lastVisible = 'v1.' . $scope . '.' . str_replace(' ', 'T', $position['updated_at']) . '.' . $position['publication_id'];
+                $lastVisible = $prefix . str_replace(' ', 'T', $position['updated_at']) . '.' . $position['publication_id'];
             }
             if (count($rows) < 50) { return ['items' => $result, 'next_cursor' => null]; }
         }
     }
 
     /** @return array{updated_at:string,publication_id:string}|null|false */
-    private static function pagePosition(mixed $cursor, string $scope): array|null|false
+    private static function pagePosition(mixed $cursor, string $prefix): array|null|false
     {
         if ($cursor === null) { return null; }
-        if (!is_string($cursor) || strlen($cursor) > 90
-            || preg_match('/^v1\.(public|own|queue)\.([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2})\.([0-9a-f-]{36})$/D', $cursor, $matches) !== 1
-            || $matches[1] !== $scope || !self::validId($matches[3])
+        if (!is_string($cursor) || strlen($cursor) > 128
+            || preg_match('/^' . preg_quote($prefix, '/') . '([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2})\.([0-9a-f-]{36})$/D', $cursor, $matches) !== 1
+            || !self::validId($matches[2])
         ) { return false; }
-        $date = str_replace('T', ' ', $matches[2]);
+        $date = str_replace('T', ' ', $matches[1]);
         $parsed = \DateTimeImmutable::createFromFormat('!Y-m-d H:i:s', $date, new \DateTimeZone('UTC'));
         if ($parsed === false || $parsed->format('Y-m-d H:i:s') !== $date) { return false; }
-        return ['updated_at' => $date, 'publication_id' => $matches[3]];
+        return ['updated_at' => $date, 'publication_id' => $matches[2]];
     }
 
     /** @return list<array<string,mixed>>|\WP_Error */
