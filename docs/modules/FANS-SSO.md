@@ -45,7 +45,7 @@ Le flag est inactif par défaut. L'activation du plugin, après configuration, i
 | `${prefix}faluss_fans_sso_states` | Client SSO Fans | Empreintes d'état et de navigateur, mode, membre optionnel, expiration et consommation unique. |
 | `faluss_fans_sso_schema_version` | Client SSO Fans | Version `1`, écrite uniquement après vérification des tables InnoDB. |
 | `faluss_fans_sso_start` | Client SSO Fans | POST avec nonce ; connexion anonyme ou liaison explicite d'un `subscriber` connecté. |
-| `/faluss-fans/sso/callback` | Client SSO Fans | URI fixe HTTPS ; aucun retour libre fourni par le navigateur. |
+| `/faluss-fans/sso/callback` | Client SSO Fans | URI fixe HTTPS ; destination finale limitée à des chemins Fans signés et liés à l’état. Voir [retour SSO](FANS-SSO-RETURN-AND-GUEST.md). |
 | `FansSsoService::currentLinkedSubject()` | Futurs modules Fans | Retourne seulement `faluss_id`, création et dernière preuve du membre local lié. Ce n'est pas une autorisation métier. |
 
 Le démarrage crée 32 octets aléatoires indépendants pour l'état, le verifier et la liaison navigateur. Le cookie est limité à l'hôte Fans, `Secure`, `HttpOnly`, `SameSite=Lax`. Le callback vérifie le cookie, l'état, l'expiration et la consommation sous verrou InnoDB avant l'échange réseau ; les erreurs redirigent vers une notice locale sans renvoyer le code ni le secret. Le token doit contenir un UUID v4 et exactement les scopes demandés. Les autres claims, dont `apps`, sont ignorés.

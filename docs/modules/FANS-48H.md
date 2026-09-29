@@ -26,6 +26,12 @@ serveurs ou updater ; code et GitHub uniquement. Version conservée, pas de rele
 
 ## Matrice de suivi initiale
 
+Lot 1 fusionné : [PR #89](https://github.com/Alternative-LAB/faluss-platform/pull/89),
+`main` `70933b530d4b49a6d8b0c6b2ea6e318a91d11856`, CI de branche et de main vertes.
+279 tests / 4 152 assertions ; [captures et limites](../evidence/fans-48h/lot-1/README.md).
+Lot 2 : [retour SSO et étude invité](FANS-SSO-RETURN-AND-GUEST.md), avec preuve
+isolée du flux existant ; validation cible toujours réservée au propriétaire.
+
 Les cases « interface prête mais service absent » n’attestent aucune fonctionnalité
 métier. Les captures seront produites depuis un serveur de tests PHP isolé :
 **ni WordPress réel, ni Elementor, ni validation cible**. Le propriétaire conserve
@@ -38,7 +44,7 @@ la recette réelle avant activation.
 | HoF invité / connecté | Interface prête mais moteur absent | 5 |
 | Session HoF | Interface prête mais session absente | 5 |
 | Classements HoF | Interface prête mais moteur absent | 5 |
-| Classement Fans | Nouvel écran fermé ; service et décisions requis | 1 |
+| Classement Fans | Interface prête et testée, service et décisions requis ; #89 fusionnée | 1 terminé |
 | Messagerie | Interface prête mais service absent ; modération/blocage requis | 5 |
 | Mon espace Fan | Interface prête mais progression PC absente | 5 |
 | Progression Créateur | Interface prête mais score HoF absent ; aucune finance | 5 |
@@ -46,7 +52,7 @@ la recette réelle avant activation.
 | Créer — contenu texte | API de textes modérés existante, UI de gestion absente | 4 |
 | Créer — prestation / service / produit | Interface prête mais services absents | 4, 5 |
 | Ma boutique | Interface prête ; pas de gestion propriétaire ni transaction disponible | 5 |
-| SSO Me → Fans | Client existant ; destination d’origine à préparer | 2 |
+| SSO Me → Fans | Retour borné implémenté ; tests isolés, échange réel à valider par le propriétaire | 2 |
 | Session et reprise invité | Décisions requises ; aucune attribution ni progression à préserver disponible | 2 |
 | Attribution PF, corrections et remboursements | Contrat Hub non ratifié ; aucun moteur à prétendre disponible | Hors moteur dans ces lots |
 

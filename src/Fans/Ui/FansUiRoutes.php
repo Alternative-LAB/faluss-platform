@@ -130,16 +130,21 @@ final class FansUiRoutes
 
         $linked = FansSsoService::currentLinkedSubject() !== null;
         $ownProfile = $linked && $profilesEnabled ? CreatorProfileService::own() : null;
+        $signIn = $linked ? '' : FansSsoService::button(['return_to' => parse_url($canonical, PHP_URL_PATH)]);
         if ($publicProfile || $view === 'explorer' || $view === 'hof') {
             $role = !$linked ? 'visitor' : ($ownProfile === null ? 'fan' : 'creator');
         } else {
             $access = self::accessStatus($role, $view, $linked, $ownProfile !== null);
+            if ($access === 403) {
+                FansUiView::render('visitor', 'connexion', null, 403, $signIn);
+                exit;
+            }
             if ($access !== 200) {
-                wp_die($access === 403 ? 'Connexion Fans requise.' : 'Espace créateur indisponible.', '', ['response' => $access]);
+                wp_die('Espace créateur indisponible.', '', ['response' => $access]);
             }
         }
 
-        FansUiView::render((string) $role, $view, $publicProfile ? $creatorId : null);
+        FansUiView::render((string) $role, $view, $publicProfile ? $creatorId : null, 200, $signIn);
         exit;
     }
 

@@ -34,6 +34,7 @@ final class FansUiView
 
     /** @var array<string,array{string,string,string,string}> */
     private const PAGES = [
+        'visitor:connexion' => ['Votre espace Fans', 'Continuer avec Faluss', '', 'Connectez-vous via Faluss Identity pour accéder à cet espace personnel.'],
         'visitor:explorer' => ['Découvrir', 'Explorer les créateurs', 'explorer', 'La découverte est en préparation : aucun nom public ni portrait approuvé n’est encore fourni.'],
         'visitor:hof' => ['Hall of Fame', 'Le Hall of Fame', 'hof', 'Le moteur HoF n’est pas disponible. Aucune session, aucun rang ni aucun point ne peut être affiché.'],
         'fan:accueil' => ['Espace Fans', 'Bienvenue dans votre espace', 'accueil', 'Les parcours Fans s’ouvrent progressivement. Explorer permet de consulter les profils créateurs publiés.'],
@@ -57,7 +58,7 @@ final class FansUiView
         'public-profile' => ['Découvrir', 'Profil créateur', 'explorer', 'Fiche publique provisoire : aucun nom ni portrait approuvé n’est encore fourni.'],
     ];
 
-    public static function render(string $role, string $view, ?string $creatorId): void
+    public static function render(string $role, string $view, ?string $creatorId, int $status = 200, string $signIn = ''): void
     {
         $page = self::PAGES[$view === 'public-profile' ? 'public-profile' : $role . ':' . $view] ?? null;
         if ($page === null || !isset(self::NAV[$role])) {
@@ -68,7 +69,7 @@ final class FansUiView
         $publicBase = home_url('/faluss-fans/creators/');
         wp_enqueue_style('faluss-fans-ui-v2', plugins_url('assets/fans-ui-v2.css', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'));
         wp_enqueue_script('faluss-fans-ui-v2', plugins_url('assets/fans-ui-v2.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true);
-        status_header(200);
+        status_header($status);
         ?>
 <!doctype html>
 <html lang="fr">
@@ -89,6 +90,14 @@ final class FansUiView
             <h1><?php echo esc_html($title); ?></h1>
             <p class="fu-banner__subtitle"><?php echo esc_html($page[3]); ?></p>
         </header>
+        <?php if ($role === 'visitor') : ?>
+            <section class="fu-signin fu-panel" aria-label="Connexion Faluss">
+                <div><h2><?php echo $view === 'connexion' ? 'Connexion requise' : 'Retrouvez votre espace'; ?></h2>
+                <p>Connectez-vous ou créez votre compte sur Faluss Identity. Vous reviendrez sur cette page après connexion.</p>
+                <?php if ($signIn === '') : ?><p>Utilisez une session de membre pour continuer ; ce compte ne peut pas être lié par ce parcours.</p><?php endif; ?></div>
+                <?php echo $signIn; // Trusted server-rendered SSO form, all values escaped by FansSsoService. ?>
+            </section>
+        <?php endif; ?>
         <?php if ($view === 'explorer') : ?>
             <?php self::explorer($api, $publicBase); ?>
         <?php elseif ($view === 'public-profile' && $creatorId !== null) : ?>
@@ -97,6 +106,8 @@ final class FansUiView
             <?php self::creationChoices(); ?>
         <?php elseif ($view === 'classement-fans') : ?>
             <?php self::fanRanking(); ?>
+        <?php elseif ($view === 'connexion') : ?>
+            <p class="fu-footnote">Les pages Explorer et HoF restent consultables sans connexion. Aucun compte ni droit créateur n’est créé avant validation par Faluss Identity.</p>
         <?php else : ?>
             <section class="fu-panel fu-panel--status" aria-labelledby="fu-status-title">
                 <span class="fu-status-mark" aria-hidden="true">◌</span>

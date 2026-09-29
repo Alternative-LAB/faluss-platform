@@ -97,6 +97,7 @@ final class FansSsoTest extends TestCase
         $verifier = str_repeat('v', 32);
         $browser = str_repeat('b', 32);
         $_COOKIE[FansSsoService::COOKIE] = self::encode($state . $verifier . $browser);
+        $_COOKIE[FansSsoReturn::COOKIE] = FansSsoReturn::seal('/faluss-fans/fan/explorer', self::encode($state));
         $db = $GLOBALS['wpdb'];
         $db->stateRow = [
             'id' => 9, 'flow_mode' => 'login', 'wp_user_id' => null,
@@ -108,6 +109,7 @@ final class FansSsoTest extends TestCase
         $pending = self::method('consumeState')->invoke(null, self::encode($state));
         self::assertSame(self::encode($verifier), $pending['verifier']);
         self::assertSame('login', $pending['flow_mode']);
+        self::assertSame('/faluss-fans/fan/explorer', $pending['return_to']);
         self::assertContains('START TRANSACTION', $db->queries);
         self::assertContains('COMMIT', $db->queries);
         self::assertStringContainsString('FOR UPDATE', $db->prepared[0]['query']);

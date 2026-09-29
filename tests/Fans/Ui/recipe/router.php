@@ -5,6 +5,12 @@ declare(strict_types=1);
 namespace Faluss\Platform\Fans\Sso {
     final class FansSsoService
     {
+        public static function button(array $attributes): string
+        {
+            if (($_COOKIE['fans_ui_role'] ?? '') === 'admin') { return ''; }
+            return '<form method="post" action="/fixture-sso-start"><input type="hidden" name="faluss_fans_return_to" value="'
+                . htmlspecialchars($attributes['return_to'], ENT_QUOTES, 'UTF-8') . '"><button type="submit">Continuer avec Faluss</button></form>';
+        }
         public static function currentLinkedSubject(): ?array
         {
             return in_array($_COOKIE['fans_ui_role'] ?? '', ['fan', 'creator'], true) ? ['faluss_id' => 'fixture'] : null;

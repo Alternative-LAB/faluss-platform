@@ -6,6 +6,12 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Fans — retour après connexion et étude invité
+
+- Retour SSO vers une page Fans autorisée, cookie de navigation signé et lié à l’état consommé ; refus des destinations externes, admin, query et callback, sans changement de l’URI enregistrée auprès de Me.
+- Invitation via Faluss Identity sur les pages publiques et écran de connexion sur les accès personnels refusés (HTTP 403 conservé). Aucun passwordless ni SMTP Fans.
+- Étude de la session, de l’alias et du badge invité ; aucune identité provisoire activée ni promesse de conservation de progression non implémentée.
+
 ### Fans — classement des fans et navigation V2
 
 - Écran « Classement Fans » distinct du HoF créateur, sous SSO, affichant honnêtement l’absence du service d’attributions attestées et de corrections Hub. Aucun rang, score, montant, PC, donnée fictive ou nouvelle capacité économique.
