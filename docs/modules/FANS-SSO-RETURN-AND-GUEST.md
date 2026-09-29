@@ -3,12 +3,14 @@
 ## Scénarios avant ouverture
 
 Positifs : démarrer depuis Explorer, le HoF, un profil public ou une page privée
-Fans ; effectuer le SSO existant Me ; revenir au chemin initial sans query ni
-fragment. Support d’une installation en sous-répertoire. Le membre reçoit
+Fans ; effectuer le SSO existant Me ; revenir au chemin initial. La sélection
+`creator/creer?publication={uuid-v4}` est conservée, y compris en sous-répertoire.
+Le membre reçoit
 seulement les droits déjà autorisés ; revenir à Créer ne crée pas de profil.
 
 Négatifs : URL externe, `//host`, encodage, antislash, chemin admin/API/callback,
-query, fragment, tableau POST, cookie falsifié, cookie d’un autre état, ancien
+query autre que cette sélection exacte, doublon, paramètre supplémentaire,
+UUID invalide, fragment, tableau POST, cookie falsifié, cookie d’un autre état, ancien
 rejeu et expiration ne doivent pas imposer une destination. Une signature ne
 remplace jamais la consommation transactionnelle de l’état SSO. Un administrateur
 ne devient pas un membre SSO et n’obtient aucune élévation de privilège.
@@ -17,7 +19,12 @@ ne devient pas un membre SSO et n’obtient aucune élévation de privilège.
 
 La destination appartient à une liste fermée de chemins Fans. Le formulaire
 `faluss_fans_sso_button` accepte un attribut serveur `return_to` ; l’UI lui passe
-le chemin canonique de la page courante. Le démarrage reste un POST avec nonce.
+le chemin canonique de la page courante. Une seule exception aux chemins sans
+query : `publication` contenant exactement un UUID v4 minuscule, uniquement sur
+`creator/creer`. Les autres paramètres, encodages et fragments sont refusés par
+le contrat de retour. L’UI revient au chemin sans sélection si la query ne
+respecte pas ce format, sans conserver nonce, curseur, texte ou paramètre OAuth.
+Le démarrage reste un POST avec nonce.
 Le callback Me reste exactement celui préenregistré, jamais remplacé par cette
 destination. Aucun e-mail, secret ou paramètre OAuth n’est transmis dans le retour.
 
@@ -34,6 +41,9 @@ sont réévaluées normalement (403/404 possibles). Cookie absent/invalide ou cl
 historique : retour racine inchangé. Échec SSO : notice locale historique, aucune
 redirection vers la page privée. Pas de migration, nouveau SMTP, passwordless,
 table ou transport Identity.
+
+La sélection ne donne aucun accès à un texte d’un autre propriétaire. Le contenu
+non envoyé d’un formulaire n’est pas sauvegardé par ce retour SSO.
 
 ## Invité — étude, pas une session implémentée
 

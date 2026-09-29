@@ -6,6 +6,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Fans — retour SSO vers un texte sélectionné
+
+- Conservation de la sélection d’un texte dans Créer après connexion Me, avec un unique UUID v4 validé ; aucun contenu de formulaire sauvegardé.
+- Paramètres supplémentaires, doublons et destinations non autorisées refusés ; signature, consommation de l’état SSO et contrôle propriétaire inchangés.
+
 ### Fans — clavier et vérification WebKit
 
 - Focus conservé pendant le chargement d’une image, indisponibilité annoncée par ARIA et demandes concurrentes toujours refusées.
@@ -47,7 +52,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Fans — retour après connexion et étude invité
 
-- Retour SSO vers une page Fans autorisée, cookie de navigation signé et lié à l’état consommé ; refus des destinations externes, admin, query et callback, sans changement de l’URI enregistrée auprès de Me.
+- Retour SSO vers une page Fans autorisée, cookie de navigation signé et lié à l’état consommé ; refus des destinations externes, admin, paramètres non autorisés et callback, sans changement de l’URI enregistrée auprès de Me.
 - Invitation via Faluss Identity sur les pages publiques et écran de connexion sur les accès personnels refusés (HTTP 403 conservé). Aucun passwordless ni SMTP Fans.
 - Étude de la session, de l’alias et du badge invité ; aucune identité provisoire activée ni promesse de conservation de progression non implémentée.
 

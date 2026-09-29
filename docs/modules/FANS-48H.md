@@ -74,9 +74,23 @@ Raccordement du profil public à la liste filtrée du lot 8 ; quatre rôles,
 pagination, refus de réponse étrangère, états vide/erreur et 404 document vérifiés.
 [Captures et preuves](../evidence/fans-48h/lot-9/README.md).
 
-Lot 10 : recettes WebKit Windows 26.5, correction du focus clavier des images,
+Lot 10 fusionné : [PR #98](https://github.com/Alternative-LAB/faluss-platform/pull/98),
+`main` `222ab99cf0cba57d7f7e3959623ee6a773fcb836`, CI de branche et de main vertes.
+Recettes WebKit Windows 26.5, correction du focus clavier des images,
 contrôles tactiles des huit accès Créateur à 320/390 px et 168 cas de la matrice.
 [Captures, reproduction et limite typographique](../evidence/fans-48h/lot-10/README.md).
+
+Lot 11 : retour SSO vers un texte sélectionné dans Créer. Reproduction avant
+correction : la page privée 403 ne conservait que `/creator/creer`, perdant
+`publication={uuid-v4}`. Le retour signé conserve maintenant cette seule query
+exacte ; doublons, tableaux, encodages, autres paramètres et UUID invalides sont
+refusés. Le callback Me, les preuves SSO et les contrôles propriétaire restent
+inchangés. [Contrat et limites](FANS-SSO-RETURN-AND-GUEST.md).
+Vérification isolée : 288 tests / 4 411 assertions, PHPStan sans erreur, lint des
+cinq PHP modifiés ; retour positif/négatif dans Chromium 154 et WebKit 26.5,
+ordinateur/mobile. Aucun changement visuel ; captures du lot 10 toujours
+applicables. La recette a identifié séparément un 404 des routes terminées par
+`/`, à corriger dans le lot suivant ; les liens canoniques sans slash fonctionnent.
 
 ### Bilan communiqué le 29 septembre vers 22 h (Paris)
 

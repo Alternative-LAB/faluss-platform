@@ -1,7 +1,7 @@
 # Fans — matrice d’évaluation intermédiaire
 
-État du 29 septembre 2026, après les lots #89 à #97 et la vérification WebKit du
-lot 10. **Ce n’est pas encore le bilan final des 48 heures.** Version conservée :
+État du 29 septembre 2026, après les lots #89 à #98 et le retour SSO vers un texte
+sélectionné (lot 11). **Ce n’est pas encore le bilan final des 48 heures.** Version conservée :
 0.6.3. Base initiale vérifiée : `ad7c5857a0c1d65c84d8ec56b5fdbbd7dba178af`.
 Les modifications Me/Link postérieures à #84 ont été conservées.
 
@@ -32,7 +32,7 @@ des captures sont des fixtures sous `tests/`, jamais des données produit.
 | Créer — quatre types | `creator/creer` | Fonctionnel et testé pour choix et texte ; autres services absents | Contenu/prestation/service/produit distingués, seule gestion des textes raccordée |
 | Créer/éditer/retirer un texte | `creator/creer` | Fonctionnel et testé sur adaptateurs | POST natif sans JS, nonce, REST existant, idempotence, révisions, quota, retrait confirmé ; modération humaine obligatoire |
 | Ma boutique | `creator/boutique` | Interface prête mais service absent | Gestion propriétaire/réservations/commandes absentes ; refus d’achat inchangés |
-| Retour SSO Me | Boutons publics et pages privées 403 | Fonctionnel et testé en isolation ; accès cible requis | État consommé, retour local signé, callback exact ; pas de preuve réseau Me réelle |
+| Retour SSO Me | Boutons publics et pages privées 403 | Fonctionnel et testé en isolation ; accès cible requis | État consommé, retour local signé, sélection du texte conservée, callback exact ; pas de preuve réseau Me réelle ni conservation du contenu non envoyé |
 | Invité provisoire, alias/badge/reprise | Étude seulement | Décision requise | Aucun `Guest_…` runtime, badge gagné, contribution fictive ou promesse de sauvegarde |
 | Administration WordPress | Outils existants | Fonctionnel au niveau du filtre testé ; accès cible requis | Barre cachée pour membres ordinaires sur routes Fans, conservée pour `manage_options` ; rendu WordPress non réévalué ici |
 | Navigation mobile et clavier | Toutes les routes du shell | Fonctionnel et testé en émulation ; rendu cible requis | Chromium et WebKit Windows, huit accès Créateur par toucher à 320/390 px, focus image corrigé ; typographie WebKit Windows non représentative, Safari/iPhone à vérifier |

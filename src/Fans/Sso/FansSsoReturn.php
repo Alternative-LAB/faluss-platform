@@ -19,6 +19,9 @@ final class FansSsoReturn
             return null;
         }
         $relative = substr($candidate, strlen($prefix));
+        if (preg_match('~^creator/creer/?\?publication=([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$~D', $relative, $selection) === 1) {
+            return $prefix . 'creator/creer?publication=' . $selection[1];
+        }
         $fan = 'fan/(?:accueil|explorer|hof(?:/session)?|classements|classement-fans|messages|espace)';
         $creator = 'creator/(?:accueil|explorer|hof(?:/session)?|classements|messages|progression|creer|boutique|mon-profil)';
         $public = 'creators/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
