@@ -43,13 +43,17 @@ fs.mkdirSync(output, { recursive: true });
     assert.equal(publicExplorer.status(), 200);
     assert.equal(await fan.locator('.fu-nav__item').count(), 2);
     assert.equal(await fan.locator('.fu-app').getAttribute('data-fans-role'), 'visitor');
+    assert.equal(await fan.locator('input[name="faluss_fans_return_to"]').inputValue(), '/faluss-fans/fan/explorer');
+    await fan.screenshot({ path: path.join(output, 'invitation-sso-desktop.png'), fullPage: true });
     assert.equal((await fan.goto(`${base}/faluss-fans/fan/hof`)).status(), 200);
     assert.equal(await fan.locator('.fu-nav__item[aria-current="page"]').getAttribute('aria-label'), 'HoF');
     assert.equal((await fan.goto(`${base}/faluss-fans/fan/hof/session`)).status(), 403);
     assert.equal((await fan.goto(`${base}/faluss-fans/fan/classement-fans`)).status(), 403);
     const denied = await fan.goto(`${base}/faluss-fans/fan/accueil`);
     assert.equal(denied.status(), 403);
-    assert.equal(await fan.locator('.fu-app').count(), 0);
+    assert.equal(await fan.locator('.fu-app').getAttribute('data-fans-role'), 'visitor');
+    assert.equal(await fan.locator('input[name="faluss_fans_return_to"]').inputValue(), '/faluss-fans/fan/accueil');
+    await fan.screenshot({ path: path.join(output, 'connexion-requise-desktop.png'), fullPage: true });
     assert.equal((await fan.goto(`${base}/faluss-fans/creators/123e4567-e89b-42d3-a456-426614174000`)).status(), 200);
     assert.equal((await fan.goto(`${base}/faluss-fans/creators/123e4567-e89b-42d3-a456-426614174099`)).status(), 404);
     await desktop.addCookies([{ name: 'fans_ui_role', value: 'fan', url: base }]);
@@ -131,7 +135,13 @@ fs.mkdirSync(output, { recursive: true });
     for (const role of ['unlinked', 'admin']) {
       await desktop.addCookies([{ name: 'fans_ui_role', value: role, url: base }]);
       assert.equal((await fan.goto(`${base}/faluss-fans/fan/classement-fans`)).status(), 403, role);
+      assert.equal(await fan.getByRole('button', { name: 'Continuer avec Faluss', exact: true }).count(), role === 'admin' ? 0 : 1);
     }
+    await mobile.addCookies([{ name: 'fans_ui_role', value: 'guest', url: base }]);
+    assert.equal((await mobileFan.goto(`${base}/faluss-fans/fan/classement-fans`)).status(), 403);
+    assert.equal(await mobileFan.locator('input[name="faluss_fans_return_to"]').inputValue(), '/faluss-fans/fan/classement-fans');
+    assert.equal(await mobileFan.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true);
+    await mobileFan.screenshot({ path: path.join(output, 'connexion-requise-mobile.png') });
     console.log('Synthetic browser recipe passed: public guest discovery, desktop/mobile, keyboard focus, private permissions, empty/error boundaries, eight creator links.');
   } finally {
     await browser.close();

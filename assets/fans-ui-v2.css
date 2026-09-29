@@ -29,6 +29,8 @@
 @media(prefers-reduced-motion:reduce){.fu-app *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 .fu-discovery-note{max-width:760px;margin:0 0 22px;padding:14px 18px;border-left:3px solid var(--fu-accent);background:#15221d;color:#d2dfd8;font-size:14px}
 .fu-app[data-fans-role=visitor] .fu-rail__caption{color:#93ad9e}
+.fu-signin{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:20px 24px;margin-top:24px}.fu-signin h2{margin:0;font-size:21px}.fu-signin p{margin:5px 0 0;color:var(--fu-muted);font-size:14px;max-width:620px}.fu-signin form{flex:none}.fu-signin button{border:0;border-radius:999px;min-height:44px;padding:10px 22px;background:var(--fu-accent);color:#0b2019;font-weight:700;cursor:pointer}
+@media(max-width:700px){.fu-signin{align-items:stretch;flex-direction:column;padding:20px;gap:16px}.fu-signin button{width:100%}}
 .fu-app[data-fans-role=creator] .fu-nav__item{flex-direction:column;gap:3px}
 .fu-app[data-fans-role=creator] .fu-nav__label{position:static;transform:none;padding:0;border:0;background:none;white-space:normal;text-align:center;font-size:10px;line-height:1.2}
 .fu-app[data-fans-role=creator] .fu-nav__item:not(.is-active) .fu-nav__label{display:none}

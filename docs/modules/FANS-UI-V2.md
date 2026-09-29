@@ -104,6 +104,11 @@ décrit précisément l’environnement et les limites de la preuve avant fusion
 
 ## Ordre des PR suivantes
 
+Le [lot de retour SSO](FANS-SSO-RETURN-AND-GUEST.md) ajoute une invitation via Me
+sur les pages publiques et un écran de connexion gardant HTTP 403 sur les espaces
+privés. La destination d’origine est bornée et liée à l’état SSO ; aucun alias,
+badge gagné ou reprise de progression invité n’est implémenté.
+
 1. Identité provisoire `Guest_…`, récupération après création de compte et
    retour SSO vers la page d’origine, après contrat de session et de reprise.
    Aucun pseudo, badge de progression ou contribution provisoire n’est créé

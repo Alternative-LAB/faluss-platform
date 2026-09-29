@@ -66,14 +66,16 @@ final class FansSsoService
 
     public static function button(mixed $attributes = []): string
     {
-        unset($attributes);
-        if (!self::configured()) {
+        if (!self::configured() || (is_user_logged_in() && !self::normalUser(get_current_user_id()))) {
             return '';
         }
+
+        $returnTo = FansSsoReturn::path(is_array($attributes) ? ($attributes['return_to'] ?? null) : null);
 
         return '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">'
             . '<input type="hidden" name="action" value="' . esc_attr(self::START_ACTION) . '">'
             . wp_nonce_field(self::START_ACTION, 'faluss_fans_sso_nonce', false, false)
+            . ($returnTo === null ? '' : '<input type="hidden" name="faluss_fans_return_to" value="' . esc_attr($returnTo) . '">')
             . '<button type="submit">' . esc_html__('Continuer avec Faluss', 'faluss-platform')
             . '</button></form>';
     }
@@ -108,6 +110,14 @@ final class FansSsoService
         $cookie = self::encode($state . $verifier . $browser);
         setcookie(self::COOKIE, $cookie, self::cookieOptions(time() + self::STATE_TTL));
         $_COOKIE[self::COOKIE] = $cookie;
+        $returnCookie = FansSsoReturn::seal(
+            isset($_POST['faluss_fans_return_to']) && is_string($_POST['faluss_fans_return_to'])
+                ? wp_unslash($_POST['faluss_fans_return_to']) : null,
+            self::encode($state)
+        );
+        setcookie(FansSsoReturn::COOKIE, $returnCookie ?? '', self::cookieOptions(
+            $returnCookie === null ? time() - 3600 : time() + self::STATE_TTL
+        ));
         wp_redirect(add_query_arg([
             'response_type' => 'code',
             'client_id' => (string) constant('FALUSS_FANS_SSO_CLIENT_ID'),
@@ -150,7 +160,7 @@ final class FansSsoService
         wp_set_current_user($user->ID);
         wp_set_auth_cookie($user->ID, false, is_ssl());
         do_action('wp_login', $user->user_login, $user);
-        wp_safe_redirect(home_url('/'));
+        wp_safe_redirect($pending['return_to'] ?? home_url('/'));
         exit;
     }
 
@@ -225,7 +235,7 @@ final class FansSsoService
         )) === 1;
     }
 
-    /** @return array{verifier:string,flow_mode:string,wp_user_id:int}|null */
+    /** @return array{verifier:string,flow_mode:string,wp_user_id:int,return_to:?string}|null */
     private static function consumeState(mixed $state): ?array
     {
         $raw = self::cookieState();
@@ -267,6 +277,7 @@ final class FansSsoService
                 'verifier' => self::encode($raw['verifier']),
                 'flow_mode' => $row['flow_mode'],
                 'wp_user_id' => (int) ($row['wp_user_id'] ?? 0),
+                'return_to' => FansSsoReturn::open($_COOKIE[FansSsoReturn::COOKIE] ?? null, $state),
             ];
         } catch (\Throwable) {
             $wpdb->query('ROLLBACK');
@@ -656,7 +667,8 @@ final class FansSsoService
     private static function clearCookie(): void
     {
         setcookie(self::COOKIE, '', self::cookieOptions(time() - 3600));
-        unset($_COOKIE[self::COOKIE]);
+        setcookie(FansSsoReturn::COOKIE, '', self::cookieOptions(time() - 3600));
+        unset($_COOKIE[self::COOKIE], $_COOKIE[FansSsoReturn::COOKIE]);
     }
 
     private static function localNotice(): never
