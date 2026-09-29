@@ -1,16 +1,18 @@
 # Fans — matrice d’évaluation intermédiaire
 
-État du 29 septembre 2026, code `198ea135e0ecac6b86ab7ac43310018ae7c9da33`
-(#89 à #101), revue visuelle consolidée du lot 14.
-**Ce n’est pas encore le bilan final des 48 heures.** Version conservée :
-0.6.3. Base initiale vérifiée : `ad7c5857a0c1d65c84d8ec56b5fdbbd7dba178af`.
+État du 30 septembre 2026, code publié `dc13eda5c772dc3222045e2fc9e26024237f3e7a`
+(#89 à #104), version **0.7.0**. Revue visuelle consolidée du lot 14 et correctif
+clavier du lot 15 ; les captures conservent leurs SHA de provenance.
+**Ce n’est pas encore le bilan final des 48 heures.** Base initiale vérifiée :
+`ad7c5857a0c1d65c84d8ec56b5fdbbd7dba178af`, alors en version 0.6.3.
 Les modifications Me/Link postérieures à #84 ont été conservées.
 
-Ces évolutions sont fusionnées dans le code, **pas publiées dans une nouvelle
-release** au moment de cette matrice. Une installation portant déjà le numéro
-0.6.3 ne les reçoit pas par le seul maintien de ce numéro. La nouvelle consigne
-autorise une version ultérieure via les workflows GitHub après les prochains
-travaux livrables. Aucun ZIP de CI n’a été installé sur un site.
+La publication supplémentaire autorisée a été accomplie par les workflows
+GitHub : tag **v0.7.0**, archive avec dépendances validée et upload réussi.
+La [preuve de publication](#livraison-070) ne prouve ni sa proposition dans un
+WordPress licencié, ni une installation, ni la recette cible. Ces vérifications
+restent au propriétaire. Aucun autre numéro ou workflow de publication n’est
+autorisé automatiquement par la poursuite de ce chantier.
 
 « Fonctionnel et testé » signifie ici code de service testé et/ou adaptateur UI
 testé, selon la preuve indiquée. **Aucune installation WordPress ni aucun site
@@ -53,7 +55,7 @@ des captures sont des fixtures sous `tests/`, jamais des données produit.
 
 | Exigence | Preuve autoritative et portée | Conclusion de revue |
 | --- | --- | --- |
-| Dernier main et changements depuis #84 | Base initiale et historique dans [le suivi](FANS-48H.md), en-tête/constante 0.6.3 ; diff de la base au SHA audité | Les anciens travaux Me/Link sont conservés ; aucun départ du tag 0.6.0 |
+| Dernier main et changements depuis #84 | Base initiale 0.6.3 et historique dans [le suivi](FANS-48H.md) ; code livré 0.7.0 au SHA audité | Les anciens travaux Me/Link sont conservés ; aucun départ du tag 0.6.0 |
 | Planche Fan et planche Créateur V2 | [40 captures du même code](../evidence/fans-48h/lot-14/README.md), 18 vues de référence + Classement Fans + Mon profil distinct | DA et navigation du socle conservées ; densité et contenu métier des planches non reproduits sans capacités réelles |
 | Invité, Fan lié, Créateur lié, administrateur | [Matrice 312 cas](../evidence/fans-48h/lot-12/README.md), [contrats UI](../../tests/Fans/Ui/FansUiContractTest.php) | Statuts des pages, routes personnelles et profils non publics testés ; aucune preuve de vrais comptes de site |
 | API existantes et états indisponibles | Recettes lecture, auteur, admission, images, profil et compteur ; lots 3, 4, 6, 7, 9 et 13 | Adaptateurs raccordés aux contrats disponibles ; aucune API Hub supposée |
@@ -65,8 +67,9 @@ des captures sont des fixtures sous `tests/`, jamais des données produit.
 | Unicité, annulation, remboursement, corrections/rejeux | [Scénarios futurs explicites](FANS-FAN-RANKING.md#garanties-attendues--pas-un-moteur-existant), [façade réelle](../../src/TokenEngine/TokenEngineContract.php) | Service absent. Les tests `FakeHub` ne prouvent pas un ledger ni des compensations opérationnelles |
 | HoF 1 PF acheté, attesté et attribué = 1 point | ADR 0018 et contrat Hub ; vues HoF indisponibles | Règle documentée, aucun moteur/rang/session inventé, PC séparés |
 | Modération et refus serveur | [Publications](../../tests/Fans/Publications/TextPublicationTest.php), [Store](../../tests/Fans/Store/StoreCatalogTest.php) et CI du SHA audité | Propriétaire, révision, retrait, état public et achats fermés conservés |
-| PR courtes, protections, contrôles et captures | Historique #89–#101 et suivi des lots ; [CI PHP](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36632255276), [JS](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36632255289), [ZIP](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36632255184) | Contrôles du dernier main réussis ; aucun push direct ni contournement de protection |
-| Sites, flags, déploiement, release et paiement hors périmètre | Aucun diff de workflows, version, Identity, Token Engine ou Link ; opt-ins serveur conservés, recettes sur fixtures | Aucun site consulté, aucune installation/activation ou livraison publiée ; le présent audit n’autorise rien en production |
+| PR courtes, protections, contrôles et captures | Historique #89–#104 et suivi des lots ; [CI PHP](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36637193361), [JS](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36637193458), [ZIP](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36637193340) | Contrôles du main publié réussis : 289 tests, 4 434 assertions ; aucun push direct ni contournement de protection |
+| Sites, flags, déploiement et paiement hors périmètre | Aucun diff de workflows, Identity, Token Engine ou Link ; opt-ins serveur conservés, recettes sur fixtures | Aucun site consulté, aucune installation/activation ; la seule publication autorisée séparément est 0.7.0 via GitHub |
+| Livraison par le circuit normal de mise à jour | [Prepare release](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36636869815), PR #104, [Publish private release](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36637193352), tag et archive | Upload 0.7.0 confirmé dans GitHub ; contrôle de disponibilité WordPress réservé au propriétaire, aucun contournement de l’updater |
 | Bilans quotidiens et clôture 48 h | Bilan du 29 septembre dans le suivi ; échéance 1 octobre 20 h 52 Paris | Bilan du 30 septembre et matrice finale encore à fournir ; ce document reste intermédiaire |
 
 ## Droits vérifiés
@@ -84,6 +87,25 @@ Les doubles slashs et segments supplémentaires ne donnent aucun accès.
   retrait possible, nouvelle création/édition refusée selon le moteur.
 - Les outils de modération administrative existants restent séparés. Leur recette
   WordPress antérieure ne constitue pas une preuve du nouveau diff.
+
+## Livraison 0.7.0
+
+[PR #104](https://github.com/Alternative-LAB/faluss-platform/pull/104) fusionnée
+après six contrôles verts sur `9ba511fb5c7e4a7f3cf73309b903c2acdae5a992`.
+Le tag annoté `v0.7.0` résout vers le code publié indiqué en tête de cette matrice.
+Le workflow a exécuté avec succès l’installation des dépendances de production,
+la construction, la validation WordPress du ZIP, le tag, l’upload et le stockage
+de l’artefact. Son journal d’upload retourne `success: true`, `version: 0.7.0`.
+
+- [Artefact officiel](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36637193352/artifacts/11064268331), rétention de 30 jours.
+- ZIP du plugin à l’intérieur : `faluss-platform.zip`, 4 323 446 octets,
+  SHA-256 `8a8916154c0756ac8abc0da9bedf30c5bf74991c79b24f02c0327e0ba4ce89d3`.
+- [Compte rendu de livraison](https://github.com/Alternative-LAB/faluss-platform/pull/104#issuecomment-5899944067), dont distinction entre le digest de l’enveloppe GitHub et celui du ZIP du plugin.
+
+L’upload est attesté par GitHub exclusivement. Aucun accès direct au serveur,
+aucune vérification de licence/cache/notification dans WordPress. Aucun ZIP
+installé ou plugin remplacé manuellement ; aucun flag activé. Les changements
+documentaires postérieurs ne modifient pas le paquet publié.
 
 ## Ce qui empêche de déclarer Fans terminé
 
@@ -131,8 +153,7 @@ Les doubles slashs et segments supplémentaires ne donnent aucun accès.
 - [Lot 12 : chemins avec slash final](../evidence/fans-48h/lot-12/README.md).
 - [Lot 13 : nombre public de suivis](../evidence/fans-48h/lot-13/README.md).
 - [Lot 14 : couverture visuelle consolidée](../evidence/fans-48h/lot-14/README.md).
-
-Aucun flag activé, déploiement, paiement ou modification des sites. Nouvelle
-release autorisée via GitHub uniquement, à vérifier séparément avant de la dire publiée.
-
 - [Lot 15 : lecture au clavier](../evidence/fans-48h/lot-15/README.md).
+
+Aucun flag activé, déploiement, paiement ou modification des sites. Publication
+0.7.0 vérifiée séparément ; aucune conclusion d’activation ou de chantier terminé.

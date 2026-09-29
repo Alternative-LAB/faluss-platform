@@ -5,8 +5,10 @@ version réelle **0.6.3** (en-tête et constante). Fenêtre de travail : 29 sept
 20 h 52 → 1 octobre 20 h 52, heure de Paris. Aucun accès aux sites WordPress,
 serveurs ou updater ; code et GitHub uniquement. La consigne ultérieure autorise
 une nouvelle version après les prochains travaux livrables, exclusivement via
-Prepare release, sa PR protégée et Publish private release. Aucun numéro 0.6.3
-réutilisé ; installation, recette cible et activation conservées par le propriétaire.
+Prepare release, sa PR protégée et Publish private release. Cette livraison
+**0.7.0 est accomplie** (voir ci-dessous). Aucun numéro 0.6.3 réutilisé ; installation,
+recette cible et activation conservées par le propriétaire. Aucune autre release
+à déclencher sans nouvelle consigne.
 
 ## Changements pris en compte depuis #84
 
@@ -99,8 +101,8 @@ applicables. La recette a identifié séparément un 404 des routes terminées p
 
 Lot 12 fusionné : [PR #100](https://github.com/Alternative-LAB/faluss-platform/pull/100),
 `main` `40ee56038c78061c6040703f2bbeb6f4f98f97d9`. Six contrôles de PR verts ;
-au contrôle suivant, GitHub n’avait créé ni run ni check suite pour ce SHA de
-main. Cette CI n’est donc pas déclarée réussie et reste à confirmer.
+au premier contrôle, GitHub n’avait créé ni run ni check suite pour ce SHA de
+main. Les exécutions sont apparues ensuite et ont réussi ; liens ci-dessous.
 Normalisation de la vue capturée par les règles WordPress existantes,
 avec un slash final accepté et les chemins non canoniques toujours refusés.
 Même traitement dans le contrôleur et le filtre de barre WordPress ; aucun
@@ -112,20 +114,24 @@ Lot 13 fusionné : [PR #101](https://github.com/Alternative-LAB/faluss-platform/
 CI du nouveau main réussie : [PHP](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36632255276),
 [JS](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36632255289),
 [ZIP](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36632255184).
-Ces contrôles valident l’arbre intégrant aussi #100 ; ils ne prétendent pas
-qu’une exécution distincte ait existé pour le SHA intermédiaire #100.
+Ces contrôles valident l’arbre intégrant aussi #100 ; sa CI distincte a été
+confirmée ultérieurement et est référencée ci-dessous.
 Compteur public de suivis lu via l’API existante, sans action sociale
 ouverte ; zéro uniquement si attesté par la réponse du service, sinon état
 indisponible. Effacement et invalidation des lectures au masquage/départ, reprise
 au retour visible/BFcache. [Preuves et captures](../evidence/fans-48h/lot-13/README.md).
 
-Lot 14 : [revue visuelle consolidée](../evidence/fans-48h/lot-14/README.md) du SHA
+Lot 14 fusionné : [PR #102](https://github.com/Alternative-LAB/faluss-platform/pull/102),
+`main` `6cac194c3cf541cf6c02304912d0ce84ac479beb`.
+[Revue visuelle consolidée](../evidence/fans-48h/lot-14/README.md) du SHA
 #101, quarante captures et quatre planches de contrôle. Matrice limitée aux trois
 catégories demandées, avec tableau de couverture de chaque exigence et écarts aux
 planches explicités. Aucun runtime modifié. Le bilan final à l’échéance et celui
-du 30 septembre restent à fournir ; aucune nouvelle release publiée.
+du 30 septembre restent à fournir ; aucune release publiée à cette étape.
 
-Lot 15 : correction de la perte du focus pendant la pagination des textes,
+Lot 15 fusionné : [PR #103](https://github.com/Alternative-LAB/faluss-platform/pull/103),
+`main` `48f0033edea7e2adc122ced009f0fc0c6130a9f8`, six contrôles de PR verts.
+Correction de la perte du focus pendant la pagination des textes,
 reproduite sur #102. Reprise, erreur et dernière page navigables au clavier ;
 aucune reprise du focus si le lecteur s’est déplacé. [Captures et tests](../evidence/fans-48h/lot-15/README.md).
 
@@ -134,6 +140,24 @@ vertes : [PHP](https://github.com/Alternative-LAB/faluss-platform/actions/runs/3
 [JS](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36632319700),
 [ZIP](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36632320210).
 Cela complète le constat d’absence au moment des vérifications précédentes.
+
+### Livraison autorisée — 30 septembre, 00 h 04 Paris
+
+[PR #104](https://github.com/Alternative-LAB/faluss-platform/pull/104) issue de
+[Prepare release, bump=auto](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36636869815)
+fusionnée après les six contrôles verts. Version **0.7.0**, code publié
+`dc13eda5c772dc3222045e2fc9e26024237f3e7a`. Tag `v0.7.0` sur ce SHA ;
+[Publish private release](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36637193352)
+a construit/validé le ZIP avec ses dépendances et confirmé l’upload de 0.7.0.
+CI de main [PHP](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36637193361),
+[JS](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36637193458) et
+[ZIP](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36637193340)
+verte ; 289 tests et 4 434 assertions.
+
+Le propriétaire conserve la vérification de l’updater, l’installation, la recette
+cible et l’activation. Aucun site consulté ni flag changé. [Paquet, empreinte et
+limites de la preuve](FANS-48H-EVALUATION.md#livraison-070). Le bilan quotidien du
+30 septembre et la matrice finale du 1 octobre 20 h 52 restent à fournir.
 
 ### Bilan communiqué le 29 septembre vers 22 h (Paris)
 
