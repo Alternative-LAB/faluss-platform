@@ -80,7 +80,9 @@ Recettes WebKit Windows 26.5, correction du focus clavier des images,
 contrôles tactiles des huit accès Créateur à 320/390 px et 168 cas de la matrice.
 [Captures, reproduction et limite typographique](../evidence/fans-48h/lot-10/README.md).
 
-Lot 11 : retour SSO vers un texte sélectionné dans Créer. Reproduction avant
+Lot 11 fusionné : [PR #99](https://github.com/Alternative-LAB/faluss-platform/pull/99),
+`main` `63905766d30a6194e811c4a3abe315ed91864113`, CI de branche et de main vertes.
+Retour SSO vers un texte sélectionné dans Créer. Reproduction avant
 correction : la page privée 403 ne conservait que `/creator/creer`, perdant
 `publication={uuid-v4}`. Le retour signé conserve maintenant cette seule query
 exacte ; doublons, tableaux, encodages, autres paramètres et UUID invalides sont
@@ -91,6 +93,12 @@ cinq PHP modifiés ; retour positif/négatif dans Chromium 154 et WebKit 26.5,
 ordinateur/mobile. Aucun changement visuel ; captures du lot 10 toujours
 applicables. La recette a identifié séparément un 404 des routes terminées par
 `/`, à corriger dans le lot suivant ; les liens canoniques sans slash fonctionnent.
+
+Lot 12 : normalisation de la vue capturée par les règles WordPress existantes,
+avec un slash final accepté et les chemins non canoniques toujours refusés.
+Même traitement dans le contrôleur et le filtre de barre WordPress ; aucun
+flush de permaliens, migration ou modification des droits.
+[Preuves et captures](../evidence/fans-48h/lot-12/README.md).
 
 ### Bilan communiqué le 29 septembre vers 22 h (Paris)
 

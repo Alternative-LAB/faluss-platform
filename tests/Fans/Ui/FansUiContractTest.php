@@ -162,6 +162,28 @@ namespace Faluss\Platform\Fans\Ui {
             self::assertTrue(FansUiRoutes::adminBarVisible(true));
         }
 
+        public function testStoredRewriteAcceptsOneTrailingSlashWithoutAFlush(): void
+        {
+            FansUiRoutes::rewrite();
+            $patterns = array_keys($GLOBALS['fans_ui_rewrites']);
+            foreach (['fan/hof', 'creator/creer', 'creator/hof/session'] as $route) {
+                foreach (['', '/'] as $suffix) {
+                    $request = 'faluss-fans/' . $route . $suffix;
+                    self::assertSame(1, preg_match('~' . $patterns[1] . '~D', $request, $matches));
+                    $GLOBALS['fans_ui_query'] = [FansUiRoutes::ROLE_VAR => $matches[1], FansUiRoutes::VIEW_VAR => $matches[2]];
+                    $_SERVER['REQUEST_URI'] = '/' . $request;
+                    self::assertFalse(FansUiRoutes::adminBarVisible(true));
+                    $GLOBALS['fans_ui_admin'] = true;
+                    self::assertTrue(FansUiRoutes::adminBarVisible(true));
+                    $GLOBALS['fans_ui_admin'] = false;
+                }
+            }
+            $canonical = FansUiRoutes::url('creator', 'creer');
+            foreach (['/faluss-fans/creator/creer//', '/faluss-fans//creator/creer', '/faluss-fans/creator/creer/extra', '/faluss-fans/creator/%63reer', '/?faluss_fans_ui_view=creer'] as $request) {
+                self::assertFalse(FansUiRoutes::isCanonicalPath($canonical, $request), $request);
+            }
+        }
+
         private function render(string $role, string $view): string
         {
             ob_start();
