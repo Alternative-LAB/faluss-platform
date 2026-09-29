@@ -6,6 +6,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Fans — clavier et vérification WebKit
+
+- Focus conservé pendant le chargement d’une image, indisponibilité annoncée par ARIA et demandes concurrentes toujours refusées.
+- Recettes isolées exécutables sous Chromium ou WebKit, navigation Créateur par toucher à 320/390 px ; limite de typographie du banc WebKit Windows documentée.
+
 ### Fans — publications du profil public
 
 - Parcours Explorer → profil → textes approuvés du créateur, avec pagination filtrée et états vide/indisponible.

@@ -1,13 +1,13 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { chromium } = require('playwright');
+const launchBrowser = require('./browser-engine.cjs');
 const base = process.env.FANS_UI_BASE || 'http://127.0.0.1:8765';
 const output = process.env.FANS_UI_OUTPUT || path.resolve(__dirname, '../../../../docs/evidence/fans-48h/lot-7');
 fs.mkdirSync(output, { recursive: true });
 const imageApi = '**/text-publications/*/image/*';
 (async () => {
-  const browser = await chromium.launch({ channel: 'chrome', headless: true });
+  const browser = await launchBrowser();
   try {
     const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
     await context.addInitScript(() => {
@@ -51,18 +51,21 @@ const imageApi = '**/text-publications/*/image/*';
       assert.equal(await page.locator('.fu-publication-image img').count(), 0);
       await button().focus(); await page.keyboard.press('Enter');
       await page.locator('.fu-publication-image img').waitFor();
+      assert.equal(await page.getByRole('button', { name: 'Masquer l’image' }).evaluate(element => document.activeElement === element), true, 'Loading must retain keyboard focus');
       assert.equal(count, before + 1);
       assert.match(await page.locator('.fu-publication-image img').getAttribute('src'), /^blob:/);
       assert.equal(await page.evaluate(() => window.fixtureBlobs.size), 1);
       assert.doesNotMatch(await page.locator('main').innerText(), /123e4567/);
       if (role === 'guest') {
-        await page.locator('[data-fans-publications]').screenshot({ path: path.join(output, 'publication-image-desktop.png') });
+        await page.locator('[data-fans-publications]').evaluate(element => element.scrollIntoView({ block: 'start' }));
+        await page.screenshot({ path: path.join(output, 'publication-image-desktop.png') });
         await page.setViewportSize({ width: 390, height: 844 });
         await page.locator('.fu-text-card').evaluate(element => element.scrollIntoView({ block: 'start' }));
         await page.screenshot({ path: path.join(output, 'publication-image-mobile.png') });
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true);
       }
-      await page.getByRole('button', { name: 'Masquer l’image' }).click();
+      await page.getByRole('button', { name: 'Masquer l’image' }).focus();
+      await page.keyboard.press('Enter');
       assert.equal(await page.evaluate(() => window.fixtureBlobs.size), 0);
       assert.equal(await button().evaluate(element => document.activeElement === element), true);
       await button().click(); await page.locator('.fu-publication-image img').waitFor();
@@ -94,13 +97,18 @@ const imageApi = '**/text-publications/*/image/*';
       revision: '1', body: 'Fixture de concurrence', updated_at: 'fixture',
     })), next_cursor: null } }));
     let release;
+    let busyRequests = 0;
     await page.route(imageApi, async route => {
+      busyRequests++;
       await new Promise(resolve => { release = resolve; });
       await route.fulfill({ contentType: 'image/jpeg', body: jpeg });
     });
     await page.reload(); await loaded(); await button().click();
     while (!release) await new Promise(resolve => setTimeout(resolve, 10));
-    assert.equal(await page.locator('[data-image-load]:disabled').count(), 2);
+    assert.equal(await page.locator('[data-image-load][aria-disabled=true]').count(), 2);
+    await page.evaluate(() => document.querySelectorAll('[data-image-load]').forEach(element => element.click()));
+    await page.waitForTimeout(100);
+    assert.equal(busyRequests, 1, 'Busy controls must not start another request');
     await page.evaluate(() => {
       Object.defineProperty(document, 'hidden', { configurable: true, value: true });
       document.dispatchEvent(new Event('visibilitychange'));

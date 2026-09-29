@@ -9,6 +9,9 @@
   visuel de remplacement, aucun accès à la quarantaine.
 - Course : changement de page, masquage de l’onglet, nouvelle pagination ou
   rafraîchissement annulent les requêtes et ignorent les réponses anciennes.
+- Clavier : Entrée charge puis masque l’image sans perdre le focus. Pendant
+  une demande, les boutons annoncent leur indisponibilité sans quitter l’ordre
+  de tabulation ; le garde JavaScript refuse tout second lancement.
 
 L’UI utilise uniquement le [contrat existant de diffusion](FANS-IMAGE-DELIVERY.md).
 Elle ne modifie ni la modération, ni la projection publique des textes, ni les

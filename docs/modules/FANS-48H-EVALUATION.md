@@ -1,7 +1,7 @@
 # Fans — matrice d’évaluation intermédiaire
 
-État du 29 septembre 2026, après les lots #89 à #96 et le profil public du
-lot 9. **Ce n’est pas encore le bilan final des 48 heures.** Version conservée :
+État du 29 septembre 2026, après les lots #89 à #97 et la vérification WebKit du
+lot 10. **Ce n’est pas encore le bilan final des 48 heures.** Version conservée :
 0.6.3. Base initiale vérifiée : `ad7c5857a0c1d65c84d8ec56b5fdbbd7dba178af`.
 Les modifications Me/Link postérieures à #84 ont été conservées.
 
@@ -35,6 +35,7 @@ des captures sont des fixtures sous `tests/`, jamais des données produit.
 | Retour SSO Me | Boutons publics et pages privées 403 | Fonctionnel et testé en isolation ; accès cible requis | État consommé, retour local signé, callback exact ; pas de preuve réseau Me réelle |
 | Invité provisoire, alias/badge/reprise | Étude seulement | Décision requise | Aucun `Guest_…` runtime, badge gagné, contribution fictive ou promesse de sauvegarde |
 | Administration WordPress | Outils existants | Fonctionnel au niveau du filtre testé ; accès cible requis | Barre cachée pour membres ordinaires sur routes Fans, conservée pour `manage_options` ; rendu WordPress non réévalué ici |
+| Navigation mobile et clavier | Toutes les routes du shell | Fonctionnel et testé en émulation ; rendu cible requis | Chromium et WebKit Windows, huit accès Créateur par toucher à 320/390 px, focus image corrigé ; typographie WebKit Windows non représentative, Safari/iPhone à vérifier |
 
 ## Droits vérifiés
 
@@ -73,6 +74,9 @@ des captures sont des fixtures sous `tests/`, jamais des données produit.
    vrais comptes et SSO HTTPS/cookies, nonces REST internes, styles/barre WP,
    navigateur mobile physique, modération humaine et procédure de retrait.
    Cette validation n’est pas remplacée par la CI ou les captures de fixtures.
+   Le port WebKit Windows utilisé pour les tests fonctionnels rend les fontes
+   variables très fines malgré leurs poids déclarés ; ses captures ne valident
+   donc pas la typographie Safari macOS/iOS. Voir le diagnostic du lot 10.
 
 ## Preuves
 
@@ -86,5 +90,6 @@ des captures sont des fixtures sous `tests/`, jamais des données produit.
 - [Lot 7 : images publiques](../evidence/fans-48h/lot-7/README.md).
 - [Lot 8 : filtre serveur, PR #96](https://github.com/Alternative-LAB/faluss-platform/pull/96).
 - [Lot 9 : profil et publications](../evidence/fans-48h/lot-9/README.md).
+- [Lot 10 : WebKit et clavier](../evidence/fans-48h/lot-10/README.md).
 
 Aucun flag activé, déploiement, release, paiement ou modification des sites.

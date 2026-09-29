@@ -64,7 +64,7 @@
         return;
       }
       imageBusy = true;
-      root.querySelectorAll('[data-image-load]').forEach(control => { control.disabled = true; });
+      root.querySelectorAll('[data-image-load]').forEach(control => { control.setAttribute('aria-disabled', 'true'); });
       message.textContent = 'Vérification de l’image…';
       let objectUrl = null;
       try {
@@ -108,7 +108,7 @@
         if (objectUrl !== null && !output.firstChild) { URL.revokeObjectURL(objectUrl); objectUrls.delete(objectUrl); }
         if (current === generation) {
           imageBusy = false;
-          root.querySelectorAll('[data-image-load]').forEach(control => { control.disabled = false; });
+          root.querySelectorAll('[data-image-load]').forEach(control => { control.removeAttribute('aria-disabled'); });
         }
       }
     });

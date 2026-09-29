@@ -1,13 +1,13 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { chromium } = require('playwright');
+const launchBrowser = require('./browser-engine.cjs');
 const base = process.env.FANS_UI_BASE || 'http://127.0.0.1:8765';
 const output = process.env.FANS_UI_OUTPUT || path.resolve(__dirname, '../../../../docs/evidence/fans-48h/lot-3');
 fs.mkdirSync(output, { recursive: true });
 const uuid = '123e4567-e89b-42d3-a456-426614174000';
 (async () => {
-  const browser = await chromium.launch({ channel: 'chrome', headless: true });
+  const browser = await launchBrowser();
   try {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     const page = await context.newPage();
