@@ -41,6 +41,10 @@ namespace Faluss\Platform\Fans\Profiles {
     }
 }
 
+namespace Faluss\Platform\Fans\Images {
+    final class ImageDisplayDerivative { public static function enabled(): bool { return ($_COOKIE['fans_ui_images'] ?? '') === 'open'; } }
+}
+
 namespace Faluss\Platform\Fans\Publications {
     final class TextPublicationsModule { public static function available(): bool { return ($_COOKIE['fans_ui_author'] ?? '') === 'open'; } }
     final class TextPublicationService {

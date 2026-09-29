@@ -15,6 +15,8 @@
   let cursor = null;
   let controller = null;
   let generation = 0;
+  let imageBusy = false;
+  const objectUrls = new Set();
   const node = (tag, text, className = '') => {
     const item = document.createElement(tag);
     item.textContent = text;
@@ -31,9 +33,83 @@
   function reset() {
     controller?.abort();
     generation += 1;
+    imageBusy = false;
+    for (const url of objectUrls) URL.revokeObjectURL(url);
+    objectUrls.clear();
     results.replaceChildren();
     cursor = null;
     next.hidden = true;
+  }
+  // The server permits one derivative generation at a time. No automatic image requests or retries.
+  function imageControl(card, item, current, signal) {
+    const figure = node('figure', '', 'fu-publication-image');
+    const button = node('button', 'Vérifier l’image associée');
+    button.type = 'button';
+    button.dataset.imageLoad = '';
+    const message = node('p', '', 'fu-footnote');
+    message.setAttribute('role', 'status');
+    const output = node('div', '', 'fu-publication-image__output');
+    let shownUrl = null;
+    figure.append(button, message, output);
+    card.append(figure);
+    button.addEventListener('click', async () => {
+      if (imageBusy || signal.aborted || current !== generation) return;
+      if (shownUrl !== null) {
+        output.replaceChildren();
+        URL.revokeObjectURL(shownUrl); objectUrls.delete(shownUrl); shownUrl = null;
+        button.textContent = 'Vérifier l’image associée';
+        message.textContent = 'Image masquée.';
+        return;
+      }
+      imageBusy = true;
+      root.querySelectorAll('[data-image-load]').forEach(control => { control.disabled = true; });
+      message.textContent = 'Vérification de l’image…';
+      let objectUrl = null;
+      try {
+        const url = new URL(root.dataset.api.replace(/\/$/, '') + '/' + item.publication_id + '/image/' + Number(item.revision), location.href);
+        if (url.origin !== location.origin || url.search || url.hash) throw new Error('invalid');
+        const response = await fetch(url, { credentials: 'same-origin', cache: 'no-store', redirect: 'error', signal });
+        if (response.status === 404) {
+          message.textContent = 'Aucune image publique disponible pour cette publication.';
+          return;
+        }
+        if (!response.ok || response.headers.get('Content-Type')?.split(';')[0].trim().toLowerCase() !== 'image/jpeg'
+          || !response.body || Number(response.headers.get('Content-Length')) > 2097152) throw new Error('unavailable');
+        const reader = response.body.getReader();
+        const chunks = [];
+        let size = 0;
+        try {
+          while (true) {
+            const part = await reader.read();
+            if (part.done) break;
+            size += part.value.byteLength;
+            if (size > 2097152 || signal.aborted || current !== generation) throw new Error('invalid');
+            chunks.push(part.value);
+          }
+        } finally { await reader.cancel(); }
+        if (signal.aborted || current !== generation) return;
+        objectUrl = URL.createObjectURL(new Blob(chunks, { type: 'image/jpeg' }));
+        objectUrls.add(objectUrl);
+        const picture = document.createElement('img');
+        picture.alt = 'Image associée à cette publication ; description détaillée indisponible.';
+        picture.src = objectUrl;
+        await picture.decode();
+        if (signal.aborted || current !== generation) return;
+        if (picture.naturalWidth > 1280 || picture.naturalHeight > 1280) throw new Error('invalid');
+        output.replaceChildren(picture);
+        message.textContent = 'Image de la publication. La description détaillée n’est pas encore fournie.';
+        shownUrl = objectUrl;
+        button.textContent = 'Masquer l’image';
+      } catch (error) {
+        if (!signal.aborted && current === generation) message.textContent = 'Image indisponible. Vous pouvez réessayer ou continuer la lecture du texte.';
+      } finally {
+        if (objectUrl !== null && !output.firstChild) { URL.revokeObjectURL(objectUrl); objectUrls.delete(objectUrl); }
+        if (current === generation) {
+          imageBusy = false;
+          root.querySelectorAll('[data-image-load]').forEach(control => { control.disabled = false; });
+        }
+      }
+    });
   }
   async function load(after = null) {
     reset();
@@ -58,6 +134,7 @@
         const card = node('article', '', 'fu-panel fu-text-card');
         card.append(node('p', 'Texte approuvé', 'fu-panel__kicker'));
         card.append(node('p', item.body, 'fu-text-body'));
+        if (root.dataset.imageDelivery === 'true') imageControl(card, item, current, signal);
         const link = node('a', 'Voir la fiche de l’auteur ↗', 'fu-link');
         link.href = root.dataset.publicBase + encodeURIComponent(item.creator_id);
         card.append(link);

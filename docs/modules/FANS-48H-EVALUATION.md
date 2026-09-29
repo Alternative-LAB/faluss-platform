@@ -1,7 +1,7 @@
 # Fans — matrice d’évaluation intermédiaire
 
-État du 29 septembre 2026, après les lots #89 à #93 et la demande de profil du
-lot 6. **Ce n’est pas encore le bilan final des 48 heures.** Version conservée :
+État du 29 septembre 2026, après les lots #89 à #94 et la lecture d’images du
+lot 7. **Ce n’est pas encore le bilan final des 48 heures.** Version conservée :
 0.6.3. Base initiale vérifiée : `ad7c5857a0c1d65c84d8ec56b5fdbbd7dba178af`.
 Les modifications Me/Link postérieures à #84 ont été conservées.
 
@@ -17,6 +17,7 @@ des captures sont des fixtures sous `tests/`, jamais des données produit.
 | Explorer, invité/Fan/Créateur | `fan/explorer`, `creator/explorer` | Fonctionnel et testé pour la lecture structurée ; identité éditoriale requise | Filtres, vide/erreur, catégories et liens testés ; ni nom public ni portrait approuvé disponibles |
 | Profil public | `creators/{uuid}` | Fonctionnel et testé pour sa fiche structurée | Accès invité ; HTTP 404 de la page pour absent/suspendu/retiré ; aucune identité inventée |
 | Textes récents | Sur Explorer et les accueils | Fonctionnel et testé sur adaptateurs | REST public paginé existant ; textes approuvés, rendu texte, curseurs, erreurs et réponses anciennes ; liste globale, pas de filtre auteur |
+| Image associée à un texte public | Dans la carte de publication | Fonctionnel et testé sur adaptateurs ; accès et décisions requis avant activation | Dérivé JPEG à la demande, opt-in fermé ; aucun portrait ; description alternative éditoriale et recette d’hébergement requises |
 | HoF | `fan/hof`, `creator/hof` | Interface prête mais service absent | Invité 200 ; aucun rang, session ou point ; moteur et politiques encore requis |
 | Session HoF | `fan/hof/session`, `creator/hof/session` | Interface prête mais service absent | Accès personnel, aucune session à rejoindre |
 | Classements HoF | `fan/classements`, `creator/classements` | Interface prête mais service absent | Aucun calcul ou classement public |
@@ -60,8 +61,10 @@ des captures sont des fixtures sous `tests/`, jamais des données produit.
 4. **Moteurs absents** : messagerie, progression PC, sessions HoF, réservations,
    gestion commerciale et transactions. Les composants indisponibles ne sont pas
    présentés comme des fonctionnalités terminées.
-5. **Revue des parcours existants à poursuivre** : lecture par auteur et éventuels
-   médias. L’admission par catégorie est raccordée, sans auto-approbation. Le suivi social minimal
+5. **Revue des parcours existants à poursuivre** : lecture par auteur et gestion
+   privée des médias. Leur lecture publique à la demande est raccordée, avec les
+   limites du [contrat UI](FANS-PUBLICATION-IMAGE-UI.md). L’admission par catégorie
+   est raccordée, sans auto-approbation. Le suivi social minimal
    ne fournit pas blocage/signalement/rétention ; aucune ouverture sociale complète
    n’est prétendue. Ces limites ne doivent pas être cachées par l’UI.
 6. **Validation cible par le propriétaire avant activation** : thème/Elementor,
@@ -78,5 +81,6 @@ des captures sont des fixtures sous `tests/`, jamais des données produit.
 - [Lot 4 : textes natifs](../evidence/fans-48h/lot-4/README.md).
 - [Lot 5 : matrice routes/HTTP](../evidence/fans-48h/lot-5/README.md).
 - [Lot 6 : demande de profil](../evidence/fans-48h/lot-6/README.md).
+- [Lot 7 : images publiques](../evidence/fans-48h/lot-7/README.md).
 
 Aucun flag activé, déploiement, release, paiement ou modification des sites.
