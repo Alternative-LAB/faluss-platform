@@ -6,6 +6,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Fans — lecture des images de publications
+
+- Affichage à la demande des dérivés JPEG via le contrat public existant, uniquement si ses opt-ins sont déjà disponibles ; aucun portrait inventé.
+- Une demande à la fois, contrôles du format et du volume, erreurs explicites, masquage accessible et suppression des URL temporaires au départ ou au masquage de la page.
+
 ### Fans — demande de profil créateur
 
 - Choix d’une catégorie et demande de profil en attente depuis Mon espace via le REST existant, avec nonce, reprise idempotente de la même catégorie et état réel du profil.

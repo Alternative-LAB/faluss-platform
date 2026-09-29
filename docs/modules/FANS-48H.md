@@ -48,9 +48,26 @@ Lot 5 fusionné : [PR #93](https://github.com/Alternative-LAB/faluss-platform/pu
 [preuves](../evidence/fans-48h/lot-5/README.md). La revue des autres API existantes
 se poursuit avant le bilan final des 48 heures.
 
-Lot 6 : [demande de profil créateur](FANS-CREATOR-ADMISSION-UI.md),
+Lot 6 fusionné : [PR #94](https://github.com/Alternative-LAB/faluss-platform/pull/94),
+`main` `d25a07b5b0a291daff00fb427f4c5e423d0329a2`, CI de branche et de main vertes.
+[Demande de profil créateur](FANS-CREATOR-ADMISSION-UI.md),
 284 tests / 4 262 assertions, parcours sans JavaScript et régressions de rôles ;
 [preuves et captures](../evidence/fans-48h/lot-6/README.md).
+
+Lot 7 : [lecture des images de publications](FANS-PUBLICATION-IMAGE-UI.md),
+contrat de diffusion existant, chargement à la demande et refus explicites ;
+[preuves et captures](../evidence/fans-48h/lot-7/README.md).
+
+### Bilan communiqué le 29 septembre vers 22 h (Paris)
+
+Six PR #89 à #94 fusionnées. Dernière CI vérifiée :
+[PHP](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36623769234),
+[JS](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36623769331),
+[ZIP](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36623769289).
+Navigation, retour SSO, lecture, écriture des textes, refus et admission testés en
+isolation ; 284 tests / 4 262 assertions et matrice de 168 cas. Le lot médias se
+poursuit. HoF/PF, messagerie, commerce et identité éditoriale restent incomplets.
+Aucun site ni flag touché ; aucune preuve WordPress cible déduite des captures.
 
 Les cases « interface prête mais service absent » n’attestent aucune fonctionnalité
 métier. Les captures seront produites depuis un serveur de tests PHP isolé :
