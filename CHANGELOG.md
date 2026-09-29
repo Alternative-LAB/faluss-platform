@@ -6,6 +6,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Fans — demande de profil créateur
+
+- Choix d’une catégorie et demande de profil en attente depuis Mon espace via le REST existant, avec nonce, reprise idempotente de la même catégorie et état réel du profil.
+- Parcours natif sans JavaScript ; aucune auto-approbation, identité éditoriale ou permission commerciale ajoutée.
+
 ### Fans — refus dans le shell et revue des routes
 
 - Pages de profil non public et d’espace créateur sans profil rendues dans le shell Fans avec HTTP 404 conservé, message neutre et retour Explorer.

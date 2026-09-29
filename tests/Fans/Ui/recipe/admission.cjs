@@ -1,0 +1,62 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const { chromium } = require('playwright');
+const base = process.env.FANS_UI_BASE || 'http://127.0.0.1:8765';
+const url = `${base}/faluss-fans/fan/espace`;
+const output = process.env.FANS_UI_OUTPUT || path.resolve(__dirname, '../../../../docs/evidence/fans-48h/lot-6');
+fs.mkdirSync(output, { recursive: true });
+(async () => {
+  const browser = await chromium.launch({ channel: 'chrome', headless: true });
+  try {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, javaScriptEnabled: false });
+    const cookie = (name, value) => context.addCookies([{ name, value, url: base }]);
+    await cookie('fans_ui_admission', 'open');
+    const form = { admission_action: 'apply', category: 'arts', fans_admission_nonce: 'fixture-fans_admission' };
+    for (const role of ['guest', 'unlinked', 'admin']) {
+      await cookie('fans_ui_role', role);
+      assert.equal((await context.request.post(url, { form })).status(), 403);
+    }
+    await cookie('fans_ui_role', 'fan');
+    const page = await context.newPage();
+    await page.goto(url);
+    await page.getByRole('button', { name: 'Demander mon profil créateur' }).waitFor();
+    assert.equal((await context.request.post(url, { form: { ...form, fans_admission_nonce: 'wrong' } })).status(), 403);
+    assert.equal((await context.request.post(url, { form: { ...form, category: 'unknown' } })).status(), 400);
+    await page.reload();
+    assert.equal(await page.locator('.fu-admission__form').count(), 1);
+    await page.getByLabel('Votre domaine de création').selectOption('arts');
+    await page.screenshot({ path: path.join(output, 'demande-desktop.png'), fullPage: true });
+    await cookie('fans_ui_admission_error', '503');
+    await page.getByRole('button', { name: 'Demander mon profil créateur' }).click();
+    await page.getByText('La demande ne peut pas être confirmée.', { exact: false }).waitFor();
+    assert.equal(await page.getByLabel('Votre domaine de création').inputValue(), 'arts');
+    await cookie('fans_ui_admission_error', '');
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(url);
+    await page.evaluate(() => window.scrollTo(0, document.querySelector('.fu-admission').offsetTop - 16));
+    await page.screenshot({ path: path.join(output, 'demande-mobile.png') });
+    await page.getByLabel('Votre domaine de création').selectOption('arts');
+    await page.getByRole('button', { name: 'Demander mon profil créateur' }).click();
+    await page.getByRole('heading', { name: 'En attente de validation', exact: true }).waitFor();
+    assert.equal(await page.locator('.fu-admission__form').count(), 0);
+    assert.doesNotMatch(await page.locator('main').innerText(), /123e4567|Profil actif|Guest_/);
+    assert.equal((await context.request.post(url, { form: { ...form, status: 'active', wp_user_id: '1' } })).status(), 200);
+    assert.equal((await context.request.post(url, { form: { ...form, category: 'music' } })).status(), 409);
+    await page.goto(url);
+    await page.getByRole('heading', { name: 'En attente de validation', exact: true }).waitFor();
+    await page.getByRole('link', { name: 'Accéder à mon profil créateur' }).click();
+    assert.equal(await page.locator('.fu-nav__item').count(), 8);
+    await page.getByRole('heading', { name: 'En attente de validation', exact: true }).waitFor();
+    assert.equal(await page.getByRole('link', { name: 'Voir ma fiche publique' }).count(), 0);
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true);
+    await page.screenshot({ path: path.join(output, 'profil-en-attente-mobile.png') });
+    await cookie('fans_ui_admission', 'closed');
+    await page.goto(url);
+    assert.equal(await page.locator('.fu-admission__form').count(), 0, 'missing route must not mean absent profile');
+    await cookie('fans_ui_profiles_ready', 'no');
+    await page.reload();
+    assert.equal(await page.locator('.fu-admission__form').count(), 0);
+    console.log('Creator admission without JS: denied roles, nonce, category, 503, pending request/replay, conflict, no self-approval, private creator navigation and unavailable API/schema passed.');
+  } finally { await browser.close(); }
+})().catch(error => { console.error(error); process.exitCode = 1; });

@@ -9,6 +9,46 @@ use Faluss\Platform\Fans\Profiles\CreatorProfileService;
 /** Read-only views; all ownership and publication decisions stay in existing services. */
 final class FansUiReading
 {
+    public static function admission(FansUiAdmission $model): void
+    {
+        $categories = ['arts' => 'Arts', 'music' => 'Musique', 'games' => 'Jeux', 'learning' => 'Savoirs', 'lifestyle' => 'Art de vivre'];
+        $states = ['pending' => 'En attente de validation', 'active' => 'Profil actif', 'suspended' => 'Profil suspendu'];
+        ?>
+        <section class="fu-content fu-admission" data-fans-private-reading aria-labelledby="fu-admission-title">
+            <h2 id="fu-admission-title">Votre profil créateur</h2>
+            <p>Demandez un profil dans votre domaine de création. Un administrateur doit approuver sa publication.</p>
+            <p class="fu-footnote">Cette demande ne vérifie pas votre identité et ne donne aucun droit de vente. Aucun nom public ni portrait n’est encore proposé.</p>
+            <?php if ($model->result !== null) : ?>
+                <?php $status = $model->result->get_status();
+                $message = match (true) {
+                    $status < 400 => 'Demande traitée. Consultez votre état actuel ci-dessous.',
+                    $status === 400 => 'Choisissez une catégorie autorisée.',
+                    $status === 403 => 'Session ou formulaire expiré. Rechargez la page pour vérifier votre accès.',
+                    $status === 409 => 'Un profil existe déjà ou la demande est en conflit. Relisez son état avant de réessayer.',
+                    default => 'La demande ne peut pas être confirmée. Vérifiez votre profil ou réessayez la même catégorie.',
+                }; ?>
+                <p class="fu-author__notice" role="status"><?php echo esc_html($message); ?></p>
+            <?php endif; ?>
+            <?php if ($model->profile !== null) : ?>
+                <article class="fu-panel fu-admission__card"><p class="fu-panel__kicker"><?php echo esc_html($categories[$model->profile['category']]); ?></p>
+                    <h3><?php echo esc_html($states[$model->profile['status']]); ?></h3>
+                    <a class="fu-link" href="<?php echo esc_url(FansUiRoutes::url('creator', 'mon-profil')); ?>">Accéder à mon profil créateur ↗</a>
+                </article>
+            <?php elseif ($model->canApply) : ?>
+                <form method="post" action="<?php echo esc_url(FansUiRoutes::url('fan', 'espace')); ?>" class="fu-admission__form">
+                    <?php echo wp_nonce_field('fans_admission', 'fans_admission_nonce', false, false); ?>
+                    <input type="hidden" name="admission_action" value="apply">
+                    <label for="fu-admission-category">Votre domaine de création</label>
+                    <select name="category" id="fu-admission-category" required><option value="">Choisir une catégorie</option>
+                        <?php foreach ($categories as $value => $label) : ?><option value="<?php echo esc_attr($value); ?>" <?php echo $model->category === $value ? 'selected' : ''; ?>><?php echo esc_html($label); ?></option><?php endforeach; ?>
+                    </select>
+                    <button type="submit">Demander mon profil créateur</button>
+                </form>
+            <?php else : ?><p class="fu-live">La demande de profil est indisponible pour le moment.</p><?php endif; ?>
+        </section>
+        <?php
+    }
+
     public static function home(string $role): void
     {
         $items = $role === 'creator' ? [

@@ -1,7 +1,7 @@
 # Fans — matrice d’évaluation intermédiaire
 
-État du 29 septembre 2026, après les lots #89 à #92 et la recette transversale du
-lot 5. **Ce n’est pas encore le bilan final des 48 heures.** Version conservée :
+État du 29 septembre 2026, après les lots #89 à #93 et la demande de profil du
+lot 6. **Ce n’est pas encore le bilan final des 48 heures.** Version conservée :
 0.6.3. Base initiale vérifiée : `ad7c5857a0c1d65c84d8ec56b5fdbbd7dba178af`.
 Les modifications Me/Link postérieures à #84 ont été conservées.
 
@@ -26,6 +26,7 @@ des captures sont des fixtures sous `tests/`, jamais des données produit.
 | Mon profil Créateur | `creator/mon-profil` | Fonctionnel et testé en lecture ; édition éditoriale absente | Catégorie/état propriétaire, lien public seulement si actif ; aucune élévation de rôle |
 | Messages Fan/Créateur | `fan/messages`, `creator/messages` | Interface prête mais service absent | Aucun envoi ; moteurs, blocage, signalement, rétention et modération à définir |
 | Mon espace Fan | `fan/espace` | Interface prête mais service absent | Pas de progression PC, niveau ou récompense attribués |
+| Demande de profil Créateur | Dans `fan/espace` | Fonctionnel et testé sur adaptateurs | Catégorie, nonce, profil pending, rejeu et conflit ; approbation administrative conservée |
 | Progression Créateur | `creator/progression` | Interface prête mais service absent | Score HoF absent ; aucune finance |
 | Créer — quatre types | `creator/creer` | Fonctionnel et testé pour choix et texte ; autres services absents | Contenu/prestation/service/produit distingués, seule gestion des textes raccordée |
 | Créer/éditer/retirer un texte | `creator/creer` | Fonctionnel et testé sur adaptateurs | POST natif sans JS, nonce, REST existant, idempotence, révisions, quota, retrait confirmé ; modération humaine obligatoire |
@@ -59,8 +60,8 @@ des captures sont des fixtures sous `tests/`, jamais des données produit.
 4. **Moteurs absents** : messagerie, progression PC, sessions HoF, réservations,
    gestion commerciale et transactions. Les composants indisponibles ne sont pas
    présentés comme des fonctionnalités terminées.
-5. **Revue des parcours existants à poursuivre** : admission d’un profil créateur
-   par catégorie, lecture par auteur et éventuels médias. Le suivi social minimal
+5. **Revue des parcours existants à poursuivre** : lecture par auteur et éventuels
+   médias. L’admission par catégorie est raccordée, sans auto-approbation. Le suivi social minimal
    ne fournit pas blocage/signalement/rétention ; aucune ouverture sociale complète
    n’est prétendue. Ces limites ne doivent pas être cachées par l’UI.
 6. **Validation cible par le propriétaire avant activation** : thème/Elementor,
@@ -76,5 +77,6 @@ des captures sont des fixtures sous `tests/`, jamais des données produit.
 - [Lot 3 : lecture](../evidence/fans-48h/lot-3/README.md).
 - [Lot 4 : textes natifs](../evidence/fans-48h/lot-4/README.md).
 - [Lot 5 : matrice routes/HTTP](../evidence/fans-48h/lot-5/README.md).
+- [Lot 6 : demande de profil](../evidence/fans-48h/lot-6/README.md).
 
 Aucun flag activé, déploiement, release, paiement ou modification des sites.

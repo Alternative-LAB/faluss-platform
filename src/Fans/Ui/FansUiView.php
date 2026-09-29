@@ -60,7 +60,7 @@ final class FansUiView
         'public-profile' => ['Découvrir', 'Profil créateur', 'explorer', 'Fiche publique provisoire : aucun nom ni portrait approuvé n’est encore fourni.'],
     ];
 
-    public static function render(string $role, string $view, ?string $creatorId, int $status = 200, string $signIn = '', ?FansUiAuthor $author = null): void
+    public static function render(string $role, string $view, ?string $creatorId, int $status = 200, string $signIn = '', ?FansUiAuthor $author = null, ?FansUiAdmission $admission = null): void
     {
         $errorView = in_array($view, ['profile-unavailable', 'creator-unavailable'], true);
         $page = self::PAGES[$view === 'public-profile' || $errorView ? $view : $role . ':' . $view] ?? null;
@@ -123,7 +123,7 @@ final class FansUiView
                 <span class="fu-status-mark" aria-hidden="true">◌</span>
                 <div>
                     <p class="fu-panel__kicker"><?php echo $errorView ? 'Accès indisponible' : 'À venir'; ?></p>
-                    <h2 id="fu-status-title"><?php echo $errorView ? 'Cette page ne peut pas être affichée' : 'Parcours indisponible'; ?></h2>
+                    <h2 id="fu-status-title"><?php echo $errorView ? 'Cette page ne peut pas être affichée' : ($view === 'espace' ? 'Progression indisponible' : 'Parcours indisponible'); ?></h2>
                     <p><?php echo esc_html($page[3]); ?></p>
                     <?php if ($errorView) : ?>
                         <a class="fu-link" href="<?php echo esc_url(FansUiRoutes::url($role === 'visitor' ? 'fan' : $role, 'explorer')); ?>">Retour à Explorer <span aria-hidden="true">↗</span></a>
@@ -131,6 +131,7 @@ final class FansUiView
                 </div>
             </section>
         <?php endif; ?>
+        <?php if ($admission !== null) { FansUiReading::admission($admission); } ?>
         <footer class="fu-footer">Faluss Fans · Certaines fonctionnalités arrivent progressivement.</footer>
     </main>
 </div>
