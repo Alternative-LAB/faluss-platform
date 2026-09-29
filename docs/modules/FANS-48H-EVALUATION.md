@@ -1,7 +1,7 @@
 # Fans — matrice d’évaluation intermédiaire
 
-État du 29 septembre 2026, après les lots #89 à #99 et la normalisation des
-chemins avec slash final (lot 12). **Ce n’est pas encore le bilan final des 48 heures.** Version conservée :
+État du 29 septembre 2026, après les lots #89 à #100 et le raccordement du
+compteur public de suivis (lot 13). **Ce n’est pas encore le bilan final des 48 heures.** Version conservée :
 0.6.3. Base initiale vérifiée : `ad7c5857a0c1d65c84d8ec56b5fdbbd7dba178af`.
 Les modifications Me/Link postérieures à #84 ont été conservées.
 
@@ -16,6 +16,7 @@ des captures sont des fixtures sous `tests/`, jamais des données produit.
 | --- | --- | --- | --- |
 | Explorer, invité/Fan/Créateur | `fan/explorer`, `creator/explorer` | Fonctionnel et testé pour la lecture structurée ; identité éditoriale requise | Filtres, vide/erreur, catégories et liens testés ; ni nom public ni portrait approuvé disponibles |
 | Profil public | `creators/{uuid}` | Fonctionnel et testé pour sa fiche structurée et ses textes approuvés | Accès invité ; pagination par créateur ; HTTP 404 de la page pour absent/suspendu/retiré ; aucune identité inventée |
+| Nombre public de suivis | Sur le profil public actif | Fonctionnel et testé en lecture sur adaptateurs | Compteur REST existant seulement ; zéro réel distingué d’une route fermée ; aucune action sociale ouverte |
 | Textes récents | Sur Explorer, les accueils et le profil public | Fonctionnel et testé sur adaptateurs | Liste globale sur accueil/Explorer, filtrée par auteur sur son profil ; curseurs liés au filtre, rendu texte, erreurs et réponses anciennes |
 | Image associée à un texte public | Dans la carte de publication | Fonctionnel et testé sur adaptateurs ; accès et décisions requis avant activation | Dérivé JPEG à la demande, opt-in fermé ; aucun portrait ; description alternative éditoriale et recette d’hébergement requises |
 | HoF | `fan/hof`, `creator/hof` | Interface prête mais service absent | Invité 200 ; aucun rang, session ou point ; moteur et politiques encore requis |
@@ -97,5 +98,6 @@ Les doubles slashs et segments supplémentaires ne donnent aucun accès.
 - [Lot 10 : WebKit et clavier](../evidence/fans-48h/lot-10/README.md).
 - [Lot 11 : retour vers un texte, PR #99](https://github.com/Alternative-LAB/faluss-platform/pull/99).
 - [Lot 12 : chemins avec slash final](../evidence/fans-48h/lot-12/README.md).
+- [Lot 13 : nombre public de suivis](../evidence/fans-48h/lot-13/README.md).
 
 Aucun flag activé, déploiement, release, paiement ou modification des sites.

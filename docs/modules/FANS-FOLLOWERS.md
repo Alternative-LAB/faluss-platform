@@ -16,6 +16,11 @@ La table InnoDB `${prefix}faluss_fans_follows` contient seulement le `wp_user_id
 
 Le service revérifie la preuve SSO, le format de l'identifiant et l'état public du profil côté serveur ; les routes d'écriture réutilisent la permission REST avec nonce du module Profils. Le compteur public n'accorde aucun droit. Il n'y a ni notification, ni événement, ni projection Hub/Federation/Apps Registry implicite.
 
+La fiche publique UI peut lire ce compteur après avoir validé son profil actif.
+Elle affiche « Suivis enregistrés » ou un état indisponible, sans valeur de
+secours. Aucun bouton POST/DELETE ni liste de membres n’est ajouté. Voir le
+[contrat de lecture UI](FANS-READING-UI.md#nombre-public-de-suivis).
+
 ## Preuves et limites
 
 Les tests couvrent l'isolation de rôle et de schéma, la création unique, le rejeu, le retrait répété, le refus de l'auto-suivi, d'un membre non lié et d'un profil suspendu, l'échec de stockage et l'absence d'identités dans le compteur. Une recette locale WordPress/MariaDB a confirmé la table InnoDB et la fermeture des routes au retrait des flags, en conservant la table. Les clés et courses simultanées réelles, les nonces REST des routes Followers et la suspension simultanée d'un profil restent à exercer.
