@@ -57,6 +57,7 @@ fs.mkdirSync(output, { recursive: true });
     const selectedText = '/faluss-fans/creator/creer?publication=123e4567-e89b-42d3-a456-426614174000';
     for (const [destination, expected] of [
       [selectedText, selectedText],
+      [selectedText.replace('creer?', 'creer/?'), selectedText],
       [selectedText + '&nonce=discard', '/faluss-fans/creator/creer'],
       [selectedText + '&publication=123e4567-e89b-42d3-a456-426614174001', '/faluss-fans/creator/creer'],
       [selectedText.replace('publication=', 'publication[]='), '/faluss-fans/creator/creer'],

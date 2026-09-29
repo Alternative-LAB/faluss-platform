@@ -1,7 +1,7 @@
 # Fans — matrice d’évaluation intermédiaire
 
-État du 29 septembre 2026, après les lots #89 à #98 et le retour SSO vers un texte
-sélectionné (lot 11). **Ce n’est pas encore le bilan final des 48 heures.** Version conservée :
+État du 29 septembre 2026, après les lots #89 à #99 et la normalisation des
+chemins avec slash final (lot 12). **Ce n’est pas encore le bilan final des 48 heures.** Version conservée :
 0.6.3. Base initiale vérifiée : `ad7c5857a0c1d65c84d8ec56b5fdbbd7dba178af`.
 Les modifications Me/Link postérieures à #84 ont été conservées.
 
@@ -38,6 +38,10 @@ des captures sont des fixtures sous `tests/`, jamais des données produit.
 | Navigation mobile et clavier | Toutes les routes du shell | Fonctionnel et testé en émulation ; rendu cible requis | Chromium et WebKit Windows, huit accès Créateur par toucher à 320/390 px, focus image corrigé ; typographie WebKit Windows non représentative, Safari/iPhone à vérifier |
 
 ## Droits vérifiés
+
+Les 18 routes Fan/Créateur sont testées avec et sans slash final sur les deux
+viewports, avec les quatre rôles. Les liens canoniques restent sans slash final.
+Les doubles slashs et segments supplémentaires ne donnent aucun accès.
 
 - Invité et administrateur non lié : Explorer, profil public actif et HoF en
   lecture ; pages personnelles HTTP 403. Le SSO n’accorde pas de rôle privilégié.
@@ -91,5 +95,7 @@ des captures sont des fixtures sous `tests/`, jamais des données produit.
 - [Lot 8 : filtre serveur, PR #96](https://github.com/Alternative-LAB/faluss-platform/pull/96).
 - [Lot 9 : profil et publications](../evidence/fans-48h/lot-9/README.md).
 - [Lot 10 : WebKit et clavier](../evidence/fans-48h/lot-10/README.md).
+- [Lot 11 : retour vers un texte, PR #99](https://github.com/Alternative-LAB/faluss-platform/pull/99).
+- [Lot 12 : chemins avec slash final](../evidence/fans-48h/lot-12/README.md).
 
 Aucun flag activé, déploiement, release, paiement ou modification des sites.

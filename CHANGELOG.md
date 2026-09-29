@@ -6,6 +6,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Fans — chemins avec slash final
+
+- Routes Fan/Créateur accessibles avec ou sans un slash final, droits et navigation identiques, sans rafraîchir les règles WordPress.
+- Doubles slashs et segments supplémentaires refusés ; filtre de barre WordPress normalisé de la même façon.
+
 ### Fans — retour SSO vers un texte sélectionné
 
 - Conservation de la sélection d’un texte dans Créer après connexion Me, avec un unique UUID v4 validé ; aucun contenu de formulaire sauvegardé.

@@ -15,6 +15,15 @@ profil (404). Ces refus canoniques utilisent le shell Fans et un retour Explorer
 sans afficher de motif privé ni suggérer qu’une connexion rendrait public un
 profil retiré. Les URL non reconnues restent des 404 de routage.
 
+Scénarios de normalisation des routes : chaque écran doit conserver son statut,
+ses droits et sa navigation avec ou sans un slash final, y compris le retour SSO
+vers un texte sélectionné. La règle WordPress existante capture ce slash dans
+la variable de vue ; le contrôleur la normalise sans modifier les règles stockées.
+Les chemins avec double slash, segment supplémentaire, encodage ou paramètres
+de réécriture injectés sur une autre page restent refusés. Le filtre de barre
+WordPress applique la même normalisation ; aucun rafraîchissement des permaliens
+n’est requis par ce correctif.
+
 Évolution du chantier 48 h : [accueil, profil propre et lecture publique](FANS-READING-UI.md).
 La matrice ci-dessous conserve l’état initial de #84 ; le suivi actualisé est dans
 [FANS-48H.md](FANS-48H.md).

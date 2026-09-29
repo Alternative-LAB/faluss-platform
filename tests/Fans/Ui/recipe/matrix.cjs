@@ -25,6 +25,8 @@ const routes = {
             const expected = publicView ? 200 : (!linked ? 403 : (shell === 'creator' && role !== 'creator' ? 404 : 200));
             const response = await page.goto(`${base}/faluss-fans/${shell}/${view}`);
             assert.equal(response.status(), expected, `${role} ${shell}/${view}`);
+            const slashResponse = await page.goto(`${base}/faluss-fans/${shell}/${view}/`);
+            assert.equal(slashResponse.status(), expected, `${role} ${shell}/${view}/`);
             assert.match(response.headers()['cache-control'], /no-store/);
             assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true, `${width} ${role} ${view}`);
             const navRole = await page.locator('.fu-app').getAttribute('data-fans-role');
@@ -38,6 +40,7 @@ const routes = {
               assert.doesNotMatch(await page.locator('main').innerText(), /#\d|\d+\s*(PF|PC|€)/);
             }
             evidence.push({ width, role, route: `${shell}/${view}`, status: response.status(), navRole });
+            evidence.push({ width, role, route: `${shell}/${view}/`, status: slashResponse.status(), navRole });
             if ((role === 'guest' && shell === 'fan' && view === 'hof')
               || (role === 'creator' && shell === 'creator' && ['progression', 'boutique', 'messages'].includes(view))) {
               await page.screenshot({ path: path.join(output, `${role}-${view}-${width}.png`) });
@@ -47,7 +50,7 @@ const routes = {
         for (const state of ['missing', 'suspended', 'withdrawn']) {
           await context.addCookies([{ name: 'fans_ui_public_state', value: state, url: base }]);
           const id = state === 'missing' ? '123e4567-e89b-42d3-a456-426614174099' : '123e4567-e89b-42d3-a456-426614174000';
-          assert.equal((await page.goto(`${base}/faluss-fans/creators/${id}`)).status(), 404);
+          assert.equal((await page.goto(`${base}/faluss-fans/creators/${id}/`)).status(), 404);
           assert.equal(await page.locator('[data-api], form').count(), 0);
           assert.doesNotMatch(await page.locator('main').innerText(), /123e4567|suspendu|retiré/);
           await page.getByRole('link', { name: 'Retour à Explorer', exact: false }).waitFor();
@@ -55,6 +58,10 @@ const routes = {
           if (role === 'guest' && state === 'missing') await page.screenshot({ path: path.join(output, `profil-indisponible-${width}.png`) });
         }
         await context.addCookies([{ name: 'fans_ui_public_state', value: 'active', url: base }]);
+        assert.equal((await page.goto(`${base}/faluss-fans/creators/123e4567-e89b-42d3-a456-426614174000/`)).status(), 200);
+        for (const invalid of ['creator/creer//', 'creator//creer', 'creator/creer/extra']) {
+          assert.equal((await page.goto(`${base}/faluss-fans/${invalid}`)).status(), 404, invalid);
+        }
       }
       await context.close();
     }

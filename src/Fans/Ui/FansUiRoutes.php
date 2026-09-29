@@ -79,12 +79,13 @@ final class FansUiRoutes
         $actual = parse_url($requestUri, PHP_URL_PATH);
 
         return is_string($expected) && is_string($actual)
-            && rtrim($expected, '/') === rtrim($actual, '/');
+            && ($actual === rtrim($expected, '/') || $actual === rtrim($expected, '/') . '/');
     }
 
     public static function adminBarVisible(bool $show): bool
     {
         $view = get_query_var(self::VIEW_VAR);
+        $view = is_string($view) ? rtrim($view, '/') : $view;
         $creatorId = get_query_var(self::CREATOR_VAR);
         if ($view === 'public-profile' && is_string($creatorId)) {
             $canonical = home_url('/faluss-fans/creators/' . $creatorId);
@@ -104,6 +105,7 @@ final class FansUiRoutes
     public static function handle(): void
     {
         $view = get_query_var(self::VIEW_VAR);
+        $view = is_string($view) ? rtrim($view, '/') : $view;
         if (!is_string($view) || $view === '') {
             return;
         }
