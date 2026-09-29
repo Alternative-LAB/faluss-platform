@@ -103,15 +103,16 @@ final class FansUiReading
         <?php
     }
 
-    public static function publications(): void
+    public static function publications(?string $creatorId = null): void
     {
         $images = ImageDisplayDerivative::enabled();
         ?>
         <section class="fu-content" data-fans-publications data-api="<?php echo esc_url(rest_url('faluss-fans/v1/text-publications')); ?>"
                  data-image-delivery="<?php echo $images ? 'true' : 'false'; ?>"
+                 <?php if ($creatorId !== null) : ?>data-creator-id="<?php echo esc_attr($creatorId); ?>"<?php endif; ?>
                  data-public-base="<?php echo esc_url(home_url('/faluss-fans/creators/')); ?>" aria-labelledby="fu-texts-title">
-            <div class="fu-section-heading"><div><p class="fu-panel__kicker">Publications</p><h2 id="fu-texts-title">Textes publics récents</h2></div></div>
-            <p class="fu-footnote">Textes approuvés de la communauté. Les noms publics et portraits des auteurs ne sont pas encore disponibles.</p>
+            <div class="fu-section-heading"><div><p class="fu-panel__kicker">Publications</p><h2 id="fu-texts-title"><?php echo $creatorId === null ? 'Textes publics récents' : 'Publications de ce profil'; ?></h2></div></div>
+            <p class="fu-footnote"><?php echo $creatorId === null ? 'Textes approuvés de la communauté. Les noms publics et portraits des auteurs ne sont pas encore disponibles.' : 'Seuls les textes approuvés de ce profil sont affichés. Son nom public et son portrait restent indisponibles.'; ?></p>
             <p class="fu-footnote"><?php echo $images ? 'Une publication peut avoir une image approuvée. Vérifiez sa disponibilité à la demande.' : 'Les images de publications sont indisponibles pour le moment.'; ?></p>
             <p class="fu-live" data-text-status role="status">Chargement des publications…</p>
             <div class="fu-text-grid" data-text-results></div>

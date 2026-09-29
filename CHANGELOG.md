@@ -6,6 +6,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Fans — publications du profil public
+
+- Parcours Explorer → profil → textes approuvés du créateur, avec pagination filtrée et états vide/indisponible.
+- Refus côté navigateur des réponses d’un autre auteur ; profils non publics toujours en HTTP 404 sans chargement de contenus.
+
 ### Fans — publications publiques d’un créateur
 
 - Filtre public `creator_id` avant pagination, avec projection et modération existantes ; profil absent ou suspendu refusé sans détail privé.
