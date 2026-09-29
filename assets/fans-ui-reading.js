@@ -21,8 +21,11 @@
     item.className = className;
     return item;
   };
+  // wpdb may return integer columns as decimal strings in the existing REST projection.
+  const validRevision = (value) => (typeof value === 'number' || (typeof value === 'string' && /^[1-9][0-9]{0,9}$/.test(value)))
+    && Number.isSafeInteger(Number(value)) && Number(value) > 0 && Number(value) < 2147483647;
   const valid = (item) => item && id.test(item.publication_id) && id.test(item.creator_id)
-    && Number.isSafeInteger(item.revision) && item.revision > 0
+    && validRevision(item.revision)
     && typeof item.body === 'string' && item.body.length > 0 && item.body.length <= 16000
     && typeof item.updated_at === 'string';
   function reset() {

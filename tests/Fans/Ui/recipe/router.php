@@ -70,7 +70,7 @@ namespace Faluss\Platform\Fans\Ui {
         $mode = $_COOKIE['fans_ui_texts'] ?? 'available';
         if ($mode === 'closed' || $mode === 'error') { http_response_code($mode === 'closed' ? 404 : 503); echo '{}'; return true; }
         $items = $mode === 'empty' ? [] : [[
-            'publication_id' => FIXTURE_ID, 'creator_id' => FIXTURE_ID, 'revision' => 1,
+            'publication_id' => FIXTURE_ID, 'creator_id' => FIXTURE_ID, 'revision' => '1',
             'body' => isset($_GET['cursor']) ? 'Fixture de recette — seconde page.' : "Fixture de recette — texte approuvé.\nLes publications sont rendues comme du texte, sans données de personne.",
             'updated_at' => '2026-09-29 00:00:00',
         ]];
