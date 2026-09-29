@@ -82,7 +82,7 @@ namespace Faluss\Platform\Fans\Ui {
             $creator = $this->render('creator', 'creer');
             $fan = $this->render('fan', 'accueil');
             self::assertSame(8, substr_count($creator, 'class="fu-nav__item'));
-            self::assertSame(5, substr_count($fan, 'class="fu-nav__item'));
+            self::assertSame(6, substr_count($fan, 'class="fu-nav__item'));
             self::assertSame(1, substr_count($creator, 'aria-current="page"'));
             self::assertSame(1, substr_count($fan, 'aria-current="page"'));
             $cursor = -1;
@@ -126,6 +126,25 @@ namespace Faluss\Platform\Fans\Ui {
             self::assertStringContainsString('Parcours indisponible', $html);
             self::assertStringNotContainsString('<form', $html);
             self::assertStringNotContainsString('€', $html);
+        }
+
+        public function testFanRankingStaysDistinctPrivateAndUnavailable(): void
+        {
+            self::assertTrue(FansUiRoutes::validView('fan', 'classement-fans'));
+            self::assertFalse(FansUiRoutes::validView('creator', 'classement-fans'));
+            self::assertSame(403, FansUiRoutes::accessStatus('fan', 'classement-fans', false, false));
+            self::assertSame(200, FansUiRoutes::accessStatus('fan', 'classement-fans', true, false));
+            self::assertNotSame(FansUiRoutes::url('fan', 'classements'), FansUiRoutes::url('fan', 'classement-fans'));
+            $html = $this->render('fan', 'classement-fans');
+            self::assertStringContainsString('Classement indisponible', $html);
+            self::assertStringContainsString('Acheter un pack sans attribuer ses PF ne donnera aucun point.', $html);
+            self::assertStringContainsString('Une même attribution ne comptera qu’une fois.', $html);
+            self::assertStringContainsString('annulations, remboursements et corrections', $html);
+            self::assertSame(1, substr_count($html, 'aria-current="page"'));
+            foreach (['<table', '<form', '<progress', 'data-api=', '€', ' PC', 'wallet'] as $forbidden) {
+                self::assertStringNotContainsString($forbidden, $html);
+            }
+            self::assertStringNotContainsString('aria-label="Classement Fans"', $this->render('creator', 'progression'));
         }
 
         public function testAdminBarIsHiddenOnlyForOrdinaryMembersOnCanonicalFansPages(): void

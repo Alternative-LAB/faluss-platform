@@ -118,7 +118,7 @@ async function noAdminBar(page) {
     await login(fanPage, fixture.fan);
     await publicChecks(fanPage, 'fan');
     await noAdminBar(fanPage);
-    assert.equal(await fanPage.locator('.fu-nav__item').count(), 5);
+    assert.equal(await fanPage.locator('.fu-nav__item').count(), 6);
     await status(fanPage, '/faluss-fans/fan/accueil', 200);
     await noAdminBar(fanPage);
     await status(fanPage, '/faluss-fans/fan/hof', 200);

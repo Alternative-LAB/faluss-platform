@@ -6,6 +6,12 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Fans — classement des fans et navigation V2
+
+- Écran « Classement Fans » distinct du HoF créateur, sous SSO, affichant honnêtement l’absence du service d’attributions attestées et de corrections Hub. Aucun rang, score, montant, PC, donnée fictive ou nouvelle capacité économique.
+- Contrat et propositions non ratifiées pour période, égalités, pseudonymes, invités et abus ; pack seul sans score, attribution unique et corrections obligatoires.
+- Six accès Fan ; huit accès Créateur dont seul l’actif affiche un label visuel, avec noms accessibles conservés. Captures et tests isolés, sans accès aux sites WordPress ni activation de production.
+
 ## [0.6.3] - 2026-09-29
 
 ### Corrigé

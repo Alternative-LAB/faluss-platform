@@ -16,6 +16,7 @@ final class FansUiView
             ['accueil', 'Accueil', 'home', 'accueil'],
             ['explorer', 'Explorer', 'compass', 'explorer'],
             ['hof', 'HoF', 'trophy', 'hof'],
+            ['classement-fans', 'Classement Fans', 'chart', 'classement-fans'],
             ['messages', 'Messages', 'message', 'messages'],
             ['espace', 'Mon espace', 'person', 'espace'],
         ],
@@ -40,6 +41,7 @@ final class FansUiView
         'fan:hof' => ['Hall of Fame', 'Le Hall of Fame', 'hof', 'Les sessions et les scores HoF persistants ne sont pas disponibles. Aucun point n’est affiché.'],
         'fan:hof/session' => ['Hall of Fame', 'Session HoF', 'hof', 'Aucune session active ne peut être affichée ou rejointe pour le moment.'],
         'fan:classements' => ['Hall of Fame', 'Classements', 'hof', 'Les classements ne sont pas encore disponibles. Aucun rang n’est estimé.'],
+        'fan:classement-fans' => ['Les fans soutiennent la création', 'Classement Fans', 'classement-fans', 'Votre place reposera uniquement sur les PF effectivement attribués à des créateurs, après attestation.'],
         'fan:messages' => ['Échanges', 'Messages', 'messages', 'La messagerie n’est pas encore disponible. Aucun message ne peut être envoyé.'],
         'fan:espace' => ['Votre espace', 'Espace personnel', 'espace', 'La progression et les gains PC ne sont pas encore disponibles.'],
         'creator:accueil' => ['Espace créateur', 'Votre espace Fans', 'accueil', 'Votre espace rassemble les accès créateur. Les résumés de sessions et de communauté attendent leurs capacités serveur.'],
@@ -93,6 +95,8 @@ final class FansUiView
             <?php self::publicProfile($api, $creatorId, $role); ?>
         <?php elseif ($view === 'creer') : ?>
             <?php self::creationChoices(); ?>
+        <?php elseif ($view === 'classement-fans') : ?>
+            <?php self::fanRanking(); ?>
         <?php else : ?>
             <section class="fu-panel fu-panel--status" aria-labelledby="fu-status-title">
                 <span class="fu-status-mark" aria-hidden="true">◌</span>
@@ -125,7 +129,7 @@ final class FansUiView
                     <a class="fu-nav__item<?php echo $active === $key ? ' is-active' : ''; ?>"
                        href="<?php echo esc_url(FansUiRoutes::url($role === 'visitor' ? 'fan' : $role, $view)); ?>"
                        aria-label="<?php echo esc_attr($label); ?>"
-                       title="<?php echo esc_attr($label); ?>"<?php echo $active === $key ? ' aria-current="page"' : ''; ?>>
+                       <?php echo $active === $key ? 'aria-current="page"' : ''; ?>>
                         <svg aria-hidden="true" viewBox="0 0 24 24"><use href="#fu-icon-<?php echo esc_attr($icon); ?>"></use></svg>
                         <span class="fu-nav__label"><?php echo esc_html($label); ?></span>
                     </a>
@@ -192,6 +196,37 @@ final class FansUiView
                 ] as [$title, $description]) : ?>
                     <article class="fu-choice"><span class="fu-choice__ornament" aria-hidden="true">✳</span><div><h3><?php echo esc_html($title); ?></h3><p><?php echo esc_html($description); ?></p><span class="fu-closed">Indisponible pour le moment</span></div></article>
                 <?php endforeach; ?>
+            </div>
+        </section>
+        <?php
+    }
+
+    private static function fanRanking(): void
+    {
+        ?>
+        <section class="fu-ranking" aria-labelledby="fu-ranking-status">
+            <div class="fu-panel fu-panel--status">
+                <span class="fu-status-mark" aria-hidden="true">◌</span>
+                <div>
+                    <p class="fu-panel__kicker">Classement Fans</p>
+                    <h2 id="fu-ranking-status">Classement indisponible</h2>
+                    <p>Les attributions attestées et leurs corrections ne sont pas encore disponibles. Votre score et votre rang ne peuvent pas être calculés.</p>
+                    <a class="fu-link" href="<?php echo esc_url(FansUiRoutes::url('fan', 'explorer')); ?>">Découvrir les créateurs <span aria-hidden="true">↗</span></a>
+                </div>
+            </div>
+            <div class="fu-ranking__rules">
+                <article class="fu-panel">
+                    <p class="fu-panel__kicker">Ce qui comptera</p>
+                    <h2>Vos PF attribués</h2>
+                    <p>Seuls les PF effectivement attribués à des créateurs et attestés pourront contribuer. Acheter un pack sans attribuer ses PF ne donnera aucun point.</p>
+                    <p>Une même attribution ne comptera qu’une fois. Les annulations, remboursements et corrections devront être pris en compte.</p>
+                </article>
+                <article class="fu-panel">
+                    <p class="fu-panel__kicker">Avant l’ouverture</p>
+                    <h2>Des règles à finaliser</h2>
+                    <p>La période, les égalités, la visibilité des pseudonymes et la place des invités restent à décider.</p>
+                    <p>Ce classement des fans est distinct du Hall of Fame des créateurs. Aucun classement public n’est lancé.</p>
+                </article>
             </div>
         </section>
         <?php

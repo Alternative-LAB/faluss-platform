@@ -16,7 +16,7 @@ final class FansUiRoutes
 
     /** @var array<string,list<string>> */
     private const VIEWS = [
-        'fan' => ['accueil', 'explorer', 'hof', 'hof/session', 'classements', 'messages', 'espace'],
+        'fan' => ['accueil', 'explorer', 'hof', 'hof/session', 'classements', 'classement-fans', 'messages', 'espace'],
         'creator' => ['accueil', 'explorer', 'hof', 'hof/session', 'classements', 'messages', 'progression', 'creer', 'boutique', 'mon-profil'],
     ];
 
