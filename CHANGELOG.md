@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Documentation
+
+- Matrice Fans et suivi des 48 heures actualisés avec la publication vérifiée de 0.7.0, le correctif clavier #103 et les limites de preuve avant activation ; aucun changement du paquet publié.
+
 ## [0.7.0] - 2026-09-29
 
 ### Ajouté
