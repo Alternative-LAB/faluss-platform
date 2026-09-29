@@ -6,6 +6,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Fans — refus dans le shell et revue des routes
+
+- Pages de profil non public et d’espace créateur sans profil rendues dans le shell Fans avec HTTP 404 conservé, message neutre et retour Explorer.
+- Matrice intermédiaire des écrans, services absents et décisions ; 168 combinaisons rôle/route/viewport vérifiées sur fixtures isolées.
+
 ### Fans — gestion des textes créateur
 
 - Formulaires natifs de création, lecture privée, édition et retrait confirmé via le REST existant ; états et refus explicites, nonce, idempotence et révisions conservés.

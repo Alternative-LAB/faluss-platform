@@ -9,6 +9,12 @@ rôle WordPress privilégié. Le profil public est une seule route canonique com
 
 ## Matrice avant implémentation
 
+Recette de clôture du socle : vérifier le statut HTTP de chaque page selon le
+rôle, avec profil public absent/suspendu/retiré (404) et espace créateur sans
+profil (404). Ces refus canoniques utilisent le shell Fans et un retour Explorer,
+sans afficher de motif privé ni suggérer qu’une connexion rendrait public un
+profil retiré. Les URL non reconnues restent des 404 de routage.
+
 Évolution du chantier 48 h : [accueil, profil propre et lecture publique](FANS-READING-UI.md).
 La matrice ci-dessous conserve l’état initial de #84 ; le suivi actualisé est dans
 [FANS-48H.md](FANS-48H.md).

@@ -1,0 +1,1154 @@
+[
+  {
+    "width": 1440,
+    "role": "guest",
+    "route": "fan/accueil",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "guest",
+    "route": "fan/explorer",
+    "status": 200,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "guest",
+    "route": "fan/hof",
+    "status": 200,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "guest",
+    "route": "fan/hof/session",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "guest",
+    "route": "fan/classements",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "guest",
+    "route": "fan/classement-fans",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "guest",
+    "route": "fan/messages",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "guest",
+    "route": "fan/espace",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "guest",
+    "route": "creator/accueil",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "guest",
+    "route": "creator/explorer",
+    "status": 200,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "guest",
+    "route": "creator/hof",
+    "status": 200,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "guest",
+    "route": "creator/hof/session",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "guest",
+    "route": "creator/classements",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "guest",
+    "route": "creator/messages",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "guest",
+    "route": "creator/progression",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "guest",
+    "route": "creator/creer",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "guest",
+    "route": "creator/boutique",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "guest",
+    "route": "creator/mon-profil",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "guest",
+    "route": "public-profile:missing",
+    "status": 404
+  },
+  {
+    "width": 1440,
+    "role": "guest",
+    "route": "public-profile:suspended",
+    "status": 404
+  },
+  {
+    "width": 1440,
+    "role": "guest",
+    "route": "public-profile:withdrawn",
+    "status": 404
+  },
+  {
+    "width": 1440,
+    "role": "fan",
+    "route": "fan/accueil",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 1440,
+    "role": "fan",
+    "route": "fan/explorer",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 1440,
+    "role": "fan",
+    "route": "fan/hof",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 1440,
+    "role": "fan",
+    "route": "fan/hof/session",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 1440,
+    "role": "fan",
+    "route": "fan/classements",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 1440,
+    "role": "fan",
+    "route": "fan/classement-fans",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 1440,
+    "role": "fan",
+    "route": "fan/messages",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 1440,
+    "role": "fan",
+    "route": "fan/espace",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 1440,
+    "role": "fan",
+    "route": "creator/accueil",
+    "status": 404,
+    "navRole": "fan"
+  },
+  {
+    "width": 1440,
+    "role": "fan",
+    "route": "creator/explorer",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 1440,
+    "role": "fan",
+    "route": "creator/hof",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 1440,
+    "role": "fan",
+    "route": "creator/hof/session",
+    "status": 404,
+    "navRole": "fan"
+  },
+  {
+    "width": 1440,
+    "role": "fan",
+    "route": "creator/classements",
+    "status": 404,
+    "navRole": "fan"
+  },
+  {
+    "width": 1440,
+    "role": "fan",
+    "route": "creator/messages",
+    "status": 404,
+    "navRole": "fan"
+  },
+  {
+    "width": 1440,
+    "role": "fan",
+    "route": "creator/progression",
+    "status": 404,
+    "navRole": "fan"
+  },
+  {
+    "width": 1440,
+    "role": "fan",
+    "route": "creator/creer",
+    "status": 404,
+    "navRole": "fan"
+  },
+  {
+    "width": 1440,
+    "role": "fan",
+    "route": "creator/boutique",
+    "status": 404,
+    "navRole": "fan"
+  },
+  {
+    "width": 1440,
+    "role": "fan",
+    "route": "creator/mon-profil",
+    "status": 404,
+    "navRole": "fan"
+  },
+  {
+    "width": 1440,
+    "role": "fan",
+    "route": "public-profile:missing",
+    "status": 404
+  },
+  {
+    "width": 1440,
+    "role": "fan",
+    "route": "public-profile:suspended",
+    "status": 404
+  },
+  {
+    "width": 1440,
+    "role": "fan",
+    "route": "public-profile:withdrawn",
+    "status": 404
+  },
+  {
+    "width": 1440,
+    "role": "creator",
+    "route": "fan/accueil",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 1440,
+    "role": "creator",
+    "route": "fan/explorer",
+    "status": 200,
+    "navRole": "creator"
+  },
+  {
+    "width": 1440,
+    "role": "creator",
+    "route": "fan/hof",
+    "status": 200,
+    "navRole": "creator"
+  },
+  {
+    "width": 1440,
+    "role": "creator",
+    "route": "fan/hof/session",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 1440,
+    "role": "creator",
+    "route": "fan/classements",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 1440,
+    "role": "creator",
+    "route": "fan/classement-fans",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 1440,
+    "role": "creator",
+    "route": "fan/messages",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 1440,
+    "role": "creator",
+    "route": "fan/espace",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 1440,
+    "role": "creator",
+    "route": "creator/accueil",
+    "status": 200,
+    "navRole": "creator"
+  },
+  {
+    "width": 1440,
+    "role": "creator",
+    "route": "creator/explorer",
+    "status": 200,
+    "navRole": "creator"
+  },
+  {
+    "width": 1440,
+    "role": "creator",
+    "route": "creator/hof",
+    "status": 200,
+    "navRole": "creator"
+  },
+  {
+    "width": 1440,
+    "role": "creator",
+    "route": "creator/hof/session",
+    "status": 200,
+    "navRole": "creator"
+  },
+  {
+    "width": 1440,
+    "role": "creator",
+    "route": "creator/classements",
+    "status": 200,
+    "navRole": "creator"
+  },
+  {
+    "width": 1440,
+    "role": "creator",
+    "route": "creator/messages",
+    "status": 200,
+    "navRole": "creator"
+  },
+  {
+    "width": 1440,
+    "role": "creator",
+    "route": "creator/progression",
+    "status": 200,
+    "navRole": "creator"
+  },
+  {
+    "width": 1440,
+    "role": "creator",
+    "route": "creator/creer",
+    "status": 200,
+    "navRole": "creator"
+  },
+  {
+    "width": 1440,
+    "role": "creator",
+    "route": "creator/boutique",
+    "status": 200,
+    "navRole": "creator"
+  },
+  {
+    "width": 1440,
+    "role": "creator",
+    "route": "creator/mon-profil",
+    "status": 200,
+    "navRole": "creator"
+  },
+  {
+    "width": 1440,
+    "role": "creator",
+    "route": "public-profile:missing",
+    "status": 404
+  },
+  {
+    "width": 1440,
+    "role": "creator",
+    "route": "public-profile:suspended",
+    "status": 404
+  },
+  {
+    "width": 1440,
+    "role": "creator",
+    "route": "public-profile:withdrawn",
+    "status": 404
+  },
+  {
+    "width": 1440,
+    "role": "admin",
+    "route": "fan/accueil",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "admin",
+    "route": "fan/explorer",
+    "status": 200,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "admin",
+    "route": "fan/hof",
+    "status": 200,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "admin",
+    "route": "fan/hof/session",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "admin",
+    "route": "fan/classements",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "admin",
+    "route": "fan/classement-fans",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "admin",
+    "route": "fan/messages",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "admin",
+    "route": "fan/espace",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "admin",
+    "route": "creator/accueil",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "admin",
+    "route": "creator/explorer",
+    "status": 200,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "admin",
+    "route": "creator/hof",
+    "status": 200,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "admin",
+    "route": "creator/hof/session",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "admin",
+    "route": "creator/classements",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "admin",
+    "route": "creator/messages",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "admin",
+    "route": "creator/progression",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "admin",
+    "route": "creator/creer",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "admin",
+    "route": "creator/boutique",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "admin",
+    "route": "creator/mon-profil",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 1440,
+    "role": "admin",
+    "route": "public-profile:missing",
+    "status": 404
+  },
+  {
+    "width": 1440,
+    "role": "admin",
+    "route": "public-profile:suspended",
+    "status": 404
+  },
+  {
+    "width": 1440,
+    "role": "admin",
+    "route": "public-profile:withdrawn",
+    "status": 404
+  },
+  {
+    "width": 390,
+    "role": "guest",
+    "route": "fan/accueil",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "guest",
+    "route": "fan/explorer",
+    "status": 200,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "guest",
+    "route": "fan/hof",
+    "status": 200,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "guest",
+    "route": "fan/hof/session",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "guest",
+    "route": "fan/classements",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "guest",
+    "route": "fan/classement-fans",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "guest",
+    "route": "fan/messages",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "guest",
+    "route": "fan/espace",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "guest",
+    "route": "creator/accueil",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "guest",
+    "route": "creator/explorer",
+    "status": 200,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "guest",
+    "route": "creator/hof",
+    "status": 200,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "guest",
+    "route": "creator/hof/session",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "guest",
+    "route": "creator/classements",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "guest",
+    "route": "creator/messages",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "guest",
+    "route": "creator/progression",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "guest",
+    "route": "creator/creer",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "guest",
+    "route": "creator/boutique",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "guest",
+    "route": "creator/mon-profil",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "guest",
+    "route": "public-profile:missing",
+    "status": 404
+  },
+  {
+    "width": 390,
+    "role": "guest",
+    "route": "public-profile:suspended",
+    "status": 404
+  },
+  {
+    "width": 390,
+    "role": "guest",
+    "route": "public-profile:withdrawn",
+    "status": 404
+  },
+  {
+    "width": 390,
+    "role": "fan",
+    "route": "fan/accueil",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 390,
+    "role": "fan",
+    "route": "fan/explorer",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 390,
+    "role": "fan",
+    "route": "fan/hof",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 390,
+    "role": "fan",
+    "route": "fan/hof/session",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 390,
+    "role": "fan",
+    "route": "fan/classements",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 390,
+    "role": "fan",
+    "route": "fan/classement-fans",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 390,
+    "role": "fan",
+    "route": "fan/messages",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 390,
+    "role": "fan",
+    "route": "fan/espace",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 390,
+    "role": "fan",
+    "route": "creator/accueil",
+    "status": 404,
+    "navRole": "fan"
+  },
+  {
+    "width": 390,
+    "role": "fan",
+    "route": "creator/explorer",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 390,
+    "role": "fan",
+    "route": "creator/hof",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 390,
+    "role": "fan",
+    "route": "creator/hof/session",
+    "status": 404,
+    "navRole": "fan"
+  },
+  {
+    "width": 390,
+    "role": "fan",
+    "route": "creator/classements",
+    "status": 404,
+    "navRole": "fan"
+  },
+  {
+    "width": 390,
+    "role": "fan",
+    "route": "creator/messages",
+    "status": 404,
+    "navRole": "fan"
+  },
+  {
+    "width": 390,
+    "role": "fan",
+    "route": "creator/progression",
+    "status": 404,
+    "navRole": "fan"
+  },
+  {
+    "width": 390,
+    "role": "fan",
+    "route": "creator/creer",
+    "status": 404,
+    "navRole": "fan"
+  },
+  {
+    "width": 390,
+    "role": "fan",
+    "route": "creator/boutique",
+    "status": 404,
+    "navRole": "fan"
+  },
+  {
+    "width": 390,
+    "role": "fan",
+    "route": "creator/mon-profil",
+    "status": 404,
+    "navRole": "fan"
+  },
+  {
+    "width": 390,
+    "role": "fan",
+    "route": "public-profile:missing",
+    "status": 404
+  },
+  {
+    "width": 390,
+    "role": "fan",
+    "route": "public-profile:suspended",
+    "status": 404
+  },
+  {
+    "width": 390,
+    "role": "fan",
+    "route": "public-profile:withdrawn",
+    "status": 404
+  },
+  {
+    "width": 390,
+    "role": "creator",
+    "route": "fan/accueil",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 390,
+    "role": "creator",
+    "route": "fan/explorer",
+    "status": 200,
+    "navRole": "creator"
+  },
+  {
+    "width": 390,
+    "role": "creator",
+    "route": "fan/hof",
+    "status": 200,
+    "navRole": "creator"
+  },
+  {
+    "width": 390,
+    "role": "creator",
+    "route": "fan/hof/session",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 390,
+    "role": "creator",
+    "route": "fan/classements",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 390,
+    "role": "creator",
+    "route": "fan/classement-fans",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 390,
+    "role": "creator",
+    "route": "fan/messages",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 390,
+    "role": "creator",
+    "route": "fan/espace",
+    "status": 200,
+    "navRole": "fan"
+  },
+  {
+    "width": 390,
+    "role": "creator",
+    "route": "creator/accueil",
+    "status": 200,
+    "navRole": "creator"
+  },
+  {
+    "width": 390,
+    "role": "creator",
+    "route": "creator/explorer",
+    "status": 200,
+    "navRole": "creator"
+  },
+  {
+    "width": 390,
+    "role": "creator",
+    "route": "creator/hof",
+    "status": 200,
+    "navRole": "creator"
+  },
+  {
+    "width": 390,
+    "role": "creator",
+    "route": "creator/hof/session",
+    "status": 200,
+    "navRole": "creator"
+  },
+  {
+    "width": 390,
+    "role": "creator",
+    "route": "creator/classements",
+    "status": 200,
+    "navRole": "creator"
+  },
+  {
+    "width": 390,
+    "role": "creator",
+    "route": "creator/messages",
+    "status": 200,
+    "navRole": "creator"
+  },
+  {
+    "width": 390,
+    "role": "creator",
+    "route": "creator/progression",
+    "status": 200,
+    "navRole": "creator"
+  },
+  {
+    "width": 390,
+    "role": "creator",
+    "route": "creator/creer",
+    "status": 200,
+    "navRole": "creator"
+  },
+  {
+    "width": 390,
+    "role": "creator",
+    "route": "creator/boutique",
+    "status": 200,
+    "navRole": "creator"
+  },
+  {
+    "width": 390,
+    "role": "creator",
+    "route": "creator/mon-profil",
+    "status": 200,
+    "navRole": "creator"
+  },
+  {
+    "width": 390,
+    "role": "creator",
+    "route": "public-profile:missing",
+    "status": 404
+  },
+  {
+    "width": 390,
+    "role": "creator",
+    "route": "public-profile:suspended",
+    "status": 404
+  },
+  {
+    "width": 390,
+    "role": "creator",
+    "route": "public-profile:withdrawn",
+    "status": 404
+  },
+  {
+    "width": 390,
+    "role": "admin",
+    "route": "fan/accueil",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "admin",
+    "route": "fan/explorer",
+    "status": 200,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "admin",
+    "route": "fan/hof",
+    "status": 200,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "admin",
+    "route": "fan/hof/session",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "admin",
+    "route": "fan/classements",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "admin",
+    "route": "fan/classement-fans",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "admin",
+    "route": "fan/messages",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "admin",
+    "route": "fan/espace",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "admin",
+    "route": "creator/accueil",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "admin",
+    "route": "creator/explorer",
+    "status": 200,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "admin",
+    "route": "creator/hof",
+    "status": 200,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "admin",
+    "route": "creator/hof/session",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "admin",
+    "route": "creator/classements",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "admin",
+    "route": "creator/messages",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "admin",
+    "route": "creator/progression",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "admin",
+    "route": "creator/creer",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "admin",
+    "route": "creator/boutique",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "admin",
+    "route": "creator/mon-profil",
+    "status": 403,
+    "navRole": "visitor"
+  },
+  {
+    "width": 390,
+    "role": "admin",
+    "route": "public-profile:missing",
+    "status": 404
+  },
+  {
+    "width": 390,
+    "role": "admin",
+    "route": "public-profile:suspended",
+    "status": 404
+  },
+  {
+    "width": 390,
+    "role": "admin",
+    "route": "public-profile:withdrawn",
+    "status": 404
+  }
+]
