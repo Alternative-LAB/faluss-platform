@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Fans — accueil et lecture
+
+- Accueil navigable, statut propriétaire et pages de textes publics approuvés via le REST existant, sans identité ou progression inventée.
+
 ### Fans — retour après connexion et étude invité
 
 - Retour SSO vers une page Fans autorisée, cookie de navigation signé et lié à l’état consommé ; refus des destinations externes, admin, query et callback, sans changement de l’URI enregistrée auprès de Me.

@@ -29,8 +29,12 @@ serveurs ou updater ; code et GitHub uniquement. Version conservée, pas de rele
 Lot 1 fusionné : [PR #89](https://github.com/Alternative-LAB/faluss-platform/pull/89),
 `main` `70933b530d4b49a6d8b0c6b2ea6e318a91d11856`, CI de branche et de main vertes.
 279 tests / 4 152 assertions ; [captures et limites](../evidence/fans-48h/lot-1/README.md).
-Lot 2 : [retour SSO et étude invité](FANS-SSO-RETURN-AND-GUEST.md), avec preuve
-isolée du flux existant ; validation cible toujours réservée au propriétaire.
+Lot 2 fusionné : [PR #90](https://github.com/Alternative-LAB/faluss-platform/pull/90),
+`main` `42123d48adfac7e5e7779d56cf060ada7a489950`, CI de branche et de main vertes.
+284 tests / 4 226 assertions ; [retour SSO et étude invité](FANS-SSO-RETURN-AND-GUEST.md),
+avec preuve isolée du flux existant ; validation cible réservée au propriétaire.
+Lot 3 : [lecture et accueil](FANS-READING-UI.md), 284 tests / 4 235 assertions,
+recettes navigateur isolées et [captures](../evidence/fans-48h/lot-3/README.md).
 
 Les cases « interface prête mais service absent » n’attestent aucune fonctionnalité
 métier. Les captures seront produites depuis un serveur de tests PHP isolé :
@@ -40,7 +44,7 @@ la recette réelle avant activation.
 | Écran ou parcours | État de départ et limite | Lot prévu |
 | --- | --- | --- |
 | Explorer → profil public | Rendu API de catégories approuvées testé dans #84 ; nom/portrait approuvé absents | 3, 5 |
-| Accueil Fan / Créateur | Interface prête mais service de flux absent | 3 |
+| Accueil Fan / Créateur | Navigation et liste globale de textes approuvés raccordées et testées ; personnalisation/statistiques absentes | 3 |
 | HoF invité / connecté | Interface prête mais moteur absent | 5 |
 | Session HoF | Interface prête mais session absente | 5 |
 | Classements HoF | Interface prête mais moteur absent | 5 |
@@ -48,7 +52,7 @@ la recette réelle avant activation.
 | Messagerie | Interface prête mais service absent ; modération/blocage requis | 5 |
 | Mon espace Fan | Interface prête mais progression PC absente | 5 |
 | Progression Créateur | Interface prête mais score HoF absent ; aucune finance | 5 |
-| Mon profil Créateur | Route distincte, lecture propriétaire à raccorder ; édition éditoriale absente | 3 |
+| Mon profil Créateur | Lecture du statut et de la catégorie raccordée et testée ; édition éditoriale absente | 3 |
 | Créer — contenu texte | API de textes modérés existante, UI de gestion absente | 4 |
 | Créer — prestation / service / produit | Interface prête mais services absents | 4, 5 |
 | Ma boutique | Interface prête ; pas de gestion propriétaire ni transaction disponible | 5 |

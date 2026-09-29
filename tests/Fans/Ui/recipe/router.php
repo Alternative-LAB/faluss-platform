@@ -24,7 +24,8 @@ namespace Faluss\Platform\Fans\Profiles {
     {
         public static function own(): ?array
         {
-            return ($_COOKIE['fans_ui_role'] ?? '') === 'creator' ? ['creator_id' => 'fixture'] : null;
+            return ($_COOKIE['fans_ui_role'] ?? '') === 'creator'
+                ? ['creator_id' => \Faluss\Platform\Fans\Ui\FIXTURE_ID, 'category' => 'arts', 'status' => $_COOKIE['fans_ui_profile'] ?? 'active'] : null;
         }
         public static function publicById(mixed $creatorId): ?array
         {
@@ -42,9 +43,9 @@ namespace Faluss\Platform\Fans\Ui {
     function rest_url(string $path): string { return home_url('/wp-json/' . $path); }
     function plugins_url(string $path, string $plugin): string { return home_url('/' . $path); }
     function wp_enqueue_style(string $handle, string $url, array $deps, string $version): void { $GLOBALS['fixture_style'] = $url; }
-    function wp_enqueue_script(string $handle, string $url, array $deps, string $version, bool $footer): void { $GLOBALS['fixture_script'] = $url; }
+    function wp_enqueue_script(string $handle, string $url, array $deps, string $version, bool $footer): void { $GLOBALS['fixture_scripts'][] = $url; }
     function wp_head(): void { echo '<link rel="stylesheet" href="' . esc_url($GLOBALS['fixture_style']) . '">'; }
-    function wp_footer(): void { echo '<script src="' . esc_url($GLOBALS['fixture_script']) . '"></script>'; }
+    function wp_footer(): void { foreach ($GLOBALS['fixture_scripts'] as $url) { echo '<script src="' . esc_url($url) . '"></script>'; } }
     function status_header(int $status): void { http_response_code($status); }
     function nocache_headers(): void { header('Cache-Control: no-store'); }
     function get_query_var(string $name): mixed { return $GLOBALS['fixture_query'][$name] ?? ''; }
@@ -62,6 +63,19 @@ namespace Faluss\Platform\Fans\Ui {
     $path = (string) parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
     if (is_file($root . $path)) {
         return false;
+    }
+    if ($path === '/wp-json/faluss-fans/v1/text-publications') {
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: no-store');
+        $mode = $_COOKIE['fans_ui_texts'] ?? 'available';
+        if ($mode === 'closed' || $mode === 'error') { http_response_code($mode === 'closed' ? 404 : 503); echo '{}'; return true; }
+        $items = $mode === 'empty' ? [] : [[
+            'publication_id' => FIXTURE_ID, 'creator_id' => FIXTURE_ID, 'revision' => '1',
+            'body' => isset($_GET['cursor']) ? 'Fixture de recette — seconde page.' : "Fixture de recette — texte approuvé.\nLes publications sont rendues comme du texte, sans données de personne.",
+            'updated_at' => '2026-09-29 00:00:00',
+        ]];
+        echo json_encode(['items' => $items, 'next_cursor' => $mode !== 'empty' && !isset($_GET['cursor']) ? 'fixture-next' : null]);
+        return true;
     }
     if (str_starts_with($path, '/wp-json/faluss-fans/v1/creators')) {
         header('Content-Type: application/json; charset=utf-8');
@@ -92,6 +106,7 @@ namespace Faluss\Platform\Fans\Ui {
     if (!defined('FALUSS_PLATFORM_FANS_CREATOR_PROFILES')) { define('FALUSS_PLATFORM_FANS_CREATOR_PROFILES', true); }
     require_once $root . '/src/Fans/Ui/FansUiRoutes.php';
     require_once $root . '/src/Fans/Ui/FansUiView.php';
+    require_once $root . '/src/Fans/Ui/FansUiReading.php';
     $GLOBALS['fixture_query'] = [];
     if (preg_match('~^/faluss-fans/creators/([0-9a-f-]{36})/?$~', $path, $matches) === 1) {
         $GLOBALS['fixture_query'][FansUiRoutes::VIEW_VAR] = 'public-profile';
