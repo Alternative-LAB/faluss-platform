@@ -1,13 +1,13 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { chromium } = require('playwright');
+const launchBrowser = require('./browser-engine.cjs');
 const base = process.env.FANS_UI_BASE || 'http://127.0.0.1:8765';
 const url = `${base}/faluss-fans/creator/creer`;
 const output = process.env.FANS_UI_OUTPUT || path.resolve(__dirname, '../../../../docs/evidence/fans-48h/lot-4');
 fs.mkdirSync(output, { recursive: true });
 (async () => {
-  const browser = await chromium.launch({ channel: 'chrome', headless: true });
+  const browser = await launchBrowser();
   try {
     const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, javaScriptEnabled: false });
     const cookie = (name, value) => context.addCookies([{ name, value, url: base }]);
@@ -66,6 +66,7 @@ fs.mkdirSync(output, { recursive: true });
     const retryKey = await page.locator('[name=creation_key]').inputValue();
     await page.getByLabel('Votre texte', { exact: true }).fill('Fixture de recette — réessai identique.');
     await page.getByRole('button', { name: 'Soumettre à la modération', exact: true }).click();
+    await page.getByRole('button', { name: 'Réessayer la même demande', exact: true }).waitFor();
     assert.equal(await page.locator('[name=creation_key]').inputValue(), retryKey);
     assert.equal(await page.locator('textarea').getAttribute('readonly'), '');
     await cookie('fans_ui_write_error', '');

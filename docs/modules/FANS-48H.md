@@ -68,9 +68,15 @@ assertions en environnement PHP isolé ; curseurs liés au filtre, suspension en
 pages, retrait, liste vide, projections publiques et compatibilité v1 vérifiés.
 Aucune interface modifiée dans ce lot ; pas de nouvelle capture requise.
 
-Lot 9 : raccordement du profil public à la liste filtrée du lot 8 ; quatre rôles,
+Lot 9 fusionné : [PR #97](https://github.com/Alternative-LAB/faluss-platform/pull/97),
+`main` `43eec96f74b9236e96ae5feb103629bb8a16964c`, CI de branche et de main vertes.
+Raccordement du profil public à la liste filtrée du lot 8 ; quatre rôles,
 pagination, refus de réponse étrangère, états vide/erreur et 404 document vérifiés.
 [Captures et preuves](../evidence/fans-48h/lot-9/README.md).
+
+Lot 10 : recettes WebKit Windows 26.5, correction du focus clavier des images,
+contrôles tactiles des huit accès Créateur à 320/390 px et 168 cas de la matrice.
+[Captures, reproduction et limite typographique](../evidence/fans-48h/lot-10/README.md).
 
 ### Bilan communiqué le 29 septembre vers 22 h (Paris)
 

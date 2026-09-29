@@ -1,14 +1,14 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { chromium } = require('playwright');
+const launchBrowser = require('./browser-engine.cjs');
 
 const base = process.env.FANS_UI_BASE || 'http://127.0.0.1:8765';
 const output = process.env.FANS_UI_OUTPUT || path.resolve(__dirname, '../../../../docs/evidence/fans-ui-v2');
 fs.mkdirSync(output, { recursive: true });
 
 (async () => {
-  const browser = await chromium.launch({ channel: 'chrome', headless: true });
+  const browser = await launchBrowser();
   try {
     const desktop = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
     await desktop.addCookies([{ name: 'fans_ui_role', value: 'fan', url: base }]);
@@ -119,6 +119,23 @@ fs.mkdirSync(output, { recursive: true });
     const mobileCreator = await creatorMobile.newPage();
     await mobileCreator.goto(`${base}/faluss-fans/creator/creer`);
     assert.equal(await mobileCreator.locator('.fu-nav__item').count(), 8);
+    for (const width of [320, 390]) {
+      await mobileCreator.setViewportSize({ width, height: 844 });
+      for (const label of ['Accueil', 'Explorer', 'HoF', 'Messages', 'Créer', 'Ma boutique', 'Progression', 'Mon profil']) {
+        const item = mobileCreator.getByRole('link', { name: label, exact: true });
+        const box = await item.boundingBox();
+        assert.ok(box.width >= 44 && box.height >= 44, `Touch target ${label}`);
+        assert.equal(await item.evaluate(element => {
+          const box = element.getBoundingClientRect();
+          return document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2)?.closest('a') === element;
+        }), true, `Unobstructed target ${label}`);
+        const destination = await item.getAttribute('href');
+        await Promise.all([mobileCreator.waitForURL(destination), item.tap()]);
+        assert.equal(await mobileCreator.locator('.fu-nav__item[aria-current="page"]').getAttribute('aria-label'), label);
+        assert.equal(await mobileCreator.locator('.fu-nav__item:not(.is-active) .fu-nav__label:visible').count(), 0);
+      }
+    }
+    await mobileCreator.goto(`${base}/faluss-fans/creator/creer`);
     assert.equal(await mobileCreator.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true);
     for (const label of ['Accueil', 'Explorer', 'HoF', 'Messages', 'Créer', 'Ma boutique', 'Progression', 'Mon profil']) {
       const item = mobileCreator.getByRole('link', { name: label, exact: true });
