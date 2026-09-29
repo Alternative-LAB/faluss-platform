@@ -138,8 +138,9 @@ ordre pendant le parcours. Recommencer à la première page pour un parcours fra
 Le retrait et la suspension restent prioritaires sur tout ancien curseur.
 La création est idempotente selon le contrat ci-dessous. Les modifications restent
 protégées par leur révision : rejouer une édition déjà appliquée renvoie 409.
-Pas d'écran d'édition/modération ajouté : parcours REST seulement, état du module
-dans l'administration commune. L'ergonomie reste à traiter.
+La [gestion des textes créateur](FANS-AUTHOR-UI.md) raccorde désormais création,
+lecture privée, édition et retrait à ce REST. La [modération](FANS-MODERATION.md)
+reste dans l’administration commune. Aucun changement de politique dans ces UI.
 
 ## Admission par créateur et concurrence
 

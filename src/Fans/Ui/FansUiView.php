@@ -52,13 +52,13 @@ final class FansUiView
         'creator:classements' => ['Hall of Fame', 'Classements', 'hof', 'Les classements et les points HoF persistants ne sont pas encore disponibles.'],
         'creator:messages' => ['Échanges', 'Messages', 'messages', 'La messagerie n’est pas encore disponible. Aucun message ne peut être envoyé.'],
         'creator:progression' => ['Espace créateur', 'Progression', 'progression', 'Les points HoF et la progression persistante ne sont pas encore disponibles.'],
-        'creator:creer' => ['Espace créateur', 'Que souhaitez-vous créer ?', 'creer', 'Chaque type de création sera ouvert lorsque son parcours serveur complet sera disponible.'],
+        'creator:creer' => ['Espace créateur', 'Que souhaitez-vous créer ?', 'creer', 'Choisissez un format. Les textes passent par la modération ; les autres parcours restent indisponibles.'],
         'creator:boutique' => ['Espace créateur', 'Ma boutique', 'boutique', 'La gestion des offres, les réservations et les commandes ne sont pas encore disponibles.'],
         'creator:mon-profil' => ['Espace créateur', 'Mon profil', 'mon-profil', 'Cet espace de gestion est distinct du profil public. Les outils d’édition ne sont pas encore disponibles.'],
         'public-profile' => ['Découvrir', 'Profil créateur', 'explorer', 'Fiche publique provisoire : aucun nom ni portrait approuvé n’est encore fourni.'],
     ];
 
-    public static function render(string $role, string $view, ?string $creatorId, int $status = 200, string $signIn = ''): void
+    public static function render(string $role, string $view, ?string $creatorId, int $status = 200, string $signIn = '', ?FansUiAuthor $author = null): void
     {
         $page = self::PAGES[$view === 'public-profile' ? 'public-profile' : $role . ':' . $view] ?? null;
         if ($page === null || !isset(self::NAV[$role])) {
@@ -109,7 +109,8 @@ final class FansUiView
         <?php elseif ($view === 'public-profile' && $creatorId !== null) : ?>
             <?php self::publicProfile($api, $creatorId, $role); ?>
         <?php elseif ($view === 'creer') : ?>
-            <?php self::creationChoices(); ?>
+            <?php self::creationChoices($author !== null && $author->available); ?>
+            <?php if ($author !== null) { FansUiAuthorView::render($author); } ?>
         <?php elseif ($view === 'classement-fans') : ?>
             <?php self::fanRanking(); ?>
         <?php elseif ($view === 'connexion') : ?>
@@ -199,7 +200,7 @@ final class FansUiView
         <?php
     }
 
-    private static function creationChoices(): void
+    private static function creationChoices(bool $textsAvailable = false): void
     {
         ?>
         <section class="fu-content" aria-labelledby="fu-create-title">
@@ -211,7 +212,9 @@ final class FansUiView
                     ['Service', 'Accompagnement personnalisé.'],
                     ['Produit', 'Objet ou création à proposer.'],
                 ] as [$title, $description]) : ?>
-                    <article class="fu-choice"><span class="fu-choice__ornament" aria-hidden="true">✳</span><div><h3><?php echo esc_html($title); ?></h3><p><?php echo esc_html($description); ?></p><span class="fu-closed">Indisponible pour le moment</span></div></article>
+                    <article class="fu-choice"><span class="fu-choice__ornament" aria-hidden="true">✳</span><div><h3><?php echo esc_html($title); ?></h3><p><?php echo esc_html($description); ?></p>
+                    <?php if ($title === 'Publication' && $textsAvailable) : ?><a class="fu-link" href="#fu-author">Gérer mes textes ↓</a>
+                    <?php else : ?><span class="fu-closed">Indisponible pour le moment</span><?php endif; ?></div></article>
                 <?php endforeach; ?>
             </div>
         </section>

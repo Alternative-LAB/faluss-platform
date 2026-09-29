@@ -33,8 +33,12 @@ Lot 2 fusionné : [PR #90](https://github.com/Alternative-LAB/faluss-platform/pu
 `main` `42123d48adfac7e5e7779d56cf060ada7a489950`, CI de branche et de main vertes.
 284 tests / 4 226 assertions ; [retour SSO et étude invité](FANS-SSO-RETURN-AND-GUEST.md),
 avec preuve isolée du flux existant ; validation cible réservée au propriétaire.
-Lot 3 : [lecture et accueil](FANS-READING-UI.md), 284 tests / 4 235 assertions,
+Lot 3 fusionné : [PR #91](https://github.com/Alternative-LAB/faluss-platform/pull/91),
+`main` `1dfcea486ce7795bdea7734e0062edfd7e3544b2`, CI de branche et de main vertes.
+[Lecture et accueil](FANS-READING-UI.md), 284 tests / 4 235 assertions,
 recettes navigateur isolées et [captures](../evidence/fans-48h/lot-3/README.md).
+Lot 4 : [gestion des textes](FANS-AUTHOR-UI.md), 284 tests / 4 253 assertions,
+recette sans JavaScript, [captures et limites](../evidence/fans-48h/lot-4/README.md).
 
 Les cases « interface prête mais service absent » n’attestent aucune fonctionnalité
 métier. Les captures seront produites depuis un serveur de tests PHP isolé :
@@ -53,7 +57,7 @@ la recette réelle avant activation.
 | Mon espace Fan | Interface prête mais progression PC absente | 5 |
 | Progression Créateur | Interface prête mais score HoF absent ; aucune finance | 5 |
 | Mon profil Créateur | Lecture du statut et de la catégorie raccordée et testée ; édition éditoriale absente | 3 |
-| Créer — contenu texte | API de textes modérés existante, UI de gestion absente | 4 |
+| Créer — contenu texte | UI de création/édition/retrait et liste privée raccordées et testées sur adaptateurs ; moteur de modération existant inchangé | 4 |
 | Créer — prestation / service / produit | Interface prête mais services absents | 4, 5 |
 | Ma boutique | Interface prête ; pas de gestion propriétaire ni transaction disponible | 5 |
 | SSO Me → Fans | Retour borné implémenté ; tests isolés, échange réel à valider par le propriétaire | 2 |

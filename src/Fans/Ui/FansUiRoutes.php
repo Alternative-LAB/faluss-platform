@@ -144,7 +144,8 @@ final class FansUiRoutes
             }
         }
 
-        FansUiView::render((string) $role, $view, $publicProfile ? $creatorId : null, 200, $signIn);
+        $author = $role === 'creator' && $view === 'creer' ? FansUiAuthor::load() : null;
+        FansUiView::render((string) $role, $view, $publicProfile ? $creatorId : null, $author?->httpStatus() ?? 200, $signIn, $author);
         exit;
     }
 

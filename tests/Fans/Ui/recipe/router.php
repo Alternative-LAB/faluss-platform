@@ -35,9 +35,74 @@ namespace Faluss\Platform\Fans\Profiles {
     }
 }
 
+namespace Faluss\Platform\Fans\Publications {
+    final class TextPublicationsModule { public static function available(): bool { return ($_COOKIE['fans_ui_author'] ?? '') === 'open'; } }
+    final class TextPublicationService {
+        public static function validId(mixed $id): bool { return is_string($id) && preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/D', $id) === 1; }
+    }
+}
+
+namespace {
+    final class WP_REST_Response {
+        public function __construct(private mixed $data, private int $status = 200) {}
+        public function get_data(): mixed { return $this->data; }
+        public function get_status(): int { return $this->status; }
+    }
+    final class WP_REST_Request {
+        public array $headers = [];
+        public array $data = [];
+        public function __construct(public string $method, public string $route) {}
+        public function set_header(string $key, string $value): void { $this->headers[$key] = $value; }
+        public function set_query_params(array $data): void { $this->data = $data; }
+        public function set_body(string $data): void { $this->data = json_decode($data, true); }
+    }
+}
+
 namespace Faluss\Platform\Fans\Ui {
     const FIXTURE_ID = '123e4567-e89b-42d3-a456-426614174000';
     const SECOND_ID = '123e4567-e89b-42d3-a456-426614174001';
+
+    function wp_generate_uuid4(): string { $hex = bin2hex(random_bytes(16)); return substr($hex, 0, 8) . '-' . substr($hex, 8, 4) . '-4' . substr($hex, 13, 3) . '-8' . substr($hex, 17, 3) . '-' . substr($hex, 20); }
+    function wp_unslash(string $value): string { return $value; }
+    function wp_create_nonce(string $action): string { return 'fixture-' . $action; }
+    function wp_verify_nonce(string $nonce, string $action): int|false { return $nonce === 'fixture-' . $action ? 1 : false; }
+    function wp_nonce_field(string $action, string $name, bool $referer, bool $echo): string { return '<input type="hidden" name="' . $name . '" value="fixture-' . $action . '">'; }
+    function wp_json_encode(array $data): string { return (string) json_encode($data); }
+    function rest_do_request(\WP_REST_Request $request): \WP_REST_Response {
+        if (($_COOKIE['fans_ui_role'] ?? '') !== 'creator' || ($request->headers['X-WP-Nonce'] ?? '') !== 'fixture-wp_rest') { return new \WP_REST_Response([], 403); }
+        if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); }
+        $_SESSION['texts'] ??= [];
+        $_SESSION['keys'] ??= [];
+        $route = str_replace('/faluss-fans/v1/text-publications', '', $request->route);
+        $data = $request->data;
+        if ($request->method === 'GET' && $route === '/mine') { return new \WP_REST_Response(['items' => array_values($_SESSION['texts']), 'next_cursor' => null]); }
+        if ($request->method === 'GET') { $id = explode('/', trim($route, '/'))[0]; return new \WP_REST_Response($_SESSION['texts'][$id] ?? [], isset($_SESSION['texts'][$id]) ? 200 : 404); }
+        if (($_COOKIE['fans_ui_write_error'] ?? '') !== '') { return new \WP_REST_Response([], (int) $_COOKIE['fans_ui_write_error']); }
+        if ($route === '') {
+            $key = $request->headers['Idempotency-Key'] ?? '';
+            if (!\Faluss\Platform\Fans\Publications\TextPublicationService::validId($key)) { return new \WP_REST_Response([], 400); }
+            if (isset($_SESSION['keys'][$key])) {
+                [$id, $original] = $_SESSION['keys'][$key];
+                return new \WP_REST_Response($_SESSION['texts'][$id], $original === $data ? 201 : 409);
+            }
+            if (($_COOKIE['fans_ui_profile'] ?? 'active') !== 'active') { return new \WP_REST_Response([], 403); }
+            $id = wp_generate_uuid4();
+            $row = ['publication_id' => $id, 'revision' => '1', 'state' => 'pending', 'body' => $data['text']];
+            $_SESSION['texts'][$id] = $row;
+            $_SESSION['keys'][$key] = [$id, $data];
+            return new \WP_REST_Response($row, 201);
+        }
+        [$id, $action] = explode('/', trim($route, '/'));
+        $row = $_SESSION['texts'][$id] ?? null;
+        if ($row === null) { return new \WP_REST_Response([], 404); }
+        if ((int) $row['revision'] !== $data['revision'] || $row['state'] === 'withdrawn') { return new \WP_REST_Response([], 409); }
+        if ($action === 'edit' && ($_COOKIE['fans_ui_profile'] ?? 'active') !== 'active') { return new \WP_REST_Response([], 403); }
+        $row['revision'] = (int) $row['revision'] + 1;
+        $row['body'] = $action === 'edit' ? $data['text'] : '';
+        $row['state'] = $action === 'edit' ? 'pending' : 'withdrawn';
+        $_SESSION['texts'][$id] = $row;
+        return new \WP_REST_Response($row);
+    }
 
     function home_url(string $path): string { return 'http://127.0.0.1:8765' . $path; }
     function rest_url(string $path): string { return home_url('/wp-json/' . $path); }
@@ -107,6 +172,8 @@ namespace Faluss\Platform\Fans\Ui {
     require_once $root . '/src/Fans/Ui/FansUiRoutes.php';
     require_once $root . '/src/Fans/Ui/FansUiView.php';
     require_once $root . '/src/Fans/Ui/FansUiReading.php';
+    require_once $root . '/src/Fans/Ui/FansUiAuthor.php';
+    require_once $root . '/src/Fans/Ui/FansUiAuthorView.php';
     $GLOBALS['fixture_query'] = [];
     if (preg_match('~^/faluss-fans/creators/([0-9a-f-]{36})/?$~', $path, $matches) === 1) {
         $GLOBALS['fixture_query'][FansUiRoutes::VIEW_VAR] = 'public-profile';

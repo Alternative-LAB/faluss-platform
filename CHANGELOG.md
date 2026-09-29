@@ -6,6 +6,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Fans — gestion des textes créateur
+
+- Formulaires natifs de création, lecture privée, édition et retrait confirmé via le REST existant ; états et refus explicites, nonce, idempotence et révisions conservés.
+- Captures et recette sans JavaScript ; aucun média, service, produit, paiement, flag ou schéma ajouté.
+
 ### Fans — accueil et lecture
 
 - Accueil navigable, statut propriétaire et pages de textes publics approuvés via le REST existant, sans identité ou progression inventée.
