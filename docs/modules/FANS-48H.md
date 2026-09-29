@@ -104,10 +104,23 @@ Même traitement dans le contrôleur et le filtre de barre WordPress ; aucun
 flush de permaliens, migration ou modification des droits.
 [Preuves et captures](../evidence/fans-48h/lot-12/README.md).
 
-Lot 13 : compteur public de suivis lu via l’API existante, sans action sociale
+Lot 13 fusionné : [PR #101](https://github.com/Alternative-LAB/faluss-platform/pull/101),
+`main` `198ea135e0ecac6b86ab7ac43310018ae7c9da33`, six contrôles de PR verts et
+CI du nouveau main réussie : [PHP](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36632255276),
+[JS](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36632255289),
+[ZIP](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36632255184).
+Ces contrôles valident l’arbre intégrant aussi #100 ; ils ne prétendent pas
+qu’une exécution distincte ait existé pour le SHA intermédiaire #100.
+Compteur public de suivis lu via l’API existante, sans action sociale
 ouverte ; zéro uniquement si attesté par la réponse du service, sinon état
 indisponible. Effacement et invalidation des lectures au masquage/départ, reprise
 au retour visible/BFcache. [Preuves et captures](../evidence/fans-48h/lot-13/README.md).
+
+Lot 14 : [revue visuelle consolidée](../evidence/fans-48h/lot-14/README.md) du SHA
+#101, quarante captures et quatre planches de contrôle. Matrice limitée aux trois
+catégories demandées, avec tableau de couverture de chaque exigence et écarts aux
+planches explicités. Aucun runtime modifié. Le bilan final à l’échéance et celui
+du 30 septembre restent à fournir ; aucune nouvelle release publiée.
 
 ### Bilan communiqué le 29 septembre vers 22 h (Paris)
 
