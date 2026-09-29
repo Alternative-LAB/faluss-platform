@@ -1,0 +1,55 @@
+# Fans — chantier du 29 septembre au 1 octobre 2026
+
+Départ vérifié : `origin/main` `ad7c5857a0c1d65c84d8ec56b5fdbbd7dba178af`,
+version réelle **0.6.3** (en-tête et constante). Fenêtre de travail : 29 septembre
+20 h 52 → 1 octobre 20 h 52, heure de Paris. Aucun accès aux sites WordPress,
+serveurs ou updater ; code et GitHub uniquement. Version conservée, pas de release.
+
+## Changements pris en compte depuis #84
+
+- #85 : préparation et publication 0.6.0.
+- #86 : retrait de la récompense ALB historique dans Link et ses contrats.
+- #87 : corrections de géométrie mobile et rendu Studio V3, version 0.6.2.
+- #88 : focus mobile Me, canvas public et contrôles de style, version 0.6.3.
+- Aucun changement des fichiers `src/Fans/` depuis #84 dans cette base.
+
+## Lots, dans l’ordre des dépendances
+
+1. Classement Fans fermé, contrat et arbitrages ; navigation conforme V2.
+2. Retour SSO vers une destination Fans autorisée, transport côté serveur lié
+   à l’état existant, tests positifs/négatifs ; aucune seconde authentification.
+   Étude de session/alias/badge invité, sans promettre de récupération absente.
+3. Profil propre, accueil et découverte raccordés aux contrats publics disponibles.
+4. Création et gestion des textes modérés : nonce, quotas, idempotence,
+   révisions et erreurs réelles ; services/prestations/produits fermés.
+5. Revue de chaque écran, tests utiles desktop/mobile et matrice de sortie.
+
+## Matrice de suivi initiale
+
+Les cases « interface prête mais service absent » n’attestent aucune fonctionnalité
+métier. Les captures seront produites depuis un serveur de tests PHP isolé :
+**ni WordPress réel, ni Elementor, ni validation cible**. Le propriétaire conserve
+la recette réelle avant activation.
+
+| Écran ou parcours | État de départ et limite | Lot prévu |
+| --- | --- | --- |
+| Explorer → profil public | Rendu API de catégories approuvées testé dans #84 ; nom/portrait approuvé absents | 3, 5 |
+| Accueil Fan / Créateur | Interface prête mais service de flux absent | 3 |
+| HoF invité / connecté | Interface prête mais moteur absent | 5 |
+| Session HoF | Interface prête mais session absente | 5 |
+| Classements HoF | Interface prête mais moteur absent | 5 |
+| Classement Fans | Nouvel écran fermé ; service et décisions requis | 1 |
+| Messagerie | Interface prête mais service absent ; modération/blocage requis | 5 |
+| Mon espace Fan | Interface prête mais progression PC absente | 5 |
+| Progression Créateur | Interface prête mais score HoF absent ; aucune finance | 5 |
+| Mon profil Créateur | Route distincte, lecture propriétaire à raccorder ; édition éditoriale absente | 3 |
+| Créer — contenu texte | API de textes modérés existante, UI de gestion absente | 4 |
+| Créer — prestation / service / produit | Interface prête mais services absents | 4, 5 |
+| Ma boutique | Interface prête ; pas de gestion propriétaire ni transaction disponible | 5 |
+| SSO Me → Fans | Client existant ; destination d’origine à préparer | 2 |
+| Session et reprise invité | Décisions requises ; aucune attribution ni progression à préserver disponible | 2 |
+| Attribution PF, corrections et remboursements | Contrat Hub non ratifié ; aucun moteur à prétendre disponible | Hors moteur dans ces lots |
+
+Chaque lot doit indiquer ses tests positifs/négatifs, son SHA et ses limites.
+Les recettes réelles antérieures ne valent pas preuve du nouveau diff. La matrice
+sera actualisée au fil des PR, puis consolidée à l’échéance.

@@ -14,6 +14,7 @@ rôle WordPress privilégié. Le profil public est une seule route canonique com
 | Fan 01 | Hall of Fame — accueil | `/faluss-fans/fan/hof` | Invité, Fan lié, Créateur lié | Simulateur HoF v3 hors runtime seulement | Lecture publique et navigation ; état indisponible | Aucune session, aucun score, rang ou point affiché |
 | Fan 02 | Session HoF | `/faluss-fans/fan/hof/session` | Membre Fans lié | Aucune session persistante | Shell | Session indisponible, aucune attribution PF |
 | Fan 03 | Classements | `/faluss-fans/fan/classements` | Membre Fans lié | Aucun classement persistant | Shell | Aucun rang ou score inventé |
+| Fan complément | Classement Fans | `/faluss-fans/fan/classement-fans` | Membre Fans lié | Autorité PF et corrections non ratifiées | Écran distinct et règles acquises ; six accès Fan | Service absent, aucun rang, score, PC ou montant ; voir [contrat](FANS-FAN-RANKING.md) |
 | Fan 04 | Profil créateur public | `/faluss-fans/creators/{creator_id}` | Invité, Fan lié, Créateur lié | `GET /creators/{creator_id}`, profils actifs uniquement | Fiche structurée via REST, sans nom ni portrait approuvé | HTTP 404 sur la page et l’API si absent, suspendu ou retiré ; suivi/PC fermés |
 | Fan 05 | Messagerie | `/faluss-fans/fan/messages` | Membre Fans lié | Aucun moteur de messages | Shell | Aucun fil ni envoi factice |
 | Fan 06 | Accueil Fans | `/faluss-fans/fan/accueil` | Membre Fans lié | Profils structurés publics seulement ; pas de flux assemblé | Shell, lien vers Explorer | Aucun faux flux, chiffre ou récompense |
@@ -67,8 +68,10 @@ Explorer, HoF, le profil et ses espaces personnels ; le Créateur lié ouvre
 Explorer, HoF, le profil et les huit accès de sa sidebar. Explorer affiche les
 seuls profils actifs répondus par l’API ;
 un profil actif s’ouvre via son lien technique. Le clavier atteint chaque lien
-et indique la destination active. Sur mobile, les huit accès Créateur restent
-nommés et visibles.
+et indique la destination active. Les huit icônes Créateur restent accessibles
+et nommées par `aria-label` ; seul l’onglet actif affiche son label visuel,
+sur ordinateur comme sur mobile. La navigation Fan comporte six accès avec
+« Classement Fans », sur deux rangées de trois sur mobile.
 
 Scénarios négatifs : flag/rôle/SSO absents ferment le module ; l’invité et le
 compte WordPress non lié ne voient aucun espace personnel, tandis que le Fan
