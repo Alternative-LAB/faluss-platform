@@ -3,7 +3,10 @@
 Départ vérifié : `origin/main` `ad7c5857a0c1d65c84d8ec56b5fdbbd7dba178af`,
 version réelle **0.6.3** (en-tête et constante). Fenêtre de travail : 29 septembre
 20 h 52 → 1 octobre 20 h 52, heure de Paris. Aucun accès aux sites WordPress,
-serveurs ou updater ; code et GitHub uniquement. Version conservée, pas de release.
+serveurs ou updater ; code et GitHub uniquement. La consigne ultérieure autorise
+une nouvelle version après les prochains travaux livrables, exclusivement via
+Prepare release, sa PR protégée et Publish private release. Aucun numéro 0.6.3
+réutilisé ; installation, recette cible et activation conservées par le propriétaire.
 
 ## Changements pris en compte depuis #84
 
@@ -121,6 +124,16 @@ Lot 14 : [revue visuelle consolidée](../evidence/fans-48h/lot-14/README.md) du 
 catégories demandées, avec tableau de couverture de chaque exigence et écarts aux
 planches explicités. Aucun runtime modifié. Le bilan final à l’échéance et celui
 du 30 septembre restent à fournir ; aucune nouvelle release publiée.
+
+Lot 15 : correction de la perte du focus pendant la pagination des textes,
+reproduite sur #102. Reprise, erreur et dernière page navigables au clavier ;
+aucune reprise du focus si le lecteur s’est déplacé. [Captures et tests](../evidence/fans-48h/lot-15/README.md).
+
+Au contrôle suivant, les exécutions de main #100 sont désormais présentes et
+vertes : [PHP](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36632320174),
+[JS](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36632319700),
+[ZIP](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36632320210).
+Cela complète le constat d’absence au moment des vérifications précédentes.
 
 ### Bilan communiqué le 29 septembre vers 22 h (Paris)
 

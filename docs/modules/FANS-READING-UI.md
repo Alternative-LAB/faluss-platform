@@ -46,6 +46,20 @@ Le contrat [Followers](FANS-FOLLOWERS.md) reste inchangé et son flag fermé. Ce
 lecture ne lève aucun prérequis d’ouverture sociale (blocage, signalement,
 suppression et rétention). L’API décide de sa disponibilité et de sa visibilité.
 
+## Lecture au clavier
+
+Scénarios positifs : « Page suivante » garde le focus pendant la requête et
+annonce son indisponibilité temporaire par ARIA. Une seconde activation ne lance
+pas de requête concurrente. À réception, le focus revient au statut placé avant
+les textes, y compris en fin de pagination ou après « Recommencer la lecture ».
+Le lecteur peut ensuite parcourir les liens du nouveau contenu avec Tab.
+
+Scénarios négatifs : une erreur place le focus sur son explication puis permet
+d’atteindre la reprise avec Tab. Si le lecteur se déplace pendant la requête,
+le résultat ne reprend pas le focus. Les chargements automatiques et les réponses
+annulées ou dépassées ne déplacent pas le focus. Aucun changement de curseur,
+de permissions, de modération ou de disponibilité des services.
+
 ## Limites
 
 Le service REST relit la visibilité et la modération à chaque page. Un contenu
