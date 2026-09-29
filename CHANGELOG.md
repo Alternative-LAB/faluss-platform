@@ -6,6 +6,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Fans — continuité de lecture au clavier
+
+- Focus conservé pendant la pagination, puis placé avant les textes ou l’erreur après une action explicite ; aucun déplacement si le lecteur a changé de cible.
+- Reprise accessible et demandes concurrentes évitées, sans changer les contrats REST ni les services indisponibles.
+
 ### Fans — revue de couverture
 
 - Quarante captures du même code, indexées par vue et viewport, avec écarts explicites aux planches officielles.

@@ -7,9 +7,10 @@
 Les modifications Me/Link postérieures à #84 ont été conservées.
 
 Ces évolutions sont fusionnées dans le code, **pas publiées dans une nouvelle
-release**. Une installation portant déjà le numéro 0.6.3 ne les reçoit pas par
-le seul maintien de ce numéro. La livraison/version suivante reste un chantier
-autorisé séparément ; aucun ZIP de CI n’a été installé sur un site.
+release** au moment de cette matrice. Une installation portant déjà le numéro
+0.6.3 ne les reçoit pas par le seul maintien de ce numéro. La nouvelle consigne
+autorise une version ultérieure via les workflows GitHub après les prochains
+travaux livrables. Aucun ZIP de CI n’a été installé sur un site.
 
 « Fonctionnel et testé » signifie ici code de service testé et/ou adaptateur UI
 testé, selon la preuve indiquée. **Aucune installation WordPress ni aucun site
@@ -45,7 +46,7 @@ des captures sont des fixtures sous `tests/`, jamais des données produit.
 | Retour SSO — contrat de navigation | Boutons publics et pages privées 403 | Fonctionnel et testé | État consommé, retour local signé, sélection du texte conservée, callback exact ; pas de preuve réseau Me réelle ni conservation du contenu non envoyé |
 | Invité provisoire, alias/badge/reprise | Étude seulement | Décision ou accès requis | Aucun `Guest_…` runtime, badge gagné, contribution fictive ou promesse de sauvegarde |
 | Barre WordPress — filtre de visibilité | Routes Fans | Fonctionnel et testé | Barre cachée pour membres ordinaires, conservée pour `manage_options` ; rendu WordPress non réévalué ici |
-| Navigation mobile et clavier — adaptateurs | Toutes les routes du shell | Fonctionnel et testé | Chromium et WebKit Windows, huit accès Créateur par toucher à 320/390 px, focus image corrigé |
+| Navigation mobile et clavier — adaptateurs | Toutes les routes du shell | Fonctionnel et testé | Chromium et WebKit Windows, huit accès Créateur par toucher à 320/390 px, focus image et pagination corrigés ; limites clavier WebKit Windows documentées au lot 15 |
 | Recette cible WordPress/Elementor/SSO et Safari physique | Site du propriétaire | Décision ou accès requis | Hors périmètre d’accès du chantier ; typographie WebKit Windows non représentative de Safari réel ; indispensable avant activation |
 
 ## Couverture des exigences du chantier
@@ -131,4 +132,7 @@ Les doubles slashs et segments supplémentaires ne donnent aucun accès.
 - [Lot 13 : nombre public de suivis](../evidence/fans-48h/lot-13/README.md).
 - [Lot 14 : couverture visuelle consolidée](../evidence/fans-48h/lot-14/README.md).
 
-Aucun flag activé, déploiement, release, paiement ou modification des sites.
+Aucun flag activé, déploiement, paiement ou modification des sites. Nouvelle
+release autorisée via GitHub uniquement, à vérifier séparément avant de la dire publiée.
+
+- [Lot 15 : lecture au clavier](../evidence/fans-48h/lot-15/README.md).

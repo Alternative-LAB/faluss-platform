@@ -11,6 +11,7 @@
   const status = root.querySelector('[data-text-status]');
   const next = root.querySelector('[data-text-next]');
   const refresh = root.querySelector('[data-text-refresh]');
+  status.tabIndex = -1;
   const id = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
   const creator = root.dataset.creatorId ?? null;
   let cursor = null;
@@ -32,7 +33,7 @@
     && validRevision(item.revision)
     && typeof item.body === 'string' && item.body.length > 0 && item.body.length <= 16000
     && typeof item.updated_at === 'string';
-  function reset() {
+  function reset(keepNext = false) {
     controller?.abort();
     generation += 1;
     imageBusy = false;
@@ -40,7 +41,7 @@
     objectUrls.clear();
     results.replaceChildren();
     cursor = null;
-    next.hidden = true;
+    if (!keepNext) next.hidden = true;
   }
   // The server permits one derivative generation at a time. No automatic image requests or retries.
   function imageControl(card, item, current, signal) {
@@ -113,13 +114,17 @@
       }
     });
   }
-  async function load(after = null) {
-    reset();
+  async function load(after = null, control = null) {
+    reset(control === next);
     const current = generation;
     controller = new AbortController();
     const { signal } = controller;
     status.textContent = 'Chargement des publications…';
-    next.disabled = true;
+    next.setAttribute('aria-disabled', 'true');
+    const focusReading = () => {
+      // Only follow an explicit action if the reader has not moved elsewhere.
+      if (control !== null && document.activeElement === control) status.focus();
+    };
     const url = new URL(root.dataset.api, location.href);
     url.searchParams.set('per_page', '6');
     if (after !== null) url.searchParams.set('cursor', after);
@@ -150,18 +155,21 @@
       }
       results.replaceChildren(fragment);
       cursor = page.next_cursor;
-      next.hidden = cursor === null;
-      next.disabled = false;
       status.textContent = page.items.length === 0 ? 'Aucune publication publique disponible.' : 'Publications chargées. Les textes restent soumis à la modération.';
+      focusReading();
+      next.hidden = cursor === null;
+      next.removeAttribute('aria-disabled');
     } catch (error) {
       if (signal.aborted || current !== generation) return;
       results.replaceChildren();
       status.textContent = 'Publications indisponibles. Le service est fermé ou ne répond pas. Vous pouvez réessayer.';
+      focusReading();
+      next.hidden = true;
     }
   }
-  next.addEventListener('click', () => { if (cursor !== null) load(cursor); });
-  refresh.addEventListener('click', () => load());
-  window.addEventListener('pagehide', reset);
+  next.addEventListener('click', () => { if (cursor !== null) load(cursor, next); });
+  refresh.addEventListener('click', () => load(null, refresh));
+  window.addEventListener('pagehide', () => reset());
   window.addEventListener('pageshow', (event) => { if (event.persisted) load(); });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) { reset(); status.textContent = 'Lecture suspendue.'; } else load();
