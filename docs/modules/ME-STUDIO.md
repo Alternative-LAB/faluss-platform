@@ -168,3 +168,12 @@ Après acceptation du garde de saisie, les deux navigations déplacent immédiat
 Design → Avatar expose `avatar_visible` dans la transaction existante, sans effacer `avatar_attachment_id`. Ce champ reste facultatif dans le contrat d'édition Avatar, absent du parcours d'onboarding. Liens expose directement `links_mode` et conserve les éditeurs `attachment_id` existants (ajouter, remplacer, retirer). Le rendu illustré donne la première place visible à une vedette puis deux colonnes ; les titres/contenus de collection gardent leur ordre et leurs règles de visibilité. Les médias de plateforme viennent uniquement du catalogue Link configuré. Aucun nouvel état ou droit économique.
 
 [Recette locale 0.6.2](../evidence/me-v3-062/README.md) : transactions et navigateurs, sans accès WordPress/Elementor réel ni téléphone physique.
+
+
+## Contrôles et accessibilité — 0.6.3
+
+Le header Retour / Studio / Aperçu est sticky et opaque dans le scroll du Studio, avec réserve de focus sous le header. La modalité d'entrée distingue le pointeur du clavier : les liens sélectionnés au toucher ou à la souris n'affichent pas le contour de focus, tandis que Tab/Entrée/flèches gardent un indicateur visible. Sélection et animation des pills restent identiques.
+
+Design → Nom expose une seule couleur `secondary_color` pour le handle et la bio : « Actuelle » conserve le rendu historique, les choix blanc/noir et une couleur hexadécimale valide personnalisent ensemble ces deux textes. Le nom et les autres textes sont indépendants. Liens → Disposition des liens et Profil → Réglages → Présentation des liens exposent les mêmes préférences globales `image_border` (none/solid) et `image_border_color` (#RRGGBB). Le mode illustré est sans bordure par défaut ; le mode liste ignore ces préférences.
+
+Ces contrôles de présentation participent immédiatement à l'aperçu ouvert, puis à la transaction existante. Les brouillons de contenus restent indépendants. Aucune nouvelle étape d'onboarding, aucun Shop ou paiement. [Preuves et limites](../evidence/me-v3-063/README.md).

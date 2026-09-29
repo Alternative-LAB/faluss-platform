@@ -59,6 +59,7 @@ final class StudioV3
                 <div data-v3-scroll>
                     <?php if ($section === 'v3_avatar') : ?><label>Afficher la photo<select name="avatar_visible"><option value="1" <?php selected((string) ($state['preferences']['avatar_visible'] ?? 1), '1'); ?>>Oui</option><option value="0" <?php selected((string) ($state['preferences']['avatar_visible'] ?? 1), '0'); ?>>Non</option></select></label><?php endif; ?>
                     <?php if (StudioV3Management::handles($section)) { StudioV3Management::render($section, $state); } else { OnboardingV3::controls($section, $mode, $state, $slug); } ?>
+                    <?php if ($section === 'v3_name') { OnboardingV3::secondaryColorControl((string) ($state['preferences']['secondary_color'] ?? '')); } ?>
                 </div>
                 <p data-v3-error role="alert" hidden></p><p data-v3-status role="status" aria-live="polite"></p>
                 <?php if (!StudioV3Management::handles($section)) : ?><button class="faluss-studio-v3__save" type="submit" data-v3-primary>Enregistrer</button><?php endif; ?>

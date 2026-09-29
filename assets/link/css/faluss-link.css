@@ -115,7 +115,7 @@
 .faluss-link-card.faluss-link-card--canonical .faluss-link-card__content-blocks {width:100%;max-width:none;margin-top:16px;padding-top:0;border-top:0;}
 .faluss-link-card.faluss-link-card--canonical .faluss-link-card__link {min-height:48px;padding:13px 17px;font-size:16px;line-height:1.3;background:var(--fl-action);color:var(--fl-action-text);border-color:var(--fl-action);}
 .faluss-link-card.faluss-link-card--canonical .faluss-link-card__link:hover {filter:brightness(.94);}
-body.faluss-identity-public-route:has(.faluss-link-card--canonical),html:has(body.faluss-identity-public-route .faluss-link-card--canonical) {background:#FFFDF5;}
+body.faluss-identity-public-route:has(.faluss-link-card--canonical),html:has(body.faluss-identity-public-route .faluss-link-card--canonical) {background:var(--fl-public-canvas,#FFFDF5);}
 body.faluss-identity-public-route .faluss-link-card--canonical {margin:0;max-width:none;width:100%;min-height:100vh;min-height:100dvh;}
 
 .faluss-link-card.faluss-link-card--canonical.faluss-link-card--cover-yes .faluss-link-card__avatar {margin-top:0;}
@@ -125,7 +125,7 @@ body.faluss-identity-public-route .faluss-link-card--canonical {margin:0;max-wid
 .faluss-link-card.faluss-link-card--canonical.faluss-link-card--links-light .faluss-link-card__link {border-radius:14px;}
 
 /* Full-page host shares the canonical canvas; only the content has a reading width. */
-body.faluss-identity-public-route .faluss-link-card--canonical > .faluss-link-card__body {max-width:560px;margin-inline:auto}
+body.faluss-identity-public-route .faluss-link-card.faluss-link-card--canonical > .faluss-link-card__body {max-width:560px;margin-inline:auto}
 
 /* V3 composition is centered in every host; saved legacy alignment is retained.
    Stable viewport units keep this spacing unchanged when the keyboard overlays the editor. */
@@ -141,3 +141,13 @@ body.faluss-identity-public-route .faluss-link-card--canonical > .faluss-link-ca
 .faluss-link-card.faluss-link-card--canonical .faluss-link-card__cover {overflow:hidden}
 .faluss-link-card.faluss-link-card--canonical.faluss-link-card--wallpaper-cover.faluss-link-card--wallpaper-effect-gradient .faluss-link-card__cover::after {background:linear-gradient(to bottom,transparent 0%,color-mix(in srgb,var(--fl-hero-transition-color) var(--fl-hero-transition-intensity),transparent) min(var(--fl-hero-transition-position),calc(var(--fl-identity-top) + 190px)),var(--fl-page-background) min(100%,calc(var(--fl-identity-top) + 290px)))}
 @media(prefers-reduced-motion:no-preference){.faluss-link-card.faluss-link-card--canonical[data-faluss-card-context="public"] .faluss-link-card__cover img {transform:translate3d(0,var(--fl-immersive-depth,0px),0) scale(var(--fl-wallpaper-scale,1));transform-origin:center top;will-change:transform}}
+
+/* Opt-in member colour never changes the name, link labels or other editorial text. */
+.faluss-link-card.faluss-link-card--canonical[data-faluss-secondary-color]:not([data-faluss-secondary-color=""]) :is(.faluss-link-card__handle,.faluss-link-card__bio){color:var(--fl-member-secondary)}
+.faluss-link-card.faluss-link-card--canonical.faluss-link-card--links-mode-image-grid .faluss-link-card__links > .faluss-link-card__link{border:var(--fl-image-border-width,0px) solid var(--fl-image-border-color,#fff)}
+/* Only the public route owns the full document canvas and safe-area treatment. */
+html:has(body.faluss-identity-public-route .faluss-link-card--canonical),body.faluss-identity-public-route:has(.faluss-link-card--canonical){margin:0;padding:0;background:var(--fl-public-canvas,#FFFDF5);min-height:100%;}
+body.faluss-identity-public-route :is(.faluss-identity-profile-page,.elementor,.elementor-section,.elementor-container,.elementor-column,.elementor-widget-wrap,.elementor-widget,.e-con,.e-con-inner,.elementor-widget-container):has(.faluss-link-card--canonical){margin:0;padding:0;gap:0;max-width:none;width:100%;background:transparent;}
+body.faluss-identity-public-route .faluss-link-card--canonical{min-height:100vh;min-height:100lvh;}
+body.faluss-identity-public-route .faluss-link-card.faluss-link-card--canonical > .faluss-link-card__body{padding-top:calc(var(--fl-identity-top) + env(safe-area-inset-top,0px));padding-bottom:calc(32px + env(safe-area-inset-bottom,0px));padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));}
+body.faluss-identity-public-route .faluss-link-card.faluss-link-card--canonical.faluss-link-card--cover-yes.faluss-link-card--avatar-no > .faluss-link-card__body{padding-top:calc(var(--fl-identity-top) + clamp(72px,12svh,100px) + env(safe-area-inset-top,0px));}

@@ -6,6 +6,24 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+## [0.6.3] - 2026-09-29
+
+### Corrigé
+
+- Onboarding : déploiement immédiat du panneau au focus d'un champ éditable, champ et actions visibles au-dessus du clavier tout en conservant le bas ancré et le défilement interne.
+- Studio : contour de focus retiré au toucher/souris et conservé au clavier ; header opaque sticky pendant le défilement et les changements de viewport.
+- Page publique : fond du document lié à la carte dès le premier rendu, conteneurs hôtes neutralisés sur cette seule route, hauteur minimale au grand viewport et marges de sécurité du contenu.
+
+### Ajouté
+
+- Design → Nom : couleur commune facultative du handle et de la bio, avec conservation du rendu précédent tant qu'aucun choix n'est fait.
+- Présentation des liens : bordure globale des tuiles illustrées désactivée par défaut ou activée avec couleur ; aucun effet sur le mode liste.
+
+### Compatibilité
+
+- Préférences additives dans le JSON de composition existant, sans migration ni écriture lors d'une lecture. Les contrats d'onboarding et les modules SSO/OTP, Fans, Hub et moteurs restent inchangés. Un retour à 0.6.2 après enregistrement d'une nouvelle préférence non standard exige d'abord une remise aux valeurs par défaut sous 0.6.3 ; voir la recette.
+- Vérifications locales et limites Safari/Elementor : `docs/evidence/me-v3-063/README.md`. Aucun accès à un site ni changement de flag.
+
 ## [0.6.2] - 2026-09-29
 
 ### Corrigé

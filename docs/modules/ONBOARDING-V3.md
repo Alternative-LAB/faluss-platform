@@ -80,3 +80,10 @@ Le champ actif est révélé par `scrollTo({behavior: 'instant'})` sur le seul c
 Le minimum de hauteur de la carte d'aperçu est calculé depuis les dimensions réelles du téléphone et son facteur de zoom. Il ne modifie pas la hauteur du rendu public. Les événements `visualViewport.resize` et `scroll` sont regroupés dans une frame : compensation de `offsetTop` sur le shell fixe, puis correction instantanée du scroll interne, sans `window.scrollTo`. Le bas du panneau et les actions conservent leur ancrage ; le clavier les recouvre. À la fermeture, la hauteur normale et le scroll antérieur sont restaurés ; l'expansion manuelle reste conservée.
 
 Avatar réutilise l'identifiant enregistré à Identité ; le remplacement est facultatif. Les styles canoniques de forme s'appliquent au conteneur **et** à l'image malgré les anciennes règles circulaires. Noir signifie désormais `#000000` : aucun gris déjà enregistré n'est converti. Preuves et limites : [recette 0.6.2](../evidence/me-v3-062/README.md).
+
+
+## Focus avec déploiement — 0.6.3
+
+La demande iPhone suivante remplace la règle antérieure de focus sans expansion : toucher un champ de texte, une zone multiligne ou un sélecteur déploie maintenant le panneau immédiatement. Le panneau reste déployé à la fermeture du clavier afin de ne pas rétracter la saisie. Son bas reste fixé ; la portion recouverte par le clavier est réservée à l'intérieur du panneau pour placer la rangée d'actions juste au-dessus. Seul le contenu interne défile, sans animation au focus ni correction de scroll fenêtre. Le panoramique Safari reste compensé comme en 0.6.2. Le coulissement manuel et les parcours Simple/Atomique sont conservés.
+
+[Recette 0.6.3](../evidence/me-v3-063/README.md) : focus depuis panneau replié et déployé, Identité/Réseaux/Liens, champ bas, actions et texte conservés, simulations Chromium/WebKit. Clavier Safari réel à confirmer par le propriétaire.

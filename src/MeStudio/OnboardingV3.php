@@ -253,11 +253,18 @@ final class OnboardingV3
         ?><div class="faluss-onboarding-v3__choices"><?php foreach ($choices as $value => $label) : ?><label><input type="radio" name="<?php echo esc_attr($name); ?>" value="<?php echo esc_attr((string) $value); ?>" <?php checked($selected, (string) $value); ?>><span><?php echo esc_html($label); ?></span></label><?php endforeach; ?></div><?php
     }
 
+    public static function secondaryColorControl(string $selected): void
+    {
+        echo '<fieldset><legend>Couleur du @identifiant et de la bio</legend>';
+        self::colors('secondary_color', $selected);
+        echo '</fieldset>';
+    }
+
     private static function colors(string $name, string $selected): void
     {
-        $nullable = $name === 'social_color';
+        $nullable = in_array($name, ['social_color', 'secondary_color'], true);
         $palette = ['#FFFFFF', '#E5E5E5', '#DED4E4', '#FFE1E5', '#FF515B', '#FFD3BD', '#ADB8A8', '#000000'];
-        ?><div class="faluss-onboarding-v3__colors"><?php if ($nullable) : ?><label><input type="radio" name="social_color" value="" <?php checked($selected, ''); ?>><span style="--v3-swatch:#fff">Auto</span></label><?php endif; ?><?php foreach ($palette as $color) : ?><label><input type="radio" name="<?php echo esc_attr($name); ?>" value="<?php echo esc_attr($color); ?>" <?php checked(strtoupper($selected), $color); ?>><span style="--v3-swatch:<?php echo esc_attr($color); ?>"></span></label><?php endforeach; ?><label class="faluss-onboarding-v3__custom">Autre<input type="color" data-v3-color="<?php echo esc_attr($name); ?>" value="<?php echo esc_attr($selected !== '' ? $selected : '#080808'); ?>" <?php echo $selected !== '' && !in_array(strtoupper($selected), $palette, true) ? 'data-selected="true"' : ''; ?>></label></div><?php
+        ?><div class="faluss-onboarding-v3__colors"><?php if ($nullable) : ?><label><input type="radio" name="<?php echo esc_attr($name); ?>" value="" <?php checked($selected, ''); ?>><span style="--v3-swatch:#fff"><?php echo $name === 'secondary_color' ? 'Actuelle' : 'Auto'; ?></span></label><?php endif; ?><?php foreach ($palette as $color) : ?><label><input type="radio" name="<?php echo esc_attr($name); ?>" value="<?php echo esc_attr($color); ?>" <?php checked(strtoupper($selected), $color); ?>><span style="--v3-swatch:<?php echo esc_attr($color); ?>"></span></label><?php endforeach; ?><label class="faluss-onboarding-v3__custom">Autre<input type="color" data-v3-color="<?php echo esc_attr($name); ?>" value="<?php echo esc_attr($selected !== '' ? $selected : '#080808'); ?>" <?php echo $selected !== '' && !in_array(strtoupper($selected), $palette, true) ? 'data-selected="true"' : ''; ?>></label></div><?php
     }
 
     public static function login(): string

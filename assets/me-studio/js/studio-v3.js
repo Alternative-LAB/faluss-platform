@@ -42,7 +42,7 @@
             v3_colors: ['page_background', 'button_color'], v3_buttons: ['link_style', 'button_texture'],
             v3_avatar: ['avatar_attachment_id', 'avatar_shape', 'avatar_effect', 'avatar_visible'],
             v3_wallpaper: ['cover_attachment_id', 'wallpaper_size', 'wallpaper_effect'],
-            v3_name: ['name_font', 'name_weight', 'name_color'],
+            v3_name: ['name_font', 'name_weight', 'name_color', 'secondary_color'],
             v3_network_style: ['social_style', 'social_color']
         };
         var result = {};
@@ -231,8 +231,14 @@
         if (!dialog.open) { return; }
         if (previewRequest) { previewRequest.abort(); }
         previewRequest = new AbortController();
-        // Management previews show server-saved content; editors keep their independent drafts.
-        post('faluss_onboarding_v3_preview', config.previewNonce, {fields: JSON.stringify(management ? {} : fields())}, previewRequest.signal)
+        // Only presentation controls participate in management previews; block drafts remain independent.
+        var draft = management ? {} : fields();
+        if (management) {
+            panel.querySelectorAll('[data-mutation="save_atomic_design"] [data-field]').forEach(function (field) {
+                if (['links_mode', 'image_border', 'image_border_color'].includes(field.dataset.field)) { draft[field.dataset.field] = field.value; }
+            });
+        }
+        post('faluss_onboarding_v3_preview', config.previewNonce, {fields: JSON.stringify(draft)}, previewRequest.signal)
             .then(function (response) {
                 if (!response.success || !response.data || !response.data.preview_html) { throw new Error(serverError(response, 'preview_failed')); }
                 previewHost.innerHTML = response.data.preview_html;
@@ -287,6 +293,11 @@
         if (left < nav.scrollLeft) { nav.scrollTo({left: left, behavior: 'instant'}); }
         else if (right > nav.scrollLeft + nav.clientWidth) { nav.scrollTo({left: right - nav.clientWidth, behavior: 'instant'}); }
     }
+    // Safari may retain :focus-visible after a programmatic touch navigation.
+    root.addEventListener('pointerdown', function () { root.dataset.inputModality = 'pointer'; }, true);
+    document.addEventListener('keydown', function (event) {
+        if (!event.metaKey && !event.ctrlKey && !event.altKey) { root.dataset.inputModality = 'keyboard'; }
+    }, true);
     var groups = JSON.parse(root.dataset.studioGroups || '{}');
     var committedSelection = [];
     function captureSelection() {
@@ -505,7 +516,7 @@
             if (chosen) { chosen.checked = false; }
             event.target.dataset.selected = 'true';
         }
-        if (event.target.matches('[name="page_background"], [name="button_color"], [name="social_color"]')) {
+        if (event.target.matches('[name="page_background"], [name="button_color"], [name="social_color"], [name="secondary_color"]')) {
             var custom = root.querySelector('[data-v3-color="' + event.target.name + '"]');
             if (custom) { custom.dataset.selected = 'false'; }
         }
