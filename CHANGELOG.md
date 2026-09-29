@@ -6,6 +6,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Fans — revue de couverture
+
+- Quarante captures du même code, indexées par vue et viewport, avec écarts explicites aux planches officielles.
+- Matrice d’évaluation séparant fonctions testées, services absents et décisions/accès requis ; aucune modification runtime ou nouvelle release.
+
 ### Fans — nombre public de suivis
 
 - Lecture du compteur public existant après validation de la fiche, avec état indisponible si la route est fermée ou la réponse invalide ; aucun zéro inventé.

@@ -1,0 +1,322 @@
+[
+  {
+    "role": "fan",
+    "title": "HoF",
+    "route": "fan/hof",
+    "width": 1440,
+    "height": 900,
+    "file": "fan-01-hof-1440.png"
+  },
+  {
+    "role": "fan",
+    "title": "Session HoF",
+    "route": "fan/hof/session",
+    "width": 1440,
+    "height": 900,
+    "file": "fan-02-session-1440.png"
+  },
+  {
+    "role": "fan",
+    "title": "Classements HoF",
+    "route": "fan/classements",
+    "width": 1440,
+    "height": 900,
+    "file": "fan-03-classements-1440.png"
+  },
+  {
+    "role": "fan",
+    "title": "Profil public",
+    "route": "creators/123e4567-e89b-42d3-a456-426614174000",
+    "width": 1440,
+    "height": 900,
+    "file": "fan-04-profil-1440.png"
+  },
+  {
+    "role": "fan",
+    "title": "Messages",
+    "route": "fan/messages",
+    "width": 1440,
+    "height": 900,
+    "file": "fan-05-messages-1440.png"
+  },
+  {
+    "role": "fan",
+    "title": "Accueil",
+    "route": "fan/accueil",
+    "width": 1440,
+    "height": 900,
+    "file": "fan-06-accueil-1440.png"
+  },
+  {
+    "role": "fan",
+    "title": "Explorer",
+    "route": "fan/explorer",
+    "width": 1440,
+    "height": 900,
+    "file": "fan-07-explorer-1440.png"
+  },
+  {
+    "role": "fan",
+    "title": "Mon espace",
+    "route": "fan/espace",
+    "width": 1440,
+    "height": 900,
+    "file": "fan-08-espace-1440.png"
+  },
+  {
+    "role": "fan",
+    "title": "Classement Fans",
+    "route": "fan/classement-fans",
+    "width": 1440,
+    "height": 900,
+    "file": "fan-09-classement-fans-1440.png"
+  },
+  {
+    "role": "fan",
+    "title": "HoF",
+    "route": "fan/hof",
+    "width": 390,
+    "height": 844,
+    "file": "fan-01-hof-390.png"
+  },
+  {
+    "role": "fan",
+    "title": "Session HoF",
+    "route": "fan/hof/session",
+    "width": 390,
+    "height": 844,
+    "file": "fan-02-session-390.png"
+  },
+  {
+    "role": "fan",
+    "title": "Classements HoF",
+    "route": "fan/classements",
+    "width": 390,
+    "height": 844,
+    "file": "fan-03-classements-390.png"
+  },
+  {
+    "role": "fan",
+    "title": "Profil public",
+    "route": "creators/123e4567-e89b-42d3-a456-426614174000",
+    "width": 390,
+    "height": 844,
+    "file": "fan-04-profil-390.png"
+  },
+  {
+    "role": "fan",
+    "title": "Messages",
+    "route": "fan/messages",
+    "width": 390,
+    "height": 844,
+    "file": "fan-05-messages-390.png"
+  },
+  {
+    "role": "fan",
+    "title": "Accueil",
+    "route": "fan/accueil",
+    "width": 390,
+    "height": 844,
+    "file": "fan-06-accueil-390.png"
+  },
+  {
+    "role": "fan",
+    "title": "Explorer",
+    "route": "fan/explorer",
+    "width": 390,
+    "height": 844,
+    "file": "fan-07-explorer-390.png"
+  },
+  {
+    "role": "fan",
+    "title": "Mon espace",
+    "route": "fan/espace",
+    "width": 390,
+    "height": 844,
+    "file": "fan-08-espace-390.png"
+  },
+  {
+    "role": "fan",
+    "title": "Classement Fans",
+    "route": "fan/classement-fans",
+    "width": 390,
+    "height": 844,
+    "file": "fan-09-classement-fans-390.png"
+  },
+  {
+    "role": "creator",
+    "title": "HoF",
+    "route": "creator/hof",
+    "width": 1440,
+    "height": 900,
+    "file": "creator-01-hof-1440.png"
+  },
+  {
+    "role": "creator",
+    "title": "Session HoF",
+    "route": "creator/hof/session",
+    "width": 1440,
+    "height": 900,
+    "file": "creator-02-session-1440.png"
+  },
+  {
+    "role": "creator",
+    "title": "Classements HoF",
+    "route": "creator/classements",
+    "width": 1440,
+    "height": 900,
+    "file": "creator-03-classements-1440.png"
+  },
+  {
+    "role": "creator",
+    "title": "Profil public",
+    "route": "creators/123e4567-e89b-42d3-a456-426614174000",
+    "width": 1440,
+    "height": 900,
+    "file": "creator-04-profil-1440.png"
+  },
+  {
+    "role": "creator",
+    "title": "Messages",
+    "route": "creator/messages",
+    "width": 1440,
+    "height": 900,
+    "file": "creator-05-messages-1440.png"
+  },
+  {
+    "role": "creator",
+    "title": "Accueil",
+    "route": "creator/accueil",
+    "width": 1440,
+    "height": 900,
+    "file": "creator-06-accueil-1440.png"
+  },
+  {
+    "role": "creator",
+    "title": "Explorer",
+    "route": "creator/explorer",
+    "width": 1440,
+    "height": 900,
+    "file": "creator-07-explorer-1440.png"
+  },
+  {
+    "role": "creator",
+    "title": "Progression",
+    "route": "creator/progression",
+    "width": 1440,
+    "height": 900,
+    "file": "creator-08-progression-1440.png"
+  },
+  {
+    "role": "creator",
+    "title": "Créer",
+    "route": "creator/creer",
+    "width": 1440,
+    "height": 900,
+    "file": "creator-09-creer-1440.png"
+  },
+  {
+    "role": "creator",
+    "title": "Ma boutique",
+    "route": "creator/boutique",
+    "width": 1440,
+    "height": 900,
+    "file": "creator-10-boutique-1440.png"
+  },
+  {
+    "role": "creator",
+    "title": "Mon profil",
+    "route": "creator/mon-profil",
+    "width": 1440,
+    "height": 900,
+    "file": "creator-11-mon-profil-1440.png"
+  },
+  {
+    "role": "creator",
+    "title": "HoF",
+    "route": "creator/hof",
+    "width": 390,
+    "height": 844,
+    "file": "creator-01-hof-390.png"
+  },
+  {
+    "role": "creator",
+    "title": "Session HoF",
+    "route": "creator/hof/session",
+    "width": 390,
+    "height": 844,
+    "file": "creator-02-session-390.png"
+  },
+  {
+    "role": "creator",
+    "title": "Classements HoF",
+    "route": "creator/classements",
+    "width": 390,
+    "height": 844,
+    "file": "creator-03-classements-390.png"
+  },
+  {
+    "role": "creator",
+    "title": "Profil public",
+    "route": "creators/123e4567-e89b-42d3-a456-426614174000",
+    "width": 390,
+    "height": 844,
+    "file": "creator-04-profil-390.png"
+  },
+  {
+    "role": "creator",
+    "title": "Messages",
+    "route": "creator/messages",
+    "width": 390,
+    "height": 844,
+    "file": "creator-05-messages-390.png"
+  },
+  {
+    "role": "creator",
+    "title": "Accueil",
+    "route": "creator/accueil",
+    "width": 390,
+    "height": 844,
+    "file": "creator-06-accueil-390.png"
+  },
+  {
+    "role": "creator",
+    "title": "Explorer",
+    "route": "creator/explorer",
+    "width": 390,
+    "height": 844,
+    "file": "creator-07-explorer-390.png"
+  },
+  {
+    "role": "creator",
+    "title": "Progression",
+    "route": "creator/progression",
+    "width": 390,
+    "height": 844,
+    "file": "creator-08-progression-390.png"
+  },
+  {
+    "role": "creator",
+    "title": "Créer",
+    "route": "creator/creer",
+    "width": 390,
+    "height": 844,
+    "file": "creator-09-creer-390.png"
+  },
+  {
+    "role": "creator",
+    "title": "Ma boutique",
+    "route": "creator/boutique",
+    "width": 390,
+    "height": 844,
+    "file": "creator-10-boutique-390.png"
+  },
+  {
+    "role": "creator",
+    "title": "Mon profil",
+    "route": "creator/mon-profil",
+    "width": 390,
+    "height": 844,
+    "file": "creator-11-mon-profil-390.png"
+  }
+]
