@@ -26,6 +26,10 @@ Le serveur valide les catégories et états même si l'API est appelée directem
 
 ## Tests et étapes restantes
 
+Le [parcours de demande natif](FANS-CREATOR-ADMISSION-UI.md) raccorde Mon espace
+à cette API : catégorie, profil pending, lecture de l’état et accès au shell
+Créateur. Il ne permet pas au membre de publier son propre profil.
+
 Les tests couvrent l'isolation du rôle, le schéma, la création unique et idempotente, le rejet des catégories inconnues et des membres non liés ou privilégiés, l'invisibilité avant approbation et après suspension, le filtre de catégorie, `identity_verified=false` avant et après approbation, et les permissions REST avec nonce. Une recette locale WordPress/MariaDB sur la chaîne Fans a confirmé l'installation InnoDB et les réponses REST 403 sans nonce, 201 à la création, 403 pour l'approbation par le membre et 200 pour l'approbation administrative avec `identity_verified=false`. Restent à exercer l'échange réseau Me, le navigateur et les courses de création réelles.
 
 Avant d'ajouter un nom affiché, une biographie, un lien ou un média, définir et tester la modération avant stockage et publication, les retraits, les signalements, la rétention et le refus de tout contenu adulte. Les publications, followers, messagerie et commerce sont des lots séparés. Les deux catégories commerciales restent régies par [FANS.md](FANS.md) : aucune vente n'est possible dans ce module.
