@@ -121,15 +121,35 @@
       const content = element('div');
       content.append(element('p', 'fu-panel__kicker', categories[response.data.category]));
       content.append(element('h3', '', 'Profil sans nom public'));
-      content.append(element('p', '', 'Cette fiche confirme uniquement la catégorie publique approuvée. Le nom et le portrait ne sont pas disponibles.'));
+      content.append(element('p', '', 'Catégorie publique approuvée. Le nom et le portrait ne sont pas disponibles.'));
+      const follows = element('p', 'fu-live', 'Chargement du nombre de suivis…');
+      follows.dataset.fansFollowCount = '';
+      follows.setAttribute('role', 'status');
+      content.append(follows);
       card.append(content);
       target.append(card);
       status(profile, 'Profil public chargé.');
+      loadFollowCount(id, follows, signal, current);
     } catch (error) {
       if (signal.aborted || current !== revision) return;
       target.replaceChildren();
       status(profile, 'Ce profil est indisponible pour le moment.');
       showState(profile, 'Profil indisponible', 'Réessayez plus tard.');
+    }
+  }
+
+  async function loadFollowCount(id, target, signal, current) {
+    try {
+      const response = await get(`${profile.dataset.api.replace(/\/$/, '')}/${encodeURIComponent(id)}/followers/count`, signal);
+      if (signal.aborted || current !== revision || !target.isConnected) return;
+      const data = response.data;
+      if (!data || data.creator_id !== id || !Number.isSafeInteger(data.count) || data.count < 0) {
+        throw new Error('invalid_count');
+      }
+      target.textContent = `Suivis enregistrés : ${data.count.toLocaleString('fr-FR')}`;
+    } catch (error) {
+      if (signal.aborted || current !== revision || !target.isConnected) return;
+      target.textContent = 'Nombre de suivis indisponible.';
     }
   }
 
@@ -144,7 +164,15 @@
     });
   }
   const refresh = () => { if (explorer) loadExplorer(); else loadProfile(); };
+  const clear = () => {
+    if (controller) controller.abort();
+    revision += 1;
+    const root = explorer || profile;
+    results(root).replaceChildren();
+    status(root, 'Lecture interrompue. Actualisation au retour sur la page.');
+  };
+  window.addEventListener('pagehide', clear);
   window.addEventListener('pageshow', (event) => { if (event.persisted) refresh(); });
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) clear(); else refresh(); });
   refresh();
 })();

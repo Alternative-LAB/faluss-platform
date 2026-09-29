@@ -6,6 +6,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Fans — nombre public de suivis
+
+- Lecture du compteur public existant après validation de la fiche, avec état indisponible si la route est fermée ou la réponse invalide ; aucun zéro inventé.
+- Fiches effacées au masquage/départ et rechargées au retour ; aucune ouverture des actions de suivi ni changement de flag ou de moteur social.
+
 ### Fans — chemins avec slash final
 
 - Routes Fan/Créateur accessibles avec ou sans un slash final, droits et navigation identiques, sans rafraîchir les règles WordPress.

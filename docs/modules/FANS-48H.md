@@ -94,11 +94,20 @@ ordinateur/mobile. Aucun changement visuel ; captures du lot 10 toujours
 applicables. La recette a identifié séparément un 404 des routes terminées par
 `/`, à corriger dans le lot suivant ; les liens canoniques sans slash fonctionnent.
 
-Lot 12 : normalisation de la vue capturée par les règles WordPress existantes,
+Lot 12 fusionné : [PR #100](https://github.com/Alternative-LAB/faluss-platform/pull/100),
+`main` `40ee56038c78061c6040703f2bbeb6f4f98f97d9`. Six contrôles de PR verts ;
+au contrôle suivant, GitHub n’avait créé ni run ni check suite pour ce SHA de
+main. Cette CI n’est donc pas déclarée réussie et reste à confirmer.
+Normalisation de la vue capturée par les règles WordPress existantes,
 avec un slash final accepté et les chemins non canoniques toujours refusés.
 Même traitement dans le contrôleur et le filtre de barre WordPress ; aucun
 flush de permaliens, migration ou modification des droits.
 [Preuves et captures](../evidence/fans-48h/lot-12/README.md).
+
+Lot 13 : compteur public de suivis lu via l’API existante, sans action sociale
+ouverte ; zéro uniquement si attesté par la réponse du service, sinon état
+indisponible. Effacement et invalidation des lectures au masquage/départ, reprise
+au retour visible/BFcache. [Preuves et captures](../evidence/fans-48h/lot-13/README.md).
 
 ### Bilan communiqué le 29 septembre vers 22 h (Paris)
 
