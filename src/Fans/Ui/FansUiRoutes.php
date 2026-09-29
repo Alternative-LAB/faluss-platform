@@ -124,15 +124,16 @@ final class FansUiRoutes
         $profilesEnabled = defined('FALUSS_PLATFORM_FANS_CREATOR_PROFILES')
             && constant('FALUSS_PLATFORM_FANS_CREATOR_PROFILES') === true
             && CreatorProfileSchema::ready();
-        if ($publicProfile && (!$profilesEnabled || CreatorProfileService::publicById($creatorId) === null)) {
-            wp_die('Profil public introuvable.', '', ['response' => 404]);
-        }
-
         $linked = FansSsoService::currentLinkedSubject() !== null;
         $ownProfile = $linked && $profilesEnabled ? CreatorProfileService::own() : null;
+        $effectiveRole = !$linked ? 'visitor' : ($ownProfile === null ? 'fan' : 'creator');
+        if ($publicProfile && (!$profilesEnabled || CreatorProfileService::publicById($creatorId) === null)) {
+            FansUiView::render($effectiveRole, 'profile-unavailable', null, 404);
+            exit;
+        }
         $signIn = $linked ? '' : FansSsoService::button(['return_to' => parse_url($canonical, PHP_URL_PATH)]);
         if ($publicProfile || $view === 'explorer' || $view === 'hof') {
-            $role = !$linked ? 'visitor' : ($ownProfile === null ? 'fan' : 'creator');
+            $role = $effectiveRole;
         } else {
             $access = self::accessStatus($role, $view, $linked, $ownProfile !== null);
             if ($access === 403) {
@@ -140,7 +141,8 @@ final class FansUiRoutes
                 exit;
             }
             if ($access !== 200) {
-                wp_die('Espace créateur indisponible.', '', ['response' => $access]);
+                FansUiView::render($effectiveRole, 'creator-unavailable', null, $access);
+                exit;
             }
         }
 

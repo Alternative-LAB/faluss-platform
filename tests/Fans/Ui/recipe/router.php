@@ -29,6 +29,7 @@ namespace Faluss\Platform\Fans\Profiles {
         }
         public static function publicById(mixed $creatorId): ?array
         {
+            if (in_array($_COOKIE['fans_ui_public_state'] ?? '', ['suspended', 'withdrawn'], true)) { return null; }
             return in_array($creatorId, [\Faluss\Platform\Fans\Ui\FIXTURE_ID, \Faluss\Platform\Fans\Ui\SECOND_ID], true)
                 ? ['creator_id' => $creatorId] : null;
         }

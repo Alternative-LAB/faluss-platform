@@ -34,6 +34,8 @@ final class FansUiView
 
     /** @var array<string,array{string,string,string,string}> */
     private const PAGES = [
+        'profile-unavailable' => ['Découvrir', 'Profil indisponible', '', 'Ce profil n’est pas public ou n’existe pas.'],
+        'creator-unavailable' => ['Votre espace Fans', 'Espace créateur indisponible', '', 'Cet espace nécessite un profil créateur associé à votre compte.'],
         'visitor:connexion' => ['Votre espace Fans', 'Continuer avec Faluss', '', 'Connectez-vous via Faluss Identity pour accéder à cet espace personnel.'],
         'visitor:explorer' => ['Découvrir', 'Explorer les créateurs', 'explorer', 'La découverte est en préparation : aucun nom public ni portrait approuvé n’est encore fourni.'],
         'visitor:hof' => ['Hall of Fame', 'Le Hall of Fame', 'hof', 'Le moteur HoF n’est pas disponible. Aucune session, aucun rang ni aucun point ne peut être affiché.'],
@@ -60,7 +62,8 @@ final class FansUiView
 
     public static function render(string $role, string $view, ?string $creatorId, int $status = 200, string $signIn = '', ?FansUiAuthor $author = null): void
     {
-        $page = self::PAGES[$view === 'public-profile' ? 'public-profile' : $role . ':' . $view] ?? null;
+        $errorView = in_array($view, ['profile-unavailable', 'creator-unavailable'], true);
+        $page = self::PAGES[$view === 'public-profile' || $errorView ? $view : $role . ':' . $view] ?? null;
         if ($page === null || !isset(self::NAV[$role])) {
             return;
         }
@@ -91,7 +94,7 @@ final class FansUiView
             <h1><?php echo esc_html($title); ?></h1>
             <p class="fu-banner__subtitle"><?php echo esc_html($page[3]); ?></p>
         </header>
-        <?php if ($role === 'visitor') : ?>
+        <?php if ($role === 'visitor' && !$errorView) : ?>
             <section class="fu-signin fu-panel" aria-label="Connexion Faluss">
                 <div><h2><?php echo $view === 'connexion' ? 'Connexion requise' : 'Retrouvez votre espace'; ?></h2>
                 <p>Connectez-vous ou créez votre compte sur Faluss Identity. Vous reviendrez sur cette page après connexion.</p>
@@ -119,11 +122,11 @@ final class FansUiView
             <section class="fu-panel fu-panel--status" aria-labelledby="fu-status-title">
                 <span class="fu-status-mark" aria-hidden="true">◌</span>
                 <div>
-                    <p class="fu-panel__kicker">À venir</p>
-                    <h2 id="fu-status-title">Parcours indisponible</h2>
+                    <p class="fu-panel__kicker"><?php echo $errorView ? 'Accès indisponible' : 'À venir'; ?></p>
+                    <h2 id="fu-status-title"><?php echo $errorView ? 'Cette page ne peut pas être affichée' : 'Parcours indisponible'; ?></h2>
                     <p><?php echo esc_html($page[3]); ?></p>
-                    <?php if ($view === 'accueil') : ?>
-                        <a class="fu-link" href="<?php echo esc_url(FansUiRoutes::url($role, 'explorer')); ?>">Explorer les profils <span aria-hidden="true">↗</span></a>
+                    <?php if ($errorView) : ?>
+                        <a class="fu-link" href="<?php echo esc_url(FansUiRoutes::url($role === 'visitor' ? 'fan' : $role, 'explorer')); ?>">Retour à Explorer <span aria-hidden="true">↗</span></a>
                     <?php endif; ?>
                 </div>
             </section>

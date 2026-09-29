@@ -59,7 +59,8 @@ fs.mkdirSync(output, { recursive: true });
     await desktop.addCookies([{ name: 'fans_ui_role', value: 'fan', url: base }]);
     const creatorDenied = await fan.goto(`${base}/faluss-fans/creator/creer`);
     assert.equal(creatorDenied.status(), 404);
-    assert.equal(await fan.locator('.fu-app').count(), 0);
+    assert.equal(await fan.locator('.fu-app[data-fans-role="fan"]').count(), 1);
+    await fan.getByRole('link', { name: 'Retour à Explorer', exact: false }).waitFor();
 
     const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
     await mobile.addCookies([

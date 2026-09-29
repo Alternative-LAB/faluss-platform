@@ -37,8 +37,14 @@ Lot 3 fusionné : [PR #91](https://github.com/Alternative-LAB/faluss-platform/pu
 `main` `1dfcea486ce7795bdea7734e0062edfd7e3544b2`, CI de branche et de main vertes.
 [Lecture et accueil](FANS-READING-UI.md), 284 tests / 4 235 assertions,
 recettes navigateur isolées et [captures](../evidence/fans-48h/lot-3/README.md).
-Lot 4 : [gestion des textes](FANS-AUTHOR-UI.md), 284 tests / 4 253 assertions,
+Lot 4 fusionné : [PR #92](https://github.com/Alternative-LAB/faluss-platform/pull/92),
+`main` `e5cf47465f91e3459fa2b0518ab5ca967813c951`, CI de branche et de main vertes.
+[Gestion des textes](FANS-AUTHOR-UI.md), 284 tests / 4 253 assertions,
 recette sans JavaScript, [captures et limites](../evidence/fans-48h/lot-4/README.md).
+Lot 5 : 404 dans le shell et 168 contrôles rôle/route/viewport ;
+[matrice d’évaluation intermédiaire](FANS-48H-EVALUATION.md) et
+[preuves](../evidence/fans-48h/lot-5/README.md). La revue des autres API existantes
+se poursuit avant le bilan final des 48 heures.
 
 Les cases « interface prête mais service absent » n’attestent aucune fonctionnalité
 métier. Les captures seront produites depuis un serveur de tests PHP isolé :
