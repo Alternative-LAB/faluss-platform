@@ -6,81 +6,38 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
-### Fans — continuité de lecture au clavier
+## [0.7.0] - 2026-09-29
 
-- Focus conservé pendant la pagination, puis placé avant les textes ou l’erreur après une action explicite ; aucun déplacement si le lecteur a changé de cible.
-- Reprise accessible et demandes concurrentes évitées, sans changer les contrats REST ni les services indisponibles.
+### Ajouté
 
-### Fans — revue de couverture
+- Lecture du nombre public de suivis sur les profils, sans ouverture des actions sociales (#101, `198ea13`).
+- Publications approuvées du créateur sur son profil public (#97, `43eec96`).
+- Filtre public par créateur et curseurs liés au filtre (#96, `2683da0`).
+- Lecture à la demande des images de publications approuvées, sous opt-ins existants (#95, `9062655`).
+- Demande native de profil créateur, soumise à approbation administrative (#94, `d25a07b`).
+- Création, édition et retrait des textes via les contrats de modération existants (#92, `e5cf474`).
+- Accueils et lecture Fans raccordés aux services disponibles (#91, `1dfcea4`).
+- Retour vers la route Fans d’origine après connexion Identity Me (#90, `42123d4`).
+- Huit accès Créateur et écran Classement Fans indisponible tant que le contrat et le service PF ne sont pas opérationnels (#89, `70933b5`).
 
-- Quarante captures du même code, indexées par vue et viewport, avec écarts explicites aux planches officielles.
-- Matrice d’évaluation séparant fonctions testées, services absents et décisions/accès requis ; aucune modification runtime ou nouvelle release.
+### Corrigé
 
-### Fans — nombre public de suivis
+- Continuité du focus clavier pendant la pagination et sa reprise (#103, `48f0033`).
+- Routes canoniques Fans acceptant un slash final unique (#100, `40ee560`).
+- Conservation du texte sélectionné dans le retour SSO, sans sauvegarde du formulaire (#99, `6390576`).
+- Focus clavier conservé pendant la lecture des images (#98, `222ab99`).
+- Pages absentes rendues dans le shell du rôle en conservant le statut HTTP 404 (#93, `cbc2cae`).
 
-- Lecture du compteur public existant après validation de la fiche, avec état indisponible si la route est fermée ou la réponse invalide ; aucun zéro inventé.
-- Fiches effacées au masquage/départ et rechargées au retour ; aucune ouverture des actions de suivi ni changement de flag ou de moteur social.
+### Documentation
 
-### Fans — chemins avec slash final
+- Matrice d’évaluation et quarante captures ordinateur/mobile avec limites explicites des fixtures (#102, `6cac194`).
 
-- Routes Fan/Créateur accessibles avec ou sans un slash final, droits et navigation identiques, sans rafraîchir les règles WordPress.
-- Doubles slashs et segments supplémentaires refusés ; filtre de barre WordPress normalisé de la même façon.
+### Disponibilité et compatibilité
 
-### Fans — retour SSO vers un texte sélectionné
-
-- Conservation de la sélection d’un texte dans Créer après connexion Me, avec un unique UUID v4 validé ; aucun contenu de formulaire sauvegardé.
-- Paramètres supplémentaires, doublons et destinations non autorisées refusés ; signature, consommation de l’état SSO et contrôle propriétaire inchangés.
-
-### Fans — clavier et vérification WebKit
-
-- Focus conservé pendant le chargement d’une image, indisponibilité annoncée par ARIA et demandes concurrentes toujours refusées.
-- Recettes isolées exécutables sous Chromium ou WebKit, navigation Créateur par toucher à 320/390 px ; limite de typographie du banc WebKit Windows documentée.
-
-### Fans — publications du profil public
-
-- Parcours Explorer → profil → textes approuvés du créateur, avec pagination filtrée et états vide/indisponible.
-- Refus côté navigateur des réponses d’un autre auteur ; profils non publics toujours en HTTP 404 sans chargement de contenus.
-
-### Fans — publications publiques d’un créateur
-
-- Filtre public `creator_id` avant pagination, avec projection et modération existantes ; profil absent ou suspendu refusé sans détail privé.
-- Curseur filtré lié au créateur, sans modifier les curseurs globaux v1 ni permettre de choisir le propriétaire des listes privées.
-
-### Fans — lecture des images de publications
-
-- Affichage à la demande des dérivés JPEG via le contrat public existant, uniquement si ses opt-ins sont déjà disponibles ; aucun portrait inventé.
-- Une demande à la fois, contrôles du format et du volume, erreurs explicites, masquage accessible et suppression des URL temporaires au départ ou au masquage de la page.
-
-### Fans — demande de profil créateur
-
-- Choix d’une catégorie et demande de profil en attente depuis Mon espace via le REST existant, avec nonce, reprise idempotente de la même catégorie et état réel du profil.
-- Parcours natif sans JavaScript ; aucune auto-approbation, identité éditoriale ou permission commerciale ajoutée.
-
-### Fans — refus dans le shell et revue des routes
-
-- Pages de profil non public et d’espace créateur sans profil rendues dans le shell Fans avec HTTP 404 conservé, message neutre et retour Explorer.
-- Matrice intermédiaire des écrans, services absents et décisions ; 168 combinaisons rôle/route/viewport vérifiées sur fixtures isolées.
-
-### Fans — gestion des textes créateur
-
-- Formulaires natifs de création, lecture privée, édition et retrait confirmé via le REST existant ; états et refus explicites, nonce, idempotence et révisions conservés.
-- Captures et recette sans JavaScript ; aucun média, service, produit, paiement, flag ou schéma ajouté.
-
-### Fans — accueil et lecture
-
-- Accueil navigable, statut propriétaire et pages de textes publics approuvés via le REST existant, sans identité ou progression inventée.
-
-### Fans — retour après connexion et étude invité
-
-- Retour SSO vers une page Fans autorisée, cookie de navigation signé et lié à l’état consommé ; refus des destinations externes, admin, paramètres non autorisés et callback, sans changement de l’URI enregistrée auprès de Me.
-- Invitation via Faluss Identity sur les pages publiques et écran de connexion sur les accès personnels refusés (HTTP 403 conservé). Aucun passwordless ni SMTP Fans.
-- Étude de la session, de l’alias et du badge invité ; aucune identité provisoire activée ni promesse de conservation de progression non implémentée.
-
-### Fans — classement des fans et navigation V2
-
-- Écran « Classement Fans » distinct du HoF créateur, sous SSO, affichant honnêtement l’absence du service d’attributions attestées et de corrections Hub. Aucun rang, score, montant, PC, donnée fictive ou nouvelle capacité économique.
-- Contrat et propositions non ratifiées pour période, égalités, pseudonymes, invités et abus ; pack seul sans score, attribution unique et corrections obligatoires.
-- Six accès Fan ; huit accès Créateur dont seul l’actif affiche un label visuel, avec noms accessibles conservés. Captures et tests isolés, sans accès aux sites WordPress ni activation de production.
+- Aucun flag de production activé. La mise à jour livre le code ; installation, recette WordPress/Elementor/SSO réelle et activation restent sous le contrôle du propriétaire.
+- HoF, classement PF, progression PC, messagerie et commerce restent indisponibles. Aucune identité publique ou invitée, contribution, session, rang ou progression fictive n’est créé.
+- Aucun second passwordless/SMTP, paiement, migration ou changement des modules Me/Hub/Identity/Link dans ces lots. Les droits et refus serveur restent applicables.
+- Détail des parcours réellement testés et des prérequis d’activation : `docs/modules/FANS-48H-EVALUATION.md`. La publication de cette version ne clôt pas le chantier de 48 heures.
 
 ## [0.6.3] - 2026-09-29
 
