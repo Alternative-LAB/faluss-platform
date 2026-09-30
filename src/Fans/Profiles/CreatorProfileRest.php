@@ -69,7 +69,7 @@ final class CreatorProfileRest
 
         return $profile === null
             ? new \WP_Error('profile_not_found', 'Profil introuvable.', ['status' => 404])
-            : new \WP_REST_Response($profile, 200);
+            : EditorialRest::response($profile);
     }
 
     public static function publicProfile(\WP_REST_Request $request): \WP_REST_Response|\WP_Error
@@ -78,14 +78,15 @@ final class CreatorProfileRest
 
         return $profile === null
             ? new \WP_Error('profile_not_found', 'Profil introuvable.', ['status' => 404])
-            : new \WP_REST_Response($profile, 200);
+            : EditorialRest::response($profile + ['editorial' => EditorialService::publicById($profile['creator_id'])]);
     }
 
     public static function listPublic(\WP_REST_Request $request): \WP_REST_Response|\WP_Error
     {
         $result = CreatorProfileService::publicList($request->get_param('category'));
 
-        return $result instanceof \WP_Error ? $result : new \WP_REST_Response($result, 200);
+        return $result instanceof \WP_Error ? $result : EditorialRest::response(array_map(
+            static fn (array $profile): array => $profile + ['editorial' => EditorialService::publicById($profile['creator_id'])], $result));
     }
 
     public static function setStatus(\WP_REST_Request $request): \WP_REST_Response|\WP_Error

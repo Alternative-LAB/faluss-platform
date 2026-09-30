@@ -1,8 +1,8 @@
 (() => {
   'use strict';
-  const privateView = document.querySelector('[data-fans-private-reading]');
-  if (privateView) {
-    window.addEventListener('pagehide', () => privateView.replaceChildren());
+  const privateViews = [...document.querySelectorAll('[data-fans-private-reading]')];
+  if (privateViews.length) {
+    window.addEventListener('pagehide', () => privateViews.forEach(view => view.replaceChildren()));
     window.addEventListener('pageshow', (event) => { if (event.persisted) window.location.reload(); });
   }
   const root = document.querySelector('[data-fans-publications]');

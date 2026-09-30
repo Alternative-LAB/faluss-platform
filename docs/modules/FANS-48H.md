@@ -1,14 +1,20 @@
-# Fans — chantier du 29 septembre au 1 octobre 2026
+# Fans — historique des lots #89 à #105
+
+Le cadre « 48 heures » est annulé par la consigne du 30 septembre 2026 : aucune
+échéance, aucun bilan planifié ni vérification périodique de `main`. Le suivi
+programmé a été supprimé. Ce fichier conserve les preuves historiques ; le
+développement reprend par lots de code, à commencer par [l’identité éditoriale](FANS-EDITORIAL.md).
 
 Départ vérifié : `origin/main` `ad7c5857a0c1d65c84d8ec56b5fdbbd7dba178af`,
-version réelle **0.6.3** (en-tête et constante). Fenêtre de travail : 29 septembre
-20 h 52 → 1 octobre 20 h 52, heure de Paris. Aucun accès aux sites WordPress,
+version réelle **0.6.3** (en-tête et constante). Aucun accès aux sites WordPress,
 serveurs ou updater ; code et GitHub uniquement. La consigne ultérieure autorise
 une nouvelle version après les prochains travaux livrables, exclusivement via
 Prepare release, sa PR protégée et Publish private release. Cette livraison
 **0.7.0 est accomplie** (voir ci-dessous). Aucun numéro 0.6.3 réutilisé ; installation,
 recette cible et activation conservées par le propriétaire. Aucune autre release
-à déclencher sans nouvelle consigne.
+à déclencher sur cette ancienne consigne. La consigne du 30 septembre autorise
+une nouvelle livraison via les workflows GitHub lorsqu’un ensemble fonctionnel
+est prêt, sans installation ou activation de production.
 
 ## Changements pris en compte depuis #84
 

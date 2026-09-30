@@ -21,6 +21,10 @@ final class CreatorProfilesModule implements Module
     {
         if (self::enabledForFans() && CreatorProfileSchema::ready() && FansSsoSchema::ready()) {
             CreatorProfileRest::register();
+            if (EditorialModule::available()) {
+                EditorialRest::register();
+                \Faluss\Platform\Fans\Moderation\ModerationPanel::register();
+            }
         }
     }
 
@@ -28,6 +32,7 @@ final class CreatorProfilesModule implements Module
     {
         if (self::enabledForFans() && FansSsoService::configured() && FansSsoSchema::ready()) {
             CreatorProfileSchema::installOrVerify();
+            EditorialModule::activate();
         }
     }
 

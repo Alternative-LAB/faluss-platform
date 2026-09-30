@@ -6,21 +6,25 @@ namespace Faluss\Platform\Fans\Moderation;
 
 use Faluss\Platform\Fans\Publications\TextPublicationsModule;
 use Faluss\Platform\Fans\Publications\TextPublicationService;
+use Faluss\Platform\Fans\Profiles\EditorialModule;
 
 /** WordPress adapter only: every operation dispatches through the existing REST permissions. */
 final class ModerationPanel
 {
     public const PAGE = 'faluss-fans-moderation';
     private static ?\WP_REST_Response $result = null;
+    private static bool $registered = false;
 
     public static function register(): void
     {
+        if (self::$registered) { return; }
+        self::$registered = true;
         add_action('admin_menu', [self::class, 'menu']);
         add_action('admin_post_faluss_fans_preview', [self::class, 'preview']);
     }
 
     public static function allowed(): bool
-    { return TextPublicationsModule::available() && current_user_can('manage_options'); }
+    { return (TextPublicationsModule::available() || EditorialModule::available()) && current_user_can('manage_options'); }
 
     public static function menu(): void
     {
@@ -73,9 +77,10 @@ final class ModerationPanel
         $kind = self::field('kind', $_POST);
         $revision = self::field('revision', $_POST);
         $reason = self::field('reason', $_POST);
-        if (!TextPublicationService::validId($id) || !in_array($kind, ['text-publications', 'images'], true)
+        $allowedReason = match ($kind) { 'images' => 'allowed_image', 'editorial' => 'allowed_editorial', default => 'allowed_text' };
+        if (!TextPublicationService::validId($id) || !in_array($kind, ['text-publications', 'images', 'editorial'], true)
             || preg_match('/^[1-9][0-9]{0,9}$/D', $revision) !== 1
-            || !in_array($reason, [$kind === 'images' ? 'allowed_image' : 'allowed_text', 'prohibited_content', 'needs_revision'], true)) {
+            || !in_array($reason, [$allowedReason, 'prohibited_content', 'needs_revision'], true)) {
             self::$result = new \WP_REST_Response(['code' => 'invalid_panel_input'], 400);
         } else {
             self::$result = self::request('POST', $kind . '/' . $id . '/moderate', ['revision' => (int) $revision,
@@ -121,6 +126,10 @@ final class ModerationPanel
     public static function render(): void
     {
         if (!self::allowed()) { wp_die('Accès non autorisé.', '', ['response' => 403]); }
+        if (self::field('view', $_GET) === 'editorial') {
+            EditorialModerationView::render(self::$result);
+            return;
+        }
         $images = self::field('view', $_GET) === 'images';
         $cursor = self::field('cursor', $_GET);
         $item = self::field('item', $_GET);
