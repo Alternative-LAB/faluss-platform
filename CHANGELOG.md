@@ -10,10 +10,14 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
-- Connect Fans messaging UI moderation and retention (#112) (`c07614b`)
-- Add private Fans message requests and conversations (`d91f142`)
-- Add private message reports and evidence retention (`d91f142`)
-- Add private Fans message requests and conversations (#110) (`b10a6f0`)
+- Demande textuelle Fan vers Créateur, acceptation ou refus, conversation bilatérale, blocage, quotas et protection contre les rejeux (#110, `b10a6f0`).
+- Signalements privés avec preuve minimale, modération habilitée, recours, décision définitive, réexamen et conservation de litige motivée (#111, `d91f142`).
+- Interfaces Fan, Créateur et panel de modération, captures ordinateur/mobile et purges : messages douze mois après le dernier envoi, preuves douze mois après décision définitive, sous réserve d’un litige motivé (#112, `c07614b`).
+
+### Conditions d’ouverture
+
+- Flags et attestation des traitements fermés par défaut ; aucune activation ni recette sur un site WordPress dans cette livraison. Politique, exploitation des purges et recette WordPress/Elementor/SSO à valider avant ouverture.
+- L’ouverture directe Max/abonnement Créateur reste indisponible faute de preuve serveur autoritative consommable par Fans. Seul le parcours ordinaire après acceptation est fonctionnel et testé en isolation.
 
 ## [0.8.0] - 2026-09-30
 
