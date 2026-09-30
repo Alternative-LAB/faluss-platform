@@ -6,17 +6,17 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+## [0.8.0] - 2026-09-30
+
 ### Ajouté
 
-- Choix et détachement d’une image approuvée depuis la fiche privée d’un texte Fans, avec aperçu, confirmation explicite et nouvelle modération contextuelle avant diffusion.
-- Galerie privée des images Fans dans Créer : dépôt JPEG/PNG, aperçu propriétaire, états et retrait natif, puis sélection du portrait dans Mon profil.
-- Déduplication des dépôts identiques encore conservés par leur propriétaire, y compris en concurrence, sans quota supplémentaire ; recette HTTP multipart et SQL isolée en CI.
-- Présentation éditoriale des créateurs Fans : nom public, bio et portrait privé approuvé, formulaire propriétaire, modération par révision et projection publique après approbation, sous opt-in serveur fermé par défaut.
-- Aperçu JPEG privé du portrait et recette SQL isolée des permissions, décisions concurrentes et révocations.
+- Connect approved images to the creator publication form (#108) (`efb3e95`)
+- Add private creator image library and safe upload retries (#107) (`2a89c34`)
+- Add moderated Fans creator editorial identities (#106) (`e78eea8`)
 
 ### Documentation
 
-- Matrice Fans et suivi des 48 heures actualisés avec la publication vérifiée de 0.7.0, le correctif clavier #103 et les limites de preuve avant activation ; aucun changement du paquet publié.
+- Reconcile Fans evaluation with the published release (#105) (`da1ca1b`)
 
 ## [0.7.0] - 2026-09-29
 
