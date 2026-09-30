@@ -25,7 +25,6 @@ final class FansUiRoutes
     {
         add_action('init', [self::class, 'rewrite'], 20);
         add_filter('query_vars', [self::class, 'queryVars']);
-        add_filter('show_admin_bar', [self::class, 'adminBarVisible']);
         add_action('template_redirect', [self::class, 'handle'], 1);
     }
 
@@ -80,26 +79,6 @@ final class FansUiRoutes
 
         return is_string($expected) && is_string($actual)
             && ($actual === rtrim($expected, '/') || $actual === rtrim($expected, '/') . '/');
-    }
-
-    public static function adminBarVisible(bool $show): bool
-    {
-        $view = get_query_var(self::VIEW_VAR);
-        $view = is_string($view) ? rtrim($view, '/') : $view;
-        $creatorId = get_query_var(self::CREATOR_VAR);
-        if ($view === 'public-profile' && is_string($creatorId)) {
-            $canonical = home_url('/faluss-fans/creators/' . $creatorId);
-        } else {
-            $role = get_query_var(self::ROLE_VAR);
-            if (!is_string($role) || !is_string($view) || !self::validView($role, $view)) {
-                return $show;
-            }
-            $canonical = self::url($role, $view);
-        }
-
-        return self::isCanonicalPath($canonical, (string) ($_SERVER['REQUEST_URI'] ?? ''))
-            ? $show && current_user_can('manage_options')
-            : $show;
     }
 
     public static function handle(): void

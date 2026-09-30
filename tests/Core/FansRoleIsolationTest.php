@@ -133,6 +133,8 @@ final class FansRoleIsolationTest extends TestCase
         self::assertCount(5, $GLOBALS['fans_test_deactivation_hooks']);
         self::assertCount(1, $GLOBALS['fans_test_actions']['plugins_loaded']);
         ($GLOBALS['fans_test_actions']['plugins_loaded'][0])();
+        self::assertSame([\Faluss\Platform\Fans\Access\WordPressAccess::class, 'adminBarVisible'], $GLOBALS['fans_test_filters']['show_admin_bar'][0]);
+        self::assertContains([\Faluss\Platform\Fans\Access\WordPressAccess::class, 'protectAdmin'], $GLOBALS['fans_test_actions']['init']);
 
         foreach ($GLOBALS['fans_test_activation_hooks'] as $callback) {
             $callback();

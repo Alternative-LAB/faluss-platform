@@ -25,9 +25,9 @@ ses droits et sa navigation avec ou sans un slash final, y compris le retour SSO
 vers un texte sélectionné. La règle WordPress existante capture ce slash dans
 la variable de vue ; le contrôleur la normalise sans modifier les règles stockées.
 Les chemins avec double slash, segment supplémentaire, encodage ou paramètres
-de réécriture injectés sur une autre page restent refusés. Le filtre de barre
-WordPress applique la même normalisation ; aucun rafraîchissement des permaliens
-n’est requis par ce correctif.
+de réécriture injectés sur une autre page restent refusés. La politique de barre
+WordPress couvre désormais tout le site de rôle Fans, indépendamment des routes ;
+aucun rafraîchissement des permaliens n’est requis par ce correctif.
 
 Évolution du chantier 48 h : [accueil, profil propre et lecture publique](FANS-READING-UI.md).
 La matrice ci-dessous conserve l’état initial de #84 ; le suivi actualisé est dans
@@ -107,9 +107,22 @@ la session HoF, les classements et les espaces personnels restent soumis au SSO 
 les destinations sans moteur ne proposent aucune mutation ; aucun chemin ne
 transforme PF historiques en PC ni un score HoF en PF ou en revenu.
 
-Sur les pages Fans, la barre d’administration WordPress est masquée aux membres
-ordinaires, sans changer leur préférence sur les autres pages. Les comptes
-dotés de `manage_options` conservent la barre et leurs outils WordPress.
+Sur **toutes les pages publiques d’un site de rôle `fans`**, y compris les pages
+WordPress et la landing Elementor, la barre WordPress est réservée aux
+administrateurs (rôle `administrator` avec `manage_options`, ou superadministrateur
+multisite). La décision est appliquée côté WordPress, indépendamment de la
+préférence utilisateur, sans écrire cette préférence : barre présente pour les
+administrateurs et absente pour les autres. Elle ne dépend ni des flags UI/SSO,
+ni d’un schéma Fans prêt. Aucun identifiant technique n’est rendu par la toolbar
+pour les non-administrateurs. Les sites de rôle `me` et `hub` sont inchangés.
+
+L’accès des membres connectés aux écrans `/wp-admin/` (dont `profile.php`) renvoie
+un **302 non stockable vers `home_url('/')`**, la landing publique, disponible même
+si les routes UI sont fermées. Les invités conservent l’authentification WordPress
+native et les administrateurs leurs écrans. `admin-post.php`, `admin-ajax.php` et
+les requêtes AJAX sont exclus de cette redirection : leurs permissions et nonces
+restent obligatoires. Aucun hook de redirection n’est ajouté aux API REST ni au
+callback SSO. Voir la [recette WordPress/Elementor](../evidence/fans-wordpress-access/README.md).
 
 ## Condition avant activation en production
 
