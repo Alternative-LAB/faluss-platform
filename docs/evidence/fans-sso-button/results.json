@@ -1,0 +1,41 @@
+{
+  "browser": "154.0.8037.58",
+  "results": [
+    {
+      "viewportWidth": 1286,
+      "background": "rgb(65, 194, 149)",
+      "font": "FalussSsoOutfit, Outfit, sans-serif",
+      "width": 486,
+      "height": 76,
+      "nativePost": true,
+      "unrelatedButtonUnchanged": true,
+      "shell": true,
+      "javascript": false,
+      "externalRequests": 0
+    },
+    {
+      "viewportWidth": 390,
+      "background": "rgb(65, 194, 149)",
+      "font": "FalussSsoOutfit, Outfit, sans-serif",
+      "width": 350,
+      "height": 64,
+      "nativePost": true,
+      "unrelatedButtonUnchanged": true,
+      "shell": true,
+      "javascript": false,
+      "externalRequests": 0
+    },
+    {
+      "viewportWidth": 320,
+      "background": "rgb(65, 194, 149)",
+      "font": "FalussSsoOutfit, Outfit, sans-serif",
+      "width": 280,
+      "height": 77,
+      "nativePost": true,
+      "unrelatedButtonUnchanged": true,
+      "shell": true,
+      "javascript": false,
+      "externalRequests": 0
+    }
+  ]
+}

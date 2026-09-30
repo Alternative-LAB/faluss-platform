@@ -1,0 +1,95 @@
+@font-face {
+    font-family: FalussSsoOutfit;
+    src: url('fonts/outfit.ttf') format('truetype');
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+}
+
+form.faluss-fans-sso-form {
+    box-sizing: border-box;
+    width: 486px;
+    max-width: 100%;
+    min-width: 0;
+    margin: 0 auto;
+    padding: 0;
+    border: 0;
+}
+
+.faluss-fans-sso-form .faluss-fans-sso-button {
+    appearance: none;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr) 28px;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 76px;
+    margin: 0;
+    padding: 18px 24px;
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background: #41c295;
+    color: #fff;
+    box-shadow: none;
+    font: 400 22px/1.25 FalussSsoOutfit, Outfit, sans-serif;
+    letter-spacing: normal;
+    text-align: center;
+    text-decoration: none;
+    text-transform: none;
+    white-space: normal;
+    cursor: pointer;
+    transition: background-color 150ms ease;
+}
+
+.faluss-fans-sso-button .faluss-fans-sso-button__icon {
+    display: block;
+    width: 28px;
+    height: 34px;
+    max-width: none;
+    margin: 0;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+}
+
+.faluss-fans-sso-button .faluss-fans-sso-button__label {
+    color: inherit;
+    font: inherit;
+    overflow-wrap: anywhere;
+}
+
+.faluss-fans-sso-form .faluss-fans-sso-button:hover {
+    background: #329e79;
+    color: #fff;
+}
+
+.faluss-fans-sso-form .faluss-fans-sso-button:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 7px #153e30;
+}
+
+.faluss-fans-sso-form .faluss-fans-sso-button:active {
+    background: #287f62;
+}
+
+.fu-signin .faluss-fans-sso-form { flex: 0 1 486px; }
+
+@media (max-width: 700px) {
+    .fu-signin .faluss-fans-sso-form { flex-basis: auto; }
+}
+
+@media (max-width: 520px) {
+    .faluss-fans-sso-form .faluss-fans-sso-button {
+        grid-template-columns: 24px minmax(0, 1fr) 24px;
+        gap: 8px;
+        min-height: 64px;
+        padding: 14px 16px;
+        font-size: 18px;
+    }
+    .faluss-fans-sso-button .faluss-fans-sso-button__icon { width: 24px; height: 29px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .faluss-fans-sso-form .faluss-fans-sso-button { transition: none; }
+}

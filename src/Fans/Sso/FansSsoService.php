@@ -37,6 +37,8 @@ final class FansSsoService
     public static function register(): void
     {
         add_shortcode('faluss_fans_sso_button', [self::class, 'button']);
+        // Shortcodes in Elementor can be rendered after wp_head; queue styles beforehand.
+        add_action('wp_enqueue_scripts', [self::class, 'enqueueButtonStyle']);
         add_action('admin_post_nopriv_' . self::START_ACTION, [self::class, 'start']);
         add_action('admin_post_' . self::START_ACTION, [self::class, 'start']);
         add_action('template_redirect', [self::class, 'callback'], 0);
@@ -64,6 +66,11 @@ final class FansSsoService
         );
     }
 
+    public static function enqueueButtonStyle(): void
+    {
+        wp_enqueue_style('faluss-fans-sso-button', plugins_url('assets/fans-sso-button.css', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'));
+    }
+
     public static function button(mixed $attributes = []): string
     {
         if (!self::configured() || (is_user_logged_in() && !self::normalUser(get_current_user_id()))) {
@@ -72,11 +79,13 @@ final class FansSsoService
 
         $returnTo = FansSsoReturn::path(is_array($attributes) ? ($attributes['return_to'] ?? null) : null);
 
-        return '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">'
+        return '<form class="faluss-fans-sso-form" method="post" action="' . esc_url(admin_url('admin-post.php')) . '">'
             . '<input type="hidden" name="action" value="' . esc_attr(self::START_ACTION) . '">'
             . wp_nonce_field(self::START_ACTION, 'faluss_fans_sso_nonce', false, false)
             . ($returnTo === null ? '' : '<input type="hidden" name="faluss_fans_return_to" value="' . esc_attr($returnTo) . '">')
-            . '<button type="submit">' . esc_html__('Continuer avec Faluss', 'faluss-platform')
+            . '<button class="faluss-fans-sso-button" type="submit">'
+            . '<img class="faluss-fans-sso-button__icon" src="' . esc_url(plugins_url('assets/images/apps/faluss-hub.png', dirname(__DIR__, 3) . '/faluss-platform.php')) . '" width="28" height="34" alt="" aria-hidden="true">'
+            . '<span class="faluss-fans-sso-button__label">' . esc_html__('Rejoindre avec Faluss Identity', 'faluss-platform') . '</span>'
             . '</button></form>';
     }
 

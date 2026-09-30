@@ -26,6 +26,21 @@ sequenceDiagram
 
 ## Configuration et activation
 
+### Présentation du shortcode
+
+`[faluss_fans_sso_button]` produit le formulaire POST natif, avec son nonce et le
+retour autorisé existant (`return_to`). Le bouton affiche le vrai texte
+« Rejoindre avec Faluss Identity », le pictogramme Faluss décoratif (`alt=""`,
+`aria-hidden="true") et la police Outfit embarquée. Il fonctionne sans JavaScript.
+La feuille `assets/fans-sso-button.css`, limitée aux classes du formulaire, est
+chargée par `wp_enqueue_scripts` uniquement lorsque le module SSO Fans est amorcé.
+Ce chargement précède le rendu du shortcode dans le corps d'une page, notamment
+dans Elementor ; il ne dépend pas d'une recherche dans `post_content`.
+La présentation ne change aucun paramètre du protocole, des flags ou de la session.
+Voir la [recette visuelle isolée](../evidence/fans-sso-button/README.md).
+
+### Paramètres serveur
+
 Le site Fans doit servir une URL HTTPS distincte de Me. Un administrateur de Me doit préenregistrer **l'URI exacte** `https://<hôte-fans>/faluss-fans/sso/callback` pour un client confidentiel autorisé aux scopes `identity.basic` et `identity.email`. Le secret aléatoire de 43 caractères base64url est fourni par la configuration serveur non versionnée ; il ne passe ni dans une URL, ni dans les logs, ni dans une option WordPress. Exemple sans valeur de secret :
 
 ```php
