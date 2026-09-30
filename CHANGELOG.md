@@ -6,13 +6,19 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+## [0.10.0] - 2026-09-30
+
 ### Ajouté
 
-- Identity : accord membre révocable par application, lié aux permissions exactes et à la configuration du client ; nouvel accord après modification ou rotation, sans statut officiel pour Fans.
+- Remember revocable Identity consent for exact client permissions (`f721d4f`)
 
 ### Corrigé
 
-- Fans : bouton SSO compact, libellés de navigation visibles au survol/focus et pour l’accès actif, conteneur commun sans décalage lié à la barre de défilement.
+- Refine Fans button sizing and navigation layout (#120) (`70af1eb`)
+
+### Sécurité
+
+- Invalidate unexchanged codes when client configuration changes (`f721d4f`)
 
 ## [0.9.3] - 2026-09-30
 
