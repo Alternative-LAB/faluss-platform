@@ -15,6 +15,8 @@ final class FansSsoTestRedirect extends \RuntimeException
 }
 
 function admin_url(string $path): string { return home_url('/wp-admin/' . $path); }
+function plugins_url(string $path, string $plugin): string { return home_url('/wp-content/plugins/faluss-platform/' . $path); }
+function wp_enqueue_style(string $handle, string $url, array $deps, string $version): void { $GLOBALS['fans_sso_styles'][$handle] = [$url, $deps, $version]; }
 function esc_url(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); }
 function esc_attr(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); }
 function esc_html__(string $value, string $domain): string { return htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); }
@@ -40,6 +42,7 @@ final class FansSsoReturnFlowTest extends TestCase
     protected function setUp(): void
     {
         fans_sso_reset();
+        if (!defined('FALUSS_PLATFORM_VERSION')) { define('FALUSS_PLATFORM_VERSION', 'test'); }
         if (!defined('FALUSS_FANS_SSO_CLIENT_ID')) {
             define('FALUSS_FANS_SSO_CLIENT_ID', 'fans-test-client');
             define('FALUSS_FANS_SSO_CLIENT_SECRET', str_repeat('s', 43));
@@ -56,6 +59,38 @@ final class FansSsoReturnFlowTest extends TestCase
             'create' => ['/faluss-fans/creator/creer'],
             'selected text' => ['/faluss-fans/creator/creer?publication=123e4567-e89b-42d3-a456-426614174000'],
         ];
+    }
+
+    public function testButtonKeepsNativePostFieldsAndAccessibleText(): void
+    {
+        $html = FansSsoService::button(['return_to' => 'https://evil.example/']);
+        $dom = new \DOMDocument();
+        $dom->loadHTML('<?xml encoding="UTF-8">' . $html);
+        $form = $dom->getElementsByTagName('form')->item(0);
+        self::assertSame('post', $form->getAttribute('method'));
+        self::assertSame(admin_url('admin-post.php'), $form->getAttribute('action'));
+        $fields = [];
+        foreach ($dom->getElementsByTagName('input') as $input) {
+            self::assertSame('hidden', $input->getAttribute('type'));
+            $fields[$input->getAttribute('name')] = $input->getAttribute('value');
+        }
+        self::assertSame(['action' => FansSsoService::START_ACTION, 'faluss_fans_sso_nonce' => 'fixture-nonce'], $fields);
+        $button = $dom->getElementsByTagName('button')->item(0);
+        self::assertSame('submit', $button->getAttribute('type'));
+        self::assertSame('Rejoindre avec Faluss Identity', $button->textContent);
+        $icon = $dom->getElementsByTagName('img')->item(0);
+        self::assertSame('', $icon->getAttribute('alt'));
+        self::assertSame('true', $icon->getAttribute('aria-hidden'));
+        self::assertStringEndsWith('/assets/images/apps/faluss-hub.png', $icon->getAttribute('src'));
+        self::assertStringNotContainsString('onclick', $html);
+    }
+
+    public function testStyleIsQueuedBeforeShortcodesInTheThemeBody(): void
+    {
+        FansSsoService::register();
+        self::assertSame([FansSsoService::class, 'enqueueButtonStyle'], $GLOBALS['fans_sso_hooks']['wp_enqueue_scripts']);
+        FansSsoService::enqueueButtonStyle();
+        self::assertStringEndsWith('/assets/fans-sso-button.css', $GLOBALS['fans_sso_styles']['faluss-fans-sso-button'][0]);
     }
 
     #[DataProvider('destinations')]
