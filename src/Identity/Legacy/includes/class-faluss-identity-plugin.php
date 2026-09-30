@@ -9,6 +9,7 @@ final class Faluss_Identity_Plugin {
     public static function boot() {
         Faluss_Identity_Front_Preferences::boot();
         Faluss_Identity_Member_Session::boot();
+        if ( class_exists( 'Faluss_Identity_Consent' ) ) { Faluss_Identity_Consent::boot(); }
         add_action( 'plugins_loaded', array( __CLASS__, 'load_textdomain' ) );
         add_action( 'init', array( 'Faluss_Identity_Passwordless', 'register' ) );
         add_action( 'init', array( 'Faluss_Identity_Public_Profile', 'register' ) );
@@ -47,6 +48,7 @@ final class Faluss_Identity_Plugin {
         Faluss_Identity_Schema::migrate_onb01();
         Faluss_Identity_Schema::migrate_fi06_sso();
         Faluss_Identity_Front_Preferences::migrate_fi06();
+        if ( class_exists( 'Faluss_Identity_Consent' ) ) { Faluss_Identity_Consent::install(); }
         Faluss_Identity_Public_Profile::register_rewrite_rule();
         Faluss_Identity_Onboarding::register_rewrite_rule();
         Faluss_Identity_Authorization::register_rewrite_rules();

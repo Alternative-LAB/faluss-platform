@@ -236,6 +236,7 @@ final class Faluss_Identity_Public_Profile {
                     <label class="faluss-identity-profile-editor__publish" for="faluss-public-publish"><input id="faluss-public-publish" name="publication_status" type="checkbox" value="published" <?php checked( null !== $profile && 'published' === $profile['publication_status'] ); ?>> <?php esc_html_e( 'Publier mon profil', 'faluss-identity' ); ?></label>
                     <button type="submit"><?php esc_html_e( 'Enregistrer le profil', 'faluss-identity' ); ?></button>
                 </form>
+                <?php if ( class_exists( 'Faluss_Identity_Consent' ) ) { echo Faluss_Identity_Consent::link(); } ?>
             </div>
         </section>
         <?php
@@ -289,6 +290,7 @@ final class Faluss_Identity_Public_Profile {
             </div>
             <button type="submit"><?php esc_html_e( 'Enregistrer le profil', 'faluss-identity' ); ?></button>
         </form>
+        <?php if ( class_exists( 'Faluss_Identity_Consent' ) ) { echo Faluss_Identity_Consent::link(); } ?>
         <?php
         return (string) ob_get_clean();
     }

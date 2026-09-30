@@ -14,7 +14,7 @@ final class IdentityCharacterizationTest extends TestCase
         $legacy = $root . '/src/Identity/Legacy/includes/';
         $files = [
             'class-faluss-identity-admin-diagnostic.php' => 'daf9a4df9ff17ca375ed95e4ae59d81b7447dbf5a3702880e77e2c6fdac64a64',
-            'class-faluss-identity-authorization.php' => '060d359e485dc6003883373ae466369e1278af34df289a5a8577350523540a32',
+            'class-faluss-identity-authorization.php' => 'd0f35738a183fee4dd33f6bb6d06acdfb28b51caf4ed3afdbcfe00c151ead10e',
             'class-faluss-identity-elementor-widget.php' => 'f7f8236e85f2e0bdae94d919106098d39548fa0b97854ee8894ffc092dd0df62',
             'class-faluss-identity-front-preferences.php' => '292eb4c3da88a5486618da45126658d48cd3e7693fb2c15c68feaaad06ffc38b',
             'class-faluss-identity-member-session.php' => '4947ea1a8b243f38fd96377cccef0f1275873dca547f2822b5bd6fdb63a5571d',
@@ -23,12 +23,12 @@ final class IdentityCharacterizationTest extends TestCase
             'class-faluss-identity-onboarding-elementor-widget.php' => 'e22059042b83a245154b784570db3a1c05a4e4907d75f40da7a65d99a51c32af',
             'class-faluss-identity-onboarding.php' => '009b55fc513feb83ad6115a9af8dc797183a665889159059ea7862e9b37fe2f6',
             'class-faluss-identity-passwordless.php' => '3d1aa52e40bf0303cae7e494fc7ebe27f2a3acbd874b0e33e85b6c11a2501fe7',
-            'class-faluss-identity-plugin.php' => 'a8ff95f0bf076b0ee36cdcea3104215a1b7e43045225d4cb72ec02e221217ffa',
+            'class-faluss-identity-plugin.php' => '34355d758eaade3738e0bd063274b8f5bdd5fdb0815d22418225c29c319526f1',
             'class-faluss-identity-public-profile-elementor-widgets.php' => '9b10d26e71ccecb4784f959e51775bb89b83bac5a400d9e6364de69472a30aa3',
-            'class-faluss-identity-public-profile.php' => 'c91efb6619368e79e44d4c74cbe3c25b90068843895b5bde266e12efef0923a2',
+            'class-faluss-identity-public-profile.php' => 'f0ea5947873f0ccb6c92f1a7a0b713ac8b50df25ef0da7d7f1dd741424633411',
             'class-faluss-identity-registry.php' => '6a69c3c3f0c9320e2cf7c9b9fc352e51689a44e5718d28c19120b53cdeb83d3a',
             'class-faluss-identity-schema.php' => 'f2e62e9e0fc9feb66813f19fe948c56cdb6ff8d3472cc596501b3dc1ff233aad',
-            'class-faluss-identity-sso-clients-admin.php' => '90233085245fd2011f4896b460ad655df717f889ff40275994a744d686053b4a',
+            'class-faluss-identity-sso-clients-admin.php' => '69619f540b39904ee93b494e6f5c1f9008f996f15a40ad35225cefb816276fff',
         ];
         $assets = [
             'assets/css/faluss-identity-authorization.css' => '9dc325ecb768e5cb615bb7a2db12f27764b19a1cc66fd064d02458122a69efd8',

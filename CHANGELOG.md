@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Ajouté
+
+- Identity : accord membre révocable par application, lié aux permissions exactes et à la configuration du client ; nouvel accord après modification ou rotation, sans statut officiel pour Fans.
+
 ### Corrigé
 
 - Fans : bouton SSO compact, libellés de navigation visibles au survol/focus et pour l’accès actif, conteneur commun sans décalage lié à la barre de défilement.

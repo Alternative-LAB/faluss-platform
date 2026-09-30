@@ -1,0 +1,12 @@
+{
+  "browser": "154.0.8037.58",
+  "results": [
+    "First explicit grant; PKCE negative; usable code; one-use replay rejected; Fans first_party=0",
+    "Remembered member skips prompt; guest still passwordless login; suspended refused; other member needs own consent; denial stores nothing",
+    "Scope expansion and reduction prompt again; exact granted scopes only; invalid nonce refused",
+    "Real admin save changes revision even with identical config; stale displayed consent refused; inactive client refused; reactivation requires approval",
+    "Real secret rotation re-prompts; old secret rejected; new secret usable",
+    "Owner-only nonce-bound revocation removes grant and outstanding codes; next visit prompts",
+    "Injected persistence failure rolls back code issuance and grant"
+  ]
+}
