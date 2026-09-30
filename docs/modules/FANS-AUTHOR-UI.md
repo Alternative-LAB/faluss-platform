@@ -19,7 +19,8 @@ interne avec nonce WordPress de la session. Les permissions, états, modération
 quotas, verrouillage et journal restent ceux de [FANS-PUBLICATIONS.md](FANS-PUBLICATIONS.md).
 Services, prestations, produits et transactions restent fermés. La
 [galerie privée d’images](FANS-PRIVATE-IMAGES-UI.md) possède un formulaire distinct
-sur Créer ; ce formulaire texte n’attache pas encore d’image.
+sur Créer. Après enregistrement, la fiche du texte permet une
+[association d’image approuvée](FANS-AUTHOR-IMAGE.md) par POST distinct.
 
 La clé UUID de création est générée par le serveur et reste dans le formulaire
 après erreur. Le navigateur peut renvoyer le même POST après réponse perdue ;

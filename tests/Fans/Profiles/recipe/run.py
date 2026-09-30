@@ -9,6 +9,7 @@ REPO = pathlib.Path(__file__).resolve().parents[4]
 (ROOT / 'images').mkdir(mode=0o700)
 (ROOT / 'upload').mkdir(mode=0o700)
 ENV = dict(os.environ, FANS_EDITORIAL_FIXTURE=str(ROOT))
+if '--publications' in sys.argv: ENV['FANS_PUBLICATION_FIXTURE'] = '1'
 log = open(ROOT / 'mariadb.log', 'w')
 db = None
 web = None
@@ -44,7 +45,7 @@ try:
                 if probe.connect_ex(('127.0.0.1',8768)) == 0: break
             time.sleep(.1)
         if '--http' in sys.argv:
-            subprocess.run([sys.executable, str(pathlib.Path(__file__).with_name('images-http.py'))], env=ENV, cwd=REPO, check=True)
+            subprocess.run([sys.executable, str(pathlib.Path(__file__).with_name('publication-http.py' if '--publications' in sys.argv else 'images-http.py'))], env=ENV, cwd=REPO, check=True)
         if '--web' in sys.argv:
             subprocess.run(['php', str(pathlib.Path(__file__).with_name('visual-seed.php'))], env=ENV, cwd=REPO, check=True)
             print('Isolated UI ready: http://127.0.0.1:8768 (stop runner after browser proof)', flush=True)

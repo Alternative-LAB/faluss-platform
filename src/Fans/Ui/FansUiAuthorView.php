@@ -18,13 +18,14 @@ final class FansUiAuthorView
                 <p class="fu-live">La création et la gestion des textes sont indisponibles. Le service n’est pas ouvert.</p>
             <?php else : ?>
                 <p>Chaque création ou modification attend une validation humaine avant de devenir publique.</p>
-                <p class="fu-footnote">Texte uniquement, sans HTML, jusqu’à 8 000 caractères. Aucun enregistrement avant envoi. Les médias ne sont pas proposés dans ce parcours.</p>
+                <p class="fu-footnote">Sans HTML, jusqu’à 8 000 caractères. Aucun enregistrement avant envoi. Enregistrez le texte puis ouvrez sa fiche pour choisir une image approuvée.</p>
                 <?php self::result($model); ?>
                 <?php if ($model->error !== '') : ?><p role="alert"><?php echo esc_html($model->error); ?></p><?php endif; ?>
                 <div class="fu-author__tools"><a class="fu-link" href="<?php echo esc_url($base); ?>">Nouveau texte / relire la liste</a></div>
                 <?php if ($model->result === null && $model->error === '') : ?>
                     <?php if ($model->item !== null) : ?>
                         <?php self::item($model->item, $model->active, true); ?>
+                        <?php FansUiAuthorImage::render($model); ?>
                     <?php elseif ($model->active) : ?>
                         <?php self::form('create', '', 0, '', $model->key); ?>
                     <?php else : ?><p class="fu-live">Votre profil doit être actif pour créer ou modifier un texte. Le retrait reste possible.</p><?php endif; ?>

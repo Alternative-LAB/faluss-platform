@@ -10,6 +10,7 @@ require dirname(__DIR__, 4) . '/vendor/autoload.php';
 define('FALUSS_PLATFORM_ROLE', 'fans');
 define('FALUSS_PLATFORM_VERSION', 'isolated-editorial-test');
 foreach (['SSO', 'CREATOR_PROFILES', 'EDITORIAL', 'IMAGES', 'IMAGE_DELIVERY'] as $flag) { define('FALUSS_PLATFORM_FANS_' . $flag, true); }
+if (getenv('FANS_PUBLICATION_FIXTURE') === '1') { define('FALUSS_PLATFORM_FANS_TEXT_PUBLICATIONS', true); }
 define('FALUSS_FANS_SSO_CLIENT_ID', 'isolated-test');
 define('FALUSS_FANS_SSO_CLIENT_SECRET', str_repeat('s', 43));
 define('ABSPATH', dirname(__DIR__, 4));
@@ -71,6 +72,8 @@ class WP_REST_Request {
     public array $files = []; public array $body = [];
     public function __construct(public string $method = 'GET', public string $route = '') {}
     public function get_route(): string { return $this->route; }
+    public function get_method(): string { return $this->method; }
+    public function get_body(): string { return $this->json === null ? '' : (string) json_encode($this->json); }
     public function get_param(string $key): mixed { return $this->params[$key] ?? $this->query[$key] ?? $this->json[$key] ?? null; }
     public function get_header(string $key): string { return $this->headers[strtolower($key)] ?? ''; }
     public function set_header(string $key, string $value): void { $this->headers[strtolower($key)] = $value; }
@@ -99,3 +102,5 @@ function rest_do_request(WP_REST_Request $r): WP_REST_Response {
 \Faluss\Platform\Fans\Profiles\CreatorProfileRest::routes();
 \Faluss\Platform\Fans\Profiles\EditorialRest::routes();
 \Faluss\Platform\Fans\Images\ImageRest::routes();
+\Faluss\Platform\Fans\Publications\TextPublicationRest::routes();
+\Faluss\Platform\Fans\Publications\PublicationImageRest::routes();
