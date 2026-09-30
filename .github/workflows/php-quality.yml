@@ -75,3 +75,30 @@ jobs:
           ini-file: none
       - name: Faluss Federation sodium_compat regression
         run: php -n -d extension=json.so tests/Federation/contracts/faluss-federation-fed01b3-regression-test.php
+
+  identity-admin-wordpress:
+    name: Identity admin-post real WordPress
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          extensions: mysqli, pdo_mysql, mbstring
+          tools: composer:v2
+      - uses: ramsey/composer-install@v3
+      - name: Install isolated database binaries
+        run: sudo apt-get update -qq && sudo apt-get install -y mariadb-server mariadb-client
+      - name: Fetch pinned WordPress and CLI test tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location https://wordpress.org/wordpress-7.1.2.tar.gz -o "$RUNNER_TEMP/wordpress.tar.gz"
+          curl --fail --silent --show-error --location https://github.com/wp-cli/wp-cli/releases/download/v2.12.0/wp-cli-2.12.0.phar -o "$RUNNER_TEMP/wp-cli.phar"
+          echo "c0c666689d66b870d8825500bb8e402ed04de52602c61a6f516c6236b8c9ac67  $RUNNER_TEMP/wordpress.tar.gz" | sha256sum --check
+          echo "ce34ddd838f7351d6759068d09793f26755463b4a4610a5a5c0a97b68220d85c  $RUNNER_TEMP/wp-cli.phar" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/wordpress.tar.gz" -C "$RUNNER_TEMP"
+          git archive HEAD -o "$RUNNER_TEMP/plugin.tar"
+      - name: Real creation rotation failure and secret authentication
+        run: python3 tests/Identity/recipe/sso-admin-wordpress.py --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --archive "$RUNNER_TEMP/plugin.tar" --vendor "$GITHUB_WORKSPACE/vendor"

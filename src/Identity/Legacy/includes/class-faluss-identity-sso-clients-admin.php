@@ -18,7 +18,7 @@ final class Faluss_Identity_SSO_Clients_Admin {
     }
 
     public static function save() {
-        if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'faluss_identity_save_sso_client' ) ) { wp_die( esc_html__( 'Accès refusé.', 'faluss-identity' ) ); }
+        if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'faluss_identity_save_sso_client' ) ) { wp_die( esc_html__( 'Accès refusé.', 'faluss-identity' ), '', array( 'response' => 403 ) ); }
         if ( ! Faluss_Identity_Schema::get_status()['ready'] ) { self::redirect( 'schema' ); }
         $client_id = isset( $_POST['client_id'] ) && is_string( $_POST['client_id'] ) ? sanitize_text_field( wp_unslash( $_POST['client_id'] ) ) : '';
         $name = isset( $_POST['client_name'] ) && is_string( $_POST['client_name'] ) ? sanitize_text_field( wp_unslash( $_POST['client_name'] ) ) : '';
@@ -39,21 +39,27 @@ final class Faluss_Identity_SSO_Clients_Admin {
         $secret = $confidential ? self::new_secret() : null;
         $hash = null === $secret ? null : Faluss_Identity_Authorization::hash_client_secret( $secret );
         if ( $confidential && null === $hash ) { self::redirect( 'error' ); }
+        $confirmation = self::render_secret_confirmation( array( 'client_id' => $client_id, 'secret' => $secret ) );
         $inserted = $wpdb->query( $wpdb->prepare( 'INSERT INTO ' . self::quote_identifier( $tables['clients'] ) . ' (client_id, client_name, status, client_secret_hash, allowed_scopes, redirect_uris, first_party, created_at) VALUES (%s, %s, %s, %s, %s, %s, %d, %s)', $client_id, $name, $status, $hash, implode( ' ', $scopes ), wp_json_encode( $uris ), $first_party, $now ) );
         if ( 1 !== $inserted ) { self::redirect( 'error' ); }
-        // Render in this response: no option, transient, log, or redirect ever holds the secret.
-        self::render_secret_confirmation( array( 'client_id' => $client_id, 'secret' => $secret ) );
+        // Release the already prepared response only after the write succeeds.
+        echo $confirmation;
+        exit;
     }
 
     public static function rotate_secret() {
-        if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'faluss_identity_rotate_sso_client_secret' ) ) { wp_die( esc_html__( 'Accès refusé.', 'faluss-identity' ) ); }
+        if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'faluss_identity_rotate_sso_client_secret' ) ) { wp_die( esc_html__( 'Accès refusé.', 'faluss-identity' ), '', array( 'response' => 403 ) ); }
         $client_id = isset( $_POST['client_id'] ) && is_string( $_POST['client_id'] ) ? sanitize_text_field( wp_unslash( $_POST['client_id'] ) ) : '';
         if ( '' === $client_id ) { self::redirect( 'invalid' ); }
+        if ( ! Faluss_Identity_Schema::get_status()['ready'] ) { self::redirect( 'schema' ); }
         $secret = self::new_secret(); $hash = Faluss_Identity_Authorization::hash_client_secret( $secret );
         global $wpdb; $tables = Faluss_Identity_Schema::get_table_names();
-        $updated = null === $hash || empty( $tables['clients'] ) ? false : $wpdb->query( $wpdb->prepare( 'UPDATE ' . self::quote_identifier( $tables['clients'] ) . ' SET client_secret_hash = %s, updated_at = %s WHERE client_id = %s', $hash, gmdate( 'Y-m-d H:i:s' ), $client_id ) );
+        if ( null === $hash || empty( $tables['clients'] ) ) { self::redirect( 'error' ); }
+        $confirmation = self::render_secret_confirmation( array( 'client_id' => $client_id, 'secret' => $secret ) );
+        $updated = $wpdb->query( $wpdb->prepare( 'UPDATE ' . self::quote_identifier( $tables['clients'] ) . ' SET client_secret_hash = %s, updated_at = %s WHERE client_id = %s', $hash, gmdate( 'Y-m-d H:i:s' ), $client_id ) );
         if ( 1 !== $updated ) { self::redirect( 'error' ); }
-        self::render_secret_confirmation( array( 'client_id' => $client_id, 'secret' => $secret ) );
+        echo $confirmation;
+        exit;
     }
 
     /** @param array<string, string>|null $secret_notice */
@@ -74,25 +80,54 @@ final class Faluss_Identity_SSO_Clients_Admin {
 
     /**
      * admin-post.php does not load the visual WordPress administration shell.
-     * Keep the raw secret in this direct response only, but render that response
-     * through the normal header/menu/styles/footer used by the Settings screen.
+     * Prepare the complete native shell before changing credentials: a failing
+     * enqueue/header/footer hook must not leave a newly committed, unseen secret.
+     * This buffer is request-local, never persisted or redirected.
      *
-     * @param array<string, string> $secret_notice
+     * @param array{client_id: string, secret: string|null} $secret_notice
+     * @return string
      */
     private static function render_secret_confirmation( $secret_notice ) {
-        global $parent_file, $submenu_file, $title;
+        global $parent_file, $submenu_file, $title, $hook_suffix, $pagenow, $plugin_page;
+        global $menu, $submenu, $_wp_real_parent_file, $_wp_submenu_nopriv, $_wp_menu_nopriv;
+        global $_registered_pages, $_parent_pages, $admin_page_hooks;
         $parent_file = 'options-general.php';
         $submenu_file = 'faluss-identity-sso-clients';
+        $pagenow = $parent_file;
+        $plugin_page = $submenu_file;
+        $hook_suffix = 'settings_page_faluss-identity-sso-clients';
         $title = __( 'Clients SSO Faluss', 'faluss-identity' );
-        require_once ABSPATH . 'wp-admin/admin-header.php';
-        self::render( $secret_notice );
-        require_once ABSPATH . 'wp-admin/admin-footer.php';
-        exit;
+        $level = ob_get_level();
+        ob_start();
+        try {
+            require_once ABSPATH . 'wp-admin/menu.php';
+            set_current_screen( $hook_suffix );
+            nocache_headers();
+            header( 'Cache-Control: private, no-store, max-age=0, must-revalidate' );
+            header( 'Referrer-Policy: no-referrer' );
+            require_once ABSPATH . 'wp-admin/admin-header.php';
+            ?>
+            <div class="wrap"><h1><?php esc_html_e( 'Client SSO enregistré', 'faluss-identity' ); ?></h1>
+                <p><?php esc_html_e( 'Identifiant du client :', 'faluss-identity' ); ?> <code><?php echo esc_html( $secret_notice['client_id'] ); ?></code></p>
+                <?php if ( null !== $secret_notice['secret'] ) : ?>
+                    <div class="notice notice-warning"><p><strong><?php esc_html_e( 'Copiez ce secret maintenant :', 'faluss-identity' ); ?></strong> <code data-faluss-client-secret><?php echo esc_html( $secret_notice['secret'] ); ?></code></p>
+                    <p><?php esc_html_e( 'Il ne sera plus affiché et seule son empreinte est conservée. Après une rotation, le précédent secret est immédiatement invalide.', 'faluss-identity' ); ?></p></div>
+                <?php endif; ?>
+                <p><a class="button button-primary" href="<?php echo esc_url( admin_url( 'options-general.php?page=faluss-identity-sso-clients' ) ); ?>"><?php esc_html_e( 'Retour aux clients SSO', 'faluss-identity' ); ?></a></p>
+            </div>
+            <?php
+            require_once ABSPATH . 'wp-admin/admin-footer.php';
+            return (string) ob_get_clean();
+        } catch ( Throwable $exception ) {
+            while ( ob_get_level() > $level ) { ob_end_clean(); }
+            self::redirect( 'error' );
+        }
     }
 
     private static function form( $client = null ) {
         $is_existing = is_array( $client ); $scopes = $is_existing ? Faluss_Identity_Authorization::normalize_scopes( $client['allowed_scopes'] ) : array( Faluss_Identity_Authorization::SCOPE_BASIC ); $uris = $is_existing ? json_decode( $client['redirect_uris'], true ) : array();
-        ?><form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"><input type="hidden" name="action" value="faluss_identity_save_sso_client"><input type="hidden" name="client_id" value="<?php echo $is_existing ? esc_attr( $client['client_id'] ) : ''; ?>"><?php wp_nonce_field( 'faluss_identity_save_sso_client' ); ?><p><label><?php esc_html_e( 'Nom', 'faluss-identity' ); ?><br><input class="regular-text" required maxlength="191" name="client_name" value="<?php echo $is_existing ? esc_attr( $client['client_name'] ) : ''; ?>"></label></p><p><label><?php esc_html_e( 'État', 'faluss-identity' ); ?><br><select name="status"><option value="active" <?php selected( ! $is_existing || 'active' === $client['status'] ); ?>><?php esc_html_e( 'Actif', 'faluss-identity' ); ?></option><option value="inactive" <?php selected( $is_existing && 'inactive' === $client['status'] ); ?>><?php esc_html_e( 'Inactif', 'faluss-identity' ); ?></option></select></label></p><p><label><?php esc_html_e( 'URI de retour HTTPS, une par ligne', 'faluss-identity' ); ?><br><textarea class="large-text" rows="4" required name="redirect_uris"><?php echo esc_textarea( is_array( $uris ) ? implode( "\n", $uris ) : '' ); ?></textarea></label></p><p><label><input type="checkbox" checked disabled> identity.basic</label> <input type="hidden" name="scopes[]" value="identity.basic"><br><label><input type="checkbox" name="scopes[]" value="identity.email" <?php checked( in_array( Faluss_Identity_Authorization::SCOPE_EMAIL, (array) $scopes, true ) ); ?>> identity.email</label></p><p><label><input type="checkbox" name="first_party" value="1" <?php checked( $is_existing && ! empty( $client['first_party'] ) ); ?>> <?php esc_html_e( 'Client officiel Faluss.com : autoriser automatiquement une session Identity existante', 'faluss-identity' ); ?></label><br><span class="description"><?php esc_html_e( 'Disponible uniquement si l’URI exacte https://faluss.com/faluss-identity/callback est la seule URI déclarée. Tous les autres clients conservent le consentement.', 'faluss-identity' ); ?></span></p><?php if ( ! $is_existing ) : ?><p><label><input type="checkbox" name="confidential" value="1"> <?php esc_html_e( 'Client confidentiel : générer un secret', 'faluss-identity' ); ?></label></p><?php endif; ?><p><button class="button button-primary" type="submit"><?php echo esc_html( $is_existing ? __( 'Enregistrer', 'faluss-identity' ) : __( 'Créer le client', 'faluss-identity' ) ); ?></button></p></form><?php
+        $eligible = ! $is_existing || ( is_array( $uris ) && array( Faluss_Identity_Authorization::FIRST_PARTY_FALUSS_COM_CALLBACK ) === array_values( $uris ) );
+        ?><form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"><input type="hidden" name="action" value="faluss_identity_save_sso_client"><input type="hidden" name="client_id" value="<?php echo $is_existing ? esc_attr( $client['client_id'] ) : ''; ?>"><?php wp_nonce_field( 'faluss_identity_save_sso_client' ); ?><p><label><?php esc_html_e( 'Nom', 'faluss-identity' ); ?><br><input class="regular-text" required maxlength="191" name="client_name" value="<?php echo $is_existing ? esc_attr( $client['client_name'] ) : ''; ?>"></label></p><p><label><?php esc_html_e( 'État', 'faluss-identity' ); ?><br><select name="status"><option value="active" <?php selected( ! $is_existing || 'active' === $client['status'] ); ?>><?php esc_html_e( 'Actif', 'faluss-identity' ); ?></option><option value="inactive" <?php selected( $is_existing && 'inactive' === $client['status'] ); ?>><?php esc_html_e( 'Inactif', 'faluss-identity' ); ?></option></select></label></p><p><label><?php esc_html_e( 'URI de retour HTTPS, une par ligne', 'faluss-identity' ); ?><br><textarea class="large-text" rows="4" required name="redirect_uris"><?php echo esc_textarea( is_array( $uris ) ? implode( "\n", $uris ) : '' ); ?></textarea></label></p><p><label><input type="checkbox" checked disabled> identity.basic</label> <input type="hidden" name="scopes[]" value="identity.basic"><br><label><input type="checkbox" name="scopes[]" value="identity.email" <?php checked( in_array( Faluss_Identity_Authorization::SCOPE_EMAIL, (array) $scopes, true ) ); ?>> identity.email</label></p><p><label><input type="checkbox" name="first_party" value="1" <?php checked( $eligible && $is_existing && 1 === (int) $client['first_party'] ); disabled( ! $eligible ); ?>> <?php esc_html_e( 'Client officiel Faluss.com : autoriser automatiquement une session Identity existante', 'faluss-identity' ); ?></label><br><span class="description"><?php esc_html_e( 'Disponible uniquement si l’URI exacte https://faluss.com/faluss-identity/callback est la seule URI déclarée. Tous les autres clients conservent le consentement.', 'faluss-identity' ); ?></span></p><?php if ( ! $is_existing ) : ?><p><label><input type="checkbox" name="confidential" value="1"> <?php esc_html_e( 'Client confidentiel : générer un secret', 'faluss-identity' ); ?></label></p><?php endif; ?><p><button class="button button-primary" type="submit"><?php echo esc_html( $is_existing ? __( 'Enregistrer', 'faluss-identity' ) : __( 'Créer le client', 'faluss-identity' ) ); ?></button></p></form><?php
     }
 
     private static function parse_uris( $value ) { $uris = preg_split( '/\r\n|\r|\n/', trim( $value ) ); if ( ! is_array( $uris ) || empty( $uris ) ) { return array(); } $out = array(); foreach ( $uris as $uri ) { $uri = trim( $uri ); if ( ! Faluss_Identity_Authorization::valid_redirect_uri( $uri ) || in_array( $uri, $out, true ) ) { return array(); } $out[] = $uri; } return $out; }

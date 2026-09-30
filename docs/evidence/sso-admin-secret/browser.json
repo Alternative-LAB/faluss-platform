@@ -1,0 +1,12 @@
+{
+  "browser": "154.0.8037.58",
+  "wordpress": "7.1.2",
+  "viewports": [
+    1440,
+    390
+  ],
+  "fansCheckbox": "unchecked and disabled",
+  "rotation": 200,
+  "secret": "one response, redacted before capture, absent after return",
+  "environment": "disposable real WordPress, loopback only"
+}

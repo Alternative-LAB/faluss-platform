@@ -13,6 +13,11 @@ function add_action(string $hook, callable $callback): void
     $GLOBALS['faluss_test_hooks'][$hook] = $callback;
 }
 
+function wp_enqueue_style(string $handle, mixed ...$arguments): void
+{
+    $GLOBALS['faluss_dashboard_enqueued'][] = $handle;
+}
+
 final class DashboardModuleTest extends TestCase
 {
     protected function setUp(): void
@@ -37,5 +42,16 @@ final class DashboardModuleTest extends TestCase
                 array_keys($GLOBALS['faluss_test_hooks'])
             );
         }
+    }
+
+    public function testAdminPostWithoutScreenDoesNotEnqueueDashboardAssets(): void
+    {
+        $module = new DashboardModule(SiteRole::Me, new ModuleRegistry(SiteRole::Me));
+        $GLOBALS['faluss_dashboard_enqueued'] = [];
+        // A native admin-post confirmation can reach this hook before admin_menu.
+        $module->enqueueAssets(null);
+        $module->enqueueAssets('');
+        $module->enqueueAssets('settings_page_faluss-identity-sso-clients');
+        self::assertSame([], $GLOBALS['faluss_dashboard_enqueued']);
     }
 }

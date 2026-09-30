@@ -62,3 +62,13 @@ La lecture verrouillée du challenge, la vérification OTP, la création/relectu
 `faluss_identity_passwordless_diagnostic` émet uniquement un nom d’étape borné côté serveur : nonce, cookie, format, challenge, vérification, transaction, WP, Registry ou préférences. Les erreurs après preuve valide sont aussi enregistrées dans l’audit Identity existant, avec son horodatage et sa rétention ; aucune adresse, OTP, cookie, ID de compte ou exception brute n’est ajouté. Les diagnostics nonce/cookie/format ne créent pas de nouvelles lignes d’audit ; l’événement historique `passwordless_code_rejected` reste conservé pour les refus de challenge. Le navigateur reçoit toujours le refus générique. L’audit existant `passwordless_session_opened` distingue l’établissement réussi de session ; la destination reste calculée par les contrats existants.
 
 La recette locale distingue publié, inachevé actif, inachevé pending et nouveau ; elle ne confirme pas la cause de l’incident rapporté en production. Voir [preuves 0.5.2](../evidence/me-v3-052/README.md).
+
+## Confirmation de secret administrateur — correctif du 30 septembre 2026
+
+La création/rotation prépare désormais la réponse native WordPress avant de
+modifier le hash, puis affiche le secret uniquement après réussite de l’écriture.
+La case officielle reste réservée à l’unique callback exact Faluss.com et est
+désactivée pour les fiches Fans. Aucun secret récupérable, aucune migration ni
+mutation automatique des clients existants n’est ajouté. Le hash de caractérisation
+du seul fichier administrateur est actualisé pour cette correction explicite.
+Voir [cause reproduite, tests et procédure de reprise](../incidents/2026-09-30-sso-client-secret-confirmation.md).

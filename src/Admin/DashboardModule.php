@@ -90,9 +90,9 @@ final class DashboardModule implements Module
         );
     }
 
-    public function enqueueAssets(string $hook): void
+    public function enqueueAssets(?string $hook): void
     {
-        if ($hook !== $this->pageHook || !current_user_can('manage_options')) {
+        if ($hook === null || $this->pageHook === '' || $hook !== $this->pageHook || !current_user_can('manage_options')) {
             return;
         }
 
