@@ -43,6 +43,7 @@ des captures sont des fixtures sous `tests/`, jamais des données produit.
 | Progression Créateur | `creator/progression` | Interface prête mais service absent | Score HoF absent ; aucune finance |
 | Créer — choix entre quatre types | `creator/creer` | Fonctionnel et testé | Contenu/prestation/service/produit distingués ; textes et galerie privée raccordés, trois offres commerciales indisponibles |
 | Créer/éditer/retirer un texte | `creator/creer` | Fonctionnel et testé | POST natif sans JS, nonce, REST existant, idempotence, révisions, quota, retrait confirmé ; modération humaine obligatoire |
+| Associer/détacher une image sur un texte | Fiche privée dans `creator/creer` | Fonctionnel et testé en environnement isolé | Choix personnel approuvé, aperçu, révision exacte, confirmation et nouvelle modération ; lecture JPEG publique après approbation et révocation au détachement. [Contrat et preuves](FANS-AUTHOR-IMAGE.md) |
 | Créer une prestation, un service ou un produit | Choix dans `creator/creer` | Interface prête mais service absent | Aucun formulaire, réservation, gestion de stock ou publication commerciale simulés |
 | Ma boutique | `creator/boutique` | Interface prête mais service absent | Gestion propriétaire/réservations/commandes absentes ; refus d’achat inchangés |
 | Retour SSO — contrat de navigation | Boutons publics et pages privées 403 | Fonctionnel et testé | État consommé, retour local signé, sélection du texte conservée, callback exact ; pas de preuve réseau Me réelle ni conservation du contenu non envoyé |

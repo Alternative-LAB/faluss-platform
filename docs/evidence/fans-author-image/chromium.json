@@ -1,0 +1,17 @@
+{
+  "engine": "154.0.8037.58",
+  "scope": "Real native forms, services, SQL and GD; WordPress adapters, no site or SSO validation.",
+  "screenshots": 6,
+  "checks": [
+    "native create",
+    "owner preview",
+    "association pending",
+    "public denied before approval",
+    "native contextual moderation",
+    "public JPEG reading",
+    "native no-JS detach",
+    "old public text revoked",
+    "no UUID presentation",
+    "no overflow or JS errors"
+  ]
+}

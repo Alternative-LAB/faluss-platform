@@ -24,6 +24,7 @@ if (($argv[1] ?? '') === 'setup') {
     check('real SSO schemas', FansSsoSchema::installOrVerify());
     check('real profile schema', CreatorProfileSchema::installOrVerify());
     check('real image schemas', ImageSchema::installOrVerify());
+    if (getenv('FANS_PUBLICATION_FIXTURE') === '1') { check('real text publication schemas', \Faluss\Platform\Fans\Publications\TextPublicationSchema::installOrVerify()); }
     check('additive editorial schema', EditorialSchema::installOrVerify());
     check('idempotent schema verification', EditorialSchema::installOrVerify());
     $wpdb->query("INSERT INTO test_faluss_fans_identity_links (wp_user_id,faluss_id,created_at,last_proved_at) VALUES (17,'" . OWNER . "',UTC_TIMESTAMP(),UTC_TIMESTAMP())");

@@ -21,6 +21,8 @@ final class FansUiAuthor
     public string $key = '';
     public string $text = '';
     public string $error = '';
+    public ?string $imageId = null;
+    public ?\WP_REST_Response $imageOptions = null;
 
     public static function load(): self
     {
@@ -42,6 +44,11 @@ final class FansUiAuthor
                 ? self::request('GET', 'text-publications/' . $item . '/private') : new \WP_REST_Response([], 400);
             $view->item = $response->get_status() === 200 ? self::row($response->get_data()) : null;
             if ($view->item === null) { $view->error = 'Ce texte est indisponible ou ne vous appartient pas.'; }
+            else {
+                $raw = $response->get_data();
+                $view->imageId = TextPublicationService::validId($raw['image_id'] ?? null) ? $raw['image_id'] : null;
+                $view->imageOptions = self::request('GET', 'images/portraits');
+            }
         }
         $cursor = $post ? '' : self::field('cursor', $_GET);
         $view->listing = self::request('GET', 'text-publications/mine', ['per_page' => 6] + ($cursor === '' ? [] : ['cursor' => $cursor]));
@@ -61,9 +68,14 @@ final class FansUiAuthor
         $id = self::field('publication_id', $_POST);
         $revision = self::field('revision', $_POST);
         if (!TextPublicationService::validId($id) || preg_match('/^[1-9][0-9]{0,9}$/D', $revision) !== 1
-            || (int) $revision >= 2147483647 || !in_array($action, ['edit', 'withdraw'], true)
+            || (int) $revision >= 2147483647 || !in_array($action, ['edit', 'withdraw', 'image'], true)
             || ($action === 'withdraw' && self::field('confirm_withdraw', $_POST) !== 'yes')) {
             return new \WP_REST_Response(['code' => 'invalid_author_input'], 400);
+        }
+        if ($action === 'image') {
+            $image = FansUiAuthorImage::input(self::field('image_choice', $_POST), self::field('confirm_image_review', $_POST));
+            return $image === null ? new \WP_REST_Response(['code' => 'invalid_image_choice'], 400)
+                : self::request('POST', 'text-publications/' . $id . '/image', ['revision' => (int) $revision] + $image);
         }
         return self::request('POST', 'text-publications/' . $id . '/' . $action,
             ['revision' => (int) $revision] + ($action === 'edit' ? ['text' => self::field('text', $_POST)] : []));

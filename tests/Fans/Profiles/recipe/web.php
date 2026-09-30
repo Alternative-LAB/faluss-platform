@@ -46,6 +46,7 @@ namespace {
     if (str_starts_with($path, '/wp-json/')) {
         $r = new WP_REST_Request($_SERVER['REQUEST_METHOD'], substr($path, strlen('/wp-json')));
         $r->set_query_params($_GET); $r->set_header('X-WP-Nonce', $_SERVER['HTTP_X_WP_NONCE'] ?? '');
+        $r->set_header('Idempotency-Key', $_SERVER['HTTP_IDEMPOTENCY_KEY'] ?? '');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (str_starts_with($_SERVER['CONTENT_TYPE'] ?? '', 'application/json')) { $r->set_body(file_get_contents('php://input')); }
             else { $r->set_file_params($_FILES); $r->body = $_POST; }
@@ -53,7 +54,8 @@ namespace {
         $response = rest_do_request($r); http_response_code($response->get_status());
         foreach ($response->get_headers() as $name => $value) { header($name . ': ' . $value); }
         if (!\Faluss\Platform\Fans\Profiles\EditorialRest::serve(false, $response, $r)
-            && !\Faluss\Platform\Fans\Images\ImageRest::serve(false, $response, $r)) {
+            && !\Faluss\Platform\Fans\Images\ImageRest::serve(false, $response, $r)
+            && !\Faluss\Platform\Fans\Publications\PublicationImageRest::serve(false, $response, $r)) {
             header('Content-Type: application/json'); echo json_encode($response->get_data());
         }
         exit;
