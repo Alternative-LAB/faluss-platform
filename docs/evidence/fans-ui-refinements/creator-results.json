@@ -1,0 +1,233 @@
+[
+  {
+    "width": 1440,
+    "view": "accueil",
+    "geometry": [
+      82,
+      0,
+      1343
+    ],
+    "links": 8,
+    "hoverFocus": true
+  },
+  {
+    "width": 1440,
+    "view": "explorer",
+    "geometry": [
+      82,
+      0,
+      1343
+    ],
+    "links": 8,
+    "hoverFocus": true
+  },
+  {
+    "width": 1440,
+    "view": "hof",
+    "geometry": [
+      82,
+      0,
+      1343
+    ],
+    "links": 8,
+    "hoverFocus": true
+  },
+  {
+    "width": 1440,
+    "view": "creer",
+    "geometry": [
+      82,
+      0,
+      1343
+    ],
+    "links": 8,
+    "hoverFocus": true
+  },
+  {
+    "width": 1440,
+    "view": "boutique",
+    "geometry": [
+      82,
+      0,
+      1343
+    ],
+    "links": 8,
+    "hoverFocus": true
+  },
+  {
+    "width": 1440,
+    "view": "progression",
+    "geometry": [
+      82,
+      0,
+      1343
+    ],
+    "links": 8,
+    "hoverFocus": true
+  },
+  {
+    "width": 1440,
+    "view": "mon-profil",
+    "geometry": [
+      82,
+      0,
+      1343
+    ],
+    "links": 8,
+    "hoverFocus": true
+  },
+  {
+    "width": 390,
+    "view": "accueil",
+    "geometry": [
+      0,
+      0,
+      375
+    ],
+    "links": 8,
+    "hoverFocus": true
+  },
+  {
+    "width": 390,
+    "view": "explorer",
+    "geometry": [
+      0,
+      0,
+      375
+    ],
+    "links": 8,
+    "hoverFocus": true
+  },
+  {
+    "width": 390,
+    "view": "hof",
+    "geometry": [
+      0,
+      0,
+      375
+    ],
+    "links": 8,
+    "hoverFocus": true
+  },
+  {
+    "width": 390,
+    "view": "creer",
+    "geometry": [
+      0,
+      0,
+      375
+    ],
+    "links": 8,
+    "hoverFocus": true
+  },
+  {
+    "width": 390,
+    "view": "boutique",
+    "geometry": [
+      0,
+      0,
+      375
+    ],
+    "links": 8,
+    "hoverFocus": true
+  },
+  {
+    "width": 390,
+    "view": "progression",
+    "geometry": [
+      0,
+      0,
+      375
+    ],
+    "links": 8,
+    "hoverFocus": true
+  },
+  {
+    "width": 390,
+    "view": "mon-profil",
+    "geometry": [
+      0,
+      0,
+      375
+    ],
+    "links": 8,
+    "hoverFocus": true
+  },
+  {
+    "width": 320,
+    "view": "accueil",
+    "geometry": [
+      0,
+      0,
+      305
+    ],
+    "links": 8,
+    "hoverFocus": true
+  },
+  {
+    "width": 320,
+    "view": "explorer",
+    "geometry": [
+      0,
+      0,
+      305
+    ],
+    "links": 8,
+    "hoverFocus": true
+  },
+  {
+    "width": 320,
+    "view": "hof",
+    "geometry": [
+      0,
+      0,
+      305
+    ],
+    "links": 8,
+    "hoverFocus": true
+  },
+  {
+    "width": 320,
+    "view": "creer",
+    "geometry": [
+      0,
+      0,
+      305
+    ],
+    "links": 8,
+    "hoverFocus": true
+  },
+  {
+    "width": 320,
+    "view": "boutique",
+    "geometry": [
+      0,
+      0,
+      305
+    ],
+    "links": 8,
+    "hoverFocus": true
+  },
+  {
+    "width": 320,
+    "view": "progression",
+    "geometry": [
+      0,
+      0,
+      305
+    ],
+    "links": 8,
+    "hoverFocus": true
+  },
+  {
+    "width": 320,
+    "view": "mon-profil",
+    "geometry": [
+      0,
+      0,
+      305
+    ],
+    "links": 8,
+    "hoverFocus": true
+  }
+]

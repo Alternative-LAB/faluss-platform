@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Corrigé
+
+- Fans : bouton SSO compact, libellés de navigation visibles au survol/focus et pour l’accès actif, conteneur commun sans décalage lié à la barre de défilement.
+
 ## [0.9.3] - 2026-09-30
 
 ### Corrigé
