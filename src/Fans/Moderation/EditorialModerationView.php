@@ -26,7 +26,8 @@ final class EditorialModerationView
             <header><p class="fm-brand">Faluss <span>by Alternative LAB</span></p><h1>Modération Fans · Présentations</h1>
                 <p>Nom public, bio et portrait éditoriaux. Cette décision ne vérifie pas l’identité du compte.</p></header>
             <nav aria-label="Modération Fans"><a href="<?php echo esc_url(ModerationView::url(false)); ?>">Textes en attente</a>
-                <a href="<?php echo esc_url(ModerationView::url(true)); ?>">Quarantaine images</a><a aria-current="page" href="<?php echo esc_url(self::url()); ?>">Présentations</a><?php MessageReportPanel::nav(); ?></nav>
+                <a href="<?php echo esc_url(ModerationView::url(true)); ?>">Quarantaine images</a><a aria-current="page" href="<?php echo esc_url(self::url()); ?>">Présentations</a><?php CreatorAdmissionView::nav(); ?>
+                <?php MessageReportPanel::nav(); ?></nav>
             <?php if ($result !== null): ?><p class="fm-notice" role="status"><?php echo $result->get_status() === 200 ? 'Décision confirmée et journalisée.' : 'Décision non confirmée. Rechargez la fiche et vérifiez sa révision et son journal.'; ?></p>
                 <?php $submitted = ModerationPanel::field('item_id', $_POST); if (EditorialService::validId($submitted)): ?>
                     <a href="<?php echo esc_url(add_query_arg('item', $submitted, self::url())); ?>">Relire la fiche et son journal</a>

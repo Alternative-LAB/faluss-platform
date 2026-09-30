@@ -21,9 +21,10 @@ final class CreatorProfilesModule implements Module
     {
         if (self::enabledForFans() && CreatorProfileSchema::ready() && FansSsoSchema::ready()) {
             CreatorProfileRest::register();
+            \Faluss\Platform\Fans\Moderation\ModerationPanel::register();
+            add_action('admin_init', [self::class, 'upgradeStatusJournal']);
             if (EditorialModule::available()) {
                 EditorialRest::register();
-                \Faluss\Platform\Fans\Moderation\ModerationPanel::register();
             }
         }
     }
@@ -31,8 +32,22 @@ final class CreatorProfilesModule implements Module
     public static function activate(): void
     {
         if (self::enabledForFans() && FansSsoService::configured() && FansSsoSchema::ready()) {
-            CreatorProfileSchema::installOrVerify();
-            EditorialModule::activate();
+            if (CreatorProfileSchema::installOrVerify()) {
+                CreatorStatusSchema::installOrVerify();
+                EditorialModule::activate();
+            }
+        }
+    }
+
+    public static function available(): bool
+    { return self::enabledForFans() && FansSsoSchema::ready() && CreatorProfileSchema::ready(); }
+
+    /** Bounded additive upgrade on an opted-in Fans site, never on a REST mutation. */
+    public static function upgradeStatusJournal(): void
+    {
+        if (self::available() && current_user_can('manage_options') && FansSsoService::configured()
+            && get_option(CreatorStatusSchema::OPTION) !== CreatorStatusSchema::VERSION) {
+            CreatorStatusSchema::installOrVerify();
         }
     }
 

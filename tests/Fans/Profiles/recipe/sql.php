@@ -23,6 +23,7 @@ if (($argv[1] ?? '') === 'setup') {
     $wpdb->query('CREATE TABLE fixture_options(name varchar(191) PRIMARY KEY,value text NOT NULL) ENGINE=InnoDB');
     check('real SSO schemas', FansSsoSchema::installOrVerify());
     check('real profile schema', CreatorProfileSchema::installOrVerify());
+    check('real admission journal', \Faluss\Platform\Fans\Profiles\CreatorStatusSchema::installOrVerify());
     check('real image schemas', ImageSchema::installOrVerify());
     if (getenv('FANS_PUBLICATION_FIXTURE') === '1') { check('real text publication schemas', \Faluss\Platform\Fans\Publications\TextPublicationSchema::installOrVerify()); }
     check('additive editorial schema', EditorialSchema::installOrVerify());

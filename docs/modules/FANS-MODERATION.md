@@ -116,3 +116,8 @@ au commit précédent retire l’interface sans migration ni suppression de trac
 Voir la [recette locale](../../tests/Fans/Publications/recipe/MODERATION-PANEL.md),
 les [textes](FANS-PUBLICATIONS.md), les [images privées](FANS-IMAGES.md) et les
 [conditions distinctes de diffusion](FANS-IMAGE-DELIVERY.md).
+
+
+### Admission des profils Créateur
+
+L’onglet **Profils Créateur** utilise les permissions et la route de statut existantes, avec une révision de statut et un journal distinct des décisions éditoriales. Il est proposé dès que le module profils Fans est autorisé, même sans textes/images/présentations. L’activation ou la suspension n’approuve aucun contenu ni partenariat commercial. Voir [contrat et mise à niveau](FANS-PROFILES.md#administration-de-ladmission-des-profils).

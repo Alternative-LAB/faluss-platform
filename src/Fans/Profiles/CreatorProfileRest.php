@@ -34,6 +34,14 @@ final class CreatorProfileRest
                 'permission_callback' => [self::class, 'memberPermission'],
             ],
         ]);
+        register_rest_route(self::NAMESPACE, '/creators/moderation', [
+            'methods' => 'GET', 'callback' => [self::class, 'moderation'],
+            'permission_callback' => [self::class, 'adminPermission'],
+        ]);
+        register_rest_route(self::NAMESPACE, '/creators/(?P<creator_id>[0-9a-f-]{36})/private', [
+            'methods' => 'GET', 'callback' => [self::class, 'privateProfile'],
+            'permission_callback' => [self::class, 'adminPermission'],
+        ]);
         register_rest_route(self::NAMESPACE, '/creators/(?P<creator_id>[0-9a-f-]{36})', [
             'methods' => 'GET',
             'callback' => [self::class, 'publicProfile'],
@@ -91,12 +99,29 @@ final class CreatorProfileRest
 
     public static function setStatus(\WP_REST_Request $request): \WP_REST_Response|\WP_Error
     {
+        $revision = $request->get_param('revision');
+        if (!is_int($revision) || $revision < 0 || $revision >= 2147483646) {
+            return new \WP_Error('invalid_status_revision', 'Relisez le statut courant avant de décider.', ['status' => 400]);
+        }
         $result = CreatorProfileService::setStatus(
             $request->get_param('creator_id'),
-            $request->get_param('status')
+            $request->get_param('status'),
+            $revision
         );
 
-        return $result instanceof \WP_Error ? $result : new \WP_REST_Response($result, 200);
+        return $result instanceof \WP_Error ? $result : EditorialRest::response($result);
+    }
+
+    public static function moderation(\WP_REST_Request $request): \WP_REST_Response|\WP_Error
+    {
+        $result = CreatorStatusReview::queue($request->get_param('status') ?? 'pending', $request->get_param('cursor'));
+        return $result instanceof \WP_Error ? $result : EditorialRest::response($result);
+    }
+
+    public static function privateProfile(\WP_REST_Request $request): \WP_REST_Response|\WP_Error
+    {
+        $result = CreatorStatusReview::detail($request->get_param('creator_id'));
+        return $result instanceof \WP_Error ? $result : EditorialRest::response($result);
     }
 
     private static function nonceValid(\WP_REST_Request $request): bool
