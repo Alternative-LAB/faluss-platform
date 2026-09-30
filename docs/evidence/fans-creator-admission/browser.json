@@ -1,0 +1,52 @@
+{
+  "browser": "154.0.8037.58",
+  "checks": [
+    {
+      "device": "desktop",
+      "view": "queue",
+      "http": 200,
+      "noHorizontalOverflow": true,
+      "nativeFormWithoutJavaScript": false
+    },
+    {
+      "device": "desktop",
+      "view": "pending",
+      "http": 200,
+      "noHorizontalOverflow": true,
+      "nativeFormWithoutJavaScript": true
+    },
+    {
+      "device": "desktop",
+      "view": "active",
+      "http": 200,
+      "noHorizontalOverflow": true,
+      "nativeFormWithoutJavaScript": true
+    },
+    {
+      "device": "mobile",
+      "view": "queue",
+      "http": 200,
+      "noHorizontalOverflow": true,
+      "nativeFormWithoutJavaScript": false
+    },
+    {
+      "device": "mobile",
+      "view": "pending",
+      "http": 200,
+      "noHorizontalOverflow": true,
+      "nativeFormWithoutJavaScript": true
+    },
+    {
+      "device": "mobile",
+      "view": "active",
+      "http": 200,
+      "noHorizontalOverflow": true,
+      "nativeFormWithoutJavaScript": true
+    },
+    {
+      "nativeBrowserSubmitWithoutJavaScript": true,
+      "http": 200,
+      "journalConfirmed": true
+    }
+  ]
+}

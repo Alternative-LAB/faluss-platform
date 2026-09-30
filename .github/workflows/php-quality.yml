@@ -102,3 +102,5 @@ jobs:
           git archive HEAD -o "$RUNNER_TEMP/plugin.tar"
       - name: Real creation rotation failure and secret authentication
         run: python3 tests/Identity/recipe/sso-admin-wordpress.py --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --archive "$RUNNER_TEMP/plugin.tar" --vendor "$GITHUB_WORKSPACE/vendor"
+      - name: Fans creator admission real WordPress
+        run: python3 tests/Fans/Profiles/recipe/admission-wordpress.py --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --test

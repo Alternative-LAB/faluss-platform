@@ -35,6 +35,7 @@ foreach (['owner', 'other', 'pending', 'unlinked', 'quota', 'churn', 'racer', 'r
         'creator_id' => $profile['creator_id'] ?? null];
     if ($name !== 'pending' && $profile !== null) {
         wp_set_current_user(1);
+        \Faluss\Platform\Fans\Profiles\CreatorStatusSchema::installOrVerify();
         if (is_wp_error(CreatorProfileService::setStatus($profile['creator_id'], 'active'))) { throw new RuntimeException('Profile approval failed'); }
     }
 }

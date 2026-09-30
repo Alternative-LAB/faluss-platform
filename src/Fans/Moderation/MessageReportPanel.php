@@ -33,7 +33,7 @@ final class MessageReportPanel
         ?>
         <div class="wrap faluss-moderation" data-fans-private-proof>
             <header><p class="fm-brand">Faluss <span>by Alternative LAB</span></p><h1>Signalements privés</h1><p>Examen minimal des preuves de messagerie. Accès réservé aux modérateurs expressément habilités.</p></header>
-            <nav aria-label="Modération Fans"><a href="<?php echo esc_url(ModerationView::url(false)); ?>">Textes</a><a href="<?php echo esc_url(ModerationView::url(true)); ?>">Images</a><a href="<?php echo esc_url(EditorialModerationView::url()); ?>">Présentations</a><a href="<?php echo esc_url(self::url()); ?>" aria-current="page">Signalements privés</a></nav>
+            <nav aria-label="Modération Fans"><?php CreatorAdmissionView::nav(); ?><a href="<?php echo esc_url(ModerationView::url(false)); ?>">Textes</a><a href="<?php echo esc_url(ModerationView::url(true)); ?>">Images</a><a href="<?php echo esc_url(EditorialModerationView::url()); ?>">Présentations</a><a href="<?php echo esc_url(self::url()); ?>" aria-current="page">Signalements privés</a></nav>
             <?php if($result!==null): ?><p class="fm-notice" role="status"><?php echo $result->get_status()===200?'Décision confirmée et journalisée.':'Décision non confirmée. Relisez l’état et la révision du dossier avant de réessayer.'; ?></p><?php endif; ?>
             <?php self::retention(); ?>
             <?php if($response->get_status()!==200||!is_array($page)): ?><p role="alert">Dossier indisponible ou expiré. Aucune preuve n’est affichée.</p>

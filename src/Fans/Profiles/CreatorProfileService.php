@@ -137,40 +137,10 @@ final class CreatorProfileService
         return $profiles;
     }
 
-    /** @return array{creator_id:string,category:string,status:string,identity_verified:false,created_at:string,updated_at:string}|\WP_Error */
-    public static function setStatus(mixed $creatorId, mixed $status): array|\WP_Error
-    {
-        if (!current_user_can('manage_options')) {
-            return self::error('admin_required', 403);
-        }
-        if (!self::validId($creatorId) || !in_array($status, ['active', 'suspended'], true)) {
-            return self::error('invalid_status', 400);
-        }
-        $table = CreatorProfileSchema::table();
-        if ($table === null || !CreatorProfileSchema::ready()) {
-            return self::error('profiles_unavailable', 503);
-        }
-        global $wpdb;
-        $updated = $wpdb->query($wpdb->prepare(
-            'UPDATE ' . self::quote($table) . ' SET status = %s, updated_at = %s'
-                . ' WHERE creator_id = %s AND status <> %s',
-            $status,
-            gmdate('Y-m-d H:i:s'),
-            $creatorId,
-            $status
-        ));
-        if ($updated === false) {
-            return self::error('profiles_unavailable', 503);
-        }
-        $row = $wpdb->get_row($wpdb->prepare(
-            'SELECT creator_id, category, status, created_at, updated_at FROM ' . self::quote($table)
-                . ' WHERE creator_id = %s LIMIT 1',
-            $creatorId
-        ), 'ARRAY_A');
-        $profile = self::profile($row);
-
-        return $profile ?? self::error('profile_not_found', 404);
-    }
+    /** The existing status entry point now commits its audit in the same transaction.
+     * @return array<string,mixed>|\WP_Error */
+    public static function setStatus(mixed $creatorId, mixed $status, mixed $revision = null): array|\WP_Error
+    { return CreatorStatusReview::decide($creatorId, $status, $revision); }
 
     private static function currentOwner(): ?int
     {

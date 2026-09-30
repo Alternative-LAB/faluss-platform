@@ -70,6 +70,9 @@ namespace Faluss\Platform\Fans\Profiles {
         /** @var array<string,mixed>|null */
         public ?array $profile = null;
         public bool $failInsert = false;
+        public bool $failAudit = false;
+        public array $decisions = [];
+        private ?array $snapshot = null;
 
         public function prepare(string $query, mixed ...$args): string
         {
@@ -77,7 +80,9 @@ namespace Faluss\Platform\Fans\Profiles {
             return $query;
         }
         public function get_charset_collate(): string { return 'DEFAULT CHARACTER SET utf8mb4'; }
-        public function get_var(string $query): mixed { return null; }
+        public function get_var(string $query): mixed {
+            return str_contains($query, 'SELECT revision FROM') ? (end($this->decisions)['revision'] ?? null) : null;
+        }
         public function get_row(string $query, mixed $output = null): ?array
         {
             if (str_starts_with($query, 'SHOW TABLE STATUS')) {
@@ -105,6 +110,17 @@ namespace Faluss\Platform\Fans\Profiles {
         }
         public function get_results(string $query, mixed $output = null): array
         {
+            if (str_contains($query, 'faluss_fans_creator_status_decisions')) {
+                if (str_starts_with($query, 'SHOW FULL COLUMNS')) {
+                    return array_map(static fn (string $name, string $type): array => ['Field'=>$name,'Type'=>$type,'Null'=>'NO','Extra'=>''],
+                        array_keys(CreatorStatusSchema::columns()), array_values(CreatorStatusSchema::columns()));
+                }
+                if (str_starts_with($query, 'SHOW INDEX')) {
+                    return [['Key_name'=>'PRIMARY','Non_unique'=>'0','Seq_in_index'=>1,'Column_name'=>'creator_id'],
+                        ['Key_name'=>'PRIMARY','Non_unique'=>'0','Seq_in_index'=>2,'Column_name'=>'revision']];
+                }
+                return array_reverse($this->decisions);
+            }
             if (str_starts_with($query, 'SHOW FULL COLUMNS')) {
                 $result = [];
                 foreach (CreatorProfileSchema::columns() as $name => $column) {
@@ -143,6 +159,13 @@ namespace Faluss\Platform\Fans\Profiles {
         public function query(string $query): int|false
         {
             $last = end($this->prepared);
+            if ($query === 'START TRANSACTION') { $this->snapshot = [$this->profile, $this->decisions]; }
+            if ($query === 'ROLLBACK' && $this->snapshot !== null) { [$this->profile, $this->decisions] = $this->snapshot; }
+            if (str_starts_with($query, 'INSERT INTO') && str_contains($query, 'creator_status_decisions')) {
+                if ($this->failAudit) { return false; }
+                $this->decisions[] = array_combine(['creator_id','revision','actor_id','previous_status','status','occurred_at'], $last['args']);
+                return 1;
+            }
             if (str_starts_with($query, 'INSERT INTO')) {
                 if ($this->failInsert || $this->profile !== null) {
                     return false;
@@ -173,7 +196,7 @@ namespace Faluss\Platform\Fans\Profiles {
         {
             \Faluss\Platform\Fans\Sso\fans_sso_reset();
             $GLOBALS['wpdb'] = new CreatorProfileDb();
-            $GLOBALS['profile_options'] = [CreatorProfileSchema::OPTION => CreatorProfileSchema::VERSION];
+            $GLOBALS['profile_options'] = [CreatorProfileSchema::OPTION => CreatorProfileSchema::VERSION, CreatorStatusSchema::OPTION => CreatorStatusSchema::VERSION];
             $GLOBALS['profile_admin'] = false;
             $GLOBALS['profile_linked'] = true;
             $GLOBALS['profile_routes'] = [];
@@ -242,6 +265,32 @@ namespace Faluss\Platform\Fans\Profiles {
             self::assertSame([], CreatorProfileService::publicList(null));
         }
 
+        public function testJournalIsAtomicAndStaleDecisionsCannotWin(): void
+        {
+            $id = CreatorProfileService::create('arts')['creator_id'];
+            $GLOBALS['profile_admin'] = true;
+            $db = $GLOBALS['wpdb'];
+            $db->failAudit = true;
+            self::assertInstanceOf(\WP_Error::class, CreatorProfileService::setStatus($id, 'active', 0));
+            self::assertNull(CreatorProfileService::publicById($id));
+            self::assertSame([], $db->decisions);
+            $db->failAudit = false;
+            self::assertSame(1, CreatorProfileService::setStatus($id, 'active', 0)['status_revision']);
+            self::assertInstanceOf(\WP_Error::class, CreatorProfileService::setStatus($id, 'suspended', 0));
+            self::assertCount(1, $db->decisions);
+            self::assertSame('pending', $db->decisions[0]['previous_status']);
+            self::assertSame(17, $db->decisions[0]['actor_id']);
+            self::assertSame(2, CreatorProfileService::setStatus($id, 'suspended', 1)['status_revision']);
+            self::assertSame(3, CreatorProfileService::setStatus($id, 'active', 2)['status_revision']);
+            self::assertInstanceOf(\WP_Error::class, CreatorProfileService::setStatus($id, 'suspended', 1));
+            self::assertArrayNotHasKey('status_revision', CreatorProfileService::publicById($id));
+            self::assertSame(3, CreatorProfileService::setStatus($id, 'active', 3)['status_revision']);
+            self::assertCount(3, $db->decisions);
+            $GLOBALS['profile_admin'] = false;
+            self::assertInstanceOf(\WP_Error::class, CreatorStatusReview::detail($id));
+            self::assertInstanceOf(\WP_Error::class, CreatorStatusReview::queue('pending', null));
+        }
+
         public function testRestMutationsRequireNonceAndScopedPermission(): void
         {
             self::assertFalse(CreatorProfileRest::memberPermission(new \WP_REST_Request(['category' => 'arts'])));
@@ -250,7 +299,7 @@ namespace Faluss\Platform\Fans\Profiles {
             $GLOBALS['profile_admin'] = true;
             self::assertTrue(CreatorProfileRest::adminPermission(new \WP_REST_Request([], ['X-WP-Nonce' => 'valid-nonce'])));
             CreatorProfileRest::routes();
-            self::assertCount(4, $GLOBALS['profile_routes']);
+            self::assertCount(6, $GLOBALS['profile_routes']);
             self::assertArrayHasKey('faluss-fans/v1/creators/me', $GLOBALS['profile_routes']);
         }
     }

@@ -35,6 +35,7 @@ wp_set_current_user($id);
 $profile = CreatorProfileService::create('arts');
 if (is_wp_error($profile)) { throw new RuntimeException('Profile fixture failed'); }
 wp_set_current_user(1);
+\Faluss\Platform\Fans\Profiles\CreatorStatusSchema::installOrVerify();
 CreatorProfileService::setStatus($profile['creator_id'], 'active');
 $ids = ['adult' => [], 'hosted' => []];
 foreach (['adult' => 'external_adult_delivery_right', 'hosted' => 'hosted_allowed_content'] as $kind => $category) {
