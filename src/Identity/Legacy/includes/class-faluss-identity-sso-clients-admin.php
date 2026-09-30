@@ -27,7 +27,10 @@ final class Faluss_Identity_SSO_Clients_Admin {
         if ( false === $wpdb->query( 'START TRANSACTION' ) ) { return false; }
         try {
             $result = $wpdb->query( $sql );
-            if ( false === $result || ! Faluss_Identity_Consent::revise( $client_id ) || false === $wpdb->query( 'COMMIT' ) ) { $wpdb->query( 'ROLLBACK' ); return false; }
+            $codes = Faluss_Identity_Schema::get_table_names()['auth_codes'];
+            if ( false === $result || ! Faluss_Identity_Consent::revise( $client_id )
+                || false === $wpdb->query( $wpdb->prepare( 'DELETE FROM ' . self::quote_identifier( $codes ) . ' WHERE client_id=%s AND consumed_at IS NULL', $client_id ) )
+                || false === $wpdb->query( 'COMMIT' ) ) { $wpdb->query( 'ROLLBACK' ); return false; }
             return $result;
         } catch ( Throwable $error ) { $wpdb->query( 'ROLLBACK' ); return false; }
     }

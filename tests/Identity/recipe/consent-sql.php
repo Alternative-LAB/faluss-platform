@@ -46,6 +46,7 @@ consent_expect(is_string($issue->invoke(null,$request,$subject)), 'Can explicitl
 $stale=consent_request($clientId,$find,$uri,'reuse');
 $sql=$wpdb->prepare('UPDATE `'.$tables['clients'].'` SET client_name=client_name WHERE client_id=%s',$clientId);
 consent_expect(false !== $update->invoke(null,$clientId,$sql), 'No-op admin save succeeds');
+consent_expect('0' === (string)$wpdb->get_var($wpdb->prepare('SELECT COUNT(*) FROM `'.$tables['auth_codes'].'` WHERE faluss_id=%s AND consumed_at IS NULL',$subject)), 'Config change invalidates outstanding codes');
 consent_expect(null === $issue->invoke(null,$stale,$subject), 'Config revision race refuses stale reuse');
 $fresh=consent_request($clientId,$find,$uri,'reuse');
 consent_expect(null === $issue->invoke(null,$fresh,$subject), 'New config cannot use old grant');

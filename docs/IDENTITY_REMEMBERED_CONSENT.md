@@ -6,7 +6,7 @@ Sur le rôle `me`, Faluss Identity conserve l’accord explicite du membre pour 
 
 La mémorisation ne connecte pas un visiteur non authentifié : le passwordless et la session Identity active restent indispensables. Un profil suspendu est refusé. Les vérifications d’URI exacte, de PKCE S256, de client confidentiel, de nonce, de code à usage unique et de délai de 60 secondes restent en place.
 
-La configuration complète est liée à l’accord : nom, secret haché, URI, scopes autorisés, marqueur officiel, date de modification et révision aléatoire renouvelée lors de **chaque** sauvegarde ou rotation dans l’administration. Même une sauvegarde identique, ou un aller-retour dans la même seconde, invalide l’accord précédent. Le nonce de confirmation est également lié à cette configuration : une ancienne page ouverte ne peut pas approuver une configuration modifiée en arrière-plan.
+La configuration complète est liée à l’accord : nom, secret haché, URI, scopes autorisés, marqueur officiel, date de modification et révision aléatoire renouvelée lors de **chaque** sauvegarde ou rotation dans l’administration. Même une sauvegarde identique, ou un aller-retour dans la même seconde, invalide l’accord précédent et les codes non échangés pour ce client. Le nonce de confirmation est également lié à cette configuration : une ancienne page ouverte ne peut pas approuver une configuration modifiée en arrière-plan.
 
 Fans reste un client tiers, `first_party=0`. Le mécanisme historique réservé au callback exact Faluss.com reste distinct ; sa politique n’est pas étendue à Fans. Les champs éditoriaux Fans ne sont pas transmis par cet accord.
 
