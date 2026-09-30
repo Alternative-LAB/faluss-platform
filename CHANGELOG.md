@@ -6,9 +6,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+## [0.9.2] - 2026-09-30
+
 ### Corrigé
 
-- Bouton du vrai shortcode SSO Fans : pill vert `#41C295`, pictogramme Faluss décoratif, texte accessible « Rejoindre avec Faluss Identity », police Outfit locale et styles isolés adaptatifs. POST, nonce et retour SSO conservés.
+- Style the native Fans SSO button without changing its flow (#116) (`561ec04`)
 
 ## [0.9.1] - 2026-09-30
 
