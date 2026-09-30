@@ -10,7 +10,12 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
-- Add audited Fans creator admission administration (#123) (`313d202`)
+- Administration Fans des demandes de profil Créateur : file privée, activation/suspension et journal atomique avec refus des décisions concurrentes obsolètes (#123, `313d202`). Les validations commerciales, éditoriales, images et d’identité restent indépendantes.
+
+### Migration et compatibilité
+
+- Journal de statut InnoDB séparé, installé uniquement pour un module profils Fans déjà autorisé, à l’activation du plugin ou au prochain accès administrateur. Aucun statut existant n’est modifié ou reconstitué par la mise à niveau.
+- La route REST de statut exige la révision lue dans la fiche privée ; les appelants PHP historiques restent compatibles et journalisés. Aucun flag de production ou secret n’est modifié. Voir `docs/modules/FANS-PROFILES.md` pour le contrat et le retour arrière.
 
 ## [0.10.0] - 2026-09-30
 
