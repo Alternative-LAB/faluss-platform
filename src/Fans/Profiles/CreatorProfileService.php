@@ -177,6 +177,16 @@ final class CreatorProfileService
         return FansSsoService::currentLinkedSubject() !== null ? get_current_user_id() : null;
     }
 
+    /** Private server contract, never projected by REST. Caller owns transaction when locking. */
+    public static function activeOwner(mixed $creatorId, bool $lock = false): ?int
+    {
+        if (!self::validId($creatorId) || !CreatorProfileSchema::ready()) { return null; }
+        global $wpdb;
+        $id = $wpdb->get_var($wpdb->prepare('SELECT wp_user_id FROM ' . self::quote(CreatorProfileSchema::table())
+            . ' WHERE creator_id=%s AND status=%s LIMIT 1' . ($lock ? ' FOR UPDATE' : ''), $creatorId, 'active'));
+        return is_numeric($id) && (int) $id > 0 && FansSsoService::linkedMember((int) $id) ? (int) $id : null;
+    }
+
     /** @return array{creator_id:string,category:string,status:string,identity_verified:false,created_at:string,updated_at:string}|null */
     private static function profile(mixed $row): ?array
     {
