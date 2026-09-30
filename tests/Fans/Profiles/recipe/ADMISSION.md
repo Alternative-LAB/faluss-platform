@@ -25,6 +25,9 @@ autorisés **uniquement dans cette configuration jetable**. Mail et HTTP externe
 sont bloqués ; les comptes sont générés localement avec mots de passe aléatoires.
 Aucun parcours vers une autorité Identity réelle n’est lancé.
 
+Le seed est chargé avec `wp eval-file --use-include`, compatible avec son
+`strict_types` sur PHP 8.3 et versions suivantes.
+
 Le seed simule une installation opt-in antérieure au nouveau journal : profils
 en attente, aucun journal. Les requêtes HTTP vérifient que seul l’administrateur
 peut installer ce journal additif, sans changer les statuts existants. Une paire

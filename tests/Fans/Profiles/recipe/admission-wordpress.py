@@ -48,7 +48,7 @@ try:
     mu = wp/'wp-content/mu-plugins'; mu.mkdir()
     shutil.copy2(pathlib.Path(a.source)/'tests/Fans/Profiles/recipe/admission-runtime.php', mu/'admission-fixture.php')
     cli('plugin', 'activate', 'faluss-platform')
-    cli('eval-file', str(pathlib.Path(a.source)/'tests/Fans/Profiles/recipe/admission-seed.php'), str(root/'session.json'))
+    cli('eval-file', str(pathlib.Path(a.source)/'tests/Fans/Profiles/recipe/admission-seed.php'), str(root/'session.json'), '--use-include')
     os.chmod(root/'session.json', 0o600)
     web = subprocess.Popen(['php', '-S', '127.0.0.1:'+str(port), '-t', str(wp)], stdout=log, stderr=log, env=dict(os.environ, PHP_CLI_SERVER_WORKERS='4'), start_new_session=True)
     time.sleep(.5)
