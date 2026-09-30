@@ -6,9 +6,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+## [0.9.1] - 2026-09-30
+
 ### Corrigé
 
-- Création et rotation des secrets SSO : contexte d’administration WordPress initialisé et confirmation préparée avant l’écriture pour éviter la perte du secret lors d’un échec d’affichage. Dashboard tolérant au hook nul d’admin-post ; case « officiel Faluss.com » décochée et désactivée pour Fans. Recette sur vrai WordPress isolé, erreurs injectées, authentification par le secret et procédure de reprise sans recréer le client.
+- Fix SSO client secret confirmation before credential writes (#114) (`c1e8f1b`)
 
 ## [0.9.0] - 2026-09-30
 
