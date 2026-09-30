@@ -10,13 +10,14 @@ final class MessageService
 {
     public static function run(callable $operation): mixed
     {
-        if (!MessageModule::available()) { return MessagePolicy::error('messages_unavailable'); }
+        if (!MessageModule::privateAccessAvailable()) { return MessagePolicy::error('messages_unavailable'); }
         if (FansSsoService::currentLinkedSubject()===null) { return MessagePolicy::error('messages_forbidden',403); }
         $result=MessageStore::transaction($operation);
         return is_array($result) && ($result['_expired']??false)===true ? MessagePolicy::error('conversation_expired',410) : $result;
     }
     public static function request(mixed $creatorId, mixed $body, mixed $key): mixed
     {
+        if (!MessageModule::available()) {return MessagePolicy::error('message_admission_closed');}
         if (!MessagePolicy::uuid($creatorId) || !MessagePolicy::text($body,1000) || !MessagePolicy::uuid($key)) { return MessagePolicy::error('invalid_message_request',400); }
         return self::run(static function () use ($creatorId,$body,$key): mixed {
             global $wpdb;
@@ -56,6 +57,7 @@ final class MessageService
     }
     public static function send(mixed $threadId, mixed $body, mixed $key): mixed
     {
+        if (!MessageModule::available()) {return MessagePolicy::error('message_admission_closed');}
         if (!MessagePolicy::uuid($threadId) || !MessagePolicy::text($body) || !MessagePolicy::uuid($key)) { return MessagePolicy::error('invalid_message',400); }
         return self::run(static function () use ($threadId,$body,$key): mixed {
             global $wpdb;

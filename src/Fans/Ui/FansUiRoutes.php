@@ -136,7 +136,7 @@ final class FansUiRoutes
         }
         $returnTo = parse_url($canonical, PHP_URL_PATH);
         $query = parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_QUERY);
-        if (!$linked && $role === 'creator' && $view === 'creer' && is_string($query)) {
+        if (!$linked && (($role === 'creator' && $view === 'creer') || $view === 'messages') && is_string($query)) {
             $returnTo = FansSsoReturn::path($returnTo . '?' . $query) ?? $returnTo;
         }
         $signIn = $linked ? '' : FansSsoService::button(['return_to' => $returnTo]);
@@ -162,8 +162,9 @@ final class FansUiRoutes
         $images = $role === 'creator' && $view === 'creer' ? FansUiImages::load() : null;
         $admission = $role === 'fan' && $view === 'espace' ? FansUiAdmission::load($profilesEnabled) : null;
         $editorial = $role === 'creator' && $view === 'mon-profil' ? FansUiEditorial::load() : null;
-        $status = max($author?->httpStatus() ?? 200, $images?->httpStatus() ?? 200, $admission?->httpStatus() ?? 200, $editorial?->httpStatus() ?? 200);
-        FansUiView::render((string) $role, $view, $publicProfile ? $creatorId : null, $status, $signIn, $author, $admission, $editorial, $images);
+        $messages = $view === 'messages' ? FansUiMessages::load((string)$role) : null;
+        $status = max($author?->httpStatus() ?? 200, $images?->httpStatus() ?? 200, $admission?->httpStatus() ?? 200, $editorial?->httpStatus() ?? 200, $messages?->httpStatus() ?? 200);
+        FansUiView::render((string) $role, $view, $publicProfile ? $creatorId : null, $status, $signIn, $author, $admission, $editorial, $images, $messages);
         exit;
     }
 
@@ -171,6 +172,9 @@ final class FansUiRoutes
     {
         nocache_headers();
         header('Cache-Control: private, no-store, max-age=0, must-revalidate');
+        header('CDN-Cache-Control: no-store');
+        header('Surrogate-Control: no-store');
+        header('Referrer-Policy: no-referrer');
         header('X-Content-Type-Options: nosniff');
     }
 }

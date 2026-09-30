@@ -11,7 +11,7 @@ define('FALUSS_PLATFORM_ROLE', 'fans');
 define('FALUSS_PLATFORM_VERSION', 'isolated-editorial-test');
 foreach (['SSO', 'CREATOR_PROFILES', 'EDITORIAL', 'IMAGES', 'IMAGE_DELIVERY'] as $flag) { define('FALUSS_PLATFORM_FANS_' . $flag, true); }
 if (getenv('FANS_PUBLICATION_FIXTURE') === '1') { define('FALUSS_PLATFORM_FANS_TEXT_PUBLICATIONS', true); }
-if (getenv('FANS_MESSAGE_FIXTURE') === '1') { define('FALUSS_PLATFORM_FANS_MESSAGING', true); }
+if (getenv('FANS_MESSAGE_FIXTURE') === '1') { define('FALUSS_PLATFORM_FANS_MESSAGING',getenv('FANS_MESSAGE_READONLY')!=='1'); define('FALUSS_FANS_MESSAGING_POLICY_ATTESTED',true); }
 define('FALUSS_FANS_SSO_CLIENT_ID', 'isolated-test');
 define('FALUSS_FANS_SSO_CLIENT_SECRET', str_repeat('s', 43));
 define('ABSPATH', dirname(__DIR__, 4));

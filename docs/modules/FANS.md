@@ -82,6 +82,14 @@ Le simulateur v2 reste historique, non conforme à cette cible ; une
 
 ## Prochains moteurs
 
+La [messagerie textuelle](FANS-MESSAGING.md) dispose désormais de demandes,
+acceptation/refus, échanges, blocages, signalements, recours et rétention testés
+avec les vrais services locaux. Son UI et le panel s’appuient sur ces contrats.
+Flags fermés, traitements à attester et recette cible à réaliser avant ouverture.
+L’ouverture directe Max/abonné Créateur reste indisponible sans preuve serveur
+propriétaire. Les mentions de « messagerie à construire » dans les étapes
+historiques ci-dessus décrivent les anciens lots, pas ce moteur actuel.
+
 La matrice des propriétaires, les contrats proposés et les portes de validation sont décrits dans [FANS-ENGINE-OWNERSHIP.md](FANS-ENGINE-OWNERSHIP.md). Ils ne constituent pas des moteurs activés. La référence visuelle Fans reste conceptuelle ; aucun badge de la maquette ne prouve une vérification d'identité.
 
 La [fondation des publications](FANS-PUBLICATIONS.md) comprend maintenant un moteur local de textes modérés, désactivé par défaut, et les politiques pures existantes. Les originaux médias, publications verrouillées et teasers Me restent sans route active ni transport.

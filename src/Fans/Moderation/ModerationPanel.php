@@ -24,7 +24,7 @@ final class ModerationPanel
     }
 
     public static function allowed(): bool
-    { return (TextPublicationsModule::available() || EditorialModule::available()) && current_user_can('manage_options'); }
+    { return (TextPublicationsModule::available() || EditorialModule::available() || \Faluss\Platform\Fans\Messaging\ReportModeration::allowed()) && current_user_can('manage_options'); }
 
     public static function menu(): void
     {
@@ -73,6 +73,9 @@ final class ModerationPanel
         self::$result = null;
         if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') { return; }
         check_admin_referer('fans_moderation');
+        if (self::field('kind',$_POST)==='message-report') {
+            self::$result=MessageReportPanel::submit();status_header(self::$result->get_status());return;
+        }
         $id = self::field('item_id', $_POST);
         $kind = self::field('kind', $_POST);
         $revision = self::field('revision', $_POST);
@@ -126,6 +129,7 @@ final class ModerationPanel
     public static function render(): void
     {
         if (!self::allowed()) { wp_die('Accès non autorisé.', '', ['response' => 403]); }
+        if (self::field('view',$_GET)==='messages') {MessageReportPanel::render(self::$result);return;}
         if (self::field('view', $_GET) === 'editorial') {
             EditorialModerationView::render(self::$result);
             return;

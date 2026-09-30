@@ -112,7 +112,7 @@ final class FansRoleIsolationTest extends TestCase
         }
 
         require dirname(__DIR__, 2) . '/faluss-platform.php';
-        self::assertCount(14, $GLOBALS['fans_test_activation_hooks']);
+        self::assertCount(15, $GLOBALS['fans_test_activation_hooks']);
         self::assertSame([
             SubscriptionsModule::class,
             TokenEngineModule::class,
@@ -127,6 +127,7 @@ final class FansRoleIsolationTest extends TestCase
             StoreCatalogModule::class,
             \Faluss\Platform\Fans\Publications\TextPublicationsModule::class,
             \Faluss\Platform\Fans\Images\ImagesModule::class,
+            \Faluss\Platform\Fans\Messaging\MessageModule::class,
             \Faluss\Platform\Fans\Ui\FansUiModule::class,
         ], array_map(static fn (array $callback): string => $callback[0], $GLOBALS['fans_test_activation_hooks']));
         self::assertCount(5, $GLOBALS['fans_test_deactivation_hooks']);

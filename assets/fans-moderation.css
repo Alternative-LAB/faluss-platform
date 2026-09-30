@@ -1,4 +1,5 @@
 @font-face { font-family: Outfit; src: url('fonts/outfit.ttf') format('truetype'); font-weight: 100 900; font-style: normal; font-display: swap; }
+.faluss-moderation .fm-retention{padding:16px;border:1px solid #cabdab;border-radius:12px;margin:20px 0}.faluss-moderation .fm-message-proof textarea{width:100%;max-width:100%;font:inherit;padding:12px;border:1px solid #9b8f80;border-radius:10px;resize:vertical}.faluss-moderation .fm-confirm{display:flex;align-items:flex-start;gap:10px}.faluss-moderation .fm-confirm input{flex:none;margin-top:6px}.faluss-moderation .fm-message-proof :is(input,textarea,select):focus-visible{outline:3px solid #a3431d;outline-offset:3px}
 .faluss-moderation { --fm-ink: #080808; --fm-muted: #6f6a63; --fm-line: rgba(8,8,8,.12); background: #fffdf5; color: var(--fm-ink); padding: clamp(16px,3vw,40px); margin: 20px 20px 40px 0; border-radius: 20px; font: 16px/1.6 Outfit,system-ui,sans-serif; }
 .faluss-moderation *, .faluss-moderation *::before, .faluss-moderation *::after { box-sizing: border-box; }
 .faluss-moderation h1 { font-size: clamp(28px,4vw,44px); line-height: 1.15; font-weight: 600; color: var(--fm-ink); }

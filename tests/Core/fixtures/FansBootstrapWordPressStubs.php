@@ -20,6 +20,9 @@ namespace {
     $GLOBALS['fans_test_deactivation_hooks'] = [];
     $GLOBALS['fans_test_actions'] = [];
 
+    function get_option(string $key, mixed $default = false): mixed
+    { return $default; } // No previously installed private data in this bootstrap fixture.
+
     function register_activation_hook(string $pluginFile, callable $callback): void
     {
         $GLOBALS['fans_test_activation_hooks'][] = $callback;

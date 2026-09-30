@@ -63,4 +63,15 @@ final class FansSsoReturnTest extends TestCase
         self::assertNull(FansSsoReturn::seal('https://evil.example', $state));
         self::assertNull(FansSsoReturn::seal($path, 'invalid'));
     }
+    public function testMessageReturnKeepsOnlyOneOpaqueSelection(): void
+    {
+        $id='123e4567-e89b-42d3-a456-426614174000';$state=str_repeat('s',43);
+        foreach(['fan','creator'] as $role) {foreach(['creator','thread'] as $kind) {
+            $path='/faluss-fans/'.$role.'/messages?'.$kind.'='.$id;
+            self::assertSame($path,FansSsoReturn::path($path));
+            self::assertSame($path,FansSsoReturn::open(FansSsoReturn::seal($path,$state),$state));
+            foreach([$path.'&body=private',$path.'&nonce=test',$path.'#fragment',$path.'&'.$kind.'='.$id,str_replace('?'.$kind.'=','?'.$kind.'[]=',$path)] as $invalid) {self::assertNull(FansSsoReturn::path($invalid));}
+        }}
+        self::assertNull(FansSsoReturn::path('/faluss-fans/fan/messages?email=private'));
+    }
 }

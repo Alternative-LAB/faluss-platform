@@ -17,7 +17,7 @@ final class MessageRest
             register_rest_route(CreatorProfileRest::NAMESPACE,$route,['methods'=>$method,'callback'=>[self::class,$callback],'permission_callback'=>[self::class,'member']]);
         }
     }
-    public static function member(\WP_REST_Request $r): bool { return MessageModule::available() && CreatorProfileRest::memberPermission($r); }
+    public static function member(\WP_REST_Request $r): bool { return MessageModule::privateAccessAvailable() && CreatorProfileRest::memberPermission($r); }
     public static function inbox(\WP_REST_Request $r): \WP_REST_Response { return EditorialRest::response(MessageReading::inbox($r->get_param('cursor')??'')); }
     public static function blocked(\WP_REST_Request $r): \WP_REST_Response { return EditorialRest::response(MessageReading::blocked($r->get_param('cursor')??'')); }
     public static function conversation(\WP_REST_Request $r): \WP_REST_Response

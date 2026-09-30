@@ -60,7 +60,7 @@ final class FansUiView
         'public-profile' => ['Découvrir', 'Profil créateur', 'explorer', 'Seuls les champs éditoriaux approuvés sont présentés ici.'],
     ];
 
-    public static function render(string $role, string $view, ?string $creatorId, int $status = 200, string $signIn = '', ?FansUiAuthor $author = null, ?FansUiAdmission $admission = null, ?FansUiEditorial $editorial = null, ?FansUiImages $images = null): void
+    public static function render(string $role, string $view, ?string $creatorId, int $status = 200, string $signIn = '', ?FansUiAuthor $author = null, ?FansUiAdmission $admission = null, ?FansUiEditorial $editorial = null, ?FansUiImages $images = null, ?FansUiMessages $messages = null): void
     {
         $errorView = in_array($view, ['profile-unavailable', 'creator-unavailable'], true);
         $page = self::PAGES[$view === 'public-profile' || $errorView ? $view : $role . ':' . $view] ?? null;
@@ -68,9 +68,11 @@ final class FansUiView
             return;
         }
         $title = $page[1];
+        if ($messages?->available) { $page[3]='Vos demandes et conversations privées. Chaque échange respecte le choix de son destinataire.'; }
         $api = rest_url('faluss-fans/v1/creators');
         $publicBase = home_url('/faluss-fans/creators/');
         wp_enqueue_style('faluss-fans-ui-v2', plugins_url('assets/fans-ui-v2.css', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'));
+        if ($messages !== null) { wp_enqueue_style('faluss-fans-messages', plugins_url('assets/fans-messages.css', dirname(__DIR__, 3) . '/faluss-platform.php'), ['faluss-fans-ui-v2'], (string)constant('FALUSS_PLATFORM_VERSION')); }
         wp_enqueue_script('faluss-fans-ui-v2', plugins_url('assets/fans-ui-v2.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true);
         wp_enqueue_script('faluss-fans-reading', plugins_url('assets/fans-ui-reading.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true);
         if ($editorial !== null || $images !== null) { wp_enqueue_script('faluss-fans-private-images', plugins_url('assets/fans-private-images.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true); }
@@ -84,7 +86,7 @@ final class FansUiView
 <title><?php echo esc_html($title); ?> · Faluss Fans</title>
 <?php wp_head(); ?>
 </head>
-<body class="faluss-fans-ui-page">
+<body class="faluss-fans-ui-page<?php echo $messages!==null?' fu-messages-page':''; ?>">
 <a class="fu-skip" href="#fu-main">Aller au contenu</a>
 <div class="fu-app" data-fans-role="<?php echo esc_attr($role); ?>">
     <?php self::navigation($role, $page[2]); ?>
@@ -118,6 +120,8 @@ final class FansUiView
             <?php self::creationChoices($author !== null && $author->available, $images !== null && $images->available); ?>
             <?php if ($author !== null) { FansUiAuthorView::render($author); } ?>
             <?php if ($images !== null) { FansUiImagesView::render($images); } ?>
+        <?php elseif ($view === 'messages' && $messages !== null) : ?>
+            <?php FansUiMessageView::render($messages); ?>
         <?php elseif ($view === 'classement-fans') : ?>
             <?php self::fanRanking(); ?>
         <?php elseif ($view === 'connexion') : ?>
@@ -204,6 +208,9 @@ final class FansUiView
             <h2 id="fu-profile-title">Informations publiques</h2>
             <p class="fu-live" data-fans-status role="status" aria-live="polite">Chargement du profil…</p>
             <div data-fans-results></div>
+            <?php if (\Faluss\Platform\Fans\Messaging\MessageModule::available() && \Faluss\Platform\Fans\Profiles\CreatorProfileService::activeOwner($creatorId)!==get_current_user_id()): ?>
+            <a class="fu-link" href="<?php echo esc_url(add_query_arg('creator',$creatorId,FansUiRoutes::url($role==='visitor'?'fan':$role,'messages'))); ?>">Adresser une demande de message ↗</a>
+            <?php endif; ?>
         </section>
         <?php
     }
