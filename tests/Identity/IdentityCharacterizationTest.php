@@ -28,7 +28,7 @@ final class IdentityCharacterizationTest extends TestCase
             'class-faluss-identity-public-profile.php' => 'c91efb6619368e79e44d4c74cbe3c25b90068843895b5bde266e12efef0923a2',
             'class-faluss-identity-registry.php' => '6a69c3c3f0c9320e2cf7c9b9fc352e51689a44e5718d28c19120b53cdeb83d3a',
             'class-faluss-identity-schema.php' => 'f2e62e9e0fc9feb66813f19fe948c56cdb6ff8d3472cc596501b3dc1ff233aad',
-            'class-faluss-identity-sso-clients-admin.php' => '56fa014d8904f097e1519c3a4f8a03bb33f1f23a864b08cf6eb0628eb41fd496',
+            'class-faluss-identity-sso-clients-admin.php' => '90233085245fd2011f4896b460ad655df717f889ff40275994a744d686053b4a',
         ];
         $assets = [
             'assets/css/faluss-identity-authorization.css' => '9dc325ecb768e5cb615bb7a2db12f27764b19a1cc66fd064d02458122a69efd8',

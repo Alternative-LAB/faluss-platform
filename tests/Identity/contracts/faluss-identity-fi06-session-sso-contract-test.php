@@ -82,6 +82,7 @@ $first_party_requested->setAccessible( true );
 $_POST['first_party'] = '1';
 fi06_sso_assert( true === $first_party_requested->invoke( null, array( $callback ) ), 'Administration can mark only the exact Faluss.com callback as first party.' );
 fi06_sso_assert( false === $first_party_requested->invoke( null, array( $callback, 'https://faluss.com/other-callback' ) ), 'Administration cannot mark a multi-callback client as first party.' );
+fi06_sso_assert( false === $first_party_requested->invoke( null, array( 'https://fans.faluss.me/faluss-fans/sso/callback' ) ), 'A forged first_party checkbox can never make the Fans client official Faluss.com.' );
 unset( $_POST['first_party'] );
 $schema_source = file_get_contents( $root . '/src/Identity/Legacy/includes/class-faluss-identity-schema.php' );
 foreach ( array( "const FI06_SSO_VERSION = '6'", 'ADD first_party tinyint(3) unsigned NOT NULL DEFAULT 0', 'fi_schema_fi06_sso_source_invalid' ) as $needle ) {
