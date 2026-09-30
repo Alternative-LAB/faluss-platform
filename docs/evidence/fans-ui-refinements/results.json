@@ -1,0 +1,437 @@
+{
+  "browser": "154.0.8037.58",
+  "results": [
+    {
+      "width": 1440,
+      "role": "guest",
+      "view": "explorer",
+      "main": [
+        82,
+        0,
+        1343
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "role": "guest",
+      "view": "hof",
+      "main": [
+        82,
+        0,
+        1343
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "role": "guest",
+      "view": "accueil",
+      "main": [
+        82,
+        0,
+        1343
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "role": "guest",
+      "view": "messages",
+      "main": [
+        82,
+        0,
+        1343
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "role": "guest",
+      "view": "classement-fans",
+      "main": [
+        82,
+        0,
+        1343
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "role": "guest",
+      "view": "espace",
+      "main": [
+        82,
+        0,
+        1343
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "role": "member-on",
+      "view": "explorer",
+      "main": [
+        82,
+        0,
+        1343
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "role": "member-on",
+      "view": "hof",
+      "main": [
+        82,
+        0,
+        1343
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "role": "member-on",
+      "view": "accueil",
+      "main": [
+        82,
+        0,
+        1343
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "role": "member-on",
+      "view": "messages",
+      "main": [
+        82,
+        0,
+        1343
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "role": "member-on",
+      "view": "classement-fans",
+      "main": [
+        82,
+        0,
+        1343
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "role": "member-on",
+      "view": "espace",
+      "main": [
+        82,
+        0,
+        1343
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "role": "guest",
+      "view": "explorer",
+      "main": [
+        0,
+        0,
+        375
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "role": "guest",
+      "view": "hof",
+      "main": [
+        0,
+        0,
+        375
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "role": "guest",
+      "view": "accueil",
+      "main": [
+        0,
+        0,
+        375
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "role": "guest",
+      "view": "messages",
+      "main": [
+        0,
+        0,
+        375
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "role": "guest",
+      "view": "classement-fans",
+      "main": [
+        0,
+        0,
+        375
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "role": "guest",
+      "view": "espace",
+      "main": [
+        0,
+        0,
+        375
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "role": "member-on",
+      "view": "explorer",
+      "main": [
+        0,
+        0,
+        375
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "role": "member-on",
+      "view": "hof",
+      "main": [
+        0,
+        0,
+        375
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "role": "member-on",
+      "view": "accueil",
+      "main": [
+        0,
+        0,
+        375
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "role": "member-on",
+      "view": "messages",
+      "main": [
+        0,
+        0,
+        375
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "role": "member-on",
+      "view": "classement-fans",
+      "main": [
+        0,
+        0,
+        375
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "role": "member-on",
+      "view": "espace",
+      "main": [
+        0,
+        0,
+        375
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "role": "guest",
+      "view": "explorer",
+      "main": [
+        0,
+        0,
+        305
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "role": "guest",
+      "view": "hof",
+      "main": [
+        0,
+        0,
+        305
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "role": "guest",
+      "view": "accueil",
+      "main": [
+        0,
+        0,
+        305
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "role": "guest",
+      "view": "messages",
+      "main": [
+        0,
+        0,
+        305
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "role": "guest",
+      "view": "classement-fans",
+      "main": [
+        0,
+        0,
+        305
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "role": "guest",
+      "view": "espace",
+      "main": [
+        0,
+        0,
+        305
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "role": "member-on",
+      "view": "explorer",
+      "main": [
+        0,
+        0,
+        305
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "role": "member-on",
+      "view": "hof",
+      "main": [
+        0,
+        0,
+        305
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "role": "member-on",
+      "view": "accueil",
+      "main": [
+        0,
+        0,
+        305
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "role": "member-on",
+      "view": "messages",
+      "main": [
+        0,
+        0,
+        305
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "role": "member-on",
+      "view": "classement-fans",
+      "main": [
+        0,
+        0,
+        305
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "role": "member-on",
+      "view": "espace",
+      "main": [
+        0,
+        0,
+        305
+      ],
+      "hoverFocus": true,
+      "overflow": false
+    }
+  ]
+}

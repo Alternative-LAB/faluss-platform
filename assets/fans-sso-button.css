@@ -8,7 +8,7 @@
 
 form.faluss-fans-sso-form {
     box-sizing: border-box;
-    width: 486px;
+    width: 340px;
     max-width: 100%;
     min-width: 0;
     margin: 0 auto;
@@ -20,19 +20,19 @@ form.faluss-fans-sso-form {
     appearance: none;
     box-sizing: border-box;
     display: grid;
-    grid-template-columns: 28px minmax(0, 1fr) 28px;
+    grid-template-columns: 20px minmax(0, 1fr) 20px;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     width: 100%;
-    min-height: 76px;
+    min-height: 48px;
     margin: 0;
-    padding: 18px 24px;
+    padding: 10px 16px;
     border: 2px solid transparent;
     border-radius: 999px;
     background: #41c295;
     color: #fff;
     box-shadow: none;
-    font: 400 22px/1.25 FalussSsoOutfit, Outfit, sans-serif;
+    font: 400 16px/1.25 FalussSsoOutfit, Outfit, sans-serif;
     letter-spacing: normal;
     text-align: center;
     text-decoration: none;
@@ -44,8 +44,8 @@ form.faluss-fans-sso-form {
 
 .faluss-fans-sso-button .faluss-fans-sso-button__icon {
     display: block;
-    width: 28px;
-    height: 34px;
+    width: 20px;
+    height: 24px;
     max-width: none;
     margin: 0;
     object-fit: contain;
@@ -73,7 +73,7 @@ form.faluss-fans-sso-form {
     background: #287f62;
 }
 
-.fu-signin .faluss-fans-sso-form { flex: 0 1 486px; }
+.fu-signin .faluss-fans-sso-form { flex: 0 1 340px; }
 
 @media (max-width: 700px) {
     .fu-signin .faluss-fans-sso-form { flex-basis: auto; }
@@ -81,13 +81,13 @@ form.faluss-fans-sso-form {
 
 @media (max-width: 520px) {
     .faluss-fans-sso-form .faluss-fans-sso-button {
-        grid-template-columns: 24px minmax(0, 1fr) 24px;
+        grid-template-columns: 20px minmax(0, 1fr) 20px;
         gap: 8px;
-        min-height: 64px;
-        padding: 14px 16px;
-        font-size: 18px;
+        min-height: 44px;
+        padding: 9px 12px;
+        font-size: 15px;
     }
-    .faluss-fans-sso-button .faluss-fans-sso-button__icon { width: 24px; height: 29px; }
+    .faluss-fans-sso-button .faluss-fans-sso-button__icon { width: 20px; height: 24px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

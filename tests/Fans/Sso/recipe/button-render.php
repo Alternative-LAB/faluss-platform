@@ -18,7 +18,9 @@ add_action('template_redirect', static function (): void {
     add_filter('home_url', static fn (string $url, string $path) => 'https://fans.example.test/' . ltrim($path, '/'), 10, 2);
     $shortcode = '[faluss_fans_sso_button return_to="/faluss-fans/fan/espace"]';
     if (isset($_GET['fans_ui'])) {
-        \Faluss\Platform\Fans\Ui\FansUiView::render('visitor', 'connexion', null, 200, do_shortcode($shortcode));
+        // Rendering-only creator fixture: no invented identity, profile or service data.
+        $creator = isset($_GET['creator_view']) && in_array($_GET['creator_view'], ['accueil', 'explorer', 'hof', 'creer', 'boutique', 'progression', 'mon-profil'], true);
+        \Faluss\Platform\Fans\Ui\FansUiView::render($creator ? 'creator' : 'visitor', $creator ? $_GET['creator_view'] : 'connexion', null, 200, $creator ? '' : do_shortcode($shortcode));
         exit;
     }
     ?>
