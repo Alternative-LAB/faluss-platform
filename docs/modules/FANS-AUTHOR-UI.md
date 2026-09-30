@@ -17,7 +17,9 @@ d’identifiant propriétaire choisi par le client ni de contournement REST.
 Formulaires POST natifs sur la route Créer, nonce propre à l’UI puis appel REST
 interne avec nonce WordPress de la session. Les permissions, états, modération,
 quotas, verrouillage et journal restent ceux de [FANS-PUBLICATIONS.md](FANS-PUBLICATIONS.md).
-Services, prestations, produits, médias et transactions restent fermés.
+Services, prestations, produits et transactions restent fermés. La
+[galerie privée d’images](FANS-PRIVATE-IMAGES-UI.md) possède un formulaire distinct
+sur Créer ; ce formulaire texte n’attache pas encore d’image.
 
 La clé UUID de création est générée par le serveur et reste dans le formulaire
 après erreur. Le navigateur peut renvoyer le même POST après réponse perdue ;

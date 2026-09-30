@@ -36,10 +36,15 @@ final class ImageRest
         if (!is_array($files) || array_keys($files) !== ['image'] || !is_array($files['image']) || $r->get_body_params() !== [] || $r->get_query_params() !== [] || $json !== null) {
             return self::response(ImageService::error('invalid_image_input', 400));
         }
-        return self::response(ImageService::submit($files['image']), 201);
+        $data = ImageService::submit($files['image']);
+        return self::response($data, is_array($data) && ($data['reused'] ?? false) === true ? 200 : 201);
     }
     public static function listing(\WP_REST_Request $r): \WP_REST_Response
-    { return self::response(ImageService::listing(is_string($r->get_param('cursor')) ? $r->get_param('cursor') : '')); }
+    {
+        $cursor = $r->get_param('cursor'); $scope = $r->get_param('scope');
+        return self::response(($cursor !== null && !is_string($cursor)) || ($scope !== null && !is_string($scope))
+            ? ImageService::error('invalid_image_cursor', 400) : ImageService::listing($cursor ?? '', $scope ?? 'all'));
+    }
     public static function portraitCandidates(): \WP_REST_Response { return self::response(ImageService::portraitCandidates()); }
     public static function ownerPreview(\WP_REST_Request $r): \WP_REST_Response
     {

@@ -29,7 +29,7 @@ des captures sont des fixtures sous `tests/`, jamais des données produit.
 | Nombre public de suivis | Sur le profil public actif | Fonctionnel et testé | Compteur REST existant seulement ; zéro réel distingué d’une route fermée ; aucune action sociale ouverte |
 | Textes récents | Sur Explorer, les accueils et le profil public | Fonctionnel et testé | Liste globale sur accueil/Explorer, filtrée par auteur sur son profil ; curseurs liés au filtre, rendu texte, erreurs et réponses anciennes |
 | Image associée à un texte public — lecture | Dans la carte de publication | Fonctionnel et testé | Dérivé JPEG à la demande, opt-in fermé ; aucun portrait ; description alternative éditoriale et recette d’hébergement requises avant activation |
-| Gestion privée des images | Sélecteur de portrait puis parcours Créer | Développement en cours | Aperçu propriétaire JPEG et sélection des images approuvées implémentés et testés ; dépôt et cycle complet à raccorder dans le lot suivant |
+| Gestion privée des images | Créer → galerie → Mon profil | Fonctionnel et testé en environnement isolé | Dépôt multipart réel, aperçu privé, modération, retrait/révocation, quota et rejeux concurrents ; [contrat et captures](FANS-PRIVATE-IMAGES-UI.md). Attestation d’hébergement et recette cible requises avant activation |
 | HoF | `fan/hof`, `creator/hof` | Interface prête mais service absent | Invité 200 ; aucun rang, session ou point ; moteur et politiques encore requis |
 | Session HoF | `fan/hof/session`, `creator/hof/session` | Interface prête mais service absent | Accès personnel, aucune session à rejoindre |
 | Classements HoF | `fan/classements`, `creator/classements` | Interface prête mais service absent | Aucun calcul ou classement public |
@@ -41,7 +41,7 @@ des captures sont des fixtures sous `tests/`, jamais des données produit.
 | Mon espace Fan | `fan/espace` | Interface prête mais service absent | Pas de progression PC, niveau ou récompense attribués |
 | Demande de profil Créateur | Dans `fan/espace` | Fonctionnel et testé | Catégorie, nonce, profil pending, rejeu et conflit ; approbation administrative conservée |
 | Progression Créateur | `creator/progression` | Interface prête mais service absent | Score HoF absent ; aucune finance |
-| Créer — choix entre quatre types | `creator/creer` | Fonctionnel et testé | Contenu/prestation/service/produit distingués, seule gestion des textes raccordée |
+| Créer — choix entre quatre types | `creator/creer` | Fonctionnel et testé | Contenu/prestation/service/produit distingués ; textes et galerie privée raccordés, trois offres commerciales indisponibles |
 | Créer/éditer/retirer un texte | `creator/creer` | Fonctionnel et testé | POST natif sans JS, nonce, REST existant, idempotence, révisions, quota, retrait confirmé ; modération humaine obligatoire |
 | Créer une prestation, un service ou un produit | Choix dans `creator/creer` | Interface prête mais service absent | Aucun formulaire, réservation, gestion de stock ou publication commerciale simulés |
 | Ma boutique | `creator/boutique` | Interface prête mais service absent | Gestion propriétaire/réservations/commandes absentes ; refus d’achat inchangés |
@@ -121,9 +121,10 @@ documentaires postérieurs ne modifient pas le paquet publié.
 4. **Moteurs absents** : messagerie, progression PC, sessions HoF, réservations,
    gestion commerciale et transactions. Les composants indisponibles ne sont pas
    présentés comme des fonctionnalités terminées.
-5. **Gestion privée des médias en cours** : l’aperçu propriétaire contrôlé et
-   le sélecteur de portraits approuvés sont disponibles dans le nouveau lot ;
-   le dépôt et la galerie complète restent le lot de code suivant. La lecture par
+5. **Images privées livrables, autres médias absents** : dépôt, galerie, aperçu,
+   retrait et choix du portrait approuvé sont raccordés et testés en isolation.
+   L’attestation d’hébergement, la rétention et la recette cible restent nécessaires.
+   La lecture par
    auteur et celle des images publiques à la demande sont raccordées, avec les
    limites du [contrat UI](FANS-PUBLICATION-IMAGE-UI.md). L’admission par catégorie
    est raccordée, sans auto-approbation. Le suivi social minimal

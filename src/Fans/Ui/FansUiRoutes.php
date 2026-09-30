@@ -154,10 +154,16 @@ final class FansUiRoutes
             }
         }
 
+        if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && $view === 'creer') {
+            if (isset($_POST['author_action'], $_POST['image_action'])) { wp_die('Formulaire ambigu. Rechargez la page.', '', ['response' => 400]); }
+            if ($_POST === [] && $_FILES === []) { wp_die('Envoi vide ou trop volumineux. Rechargez la page et vérifiez le fichier.', '', ['response' => 413]); }
+        }
         $author = $role === 'creator' && $view === 'creer' ? FansUiAuthor::load() : null;
+        $images = $role === 'creator' && $view === 'creer' ? FansUiImages::load() : null;
         $admission = $role === 'fan' && $view === 'espace' ? FansUiAdmission::load($profilesEnabled) : null;
         $editorial = $role === 'creator' && $view === 'mon-profil' ? FansUiEditorial::load() : null;
-        FansUiView::render((string) $role, $view, $publicProfile ? $creatorId : null, $author?->httpStatus() ?? $admission?->httpStatus() ?? $editorial?->httpStatus() ?? 200, $signIn, $author, $admission, $editorial);
+        $status = max($author?->httpStatus() ?? 200, $images?->httpStatus() ?? 200, $admission?->httpStatus() ?? 200, $editorial?->httpStatus() ?? 200);
+        FansUiView::render((string) $role, $view, $publicProfile ? $creatorId : null, $status, $signIn, $author, $admission, $editorial, $images);
         exit;
     }
 

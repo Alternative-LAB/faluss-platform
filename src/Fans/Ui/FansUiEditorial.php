@@ -94,6 +94,7 @@ final class FansUiEditorial
                             <?php endforeach; ?>
                             <?php if ($row['portrait_id'] !== '' && !$found): ?><p role="status">Le portrait précédent n’est plus sélectionnable. Choisissez une image disponible ou « Sans portrait ».</p><?php endif; ?>
                             <?php if ($view->images === []): ?><p>Aucune image approuvée disponible.</p><?php endif; ?>
+                            <a class="fu-link" href="<?php echo esc_url(FansUiRoutes::url('creator', 'creer')); ?>#fu-images">Déposer ou gérer mes images privées ↗</a>
                         </fieldset>
                         <p class="fu-footnote">Soumettre retire immédiatement la présentation publique précédente jusqu’à la prochaine approbation.</p>
                         <button type="submit">Soumettre à la modération →</button>

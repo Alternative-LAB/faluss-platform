@@ -7,7 +7,8 @@ Aucune diffusion du PNG de quarantaine, même après approbation : sa politique
 conserve l’état non publiable `quarantined`. #77 a ajouté les références privées
 aux textes. Le [lot de diffusion JPEG](FANS-IMAGE-DELIVERY.md) est distinct, avec
 son propre flag fermé et ses contrôles par demande ; il ne sert jamais ce fichier.
-Aucun lien avec la médiathèque WordPress, les profils illustrés, Me, Hub, un teaser, une vidéo,
+La [présentation éditoriale](FANS-EDITORIAL.md) peut référencer un portrait approuvé,
+avec ses propres contrôles de diffusion. Aucun lien avec la médiathèque WordPress, Me, Hub, un teaser, une vidéo,
 la messagerie, un paiement ou un droit commercial. Les contenus adultes restent
 interdits ; aucune catégorie `external_adult_delivery_right` n’est admise ici.
 
@@ -80,6 +81,11 @@ Ne pas interpréter les tests du serveur local comme une validation d’un hébe
   Lecture des compteurs en échec : 503. Pas de promesse de montée en charge ou de
   bascule SQL transparente ; fichiers et base doivent rester cohérents sur le même
   périmètre de stockage. Aucun multi-serveur de fichiers n’est pris en charge ici.
+- Un même PNG normalisé, encore pending/approved pour le même propriétaire, est
+  retrouvé sous ce verrou et après vérification de son fichier : réponse 200
+  `reused:true`, même ID/révision/état, aucune nouvelle ligne ni consommation de
+  quota. Aucun rapprochement entre propriétaires. Après rejet/retrait, renvoyer
+  ce fichier est une nouvelle soumission pending, jamais une réactivation.
 
 ## Avant la réception des octets : limite réelle du contrat
 
@@ -103,12 +109,15 @@ par WordPress. Les fichiers suspects doivent être rejetés et supprimés.
 ## API et droits
 
 Namespace `faluss-fans/v1`, cookie WordPress et `X-WP-Nonce` obligatoires, réponses
-privées `no-store`. Aucune URL publique de fichier, aucun accès créateur aux octets.
+privées `no-store`. Aucune URL publique du fichier source. Un propriétaire actif
+peut lire un dérivé JPEG privé, jamais le PNG source.
 
 | Route | Autorisation / contrat |
 | --- | --- |
-| POST `/images` | Créateur SSO au profil actif, multipart avec **un seul champ fichier `image`**, aucun autre champ/query/JSON ; 201 `{image_id,revision,state:pending}` |
-| GET `/images?cursor=<uuid>` | Admin : toute la file/historique ; créateur : ses métadonnées seulement. 20 résultats max, UUID croissant, `items` et `next_cursor` ; aucun chemin/hash/octet |
+| POST `/images` | Créateur SSO au profil actif, multipart avec **un seul champ fichier `image`**, aucun autre champ/query/JSON ; 201 `{image_id,revision,state:pending}` ; 200 avec `reused:true` si image identique encore conservée |
+| GET `/images?cursor=<uuid>&scope=all` | Admin : toute la file/historique ; créateur : ses métadonnées seulement. `scope=all` par défaut, `live` ou `closed` facultatif. 20 résultats max, UUID croissant, date UTC `created_at`, `items` et `next_cursor` ; aucun chemin/hash/octet |
+| GET `/images/portraits` | Propriétaire lié : jusqu’à 5 références approuvées, aucun octet ; validation complète à la sélection |
+| GET `/images/{id}/preview/{revision}` | Propriétaire lié actif + nonce, pending/approved et révision exacte : JPEG dérivé privé borné, sans exiger le flag de diffusion publique |
 | GET `/images/{id}/bytes` | Admin Fans `manage_options` + nonce, image pending/approved et profil actif ; PNG binaire, attachment, nosniff, CSP sandbox, no-store |
 | POST `/images/{id}/moderate` | Admin + nonce ; `revision`, `decision=approve/reject`, `reason=allowed_image` pour approve ou `prohibited_content/needs_revision` pour reject |
 | POST `/images/{id}/withdraw` | Propriétaire SSO + nonce, même suspendu ; `revision` |
@@ -120,8 +129,9 @@ Statuts : 400 multipart/paramètres invalides ; 401/403 session, nonce ou permis
 413 taille réelle dépassée ; 415 format/décodage/dimensions invalides ; 429 quota ;
 503 stockage, verrou, SQL, dépendance ou nettoyage indisponible. Les limites PHP ou
 proxy peuvent renvoyer une autre réponse avant le moteur (pas de faux contrat 413
-universel). Un rejeu de soumission n’est pas idempotent dans ce premier lot : ne pas
-réessayer aveuglément après perte de réponse ; consulter ses métadonnées.
+universel). Après réponse perdue, relire la galerie. Renvoyer le même fichier
+normalisé encore conservé retrouve son état ; cette déduplication ne couvre pas
+une image déjà retirée/rejetée ni un contenu modifié.
 
 Une approbation conserve seulement un objet privé. Elle ne crée aucune publication,
 URL, miniature, entitlement ou score. Le nonce d’inspection ne doit pas être placé
@@ -191,3 +201,6 @@ les permissions de lecture des octets. Aucune URL ni diffusion n’est ajoutée.
 ## Administration
 
 Le [panel de modération Fans](FANS-MODERATION.md) propose un parcours manuel sur ces API existantes, sous permissions et nonces, sans modifier leurs motifs, révisions ou décisions métier.
+
+Le [parcours propriétaire](FANS-PRIVATE-IMAGES-UI.md) expose le dépôt, l’aperçu et
+le retrait depuis Créer, avec accès au choix du portrait dans Mon profil.

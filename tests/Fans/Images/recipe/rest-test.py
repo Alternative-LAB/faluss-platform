@@ -48,7 +48,7 @@ def png(w=2, h=2):
     def chunk(kind, payload): return struct.pack('!I', len(payload)) + kind + payload + struct.pack('!I', zlib.crc32(kind + payload))
     return b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('!IIBBBBB', w, h, 8, 2, 0, 0, 0)) + chunk(b'IDAT', zlib.compress((b'\0' + b'\0\x80\0' * w) * h)) + chunk(b'IEND', b'')
 PNG = png()
-def submit(who='owner', **kwargs): return call(who, 'images', upload=PNG, **kwargs)
+def submit(who='owner', variant=0, **kwargs): return call(who, 'images', upload=png(2+variant,2), **kwargs)
 def decide(item, action='approve', reason='allowed_image'):
     return call('admin', 'images/' + item['image_id'] + '/moderate', {'revision': int(item['revision']), 'decision': action, 'reason': reason})
 def withdraw(item, who='owner'):
@@ -138,9 +138,9 @@ subprocess.run(WP+['config','set','FALUSS_FANS_IMAGE_PRIVATE_ROOT',str(ROOT),'--
 try: check('web-root storage denied', submit('other')[0]==503)
 finally: subprocess.run(WP+['config','set','FALUSS_FANS_IMAGE_PRIVATE_ROOT',str(STORE),'--quiet'],check=True)
 
-rows=[submit('quota')[1] for _ in range(4)]
+rows=[submit('quota',variant=i)[1] for i in range(1,5)]
 with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
-    results=list(pool.map(lambda _:submit('quota'),range(4)))
+    results=list(pool.map(lambda i:submit('quota',variant=i),range(5,9)))
 check('concurrent final creator slot admits exactly one image', sorted(r[0] for r in results)==[201,429,429,429])
 rows += [r[1] for r in results if r[0]==201]
 check('quota cannot block withdrawal', withdraw(rows[0],'quota')[0]==200)

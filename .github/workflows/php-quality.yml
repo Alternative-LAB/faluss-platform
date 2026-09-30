@@ -60,7 +60,7 @@ jobs:
       - name: Install local database binaries
         run: sudo apt-get update -qq && sudo apt-get install -y mariadb-server mariadb-client
       - name: Isolated SQL transactions and revocation
-        run: python3 tests/Fans/Profiles/recipe/run.py
+        run: python3 tests/Fans/Profiles/recipe/run.py --http
 
   federation-sodium-compat:
     name: Federation without native Sodium
