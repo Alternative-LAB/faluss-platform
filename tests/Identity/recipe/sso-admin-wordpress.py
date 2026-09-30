@@ -205,6 +205,7 @@ add_filter('pre_wp_mail',static function(){return false;});
             assert original not in content and current not in content
             assert 'Fatal error' not in content
         print('PASS anomalous Fans marker rendered ineligible and cleared on save without rotating; official exact Faluss.com remains eligible; no secret in logs',flush=True)
+        print(cli('eval-file', str(plugin/'tests/Identity/recipe/consent-sql.php')).strip(), flush=True)
     print('WordPress '+cli('core','version').strip()+'; PHP '+run(['php','-r','echo PHP_VERSION;']).strip()+'; '+sql('SELECT VERSION()'),flush=True)
     print('Private fixture: '+str(root),flush=True)
     if a.keep_web:

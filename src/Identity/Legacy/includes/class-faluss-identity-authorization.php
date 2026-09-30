@@ -155,6 +155,10 @@ final class Faluss_Identity_Authorization {
             }
             self::complete_authorization( $request, $faluss_id, true, array( 'pending', 'onboarding' ) );
         }
+        if ( class_exists( 'Faluss_Identity_Consent' ) && Faluss_Identity_Consent::matches( $faluss_id, $request ) ) {
+            $request['consent_mode'] = 'reuse';
+            self::complete_authorization( $request, $faluss_id, false );
+        }
         self::render_consent( $request, $faluss_id );
     }
 
@@ -162,7 +166,7 @@ final class Faluss_Identity_Authorization {
         $request = self::request_from_cookie( array( 'pending' ) );
         $faluss_id = is_user_logged_in() ? Faluss_Identity_Registry::get_active_for_wp_user( get_current_user_id() ) : null;
         $nonce = isset( $_POST['faluss_identity_authorization_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['faluss_identity_authorization_nonce'] ) ) : '';
-        if ( null === $request || null === $faluss_id || ! wp_verify_nonce( $nonce, 'faluss_identity_authorization_' . $request['request_hash'] ) ) {
+        if ( null === $request || null === $faluss_id || ! wp_verify_nonce( $nonce, self::consent_nonce_action( $request ) ) ) {
             self::clear_request_cookie();
             self::render_error( __( 'Cette confirmation n’est plus valide. Recommencez depuis l’application.', 'faluss-identity' ), 400 );
         }
@@ -177,6 +181,7 @@ final class Faluss_Identity_Authorization {
             self::render_error( __( 'Choisissez une réponse valide.', 'faluss-identity' ), 400 );
         }
 
+        if ( class_exists( 'Faluss_Identity_Consent' ) && Faluss_Identity_Consent::ready() ) { $request['consent_mode'] = 'grant'; }
         self::complete_authorization( $request, $faluss_id, false );
     }
 
@@ -259,8 +264,14 @@ final class Faluss_Identity_Authorization {
         $tables = Faluss_Identity_Schema::get_table_names();
         if ( empty( $tables['auth_codes'] ) || false === $wpdb->query( 'START TRANSACTION' ) ) { return null; }
         try {
+            if ( ! empty( $request['consent_mode'] ) ) {
+                $client = self::find_client( $request['client_id'], true );
+                if ( null === $client || ! hash_equals( Faluss_Identity_Consent::fingerprint( $request['client'] ), Faluss_Identity_Consent::fingerprint( $client ) ) ) { $wpdb->query( 'ROLLBACK' ); return null; }
+                if ( 'reuse' === $request['consent_mode'] && ! Faluss_Identity_Consent::matches( $faluss_id, $request, true ) ) { $wpdb->query( 'ROLLBACK' ); return null; }
+            }
             $locked = $wpdb->get_row( $wpdb->prepare( 'SELECT id, status, expires_at FROM ' . self::quote_identifier( Faluss_Identity_Schema::get_authorization_requests_table() ) . ' WHERE request_hash = %s FOR UPDATE', $request['request_hash'] ), ARRAY_A );
             if ( ! is_array( $locked ) || ! in_array( $locked['status'], $allowed_statuses, true ) || ! self::future( $locked['expires_at'] ) ) { $wpdb->query( 'ROLLBACK' ); return null; }
+            if ( 'grant' === ( $request['consent_mode'] ?? '' ) && ! Faluss_Identity_Consent::grant( $faluss_id, $request ) ) { $wpdb->query( 'ROLLBACK' ); return null; }
             for ( $attempt = 0; $attempt < 3; ++$attempt ) {
                 try { $code = self::base64url_encode( random_bytes( 32 ) ); } catch ( Exception $exception ) { $wpdb->query( 'ROLLBACK' ); return null; }
                 $inserted = $wpdb->query( $wpdb->prepare(
@@ -333,13 +344,16 @@ final class Faluss_Identity_Authorization {
         return $claims;
     }
 
-    private static function find_client( $client_id ) {
+    private static function find_client( $client_id, $lock = false ) {
         if ( ! is_string( $client_id ) || '' === $client_id || strlen( $client_id ) > 191 ) { return null; }
         global $wpdb;
         $tables = Faluss_Identity_Schema::get_table_names();
         if ( empty( $tables['clients'] ) ) { return null; }
-        $row = $wpdb->get_row( $wpdb->prepare( 'SELECT client_id, client_name, client_secret_hash, allowed_scopes, redirect_uris, first_party FROM ' . self::quote_identifier( $tables['clients'] ) . ' WHERE client_id = %s AND status = %s', $client_id, 'active' ), ARRAY_A );
+        $revision = class_exists( 'Faluss_Identity_Consent' ) && Faluss_Identity_Consent::ready() ? ', updated_at' : '';
+        $row = $wpdb->get_row( $wpdb->prepare( 'SELECT client_id, client_name, client_secret_hash, allowed_scopes, redirect_uris, first_party' . $revision . ' FROM ' . self::quote_identifier( $tables['clients'] ) . ' WHERE client_id = %s AND status = %s' . ( $lock ? ' FOR UPDATE' : '' ), $client_id, 'active' ), ARRAY_A );
         if ( ! is_array( $row ) ) { return null; }
+        if ( '' !== $revision ) { $row['consent_version'] = Faluss_Identity_Consent::revision( $client_id, $lock ); }
+        if ( '' !== $revision && null === $row['consent_version'] ) { return null; }
         $scopes = self::normalize_scopes( $row['allowed_scopes'] );
         $uris = json_decode( $row['redirect_uris'], true );
         if ( null === $scopes || ! is_array( $uris ) || empty( $uris ) ) { return null; }
@@ -450,6 +464,8 @@ final class Faluss_Identity_Authorization {
         }
         if ( $automatic ) {
             self::record_audit( 'authorization_first_party_auto_approved', $request['client_id'] );
+        } elseif ( 'reuse' === ( $request['consent_mode'] ?? '' ) ) {
+            self::record_audit( 'authorization_consent_reused', $request['client_id'] );
         }
         $url = add_query_arg( array( 'code' => $code, 'state' => $request['state'] ), $request['redirect_uri'] );
         wp_redirect( $url, 302, 'Faluss Identity' );
@@ -461,6 +477,11 @@ final class Faluss_Identity_Authorization {
         $table = Faluss_Identity_Schema::get_authorization_requests_table();
         if ( '' !== $table ) { $wpdb->query( $wpdb->prepare( 'UPDATE ' . self::quote_identifier( $table ) . ' SET status = %s, updated_at = %s WHERE request_hash = %s AND status = %s', $status, gmdate( 'Y-m-d H:i:s' ), $request['request_hash'], 'pending' ) ); }
         self::record_audit( 'authorization_' . $status, $request['client_id'] );
+    }
+
+    private static function consent_nonce_action( $request ) {
+        $binding = class_exists( 'Faluss_Identity_Consent' ) ? '_' . Faluss_Identity_Consent::fingerprint( $request['client'] ) : '';
+        return 'faluss_identity_authorization_' . $request['request_hash'] . $binding;
     }
 
     private static function render_consent( $request, $faluss_id ) {
@@ -481,8 +502,12 @@ final class Faluss_Identity_Authorization {
                     <li><?php esc_html_e( 'L’état publié et la route membre de Faluss Me, si votre carte existe', 'faluss-identity' ); ?></li>
                 </ul>
                 <p class="faluss-identity-authorization__hint"><?php esc_html_e( 'Aucun contenu de profil public, ni donnée Pro, Date ou Token Engine ne sera accordé.', 'faluss-identity' ); ?></p>
+                <?php if ( class_exists( 'Faluss_Identity_Consent' ) && Faluss_Identity_Consent::ready() ) : ?>
+                <p><?php esc_html_e( 'Votre accord sera mémorisé pour cette application et ces permissions. Vous pourrez le révoquer à tout moment. Toute modification des permissions ou de la configuration demandera un nouvel accord.', 'faluss-identity' ); ?></p>
+                <?php echo Faluss_Identity_Consent::link(); ?>
+                <?php endif; ?>
                 <form method="post" action="<?php echo esc_url( home_url( '/oauth/authorize' ) ); ?>">
-                    <?php wp_nonce_field( 'faluss_identity_authorization_' . $request['request_hash'], 'faluss_identity_authorization_nonce' ); ?>
+                    <?php wp_nonce_field( self::consent_nonce_action( $request ), 'faluss_identity_authorization_nonce' ); ?>
                     <button type="submit" name="decision" value="approve"><?php esc_html_e( 'Autoriser', 'faluss-identity' ); ?></button>
                     <button type="submit" name="decision" value="deny" class="faluss-identity-authorization__secondary"><?php esc_html_e( 'Refuser', 'faluss-identity' ); ?></button>
                 </form>

@@ -17,6 +17,24 @@ final class Faluss_Identity_SSO_Clients_Admin {
         add_options_page( __( 'Clients SSO Faluss', 'faluss-identity' ), __( 'Clients SSO Faluss', 'faluss-identity' ), 'manage_options', 'faluss-identity-sso-clients', array( __CLASS__, 'render' ) );
     }
 
+    /** Persist configuration and consent invalidation in the same transaction. */
+    private static function update_client( $client_id, $sql ) {
+        global $wpdb;
+        if ( ! class_exists( 'Faluss_Identity_Consent' ) ) { return $wpdb->query( $sql ); }
+        if ( ! Faluss_Identity_Consent::ready() ) {
+            return '1' === (string) get_option( Faluss_Identity_Consent::OPTION, '' ) ? false : $wpdb->query( $sql );
+        }
+        if ( false === $wpdb->query( 'START TRANSACTION' ) ) { return false; }
+        try {
+            $result = $wpdb->query( $sql );
+            $codes = Faluss_Identity_Schema::get_table_names()['auth_codes'];
+            if ( false === $result || ! Faluss_Identity_Consent::revise( $client_id )
+                || false === $wpdb->query( $wpdb->prepare( 'DELETE FROM ' . self::quote_identifier( $codes ) . ' WHERE client_id=%s AND consumed_at IS NULL', $client_id ) )
+                || false === $wpdb->query( 'COMMIT' ) ) { $wpdb->query( 'ROLLBACK' ); return false; }
+            return $result;
+        } catch ( Throwable $error ) { $wpdb->query( 'ROLLBACK' ); return false; }
+    }
+
     public static function save() {
         if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'faluss_identity_save_sso_client' ) ) { wp_die( esc_html__( 'Accès refusé.', 'faluss-identity' ), '', array( 'response' => 403 ) ); }
         if ( ! Faluss_Identity_Schema::get_status()['ready'] ) { self::redirect( 'schema' ); }
@@ -31,7 +49,7 @@ final class Faluss_Identity_SSO_Clients_Admin {
         $first_party = self::first_party_requested( $uris ) ? 1 : 0;
         $now = gmdate( 'Y-m-d H:i:s' );
         if ( '' !== $client_id ) {
-            $updated = $wpdb->query( $wpdb->prepare( 'UPDATE ' . self::quote_identifier( $tables['clients'] ) . ' SET client_name = %s, status = %s, allowed_scopes = %s, redirect_uris = %s, first_party = %d, updated_at = %s WHERE client_id = %s', $name, $status, implode( ' ', $scopes ), wp_json_encode( $uris ), $first_party, $now, $client_id ) );
+            $updated = self::update_client( $client_id, $wpdb->prepare( 'UPDATE ' . self::quote_identifier( $tables['clients'] ) . ' SET client_name = %s, status = %s, allowed_scopes = %s, redirect_uris = %s, first_party = %d, updated_at = %s WHERE client_id = %s', $name, $status, implode( ' ', $scopes ), wp_json_encode( $uris ), $first_party, $now, $client_id ) );
             self::redirect( false === $updated ? 'error' : 'saved' );
         }
         try { $client_id = 'faluss_' . bin2hex( random_bytes( 16 ) ); } catch ( Exception $exception ) { self::redirect( 'error' ); }
@@ -56,7 +74,7 @@ final class Faluss_Identity_SSO_Clients_Admin {
         global $wpdb; $tables = Faluss_Identity_Schema::get_table_names();
         if ( null === $hash || empty( $tables['clients'] ) ) { self::redirect( 'error' ); }
         $confirmation = self::render_secret_confirmation( array( 'client_id' => $client_id, 'secret' => $secret ) );
-        $updated = $wpdb->query( $wpdb->prepare( 'UPDATE ' . self::quote_identifier( $tables['clients'] ) . ' SET client_secret_hash = %s, updated_at = %s WHERE client_id = %s', $hash, gmdate( 'Y-m-d H:i:s' ), $client_id ) );
+        $updated = self::update_client( $client_id, $wpdb->prepare( 'UPDATE ' . self::quote_identifier( $tables['clients'] ) . ' SET client_secret_hash = %s, updated_at = %s WHERE client_id = %s', $hash, gmdate( 'Y-m-d H:i:s' ), $client_id ) );
         if ( 1 !== $updated ) { self::redirect( 'error' ); }
         echo $confirmation;
         exit;

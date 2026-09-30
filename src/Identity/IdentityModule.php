@@ -93,6 +93,7 @@ final class IdentityModule implements Module
             'Faluss_Identity_Public_Profile',
             'Faluss_Identity_Onboarding',
             'Faluss_Identity_Authorization',
+            'Faluss_Identity_Consent',
             'Faluss_Identity_SSO_Clients_Admin',
             'Faluss_Identity_Admin_Diagnostic',
             'Faluss_Identity_Elementor_Widget',
@@ -130,6 +131,7 @@ final class IdentityModule implements Module
             'class-faluss-identity-public-profile.php',
             'class-faluss-identity-onboarding.php',
             'class-faluss-identity-authorization.php',
+            'class-faluss-identity-consent.php',
             'class-faluss-identity-sso-clients-admin.php',
             'class-faluss-identity-admin-diagnostic.php',
         ] as $file) {
