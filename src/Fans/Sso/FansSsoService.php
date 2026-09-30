@@ -199,6 +199,12 @@ final class FansSsoService
             : null;
     }
 
+    /** Server-side membership check for private local application recipients; exposes no identity. */
+    public static function linkedMember(int $userId): bool
+    {
+        return $userId > 0 && self::normalUser($userId) && self::isLinked($userId);
+    }
+
     public static function callbackUrl(): string
     {
         return self::callbackUri();
