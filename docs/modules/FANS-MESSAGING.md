@@ -104,3 +104,67 @@ Retour arrière du premier lot : retirer le code sans toucher aux autres modules
 aucune route, activation ni donnée runtime n’a encore été créée. Après intégration,
 fermer l’admission ne devra pas interrompre les obligations de purge des données
 déjà conservées. Aucun effacement automatique à la désactivation du plugin.
+
+## Signalement, décisions et recours
+
+Le signalement porte sur **un message de l’autre participant** encore conservé,
+dans sa conversation. Motif codifié : harcèlement, spam, contenu interdit, autre.
+La copie contient texte, auteur local, date, références opaques et motif ; aucun
+historique complet, e-mail, profil Identity, IP, média ou abonnement n’est copié.
+Un rejeu renvoie le même dossier. Protection technique : trois nouveaux dossiers
+par jour et vingt non définitifs par membre. Le membre peut toujours bloquer.
+
+Les deux participants voient seulement référence, état et décision du dossier.
+La preuve, les motivations internes et les journaux sont réservés aux comptes
+ayant **les deux capacités** `manage_options` et `moderate_faluss_fans_messages`.
+Aucune attribution automatique de cette capacité ; un administrateur ordinaire
+ne l’obtient pas par le SSO, par son seul rôle ni par une requête. Un modérateur
+ne peut pas examiner un dossier dont il est lui-même participant.
+
+Décisions provisoires : absence de mesure, retrait du texte ordinaire, restriction
+de la conversation, restauration. Une restriction préserve l’état antérieur :
+restaurer une demande ne l’accepte pas. Une autre restriction encore applicable
+au même fil reste effective. Restaurer ne recrée jamais de contenu ordinaire purgé.
+Une décision d’absence de mesure ne lève pas implicitement une restriction antérieure :
+utiliser la restauration explicite. Retirer un texte conserve ses métadonnées de
+quota/rejeu jusqu’à l’expiration ordinaire, avec un texte vide rendu comme retiré.
+
+Chaque partie peut former un recours textuel de mille caractères au plus, une
+fois **par décision provisoire**. Il devient une pièce nécessaire du dossier privé.
+La décision change alors en `appealed`, bloquant la finalisation jusqu’à nouvel
+examen. Après une nouvelle décision, une nouvelle contestation reste possible.
+La finalisation exige une motivation et l’attestation explicite du modérateur
+que les recours ont été traités et que la décision est définitive. Aucun délai de
+recours n’est inventé par le logiciel. Avant activation, l’exploitant doit définir
+et communiquer sa procédure de notification, ses voies et délais applicables ;
+il est responsable de la véracité de cette attestation, pas d’une clôture automatique.
+
+## Revue, litiges et purge des preuves
+
+Échéance opérationnelle de réexamen : trente jours après ouverture, réception
+d’un recours ou réexamen humain. Le panel affiche les retards ; chaque réexamen
+exige une motivation. Le passage du temps ne vaut jamais revue ou clôture.
+Après finalisation sans litige actif, seules les obligations de purge demeurent.
+
+La conservation de litige n’est possible qu’avant l’effacement : motif obligatoire,
+responsable, début, échéance de un à quatre-vingt-dix jours et journal distinct
+`faluss_fans_dm_legal_holds`. Renouvellement explicite et motivé, révocation explicite.
+Les dossiers sous litige continuent à apparaître parmi les revues à effectuer.
+Cette borne oblige au réexamen ; elle ne constitue pas une durée légale supposée.
+L’exploitant doit surveiller les échéances et renouveler ce qui demeure nécessaire.
+Aucun litige ne repousse l’expiration des messages ordinaires.
+
+`faluss_fans_dm_reports` contient la preuve, `faluss_fans_dm_report_events` les
+actes et recours, et le journal de litiges reste séparé. L’option
+`faluss_fans_message_reports_schema_version` vérifie ces trois tables additives.
+La purge détruit dans une même transaction preuve, recours et journaux sensibles
+douze mois calendaires après la décision définitive, sauf litige encore actif.
+Les lectures modérateur effacent les preuves expirées avant de renvoyer `410`.
+Un échec SQL ne sert jamais de texte expiré. La purge batch traite cent dossiers
+au plus par appel et fonctionne sans flag d’admission ni session de modérateur.
+
+REST : `POST /messages/{thread}/report`, `GET /message-reports/mine`,
+`POST /message-reports/{case}/appeal` pour les membres ; `GET /message-reports`,
+`GET /message-reports/{case}`, `POST /message-reports/{case}/decision` pour les
+modérateurs dédiés. JSON strict, nonce REST et réponses privées `no-store` partout.
+Hooks, panel et automatisation des purges sont raccordés dans le lot UI suivant.

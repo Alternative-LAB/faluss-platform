@@ -37,6 +37,7 @@ try:
     print('SQL fixture proof: '+str(ROOT), flush=True)
     if '--messages' in sys.argv:
         subprocess.run(['php',str(REPO/'tests/Fans/Messaging/recipe/sql.php')],env=ENV,cwd=REPO,check=True)
+        subprocess.run(['php',str(REPO/'tests/Fans/Messaging/recipe/reports.php')],env=ENV,cwd=REPO,check=True)
     if '--web' in sys.argv or '--http' in sys.argv:
         with socket.socket() as probe:
             assert probe.connect_ex(('127.0.0.1',8768)) != 0, 'Isolated HTTP port already occupied'
@@ -51,6 +52,7 @@ try:
             subprocess.run([sys.executable, str(pathlib.Path(__file__).with_name('publication-http.py' if '--publications' in sys.argv else 'images-http.py'))], env=ENV, cwd=REPO, check=True)
             if '--messages' in sys.argv:
                 subprocess.run([sys.executable,str(REPO/'tests/Fans/Messaging/recipe/message-http.py')],env=ENV,cwd=REPO,check=True)
+                subprocess.run([sys.executable,str(REPO/'tests/Fans/Messaging/recipe/report-http.py')],env=ENV,cwd=REPO,check=True)
         if '--web' in sys.argv:
             subprocess.run(['php', str(pathlib.Path(__file__).with_name('visual-seed.php'))], env=ENV, cwd=REPO, check=True)
             print('Isolated UI ready: http://127.0.0.1:8768 (stop runner after browser proof)', flush=True)

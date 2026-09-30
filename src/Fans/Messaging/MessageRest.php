@@ -37,7 +37,7 @@ final class MessageRest
      * @param list<string> $keys
      * @return array<string,mixed>|null
      */
-    private static function input(\WP_REST_Request $r,array $keys): ?array
+    public static function input(\WP_REST_Request $r,array $keys): ?array
     {
         /** @var mixed $data */
         $data=$r->get_json_params();
