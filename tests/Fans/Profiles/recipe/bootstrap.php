@@ -68,6 +68,7 @@ class WP_HTTP_Response {
 class WP_REST_Response extends WP_HTTP_Response {}
 class WP_REST_Request {
     public array $params = []; public array $query = []; public array $headers = []; public ?array $json = null;
+    public array $files = []; public array $body = [];
     public function __construct(public string $method = 'GET', public string $route = '') {}
     public function get_route(): string { return $this->route; }
     public function get_param(string $key): mixed { return $this->params[$key] ?? $this->query[$key] ?? $this->json[$key] ?? null; }
@@ -76,10 +77,12 @@ class WP_REST_Request {
     public function set_body(string $body): void { $this->json = json_decode($body, true); }
     public function set_query_params(array $query): void { $this->query = $query; }
     public function get_query_params(): array { return $this->query; }
-    public function get_body_params(): array { return []; }
+    public function get_body_params(): array { return $this->body; }
     public function get_json_params(): ?array { return $this->json; }
-    public function get_file_params(): array { return []; }
+    public function get_file_params(): array { return $this->files; }
+    public function set_file_params(array $files): void { $this->files = $files; }
 }
+function wp_generate_uuid4(): string { $hex = bin2hex(random_bytes(16)); return substr($hex,0,8).'-'.substr($hex,8,4).'-4'.substr($hex,13,3).'-8'.substr($hex,17,3).'-'.substr($hex,20); }
 function register_rest_route(string $namespace, string $route, array $args): void {
     foreach (isset($args['methods']) ? [$args] : $args as $arg) { $GLOBALS['fixtureRoutes'][] = [$namespace . $route, $arg]; }
 }

@@ -30,7 +30,7 @@ final class FansUiAuthor
         $view->available = true;
         $view->active = $profile['status'] === 'active';
         $view->key = wp_generate_uuid4();
-        $post = ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST';
+        $post = ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && !isset($_POST['image_action']);
         if ($post) {
             $view->key = self::field('author_action', $_POST) === 'create' ? self::field('creation_key', $_POST) : '';
             $view->text = self::field('text', $_POST);

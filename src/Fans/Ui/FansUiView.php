@@ -54,13 +54,13 @@ final class FansUiView
         'creator:classements' => ['Hall of Fame', 'Classements', 'hof', 'Les classements et les points HoF persistants ne sont pas encore disponibles.'],
         'creator:messages' => ['Échanges', 'Messages', 'messages', 'La messagerie n’est pas encore disponible. Aucun message ne peut être envoyé.'],
         'creator:progression' => ['Espace créateur', 'Progression', 'progression', 'Les points HoF et la progression persistante ne sont pas encore disponibles.'],
-        'creator:creer' => ['Espace créateur', 'Que souhaitez-vous créer ?', 'creer', 'Choisissez un format. Les textes passent par la modération ; les autres parcours restent indisponibles.'],
+        'creator:creer' => ['Espace créateur', 'Que souhaitez-vous créer ?', 'creer', 'Les textes et images passent par la modération. Prestations, services et produits restent indisponibles.'],
         'creator:boutique' => ['Espace créateur', 'Ma boutique', 'boutique', 'La gestion des offres, les réservations et les commandes ne sont pas encore disponibles.'],
         'creator:mon-profil' => ['Espace créateur', 'Mon profil', 'mon-profil', 'Gérez votre présentation publique et suivez son état de modération.'],
         'public-profile' => ['Découvrir', 'Profil créateur', 'explorer', 'Seuls les champs éditoriaux approuvés sont présentés ici.'],
     ];
 
-    public static function render(string $role, string $view, ?string $creatorId, int $status = 200, string $signIn = '', ?FansUiAuthor $author = null, ?FansUiAdmission $admission = null, ?FansUiEditorial $editorial = null): void
+    public static function render(string $role, string $view, ?string $creatorId, int $status = 200, string $signIn = '', ?FansUiAuthor $author = null, ?FansUiAdmission $admission = null, ?FansUiEditorial $editorial = null, ?FansUiImages $images = null): void
     {
         $errorView = in_array($view, ['profile-unavailable', 'creator-unavailable'], true);
         $page = self::PAGES[$view === 'public-profile' || $errorView ? $view : $role . ':' . $view] ?? null;
@@ -73,7 +73,7 @@ final class FansUiView
         wp_enqueue_style('faluss-fans-ui-v2', plugins_url('assets/fans-ui-v2.css', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'));
         wp_enqueue_script('faluss-fans-ui-v2', plugins_url('assets/fans-ui-v2.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true);
         wp_enqueue_script('faluss-fans-reading', plugins_url('assets/fans-ui-reading.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true);
-        if ($editorial !== null) { wp_enqueue_script('faluss-fans-private-images', plugins_url('assets/fans-private-images.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true); }
+        if ($editorial !== null || $images !== null) { wp_enqueue_script('faluss-fans-private-images', plugins_url('assets/fans-private-images.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true); }
         status_header($status);
         ?>
 <!doctype html>
@@ -115,8 +115,9 @@ final class FansUiView
             <?php self::publicProfile($api, $creatorId, $role); ?>
             <?php FansUiReading::publications($creatorId); ?>
         <?php elseif ($view === 'creer') : ?>
-            <?php self::creationChoices($author !== null && $author->available); ?>
+            <?php self::creationChoices($author !== null && $author->available, $images !== null && $images->available); ?>
             <?php if ($author !== null) { FansUiAuthorView::render($author); } ?>
+            <?php if ($images !== null) { FansUiImagesView::render($images); } ?>
         <?php elseif ($view === 'classement-fans') : ?>
             <?php self::fanRanking(); ?>
         <?php elseif ($view === 'connexion') : ?>
@@ -207,7 +208,7 @@ final class FansUiView
         <?php
     }
 
-    private static function creationChoices(bool $textsAvailable = false): void
+    private static function creationChoices(bool $textsAvailable = false, bool $imagesAvailable = false): void
     {
         ?>
         <section class="fu-content" aria-labelledby="fu-create-title">
@@ -220,7 +221,9 @@ final class FansUiView
                     ['Produit', 'Objet ou création à proposer.'],
                 ] as [$title, $description]) : ?>
                     <article class="fu-choice"><span class="fu-choice__ornament" aria-hidden="true">✳</span><div><h3><?php echo esc_html($title); ?></h3><p><?php echo esc_html($description); ?></p>
-                    <?php if ($title === 'Publication' && $textsAvailable) : ?><a class="fu-link" href="#fu-author">Gérer mes textes ↓</a>
+                    <?php if ($title === 'Publication' && ($textsAvailable || $imagesAvailable)) : ?>
+                        <?php if ($textsAvailable): ?><a class="fu-link" href="#fu-author">Gérer mes textes ↓</a><?php endif; ?>
+                        <?php if ($imagesAvailable): ?><a class="fu-link" href="#fu-images">Gérer mes images ↓</a><?php endif; ?>
                     <?php else : ?><span class="fu-closed">Indisponible pour le moment</span><?php endif; ?></div></article>
                 <?php endforeach; ?>
             </div>

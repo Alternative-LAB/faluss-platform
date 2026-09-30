@@ -42,22 +42,33 @@ final class ImageService
                 if ($root === null) { return self::error('private_storage_required'); }
                 $files = ImageStorage::files($root);
                 if ($files === null) { return self::error('private_storage_unavailable'); }
-                if (count($files) >= 100) { return self::error('image_site_quota', 429); }
                 if ($wpdb->query('START TRANSACTION') === false) { return self::error('image_write_failed'); }
                 $table = ImageSchema::table();
+                if (CreatorProfileService::publicById($profile['creator_id'], true) === null) { return self::error('active_creator_required', 403); }
+                $raw = @file_get_contents($tmp, false, null, 0, ImageStorage::INPUT_LIMIT + 1);
+                if (!is_string($raw) || strlen($raw) > ImageStorage::INPUT_LIMIT) { return self::error('image_too_large', 413); }
+                $bytes = ImageStorage::normalize($raw);
+                if ($bytes === null) { return self::error('invalid_image', 415); }
+                $hash = hash('sha256', $bytes);
+                $existing = $wpdb->get_row($wpdb->prepare('SELECT image_id,revision,state FROM `' . $table
+                    . '` WHERE creator_id=%s AND file_hash=%s AND state IN (%s,%s) ORDER BY image_id LIMIT 1',
+                    $profile['creator_id'], $hash, 'pending', 'approved'), 'ARRAY_A');
+                if ($wpdb->last_error !== '') { return self::error('image_write_failed'); }
+                if (is_array($existing)) {
+                    if (ImageStorage::read($root, $existing['image_id'], $hash) === null) { return self::error('image_storage_unavailable'); }
+                    return $existing + ['reused' => true];
+                }
+                if (count($files) >= 100) { return self::error('image_site_quota', 429); }
                 $live = $wpdb->get_var($wpdb->prepare('SELECT COUNT(*) FROM `' . $table . '` WHERE creator_id=%s AND state IN (%s,%s)', $profile['creator_id'], 'pending', 'approved'));
-                if ($wpdb->last_error !== '' || !is_numeric($live)) { return self::error('image_write_failed'); }
+                /** @var string $readError The query updates wpdb state. */
+                $readError = $wpdb->last_error;
+                if ($readError !== '' || !is_numeric($live)) { return self::error('image_write_failed'); }
                 if ((int) $live >= 5) { return self::error('image_creator_quota', 429); }
                 $rates = $wpdb->get_row($wpdb->prepare('SELECT COUNT(*) AS daily_count, COALESCE(SUM(d.occurred_at > UTC_TIMESTAMP()-INTERVAL 1 HOUR),0) AS hourly_count FROM `'
                     . ImageSchema::table(true) . '` d INNER JOIN `' . $table . '` i ON i.image_id=d.image_id WHERE i.creator_id=%s AND d.action=%s AND d.occurred_at > UTC_TIMESTAMP()-INTERVAL 24 HOUR', $profile['creator_id'], 'submit'), 'ARRAY_A');
                 if (!is_array($rates) || !is_numeric($rates['daily_count'] ?? null) || !is_numeric($rates['hourly_count'] ?? null)) { return self::error('image_write_failed'); }
                 if ((int) $rates['hourly_count'] >= 20 || (int) $rates['daily_count'] >= 60) { return self::error('image_rate_quota', 429); }
-                $raw = @file_get_contents($tmp, false, null, 0, ImageStorage::INPUT_LIMIT + 1);
-                if (!is_string($raw) || strlen($raw) > ImageStorage::INPUT_LIMIT) { return self::error('image_too_large', 413); }
-                $bytes = ImageStorage::normalize($raw);
-                if ($bytes === null) { return self::error('invalid_image', 415); }
                 $id = wp_generate_uuid4();
-                $hash = hash('sha256', $bytes);
                 if (!ImageStorage::put($root, $id, $bytes)) { return self::error('image_storage_failed'); }
                 $committed = false;
                 try {
@@ -145,17 +156,18 @@ final class ImageService
     }
 
     /** @return array<string,mixed>|\WP_Error */
-    public static function listing(string $cursor = ''): array|\WP_Error
+    public static function listing(string $cursor = '', string $scope = 'all'): array|\WP_Error
     {
         $admin = current_user_can('manage_options');
         $profile = $admin ? null : CreatorProfileService::own();
         if (!$admin && $profile === null) { return self::error('image_forbidden', 403); }
-        if ($cursor !== '' && !ImageStorage::validId($cursor)) { return self::error('invalid_image_cursor', 400); }
-        return self::locked(static function () use ($admin, $profile, $cursor): array|\WP_Error {
+        if (($cursor !== '' && !ImageStorage::validId($cursor)) || !in_array($scope, ['all', 'live', 'closed'], true)) { return self::error('invalid_image_cursor', 400); }
+        return self::locked(static function () use ($admin, $profile, $cursor, $scope): array|\WP_Error {
             global $wpdb;
-            $sql = 'SELECT image_id,revision,state FROM `' . ImageSchema::table() . '` WHERE image_id>%s';
+            $sql = 'SELECT image_id,revision,state,created_at FROM `' . ImageSchema::table() . '` WHERE image_id>%s';
             $args = [$cursor];
             if (!$admin) { $sql .= ' AND creator_id=%s'; $args[] = $profile['creator_id']; }
+            if ($scope !== 'all') { $sql .= ' AND state IN (%s,%s)'; $args = array_merge($args, $scope === 'live' ? ['pending', 'approved'] : ['rejected', 'withdrawn']); }
             $rows = $wpdb->get_results($wpdb->prepare($sql . ' ORDER BY image_id LIMIT 21', ...$args), 'ARRAY_A');
             if (!is_array($rows) || $wpdb->last_error !== '') { return self::error('image_read_failed'); }
             $more = count($rows) > 20; $rows = array_slice($rows, 0, 20);

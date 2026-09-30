@@ -8,6 +8,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Galerie privée des images Fans dans Créer : dépôt JPEG/PNG, aperçu propriétaire, états et retrait natif, puis sélection du portrait dans Mon profil.
+- Déduplication des dépôts identiques encore conservés par leur propriétaire, y compris en concurrence, sans quota supplémentaire ; recette HTTP multipart et SQL isolée en CI.
 - Présentation éditoriale des créateurs Fans : nom public, bio et portrait privé approuvé, formulaire propriétaire, modération par révision et projection publique après approbation, sous opt-in serveur fermé par défaut.
 - Aperçu JPEG privé du portrait et recette SQL isolée des permissions, décisions concurrentes et révocations.
 

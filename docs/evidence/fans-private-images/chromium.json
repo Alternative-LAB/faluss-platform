@@ -1,0 +1,20 @@
+{
+  "engine": "154.0.8037.58",
+  "scope": "Actual native multipart, services, InnoDB and GD. WordPress/session adapters; no WordPress site or real SSO.",
+  "screenshots": 8,
+  "checks": [
+    "native upload",
+    "private owner preview",
+    "retry no duplicate",
+    "no preapproval portrait",
+    "native image moderation",
+    "portrait selection",
+    "editorial moderation",
+    "Explorer → profile",
+    "withdraw revokes portrait",
+    "closed gallery",
+    "upload and withdraw without JS",
+    "pagehide clears private content",
+    "no overflow or JS errors"
+  ]
+}
