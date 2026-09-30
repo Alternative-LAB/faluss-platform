@@ -121,6 +121,7 @@ add_action('plugins_loaded', static function (): void {
     }
 
     $registry = new \Faluss\Platform\Core\ModuleRegistry($role);
+    \Faluss\Platform\Fans\Access\WordPressAccess::register($role);
     \Faluss\Platform\Fans\Messaging\MessageRetention::register();
     $registry->register(new \Faluss\Platform\Admin\DashboardModule($role, $registry));
     if ($role === \Faluss\Platform\Core\SiteRole::Fans

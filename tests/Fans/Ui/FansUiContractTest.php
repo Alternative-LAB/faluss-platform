@@ -148,19 +148,10 @@ namespace Faluss\Platform\Fans\Ui {
             self::assertStringNotContainsString('aria-label="Classement Fans"', $this->render('creator', 'progression'));
         }
 
-        public function testAdminBarIsHiddenOnlyForOrdinaryMembersOnCanonicalFansPages(): void
+        public function testToolbarPolicyIsNoLongerOwnedByOptionalUiRoutes(): void
         {
             FansUiRoutes::register();
-            self::assertSame([FansUiRoutes::class, 'adminBarVisible'], $GLOBALS['fans_ui_filters']['show_admin_bar']);
-            $GLOBALS['fans_ui_query'] = [FansUiRoutes::ROLE_VAR => 'fan', FansUiRoutes::VIEW_VAR => 'hof'];
-            $_SERVER['REQUEST_URI'] = '/faluss-fans/fan/hof';
-            self::assertFalse(FansUiRoutes::adminBarVisible(true));
-            $GLOBALS['fans_ui_admin'] = true;
-            self::assertTrue(FansUiRoutes::adminBarVisible(true));
-            self::assertFalse(FansUiRoutes::adminBarVisible(false));
-            $GLOBALS['fans_ui_admin'] = false;
-            $_SERVER['REQUEST_URI'] = '/unrelated-page';
-            self::assertTrue(FansUiRoutes::adminBarVisible(true));
+            self::assertArrayNotHasKey('show_admin_bar', $GLOBALS['fans_ui_filters']);
         }
 
         public function testStoredRewriteAcceptsOneTrailingSlashWithoutAFlush(): void
@@ -173,10 +164,7 @@ namespace Faluss\Platform\Fans\Ui {
                     self::assertSame(1, preg_match('~' . $patterns[1] . '~D', $request, $matches));
                     $GLOBALS['fans_ui_query'] = [FansUiRoutes::ROLE_VAR => $matches[1], FansUiRoutes::VIEW_VAR => $matches[2]];
                     $_SERVER['REQUEST_URI'] = '/' . $request;
-                    self::assertFalse(FansUiRoutes::adminBarVisible(true));
-                    $GLOBALS['fans_ui_admin'] = true;
-                    self::assertTrue(FansUiRoutes::adminBarVisible(true));
-                    $GLOBALS['fans_ui_admin'] = false;
+                    self::assertTrue(FansUiRoutes::isCanonicalPath(FansUiRoutes::url($matches[1], $matches[2]), '/' . $request));
                 }
             }
             $canonical = FansUiRoutes::url('creator', 'creer');

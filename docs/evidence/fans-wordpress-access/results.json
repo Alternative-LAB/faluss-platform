@@ -1,0 +1,215 @@
+{
+  "browser": "154.0.8037.58",
+  "results": [
+    {
+      "role": "guest",
+      "width": 1440,
+      "page": "elementor",
+      "status": 200,
+      "toolbar": false
+    },
+    {
+      "role": "guest",
+      "width": 1440,
+      "page": "fans-hof",
+      "status": 200,
+      "toolbar": false
+    },
+    {
+      "role": "guest",
+      "width": 390,
+      "page": "elementor",
+      "status": 200,
+      "toolbar": false
+    },
+    {
+      "role": "guest",
+      "width": 390,
+      "page": "fans-hof",
+      "status": 200,
+      "toolbar": false
+    },
+    {
+      "role": "guest",
+      "adminScreens": "WordPress login",
+      "postAndAjax": "200 valid nonce / 403 invalid nonce",
+      "sso": "handler reached; invalid callback rejected",
+      "rest": 200
+    },
+    {
+      "role": "member-on",
+      "width": 1440,
+      "page": "elementor",
+      "status": 200,
+      "toolbar": false
+    },
+    {
+      "role": "member-on",
+      "width": 1440,
+      "page": "fans-hof",
+      "status": 200,
+      "toolbar": false
+    },
+    {
+      "role": "member-on",
+      "width": 390,
+      "page": "elementor",
+      "status": 200,
+      "toolbar": false
+    },
+    {
+      "role": "member-on",
+      "width": 390,
+      "page": "fans-hof",
+      "status": 200,
+      "toolbar": false
+    },
+    {
+      "role": "member-on",
+      "adminScreens": "302 public home no-store",
+      "postAndAjax": "200 valid nonce / 403 invalid nonce",
+      "sso": "handler reached; invalid callback rejected",
+      "rest": 200
+    },
+    {
+      "role": "member-off",
+      "width": 1440,
+      "page": "elementor",
+      "status": 200,
+      "toolbar": false
+    },
+    {
+      "role": "member-off",
+      "width": 1440,
+      "page": "fans-hof",
+      "status": 200,
+      "toolbar": false
+    },
+    {
+      "role": "member-off",
+      "width": 390,
+      "page": "elementor",
+      "status": 200,
+      "toolbar": false
+    },
+    {
+      "role": "member-off",
+      "width": 390,
+      "page": "fans-hof",
+      "status": 200,
+      "toolbar": false
+    },
+    {
+      "role": "member-off",
+      "adminScreens": "302 public home no-store",
+      "postAndAjax": "200 valid nonce / 403 invalid nonce",
+      "sso": "handler reached; invalid callback rejected",
+      "rest": 200
+    },
+    {
+      "role": "editor",
+      "width": 1440,
+      "page": "elementor",
+      "status": 200,
+      "toolbar": false
+    },
+    {
+      "role": "editor",
+      "width": 1440,
+      "page": "fans-hof",
+      "status": 200,
+      "toolbar": false
+    },
+    {
+      "role": "editor",
+      "width": 390,
+      "page": "elementor",
+      "status": 200,
+      "toolbar": false
+    },
+    {
+      "role": "editor",
+      "width": 390,
+      "page": "fans-hof",
+      "status": 200,
+      "toolbar": false
+    },
+    {
+      "role": "editor",
+      "adminScreens": "302 public home no-store",
+      "postAndAjax": "200 valid nonce / 403 invalid nonce",
+      "sso": "handler reached; invalid callback rejected",
+      "rest": 200
+    },
+    {
+      "role": "admin-on",
+      "width": 1440,
+      "page": "elementor",
+      "status": 200,
+      "toolbar": true
+    },
+    {
+      "role": "admin-on",
+      "width": 1440,
+      "page": "fans-hof",
+      "status": 200,
+      "toolbar": true
+    },
+    {
+      "role": "admin-on",
+      "width": 390,
+      "page": "elementor",
+      "status": 200,
+      "toolbar": true
+    },
+    {
+      "role": "admin-on",
+      "width": 390,
+      "page": "fans-hof",
+      "status": 200,
+      "toolbar": true
+    },
+    {
+      "role": "admin-on",
+      "adminScreens": "200",
+      "postAndAjax": "200 valid nonce / 403 invalid nonce",
+      "sso": "handler reached; invalid callback rejected",
+      "rest": 200
+    },
+    {
+      "role": "admin-off",
+      "width": 1440,
+      "page": "elementor",
+      "status": 200,
+      "toolbar": true
+    },
+    {
+      "role": "admin-off",
+      "width": 1440,
+      "page": "fans-hof",
+      "status": 200,
+      "toolbar": true
+    },
+    {
+      "role": "admin-off",
+      "width": 390,
+      "page": "elementor",
+      "status": 200,
+      "toolbar": true
+    },
+    {
+      "role": "admin-off",
+      "width": 390,
+      "page": "fans-hof",
+      "status": 200,
+      "toolbar": true
+    },
+    {
+      "role": "admin-off",
+      "adminScreens": "200",
+      "postAndAjax": "200 valid nonce / 403 invalid nonce",
+      "sso": "handler reached; invalid callback rejected",
+      "rest": 200
+    }
+  ]
+}

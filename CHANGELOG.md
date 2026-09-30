@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Corrigé
+
+- Sur le rôle Fans, réserver la toolbar WordPress aux administrateurs sur toutes les pages publiques, landing Elementor comprise, indépendamment de la préférence utilisateur et des flags UI/SSO. Rediriger les membres hors des écrans wp-admin vers l’accueil public, en préservant admin-post, AJAX, REST et SSO.
+
 ## [0.9.2] - 2026-09-30
 
 ### Corrigé
