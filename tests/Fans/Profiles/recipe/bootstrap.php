@@ -52,9 +52,9 @@ function update_option(string $key, mixed $value, bool $autoload = false): bool 
 $fixtureUser = (int) ($_COOKIE['fixture_user'] ?? 17);
 function get_current_user_id(): int { return $GLOBALS['fixtureUser']; }
 function is_user_logged_in(): bool { return get_current_user_id() > 0; }
-function current_user_can(string $cap): bool { return $cap === 'manage_options' && get_current_user_id() === 1; }
+function current_user_can(string $cap): bool { return ($cap === 'manage_options' && in_array(get_current_user_id(),[1,42],true)) || ($cap === 'moderate_faluss_fans_messages' && get_current_user_id()===42); }
 class WP_User { public function __construct(public int $ID, public array $roles = ['subscriber']) {} }
-function get_userdata(int $id): WP_User|false { return $id > 0 ? new WP_User($id, $id === 1 ? ['administrator'] : ['subscriber']) : false; }
+function get_userdata(int $id): WP_User|false { return $id > 0 ? new WP_User($id, in_array($id,[1,42],true) ? ['administrator'] : ['subscriber']) : false; }
 function wp_parse_url(string $url): array|false { return parse_url($url); }
 function home_url(string $path = ''): string { return (getenv('FANS_EDITORIAL_HTTP') ?: 'https://editorial.example.test') . $path; }
 function wp_verify_nonce(string $nonce, string $action): int|false { return $nonce === 'fixture-' . $action ? 1 : false; }
@@ -106,3 +106,4 @@ function rest_do_request(WP_REST_Request $r): WP_REST_Response {
 \Faluss\Platform\Fans\Publications\TextPublicationRest::routes();
 \Faluss\Platform\Fans\Publications\PublicationImageRest::routes();
 if (getenv('FANS_MESSAGE_FIXTURE') === '1') { \Faluss\Platform\Fans\Messaging\MessageRest::routes(); }
+if (getenv('FANS_MESSAGE_FIXTURE') === '1') { \Faluss\Platform\Fans\Messaging\ReportRest::routes(); }

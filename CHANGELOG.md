@@ -8,6 +8,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Signalements de messages Fans : preuve minimale séparée, habilitation dédiée des modérateurs, décisions provisoires, recours, finalisation explicite, revues et conservation de litige motivée. Purge des preuves douze mois après décision définitive ; aucune activation runtime dans ce lot.
+
 - Moteur privé de messagerie Fans : demande textuelle, acceptation ou refus du Créateur, échange après acceptation, blocage réversible, quotas, rejeux et purge après douze mois sans nouveau message. Schémas et tests HTTP/InnoDB isolés ; branchement runtime différé jusqu’au signalement, à la modération et à leur UI.
 
 ## [0.8.0] - 2026-09-30
