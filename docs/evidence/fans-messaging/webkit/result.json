@@ -1,0 +1,20 @@
+{
+  "browser": "26.5",
+  "assertions": "native request, guest SSO return, accept, bilateral send, report, dedicated moderation, appeal, finality, block, unblock, no-JS, no overflow, no visible UUID, pagehide privacy",
+  "scope": "real PHP/HTTP/SQL; WordPress sessions are adapters; synthetic fixture only",
+  "screenshots": [
+    "blocked-conversation-mobile.png",
+    "creator-conversation-desktop.png",
+    "creator-conversation-mobile.png",
+    "creator-request-desktop.png",
+    "creator-request-mobile.png",
+    "fan-appeal-mobile.png",
+    "fan-conversation-desktop.png",
+    "fan-conversation-mobile.png",
+    "fan-pending-mobile.png",
+    "fan-request-desktop.png",
+    "guest-message-sso.png",
+    "moderation-proof-desktop.png",
+    "moderation-proof-mobile.png"
+  ]
+}

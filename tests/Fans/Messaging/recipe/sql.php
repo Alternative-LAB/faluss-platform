@@ -9,6 +9,7 @@ function check(string $label,bool $ok): void { if(!$ok){throw new RuntimeExcepti
 function code(mixed $r): int { return $r instanceof WP_Error?(int)$r->data['status']:200; }
 const CREATOR='11111111-1111-4111-8111-111111111111';
 check('message schema explicit and idempotent',Schema::installOrVerify()&&Schema::installOrVerify());
+check('report safeguards installed before any admission',\Faluss\Platform\Fans\Messaging\ReportSchema::installOrVerify());
 $fixtureUser=18; $key=wp_generate_uuid4();
 $r=Service::request(CREATOR,'Demande de test SQL',$key);
 check('linked fan real pending request',is_array($r)&&$r['state']==='pending'&&!$r['direct_opening_available']);

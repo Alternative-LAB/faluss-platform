@@ -1,15 +1,16 @@
 # Fans — matrice d’évaluation intermédiaire
 
-État du 30 septembre 2026, code publié `dc13eda5c772dc3222045e2fc9e26024237f3e7a`
-(#89 à #104), version **0.7.0**. Revue visuelle consolidée du lot 14 et correctif
-clavier du lot 15 ; les captures conservent leurs SHA de provenance.
+État du 30 septembre 2026 : version de départ publiée **0.8.0** au SHA
+`c06eaca45ac4b638be94abf383ee73aa49f08ba1` (#109), puis moteurs de messagerie
+#110 et #111, base du lot UI `d91f1427b07c298012f1a8cac2a625771c3c67ac`.
+Les captures conservent leurs preuves de provenance ; les nouveaux parcours sont
+décrits dans [la recette de messagerie](../evidence/fans-messaging/README.md).
 Le cadre temporel et les bilans planifiés sont annulés. Base initiale vérifiée :
 `ad7c5857a0c1d65c84d8ec56b5fdbbd7dba178af`, alors en version 0.6.3.
 Les modifications Me/Link postérieures à #84 ont été conservées.
 
-La publication supplémentaire autorisée a été accomplie par les workflows
-GitHub : tag **v0.7.0**, archive avec dépendances validée et upload réussi.
-La [preuve de publication](#livraison-070) ne prouve ni sa proposition dans un
+Les publications autorisées 0.7.0 puis [0.8.0 (#109)](https://github.com/Alternative-LAB/faluss-platform/pull/109#issuecomment-5901824738)
+ont été accomplies par les workflows GitHub. La [preuve historique 0.7.0](#livraison-070) ne prouve ni sa proposition dans un
 WordPress licencié, ni une installation, ni la recette cible. Ces vérifications
 restent au propriétaire. La nouvelle consigne du 30 septembre autorise les
 workflows de publication lorsqu’un ensemble fonctionnel est prêt à être livré.
@@ -37,7 +38,9 @@ des captures sont des fixtures sous `tests/`, jamais des données produit.
 | Accueil Fan — navigation/lecture | `fan/accueil` | Fonctionnel et testé | Pas de fil personnalisé, compteur de communauté ou progression inventé |
 | Accueil Créateur — navigation/lecture | `creator/accueil` | Fonctionnel et testé | Huit accès ; aucun wallet, solde PF utilisable, euro ou statistique financière |
 | Mon profil Créateur — lecture et présentation | `creator/mon-profil` | Fonctionnel et testé en environnement isolé | Catégorie/état, lien public si actif ; formulaire nom/bio/portrait modéré et retrait ; aucune élévation de rôle |
-| Messages Fan/Créateur | `fan/messages`, `creator/messages` | Interface prête mais service absent | Aucun envoi ; moteurs, blocage, signalement, rétention et modération à définir |
+| Messages Fan/Créateur — parcours ordinaire | `fan/messages`, `creator/messages` | Fonctionnel et testé en environnement isolé | Demande textuelle, acceptation/refus, échange, blocage, quotas et purge ; vrais services SQL/HTTP et formulaires, captures deux moteurs ; [preuves](../evidence/fans-messaging/README.md) |
+| Signalements, modération privée et recours | Messages + panel existant | Fonctionnel et testé en environnement isolé | Preuve minimale, habilitation dédiée, décision provisoire/définitive, recours, litige motivé, rétention indépendante ; politique opérationnelle et recette cible requises avant activation |
+| Ouverture directe Max/abonné Créateur | Demande de message | Interface prête mais service absent | Aucune preuve serveur propriétaire consommable sur Fans ; parcours ordinaire proposé explicitement, jamais de badge/droit supposé |
 | Mon espace Fan | `fan/espace` | Interface prête mais service absent | Pas de progression PC, niveau ou récompense attribués |
 | Demande de profil Créateur | Dans `fan/espace` | Fonctionnel et testé | Catégorie, nonce, profil pending, rejeu et conflit ; approbation administrative conservée |
 | Progression Créateur | `creator/progression` | Interface prête mais service absent | Score HoF absent ; aucune finance |
@@ -46,7 +49,7 @@ des captures sont des fixtures sous `tests/`, jamais des données produit.
 | Associer/détacher une image sur un texte | Fiche privée dans `creator/creer` | Fonctionnel et testé en environnement isolé | Choix personnel approuvé, aperçu, révision exacte, confirmation et nouvelle modération ; lecture JPEG publique après approbation et révocation au détachement. [Contrat et preuves](FANS-AUTHOR-IMAGE.md) |
 | Créer une prestation, un service ou un produit | Choix dans `creator/creer` | Interface prête mais service absent | Aucun formulaire, réservation, gestion de stock ou publication commerciale simulés |
 | Ma boutique | `creator/boutique` | Interface prête mais service absent | Gestion propriétaire/réservations/commandes absentes ; refus d’achat inchangés |
-| Retour SSO — contrat de navigation | Boutons publics et pages privées 403 | Fonctionnel et testé | État consommé, retour local signé, sélection du texte conservée, callback exact ; pas de preuve réseau Me réelle ni conservation du contenu non envoyé |
+| Retour SSO — contrat de navigation | Boutons publics et pages privées 403 | Fonctionnel et testé | État consommé, retour local signé, sélection du texte ou destinataire/fil conservée, callback exact ; pas de preuve réseau Me réelle ni conservation du contenu non envoyé |
 | Invité provisoire, alias/badge/reprise | Étude seulement | Décision ou accès requis | Aucun `Guest_…` runtime, badge gagné, contribution fictive ou promesse de sauvegarde |
 | Barre WordPress — filtre de visibilité | Routes Fans | Fonctionnel et testé | Barre cachée pour membres ordinaires, conservée pour `manage_options` ; rendu WordPress non réévalué ici |
 | Navigation mobile et clavier — adaptateurs | Toutes les routes du shell | Fonctionnel et testé | Chromium et WebKit Windows, huit accès Créateur par toucher à 320/390 px, focus image et pagination corrigés ; limites clavier WebKit Windows documentées au lot 15 |
@@ -69,7 +72,7 @@ des captures sont des fixtures sous `tests/`, jamais des données produit.
 | HoF 1 PF acheté, attesté et attribué = 1 point | ADR 0018 et contrat Hub ; vues HoF indisponibles | Règle documentée, aucun moteur/rang/session inventé, PC séparés |
 | Modération et refus serveur | [Publications](../../tests/Fans/Publications/TextPublicationTest.php), [Store](../../tests/Fans/Store/StoreCatalogTest.php) et CI du SHA audité | Propriétaire, révision, retrait, état public et achats fermés conservés |
 | PR courtes, protections, contrôles et captures | Historique #89–#104 et suivi des lots ; [CI PHP](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36637193361), [JS](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36637193458), [ZIP](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36637193340) | Contrôles du main publié réussis : 289 tests, 4 434 assertions ; aucun push direct ni contournement de protection |
-| Sites, flags, déploiement et paiement hors périmètre | Aucun diff de workflows, Identity, Token Engine ou Link ; opt-ins serveur conservés, recettes sur fixtures | Aucun site consulté, aucune installation/activation ; la seule publication autorisée séparément est 0.7.0 via GitHub |
+| Sites, flags, déploiement et paiement hors périmètre | Opt-ins conservés ; nouveaux contrôles SQL/HTTP dans la CI, aucun changement économique Identity/Token Engine/Link | Aucun site consulté, aucune installation/activation ; publications autorisées uniquement par workflows GitHub |
 | Livraison par le circuit normal de mise à jour | [Prepare release](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36636869815), PR #104, [Publish private release](https://github.com/Alternative-LAB/faluss-platform/actions/runs/36637193352), tag et archive | Upload 0.7.0 confirmé dans GitHub ; contrôle de disponibilité WordPress réservé au propriétaire, aucun contournement de l’updater |
 | Ancien suivi temporel | Annulé par la consigne du 30 septembre | Automatisation supprimée ; aucun bilan planifié ni déclenchement périodique |
 
@@ -88,6 +91,10 @@ Les doubles slashs et segments supplémentaires ne donnent aucun accès.
   retrait possible, nouvelle création/édition refusée selon le moteur.
 - Les outils de modération administrative existants restent séparés. Leur recette
   WordPress antérieure ne constitue pas une preuve du nouveau diff.
+- Preuves de messagerie : administrateur ordinaire refusé ; `manage_options` ET
+  `moderate_faluss_fans_messages` requis, sans attribution automatique. Participant
+  au dossier exclu de sa modération. Fermer l’admission conserve les recours et
+  purges lorsque les prérequis de données/session demeurent valides.
 
 ## Livraison 0.7.0
 
@@ -119,7 +126,8 @@ documentaires postérieurs ne modifient pas le paquet publié.
 3. **Identité éditoriale livrable** : nom/portrait/bio, modération, retrait et
    effacement des champs refusés implémentés ; preuves SQL et navigateur isolés
    dans [le lot éditorial](FANS-EDITORIAL.md). La recette cible reste distincte.
-4. **Moteurs absents** : messagerie, progression PC, sessions HoF, réservations,
+4. **Moteurs absents** : preuve d’abonnement pour l’ouverture directe de messagerie,
+   progression PC, sessions HoF, réservations,
    gestion commerciale et transactions. Les composants indisponibles ne sont pas
    présentés comme des fonctionnalités terminées.
 5. **Images privées livrables, autres médias absents** : dépôt, galerie, aperçu,
@@ -138,10 +146,16 @@ documentaires postérieurs ne modifient pas le paquet publié.
    Le port WebKit Windows utilisé pour les tests fonctionnels rend les fontes
    variables très fines malgré leurs poids déclarés ; ses captures ne valident
    donc pas la typographie Safari macOS/iOS. Voir le diagnostic du lot 10.
+7. **Exploitation de la messagerie** : politiques de notification et de recours,
+   personnes habilitées, réexamens/litiges, cron fiable, surveillance des retards,
+   sauvegardes et textes interdits à valider avant attestation. Le moteur local
+   de demande/conversation/modération fonctionne indépendamment de Hub ; la preuve
+   Max/abonnement Créateur absente ne doit pas être présentée comme disponible.
 
 ## Preuves
 
 - [Suivi des PR et base](FANS-48H.md).
+- [Messagerie, modération et rétention : services réels et captures](../evidence/fans-messaging/README.md).
 - [Lot 1 : navigation/classement](../evidence/fans-48h/lot-1/README.md).
 - [Lot 2 : retour SSO](../evidence/fans-48h/lot-2/README.md).
 - [Lot 3 : lecture](../evidence/fans-48h/lot-3/README.md).
@@ -159,4 +173,4 @@ documentaires postérieurs ne modifient pas le paquet publié.
 - [Lot 15 : lecture au clavier](../evidence/fans-48h/lot-15/README.md).
 
 Aucun flag activé, déploiement, paiement ou modification des sites. Publication
-0.7.0 vérifiée séparément ; aucune conclusion d’activation ou de chantier terminé.
+0.8.0 vérifiée séparément ; aucune conclusion d’activation ou de chantier terminé.

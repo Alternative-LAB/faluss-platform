@@ -19,6 +19,9 @@ final class FansSsoReturn
             return null;
         }
         $relative = substr($candidate, strlen($prefix));
+        if (preg_match('~^(fan|creator)/messages/?\?(creator|thread)=([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$~D', $relative, $selection) === 1) {
+            return $prefix.$selection[1].'/messages?'.$selection[2].'='.$selection[3];
+        }
         if (preg_match('~^creator/creer/?\?publication=([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$~D', $relative, $selection) === 1) {
             return $prefix . 'creator/creer?publication=' . $selection[1];
         }

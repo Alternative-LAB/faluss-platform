@@ -6,7 +6,8 @@ namespace Faluss\Platform\Fans\Messaging;
 final class ReportModeration
 {
     public static function allowed(): bool
-    { return MessageModule::available() && ReportSchema::ready() && current_user_can('manage_options') && current_user_can('moderate_faluss_fans_messages'); }
+    { return \Faluss\Platform\Core\SiteRole::fromValue(defined('FALUSS_PLATFORM_ROLE')?constant('FALUSS_PLATFORM_ROLE'):null)===\Faluss\Platform\Core\SiteRole::Fans
+        && MessageSchema::ready() && ReportSchema::ready() && current_user_can('manage_options') && current_user_can('moderate_faluss_fans_messages'); }
     public static function run(callable $operation): mixed
     {
         if(!self::allowed()) {return MessagePolicy::error('report_moderation_forbidden',403);}
@@ -32,9 +33,9 @@ final class ReportModeration
         return self::run(static function () use($id): mixed {
             global $wpdb;$row=self::case($id);
             if($row instanceof \WP_Error||isset($row['_report_expired'])) {return $row;}
-            $events=$wpdb->get_results($wpdb->prepare('SELECT revision,actor_user,action,reason,created_at FROM `'.MessageSchema::table('report_events').'` WHERE case_id=%s ORDER BY revision LIMIT 201',$id),'ARRAY_A');
+            $events=$wpdb->get_results($wpdb->prepare('SELECT revision,actor_user,action,reason,created_at FROM `'.MessageSchema::table('report_events').'` WHERE case_id=%s ORDER BY revision DESC LIMIT 201',$id),'ARRAY_A');
             if(!is_array($events)||MessageStore::failed()) {return MessagePolicy::error('reports_read_failed');}
-            $holds=$wpdb->get_results($wpdb->prepare('SELECT actor_user,action,reason,until_at,created_at FROM `'.MessageSchema::table('legal_holds').'` WHERE case_id=%s ORDER BY created_at,hold_id LIMIT 201',$id),'ARRAY_A');
+            $holds=$wpdb->get_results($wpdb->prepare('SELECT actor_user,action,reason,until_at,created_at FROM `'.MessageSchema::table('legal_holds').'` WHERE case_id=%s ORDER BY created_at DESC,hold_id DESC LIMIT 201',$id),'ARRAY_A');
             if(!is_array($holds)||MessageStore::failed()) {return MessagePolicy::error('reports_read_failed');}
             unset($row['expired']);
             return $row+['events'=>array_slice($events,0,200),'holds'=>array_slice($holds,0,200),'history_truncated'=>count($events)>200||count($holds)>200];

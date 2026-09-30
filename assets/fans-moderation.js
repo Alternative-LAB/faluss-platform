@@ -1,6 +1,10 @@
 (() => {
     'use strict';
     const panel = document.querySelector('.faluss-moderation');
+    if (panel?.matches('[data-fans-private-proof]')) {
+        window.addEventListener('pagehide', () => panel.replaceChildren());
+        window.addEventListener('pageshow', event => { if (event.persisted) window.location.reload(); });
+    }
     if (!panel || !window.fetch || !window.AbortController || !URL.createObjectURL) return;
     const clearAll = [];
     panel.querySelectorAll('.fm-preview').forEach(form => {

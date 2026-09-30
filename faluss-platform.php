@@ -88,6 +88,7 @@ register_activation_hook(
     [\Faluss\Platform\Fans\Publications\TextPublicationsModule::class, 'activate']
 );
 register_activation_hook(__FILE__, [\Faluss\Platform\Fans\Images\ImagesModule::class, 'activate']);
+register_activation_hook(__FILE__, [\Faluss\Platform\Fans\Messaging\MessageModule::class, 'activate']);
 register_activation_hook(__FILE__, [\Faluss\Platform\Fans\Ui\FansUiModule::class, 'activate']);
 register_deactivation_hook(
     __FILE__,
@@ -120,6 +121,7 @@ add_action('plugins_loaded', static function (): void {
     }
 
     $registry = new \Faluss\Platform\Core\ModuleRegistry($role);
+    \Faluss\Platform\Fans\Messaging\MessageRetention::register();
     $registry->register(new \Faluss\Platform\Admin\DashboardModule($role, $registry));
     if ($role === \Faluss\Platform\Core\SiteRole::Fans
         && defined('FALUSS_PLATFORM_FANS_SSO')
@@ -138,6 +140,9 @@ add_action('plugins_loaded', static function (): void {
             && \Faluss\Platform\Fans\Profiles\CreatorProfileSchema::ready()
         ) {
             $registry->register(new \Faluss\Platform\Fans\Profiles\CreatorProfilesModule());
+            if (\Faluss\Platform\Fans\Messaging\MessageModule::privateAccessAvailable()) {
+                $registry->register(new \Faluss\Platform\Fans\Messaging\MessageModule());
+            }
             if (\Faluss\Platform\Fans\Images\ImagesModule::available()) {
                 $registry->register(new \Faluss\Platform\Fans\Images\ImagesModule());
             }

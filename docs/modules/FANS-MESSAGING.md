@@ -3,6 +3,12 @@
 Arbitrages utilisateur du 30 septembre 2026. Développement en lots de code ;
 aucune activation ou visite de site. Faluss Identity reste l’autorité du compte.
 
+**État du lot raccordé** : moteurs des PR #110 et #111 fusionnés ; UI native,
+panel existant, cron et contrôles navigateur raccordés dans le lot suivant.
+[Preuves et captures](../evidence/fans-messaging/README.md). Les descriptions
+« premier lot sans runtime » ci-dessous retracent la construction ; les portes
+d’ouverture actuelles sont précisées à la fin de ce document.
+
 ## Accès et états
 
 Un membre SSO lié peut agir en Fan et envoyer une demande **textuelle** à un
@@ -168,3 +174,60 @@ REST : `POST /messages/{thread}/report`, `GET /message-reports/mine`,
 `GET /message-reports/{case}`, `POST /message-reports/{case}/decision` pour les
 modérateurs dédiés. JSON strict, nonce REST et réponses privées `no-store` partout.
 Hooks, panel et automatisation des purges sont raccordés dans le lot UI suivant.
+
+## Raccordement UI et conditions d’ouverture
+
+Routes existantes `fan/messages` et `creator/messages`, sidebar Créateur à huit
+accès, liste et échange en deux colonnes sur ordinateur. Sur mobile, un fil choisi
+remplace la liste avec un retour explicite. Demande depuis le profil public,
+formulaires natifs sans JavaScript, statuts HTTP réels, erreurs serveur, blocages
+et recours accessibles séparément. Aucun UUID, nom Fan supposé, faux portrait,
+badge d’abonné ou état « en ligne » inventé. Un nom Créateur n’est lu que depuis
+la présentation éditoriale approuvée. Il n’existe pas de diffusion de nom Fan.
+
+Le retour SSO conserve uniquement un paramètre UUID `creator` ou `thread` sur
+les deux routes Messages. Jamais le texte rédigé, un nonce, un e-mail ou un droit.
+La page cible revérifie toutes les permissions après connexion. Le vrai trajet
+Identity Me n’a pas été exécuté par cette recette.
+
+`MessageModule` est déclaré pour Fans uniquement, dépend de `fans-creator-profiles`
+et s’installe à l’activation explicite du plugin. Il exige SSO configuré, profils,
+les six tables privées vérifiées et l’attestation **hors Git**
+`FALUSS_FANS_MESSAGING_POLICY_ATTESTED === true`. Toute nouvelle demande ou tout
+envoi exige en plus `FALUSS_PLATFORM_FANS_MESSAGING === true`. Les constantes
+sont absentes/fermées par défaut ; elles ne sont mises à vrai que dans les fixtures
+isolées. Aucun compte modérateur n’est créé ni promu par le module.
+
+Une fois les données installées et la politique attestée, fermer uniquement
+`FALUSS_PLATFORM_FANS_MESSAGING` ferme les envois mais conserve lecture privée,
+blocages, signalements et recours des membres liés. La modération habilitée et
+la rétention restent disponibles indépendamment de l’admission. Ne pas fermer
+l’Identity Client ou supprimer le plugin tant que les obligations de traitement
+et de recours subsistent sans procédure de remplacement.
+
+Cron horaire `faluss_fans_messages_retention` : dix lots maximum de cent fils et
+cent dossiers chacun par exécution, transactions et échecs fermés. Le diagnostic
+`faluss_fans_messages_retention_status` contient seulement date de contrôle,
+compteurs de suppressions, lot restant et code d’erreur sans contenu. Le panel
+signale exécution absente, erreur, retard supérieur à deux heures ou lot restant.
+L’expiration empêche immédiatement la lecture ; l’effacement batch dépend de
+l’exécution effective du cron. Avant ouverture : configurer un déclenchement
+fiable, surveiller les lots en retard et tester sa capacité avec le volume prévu.
+Une désactivation/absence du plugin empêche ses callbacks : elle n’efface pas les
+preuves et ne remplace pas leur traitement. Les sauvegardes et journaux techniques
+de l’hébergeur nécessitent une procédure séparée ; éviter les journaux SQL/HTTP
+contenant des corps privés.
+
+Attester la politique signifie avoir défini les personnes habilitées, les canaux
+de notification, la procédure et les délais de recours, les réexamens, la gestion
+des litiges, des sauvegardes et des erreurs de purge. Le code ne prétend pas
+détecter automatiquement tout texte interdit. L’interdiction des contenus adultes
+et des pièces jointes reste applicable ; quotas, blocage, signalement et revue
+humaine ne sont pas une garantie de détection exhaustive. Cette validation et
+la recette WordPress/Elementor/SSO restent à l’exploitant avant activation.
+
+Limite persistante précise : **l’ouverture directe Max/abonnement Créateur n’est
+pas fonctionnelle**, faute de preuve propriétaire accessible depuis Fans.
+Le formulaire et l’aide le disent ; aucun rôle, paramètre, badge ou paiement
+ne simule cette capacité. La demande ordinaire et la conversation acceptée
+fonctionnent indépendamment de cette absence.
