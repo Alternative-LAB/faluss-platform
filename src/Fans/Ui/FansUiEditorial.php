@@ -76,6 +76,7 @@ final class FansUiEditorial
             <?php if ($row === null): ?><p class="fu-live">L’édition de la présentation est indisponible pour le moment.</p>
             <?php else: ?>
                 <p class="fu-panel__kicker"><?php echo esc_html($states[$row['state']] ?? 'État indisponible'); ?></p>
+                <?php if (is_array($row['published'] ?? null)): ?><div class="fu-panel"><h3>Dernière présentation approuvée</h3><strong><?php echo esc_html($row['published']['public_name']); ?></strong><p><?php echo esc_html($row['published']['bio']); ?></p><p>Cette version reste publique pendant l’examen d’une modification, tant que votre profil est actif.</p></div><?php endif; ?>
                 <?php if (in_array($row['state'], ['rejected', 'withdrawn'], true)): ?><p>Les champs ont été effacés. Vous pouvez proposer une nouvelle présentation si votre profil est actif.</p><?php endif; ?>
                 <?php if ($view->active): ?>
                     <form method="post" action="<?php echo esc_url($url); ?>" class="fu-panel fu-editorial__form">
@@ -96,11 +97,11 @@ final class FansUiEditorial
                             <?php if ($view->images === []): ?><p>Aucune image approuvée disponible.</p><?php endif; ?>
                             <a class="fu-link" href="<?php echo esc_url(FansUiRoutes::url('creator', 'creer')); ?>#fu-images">Déposer ou gérer mes images privées ↗</a>
                         </fieldset>
-                        <p class="fu-footnote">Soumettre retire immédiatement la présentation publique précédente jusqu’à la prochaine approbation.</p>
+                        <p class="fu-footnote">Votre dernière présentation approuvée reste visible jusqu’à la prochaine décision. Le retrait volontaire l’efface immédiatement.</p>
                         <button type="submit">Soumettre à la modération →</button>
                     </form>
                 <?php else: ?><p>Profil non actif : les modifications sont fermées. Vous pouvez encore retirer votre présentation.</p><?php endif; ?>
-                <?php if (in_array($row['state'], ['pending', 'approved'], true)): ?>
+                <?php if (in_array($row['state'], ['pending', 'approved'], true) || is_array($row['published'] ?? null)): ?>
                     <form method="post" action="<?php echo esc_url($url); ?>" class="fu-panel fu-editorial__form">
                         <?php echo wp_nonce_field('fans_editorial', 'fans_editorial_nonce', false, false); ?>
                         <input type="hidden" name="editorial_action" value="withdraw"><input type="hidden" name="revision" value="<?php echo esc_attr((string) $row['revision']); ?>">

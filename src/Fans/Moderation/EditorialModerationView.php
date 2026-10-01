@@ -37,7 +37,7 @@ final class EditorialModerationView
             <nav aria-label="État des présentations"><?php foreach (['pending' => 'En attente', 'approved' => 'Approuvées', 'rejected' => 'Refusées', 'withdrawn' => 'Retirées'] as $value => $label): ?>
                 <a href="<?php echo esc_url(self::url($value)); ?>" <?php echo $value === $state ? 'aria-current="page"' : ''; ?>><?php echo esc_html($label); ?></a>
             <?php endforeach; ?></nav>
-            <p class="fm-warning">Examinez le texte et le portrait ensemble. Toute modification retire immédiatement la présentation publique jusqu’à une nouvelle approbation.</p>
+            <p class="fm-warning">Examinez le texte et le portrait ensemble. Une proposition ne remplace la dernière présentation approuvée qu’après approbation. La révocation retire immédiatement la version publique et la proposition.</p>
             <?php if ($response->get_status() !== 200 || !is_array($page) || !is_array($page['items'] ?? null)): ?><p role="alert">File indisponible.</p>
             <?php else: ?>
                 <?php if ($page['items'] === []): ?><p>Aucune présentation sur cette page.</p><?php endif; ?>
@@ -63,7 +63,8 @@ final class EditorialModerationView
             <?php if ($row['portrait_id'] !== ''): ModerationView::previewForm((string) $row['portrait_id']); ?>
                 <p>Portrait à la révision image <?php echo esc_html((string) $row['portrait_revision']); ?>. Son état et sa propriété sont revérifiés lors de l’approbation.</p>
             <?php else: ?><p>Aucun portrait associé.</p><?php endif; ?>
-            <?php if (in_array($row['state'], ['pending', 'approved'], true)): ?>
+            <?php if (is_array($row['published'] ?? null)): ?><aside class="fm-card"><h4>Version approuvée · révision <?php echo (int) $row['published']['revision']; ?></h4><strong><?php echo esc_html($row['published']['public_name']); ?></strong><p><?php echo esc_html($row['published']['bio']); ?></p><?php if ($row['published']['portrait_id'] !== ''): ModerationView::previewForm($row['published']['portrait_id']); endif; ?></aside><?php endif; ?>
+            <?php if (in_array($row['state'], ['pending', 'approved'], true) || is_array($row['published'] ?? null)): ?>
                 <form method="post" action="<?php echo esc_url(self::url()); ?>" class="fm-decision">
                     <?php wp_nonce_field('fans_moderation'); ?>
                     <input type="hidden" name="kind" value="editorial"><input type="hidden" name="item_id" value="<?php echo esc_attr($id); ?>">
@@ -71,8 +72,9 @@ final class EditorialModerationView
                     <label for="reason-<?php echo esc_attr($id); ?>">Décision et motif</label><select required name="reason" id="reason-<?php echo esc_attr($id); ?>">
                         <option value="">Choisir après examen</option>
                         <?php if ($row['state'] === 'pending' && $active): ?><option value="allowed_editorial">Approuver · présentation autorisée</option><?php endif; ?>
-                        <option value="needs_revision">Refuser · correction nécessaire</option><option value="prohibited_content">Refuser · contenu interdit</option>
-                    </select><p>Un refus efface le nom, la bio et la référence du portrait de cette présentation.</p><button type="submit">Confirmer cette décision</button>
+                        <?php if (in_array($row['state'], ['pending', 'approved'], true)): ?><option value="needs_revision">Refuser · correction nécessaire</option><option value="prohibited_content">Refuser · contenu interdit</option><?php endif; ?>
+                        <?php if (is_array($row['published'] ?? null)): ?><option value="revoke_prohibited_content">Révoquer la version publique et effacer la proposition · contenu interdit</option><?php endif; ?>
+                    </select><p>Refuser une proposition en attente efface cette proposition ; la version approuvée précédente reste visible. Révoquer efface les deux.</p><button type="submit">Confirmer cette décision</button>
                 </form>
             <?php endif; ?>
             <?php if (isset($row['journal']) && is_array($row['journal'])): ?><details><summary>Journal · 100 dernières traces maximum</summary><ul class="fm-journal">

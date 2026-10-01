@@ -60,7 +60,7 @@ final class EditorialRest
     {
         $data = self::input($r, ['revision', 'decision', 'reason']);
         return self::response($data === null || !is_int($data['revision']) || !is_string($data['reason'])
-            || !in_array($data['decision'], ['approve', 'reject'], true) ? EditorialService::error('invalid_editorial_decision', 400)
+            || !in_array($data['decision'], ['approve', 'reject', 'revoke'], true) ? EditorialService::error('invalid_editorial_decision', 400)
             : EditorialService::decide((string) $r->get_param('creator_id'), $data['revision'], $data['decision'], $data['reason']));
     }
     public static function portrait(\WP_REST_Request $r): \WP_REST_Response

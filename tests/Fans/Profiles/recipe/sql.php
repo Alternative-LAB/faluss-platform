@@ -61,12 +61,13 @@ $wpdb->query("CREATE TRIGGER fail_editorial_audit BEFORE INSERT ON test_faluss_f
 check('real SQL audit failure is reported', EditorialService::submit(2, 'Must roll back', '', '', 0) instanceof WP_Error);
 $wpdb->query('DROP TRIGGER fail_editorial_audit');
 check('real InnoDB rollback preserves approved revision', EditorialService::publicById(OWNER)['revision'] === 2 && EditorialService::publicById(OWNER)['public_name'] === 'Atelier test SQL');
-check('edit hides immediately', is_array(EditorialService::submit(2, 'Atelier édité', 'Bio privée', '', 0)) && EditorialService::publicById(OWNER) === null);
+check('edit preserves approved fields only', is_array(EditorialService::submit(2, 'Atelier édité', 'Bio privée', '', 0)) && EditorialService::publicById(OWNER)['public_name'] === 'Atelier test SQL');
 check('stale decision rejected', EditorialService::decide(OWNER, 2, 'withdraw', '')->get_error_data()['status'] === 409);
 $fixtureUser = 1;
 check('rejection purges', is_array(EditorialService::decide(OWNER, 3, 'reject', 'needs_revision')));
 $row = $wpdb->get_row("SELECT * FROM test_faluss_fans_editorial WHERE creator_id='" . OWNER . "'");
 check('no rejected content retained', $row['public_name'] === '' && $row['bio'] === '' && $row['portrait_id'] === '');
+check('rejected draft preserves previous approval', EditorialService::publicById(OWNER)['revision'] === 2);
 check('audit contains no content', !str_contains(json_encode($wpdb->get_results('SELECT * FROM test_faluss_fans_editorial_decisions')), 'Atelier'));
 // Synthetic raster with no person: exercise real normalization, private storage and JPEG derivation.
 $canvas = imagecreatetruecolor(96, 96); imagefill($canvas, 0, 0, imagecolorallocate($canvas, 24, 120, 96));
@@ -96,6 +97,14 @@ $fixtureUser = 1;
 check('approve contextual portrait', is_array(EditorialService::decide(OWNER, 5, 'approve', 'allowed_editorial')));
 $jpeg = EditorialService::portrait(OWNER, 6);
 check('fresh JPEG never source PNG', is_string($jpeg) && str_starts_with($jpeg, "\xff\xd8") && $jpeg !== $png);
+// Migration seeds only a currently approved v1 version, without touching its revision.
+$wpdb->query('DROP TABLE `' . EditorialSchema::publishedTable() . '`'); update_option(EditorialSchema::OPTION, '1');
+check('upgrade approved v1 without rewriting current row', EditorialSchema::installOrVerify() && EditorialService::publicById(OWNER)['revision'] === 6);
+check('upgrade idempotent', EditorialSchema::installOrVerify());
+$fixtureUser = 17;
+check('new draft preserves approved portrait URL', is_array(EditorialService::submit(6, 'Private new proposal', '', '', 0)) && is_string(EditorialService::portrait(OWNER, 6)));
+$fixtureUser = 1;
+check('reject draft preserves approved portrait URL', is_array(EditorialService::decide(OWNER, 7, 'reject', 'needs_revision')) && is_string(EditorialService::portrait(OWNER, 6)));
 CreatorProfileService::setStatus(OWNER, 'suspended');
 check('suspension removes fields and portrait', EditorialService::publicById(OWNER) === null && EditorialService::portrait(OWNER, 6) instanceof WP_Error);
 CreatorProfileService::setStatus(OWNER, 'active');
@@ -104,6 +113,6 @@ check('image withdrawal revokes portrait', is_array(ImageService::decide(IMAGE, 
 check('withdrawn image has no owner preview', ImageService::ownerPreview(IMAGE, 3) instanceof WP_Error);
 check('withdrawn image removed from picker', ImageService::portraitCandidates()['items'] === []);
 check('name survives absent portrait honestly', EditorialService::publicById(OWNER)['portrait'] === false);
-check('editorial withdrawal purges', is_array(EditorialService::decide(OWNER, 6, 'withdraw', '')) && EditorialService::publicById(OWNER) === null);
-check('SQL audit exact revisions', $wpdb->get_var('SELECT COUNT(*) FROM test_faluss_fans_editorial_decisions') == 7);
-// Leave revision 7 for the runner's concurrent submissions (exactly one must win).
+check('editorial withdrawal after draft rejection purges', is_array(EditorialService::decide(OWNER, 8, 'withdraw', '')) && EditorialService::publicById(OWNER) === null);
+check('SQL audit exact revisions', $wpdb->get_var('SELECT COUNT(*) FROM test_faluss_fans_editorial_decisions') == 9);
+// Leave revision 9 for the runner's concurrent submissions (exactly one must win).

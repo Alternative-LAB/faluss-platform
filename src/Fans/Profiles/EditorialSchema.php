@@ -8,7 +8,10 @@ namespace Faluss\Platform\Fans\Profiles;
 final class EditorialSchema
 {
     public const OPTION = 'faluss_fans_editorial_schema_version';
-    public const VERSION = '1';
+    public const VERSION = '2';
+
+    public static function publishedTable(): ?string
+    { return self::table() === null ? null : self::table() . '_approved'; }
 
     public static function table(bool $audit = false): ?string
     {
@@ -29,7 +32,7 @@ final class EditorialSchema
 
     public static function ready(): bool
     {
-        return get_option(self::OPTION) === self::VERSION && self::verify(false) && self::verify(true);
+        return get_option(self::OPTION) === self::VERSION && self::verify(false) && self::verify(true) && self::verify(false, true);
     }
 
     public static function installOrVerify(): bool
@@ -39,8 +42,8 @@ final class EditorialSchema
         $lock = 'fans_editorial_schema_' . substr(hash('sha256', (string) self::table()), 0, 32);
         if ((int) $wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s,10)', $lock)) !== 1) { return false; }
         try {
-            foreach ([false, true] as $audit) {
-                $table = self::table($audit);
+            foreach ([[false, false], [true, false], [false, true]] as [$audit, $published]) {
+                $table = $published ? self::publishedTable() : self::table($audit);
                 $found = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table));
                 if ($found === null) {
                     if ($wpdb->last_error !== '') { return false; }
@@ -51,17 +54,25 @@ final class EditorialSchema
                     if ($wpdb->query('CREATE TABLE `' . $table . '` (' . implode(',', $columns) . ') ENGINE=InnoDB '
                         . $wpdb->get_charset_collate()) === false) { return false; }
                 } elseif ($found !== $table) { return false; }
-                if (!self::verify($audit)) { return false; }
+                if (!self::verify($audit, $published)) { return false; }
             }
-            update_option(self::OPTION, self::VERSION, false);
+            if (get_option(self::OPTION) !== self::VERSION) {
+                // Only the actually approved v1 row is recoverable. Never promote a pending draft.
+                $domainLock = 'fans_editorial_' . substr(hash('sha256', (string) self::table()), 0, 40);
+                if ((int) $wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s,5)', $domainLock)) !== 1) { return false; }
+                try {
+                    if ($wpdb->query('INSERT IGNORE INTO `' . self::publishedTable() . '` SELECT * FROM `' . self::table() . "` WHERE state='approved'") === false) { return false; }
+                    update_option(self::OPTION, self::VERSION, false);
+                } finally { $wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)', $domainLock)); }
+            }
             return self::ready();
         } finally { $wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)', $lock)); }
     }
 
-    private static function verify(bool $audit): bool
+    private static function verify(bool $audit, bool $published = false): bool
     {
         global $wpdb;
-        $table = self::table($audit);
+        $table = $published ? self::publishedTable() : self::table($audit);
         if ($table === null) { return false; }
         $status = $wpdb->get_row($wpdb->prepare('SHOW TABLE STATUS LIKE %s', $table), 'ARRAY_A');
         if (!is_array($status) || strtolower((string) ($status['Engine'] ?? '')) !== 'innodb') { return false; }

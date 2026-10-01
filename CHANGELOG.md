@@ -8,6 +8,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Corrigé
 
+- Présentations Fans : maintien de la dernière version approuvée pendant une modification ou un refus ; retrait et révocation immédiats, y compris après refus de la proposition, sans diffusion des champs en attente.
 - Consentement Identity après mise à jour : préparation additive avant les parcours publics, sans attendre une visite administrateur ; refus explicite si la mémorisation est indisponible, sans connexion présentée comme autorisée.
 
 ## [0.11.1] - 2026-10-01
