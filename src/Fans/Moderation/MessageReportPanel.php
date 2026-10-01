@@ -41,7 +41,7 @@ final class MessageReportPanel
             else: ?>
                 <p class="fm-warning"><?php echo esc_html((string)$page['overdue']); ?> dossier(s) à réexaminer. Aucune clôture ni prolongation de litige n’est automatique.</p>
                 <?php if($page['items']===[]): ?><p>Aucun dossier sur cette page.</p><?php endif; ?>
-                <div class="fm-items"><?php foreach($page['items'] as $row): ?><article class="fm-card"><p class="fm-meta"><?php echo esc_html(FansUiMessages::state($row['state']==='open'?'open_report':$row['state'])); ?></p><h2>Dossier du <?php echo esc_html($row['created_at']); ?> UTC</h2><p>Motif : <?php echo esc_html($row['reason']); ?> · réexamen avant <?php echo esc_html($row['review_due_at']); ?> UTC.</p><?php if((bool)$row['overdue']): ?><p class="fm-warning">Réexamen en retard.</p><?php endif; ?><a href="<?php echo esc_url(self::url($row['case_id'])); ?>">Examiner le dossier privé →</a></article><?php endforeach; ?></div>
+                <div class="fm-items"><?php foreach($page['items'] as $row): ?><article class="fm-card"><p class="fm-meta"><?php echo esc_html(FansUiMessages::state($row['state']==='open'?'open_report':$row['state'])); ?></p><h2>Dossier du <?php echo esc_html($row['created_at']); ?> UTC</h2><?php self::accounts($row); ?><p>Motif : <?php echo esc_html($row['reason']); ?> · réexamen avant <?php echo esc_html($row['review_due_at']); ?> UTC.</p><?php if((bool)$row['overdue']): ?><p class="fm-warning">Réexamen en retard.</p><?php endif; ?><a href="<?php echo esc_url(self::url($row['case_id'])); ?>">Examiner le dossier privé →</a></article><?php endforeach; ?></div>
                 <?php if($page['next_cursor']!==null): ?><a href="<?php echo esc_url(add_query_arg('cursor',$page['next_cursor'],self::url())); ?>">Page suivante →</a><?php endif; ?>
             <?php endif; ?>
         </div>
@@ -60,6 +60,7 @@ final class MessageReportPanel
     {
         ?>
         <article class="fm-card fm-message-proof"><p class="fm-meta"><?php echo esc_html(FansUiMessages::state($row['state']==='open'?'open_report':$row['state'])); ?> · révision <?php echo esc_html((string)$row['revision']); ?></p>
+            <?php self::accounts($row); ?>
             <h2>Message isolé pour examen</h2><p>Auteur local <?php echo esc_html((string)$row['subject_user']); ?> · envoyé le <?php echo esc_html($row['sent_at']); ?> UTC · motif <?php echo esc_html($row['reason']); ?>.</p><div class="fm-text"><?php echo esc_html($row['body']); ?></div>
             <p>Réexamen avant <?php echo esc_html($row['review_due_at']); ?> UTC. <?php echo $row['final_at']!==null?'Décision définitive : '.esc_html($row['final_at']).' UTC.':'Aucune décision définitive attestée.'; ?></p>
             <?php if($row['hold_until']!==null): ?><p class="fm-warning">Conservation de litige jusqu’au <?php echo esc_html($row['hold_until']); ?> UTC. Réexaminer et motiver tout renouvellement.</p><?php endif; ?>
@@ -80,5 +81,13 @@ final class MessageReportPanel
             <?php if($row['history_truncated']): ?><p>Affichage limité aux 200 dernières traces de chaque journal.</p><?php endif; ?>
         </article>
         <?php
+    }
+
+    /** @param array<string,mixed> $row */
+    private static function accounts(array $row): void
+    {
+        if (!ReportModeration::allowed()) { return; }
+        echo '<h3>Compte signalant</h3>'; AccountContext::member((int) ($row['reporter_user'] ?? 0));
+        echo '<h3>Auteur du message signalé</h3>'; AccountContext::member((int) ($row['subject_user'] ?? 0));
     }
 }

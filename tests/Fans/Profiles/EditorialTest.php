@@ -27,7 +27,7 @@ class EditorialDb extends CreatorProfileDb
         if (str_contains($q, 'GET_LOCK')) { return $this->lock ? 1 : 0; }
         if (str_contains($q, 'RELEASE_LOCK')) { return 1; }
         if (str_starts_with($q, 'SELECT COUNT')) { return $this->rate; }
-        return null;
+        return parent::get_var($q);
     }
     public function get_row(string $q, mixed $output = null): ?array
     {
@@ -131,6 +131,17 @@ final class EditorialTest extends TestCase
         $GLOBALS['profile_admin'] = false; $this->submit(2);
         self::assertSame(2, EditorialService::publicById(self::ID)['revision']);
         self::assertCount(3, $GLOBALS['wpdb']->audit);
+    }
+
+    public function testMissingLinkBlocksApprovalWithoutLosingPendingContent(): void
+    {
+        $this->submit(); $GLOBALS['profile_admin'] = true; $GLOBALS['profile_linked'] = false;
+        $before = $GLOBALS['wpdb']->audit;
+        self::assertSame('creator_link_missing', EditorialService::decide(self::ID, 1, 'approve', 'allowed_editorial')->get_error_code());
+        self::assertSame('pending', $GLOBALS['wpdb']->editorial['state']);
+        self::assertSame($before, $GLOBALS['wpdb']->audit);
+        self::assertNull(EditorialService::publicById(self::ID));
+        self::assertIsArray(EditorialService::decide(self::ID, 1, 'reject', 'needs_revision'));
     }
 
     public function testDraftRejectionPreservesApprovalAndOwnerCanWithdrawAfterRejection(): void

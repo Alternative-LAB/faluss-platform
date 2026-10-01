@@ -28,5 +28,6 @@
 .faluss-moderation :is(a,button,select,summary):focus-visible { outline: 3px solid #080808; outline-offset: 4px; }
 .faluss-moderation details { margin-top: 22px; border-top: 1px solid var(--fm-line); padding-top: 16px; }
 .faluss-moderation summary { cursor: pointer; min-height: 44px; }
+.faluss-moderation .fm-account{border:1px solid currentColor;border-radius:12px;padding:16px;margin:16px 0;overflow-wrap:anywhere}.fm-account dl{display:grid;grid-template-columns:minmax(90px,1fr) minmax(0,2fr);gap:8px 16px}.fm-account dd{margin:0}.fm-account dt{font-weight:600}.fm-account img{border-radius:50%;object-fit:cover}.fm-account__notice{font-size:12px;opacity:.8}@media(max-width:600px){.fm-account dl{grid-template-columns:1fr}.fm-account dd{margin-bottom:8px}}
 .faluss-moderation .fm-notice { background: #fff; border: 2px solid #080808; padding: 20px; border-radius: 12px; }
 @media(max-width:782px) { .faluss-moderation { margin-right: 10px; } .faluss-moderation button { width: 100%; } }

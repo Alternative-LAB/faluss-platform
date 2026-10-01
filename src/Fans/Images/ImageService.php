@@ -97,6 +97,7 @@ final class ImageService
             if ((int) $row['revision'] !== $revision || !in_array($row['state'], ['pending', 'approved'], true) || ($action === 'approve' && $row['state'] !== 'pending')) { return self::error('image_revision_conflict', 409); }
             $root = ImageStorage::root();
             if ($action === 'approve' && ($root === null || CreatorProfileService::publicById($row['creator_id']) === null || ImageStorage::read($root, $id, $row['file_hash']) === null)) { return self::error('image_unavailable'); }
+            if ($action === 'approve' && !CreatorProfileService::hasLinkedOwner($row['creator_id'])) { return self::error('creator_link_missing', 409); }
             $state = match ($action) { 'approve' => 'approved', 'reject' => 'rejected', default => 'withdrawn' };
             if ($wpdb->query($wpdb->prepare('UPDATE `' . ImageSchema::table() . '` SET state=%s,revision=revision+1,updated_at=UTC_TIMESTAMP() WHERE image_id=%s AND revision=%d', $state, $id, $revision)) !== 1
                 || !self::audit($id, $revision + 1, $action, $action === 'withdraw' ? 'creator_withdrawal' : $reason, $row['file_hash']) || $wpdb->query('COMMIT') === false) { return self::error('image_write_failed'); }

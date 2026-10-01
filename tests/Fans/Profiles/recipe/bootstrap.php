@@ -53,7 +53,8 @@ $fixtureUser = (int) ($_COOKIE['fixture_user'] ?? 17);
 function get_current_user_id(): int { return $GLOBALS['fixtureUser']; }
 function is_user_logged_in(): bool { return get_current_user_id() > 0; }
 function current_user_can(string $cap): bool { return ($cap === 'manage_options' && in_array(get_current_user_id(),[1,42],true)) || ($cap === 'moderate_faluss_fans_messages' && get_current_user_id()===42); }
-class WP_User { public function __construct(public int $ID, public array $roles = ['subscriber']) {} }
+class WP_User { public string $user_email = 'recipe@example.invalid'; public function __construct(public int $ID, public array $roles = ['subscriber']) {} }
+function is_email(string $value): string|false { return filter_var($value, FILTER_VALIDATE_EMAIL) ? $value : false; }
 function get_userdata(int $id): WP_User|false { return $id > 0 ? new WP_User($id, in_array($id,[1,42],true) ? ['administrator'] : ['subscriber']) : false; }
 function wp_parse_url(string $url): array|false { return parse_url($url); }
 function home_url(string $path = ''): string { return (getenv('FANS_EDITORIAL_HTTP') ?: 'https://editorial.example.test') . $path; }

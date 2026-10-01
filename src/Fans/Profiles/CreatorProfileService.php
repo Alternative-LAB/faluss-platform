@@ -147,6 +147,30 @@ final class CreatorProfileService
         return FansSsoService::currentLinkedSubject() !== null ? get_current_user_id() : null;
     }
 
+    /** Private administration contract; never included in public projections.
+     * @return array<string,mixed>|null */
+    public static function administration(mixed $creatorId = null, int $userId = 0): ?array
+    {
+        if (!current_user_can('manage_options') || !CreatorProfileSchema::ready()
+            || ($creatorId !== null ? !self::validId($creatorId) : $userId < 1)) { return null; }
+        global $wpdb;
+        $row = $wpdb->get_row($wpdb->prepare('SELECT creator_id,wp_user_id,category,status,created_at,updated_at FROM '
+            . self::quote(CreatorProfileSchema::table()) . ($creatorId !== null ? ' WHERE creator_id=%s LIMIT 1' : ' WHERE wp_user_id=%d LIMIT 1'),
+            $creatorId ?? $userId), 'ARRAY_A');
+        return is_array($row) && $wpdb->last_error === '' ? $row : null;
+    }
+
+    /** Server approval guard for all creator states; exposes no account data. */
+    public static function hasLinkedOwner(string $creatorId): bool
+    {
+        if (!self::validId($creatorId) || !CreatorProfileSchema::ready()) { return false; }
+        global $wpdb;
+        $row = $wpdb->get_row($wpdb->prepare('SELECT wp_user_id FROM ' . self::quote(CreatorProfileSchema::table())
+            . ' WHERE creator_id=%s LIMIT 1', $creatorId), 'ARRAY_A');
+        return is_array($row) && $wpdb->last_error === '' && is_numeric($row['wp_user_id'] ?? null)
+            && FansSsoService::linkedMember((int) $row['wp_user_id']);
+    }
+
     /** Private server contract, never projected by REST. Caller owns transaction when locking. */
     public static function activeOwner(mixed $creatorId, bool $lock = false): ?int
     {

@@ -59,6 +59,7 @@ check('REST absence preserves schema and pending visibility', cli("echo get_opti
 code, body, headers = http(panel, 'admin')
 check('existing panel shows new admission tab', code == 200 and 'Profils Créateur' in body and member in body)
 check('panel private no-store', 'no-store' in headers.get('Cache-Control',''))
+check('admission queue identifies local linked account without fabricated handle', 'member@example.invalid' in body and 'Faluss ID' in body and 'Non fourni par le contrat actuel' in body)
 check('isolated opted-in admin upgrade creates journal', cli("echo get_option('faluss_fans_creator_status_schema_version','absent');") == '1')
 check('upgrade leaves existing profile pending', api(private_route,'admin')[1]['status'] == 'pending')
 check('admin cannot read private profile without nonce', api(private_route,'admin',nonce=False)[0] in (401,403))
@@ -66,6 +67,7 @@ check('admin cannot mutate without nonce', api(status_route,'admin',{'status':'a
 detail = panel+'&item='+member
 code, body, headers = http(detail,'admin')
 check('detail renders native POST form and nonce', code==200 and 'method="post"' in body and 'name="_wpnonce"' in body)
+check('admission detail contains account context', 'member@example.invalid' in body and 'Données locales Fans' in body)
 check('activation warning separates all approvals', 'ne valide ni le partenariat commercial, ni les contenus éditoriaux, ni les images' in body)
 nonce_value = re.search(r'name="_wpnonce" value="([^"]+)"', body).group(1)
 form = {'kind':'creator-profile','item_id':member,'revision':'0','status':'active','confirm':'yes','_wpnonce':nonce_value}

@@ -19,7 +19,7 @@ final class ReportModeration
         if($cursor!==''&&!MessagePolicy::uuid($cursor)) {return MessagePolicy::error('invalid_report_cursor',400);}
         return self::run(static function () use($cursor): mixed {
             global $wpdb;
-            $rows=$wpdb->get_results($wpdb->prepare('SELECT case_id,state,revision,decision,reason,created_at,review_due_at,final_at,hold_until,((state<>%s OR hold_until>UTC_TIMESTAMP()) AND review_due_at<=UTC_TIMESTAMP()) AS overdue FROM `'.MessageSchema::table('reports').'` WHERE case_id>%s AND (state<>%s OR DATE_ADD(final_at,INTERVAL 12 MONTH)>UTC_TIMESTAMP() OR hold_until>UTC_TIMESTAMP()) ORDER BY case_id LIMIT 21','final',$cursor,'final'),'ARRAY_A');
+            $rows=$wpdb->get_results($wpdb->prepare('SELECT case_id,reporter_user,subject_user,state,revision,decision,reason,created_at,review_due_at,final_at,hold_until,((state<>%s OR hold_until>UTC_TIMESTAMP()) AND review_due_at<=UTC_TIMESTAMP()) AS overdue FROM `'.MessageSchema::table('reports').'` WHERE case_id>%s AND (state<>%s OR DATE_ADD(final_at,INTERVAL 12 MONTH)>UTC_TIMESTAMP() OR hold_until>UTC_TIMESTAMP()) ORDER BY case_id LIMIT 21','final',$cursor,'final'),'ARRAY_A');
             if(!is_array($rows)||MessageStore::failed()) {return MessagePolicy::error('reports_read_failed');}
             $more=count($rows)>20;$rows=array_slice($rows,0,20);
             $overdue=$wpdb->get_var('SELECT COUNT(*) FROM `'.MessageSchema::table('reports').'` WHERE (state<>\'final\' OR hold_until>UTC_TIMESTAMP()) AND review_due_at<=UTC_TIMESTAMP()');

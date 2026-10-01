@@ -113,6 +113,7 @@ final class TextPublicationService
             if (in_array($action, ['edit', 'image', 'approve'], true) && CreatorProfileService::publicById($row['creator_id']) === null) {
                 return self::error('active_creator_required', 403);
             }
+            if ($action === 'approve' && !CreatorProfileService::hasLinkedOwner($row['creator_id'])) { return self::error('creator_link_missing', 409); }
             if ($admission) {
                 // Use the locked persisted state, never a client-provided pending count or state.
                 $quota = TextPublicationIntake::check($profile['creator_id'], $row['state'] !== 'pending');

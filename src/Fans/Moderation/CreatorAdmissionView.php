@@ -72,6 +72,7 @@ final class CreatorAdmissionView
                 <?php if ($page['items'] === []): ?><p>Aucun profil dans cette file.</p><?php endif; ?>
                 <div class="fm-items"><?php foreach ($page['items'] as $row): ?>
                     <article class="fm-card"><h3>Demande · <?php echo esc_html(self::category($row['category'])); ?></h3>
+                        <?php AccountContext::creator($row['creator_id']); ?>
                         <p class="fm-meta"><?php echo esc_html(self::label($row['status'])); ?> · demande du <?php echo esc_html($row['created_at']); ?> UTC</p>
                         <p class="fm-id">Référence privée : <?php echo esc_html($row['creator_id']); ?></p>
                         <a href="<?php echo esc_url(self::url($status, $row['creator_id'])); ?>">Examiner le profil et son journal →</a>
@@ -93,6 +94,7 @@ final class CreatorAdmissionView
         <article class="fm-card">
             <div class="fm-meta"><strong><?php echo esc_html(self::label($row['status'])); ?></strong><span>Révision de statut <?php echo esc_html((string) $row['status_revision']); ?></span></div>
             <h2>Profil · <?php echo esc_html(self::category($row['category'])); ?></h2>
+            <?php AccountContext::creator($id); ?>
             <p class="fm-id">Référence privée : <?php echo esc_html($id); ?><br>Demande : <?php echo esc_html($row['created_at']); ?> UTC<br>Mis à jour : <?php echo esc_html($row['updated_at']); ?> UTC</p>
             <p><?php echo $row['status'] === 'active' ? 'Profil public. Seules les données éditoriales approuvées séparément peuvent être diffusées.' : 'Profil absent des lectures publiques. Aucun nom ni portrait n’est approuvé par cette décision.'; ?></p>
             <form class="fm-decision" method="post" action="<?php echo esc_url(self::url($filter, $id)); ?>">
