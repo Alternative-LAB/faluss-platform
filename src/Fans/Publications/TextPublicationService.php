@@ -239,7 +239,7 @@ final class TextPublicationService
     public static function listing(string $scope, mixed $perPage = 20, mixed $cursor = null, mixed $creatorId = null): array|\WP_Error
     {
         if (!TextPublicationsModule::available()) { return self::error('publications_unavailable', 503); }
-        if (!in_array($scope, ['public', 'own', 'queue'], true)
+        if (!in_array($scope, ['public', 'own', 'current', 'archive', 'queue'], true)
             || (!is_int($perPage) && !(is_string($perPage) && preg_match('/^[1-9][0-9]?$/D', $perPage) === 1))
             || (int) $perPage < 1 || (int) $perPage > 20
             || ($creatorId !== null && ($scope !== 'public' || !is_string($creatorId) || !self::validId($creatorId)))
@@ -255,10 +255,14 @@ final class TextPublicationService
         if ($scope === 'queue') {
             if (!current_user_can('manage_options')) { return self::error('publication_forbidden', 403); }
             $filter = 'state=%s'; $args = ['pending'];
-        } elseif ($scope === 'own') {
+        } elseif (in_array($scope, ['own', 'current', 'archive'], true)) {
             $profile = CreatorProfileService::own();
             if ($profile === null) { return self::error('publication_forbidden', 403); }
             $filter = 'creator_id=%s'; $args = [$profile['creator_id']];
+            if ($scope !== 'own') {
+                $filter .= ' AND state IN (%s,%s)';
+                array_push($args, ...($scope === 'current' ? ['pending', 'approved'] : ['rejected', 'withdrawn']));
+            }
         } else {
             $filter = 'state=%s'; $args = ['approved'];
             if ($creatorId !== null) { $filter .= ' AND creator_id=%s'; $args[] = $creatorId; }
@@ -289,6 +293,8 @@ final class TextPublicationService
                 }
                 // A row can leave the queue between the candidate query and its fresh read.
                 if ($scope === 'queue' && $value['state'] !== 'pending') { continue; }
+                if ($scope === 'current' && !in_array($value['state'], ['pending', 'approved'], true)) { continue; }
+                if ($scope === 'archive' && !in_array($value['state'], ['rejected', 'withdrawn'], true)) { continue; }
                 if ($creatorId !== null && $value['creator_id'] !== $creatorId) { continue; }
                 if (count($result) === (int) $perPage) {
                     return ['items' => $result, 'next_cursor' => $lastVisible];

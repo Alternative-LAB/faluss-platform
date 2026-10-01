@@ -57,7 +57,7 @@ final class FansUiReading
             ['creer', 'Créer', 'Choisissez le type de création que vous souhaitez proposer.'],
             ['boutique', 'Ma boutique', 'Les offres et réservations ne sont pas encore disponibles.'],
         ] : [
-            ['explorer', 'Découvrir', 'Consultez les fiches publiques et les textes approuvés.'],
+            ['explorer', 'Découvrir', 'Consultez les profils et les publications de la communauté.'],
             ['classement-fans', 'Classement Fans', 'Découvrez les règles prévues ; aucun classement n’est encore ouvert.'],
             ['espace', 'Votre espace', 'La progression personnelle n’est pas encore disponible.'],
         ];
@@ -111,8 +111,8 @@ final class FansUiReading
                  data-image-delivery="<?php echo $images ? 'true' : 'false'; ?>"
                  <?php if ($creatorId !== null) : ?>data-creator-id="<?php echo esc_attr($creatorId); ?>"<?php endif; ?>
                  data-public-base="<?php echo esc_url(home_url('/app/creators/')); ?>" aria-labelledby="fu-texts-title">
-            <div class="fu-section-heading"><div><p class="fu-panel__kicker">Publications</p><h2 id="fu-texts-title"><?php echo $creatorId === null ? 'Textes publics récents' : 'Publications de ce profil'; ?></h2></div></div>
-            <p class="fu-footnote"><?php echo $creatorId === null ? 'Textes approuvés de la communauté. La fiche de chaque auteur présente ses informations publiques disponibles.' : 'Seuls les textes approuvés de ce profil sont affichés.'; ?></p>
+            <div class="fu-section-heading"><div><p class="fu-panel__kicker">Publications</p><h2 id="fu-texts-title"><?php echo $creatorId === null ? 'À découvrir dans la communauté' : 'Publications de ce profil'; ?></h2></div></div>
+            <p class="fu-footnote"><?php echo $creatorId === null ? 'Les dernières publications approuvées. Retrouvez leur auteur sur sa fiche publique.' : 'Les publications approuvées de ce profil.'; ?></p>
             <p class="fu-footnote"><?php echo $images ? 'Une publication peut avoir une image approuvée. Vérifiez sa disponibilité à la demande.' : 'Les images de publications sont indisponibles pour le moment.'; ?></p>
             <p class="fu-live" data-text-status role="status">Chargement des publications…</p>
             <div class="fu-text-grid" data-text-results></div>

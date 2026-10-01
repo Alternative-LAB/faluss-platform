@@ -1,0 +1,9 @@
+{
+  "browser": "154.0.8037.58",
+  "archived": 8,
+  "checks": [
+    "Real WordPress creates, rejects, withdraws and approves",
+    "Current/archive SQL pagination, cursor isolation, guest and foreign member denial",
+    "No terminal bodies or withdrawn links, accessible excerpts and desktop/mobile captures"
+  ]
+}

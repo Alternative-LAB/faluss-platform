@@ -6,6 +6,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+- Fans : publications courantes et archives privées paginées séparées ; aperçus publics dépliables et dates réelles, libellés de publication harmonisés.
+
 ### Ajouté
 
 - Entrée Fans `/app`, résolution du rôle et redirection des anciennes routes humaines ; callback SSO et API stables, accès application visible pour les membres liés.

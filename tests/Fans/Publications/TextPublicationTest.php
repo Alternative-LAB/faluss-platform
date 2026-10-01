@@ -60,11 +60,13 @@ final class TextPublicationDb extends CreatorProfileDb
             $args = end($this->prepared)['args'];
             $field = str_contains($query, 'WHERE creator_id=') ? 'creator_id' : 'state';
             $creatorFilter = str_contains($query, 'AND creator_id=');
+            $stateFilter = str_contains($query, 'AND state IN');
             $ascending = str_contains($query, 'updated_at ASC');
-            $rows = array_values(array_filter($this->publications, static function ($row) use ($args, $field, $creatorFilter, $ascending) {
+            $rows = array_values(array_filter($this->publications, static function ($row) use ($args, $field, $creatorFilter, $stateFilter, $ascending) {
                 if ($row[$field] !== $args[0]) { return false; }
                 if ($creatorFilter && $row['creator_id'] !== $args[1]) { return false; }
-                $offset = $creatorFilter ? 2 : 1;
+                if ($stateFilter && !in_array($row['state'], [$args[1], $args[2]], true)) { return false; }
+                $offset = $stateFilter ? 3 : ($creatorFilter ? 2 : 1);
                 if (count($args) === $offset) { return true; }
                 $comparison = [$row['updated_at'], $row['publication_id']] <=> [$args[$offset], $args[$offset + 2]];
                 return $ascending ? $comparison > 0 : $comparison < 0;
@@ -333,6 +335,8 @@ final class TextPublicationTest extends TestCase
             'public' => $row['state'] === 'approved' && $db->profiles[$row['creator_id']]['status'] === 'active',
             'queue' => $row['state'] === 'pending',
             'own' => $row['creator_id'] === $db->profile['creator_id'],
+            'current' => $row['creator_id'] === $db->profile['creator_id'] && in_array($row['state'], ['pending', 'approved'], true),
+            'archive' => $row['creator_id'] === $db->profile['creator_id'] && in_array($row['state'], ['rejected', 'withdrawn'], true),
         }));
         usort($rows, static fn ($a, $b) => ($scope === 'queue' ? 1 : -1) * ([$a['updated_at'], $a['publication_id']] <=> [$b['updated_at'], $b['publication_id']]));
         return array_column($rows, 'publication_id');
@@ -402,6 +406,26 @@ final class TextPublicationTest extends TestCase
         foreach (['ownList', 'queue'] as $callback) {
             self::assertSame(400, TextPublicationRest::$callback(new \WP_REST_Request(['creator_id' => $second]))->status);
         }
+    }
+
+    public function testPrivateBucketsHaveCompleteIndependentPagesAndKeepLegacyHistory(): void
+    {
+        $this->paginationFixture();
+        foreach (['current', 'archive'] as $scope) {
+            self::assertSame($this->expectedIds($scope), $this->collectPages($scope, 3));
+            $page = TextPublicationRest::ownList(new \WP_REST_Request(['bucket' => $scope, 'per_page' => 3]));
+            self::assertSame(200, $page->status);
+            self::assertSame('private, no-store, max-age=0', $page->headers['Cache-Control']);
+            self::assertSame(array_slice($this->expectedIds($scope), 0, 3), array_column($page->data['items'], 'publication_id'));
+            $other = $scope === 'current' ? 'archive' : 'current';
+            self::assertSame(400, TextPublicationRest::ownList(new \WP_REST_Request(['bucket' => $other, 'cursor' => $page->data['next_cursor']]))->status);
+        }
+        foreach (['all', [], true, ''] as $invalid) {
+            self::assertSame(400, TextPublicationRest::ownList(new \WP_REST_Request(['bucket' => $invalid]))->status);
+        }
+        self::assertSame($this->expectedIds('own'), $this->collectPages('own'));
+        $GLOBALS['profile_linked'] = false;
+        foreach (['current', 'archive'] as $scope) { self::assertInstanceOf(\WP_Error::class, TextPublicationService::listing($scope)); }
     }
 
     public function testEntireModerationQueueAndOwnHistoryAreReachableWithoutGaps(): void

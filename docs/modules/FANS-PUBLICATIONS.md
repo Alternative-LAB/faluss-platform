@@ -89,7 +89,7 @@ rendre le texte comme texte, jamais comme HTML. Aucun import de contenu distant.
 | `GET /text-publications` | Publique | Page de textes approuvés actuellement visibles, plus récents d'abord |
 | `GET /text-publications/{id}` | Publique | Texte approuvé et profil actif, sinon 404 |
 | `POST /text-publications` | Auteur SSO + nonce ; profil actif pour nouvelle création | `Idempotency-Key` UUID v4 obligatoire ; `text`, `category=hosted_allowed_content` ; 201 pending ou état courant lors d'un rejeu |
-| `GET /text-publications/mine` | Auteur SSO + nonce | Pages de tous ses textes, tous états, plus récemment modifiés d'abord |
+| `GET /text-publications/mine` | Auteur SSO + nonce | Sans `bucket`, historique compatible tous états ; `bucket=current` pour pending/approved, `bucket=archive` pour rejected/withdrawn ; plus récemment modifiés d'abord |
 | `GET /text-publications/{id}/private` | Propriétaire ou admin + nonce | Révision courante privée |
 | `POST /text-publications/{id}/edit` | Propriétaire actif + nonce | `text`, `revision` ; pending |
 | `POST /text-publications/{id}/withdraw` | Propriétaire + nonce | `revision` ; withdrawn, texte effacé |
@@ -101,6 +101,18 @@ Les réponses publiques ne contiennent que `publication_id`, `creator_id`, `revi
 `body`, `updated_at`. Aucun `wp_user_id`, `faluss_id`, e-mail, motif ou acteur de
 modération. À chaque lecture, la politique relit le statut du profil via son contrat
 public et les valeurs conservées par Fans ; aucune donnée de droit client n'est utilisée.
+
+La liste principale de l'auteur utilise `bucket=current`. L'archive privée sous
+`/app/creator/creer?archive=1` utilise `bucket=archive` et conserve ce filtre dans
+chaque lien de pagination. Les états sont filtrés en SQL **avant LIMIT**, puis
+revérifiés à la lecture de chaque objet. Les curseurs sont liés à leur périmètre ;
+un curseur d'archive est refusé dans la liste courante et réciproquement.
+Le paramètre ne permet pas de choisir un autre propriétaire. Les contenus purgés
+ne sont pas recréés : une publication retirée n'a aucun lien d'ouverture ; une
+publication refusée peut seulement être réécrite et soumise à nouveau par son auteur actif.
+Les cartes publiques utilisent du vrai texte, un aperçu dépliable au clavier pour
+les contenus longs et la date UTC de mise à jour fournie par le service. Aucun contenu
+masqué ou privé n'est utilisé pour remplir la carte.
 Réponses `private, no-store, max-age=0` : un cache serveur/CDN ne doit pas passer outre.
 Après commit d'un retrait ou d'une suspension, une nouvelle lecture est masquée ;
 des octets déjà lus ou affichés avant le commit ne peuvent pas être rappelés.

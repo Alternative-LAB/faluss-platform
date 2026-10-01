@@ -67,7 +67,12 @@ final class TextPublicationRest
         return self::response(TextPublicationService::change($r->get_param('publication_id'), $data['revision'], $data['decision'], null, $data['reason']));
     }
     public static function publicList(\WP_REST_Request $r): \WP_REST_Response { return self::page($r, 'public'); }
-    public static function ownList(\WP_REST_Request $r): \WP_REST_Response { return self::page($r, 'own'); }
+    public static function ownList(\WP_REST_Request $r): \WP_REST_Response
+    {
+        $bucket = $r->get_param('bucket');
+        if ($bucket !== null && !in_array($bucket, ['current', 'archive'], true)) { return self::response(self::badInput()); }
+        return self::page($r, $bucket ?? 'own');
+    }
     public static function queue(\WP_REST_Request $r): \WP_REST_Response { return self::page($r, 'queue'); }
     public static function publicGet(\WP_REST_Request $r): \WP_REST_Response { return self::response(TextPublicationService::get($r->get_param('publication_id'))); }
     public static function privateGet(\WP_REST_Request $r): \WP_REST_Response { return self::response(TextPublicationService::get($r->get_param('publication_id'), true)); }

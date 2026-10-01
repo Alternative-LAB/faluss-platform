@@ -120,9 +120,9 @@ final class FansUiView
             <?php self::publicProfile($api, $creatorId, $role); ?>
             <?php FansUiReading::publications($creatorId); ?>
         <?php elseif ($view === 'creer') : ?>
-            <?php self::creationChoices($author !== null && $author->available, $images !== null && $images->available); ?>
+            <?php if ($author === null || !$author->archive) { self::creationChoices($author !== null && $author->available, $images !== null && $images->available); } ?>
             <?php if ($author !== null) { FansUiAuthorView::render($author); } ?>
-            <?php if ($images !== null) { FansUiImagesView::render($images); } ?>
+            <?php if ($images !== null && ($author === null || !$author->archive)) { FansUiImagesView::render($images); } ?>
         <?php elseif ($view === 'messages' && $messages !== null) : ?>
             <?php FansUiMessageView::render($messages); ?>
         <?php elseif ($view === 'classement-fans') : ?>
@@ -234,7 +234,7 @@ final class FansUiView
                 ] as [$title, $description]) : ?>
                     <article class="fu-choice"><span class="fu-choice__ornament" aria-hidden="true">✳</span><div><h3><?php echo esc_html($title); ?></h3><p><?php echo esc_html($description); ?></p>
                     <?php if ($title === 'Publication' && ($textsAvailable || $imagesAvailable)) : ?>
-                        <?php if ($textsAvailable): ?><a class="fu-link" href="#fu-author">Gérer mes textes ↓</a><?php endif; ?>
+                        <?php if ($textsAvailable): ?><a class="fu-link" href="#fu-author">Gérer mes publications ↓</a><?php endif; ?>
                         <?php if ($imagesAvailable): ?><a class="fu-link" href="#fu-images">Gérer mes images ↓</a><?php endif; ?>
                     <?php else : ?><span class="fu-closed">Indisponible pour le moment</span><?php endif; ?></div></article>
                 <?php endforeach; ?>

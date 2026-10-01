@@ -13,22 +13,24 @@ final class FansUiAuthorView
         $base = FansUiRoutes::url('creator', 'creer');
         ?>
         <section class="fu-content fu-author" id="fu-author" data-fans-private-reading aria-labelledby="fu-author-title">
-            <h2 id="fu-author-title">Mes textes</h2>
+            <h2 id="fu-author-title"><?php echo $model->archive ? 'Archives privées' : 'Mes publications'; ?></h2>
             <?php if (!$model->available) : ?>
-                <p class="fu-live">La création et la gestion des textes sont indisponibles. Le service n’est pas ouvert.</p>
+                <p class="fu-live">La création et la gestion des publications sont indisponibles. Le service n’est pas ouvert.</p>
             <?php else : ?>
                 <p>Chaque création ou modification attend une validation humaine avant de devenir publique.</p>
                 <p class="fu-footnote">Sans HTML, jusqu’à 8 000 caractères. Aucun enregistrement avant envoi. Enregistrez le texte puis ouvrez sa fiche pour choisir une image approuvée.</p>
                 <?php self::result($model); ?>
                 <?php if ($model->error !== '') : ?><p role="alert"><?php echo esc_html($model->error); ?></p><?php endif; ?>
-                <div class="fu-author__tools"><a class="fu-link" href="<?php echo esc_url($base); ?>">Nouveau texte / relire la liste</a></div>
+                <nav class="fu-author__tools" aria-label="Mes publications"><a class="fu-link" href="<?php echo esc_url($base); ?>" <?php echo !$model->archive ? 'aria-current="page"' : ''; ?>>Publications courantes</a>
+                    <a class="fu-link" href="<?php echo esc_url($base . '?archive=1'); ?>" <?php echo $model->archive ? 'aria-current="page"' : ''; ?>>Archives privées</a></nav>
+                <?php if ($model->archive) : ?><p class="fu-footnote">Publications refusées ou retirées. Leur contenu a été effacé. Seuls les états privés restent consultables ; une publication refusée peut être réécrite et soumise à nouveau.</p><?php endif; ?>
                 <?php if ($model->result === null && $model->error === '') : ?>
                     <?php if ($model->item !== null) : ?>
                         <?php self::item($model->item, $model->active, true); ?>
                         <?php FansUiAuthorImage::render($model); ?>
-                    <?php elseif ($model->active) : ?>
+                    <?php elseif ($model->active && !$model->archive) : ?>
                         <?php self::form('create', '', 0, '', $model->key); ?>
-                    <?php else : ?><p class="fu-live">Votre profil doit être actif pour créer ou modifier un texte. Le retrait reste possible.</p><?php endif; ?>
+                    <?php elseif (!$model->active) : ?><p class="fu-live">Votre profil doit être actif pour créer ou modifier une publication. Le retrait reste possible.</p><?php endif; ?>
                 <?php elseif ($model->result !== null && $model->result->get_status() >= 400 && $model->key !== '') : ?>
                     <p>Après une réponse incertaine, réessayez avec le même texte et la même clé avant de commencer une nouvelle publication.</p>
                     <?php self::form('create', '', 0, $model->text, $model->key, true, $model->result->get_status() >= 500 || $model->result->get_status() === 409); ?>
@@ -69,11 +71,11 @@ final class FansUiAuthorView
         ?>
         <article class="fu-panel fu-author__item">
             <h3><?php echo esc_html(self::STATES[$item['state']]); ?></h3>
-            <p class="fu-text-body"><?php echo esc_html($item['body'] === '' ? 'Texte effacé.' : $item['body']); ?></p>
+            <?php if ($item['body'] !== '') : ?><p class="fu-text-body"><?php echo esc_html($item['body']); ?></p><?php endif; ?>
             <?php if ($edit && $active && $item['state'] !== 'withdrawn') : ?>
                 <?php self::form('edit', $item['publication_id'], $item['revision'], $item['body']); ?>
-            <?php elseif (!$edit) : ?>
-                <a class="fu-link" href="<?php echo esc_url($base . '?publication=' . rawurlencode($item['publication_id'])); ?>">Ouvrir ce texte ↗</a>
+            <?php elseif (!$edit && $item['state'] !== 'withdrawn' && ($item['state'] !== 'rejected' || $active)) : ?>
+                <a class="fu-link" href="<?php echo esc_url($base . '?publication=' . rawurlencode($item['publication_id'])); ?>"><?php echo $item['state'] === 'rejected' ? 'Réécrire et soumettre à nouveau ↗' : 'Gérer cette publication ↗'; ?></a>
             <?php endif; ?>
             <?php if ($edit && $item['state'] !== 'withdrawn') : ?>
                 <form method="post" action="<?php echo esc_url($base); ?>" class="fu-author__withdraw">
@@ -112,17 +114,17 @@ final class FansUiAuthorView
     {
         $page = $model->listing?->get_data();
         if ($model->listing?->get_status() !== 200 || !is_array($page) || !is_array($page['items'] ?? null)) {
-            echo '<p class="fu-live">Vos textes ne peuvent pas être chargés.</p>';
+            echo '<p class="fu-live">Vos publications ne peuvent pas être chargées.</p>';
             return;
         }
-        echo '<h3 class="fu-author__list-title">Vos textes enregistrés</h3>';
-        if ($page['items'] === []) { echo '<p class="fu-live">Aucun texte enregistré.</p>'; }
+        echo '<h3 class="fu-author__list-title">' . ($model->archive ? 'Publications archivées' : 'Publications courantes') . '</h3>';
+        if ($page['items'] === []) { echo '<p class="fu-live">' . ($model->archive ? 'Aucune publication archivée.' : 'Aucune publication courante.') . '</p>'; }
         foreach ($page['items'] as $raw) {
             $item = FansUiAuthor::row($raw);
             if ($item !== null) { self::item($item, $model->active, false); }
         }
         if (is_string($page['next_cursor'] ?? null)) {
-            echo '<a class="fu-link" href="' . esc_url(FansUiRoutes::url('creator', 'creer') . '?cursor=' . rawurlencode($page['next_cursor'])) . '">Page suivante des textes</a>';
+            echo '<a class="fu-link" href="' . esc_url(FansUiRoutes::url('creator', 'creer') . '?' . ($model->archive ? 'archive=1&' : '') . 'cursor=' . rawurlencode($page['next_cursor'])) . '">Page suivante des publications</a>';
         }
     }
 }
