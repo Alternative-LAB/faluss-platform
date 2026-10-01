@@ -176,6 +176,27 @@ final class ImageService
         });
     }
 
+    /** Private metadata contract; no hash or storage path.
+     * @return array<string,mixed>|null */
+    public static function administrationItem(string $id): ?array
+    {
+        if (!current_user_can('manage_options') || !ImagesModule::available() || !ImageStorage::validId($id)) { return null; }
+        $row = self::row($id);
+        return $row === null ? null : array_intersect_key($row, array_flip(['image_id','creator_id','revision','state','created_at','updated_at']));
+    }
+
+    /** @return array<string,int>|null */
+    public static function administrationCounts(string $creatorId): ?array
+    {
+        if (!current_user_can('manage_options') || !ImagesModule::available() || !ImageStorage::validId($creatorId)) { return null; }
+        global $wpdb;
+        $rows = $wpdb->get_results($wpdb->prepare('SELECT state,COUNT(*) AS total FROM `' . ImageSchema::table() . '` WHERE creator_id=%s GROUP BY state', $creatorId), 'ARRAY_A');
+        if (!is_array($rows) || $wpdb->last_error !== '') { return null; }
+        $counts = ['pending'=>0,'approved'=>0,'rejected'=>0,'withdrawn'=>0];
+        foreach ($rows as $row) { if (!isset($counts[$row['state']]) || !is_numeric($row['total'])) { return null; } $counts[$row['state']] = (int) $row['total']; }
+        return $counts;
+    }
+
     /** @return array<mixed>|\WP_Error */
     public static function decisions(string $id): array|\WP_Error
     {

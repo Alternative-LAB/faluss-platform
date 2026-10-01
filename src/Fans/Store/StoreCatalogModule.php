@@ -23,6 +23,9 @@ final class StoreCatalogModule implements Module
         }
     }
 
+    public static function available(): bool
+    { return self::enabledForFans() && CreatorProfileSchema::ready() && StoreCatalogSchema::ready(); }
+
     public static function activate(): void
     {
         if (self::enabledForFans() && CreatorProfileSchema::ready()) {

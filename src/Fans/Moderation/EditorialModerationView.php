@@ -11,7 +11,7 @@ use Faluss\Platform\Fans\Profiles\EditorialService;
 final class EditorialModerationView
 {
     public static function url(?string $state = null): string
-    { return add_query_arg(['page' => ModerationPanel::PAGE, 'view' => 'editorial', 'state' => $state ?? (ModerationPanel::field('state', $_GET) ?: 'pending')], admin_url('admin.php')); }
+    { return ModerationPanel::url(['view' => 'editorial', 'state' => $state ?? (ModerationPanel::field('state', $_GET) ?: 'pending')]); }
 
     public static function render(?\WP_REST_Response $result): void
     {

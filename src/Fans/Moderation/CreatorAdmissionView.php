@@ -12,8 +12,7 @@ final class CreatorAdmissionView
 {
     public static function url(string $status = 'pending', string $item = ''): string
     {
-        return add_query_arg(array_filter(['page' => ModerationPanel::PAGE, 'view' => 'profiles',
-            'status' => $status, 'item' => $item]), admin_url('admin.php'));
+        return ModerationPanel::url(['view' => 'profiles', 'status' => $status, 'item' => $item]);
     }
 
     public static function nav(): void

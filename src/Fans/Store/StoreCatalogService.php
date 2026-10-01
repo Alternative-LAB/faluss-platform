@@ -8,6 +8,10 @@ use Faluss\Platform\Fans\Profiles\CreatorProfileService;
 
 final class StoreCatalogService
 {
+    /** @return array<string,mixed>|null Private read includes archives; never grants purchase rights. */
+    public static function administrationItem(string $id): ?array
+    { return StoreCatalogModule::available() && current_user_can('manage_options') && self::uuidValid($id) ? self::byId($id) : null; }
+
     /** @return array{product_id:string,creator_id:string,category:string,category_label:string,visibility:string,created_at:string,archived:bool}|\WP_Error */
     public static function create(mixed $creatorId, mixed $category, mixed $requestKey): array|\WP_Error
     {
@@ -187,6 +191,22 @@ final class StoreCatalogService
         return $product === null
             ? self::error('product_not_found', 404)
             : PurchaseGate::refusePurchase($product['archived'] ? PurchaseGate::EXTERNAL_ADULT : $product['category']);
+    }
+
+    /** Private complete catalogue, no purchase authority.
+     * @return array{items:list<array<string,mixed>>,next_cursor:?string}|\WP_Error */
+    public static function administrationList(string $cursor = '', string $state = 'current'): array|\WP_Error
+    {
+        if (!current_user_can('manage_options')) { return self::error('admin_required',403); }
+        if (($cursor!==''&&!self::uuidValid($cursor))||!in_array($state,['current','archive'],true)) {return self::error('invalid_catalog_page',400);}
+        if (!StoreCatalogModule::available() || ($table=StoreCatalogSchema::table())===null) {return self::error('store_unavailable',503);}
+        global $wpdb;
+        $condition=$state==='archive'?'(archived=1 OR category=%s)':'(archived=0 AND category<>%s)';
+        $rows=$wpdb->get_results($wpdb->prepare('SELECT product_id,creator_id,category,visibility,created_at,archived FROM `'.$table.'` WHERE '.$condition.' AND product_id>%s ORDER BY product_id LIMIT 21',PurchaseGate::EXTERNAL_ADULT,$cursor),'ARRAY_A');
+        if(!is_array($rows)||$wpdb->last_error!==''){return self::error('store_unavailable',503);}
+        $more=count($rows)>20;$items=[];
+        foreach(array_slice($rows,0,20) as $row){$item=self::product($row);if($item===null){return self::error('store_unavailable',503);}$items[]=$item;}
+        return ['items'=>$items,'next_cursor'=>$more?$items[19]['product_id']:null];
     }
 
     /** @return array{product_id:string,creator_id:string,category:string,category_label:string,visibility:string,created_at:string,archived:bool}|null */
