@@ -10,7 +10,17 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Corrigé
 
-- Fix Fans navigation, image composer and local sessions (`f209b71`)
+- Fans : cases de navigation fixes, libellés flottants au survol/focus, aide tactile et logo SVG officiel ; retrait des commentaires internes du profil et d’Explorer.
+- Publication → Image → retour dans le compositeur courant avec conservation du texte, dépôt/aperçu privés et sélection des images approuvées. Galerie privée distincte, anciens formulaires et liens compatibles, scroll/focus/historique stabilisés.
+- Sessions locales des Fans/Créateurs liés : huit heures fixes, cookie persistant à échéance serveur exacte, déconnexion protégée près de la cloche, invalidation serveur et retrait des vues privées des autres onglets. Administrateurs WordPress et Identity Me inchangés.
+- Correctif et preuves : #135, `f209b71`.
+
+### Documentation et compatibilité
+
+- Aucun schéma métier, flag, secret, paiement ou site de production modifié. Les sessions déjà ouvertes gardent leur échéance initiale ; les huit heures s’appliquent aux nouvelles connexions.
+- Identity ne fournit pas de sélecteur de compte : après déconnexion locale, l’aide décrit une action explicite et manuelle sur Me. Aucune déconnexion centrale silencieuse.
+- Un flux SSO propre réussit en HTTPS isolé ; deux flux partageant le cookie navigateur peuvent provoquer un refus selon l’ordre des retours. Cause reproduite localement, pas diagnostic confirmé du site cible.
+- 314 tests PHP, 294 assertions SQL/services, recettes réelles WordPress/MariaDB et navigateur, captures ordinateur/mobile. Voir `docs/evidence/fans-ui-navigation-fix/README.md`. Installation, Elementor cible et recette de production restent à l’exploitant.
 
 ## [0.12.0] - 2026-10-01
 
