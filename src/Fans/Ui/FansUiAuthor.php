@@ -14,6 +14,7 @@ final class FansUiAuthor
 {
     public bool $available = false;
     public bool $active = false;
+    public bool $archive = false;
     public ?\WP_REST_Response $result = null;
     public ?\WP_REST_Response $listing = null;
     /** @var array{publication_id:string,revision:int,body:string,state:string}|null */
@@ -31,6 +32,7 @@ final class FansUiAuthor
             || ($profile = CreatorProfileService::own()) === null) { return $view; }
         $view->available = true;
         $view->active = $profile['status'] === 'active';
+        $view->archive = self::field('archive', $_GET) === '1';
         $view->key = wp_generate_uuid4();
         if ($composeOnly) { return $view; }
         $post = ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && !isset($_POST['image_action']);
@@ -44,7 +46,7 @@ final class FansUiAuthor
             $response = TextPublicationService::validId($item)
                 ? self::request('GET', 'text-publications/' . $item . '/private') : new \WP_REST_Response([], 400);
             $view->item = $response->get_status() === 200 ? self::row($response->get_data()) : null;
-            if ($view->item === null) { $view->error = 'Ce texte est indisponible ou ne vous appartient pas.'; }
+            if ($view->item === null) { $view->error = 'Cette publication est indisponible ou ne vous appartient pas.'; }
             else {
                 $raw = $response->get_data();
                 $view->imageId = TextPublicationService::validId($raw['image_id'] ?? null) ? $raw['image_id'] : null;
@@ -52,7 +54,7 @@ final class FansUiAuthor
             }
         }
         $cursor = $post ? '' : self::field('cursor', $_GET);
-        $view->listing = self::request('GET', 'text-publications/mine', ['per_page' => 6] + ($cursor === '' ? [] : ['cursor' => $cursor]));
+        $view->listing = self::request('GET', 'text-publications/mine', ['per_page' => 6, 'bucket' => $view->archive ? 'archive' : 'current'] + ($cursor === '' ? [] : ['cursor' => $cursor]));
         return $view;
     }
 

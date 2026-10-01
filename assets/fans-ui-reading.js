@@ -143,8 +143,26 @@
       const fragment = document.createDocumentFragment();
       for (const item of page.items) {
         const card = node('article', '', 'fu-panel fu-text-card');
-        card.append(node('p', 'Texte approuvé', 'fu-panel__kicker'));
-        card.append(node('p', item.body, 'fu-text-body'));
+        card.append(node('p', 'Publication', 'fu-panel__kicker'));
+        const body = node('p', item.body.length > 420 ? item.body.slice(0, 420) + '…' : item.body, 'fu-text-body');
+        card.append(body);
+        if (item.body.length > 420) {
+          const expand = node('button', 'Lire la suite', 'fu-link');
+          expand.type = 'button';
+          expand.setAttribute('aria-expanded', 'false');
+          expand.addEventListener('click', () => {
+            const open = expand.getAttribute('aria-expanded') !== 'true';
+            body.textContent = open ? item.body : item.body.slice(0, 420) + '…';
+            expand.setAttribute('aria-expanded', String(open));
+            expand.textContent = open ? 'Réduire la publication' : 'Lire la suite';
+          });
+          card.append(expand);
+        }
+        if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(item.updated_at)) {
+          const time = node('time', 'Mise à jour le ' + item.updated_at.slice(0, 10).split('-').reverse().join('/'), 'fu-footnote');
+          time.dateTime = item.updated_at.replace(' ', 'T') + 'Z';
+          card.append(time);
+        }
         if (root.dataset.imageDelivery === 'true') imageControl(card, item, current, signal);
         if (creator === null) {
           const link = node('a', 'Voir la fiche de l’auteur ↗', 'fu-link');
