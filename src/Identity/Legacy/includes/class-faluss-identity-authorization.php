@@ -181,7 +181,10 @@ final class Faluss_Identity_Authorization {
             self::render_error( __( 'Choisissez une réponse valide.', 'faluss-identity' ), 400 );
         }
 
-        if ( class_exists( 'Faluss_Identity_Consent' ) && Faluss_Identity_Consent::ready() ) { $request['consent_mode'] = 'grant'; }
+        if ( ! class_exists( 'Faluss_Identity_Consent' ) || ! Faluss_Identity_Consent::ready() ) {
+            self::render_error( __( 'Votre accord ne peut pas être enregistré pour le moment. Réessayez plus tard.', 'faluss-identity' ), 503 );
+        }
+        $request['consent_mode'] = 'grant';
         self::complete_authorization( $request, $faluss_id, false );
     }
 

@@ -33,6 +33,33 @@ const { execFileSync } = require('node:child_process');
       if (role !== 'guest') await contexts[role].addCookies(Object.entries(seed.sessions[role]).map(([name,value])=>({ name,value,domain:'127.0.0.1',path:'/' })));
     }
     const member=contexts.member, admin=contexts.admin, other=contexts.other;
+    // Simulate an updater replacing an already active plugin: no activation or admin visit.
+    sql("DROP TABLE wp_faluss_identity_consents, wp_faluss_identity_consents_clients; DELETE FROM wp_options WHERE option_name='faluss_identity_consent_schema'");
+    let upgradeResponse = await get(member,startUrl());
+    assert.equal(upgradeResponse.status(),200);
+    assert.ok(code(await approve(member,upgradeResponse)));
+    upgradeResponse = await get(member,startUrl());
+    if (process.env.EXPECT_UPGRADE_BUG === '1') {
+      assert.equal(upgradeResponse.status(),200);
+      assert.ok(code(await approve(member,upgradeResponse)));
+      assert.equal(sql("SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='wp_faluss_identity_consents'"),'0');
+      results.push('BASELINE: two successful authorizations both prompt; consent storage absent without admin visit');
+      console.log(JSON.stringify(results));
+      return;
+    }
+    assert.ok(code(upgradeResponse));
+    assert.equal(sql('SELECT COUNT(*) FROM wp_faluss_identity_consents'),'1');
+    assert.equal(sql("SELECT first_party FROM wp_faluss_identity_clients WHERE client_id='consent-fixture'"),'0');
+    results.push('Updater without admin visit: member approval persisted, next authorization reuses it, Fans remains third party');
+    // A damaged already installed store must fail closed, not issue another unremembered code.
+    sql('DELETE FROM wp_faluss_identity_consents; ALTER TABLE wp_faluss_identity_consents ENGINE=MyISAM');
+    const codesBefore=sql('SELECT COUNT(*) FROM wp_faluss_identity_auth_codes');
+    upgradeResponse=await approve(member,await get(member,startUrl()));
+    assert.equal(upgradeResponse.status(),503);
+    assert.equal(sql('SELECT COUNT(*) FROM wp_faluss_identity_auth_codes'),codesBefore);
+    assert.equal(sql('SELECT COUNT(*) FROM wp_faluss_identity_consents'),'0');
+    sql('ALTER TABLE wp_faluss_identity_consents ENGINE=InnoDB');
+    results.push('Corrupt installed consent storage: approval HTTP 503, no grant and no code issued');
     const page=await member.newPage();
     for (const width of [1440,390]) {
       await page.setViewportSize({ width,height:900 });

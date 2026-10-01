@@ -14,7 +14,7 @@ final class IdentityCharacterizationTest extends TestCase
         $legacy = $root . '/src/Identity/Legacy/includes/';
         $files = [
             'class-faluss-identity-admin-diagnostic.php' => 'daf9a4df9ff17ca375ed95e4ae59d81b7447dbf5a3702880e77e2c6fdac64a64',
-            'class-faluss-identity-authorization.php' => 'd0f35738a183fee4dd33f6bb6d06acdfb28b51caf4ed3afdbcfe00c151ead10e',
+            'class-faluss-identity-authorization.php' => '7248022e748b646463b74c79fd0eaf3c1fedde2882dfa8da53351ec4851922bf',
             'class-faluss-identity-elementor-widget.php' => 'f7f8236e85f2e0bdae94d919106098d39548fa0b97854ee8894ffc092dd0df62',
             'class-faluss-identity-front-preferences.php' => '292eb4c3da88a5486618da45126658d48cd3e7693fb2c15c68feaaad06ffc38b',
             'class-faluss-identity-member-session.php' => '4947ea1a8b243f38fd96377cccef0f1275873dca547f2822b5bd6fdb63a5571d',
