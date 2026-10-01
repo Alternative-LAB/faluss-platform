@@ -16,6 +16,7 @@
     "1440: scrolled rail/overlay, wheel lock, image return draft, Escape, close/reopen x3, browser back/forward, sidebar navigation",
     "390: scrolled rail/overlay, wheel lock, image return draft, Escape, close/reopen x3, browser back/forward, sidebar navigation",
     "Touch label then navigation; no active persistent caption",
-    "Real private upload/pending/approval/preview/selection/association, guest and nonowner denied, publication pending only, concurrent withdrawal yields honest partial outcome and no resend"
+    "Real private upload/pending/approval/preview/selection/association, guest and nonowner denied, publication pending only, concurrent withdrawal yields honest partial outcome and no resend",
+    "Creator logout clears composer/private UI in both tabs and replayed member cookie cannot reopen profile"
   ]
 }

@@ -65,6 +65,12 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
   await p.locator('#fu-create .fu-author__form button[type=submit]').click();await p.waitForFunction(()=>document.querySelector('[data-create-result]').textContent.includes('Texte enregistré. Association'));
   assert.equal(await p.locator('#fu-create .fu-author__form button[type=submit]').isDisabled(),true);assert.ok(await p.locator('[data-create-result] a').isVisible());
   checks.push('Real private upload/pending/approval/preview/selection/association, guest and nonowner denied, publication pending only, concurrent withdrawal yields honest partial outcome and no resend');
+  await p.locator('[data-create-close]').last().click();await p.waitForTimeout(100);
+  const second=await contexts.member.newPage();await second.goto(base+'/app/creator/progression');await second.locator('[data-fans-logout]').waitFor();await p.bringToFront();
+  await p.getByRole('button',{name:'Déconnexion de Fans'}).click();await p.waitForURL('**/explorer?faluss_fans_session=closed');await second.waitForURL('**/explorer?faluss_fans_session=closed');
+  assert.equal(await p.locator('[data-fans-logout]').count(),0);assert.equal(await second.locator('[data-fans-logout]').count(),0);
+  await contexts.member.addCookies(Object.entries(s.sessions.member.cookies).map(([name,value])=>({name,value,url:base})));assert.equal((await contexts.member.request.get(base+'/app/creator/mon-profil')).status(),403);
+  checks.push('Creator logout clears composer/private UI in both tabs and replayed member cookie cannot reopen profile');
   assert.deepEqual(errors,[]);fs.writeFileSync(out+'/browser.json',JSON.stringify({browser:browser.version(),checks},null,2));console.log('PASS '+checks.length+' grouped real WordPress/browser scenarios');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e.stack);process.exitCode=1;});

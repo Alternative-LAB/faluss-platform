@@ -24,6 +24,8 @@ Elementor de fans.faluss.me ; installation et recette cible restent à l’explo
 - À scrollY 1504, le verrou de scroll sur body faisait sortir la sidebar sticky
   du viewport (y = -1504). Le verrou porte sur le viewport, avec restauration de
   l’état précédent et du scroll ; un seul état d’historique et une seule superposition.
+  L’état d’historique est propre au document courant : après une nouvelle navigation,
+  fermer le menu ne réactive plus une ancienne entrée du compositeur.
 - /app/creator/creer garde une fonction autonome : gestion des publications,
   archives et formulaire HTML sans JS. Les quatre anciennes cartes sont retirées.
   Galerie indépendante /app/creator/images ; anciennes sélections image redirigées
@@ -84,6 +86,11 @@ La session Me initiale est préparée par fixture : aucun envoi OTP n’est test
 
 - [Mesures avant](before.json), [scénarios UI](browser.json),
   [HTTP/session](session-http.json), [navigateur/session](session-browser.json).
+- PHPUnit : 314 tests / 5271 assertions ; PHPStan sans erreur, deux dépréciations
+  PHP 8.5 préexistantes. Recette SQL/services complète : 294 assertions PASS.
+  17 groupes navigateur UI, 20 contrôles HTTP/session, 3 groupes navigateur/session.
+  La première CI signalait l’adaptateur de l’ancien formulaire d’images ; il vérifie
+  maintenant la redirection 307 et le POST multipart sur la galerie distincte.
 - 320, 390, 700, 701, 1024 et 1440 px : Fan/Créateur, toutes les cases, noms
   au focus/survol, absence de déplacement du contenu et de débordement.
 - Publication → Image → retour, texte inchangé, scroll, cycles de fermeture/réouverture,

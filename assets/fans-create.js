@@ -8,6 +8,9 @@
   const main=document.querySelector('.fu-main'),rail=document.querySelector('.fu-rail'),root=document.documentElement;
   const panels=[...dialog.querySelectorAll('[data-create-panel]')],choices=[...dialog.querySelectorAll('[data-create-type]')];
   const nav=rail.querySelector('[data-create-open]');
+  // A previous document's composer entry must never reopen a new document's overlay.
+  const entryId=globalThis.crypto?.randomUUID?.()||String(Date.now())+Math.random();
+  if(history.state?.fansCreate){const state={...history.state};delete state.fansCreate;history.replaceState(state,'',location.href);}
   let opened=false,previous=null,previousActive=null,oldOverflow='',position=0,closing=false,queued=null;
   const media=new window.FansCreateMedia(dialog,()=>show('publication',true));
   function show(type,returning=false){
@@ -25,7 +28,7 @@
     dialog.hidden=false;main.inert=true;
     // Lock the viewport, not body: body overflow would become the sticky rail's scroll container.
     root.style.overflow='hidden';
-    if(push)history.pushState({...history.state,fansCreate:true},'',location.href);
+    if(push)history.pushState({...history.state,fansCreate:entryId},'',location.href);
     show('selector');
   }
   function close(fromHistory=false,restoreFocus=true){
@@ -33,7 +36,7 @@
     nav?.classList.remove('is-active');nav?.setAttribute('aria-expanded','false');previousActive?.classList.add('is-active');
     window.scrollTo({top:position,behavior:'instant'});
     if(restoreFocus&&previous?.isConnected)previous.focus({preventScroll:true});
-    if(!fromHistory&&history.state?.fansCreate===true){closing=true;history.back();}
+    if(!fromHistory&&history.state?.fansCreate===entryId){closing=true;history.back();}
   }
   document.addEventListener('click',event=>{
     const trigger=event.target.closest('[data-create-open]');
@@ -58,6 +61,6 @@
     const index=focusable.indexOf(document.activeElement),next=index<0?(event.shiftKey?focusable.length-1:0):(index+(event.shiftKey?-1:1)+focusable.length)%focusable.length;
     event.preventDefault();focusable[next]?.focus({preventScroll:true});
   });
-  window.addEventListener('popstate',()=>{closing=false;if(history.state?.fansCreate===true){if(!opened)open(nav,false);}else close(true);if(queued){const trigger=queued;queued=null;open(trigger);}});
+  window.addEventListener('popstate',()=>{closing=false;if(history.state?.fansCreate===entryId){if(!opened)open(nav,false);}else close(true);if(queued){const trigger=queued;queued=null;open(trigger);}});
   window.addEventListener('pagehide',()=>close(true,false));
 })();

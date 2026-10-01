@@ -7,6 +7,9 @@ namespace Faluss\Platform\Fans\Sso {
 namespace {
     require __DIR__ . '/bootstrap.php';
     function wp_unslash(string $value): string { return $value; }
+    // No WordPress authentication cookies in this adapter; real expiry/logout has its own WP recipe.
+    function wp_parse_auth_cookie(string $cookie = '', string $scheme = ''): false { return false; }
+    function wp_safe_redirect(string $url, int $status = 302): void { header('Location: ' . $url, true, $status); }
     function wp_create_nonce(string $action): string { return 'fixture-' . $action; }
     function wp_nonce_field(string $action, string $name = '_wpnonce', bool $referer = true, bool $echo = true): string {
         $html = '<input type="hidden" name="' . esc_attr($name) . '" value="fixture-' . esc_attr($action) . '">';
