@@ -165,7 +165,7 @@ final class ImageService
         if (($cursor !== '' && !ImageStorage::validId($cursor)) || !in_array($scope, ['all', 'live', 'closed'], true)) { return self::error('invalid_image_cursor', 400); }
         return self::locked(static function () use ($admin, $profile, $cursor, $scope): array|\WP_Error {
             global $wpdb;
-            $sql = 'SELECT image_id,revision,state,created_at FROM `' . ImageSchema::table() . '` WHERE image_id>%s';
+            $sql = 'SELECT image_id,revision,state,created_at' . ($admin ? ',creator_id' : '') . ' FROM `' . ImageSchema::table() . '` WHERE image_id>%s';
             $args = [$cursor];
             if (!$admin) { $sql .= ' AND creator_id=%s'; $args[] = $profile['creator_id']; }
             if ($scope !== 'all') { $sql .= ' AND state IN (%s,%s)'; $args = array_merge($args, $scope === 'live' ? ['pending', 'approved'] : ['rejected', 'withdrawn']); }
