@@ -6,12 +6,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+## [0.11.1] - 2026-10-01
+
 ### Corrigé
 
-- Préparation opérateur de la messagerie Fans avant toute attestation ou admission : commandes WP-CLI protégées pour installer/vérifier les six tables et la planification horaire, inspecter la santé et exécuter une purge bornée avec échec explicite. Aucun flag ni habilitation n’est modifié automatiquement.
-- Ordre d’enregistrement du sous-menu de modération après son parent Faluss : les schémas de rétention présents ne provoquent plus le refus WordPress du panel pour un modérateur habilité.
-- Refus de l’administration des preuves privées avant l’envoi des en-têtes pour retourner HTTP 403 à un administrateur non habilité, sans afficher de preuve.
-- Procédure d’ouverture, fermeture des envois et rétention, avec décisions humaines de notification/recours et recette WordPress/MariaDB isolée.
+- Make Fans messaging preparation safe before admission (#125) (`66c5dc0`)
 
 ## [0.11.0] - 2026-09-30
 
