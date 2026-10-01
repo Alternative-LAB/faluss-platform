@@ -31,7 +31,9 @@ final class FansUiNotifications
         if(!in_array($role,['fan','creator'],true)){return;}$count=NotificationService::count();
         echo '<div class="fu-notifications-bar"><a class="fu-link fu-bell" href="'.esc_url(FansUiRoutes::url($role,'notifications')).'">';
         echo '<svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 17h14l-2-3V9a5 5 0 0 0-10 0v5l-2 3ZM10 20h4"/></svg><span>Notifications</span>';
-        echo $count===null?'<span class="fu-footnote">Indisponibles</span>':'<span class="fu-notification-count" aria-label="'.(int)$count.' non lues">'.(int)$count.'</span>';echo '</a></div>';
+        echo $count===null?'<span class="fu-footnote">Indisponibles</span>':'<span class="fu-notification-count" aria-label="'.(int)$count.' non lues">'.(int)$count.'</span>';echo '</a>';
+        \Faluss\Platform\Fans\Sso\FansLocalSession::renderControl();
+        echo '</div>';
     }
     /** @param array<string,mixed> $row */
     public static function link(array $row,string $role): ?string
@@ -43,7 +45,7 @@ final class FansUiNotifications
         if(str_starts_with($kind,'profile_')){return $own['creator_id']===$id?FansUiRoutes::url('fan','espace'):null;}
         if(str_starts_with($kind,'editorial_')){return $own['creator_id']===$id?FansUiRoutes::url('creator','mon-profil'):null;}
         if(str_starts_with($kind,'publication_')){$item=TextPublicationService::get($id,true);return is_array($item)&&$item['creator_id']===$own['creator_id']?add_query_arg(['publication'=>$id,'archive'=>in_array($item['state'],['rejected','withdrawn'],true)?'1':'0'],FansUiRoutes::url('creator','creer')):null;}
-        if(str_starts_with($kind,'image_')){return ImageService::ownItem($id)!==null?add_query_arg('image',$id,FansUiRoutes::url('creator','creer')).'#fu-images':null;}
+        if(str_starts_with($kind,'image_')){return ImageService::ownItem($id)!==null?add_query_arg('image',$id,FansUiRoutes::url('creator','images')).'#fu-images':null;}
         return null;
     }
     public static function label(string $kind): string

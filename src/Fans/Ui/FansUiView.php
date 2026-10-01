@@ -35,14 +35,15 @@ final class FansUiView
     /** @var array<string,array{string,string,string,string}> */
     private const PAGES = [
         'fan:notifications' => ['Votre espace', 'Notifications', '', 'Les décisions et échanges qui vous concernent.'],
+        'creator:images' => ['Espace créateur', 'Mes images privées', 'creer', 'Déposez, consultez et gérez vos images.'],
         'creator:notifications' => ['Espace créateur', 'Notifications', '', 'Les décisions et échanges qui vous concernent.'],
         'profile-unavailable' => ['Découvrir', 'Profil indisponible', '', 'Ce profil n’est pas public ou n’existe pas.'],
         'creator-unavailable' => ['Votre espace Fans', 'Espace créateur indisponible', '', 'Cet espace nécessite un profil créateur associé à votre compte.'],
         'visitor:connexion' => ['Votre espace Fans', 'Continuer avec Faluss', '', 'Connectez-vous via Faluss Identity pour accéder à cet espace personnel.'],
-        'visitor:explorer' => ['Découvrir', 'Explorer les créateurs', 'explorer', 'Découvrez les présentations approuvées. Les profils incomplets restent signalés.'],
+        'visitor:explorer' => ['Découvrir', 'Explorer les créateurs', 'explorer', 'Explorez les univers des créateurs.'],
         'visitor:hof' => ['Hall of Fame', 'Le Hall of Fame', 'hof', 'Le Hall of Fame se prépare. Retrouvez ici les prochaines sessions de création.'],
         'fan:accueil' => ['Espace Fans', 'Bienvenue dans votre espace', 'accueil', 'Les parcours Fans s’ouvrent progressivement. Explorer permet de consulter les profils créateurs publiés.'],
-        'fan:explorer' => ['Découvrir', 'Explorer les créateurs', 'explorer', 'Découvrez les profils et présentations approuvés par la modération.'],
+        'fan:explorer' => ['Découvrir', 'Explorer les créateurs', 'explorer', 'Explorez les univers des créateurs.'],
         'fan:hof' => ['Hall of Fame', 'Le Hall of Fame', 'hof', 'Les prochaines sessions du Hall of Fame apparaîtront ici.'],
         'fan:hof/session' => ['Hall of Fame', 'Session HoF', 'hof', 'Aucune session active ne peut être affichée ou rejointe pour le moment.'],
         'fan:classements' => ['Hall of Fame', 'Classements', 'hof', 'Les classements ne sont pas encore disponibles. Aucun rang n’est estimé.'],
@@ -50,16 +51,16 @@ final class FansUiView
         'fan:messages' => ['Échanges', 'Messages', 'messages', 'La messagerie n’est pas encore disponible. Aucun message ne peut être envoyé.'],
         'fan:espace' => ['Votre espace', 'Espace personnel', 'espace', 'La progression et les gains PC ne sont pas encore disponibles.'],
         'creator:accueil' => ['Espace créateur', 'Votre espace Fans', 'accueil', 'Retrouvez vos publications, votre présentation et vos conversations.'],
-        'creator:explorer' => ['Découvrir', 'Explorer les créateurs', 'explorer', 'Découvrez les profils et présentations approuvés par la modération.'],
+        'creator:explorer' => ['Découvrir', 'Explorer les créateurs', 'explorer', 'Explorez les univers des créateurs.'],
         'creator:hof' => ['Hall of Fame', 'Le Hall of Fame', 'hof', 'Les prochaines sessions du Hall of Fame apparaîtront ici.'],
         'creator:hof/session' => ['Hall of Fame', 'Session HoF', 'hof', 'Aucune session active ne peut être affichée ou rejointe pour le moment.'],
         'creator:classements' => ['Hall of Fame', 'Classements', 'hof', 'Les classements seront présentés à leur ouverture.'],
         'creator:messages' => ['Échanges', 'Messages', 'messages', 'La messagerie n’est pas encore disponible. Aucun message ne peut être envoyé.'],
         'creator:progression' => ['Espace créateur', 'Progression', 'progression', 'Votre progression apparaîtra ici lorsque le Hall of Fame ouvrira.'],
-        'creator:creer' => ['Espace créateur', 'Que souhaitez-vous créer ?', 'creer', 'Vos publications et images sont examinées avant publication. Prestations, services et produits restent indisponibles.'],
+        'creator:creer' => ['Espace créateur', 'Mes publications', 'creer', 'Retrouvez vos publications et leurs archives privées.'],
         'creator:boutique' => ['Espace créateur', 'Ma boutique', 'boutique', 'La gestion des offres, les réservations et les commandes ne sont pas encore disponibles.'],
         'creator:mon-profil' => ['Espace créateur', 'Mon profil', 'mon-profil', 'Gérez votre présentation publique et suivez son état de modération.'],
-        'public-profile' => ['Découvrir', 'Profil créateur', 'explorer', 'Seuls les champs éditoriaux approuvés sont présentés ici.'],
+        'public-profile' => ['Découvrir', 'Profil créateur', 'explorer', 'Découvrez son univers et ses publications.'],
     ];
 
     public static function render(string $role, string $view, ?string $creatorId, int $status = 200, string $signIn = '', ?FansUiAuthor $author = null, ?FansUiAdmission $admission = null, ?FansUiEditorial $editorial = null, ?FansUiImages $images = null, ?FansUiMessages $messages = null, ?FansUiAuthor $composer = null, ?FansUiNotifications $notifications = null): void
@@ -79,7 +80,10 @@ final class FansUiView
         if ($messages !== null) { wp_enqueue_style('faluss-fans-messages', plugins_url('assets/fans-messages.css', dirname(__DIR__, 3) . '/faluss-platform.php'), ['faluss-fans-ui-v2'], (string)constant('FALUSS_PLATFORM_VERSION')); }
         wp_enqueue_script('faluss-fans-ui-v2', plugins_url('assets/fans-ui-v2.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true);
         wp_enqueue_script('faluss-fans-reading', plugins_url('assets/fans-ui-reading.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true);
-        if ($role === 'creator') { wp_enqueue_script('faluss-fans-create', plugins_url('assets/fans-create.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true); }
+        $sessionExpiry = \Faluss\Platform\Fans\Sso\FansLocalSession::expires();
+        if ($sessionExpiry !== null) { wp_enqueue_script('faluss-fans-session', plugins_url('assets/fans-session.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true); }
+        wp_enqueue_script('faluss-fans-navigation', plugins_url('assets/fans-navigation.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true);
+        if ($role === 'creator') { wp_enqueue_script('faluss-fans-create-media', plugins_url('assets/fans-create-media.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true); wp_enqueue_script('faluss-fans-create', plugins_url('assets/fans-create.js', dirname(__DIR__, 3) . '/faluss-platform.php'), ['faluss-fans-create-media'], (string) constant('FALUSS_PLATFORM_VERSION'), true); }
         if ($editorial !== null || $images !== null) { wp_enqueue_script('faluss-fans-private-images', plugins_url('assets/fans-private-images.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true); }
         status_header($status);
         ?>
@@ -91,7 +95,7 @@ final class FansUiView
 <title><?php echo esc_html($title); ?> · Faluss Fans</title>
 <?php wp_head(); ?>
 </head>
-<body class="faluss-fans-ui-page<?php echo $messages!==null?' fu-messages-page':''; ?>">
+<body class="faluss-fans-ui-page<?php echo $messages!==null?' fu-messages-page':''; ?>" <?php if ($sessionExpiry !== null): ?>data-fans-session="<?php echo esc_url(rest_url('faluss-fans/v1/session')); ?>" data-session-nonce="<?php echo esc_attr(wp_create_nonce('wp_rest')); ?>" data-session-expires="<?php echo $sessionExpiry; ?>" data-session-now="<?php echo time(); ?>" data-session-public="<?php echo esc_attr((string) parse_url(home_url('/app/fan/explorer'), PHP_URL_PATH)); ?>"<?php endif; ?>>
 <a class="fu-skip" href="#fu-main">Aller au contenu</a>
 <div class="fu-app" data-fans-role="<?php echo esc_attr($role); ?>">
     <?php self::navigation($role, $page[2]); ?>
@@ -104,6 +108,9 @@ final class FansUiView
             <p class="fu-banner__subtitle"><?php echo esc_html($page[3]); ?></p>
         </header>
         <?php if ($role === 'visitor' && !$errorView) : ?>
+            <?php if (isset($_GET['faluss_fans_session']) && $_GET['faluss_fans_session'] === 'closed'): ?>
+                <section class="fu-panel fu-session-notice"><h2>Vous êtes déconnecté de Fans</h2><p>Cette déconnexion concerne uniquement Fans. Elle ne ferme pas vos sessions sur Faluss Identity ou les autres sites.</p><details><summary>Utiliser un autre compte</summary><p>Fans ne dispose pas encore d’un sélecteur de compte Identity. Ouvrez Faluss Identity, déconnectez-vous explicitement de ce compte puis connectez-vous au compte souhaité avant de revenir sur Fans.</p><a class="fu-link" href="https://faluss.me/login" target="_blank" rel="noopener">Gérer ma connexion Faluss Identity ↗</a></details></section>
+            <?php endif; ?>
             <section class="fu-signin fu-panel" aria-label="Connexion Faluss">
                 <div><h2><?php echo $view === 'connexion' ? 'Connexion requise' : 'Retrouvez votre espace'; ?></h2>
                 <p>Connectez-vous ou créez votre compte sur Faluss Identity. Vous reviendrez sur cette page après connexion.</p>
@@ -125,9 +132,10 @@ final class FansUiView
             <?php self::publicProfile($api, $creatorId, $role); ?>
             <?php FansUiReading::publications($creatorId); ?>
         <?php elseif ($view === 'creer') : ?>
-            <?php if ($author === null || !$author->archive) { self::creationChoices($author !== null && $author->available, $images !== null && $images->available); } ?>
+            <p class="fu-content"><a class="fu-link" href="#fu-author" data-create-open>Créer une publication</a> · <a class="fu-link" href="<?php echo esc_url(FansUiRoutes::url('creator', 'images')); ?>">Gérer ma galerie privée</a></p>
             <?php if ($author !== null) { FansUiAuthorView::render($author); } ?>
-            <?php if ($images !== null && ($author === null || !$author->archive)) { FansUiImagesView::render($images); } ?>
+        <?php elseif ($view === 'images' && $images !== null) : ?>
+            <?php FansUiImagesView::render($images); ?>
         <?php elseif ($view === 'messages' && $messages !== null) : ?>
             <?php FansUiMessageView::render($messages); ?>
         <?php elseif ($view === 'classement-fans') : ?>
@@ -162,7 +170,7 @@ final class FansUiView
     {
         ?>
         <aside class="fu-rail">
-            <a class="fu-brand" href="<?php echo esc_url(FansUiRoutes::url($role === 'visitor' ? 'fan' : $role, $role === 'visitor' ? 'explorer' : 'accueil')); ?>" aria-label="Faluss Fans — <?php echo $role === 'visitor' ? 'Explorer' : 'accueil'; ?>" title="Faluss Fans — <?php echo $role === 'visitor' ? 'Explorer' : 'accueil'; ?>">F</a>
+            <a class="fu-brand" href="<?php echo esc_url(home_url('/app')); ?>" aria-label="Faluss Fans — <?php echo $role === 'visitor' ? 'Explorer' : 'accueil'; ?>" title="Faluss Fans — <?php echo $role === 'visitor' ? 'Explorer' : 'accueil'; ?>"><img src="<?php echo esc_url(plugins_url('assets/FANS-SV-XS.svg', dirname(__DIR__, 3) . '/faluss-platform.php')); ?>" alt="" width="87" height="107"></a>
             <nav class="fu-nav" aria-label="Navigation <?php echo $role === 'creator' ? 'créateur' : ($role === 'visitor' ? 'publique' : 'Fan'); ?>">
                 <?php foreach (self::NAV[$role] as [$view, $label, $icon, $key]) : ?>
                     <a class="fu-nav__item<?php echo $active === $key ? ' is-active' : ''; ?>"
@@ -171,7 +179,7 @@ final class FansUiView
                        <?php echo $role === 'creator' && $view === 'creer' ? 'data-create-open aria-haspopup="dialog" aria-controls="fu-create"' : ''; ?>
                        <?php echo $active === $key ? 'aria-current="page"' : ''; ?>>
                         <svg aria-hidden="true" viewBox="0 0 24 24"><use href="#fu-icon-<?php echo esc_attr($icon); ?>"></use></svg>
-                        <span class="fu-nav__label"><?php echo esc_html($label); ?></span>
+                        <span class="fu-nav__label" aria-hidden="true"><?php echo esc_html($label); ?></span>
                     </a>
                 <?php endforeach; ?>
             </nav>
@@ -195,7 +203,7 @@ final class FansUiView
         ?>
         <section class="fu-content" data-fans-explorer data-api="<?php echo esc_url($api); ?>" data-public-base="<?php echo esc_url($publicBase); ?>" aria-labelledby="fu-explore-title">
             <div class="fu-section-heading"><div><p class="fu-panel__kicker">Découvrir</p><h2 id="fu-explore-title">Profils créateurs</h2></div></div>
-            <p class="fu-discovery-note">Les noms, bios et portraits ne sont diffusés qu’après approbation. Une fiche sans présentation approuvée reste explicitement incomplète.</p>
+
             <div class="fu-filters" role="group" aria-label="Filtrer par catégorie">
                 <button type="button" data-category="" aria-pressed="true">Toutes les catégories</button>
                 <button type="button" data-category="arts" aria-pressed="false">Arts</button>
@@ -221,29 +229,6 @@ final class FansUiView
             <?php if (\Faluss\Platform\Fans\Messaging\MessageModule::available() && \Faluss\Platform\Fans\Profiles\CreatorProfileService::activeOwner($creatorId)!==get_current_user_id()): ?>
             <a class="fu-link" href="<?php echo esc_url(add_query_arg('creator',$creatorId,FansUiRoutes::url($role==='visitor'?'fan':$role,'messages'))); ?>">Adresser une demande de message ↗</a>
             <?php endif; ?>
-        </section>
-        <?php
-    }
-
-    private static function creationChoices(bool $textsAvailable = false, bool $imagesAvailable = false): void
-    {
-        ?>
-        <section class="fu-content" aria-labelledby="fu-create-title">
-            <div class="fu-section-heading"><div><p class="fu-panel__kicker">Créer</p><h2 id="fu-create-title">Choisir un type</h2></div></div>
-            <div class="fu-choice-grid">
-                <?php foreach ([
-                    ['Publication', 'Texte et création destinés à votre communauté.'],
-                    ['Prestation', 'Séance ou rendez-vous à proposer.'],
-                    ['Service', 'Accompagnement personnalisé.'],
-                    ['Produit', 'Objet ou création à proposer.'],
-                ] as [$title, $description]) : ?>
-                    <article class="fu-choice"><span class="fu-choice__ornament" aria-hidden="true">✳</span><div><h3><?php echo esc_html($title); ?></h3><p><?php echo esc_html($description); ?></p>
-                    <?php if ($title === 'Publication' && ($textsAvailable || $imagesAvailable)) : ?>
-                        <?php if ($textsAvailable): ?><a class="fu-link" href="#fu-author">Gérer mes publications ↓</a><?php endif; ?>
-                        <?php if ($imagesAvailable): ?><a class="fu-link" href="#fu-images">Gérer mes images ↓</a><?php endif; ?>
-                    <?php else : ?><span class="fu-closed">Indisponible pour le moment</span><?php endif; ?></div></article>
-                <?php endforeach; ?>
-            </div>
         </section>
         <?php
     }

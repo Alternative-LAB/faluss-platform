@@ -170,9 +170,16 @@ final class FansSsoTest extends TestCase
         self::assertSame('subscriber', $GLOBALS['fans_sso_insert_calls'][0]['role']);
         self::assertSame(1, count(array_filter($GLOBALS['wpdb']->queries, static fn (string $query): bool => str_starts_with($query, 'INSERT INTO'))));
         $GLOBALS['wpdb']->linkedId = 51;
-        self::assertSame(3600, FansSsoService::cookieExpiration(172800, 51, false));
+        self::assertSame(28800, FansSsoService::cookieExpiration(172800, 51, false));
+        self::assertSame(28800, FansSsoService::cookieExpiration(172800, 51, true));
         $GLOBALS['fans_sso_users'][52] = new \WP_User(52, ['administrator']);
         self::assertSame(172800, FansSsoService::cookieExpiration(172800, 52, false));
+        self::assertTrue(FansLocalSession::sendCookies(true, 0, 0, 52, 'auth', ''));
+        self::assertTrue(FansLocalSession::sendCookies(true, 0, 0, 0, 'auth', ''));
+        self::assertFalse(FansLocalSession::sendCookies(false, 0, 0, 51, 'auth', ''));
+        $GLOBALS['wpdb']->linkedId = null;
+        self::assertSame(172800, FansSsoService::cookieExpiration(172800, 51, false));
+        self::assertTrue(FansLocalSession::sendCookies(true, 0, 0, 51, 'auth', ''));
     }
 
     public function testFailedLinkRollsBackCreatedSubscriberAndAllowsRetry(): void

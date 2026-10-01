@@ -6,7 +6,7 @@ final class FansUiImagesView
 {
     public static function render(FansUiImages $model): void
     {
-        $url = FansUiRoutes::url('creator', 'creer');
+        $url = FansUiRoutes::url('creator', 'images');
         $page = $model->listing?->get_data();
         $result = $model->result?->get_data();
         $code = is_array($result) ? ($result['code'] ?? '') : '';

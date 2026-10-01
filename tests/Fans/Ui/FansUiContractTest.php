@@ -53,6 +53,8 @@ namespace Faluss\Platform\Fans\Ui {
                 FansUiRoutes::url('creator', 'mon-profil'),
                 'https://fans.example.test/app/creators/123e4567-e89b-42d3-a456-426614174000'
             );
+            self::assertTrue(FansUiRoutes::validView('creator', 'images'));
+            self::assertFalse(FansUiRoutes::validView('fan', 'images'));
             self::assertTrue(FansUiRoutes::validView('fan', 'explorer'));
             self::assertFalse(FansUiRoutes::validView('fan', 'boutique'));
             self::assertFalse(FansUiRoutes::validView('creator', 'espace'));
@@ -94,10 +96,7 @@ namespace Faluss\Platform\Fans\Ui {
             }
             self::assertStringNotContainsString('aria-label="Ma boutique"', $fan);
             self::assertStringNotContainsString('aria-label="Créer"', $fan);
-            foreach (['Publication', 'Prestation', 'Service', 'Produit'] as $choice) {
-                self::assertStringContainsString('<h3>' . $choice . '</h3>', $creator);
-            }
-            self::assertSame(4, substr_count($creator, 'Indisponible pour le moment'));
+            self::assertStringContainsString('Gérer ma galerie privée', $creator);
             self::assertStringNotContainsString('<form', $creator);
         }
 
@@ -106,11 +105,12 @@ namespace Faluss\Platform\Fans\Ui {
             $html = $this->render('fan', 'explorer');
             self::assertStringContainsString('data-api="https://fans.example.test/wp-json/faluss-fans/v1/creators"', $html);
             self::assertStringContainsString('data-fans-results', $html);
-            self::assertStringNotContainsString('<img', $html);
+            self::assertSame(1, substr_count($html, '<img'));
+            self::assertStringContainsString('assets/FANS-SV-XS.svg', $html);
             self::assertStringNotContainsString('PF</', $html);
             self::assertStringNotContainsString('€', $html);
-            self::assertStringContainsString('ne sont diffusés qu’après approbation', $html);
-            self::assertStringContainsString('sans présentation approuvée reste explicitement incomplète', $html);
+            self::assertStringNotContainsString('ne sont diffusés qu’après approbation', $html);
+            self::assertStringNotContainsString('sans présentation approuvée reste explicitement incomplète', $html);
             $visitor = $this->render('visitor', 'explorer');
             self::assertSame(2, substr_count($visitor, 'class="fu-nav__item'));
             self::assertStringContainsString('href="https://fans.example.test/app/fan/explorer"', $visitor);

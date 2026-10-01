@@ -193,3 +193,5 @@ erreur API, le focus clavier et les huit liens Créateur. Les [captures réelles
 et synthétiques](../evidence/fans-ui-v2/README.md) séparent ces deux preuves.
 Ni la liaison Me en réseau, ni Elementor, Safari physique, les droits en
 production ou une validation visuelle humaine finale ne sont prouvés ici.
+
+Voir aussi [le correctif navigation, images et session](../evidence/fans-ui-navigation-fix/README.md) : cases fixes, logo officiel, galerie privée distincte et compositeur sans perte de texte.

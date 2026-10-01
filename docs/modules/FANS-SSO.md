@@ -27,7 +27,7 @@ sequenceDiagram
     F->>F: état lié au navigateur consommé en transaction
     F->>M: POST /oauth/token avec secret et verifier
     M-->>F: identité et scopes bornés
-    F->>F: liaison locale et session subscriber d'une heure
+    F->>F: liaison locale et session subscriber fixe de huit heures
 ```
 
 ## Configuration et activation
@@ -71,7 +71,7 @@ Le flag est inactif par défaut. L'activation du plugin, après configuration, i
 
 Le démarrage crée 32 octets aléatoires indépendants pour l'état, le verifier et la liaison navigateur. Le cookie est limité à l'hôte Fans, `Secure`, `HttpOnly`, `SameSite=Lax`. Le callback vérifie le cookie, l'état, l'expiration et la consommation sous verrou InnoDB avant l'échange réseau ; les erreurs redirigent vers une notice locale sans renvoyer le code ni le secret. Le token doit contenir un UUID v4 et exactement les scopes demandés. Les autres claims, dont `apps`, sont ignorés.
 
-Le flux anonyme peut créer uniquement un compte `subscriber` local après une preuve `identity.email`, et refuse une collision avec un e-mail déjà présent. La liaison d'un compte existant exige un `subscriber` connecté, le nonce et le même compte au retour. Un rôle privilégié ne reçoit pas de session SSO. Une session locale liée expire après une heure. Ni l'e-mail ni le `wp_user_id` d'un autre site ne servent de clé de droit.
+Le flux anonyme peut créer uniquement un compte `subscriber` local après une preuve `identity.email`, et refuse une collision avec un e-mail déjà présent. La liaison d'un compte existant exige un `subscriber` connecté, le nonce et le même compte au retour. Un rôle privilégié ne reçoit pas de session SSO. Une nouvelle session locale liée expire huit heures après sa création (28 800 secondes), sans renouvellement à chaque visite. Le cookie est persistant, avec exactement la même échéance que sa signature et le jeton serveur WordPress ; fermer puis rouvrir le navigateur ne l’expire pas avant cette date. Les anciennes sessions conservent leur échéance initiale. Les administrateurs WordPress et les sessions Identity sur Me sont inchangés. Ni l'e-mail ni le `wp_user_id` d'un autre site ne servent de clé de droit.
 
 La création anonyme exige que `wp_users` et `wp_usermeta` soient InnoDB, comme la table de liaison Fans. Un verrou MariaDB par `faluss_id`, puis un par e-mail, sérialise les tentatives concurrentes avant la vérification de collision. `wp_insert_user()` et l'insertion de la liaison s'exécutent dans **la même transaction** sur la connexion `$wpdb` : si l'insertion de liaison échoue, `ROLLBACK` retire le compte créé et `clean_user_cache()` invalide le compte que WordPress avait déjà mis en cache, ce qui permet une nouvelle tentative. Le chemin de liaison explicite ne crée ni ne supprime de compte ; son échec laisse intact le membre préexistant. Si un verrou ou la vérification InnoDB échoue, aucune création n'est tentée. Les hooks WordPress de création peuvent déclencher des effets externes hors transaction ; une recette jetable doit vérifier les plugins présents avant activation réelle.
 
@@ -87,3 +87,8 @@ Avant une activation réelle, vérifier encore sur un site WordPress/MariaDB de 
 ### Complément HTTP local du 25 septembre 2026
 
 La [recette HTTPS locale](../evidence/fans-local/SSO-HTTP.md) complète la première recette de service : vrai serveur Me, callback et cookies curl, rejeu, expiration, collision, rollback/retry et deux callbacks simultanés ont été exercés. La session Me initiale reste une fixture ; OTP, navigateurs physiques, cache persistant et extensions tierces ne sont pas couverts. Aucun déploiement n’est déduit de ces résultats.
+
+
+### Correctif UI et session locale après 0.12.0
+
+Voir [la recette ciblée](../evidence/fans-ui-navigation-fix/README.md) : nouvelle session locale fixe de huit heures, cookie persistant, déconnexion protégée, invalidation entre onglets et limites du changement de compte Identity. Aucun flag de production modifié.

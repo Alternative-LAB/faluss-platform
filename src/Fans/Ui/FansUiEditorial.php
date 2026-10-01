@@ -64,7 +64,7 @@ final class FansUiEditorial
         ?>
         <section class="fu-content fu-editorial" data-fans-private-reading data-fans-image-previews data-nonce="<?php echo esc_attr(wp_create_nonce('wp_rest')); ?>" aria-labelledby="fu-editorial-title">
             <h2 id="fu-editorial-title">Votre présentation publique</h2>
-            <p>Choisissez votre nom de création, votre bio et votre portrait. Ils seront visibles après approbation. Votre compte Faluss Identity reste inchangé.</p>
+            <p>Choisissez votre nom de création, votre bio et votre portrait. Ils seront visibles après approbation.</p>
             <?php if ($view->result !== null): ?><p role="status" class="fu-author__notice"><?php echo match ($view->result->get_status()) {
                 200 => 'Action confirmée. L’état courant est affiché ci-dessous.',
                 409 => 'La révision ou le portrait a changé. Relisez l’état courant avant de soumettre à nouveau.',
@@ -76,7 +76,7 @@ final class FansUiEditorial
             <?php if ($row === null): ?><p class="fu-live">L’édition de la présentation est indisponible pour le moment.</p>
             <?php else: ?>
                 <p class="fu-panel__kicker"><?php echo esc_html($states[$row['state']] ?? 'État indisponible'); ?></p>
-                <?php if (is_array($row['published'] ?? null)): ?><div class="fu-panel"><h3>Dernière présentation approuvée</h3><strong><?php echo esc_html($row['published']['public_name']); ?></strong><p><?php echo esc_html($row['published']['bio']); ?></p><p>Cette version reste publique pendant l’examen d’une modification, tant que votre profil est actif.</p></div><?php endif; ?>
+                <?php if (is_array($row['published'] ?? null)): ?><div class="fu-panel"><h3>Dernière présentation approuvée</h3><strong><?php echo esc_html($row['published']['public_name']); ?></strong><p><?php echo esc_html($row['published']['bio']); ?></p></div><?php endif; ?>
                 <?php if (in_array($row['state'], ['rejected', 'withdrawn'], true)): ?><p>Les champs ont été effacés. Vous pouvez proposer une nouvelle présentation si votre profil est actif.</p><?php endif; ?>
                 <?php if ($view->active): ?>
                     <form method="post" action="<?php echo esc_url($url); ?>" class="fu-panel fu-editorial__form">
@@ -95,7 +95,7 @@ final class FansUiEditorial
                             <?php endforeach; ?>
                             <?php if ($row['portrait_id'] !== '' && !$found): ?><p role="status">Le portrait précédent n’est plus sélectionnable. Choisissez une image disponible ou « Sans portrait ».</p><?php endif; ?>
                             <?php if ($view->images === []): ?><p>Aucune image approuvée disponible.</p><?php endif; ?>
-                            <a class="fu-link" href="<?php echo esc_url(FansUiRoutes::url('creator', 'creer')); ?>#fu-images">Déposer ou gérer mes images privées ↗</a>
+                            <a class="fu-link" href="<?php echo esc_url(FansUiRoutes::url('creator', 'images')); ?>#fu-images">Déposer ou gérer mes images privées ↗</a>
                         </fieldset>
                         <p class="fu-footnote">Votre dernière présentation approuvée reste visible jusqu’à la prochaine décision. Le retrait volontaire l’efface immédiatement.</p>
                         <button type="submit">Soumettre à la modération →</button>
