@@ -6,23 +6,40 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
-- Fans : publications courantes et archives privées paginées séparées ; aperçus publics dépliables et dates réelles, libellés de publication harmonisés.
+## [0.12.0] - 2026-10-01
 
 ### Ajouté
 
-- Notifications privées Fans persistées : cloche, compteur exact, lu/non lu, pagination, décisions communicables, messages et dossiers autorisés ; écriture atomique et purges liées à leur objet.
-
-- Administration Fans privée `/app/admin` : pills centrées, recherche et comptes, décisions partagées, statistiques réelles, catalogue fermé aux achats, habilitations concurrentes journalisées et opérations de rétention sans activation.
-
-- Contexte privé des comptes liés dans toutes les files et fiches de modération Fans ; recherche locale et refus des approbations sans liaison membre valide.
-
-- Entrée Fans `/app`, résolution du rôle et redirection des anciennes routes humaines ; callback SSO et API stables, accès application visible pour les membres liés.
-- Sélecteur Créer depuis chaque écran Créateur, compositeur de publication réel et aperçus commerciaux fermés, navigation clavier et mobile ; en-têtes compacts hors Accueil/Explorer/HoF.
+- Persist private Fans notifications with domain transactions (`7e9c7d7`)
+- Add Fans app entry and contextual creator composer (`8913d30`)
+- Separate private publication archives and refine reading cards (`8913d30`)
+- Resolve linked accounts in Fans moderation queues (`8913d30`)
+- Add unified private Fans administration (`8913d30`)
+- Add Fans app entry and contextual creator composer (`8fbfe80`)
+- Separate private publication archives and refine reading cards (`8fbfe80`)
+- Resolve linked accounts in Fans moderation queues (`8fbfe80`)
+- Add Fans app entry and contextual creator composer (`787bc3e`)
+- Separate private publication archives and refine reading cards (`787bc3e`)
+- Add Fans app entry and contextual creator composer (`4782af2`)
 
 ### Corrigé
 
-- Présentations Fans : maintien de la dernière version approuvée pendant une modification ou un refus ; retrait et révocation immédiats, y compris après refus de la proposition, sans diffusion des champs en attente.
-- Consentement Identity après mise à jour : préparation additive avant les parcours publics, sans attendre une visite administrateur ; refus explicite si la mémorisation est indisponible, sans connexion présentée comme autorisée.
+- Persist Identity consent after automatic plugin updates (`8913d30`)
+- Preserve approved creator presentation while reviewing changes (`8913d30`)
+- Include creator context in private administrative image lists (`8913d30`)
+- Persist Identity consent after automatic plugin updates (`8fbfe80`)
+- Preserve approved creator presentation while reviewing changes (`8fbfe80`)
+- Include creator context in private administrative image lists (`8fbfe80`)
+- Persist Identity consent after automatic plugin updates (`787bc3e`)
+- Preserve approved creator presentation while reviewing changes (`787bc3e`)
+- Persist Identity consent after automatic plugin updates (`4782af2`)
+- Preserve approved creator presentation while reviewing changes (`4782af2`)
+- Preserve approved creator presentation while reviewing changes (#128) (`45b036d`)
+- Persist Identity consent after automatic plugin updates (#127) (`f15a105`)
+
+### Documentation
+
+- Link delivered notification pull request (`7e9c7d7`)
 
 ## [0.11.1] - 2026-10-01
 
