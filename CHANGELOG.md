@@ -10,7 +10,14 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Corrigé
 
-- Make Fans messaging preparation safe before admission (#125) (`66c5dc0`)
+- Préparation de la messagerie Fans avant admission : commandes opérateur WP-CLI protégées pour installer/vérifier les six tables et le cron horaire, inspecter la santé et exécuter une purge bornée avec échec explicite (#125, `66c5dc0`).
+- Accès au panel privé du modérateur rétabli par l’enregistrement du sous-menu après son parent Faluss ; administrateur non habilité refusé en HTTP 403 avant les en-têtes.
+- Procédure opérateur complète et preuves WordPress/MariaDB/navigateur isolées : ouverture, fermeture des envois, signalements/recours et purges indépendantes.
+
+### Migration et compatibilité
+
+- Aucun flag, rôle, secret ou attestation humaine modifié. La préparation additive explicite exige le rôle Fans et les deux capacités de modération ; les tables non conformes et récurrences incorrectes sont refusées.
+- L’exploitant doit décider et tracer les notifications/recours, habiliter nominativement le modérateur, vérifier le planificateur et les sauvegardes, puis effectuer le vrai SSO cible avant ouverture. Voir `docs/operations/FANS-MESSAGING-RUNBOOK.md` ; les tests locaux ne constituent aucune attestation de politique ou de site.
 
 ## [0.11.0] - 2026-09-30
 
