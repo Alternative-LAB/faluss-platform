@@ -15,7 +15,7 @@ et isolées ; l’installation et la recette de `fans.faluss.me` restent au prop
 | Publications et archives | #130 | [Cartes, liste courante, archives privées paginées](../evidence/fans-publication-archives/README.md) |
 | Comptes liés dans l’administration | #131 | [Contexte privé, liaison manquante, garde d’approbation](../evidence/fans-admin-accounts/README.md) |
 | Administration unifiée | #132 | [Matrice WP → back-office → capacité → preuve](../modules/FANS-BACKOFFICE.md), [26 captures](../evidence/fans-backoffice/README.md) |
-| Notifications persistées | Lot suivant #132 | [Atomicité, destinataires, motifs, compteurs, purges et six captures](../evidence/fans-notifications/README.md) |
+| Notifications persistées | #133 | [Atomicité, destinataires, motifs, compteurs, purges et six captures](../evidence/fans-notifications/README.md) |
 
 ## Matrice écran / parcours
 
