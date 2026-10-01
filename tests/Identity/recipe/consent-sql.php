@@ -3,6 +3,13 @@
 if (!defined('WP_CLI') || !WP_CLI || !in_array(DB_NAME, ['sso_recipe', 'button_recipe'], true) || !str_starts_with(ABSPATH, '/var/tmp/')) { throw new RuntimeException('Disposable CI fixture only'); }
 global $wpdb;
 function consent_expect($condition, $label) { if (!$condition) { throw new RuntimeException($label); } }
+// Automatic updater does not rerun activation and need not be followed by an admin visit.
+$wpdb->query('DROP TABLE IF EXISTS `' . Faluss_Identity_Consent::table() . '`');
+$wpdb->query('DROP TABLE IF EXISTS `' . Faluss_Identity_Consent::table() . '_clients`');
+delete_option(Faluss_Identity_Consent::OPTION);
+wp_set_current_user(0);
+Faluss_Identity_Consent::upgrade_after_update();
+consent_expect(Faluss_Identity_Consent::ready(), 'Upgrade before public flow without administrator session');
 consent_expect(Faluss_Identity_Consent::install(), 'Migration ready');
 consent_expect(Faluss_Identity_Consent::install(), 'Migration idempotent');
 $tables = Faluss_Identity_Schema::get_table_names();

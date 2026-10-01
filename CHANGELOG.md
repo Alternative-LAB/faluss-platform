@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Corrigé
+
+- Consentement Identity après mise à jour : préparation additive avant les parcours publics, sans attendre une visite administrateur ; refus explicite si la mémorisation est indisponible, sans connexion présentée comme autorisée.
+
 ## [0.11.1] - 2026-10-01
 
 ### Corrigé

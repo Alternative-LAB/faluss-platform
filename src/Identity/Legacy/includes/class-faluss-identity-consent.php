@@ -7,12 +7,18 @@ final class Faluss_Identity_Consent {
     const OPTION = 'faluss_identity_consent_schema';
 
     public static function boot() {
+        add_action( 'init', array( __CLASS__, 'upgrade_after_update' ), 0 );
         add_action( 'admin_init', array( __CLASS__, 'upgrade' ) );
         add_action( 'template_redirect', array( __CLASS__, 'dispatch' ), 0 );
     }
 
     public static function upgrade() {
         if ( current_user_can( 'manage_options' ) ) { self::install(); }
+    }
+
+    /** Plugin updates do not invoke activation; prepare before any authorization transaction. */
+    public static function upgrade_after_update() {
+        if ( '' === (string) get_option( self::OPTION, '' ) ) { self::install(); }
     }
 
     public static function table() {
