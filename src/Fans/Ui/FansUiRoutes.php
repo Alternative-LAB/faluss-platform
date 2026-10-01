@@ -18,7 +18,7 @@ final class FansUiRoutes
     /** @var array<string,list<string>> */
     private const VIEWS = [
         'fan' => ['accueil', 'explorer', 'hof', 'hof/session', 'classements', 'classement-fans', 'messages', 'espace', 'notifications'],
-        'creator' => ['accueil', 'explorer', 'hof', 'hof/session', 'classements', 'messages', 'progression', 'creer', 'boutique', 'mon-profil', 'notifications'],
+        'creator' => ['accueil', 'explorer', 'hof', 'hof/session', 'classements', 'messages', 'progression', 'creer', 'images', 'boutique', 'mon-profil', 'notifications'],
     ];
 
     public static function register(): void
@@ -121,7 +121,7 @@ final class FansUiRoutes
         if (self::isCanonicalPath($legacy, (string) ($_SERVER['REQUEST_URI'] ?? ''))) {
             self::noStore();
             $selection = [];
-            foreach (['publication', 'cursor', 'section', 'thread', 'creator', 'archive'] as $key) {
+            foreach (['publication', 'cursor', 'section', 'thread', 'creator', 'archive', 'image', 'image_state', 'images_cursor'] as $key) {
                 if (isset($_GET[$key]) && is_string($_GET[$key]) && strlen($_GET[$key]) <= 160) { $selection[$key] = wp_unslash($_GET[$key]); }
             }
             wp_safe_redirect($selection === [] ? $canonical : add_query_arg($selection, $canonical), ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' ? 307 : 302);
@@ -162,12 +162,21 @@ final class FansUiRoutes
             }
         }
 
-        if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && $view === 'creer') {
+        if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && in_array($view, ['creer', 'images'], true)) {
             if (isset($_POST['author_action'], $_POST['image_action'])) { wp_die('Formulaire ambigu. Rechargez la page.', '', ['response' => 400]); }
             if ($_POST === [] && $_FILES === []) { wp_die('Envoi vide ou trop volumineux. Rechargez la page et vérifiez le fichier.', '', ['response' => 413]); }
         }
+        // Preserve old image forms/bookmarks without executing their mutation on a page that no longer renders the gallery.
+        if ($role === 'creator' && $view === 'creer' && (isset($_POST['image_action']) || isset($_GET['image']) || isset($_GET['image_state']) || isset($_GET['images_cursor']))) {
+            $selection = [];
+            foreach (['image', 'image_state', 'images_cursor'] as $key) {
+                if (isset($_GET[$key]) && is_string($_GET[$key]) && strlen($_GET[$key]) <= 160) { $selection[$key] = wp_unslash($_GET[$key]); }
+            }
+            wp_safe_redirect(add_query_arg($selection, self::url('creator', 'images')), ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' ? 307 : 302);
+            exit;
+        }
         $author = $role === 'creator' && $view === 'creer' ? FansUiAuthor::load() : null;
-        $images = $role === 'creator' && $view === 'creer' ? FansUiImages::load() : null;
+        $images = $role === 'creator' && $view === 'images' ? FansUiImages::load() : null;
         $admission = $role === 'fan' && $view === 'espace' ? FansUiAdmission::load($profilesEnabled) : null;
         $editorial = $role === 'creator' && $view === 'mon-profil' ? FansUiEditorial::load() : null;
         $messages = $view === 'messages' ? FansUiMessages::load((string)$role) : null;

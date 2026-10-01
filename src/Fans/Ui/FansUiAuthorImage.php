@@ -30,7 +30,7 @@ final class FansUiAuthorImage
             <h3 id="fu-author-image-title">Image de cette publication</h3>
             <p><?php echo $model->imageId === null ? 'Aucune image actuellement utilisable sur ce texte.' : 'Ce texte possède une image approuvée utilisable actuellement.'; ?></p>
             <p>Associer, remplacer ou détacher une image masque le texte public jusqu’à sa nouvelle approbation. L’image et le texte sont examinés ensemble.</p>
-            <a class="fu-link" href="<?php echo esc_url(FansUiRoutes::url('creator', 'creer')); ?>#fu-images">Déposer ou retirer une image dans ma galerie ↗</a>
+            <a class="fu-link" href="<?php echo esc_url(FansUiRoutes::url('creator', 'images')); ?>#fu-images">Déposer ou retirer une image dans ma galerie ↗</a>
             <form class="fu-editorial__form" method="post" action="<?php echo esc_url($url); ?>#fu-author">
                 <?php echo wp_nonce_field('fans_author', 'fans_author_nonce', false, false); ?>
                 <input type="hidden" name="author_action" value="image">

@@ -107,7 +107,7 @@ final class FansSsoReturnFlowTest extends TestCase
         }
         $this->readyCallback($state);
         self::assertSame($target, $this->redirect(fn () => FansSsoService::callback()));
-        self::assertSame([[51, false, true]], $GLOBALS['fans_return_auth']);
+        self::assertSame([[51, true, true]], $GLOBALS['fans_return_auth']);
         self::assertArrayNotHasKey(FansSsoReturn::COOKIE, $_COOKIE);
         self::assertSame('', $GLOBALS['fans_return_cookies'][FansSsoReturn::COOKIE][0]);
         self::assertStringContainsString('faluss_fans_sso=invalid', $this->redirect(fn () => FansSsoService::callback()));

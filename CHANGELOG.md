@@ -6,6 +6,16 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Corrigé
+
+- Fans : emplacements de navigation fixes, étiquettes hors flux au survol/focus (aide au premier toucher), logo SVG officiel et retrait des commentaires internes du profil et d’Explorer.
+- Compositeur Publication : images privées dans le parcours courant, texte conservé, sélection des images approuvées et soumission aux contrôles existants ; scroll, focus, fermeture et retour navigateur stabilisés. Galerie privée distincte et anciennes entrées compatibles.
+- Session locale Fan/Créateur lié : huit heures fixes, cookie persistant à échéance serveur exacte, déconnexion protégée près de la cloche, invalidation serveur et retrait des vues privées des autres onglets. Administrateurs et Identity Me inchangés ; changement de compte central explicite et manuel.
+
+### Documentation et compatibilité
+
+- Recettes réelles WordPress/MariaDB/HTTPS et navigateur isolées, captures comparatives et diagnostic des flux SSO concurrents. Aucun schéma métier, flag, secret ou paramètre de production modifié. Les sessions déjà ouvertes gardent leur échéance ; les nouveaux cookies utilisent huit heures.
+
 ## [0.12.0] - 2026-10-01
 
 ### Ajouté

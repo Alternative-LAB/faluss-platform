@@ -1,0 +1,150 @@
+[
+  {
+    "width": 1440,
+    "nav": [
+      {
+        "label": "Accueil",
+        "height": 58,
+        "top": 92
+      },
+      {
+        "label": "Explorer",
+        "height": 58,
+        "top": 158
+      },
+      {
+        "label": "HoF",
+        "height": 58,
+        "top": 224
+      },
+      {
+        "label": "Messages",
+        "height": 58,
+        "top": 290
+      },
+      {
+        "label": "Créer",
+        "height": 58,
+        "top": 356
+      },
+      {
+        "label": "Ma boutique",
+        "height": 66,
+        "top": 422
+      },
+      {
+        "label": "Progression",
+        "height": 58,
+        "top": 496
+      },
+      {
+        "label": "Mon profil",
+        "height": 58,
+        "top": 562
+      }
+    ]
+  },
+  {
+    "imageTarget": "https://fans.example.test/app/creator/creer#fu-images"
+  },
+  {
+    "scrollY": 1504,
+    "bodyOverflow": "hidden",
+    "htmlOverflow": "auto scroll",
+    "dialog": {
+      "x": 82,
+      "y": 0,
+      "width": 1343,
+      "height": 900,
+      "top": 0,
+      "right": 1425,
+      "bottom": 900,
+      "left": 82
+    },
+    "rail": {
+      "x": 0,
+      "y": -1504,
+      "width": 82,
+      "height": 900,
+      "top": -1504,
+      "right": 82,
+      "bottom": -604,
+      "left": 0
+    },
+    "text": ""
+  },
+  {
+    "width": 390,
+    "nav": [
+      {
+        "label": "Accueil",
+        "height": 58,
+        "top": 774
+      },
+      {
+        "label": "Explorer",
+        "height": 58,
+        "top": 774
+      },
+      {
+        "label": "HoF",
+        "height": 58,
+        "top": 774
+      },
+      {
+        "label": "Messages",
+        "height": 58,
+        "top": 774
+      },
+      {
+        "label": "Créer",
+        "height": 58,
+        "top": 834
+      },
+      {
+        "label": "Ma boutique",
+        "height": 58,
+        "top": 834
+      },
+      {
+        "label": "Progression",
+        "height": 58,
+        "top": 834
+      },
+      {
+        "label": "Mon profil",
+        "height": 58,
+        "top": 834
+      }
+    ]
+  },
+  {
+    "imageTarget": "https://fans.example.test/app/creator/creer#fu-images"
+  },
+  {
+    "scrollY": 1746,
+    "bodyOverflow": "hidden",
+    "htmlOverflow": "auto scroll",
+    "dialog": {
+      "x": 0,
+      "y": 0,
+      "width": 375,
+      "height": 766,
+      "top": 0,
+      "right": 375,
+      "bottom": 766,
+      "left": 0
+    },
+    "rail": {
+      "x": 0,
+      "y": 765,
+      "width": 375,
+      "height": 135,
+      "top": 765,
+      "right": 375,
+      "bottom": 900,
+      "left": 0
+    },
+    "text": ""
+  }
+]

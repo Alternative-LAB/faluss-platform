@@ -11,7 +11,7 @@ final class FansSsoService
     public const START_ACTION = 'faluss_fans_sso_start';
     public const CALLBACK_QUERY_VAR = 'faluss_fans_sso_callback';
     public const STATE_TTL = 600;
-    public const SESSION_TTL = 3600;
+    public const SESSION_TTL = 28800;
 
     public static function configured(): bool
     {
@@ -45,6 +45,7 @@ final class FansSsoService
         add_action('init', [self::class, 'rewrite'], 20);
         add_filter('query_vars', [self::class, 'queryVars']);
         add_filter('auth_cookie_expiration', [self::class, 'cookieExpiration'], PHP_INT_MAX, 3);
+        FansLocalSession::register();
     }
 
     /** @param list<string> $variables
@@ -171,7 +172,7 @@ final class FansSsoService
         }
 
         wp_set_current_user($user->ID);
-        wp_set_auth_cookie($user->ID, false, is_ssl());
+        wp_set_auth_cookie($user->ID, true, is_ssl());
         do_action('wp_login', $user->user_login, $user);
         wp_safe_redirect($pending['return_to'] ?? home_url('/'));
         exit;
@@ -683,7 +684,7 @@ final class FansSsoService
         ];
     }
 
-    private static function clearCookie(): void
+    public static function clearCookie(): void
     {
         setcookie(self::COOKIE, '', self::cookieOptions(time() - 3600));
         setcookie(FansSsoReturn::COOKIE, '', self::cookieOptions(time() - 3600));

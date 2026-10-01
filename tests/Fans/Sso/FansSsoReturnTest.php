@@ -14,7 +14,7 @@ final class FansSsoReturnTest extends TestCase
 
     public function testOnlyExplicitFansPathsSurviveIncludingSubdirectories(): void
     {
-        foreach (['/app', '/app/fan/explorer', '/app/creator/mon-profil'] as $path) {
+        foreach (['/app', '/app/fan/explorer', '/app/creator/mon-profil', '/app/creator/images'] as $path) {
             self::assertSame($path, FansSsoReturn::path($path . '/'));
         }
         foreach (['fan/explorer', 'fan/hof', 'fan/classement-fans', 'creator/creer', 'creator/mon-profil', 'creator/progression', 'creator/boutique', 'creators/123e4567-e89b-42d3-a456-426614174000'] as $view) {

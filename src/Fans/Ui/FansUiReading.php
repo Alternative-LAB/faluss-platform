@@ -90,7 +90,7 @@ final class FansUiReading
                     <div class="fu-profile__glyph" aria-hidden="true"></div>
                     <div><p class="fu-panel__kicker"><?php echo esc_html($categories[$profile['category']]); ?></p>
                         <h3><?php echo esc_html($states[$profile['status']]); ?></h3>
-                        <p>La présentation ci-dessous est soumise à une modération distincte de l’admission du profil.</p>
+
                         <?php if ($profile['status'] === 'active') : ?>
                             <a class="fu-link" href="<?php echo esc_url(home_url('/app/creators/' . $profile['creator_id'])); ?>">Voir ma fiche publique ↗</a>
                         <?php else : ?>

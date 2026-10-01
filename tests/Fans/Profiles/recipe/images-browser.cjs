@@ -28,7 +28,7 @@ fs.mkdirSync(output, { recursive: true });
     else { await page.evaluate(() => scrollTo(0, 0)); await page.screenshot({ path: path.join(output, name + '.png'), fullPage: true }); }
   };
   try {
-    await role(17); await page.goto(base + '/app/creator/creer');
+    await role(17); await page.goto(base + '/app/creator/images');
     const previousIds = (await api('images?scope=live')).data.items.map(x => x.image_id);
     // A synthetic abstract raster, sent through PHP multipart, never seeded as an image row.
     const data = await page.evaluate(() => {
@@ -83,7 +83,7 @@ fs.mkdirSync(output, { recursive: true });
     await page.locator('.fu-profile__glyph img').waitFor();
     await capture('portrait-from-upload-desktop');
     await page.setViewportSize({ width: 390, height: 844 }); await capture('portrait-from-upload-mobile');
-    await role(17); await page.goto(base + '/app/creator/creer');
+    await role(17); await page.goto(base + '/app/creator/images');
     await card.getByRole('checkbox').check(); await card.getByRole('button', { name: 'Retirer cette image', exact: true }).click();
     await page.getByText('Action confirmée. Consultez l’état actuel dans la galerie.').waitFor();
     assert.equal((await api('creators/' + creator)).data.editorial.portrait, false);
@@ -96,7 +96,7 @@ fs.mkdirSync(output, { recursive: true });
     const native = await browser.newContext({ javaScriptEnabled: false });
     await native.route('**/*', route => new URL(route.request().url()).origin === base ? route.continue() : route.abort());
     await native.addCookies([{ name: 'fixture_user', value: '17', url: base }]);
-    const nojs = await native.newPage(); await nojs.goto(base + '/app/creator/creer');
+    const nojs = await native.newPage(); await nojs.goto(base + '/app/creator/images');
     const beforeNative = (await api('images?scope=live')).data.items.map(x => x.image_id);
     await nojs.locator('#fu-image-file').setInputFiles(upload);
     await nojs.getByRole('button', { name: 'Déposer mon image en privé' }).click();

@@ -30,7 +30,7 @@ final class FansSsoReturn
             return $prefix . 'creator/creer?publication=' . $selection[1];
         }
         $fan = 'fan/(?:accueil|explorer|hof(?:/session)?|classements|classement-fans|messages|espace)';
-        $creator = 'creator/(?:accueil|explorer|hof(?:/session)?|classements|messages|progression|creer|boutique|mon-profil)';
+        $creator = 'creator/(?:accueil|explorer|hof(?:/session)?|classements|messages|progression|creer|images|boutique|mon-profil)';
         $public = 'creators/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
 
         return preg_match('~^(?:' . $fan . '|' . $creator . '|' . $public . ')/?$~D', $relative) === 1

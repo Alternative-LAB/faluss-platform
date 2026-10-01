@@ -1,0 +1,29 @@
+{
+  "checks": [
+    "Single clean real Me authorization/token/Fans callback succeeds",
+    "Persistent secure cookie deadline is exactly signed expiry, eight hours after login",
+    "Server token shares the exact cookie deadline",
+    "Private page has no-store and exposes logout with nonce",
+    "Visits never renew the session or emit authentication cookies",
+    "Session endpoint verifies real WordPress token without exposing identity",
+    "GET logout denied without destroying session",
+    "forged logout denied without destroying session",
+    "Native POST logout redirects to public Explorer with local logout notice",
+    "Logout destroys the server token",
+    "Replayed old authentication cookie cannot read private pages",
+    "Replayed cookie cannot authorize REST after logout",
+    "Me central session remains valid after local logout",
+    "Fans administrator duration remains WordPress default",
+    "Me member duration remains one hour",
+    "Administrator SSO button remains intentionally absent",
+    "Fans member logout cannot destroy administrator session even with a valid admin nonce",
+    "Two overlapping flows, older callback first: both denied after browser-state mismatch clears cookie",
+    "Two overlapping flows, latest callback first: latest succeeds, older denied",
+    "Server expiry denies still-present correctly signed browser cookie"
+  ],
+  "limits": [
+    "Me initial session seeded; OTP delivery not exercised",
+    "No target site or third-party cache accessed",
+    "Concurrent failure reproduced locally; not proof of target incident cause"
+  ]
+}

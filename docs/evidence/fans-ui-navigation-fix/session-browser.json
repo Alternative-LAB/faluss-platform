@@ -1,0 +1,11 @@
+{
+  "checks": [
+    "Chrome closed/reopened: persistent real SSO cookie works before unchanged eight-hour deadline",
+    "Nonce logout clears current/other tab; back/reload never restore authenticated UI",
+    "No-JavaScript native POST logout works"
+  ],
+  "limits": [
+    "Isolated local HTTPS WordPress only",
+    "No control over screenshots previously taken or a malicious client cache"
+  ]
+}
