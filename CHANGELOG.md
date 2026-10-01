@@ -10,36 +10,25 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
-- Persist private Fans notifications with domain transactions (`7e9c7d7`)
-- Add Fans app entry and contextual creator composer (`8913d30`)
-- Separate private publication archives and refine reading cards (`8913d30`)
-- Resolve linked accounts in Fans moderation queues (`8913d30`)
-- Add unified private Fans administration (`8913d30`)
-- Add Fans app entry and contextual creator composer (`8fbfe80`)
-- Separate private publication archives and refine reading cards (`8fbfe80`)
-- Resolve linked accounts in Fans moderation queues (`8fbfe80`)
-- Add Fans app entry and contextual creator composer (`787bc3e`)
-- Separate private publication archives and refine reading cards (`787bc3e`)
-- Add Fans app entry and contextual creator composer (`4782af2`)
+- Entrée Fans `/app`, résolution du rôle, anciennes routes redirigées et interaction Créer contextuelle depuis chaque écran Créateur ; publication réelle, navigation clavier/mobile et aperçus commerciaux fermés (#129, `4782af2`).
+- Publications courantes et archives privées paginées, cartes publiques dépliables avec dates réelles (#130, `787bc3e`).
+- Contexte privé des comptes liés dans toutes les files et fiches Fans, recherche et garde contre les approbations sans liaison valide (#131, `8fbfe80`).
+- Back-office privé `/app/admin` : navigation centrale, recherche transversale, comptes, décisions partagées, statistiques réelles, staff et opérations journalisées ; administration WordPress conservée (#132, `8913d30`).
+- Notifications Fan/Créateur persistées dans les transactions métier : destinataires exacts, motifs communicables, compteur, lu/non lu, pagination, déduplication et liens autorisés ; purges liées aux conversations et dossiers (#133, `7e9c7d7`).
 
 ### Corrigé
 
-- Persist Identity consent after automatic plugin updates (`8913d30`)
-- Preserve approved creator presentation while reviewing changes (`8913d30`)
-- Include creator context in private administrative image lists (`8913d30`)
-- Persist Identity consent after automatic plugin updates (`8fbfe80`)
-- Preserve approved creator presentation while reviewing changes (`8fbfe80`)
-- Include creator context in private administrative image lists (`8fbfe80`)
-- Persist Identity consent after automatic plugin updates (`787bc3e`)
-- Preserve approved creator presentation while reviewing changes (`787bc3e`)
-- Persist Identity consent after automatic plugin updates (`4782af2`)
-- Preserve approved creator presentation while reviewing changes (`4782af2`)
-- Preserve approved creator presentation while reviewing changes (#128) (`45b036d`)
-- Persist Identity consent after automatic plugin updates (#127) (`f15a105`)
+- Consentement Identity après mise à jour : préparation additive avant autorisation, accord révocable et refus explicite si sa persistance échoue (#127, `f15a105`).
+- Maintien de la présentation approuvée pendant modification/refus ; retrait, révocation et suspension immédiatement respectés, sans diffusion de la proposition en attente (#128, `45b036d`).
+- Purge opérateur : un résultat incomplet ou en erreur ne peut plus être présenté comme une réussite complète (#133).
 
-### Documentation
+### Migration et compatibilité
 
-- Link delivered notification pull request (`7e9c7d7`)
+- Schémas additifs : consentements Identity, instantané éditorial approuvé, notifications privées ; aucune conversion silencieuse des tables incompatibles. Le journal des opérations est préparé avant les premières mutations habilitées. Voir les contrats de modules et `docs/operations/FANS-REPASSE-DELIVERY.md`.
+- Aucun flag, secret, rôle existant ou attestation de politique activé. Callback SSO enregistré et routes REST préservés ; les nouvelles routes humaines ne remplacent pas le callback.
+- Captures et recettes WordPress/MariaDB isolées, matrice WordPress vers back-office et permissions incluses. Installation, vrai SSO et rendu Elementor cible restent à recetter par l’exploitant.
+- Messagerie : cron fiable, stockage privé, habilitations, notifications externes éventuelles, recours et archivage des métadonnées restent des responsabilités opérateur distinctes. Les durées ratifiées des messages/preuves sont inchangées ; les notifications dans Fans ne valent pas e-mail envoyé.
+- HoF/classements calculés, abonnement vérifié et parcours commerciaux restent fermés en l’absence des contrats serveurs correspondants. Retour arrière par le paquet précédent en conservant tables et journaux ; les événements anciens ne sont pas reconstitués.
 
 ## [0.11.1] - 2026-10-01
 
