@@ -22,6 +22,7 @@ if (($argv[1] ?? '') === 'race') {
 if (($argv[1] ?? '') === 'setup') {
     $wpdb->query('CREATE TABLE fixture_options(name varchar(191) PRIMARY KEY,value text NOT NULL) ENGINE=InnoDB');
     check('real SSO schemas', FansSsoSchema::installOrVerify());
+    check('real notification schema', \Faluss\Platform\Fans\Notifications\NotificationSchema::installOrVerify());
     check('real profile schema', CreatorProfileSchema::installOrVerify());
     check('real admission journal', \Faluss\Platform\Fans\Profiles\CreatorStatusSchema::installOrVerify());
     check('real image schemas', ImageSchema::installOrVerify());
@@ -118,3 +119,11 @@ check('name survives absent portrait honestly', EditorialService::publicById(OWN
 check('editorial withdrawal after draft rejection purges', is_array(EditorialService::decide(OWNER, 8, 'withdraw', '')) && EditorialService::publicById(OWNER) === null);
 check('SQL audit exact revisions', $wpdb->get_var('SELECT COUNT(*) FROM test_faluss_fans_editorial_decisions') == 9);
 // Leave revision 9 for the runner's concurrent submissions (exactly one must win).
+$notifications=\Faluss\Platform\Fans\Notifications\NotificationService::listing();
+check('committed moderation notifications persisted',is_array($notifications)&&count($notifications['items'])>0);
+$before=\Faluss\Platform\Fans\Notifications\NotificationService::count();$notice=(string)$notifications['items'][0]['id'];
+check('mark notification read',\Faluss\Platform\Fans\Notifications\NotificationService::mark($notice,false)===true&&\Faluss\Platform\Fans\Notifications\NotificationService::count()===$before-1);
+check('read replay exact count',\Faluss\Platform\Fans\Notifications\NotificationService::mark($notice,false)===true&&\Faluss\Platform\Fans\Notifications\NotificationService::count()===$before-1);
+$fixtureUser=18;
+check('foreign notification denied',\Faluss\Platform\Fans\Notifications\NotificationService::mark($notice,false)->get_error_data()['status']===404);
+$fixtureUser=17;

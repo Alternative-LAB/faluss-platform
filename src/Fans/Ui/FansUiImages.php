@@ -26,6 +26,8 @@ final class FansUiImages
         $cursor = $post ? '' : ModerationPanel::field('images_cursor', $_GET);
         $view->scope = $post ? 'live' : (ModerationPanel::field('image_state', $_GET) ?: 'live');
         $view->listing = ModerationPanel::request('GET', 'images', ['scope' => $view->scope] + ($cursor === '' ? [] : ['cursor' => $cursor]));
+        $item=ModerationPanel::field('image',$_GET);
+        if($item!==''){$row=\Faluss\Platform\Fans\Images\ImageService::ownItem($item);$view->listing=new \WP_REST_Response(['items'=>$row===null?[]:[$row],'next_cursor'=>null],$row===null?404:200);}
         return $view;
     }
     private static function submit(): \WP_REST_Response

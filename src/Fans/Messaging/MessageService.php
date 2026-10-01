@@ -52,6 +52,7 @@ final class MessageService
             if ($wpdb->query($wpdb->prepare('INSERT INTO `'.$threads.'` (thread_id,fan_user,creator_id,creator_user,state,revision,last_seq,created_at,last_sent_at) VALUES(%s,%d,%s,%d,%s,1,1,UTC_TIMESTAMP(),UTC_TIMESTAMP())',
                 $id,$fan,$creatorId,$owner,'pending'))!==1) { return MessagePolicy::error('messages_write_failed'); }
             $message=self::insert($id,1,$fan,$body,$key,$hash);
+            if(!($message instanceof \WP_Error)&&!\Faluss\Platform\Fans\Notifications\NotificationEvents::record($owner,'message_request',$id,1)){return MessagePolicy::error('message_notification_failed');}
             return $message instanceof \WP_Error ? $message : ['thread_id'=>$id,'message_id'=>$message,'state'=>'pending','direct_opening_available'=>false];
         });
     }
@@ -73,6 +74,8 @@ final class MessageService
             $message=self::insert($threadId,$seq,$sender,$body,$key,$hash);
             if ($message instanceof \WP_Error) { return $message; }
             if ($wpdb->query($wpdb->prepare('UPDATE `'.MessageSchema::table('threads').'` SET last_seq=%d,revision=revision+1,last_sent_at=UTC_TIMESTAMP() WHERE thread_id=%s',$seq,$threadId))!==1) { return MessagePolicy::error('messages_write_failed'); }
+            $recipient=$sender===(int)$thread['fan_user']?(int)$thread['creator_user']:(int)$thread['fan_user'];
+            if(!\Faluss\Platform\Fans\Notifications\NotificationEvents::record($recipient,'message_received',$threadId,$seq)){return MessagePolicy::error('message_notification_failed');}
             return ['thread_id'=>$threadId,'message_id'=>$message,'state'=>'open'];
         });
     }
@@ -96,6 +99,7 @@ final class MessageService
                 $thread['state']=$action==='accept'?'open':'refused';
             }
             if ($wpdb->query($wpdb->prepare('UPDATE `'.MessageSchema::table('threads').'` SET state=%s,revision=revision+1 WHERE thread_id=%s',$thread['state'],$threadId))!==1) { return MessagePolicy::error('messages_write_failed'); }
+            if(in_array($action,['accept','refuse'],true)&&!\Faluss\Platform\Fans\Notifications\NotificationEvents::record((int)$thread['fan_user'],$action==='accept'?'message_accepted':'message_refused',$threadId,$revision+1)){return MessagePolicy::error('message_notification_failed');}
             return ['thread_id'=>$threadId,'state'=>$thread['state'],'revision'=>$revision+1];
         });
     }

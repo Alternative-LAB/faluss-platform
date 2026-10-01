@@ -71,6 +71,11 @@ final class ReportModeration
                 $update=$wpdb->prepare('UPDATE `'.$table.'` SET state=%s,decision=%s'.$restriction.',reviewed_at=UTC_TIMESTAMP(),review_due_at=UTC_TIMESTAMP()+INTERVAL 30 DAY,revision=revision+1 WHERE case_id=%s',$state,$action,$id);
             }
             if($wpdb->query($update)!==1||!MessageReports::event($id,$revision+1,$action,$reason)) {return MessagePolicy::error('reports_write_failed');}
+            if(in_array($action,['no_action','remove','restrict','restore','finalize'],true)){
+                foreach([(int)$row['reporter_user'],(int)$row['subject_user']] as $recipient){
+                    if(!\Faluss\Platform\Fans\Notifications\NotificationEvents::record($recipient,$action==='finalize'?'report_final':'report_decision',$id,$revision+1)){return MessagePolicy::error('report_notification_failed');}
+                }
+            }
             return ['case_id'=>$id,'state'=>$state,'revision'=>$revision+1];
         });
     }

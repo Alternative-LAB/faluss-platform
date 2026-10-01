@@ -33,7 +33,8 @@ final class MessageStore
     public static function eraseThread(string $id): bool
     {
         global $wpdb;
-        return $wpdb->query($wpdb->prepare('DELETE FROM `'.MessageSchema::table('messages').'` WHERE thread_id=%s',$id))!==false
+        return \Faluss\Platform\Fans\Notifications\NotificationEvents::forgetConversation($id)
+            && $wpdb->query($wpdb->prepare('DELETE FROM `'.MessageSchema::table('messages').'` WHERE thread_id=%s',$id))!==false
             && $wpdb->query($wpdb->prepare('DELETE FROM `'.MessageSchema::table('threads').'` WHERE thread_id=%s',$id))!==false;
     }
     /** Deletes expired ordinary content only; legal proofs live in separate storage. */

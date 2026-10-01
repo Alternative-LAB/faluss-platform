@@ -5,6 +5,14 @@ namespace Faluss\Platform\Fans\Messaging;
 /** Bounded private projections. Local user IDs and idempotency material never leave storage. */
 final class MessageReading
 {
+    /** Read-only notification link gate: no body loaded and no expiry mutation during rendering. */
+    public static function notificationAccessible(string $id): bool
+    {
+        if(!MessagePolicy::uuid($id)||!MessageModule::privateAccessAvailable()||\Faluss\Platform\Fans\Sso\FansSsoService::currentLinkedSubject()===null){return false;}
+        global $wpdb;$user=get_current_user_id();
+        $found=$wpdb->get_var($wpdb->prepare('SELECT thread_id FROM `'.MessageSchema::table('threads').'` WHERE thread_id=%s AND (fan_user=%d OR creator_user=%d) AND DATE_ADD(last_sent_at,INTERVAL 12 MONTH)>UTC_TIMESTAMP()',$id,$user,$user));
+        return $found===$id&&!MessageStore::failed();
+    }
     public static function inbox(mixed $cursor=''): mixed
     {
         if ($cursor!=='' && !MessagePolicy::uuid($cursor)) { return MessagePolicy::error('invalid_message_cursor',400); }

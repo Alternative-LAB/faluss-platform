@@ -227,6 +227,12 @@ continuité décidée et notifiée, pas un abandon silencieux des dossiers.
 
 ## Preuves et limites de l’audit
 
+La repasse ajoute un [centre de notifications dans Fans](../modules/FANS-NOTIFICATIONS.md)
+et les [opérations du back-office privé](../modules/FANS-BACKOFFICE.md). Les événements
+de message et décisions de dossier sont persistés pour les destinataires autorisés,
+sans exposer les motifs internes. Cela ne remplace ni un canal externe décidé,
+ni la procédure de recours, ni l’attestation humaine avant activation.
+
 Le moteur ordinaire, modération, recours, rétention et fermeture sont livrés ;
 l’outil de préparation ajouté est testé sur WordPress/MariaDB jetables avec vrais
 cookies/nonces et API. Les liaisons SSO y sont des fixtures locales : aucun échange

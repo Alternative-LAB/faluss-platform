@@ -9,6 +9,13 @@ use Faluss\Platform\Fans\Publications\PublicationAccessPolicy;
 
 final class ImageService
 {
+    /** @return array<string,mixed>|null Owner metadata, including withdrawn state; no storage material. */
+    public static function ownItem(string $id): ?array
+    {
+        if(!ImagesModule::available()||!ImageStorage::validId($id)||($profile=CreatorProfileService::own())===null){return null;}
+        $row=self::row($id);
+        return $row!==null&&$row['creator_id']===$profile['creator_id']?array_intersect_key($row,array_flip(['image_id','revision','state','created_at','updated_at'])):null;
+    }
     public static function error(string $code, int $status = 503): \WP_Error
     { return new \WP_Error($code, 'Image indisponible.', ['status' => $status]); }
 
@@ -100,7 +107,9 @@ final class ImageService
             if ($action === 'approve' && !CreatorProfileService::hasLinkedOwner($row['creator_id'])) { return self::error('creator_link_missing', 409); }
             $state = match ($action) { 'approve' => 'approved', 'reject' => 'rejected', default => 'withdrawn' };
             if ($wpdb->query($wpdb->prepare('UPDATE `' . ImageSchema::table() . '` SET state=%s,revision=revision+1,updated_at=UTC_TIMESTAMP() WHERE image_id=%s AND revision=%d', $state, $id, $revision)) !== 1
-                || !self::audit($id, $revision + 1, $action, $action === 'withdraw' ? 'creator_withdrawal' : $reason, $row['file_hash']) || $wpdb->query('COMMIT') === false) { return self::error('image_write_failed'); }
+                || !self::audit($id, $revision + 1, $action, $action === 'withdraw' ? 'creator_withdrawal' : $reason, $row['file_hash'])
+                || ($action!=='withdraw' && !\Faluss\Platform\Fans\Notifications\NotificationEvents::record((int)(CreatorProfileService::administration($row['creator_id'])['wp_user_id']??0),'image_'.$state,$id,$revision+1,$reason))
+                || $wpdb->query('COMMIT') === false) { return self::error('image_write_failed'); }
             // Revoke access durably BEFORE unlink. A failed unlink can never reopen bytes.
             if ($action !== 'approve' && ($root === null || !ImageStorage::remove($root, $id))) { return self::error('image_cleanup_required'); }
             return ['image_id' => $id, 'revision' => $revision + 1, 'state' => $state];

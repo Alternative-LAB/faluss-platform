@@ -21,7 +21,9 @@ sql("UPDATE test_faluss_fans_creator_profiles SET status='active' WHERE creator_
 for user in [0,19,1]: check('HTTP request denied '+str(user),call(user,'messages/requests',payload())[0]==403)
 check('HTTP CSRF denied',call(18,'messages/requests',payload(),False)[0]==403)
 for extra in [{'max':True},{'state':'open'},{'image_id':str(uuid.uuid4())}]: check('forged fields refused '+str(extra),call(18,'messages/requests',dict(payload(),**extra))[0]==400)
-for body in ['', 'x'*1001,'<img src=x>','x\u0000y']: check('request text validation',call(18,'messages/requests',payload(body))[0]==400)
+for body in ['', 'x'*1001,'<img src=x>','x\u0000y']:
+    result=call(18,'messages/requests',payload(body))
+    check('request text validation '+str(result[0]),result[0]==400)
 check('query cannot override body',call(18,'messages/requests?body=changed',payload())[0]==400)
 check('self request refused',call(17,'messages/requests',payload())[0]==403)
 p=payload()

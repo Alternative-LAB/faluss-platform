@@ -34,6 +34,8 @@ final class FansUiView
 
     /** @var array<string,array{string,string,string,string}> */
     private const PAGES = [
+        'fan:notifications' => ['Votre espace', 'Notifications', '', 'Les décisions et échanges qui vous concernent.'],
+        'creator:notifications' => ['Espace créateur', 'Notifications', '', 'Les décisions et échanges qui vous concernent.'],
         'profile-unavailable' => ['Découvrir', 'Profil indisponible', '', 'Ce profil n’est pas public ou n’existe pas.'],
         'creator-unavailable' => ['Votre espace Fans', 'Espace créateur indisponible', '', 'Cet espace nécessite un profil créateur associé à votre compte.'],
         'visitor:connexion' => ['Votre espace Fans', 'Continuer avec Faluss', '', 'Connectez-vous via Faluss Identity pour accéder à cet espace personnel.'],
@@ -60,7 +62,7 @@ final class FansUiView
         'public-profile' => ['Découvrir', 'Profil créateur', 'explorer', 'Seuls les champs éditoriaux approuvés sont présentés ici.'],
     ];
 
-    public static function render(string $role, string $view, ?string $creatorId, int $status = 200, string $signIn = '', ?FansUiAuthor $author = null, ?FansUiAdmission $admission = null, ?FansUiEditorial $editorial = null, ?FansUiImages $images = null, ?FansUiMessages $messages = null, ?FansUiAuthor $composer = null): void
+    public static function render(string $role, string $view, ?string $creatorId, int $status = 200, string $signIn = '', ?FansUiAuthor $author = null, ?FansUiAdmission $admission = null, ?FansUiEditorial $editorial = null, ?FansUiImages $images = null, ?FansUiMessages $messages = null, ?FansUiAuthor $composer = null, ?FansUiNotifications $notifications = null): void
     {
         $errorView = in_array($view, ['profile-unavailable', 'creator-unavailable'], true);
         $page = self::PAGES[$view === 'public-profile' || $errorView ? $view : $role . ':' . $view] ?? null;
@@ -94,6 +96,7 @@ final class FansUiView
 <div class="fu-app" data-fans-role="<?php echo esc_attr($role); ?>">
     <?php self::navigation($role, $page[2]); ?>
     <main class="fu-main" id="fu-main" tabindex="-1">
+        <?php FansUiNotifications::bell($role); ?>
         <header class="<?php echo in_array($view, ['accueil', 'explorer', 'hof'], true) ? 'fu-banner' : 'fu-heading'; ?>">
             <div class="fu-banner__texture" aria-hidden="true"></div>
             <p class="fu-eyebrow"><?php echo esc_html($page[0]); ?></p>
@@ -108,7 +111,9 @@ final class FansUiView
                 <?php echo $signIn; // Trusted server-rendered SSO form, all values escaped by FansSsoService. ?>
             </section>
         <?php endif; ?>
-        <?php if ($view === 'explorer') : ?>
+        <?php if ($view === 'notifications' && $notifications !== null) : ?>
+            <?php FansUiNotifications::render($notifications,$role); ?>
+        <?php elseif ($view === 'explorer') : ?>
             <?php self::explorer($api, $publicBase); ?>
             <?php FansUiReading::publications(); ?>
         <?php elseif ($view === 'accueil') : ?>

@@ -17,8 +17,8 @@ final class FansUiRoutes
 
     /** @var array<string,list<string>> */
     private const VIEWS = [
-        'fan' => ['accueil', 'explorer', 'hof', 'hof/session', 'classements', 'classement-fans', 'messages', 'espace'],
-        'creator' => ['accueil', 'explorer', 'hof', 'hof/session', 'classements', 'messages', 'progression', 'creer', 'boutique', 'mon-profil'],
+        'fan' => ['accueil', 'explorer', 'hof', 'hof/session', 'classements', 'classement-fans', 'messages', 'espace', 'notifications'],
+        'creator' => ['accueil', 'explorer', 'hof', 'hof/session', 'classements', 'messages', 'progression', 'creer', 'boutique', 'mon-profil', 'notifications'],
     ];
 
     public static function register(): void
@@ -172,8 +172,10 @@ final class FansUiRoutes
         $editorial = $role === 'creator' && $view === 'mon-profil' ? FansUiEditorial::load() : null;
         $messages = $view === 'messages' ? FansUiMessages::load((string)$role) : null;
         $composer = $role === 'creator' ? FansUiAuthor::load(true) : null;
+        $notifications=$view==='notifications'?FansUiNotifications::load():null;
         $status = max($author?->httpStatus() ?? 200, $images?->httpStatus() ?? 200, $admission?->httpStatus() ?? 200, $editorial?->httpStatus() ?? 200, $messages?->httpStatus() ?? 200);
-        FansUiView::render((string) $role, $view, $publicProfile ? $creatorId : null, $status, $signIn, $author, $admission, $editorial, $images, $messages, $composer);
+        $status=max($status,$notifications->status??200);
+        FansUiView::render((string) $role, $view, $publicProfile ? $creatorId : null, $status, $signIn, $author, $admission, $editorial, $images, $messages, $composer, $notifications);
         exit;
     }
 

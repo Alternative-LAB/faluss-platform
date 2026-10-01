@@ -113,6 +113,11 @@ final class EditorialService
             } elseif ($action !== 'reject' || $row['state'] === 'approved') {
                 if ($wpdb->query($wpdb->prepare('DELETE FROM `' . EditorialSchema::publishedTable() . '` WHERE creator_id=%s', $id)) === false) { return self::error('editorial_write_failed'); }
             }
+            if($action!=='withdraw'){
+                $owner=CreatorProfileService::administration($id);
+                $kind=match($action){'approve'=>'editorial_approved','revoke'=>'editorial_revoked',default=>'editorial_rejected'};
+                if(!\Faluss\Platform\Fans\Notifications\NotificationEvents::record((int)($owner['wp_user_id']??0),$kind,$id,$revision+1,$reason)){return self::error('editorial_notification_failed');}
+            }
             return ['creator_id' => $id, 'revision' => $revision + 1, 'state' => $state];
         });
     }
