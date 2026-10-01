@@ -20,6 +20,7 @@ final class CreatorStatusReview
             $row = self::row($id);
             if ($row instanceof \WP_Error) { return $row; }
             if ($revision !== null && $revision !== $row['status_revision']) { return self::error('status_revision_conflict', 409); }
+            if ($status === 'active' && !CreatorProfileService::hasLinkedOwner($id)) { return self::error('creator_link_missing', 409); }
             // Legacy server callers may omit the expected revision; no-op still creates no decision.
             if ($row['status'] === $status) { return $row; }
             if ($row['status_revision'] >= 2147483646) { return self::error('status_revision_exhausted', 503); }

@@ -10,6 +10,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Contexte privé des comptes liés dans toutes les files et fiches de modération Fans ; recherche locale et refus des approbations sans liaison membre valide.
+
 - Entrée Fans `/app`, résolution du rôle et redirection des anciennes routes humaines ; callback SSO et API stables, accès application visible pour les membres liés.
 - Sélecteur Créer depuis chaque écran Créateur, compositeur de publication réel et aperçus commerciaux fermés, navigation clavier et mobile ; en-têtes compacts hors Accueil/Explorer/HoF.
 

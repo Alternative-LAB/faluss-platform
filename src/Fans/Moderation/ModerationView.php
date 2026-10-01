@@ -70,6 +70,7 @@ final class ModerationView
         <article class="fm-card" aria-label="<?php echo esc_attr(($images ? 'Image ' : 'Texte ') . $id); ?>">
             <div class="fm-meta"><strong><?php echo esc_html((string) $row['state']); ?></strong><span>Révision <?php echo esc_html((string) $row['revision']); ?></span></div>
             <h3><?php echo $images ? 'Image en quarantaine' : 'Publication textuelle'; ?></h3>
+            <?php $linked = AccountContext::creator((string) $row['creator_id']); ?>
             <p class="fm-id"><?php echo esc_html($id); ?></p>
             <?php if (!$images): ?>
                 <a href="<?php echo esc_url(add_query_arg('item', $id, self::url(false))); ?>">Fiche et journal</a>
@@ -91,7 +92,7 @@ final class ModerationView
                     <label for="reason-<?php echo esc_attr($id); ?>">Décision et motif</label>
                     <select required name="reason" id="reason-<?php echo esc_attr($id); ?>">
                         <option value="">Choisir après examen</option>
-                        <?php if ($row['state'] === 'pending' && $active): ?><option value="<?php echo $images ? 'allowed_image' : 'allowed_text'; ?>">Approuver · contenu autorisé</option><?php endif; ?>
+                        <?php if ($row['state'] === 'pending' && $active && $linked): ?><option value="<?php echo $images ? 'allowed_image' : 'allowed_text'; ?>">Approuver · contenu autorisé</option><?php endif; ?>
                         <option value="prohibited_content">Refuser · contenu interdit</option><option value="needs_revision">Refuser · correction nécessaire</option>
                     </select>
                     <p>Le refus purge le contenu courant. Relisez le texte et examinez l’image avant de confirmer.</p>

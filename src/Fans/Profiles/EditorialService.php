@@ -86,6 +86,7 @@ final class EditorialService
         return self::transaction(static function () use ($id, $revision, $action, $reason): array|\WP_Error {
             global $wpdb;
             if ($action === 'approve' && CreatorProfileService::publicById($id, true) === null) { return self::error('active_creator_required', 409); }
+            if ($action === 'approve' && !CreatorProfileService::hasLinkedOwner($id)) { return self::error('creator_link_missing', 409); }
             $row = self::row($id);
             if ($row instanceof \WP_Error) { return $row; }
             if ($row === null) { return self::error('editorial_not_found', 404); }

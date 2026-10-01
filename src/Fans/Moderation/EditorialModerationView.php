@@ -57,6 +57,7 @@ final class EditorialModerationView
         ?>
         <article class="fm-card"><div class="fm-meta"><strong><?php echo esc_html((string) $row['state']); ?></strong><span>Révision <?php echo esc_html((string) $row['revision']); ?></span></div>
             <h3><?php echo esc_html($row['public_name'] !== '' ? (string) $row['public_name'] : 'Présentation retirée'); ?></h3>
+            <?php $linked = AccountContext::creator($id); ?>
             <p class="fm-id">Créateur : <?php echo esc_html($id); ?></p>
             <a href="<?php echo esc_url(add_query_arg('item', $id, self::url())); ?>">Fiche et journal</a>
             <div class="fm-text"><?php echo esc_html((string) $row['bio']); ?></div>
@@ -71,7 +72,7 @@ final class EditorialModerationView
                     <input type="hidden" name="revision" value="<?php echo esc_attr((string) $row['revision']); ?>">
                     <label for="reason-<?php echo esc_attr($id); ?>">Décision et motif</label><select required name="reason" id="reason-<?php echo esc_attr($id); ?>">
                         <option value="">Choisir après examen</option>
-                        <?php if ($row['state'] === 'pending' && $active): ?><option value="allowed_editorial">Approuver · présentation autorisée</option><?php endif; ?>
+                        <?php if ($row['state'] === 'pending' && $active && $linked): ?><option value="allowed_editorial">Approuver · présentation autorisée</option><?php endif; ?>
                         <?php if (in_array($row['state'], ['pending', 'approved'], true)): ?><option value="needs_revision">Refuser · correction nécessaire</option><option value="prohibited_content">Refuser · contenu interdit</option><?php endif; ?>
                         <?php if (is_array($row['published'] ?? null)): ?><option value="revoke_prohibited_content">Révoquer la version publique et effacer la proposition · contenu interdit</option><?php endif; ?>
                     </select><p>Refuser une proposition en attente efface cette proposition ; la version approuvée précédente reste visible. Révoquer efface les deux.</p><button type="submit">Confirmer cette décision</button>

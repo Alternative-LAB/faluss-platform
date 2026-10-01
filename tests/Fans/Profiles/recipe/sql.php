@@ -85,7 +85,9 @@ check('wrong image revision cannot preview', ImageService::ownerPreview(IMAGE, 2
 check('pending portrait cannot attach', EditorialService::submit(4, 'Atelier SQL', '', IMAGE, 1)->get_error_data()['status'] === 409);
 $fixtureUser = 1;
 check('real image moderation', is_array(ImageService::decide(IMAGE, 1, 'approve', 'allowed_image')));
+check('admin image list resolves creator context', (ImageService::listing()['items'][0]['creator_id'] ?? null) === OWNER);
 $fixtureUser = 17;
+check('member image list does not gain administrative creator context', !array_key_exists('creator_id', ImageService::listing()['items'][0]));
 check('approved portrait candidates are owned', ImageService::portraitCandidates()['items'][0]['image_id'] === IMAGE);
 $wpdb->query("UPDATE test_faluss_fans_images SET creator_id='44444444-4444-4444-8444-444444444444' WHERE image_id='" . IMAGE . "'");
 check('foreign approved portrait cannot attach', EditorialService::submit(4, 'Atelier SQL', '', IMAGE, 2)->get_error_data()['status'] === 409);

@@ -81,6 +81,7 @@ namespace Faluss\Platform\Fans\Profiles {
         }
         public function get_charset_collate(): string { return 'DEFAULT CHARACTER SET utf8mb4'; }
         public function get_var(string $query): mixed {
+            if (str_starts_with($query, 'SELECT faluss_id FROM')) { return $GLOBALS['profile_linked'] ? '11111111-1111-4111-8111-111111111111' : null; }
             return str_contains($query, 'SELECT revision FROM') ? (end($this->decisions)['revision'] ?? null) : null;
         }
         public function get_row(string $query, mixed $output = null): ?array
@@ -301,6 +302,18 @@ namespace Faluss\Platform\Fans\Profiles {
             CreatorProfileRest::routes();
             self::assertCount(6, $GLOBALS['profile_routes']);
             self::assertArrayHasKey('faluss-fans/v1/creators/me', $GLOBALS['profile_routes']);
+        }
+
+        public function testMissingMemberLinkBlocksActivationButAllowsSuspension(): void
+        {
+            $row = CreatorProfileService::create('arts');
+            $GLOBALS['profile_admin'] = true; $GLOBALS['profile_linked'] = false;
+            self::assertSame('creator_link_missing', CreatorProfileService::setStatus($row['creator_id'], 'active', 0)->get_error_code());
+            self::assertSame([], $GLOBALS['wpdb']->decisions);
+            self::assertNull(CreatorProfileService::publicById($row['creator_id']));
+            self::assertSame('suspended', CreatorProfileService::setStatus($row['creator_id'], 'suspended', 0)['status']);
+            $GLOBALS['profile_linked'] = true;
+            self::assertSame('active', CreatorProfileService::setStatus($row['creator_id'], 'active', 1)['status']);
         }
     }
 }
