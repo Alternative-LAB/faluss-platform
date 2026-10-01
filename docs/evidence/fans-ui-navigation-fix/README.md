@@ -137,4 +137,3 @@ les fichiers privés de cookies, clés et profils de navigateur.
 Aucune migration de données. Retour arrière par le paquet précédent sans toucher
 aux tables ; les cookies déjà émis conservent leur durée jusqu’à expiration ou
 révocation. Les flags fermés le restent.
-
