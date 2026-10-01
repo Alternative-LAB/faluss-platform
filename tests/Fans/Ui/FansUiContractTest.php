@@ -44,21 +44,21 @@ namespace Faluss\Platform\Fans\Ui {
         public function testDistinctRoutesAndDeniedCreatorAccess(): void
         {
             FansUiRoutes::rewrite();
-            self::assertCount(2, $GLOBALS['fans_ui_rewrites']);
+            self::assertCount(5, $GLOBALS['fans_ui_rewrites']);
             self::assertSame(
-                'https://fans.example.test/faluss-fans/creator/mon-profil',
+                'https://fans.example.test/app/creator/mon-profil',
                 FansUiRoutes::url('creator', 'mon-profil')
             );
             self::assertNotSame(
                 FansUiRoutes::url('creator', 'mon-profil'),
-                'https://fans.example.test/faluss-fans/creators/123e4567-e89b-42d3-a456-426614174000'
+                'https://fans.example.test/app/creators/123e4567-e89b-42d3-a456-426614174000'
             );
             self::assertTrue(FansUiRoutes::validView('fan', 'explorer'));
             self::assertFalse(FansUiRoutes::validView('fan', 'boutique'));
             self::assertFalse(FansUiRoutes::validView('creator', 'espace'));
             self::assertTrue(FansUiRoutes::isCanonicalPath(
                 FansUiRoutes::url('creator', 'creer'),
-                '/faluss-fans/creator/creer/?source=sidebar'
+                '/app/creator/creer/?source=sidebar'
             ));
             self::assertFalse(FansUiRoutes::isCanonicalPath(
                 FansUiRoutes::url('creator', 'creer'),
@@ -113,8 +113,8 @@ namespace Faluss\Platform\Fans\Ui {
             self::assertStringContainsString('sans présentation approuvée reste explicitement incomplète', $html);
             $visitor = $this->render('visitor', 'explorer');
             self::assertSame(2, substr_count($visitor, 'class="fu-nav__item'));
-            self::assertStringContainsString('href="https://fans.example.test/faluss-fans/fan/explorer"', $visitor);
-            self::assertStringContainsString('href="https://fans.example.test/faluss-fans/fan/hof"', $visitor);
+            self::assertStringContainsString('href="https://fans.example.test/app/fan/explorer"', $visitor);
+            self::assertStringContainsString('href="https://fans.example.test/app/fan/hof"', $visitor);
             self::assertStringNotContainsString('faluss-fans/visitor/', $visitor);
         }
 
@@ -123,8 +123,9 @@ namespace Faluss\Platform\Fans\Ui {
             $html = $this->render('visitor', 'hof');
             self::assertSame(2, substr_count($html, 'class="fu-nav__item'));
             self::assertStringContainsString('aria-label="HoF"', $html);
-            self::assertStringContainsString('Aucune session, aucun rang ni aucun point', $html);
-            self::assertStringContainsString('Parcours indisponible', $html);
+            self::assertStringContainsString('Le Hall of Fame se prépare', $html);
+            self::assertStringContainsString('Bientôt sur Fans', $html);
+            self::assertStringNotContainsString('moteur', $html);
             self::assertStringNotContainsString('<form', $html);
             self::assertStringNotContainsString('€', $html);
         }
@@ -160,15 +161,15 @@ namespace Faluss\Platform\Fans\Ui {
             $patterns = array_keys($GLOBALS['fans_ui_rewrites']);
             foreach (['fan/hof', 'creator/creer', 'creator/hof/session'] as $route) {
                 foreach (['', '/'] as $suffix) {
-                    $request = 'faluss-fans/' . $route . $suffix;
-                    self::assertSame(1, preg_match('~' . $patterns[1] . '~D', $request, $matches));
+                    $request = 'app/' . $route . $suffix;
+                    self::assertSame(1, preg_match('~' . $patterns[2] . '~D', $request, $matches));
                     $GLOBALS['fans_ui_query'] = [FansUiRoutes::ROLE_VAR => $matches[1], FansUiRoutes::VIEW_VAR => $matches[2]];
                     $_SERVER['REQUEST_URI'] = '/' . $request;
                     self::assertTrue(FansUiRoutes::isCanonicalPath(FansUiRoutes::url($matches[1], $matches[2]), '/' . $request));
                 }
             }
             $canonical = FansUiRoutes::url('creator', 'creer');
-            foreach (['/faluss-fans/creator/creer//', '/faluss-fans//creator/creer', '/faluss-fans/creator/creer/extra', '/faluss-fans/creator/%63reer', '/?faluss_fans_ui_view=creer'] as $request) {
+            foreach (['/app/creator/creer//', '/faluss-fans//creator/creer', '/app/creator/creer/extra', '/app/creator/%63reer', '/?faluss_fans_ui_view=creer'] as $request) {
                 self::assertFalse(FansUiRoutes::isCanonicalPath($canonical, $request), $request);
             }
         }

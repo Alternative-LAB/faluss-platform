@@ -8,7 +8,7 @@ fs.mkdirSync(output, { recursive: true });
   const browser = await launchBrowser();
   try {
     const page = await browser.newPage({ viewport: { width: 1100, height: 600 } });
-    await page.goto(`${base}/faluss-fans/fan/hof`);
+    await page.goto(`${base}/app/fan/hof`);
     await page.setContent(`<style>
       @font-face{font-family:TestNormal;src:url('${base}/assets/fonts/outfit.ttf') format('truetype');font-weight:100 900}
       @font-face{font-family:TestVariable;src:url('${base}/assets/fonts/outfit.ttf') format('truetype-variations');font-weight:100 900}

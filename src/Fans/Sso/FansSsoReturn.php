@@ -14,7 +14,11 @@ final class FansSsoReturn
         if (!is_string($candidate) || strlen($candidate) > 512) {
             return null;
         }
-        $prefix = parse_url(home_url('/faluss-fans/'), PHP_URL_PATH);
+        $entry = parse_url(home_url('/app'), PHP_URL_PATH);
+        if (is_string($entry) && ($candidate === $entry || $candidate === $entry . '/')) { return $entry; }
+        $prefix = parse_url(home_url('/app/'), PHP_URL_PATH);
+        $legacy = parse_url(home_url('/faluss-fans/'), PHP_URL_PATH);
+        if (is_string($legacy) && str_starts_with($candidate, $legacy)) { $prefix = $legacy; }
         if (!is_string($prefix) || !str_starts_with($candidate, $prefix)) {
             return null;
         }

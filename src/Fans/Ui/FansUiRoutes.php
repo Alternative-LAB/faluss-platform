@@ -24,12 +24,16 @@ final class FansUiRoutes
     public static function register(): void
     {
         add_action('init', [self::class, 'rewrite'], 20);
+        add_action('init', [self::class, 'upgradeRoutes'], 21);
         add_filter('query_vars', [self::class, 'queryVars']);
         add_action('template_redirect', [self::class, 'handle'], 1);
     }
 
     public static function rewrite(): void
     {
+        add_rewrite_rule('^app/?$', 'index.php?' . self::VIEW_VAR . '=entry', 'top');
+        add_rewrite_rule('^app/creators/([0-9a-f-]{36})/?$', 'index.php?' . self::VIEW_VAR . '=public-profile&' . self::CREATOR_VAR . '=$matches[1]', 'top');
+        add_rewrite_rule('^app/(fan|creator)/([a-z/-]+)/?$', 'index.php?' . self::ROLE_VAR . '=$matches[1]&' . self::VIEW_VAR . '=$matches[2]', 'top');
         add_rewrite_rule(
             '^faluss-fans/creators/([0-9a-f-]{36})/?$',
             'index.php?' . self::VIEW_VAR . '=public-profile&' . self::CREATOR_VAR . '=$matches[1]',
@@ -40,6 +44,14 @@ final class FansUiRoutes
             'index.php?' . self::ROLE_VAR . '=$matches[1]&' . self::VIEW_VAR . '=$matches[2]',
             'top'
         );
+    }
+
+    public static function upgradeRoutes(): void
+    {
+        if (get_option('faluss_fans_ui_routes') !== 'app-v1') {
+            flush_rewrite_rules(false);
+            update_option('faluss_fans_ui_routes', 'app-v1', false);
+        }
     }
 
     /** @param list<string> $vars
@@ -69,7 +81,7 @@ final class FansUiRoutes
 
     public static function url(string $role, string $view): string
     {
-        return home_url('/faluss-fans/' . $role . '/' . $view);
+        return home_url('/app/' . $role . '/' . $view);
     }
 
     public static function isCanonicalPath(string $url, string $requestUri): bool
@@ -90,14 +102,31 @@ final class FansUiRoutes
         }
         $role = get_query_var(self::ROLE_VAR);
         $creatorId = get_query_var(self::CREATOR_VAR);
+        if ($view === 'entry' && self::isCanonicalPath(home_url('/app'), (string) ($_SERVER['REQUEST_URI'] ?? ''))) {
+            self::noStore();
+            $linked = FansSsoService::currentLinkedSubject() !== null;
+            $own = $linked && CreatorProfileSchema::ready() ? CreatorProfileService::own() : null;
+            wp_safe_redirect(self::url($own === null ? 'fan' : 'creator', $linked ? 'accueil' : 'explorer'), 302);
+            exit;
+        }
         $publicProfile = $view === 'public-profile' && is_string($creatorId)
             && preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/D', $creatorId) === 1;
         if (!$publicProfile && (!is_string($role) || !self::validView($role, $view))) {
             wp_die('Page introuvable.', '', ['response' => 404]);
         }
         $canonical = $publicProfile
-            ? home_url('/faluss-fans/creators/' . $creatorId)
+            ? home_url('/app/creators/' . $creatorId)
             : self::url($role, $view);
+        $legacy = $publicProfile ? home_url('/faluss-fans/creators/' . $creatorId) : home_url('/faluss-fans/' . $role . '/' . $view);
+        if (self::isCanonicalPath($legacy, (string) ($_SERVER['REQUEST_URI'] ?? ''))) {
+            self::noStore();
+            $selection = [];
+            foreach (['publication', 'cursor', 'section', 'thread', 'creator', 'archive'] as $key) {
+                if (isset($_GET[$key]) && is_string($_GET[$key]) && strlen($_GET[$key]) <= 160) { $selection[$key] = wp_unslash($_GET[$key]); }
+            }
+            wp_safe_redirect($selection === [] ? $canonical : add_query_arg($selection, $canonical), ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' ? 307 : 302);
+            exit;
+        }
         if (!self::isCanonicalPath($canonical, (string) ($_SERVER['REQUEST_URI'] ?? ''))) {
             wp_die('Page introuvable.', '', ['response' => 404]);
         }
@@ -142,8 +171,9 @@ final class FansUiRoutes
         $admission = $role === 'fan' && $view === 'espace' ? FansUiAdmission::load($profilesEnabled) : null;
         $editorial = $role === 'creator' && $view === 'mon-profil' ? FansUiEditorial::load() : null;
         $messages = $view === 'messages' ? FansUiMessages::load((string)$role) : null;
+        $composer = $role === 'creator' ? FansUiAuthor::load(true) : null;
         $status = max($author?->httpStatus() ?? 200, $images?->httpStatus() ?? 200, $admission?->httpStatus() ?? 200, $editorial?->httpStatus() ?? 200, $messages?->httpStatus() ?? 200);
-        FansUiView::render((string) $role, $view, $publicProfile ? $creatorId : null, $status, $signIn, $author, $admission, $editorial, $images, $messages);
+        FansUiView::render((string) $role, $view, $publicProfile ? $creatorId : null, $status, $signIn, $author, $admission, $editorial, $images, $messages, $composer);
         exit;
     }
 

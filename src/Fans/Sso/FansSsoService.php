@@ -77,7 +77,11 @@ final class FansSsoService
             return '';
         }
 
-        $returnTo = FansSsoReturn::path(is_array($attributes) ? ($attributes['return_to'] ?? null) : null);
+        if (self::currentLinkedSubject() !== null) {
+            return '<p class="faluss-fans-app-entry"><a href="' . esc_url(home_url('/app')) . '">' . esc_html__('Accéder à mon espace Fans', 'faluss-platform') . '</a></p>';
+        }
+        $returnTo = FansSsoReturn::path(is_array($attributes) ? ($attributes['return_to'] ?? null) : null)
+            ?? FansSsoReturn::path(parse_url(home_url('/app'), PHP_URL_PATH));
 
         return '<form class="faluss-fans-sso-form" method="post" action="' . esc_url(admin_url('admin-post.php')) . '">'
             . '<input type="hidden" name="action" value="' . esc_attr(self::START_ACTION) . '">'

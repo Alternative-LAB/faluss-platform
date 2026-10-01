@@ -38,29 +38,29 @@ final class FansUiView
         'creator-unavailable' => ['Votre espace Fans', 'Espace créateur indisponible', '', 'Cet espace nécessite un profil créateur associé à votre compte.'],
         'visitor:connexion' => ['Votre espace Fans', 'Continuer avec Faluss', '', 'Connectez-vous via Faluss Identity pour accéder à cet espace personnel.'],
         'visitor:explorer' => ['Découvrir', 'Explorer les créateurs', 'explorer', 'Découvrez les présentations approuvées. Les profils incomplets restent signalés.'],
-        'visitor:hof' => ['Hall of Fame', 'Le Hall of Fame', 'hof', 'Le moteur HoF n’est pas disponible. Aucune session, aucun rang ni aucun point ne peut être affiché.'],
+        'visitor:hof' => ['Hall of Fame', 'Le Hall of Fame', 'hof', 'Le Hall of Fame se prépare. Retrouvez ici les prochaines sessions de création.'],
         'fan:accueil' => ['Espace Fans', 'Bienvenue dans votre espace', 'accueil', 'Les parcours Fans s’ouvrent progressivement. Explorer permet de consulter les profils créateurs publiés.'],
         'fan:explorer' => ['Découvrir', 'Explorer les créateurs', 'explorer', 'Découvrez les profils et présentations approuvés par la modération.'],
-        'fan:hof' => ['Hall of Fame', 'Le Hall of Fame', 'hof', 'Les sessions et les scores HoF persistants ne sont pas disponibles. Aucun point n’est affiché.'],
+        'fan:hof' => ['Hall of Fame', 'Le Hall of Fame', 'hof', 'Les prochaines sessions du Hall of Fame apparaîtront ici.'],
         'fan:hof/session' => ['Hall of Fame', 'Session HoF', 'hof', 'Aucune session active ne peut être affichée ou rejointe pour le moment.'],
         'fan:classements' => ['Hall of Fame', 'Classements', 'hof', 'Les classements ne sont pas encore disponibles. Aucun rang n’est estimé.'],
         'fan:classement-fans' => ['Les fans soutiennent la création', 'Classement Fans', 'classement-fans', 'Votre place reposera uniquement sur les PF effectivement attribués à des créateurs, après attestation.'],
         'fan:messages' => ['Échanges', 'Messages', 'messages', 'La messagerie n’est pas encore disponible. Aucun message ne peut être envoyé.'],
         'fan:espace' => ['Votre espace', 'Espace personnel', 'espace', 'La progression et les gains PC ne sont pas encore disponibles.'],
-        'creator:accueil' => ['Espace créateur', 'Votre espace Fans', 'accueil', 'Votre espace rassemble les accès créateur. Les résumés de sessions et de communauté attendent leurs capacités serveur.'],
+        'creator:accueil' => ['Espace créateur', 'Votre espace Fans', 'accueil', 'Retrouvez vos publications, votre présentation et vos conversations.'],
         'creator:explorer' => ['Découvrir', 'Explorer les créateurs', 'explorer', 'Découvrez les profils et présentations approuvés par la modération.'],
-        'creator:hof' => ['Hall of Fame', 'Le Hall of Fame', 'hof', 'Les sessions et le score public en points HoF ne sont pas encore disponibles.'],
+        'creator:hof' => ['Hall of Fame', 'Le Hall of Fame', 'hof', 'Les prochaines sessions du Hall of Fame apparaîtront ici.'],
         'creator:hof/session' => ['Hall of Fame', 'Session HoF', 'hof', 'Aucune session active ne peut être affichée ou rejointe pour le moment.'],
-        'creator:classements' => ['Hall of Fame', 'Classements', 'hof', 'Les classements et les points HoF persistants ne sont pas encore disponibles.'],
+        'creator:classements' => ['Hall of Fame', 'Classements', 'hof', 'Les classements seront présentés à leur ouverture.'],
         'creator:messages' => ['Échanges', 'Messages', 'messages', 'La messagerie n’est pas encore disponible. Aucun message ne peut être envoyé.'],
-        'creator:progression' => ['Espace créateur', 'Progression', 'progression', 'Les points HoF et la progression persistante ne sont pas encore disponibles.'],
-        'creator:creer' => ['Espace créateur', 'Que souhaitez-vous créer ?', 'creer', 'Les textes et images passent par la modération. Prestations, services et produits restent indisponibles.'],
+        'creator:progression' => ['Espace créateur', 'Progression', 'progression', 'Votre progression apparaîtra ici lorsque le Hall of Fame ouvrira.'],
+        'creator:creer' => ['Espace créateur', 'Que souhaitez-vous créer ?', 'creer', 'Vos publications et images sont examinées avant publication. Prestations, services et produits restent indisponibles.'],
         'creator:boutique' => ['Espace créateur', 'Ma boutique', 'boutique', 'La gestion des offres, les réservations et les commandes ne sont pas encore disponibles.'],
         'creator:mon-profil' => ['Espace créateur', 'Mon profil', 'mon-profil', 'Gérez votre présentation publique et suivez son état de modération.'],
         'public-profile' => ['Découvrir', 'Profil créateur', 'explorer', 'Seuls les champs éditoriaux approuvés sont présentés ici.'],
     ];
 
-    public static function render(string $role, string $view, ?string $creatorId, int $status = 200, string $signIn = '', ?FansUiAuthor $author = null, ?FansUiAdmission $admission = null, ?FansUiEditorial $editorial = null, ?FansUiImages $images = null, ?FansUiMessages $messages = null): void
+    public static function render(string $role, string $view, ?string $creatorId, int $status = 200, string $signIn = '', ?FansUiAuthor $author = null, ?FansUiAdmission $admission = null, ?FansUiEditorial $editorial = null, ?FansUiImages $images = null, ?FansUiMessages $messages = null, ?FansUiAuthor $composer = null): void
     {
         $errorView = in_array($view, ['profile-unavailable', 'creator-unavailable'], true);
         $page = self::PAGES[$view === 'public-profile' || $errorView ? $view : $role . ':' . $view] ?? null;
@@ -68,13 +68,16 @@ final class FansUiView
             return;
         }
         $title = $page[1];
+        // Use native Unicode glyphs on the standalone app; do not fetch emoji images from a CDN.
+        if (function_exists('remove_action')) { remove_action('wp_head', 'print_emoji_detection_script', 7); }
         if ($messages?->available) { $page[3]='Vos demandes et conversations privées. Chaque échange respecte le choix de son destinataire.'; }
         $api = rest_url('faluss-fans/v1/creators');
-        $publicBase = home_url('/faluss-fans/creators/');
+        $publicBase = home_url('/app/creators/');
         wp_enqueue_style('faluss-fans-ui-v2', plugins_url('assets/fans-ui-v2.css', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'));
         if ($messages !== null) { wp_enqueue_style('faluss-fans-messages', plugins_url('assets/fans-messages.css', dirname(__DIR__, 3) . '/faluss-platform.php'), ['faluss-fans-ui-v2'], (string)constant('FALUSS_PLATFORM_VERSION')); }
         wp_enqueue_script('faluss-fans-ui-v2', plugins_url('assets/fans-ui-v2.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true);
         wp_enqueue_script('faluss-fans-reading', plugins_url('assets/fans-ui-reading.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true);
+        if ($role === 'creator') { wp_enqueue_script('faluss-fans-create', plugins_url('assets/fans-create.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true); }
         if ($editorial !== null || $images !== null) { wp_enqueue_script('faluss-fans-private-images', plugins_url('assets/fans-private-images.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true); }
         status_header($status);
         ?>
@@ -91,7 +94,7 @@ final class FansUiView
 <div class="fu-app" data-fans-role="<?php echo esc_attr($role); ?>">
     <?php self::navigation($role, $page[2]); ?>
     <main class="fu-main" id="fu-main" tabindex="-1">
-        <header class="fu-banner">
+        <header class="<?php echo in_array($view, ['accueil', 'explorer', 'hof'], true) ? 'fu-banner' : 'fu-heading'; ?>">
             <div class="fu-banner__texture" aria-hidden="true"></div>
             <p class="fu-eyebrow"><?php echo esc_html($page[0]); ?></p>
             <h1><?php echo esc_html($title); ?></h1>
@@ -131,7 +134,7 @@ final class FansUiView
                 <span class="fu-status-mark" aria-hidden="true">◌</span>
                 <div>
                     <p class="fu-panel__kicker"><?php echo $errorView ? 'Accès indisponible' : 'À venir'; ?></p>
-                    <h2 id="fu-status-title"><?php echo $errorView ? 'Cette page ne peut pas être affichée' : ($view === 'espace' ? 'Progression indisponible' : 'Parcours indisponible'); ?></h2>
+                    <h2 id="fu-status-title"><?php echo $errorView ? 'Cette page ne peut pas être affichée' : ($view === 'espace' ? 'Progression indisponible' : 'Bientôt sur Fans'); ?></h2>
                     <p><?php echo esc_html($page[3]); ?></p>
                     <?php if ($errorView) : ?>
                         <a class="fu-link" href="<?php echo esc_url(FansUiRoutes::url($role === 'visitor' ? 'fan' : $role, 'explorer')); ?>">Retour à Explorer <span aria-hidden="true">↗</span></a>
@@ -143,6 +146,7 @@ final class FansUiView
         <footer class="fu-footer">Faluss Fans · Certaines fonctionnalités arrivent progressivement.</footer>
     </main>
 </div>
+<?php if ($role === 'creator' && $composer !== null) { FansUiCreate::render($composer); } ?>
 <?php wp_footer(); ?>
 </body>
 </html>
@@ -159,6 +163,7 @@ final class FansUiView
                     <a class="fu-nav__item<?php echo $active === $key ? ' is-active' : ''; ?>"
                        href="<?php echo esc_url(FansUiRoutes::url($role === 'visitor' ? 'fan' : $role, $view)); ?>"
                        aria-label="<?php echo esc_attr($label); ?>"
+                       <?php echo $role === 'creator' && $view === 'creer' ? 'data-create-open aria-haspopup="dialog" aria-controls="fu-create"' : ''; ?>
                        <?php echo $active === $key ? 'aria-current="page"' : ''; ?>>
                         <svg aria-hidden="true" viewBox="0 0 24 24"><use href="#fu-icon-<?php echo esc_attr($icon); ?>"></use></svg>
                         <span class="fu-nav__label"><?php echo esc_html($label); ?></span>

@@ -4,7 +4,7 @@ fixture = runpy.run_path(str(pathlib.Path(__file__).with_name('images-http.py'))
 call, check, sql, png, BASE = [fixture[key] for key in ['call','check','sql','png','BASE']]
 
 def native(user, fields, publication):
-    request=urllib.request.Request(BASE+'/faluss-fans/creator/creer?publication='+publication,
+    request=urllib.request.Request(BASE+'/app/creator/creer?publication='+publication,
         urllib.parse.urlencode(fields).encode(), {'Cookie':'fixture_user='+str(user)})
     try: response=urllib.request.urlopen(request,timeout=20)
     except urllib.error.HTTPError as error: response=error

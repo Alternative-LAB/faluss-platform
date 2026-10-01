@@ -42,7 +42,7 @@ panel = '/wp-admin/admin.php?page=faluss-fans-moderation&view=profiles'
 status_route = 'creators/'+member+'/status'
 private_route = 'creators/'+member+'/private'
 public_route = 'creators/'+member
-page = '/faluss-fans/creators/'+member
+page = '/app/creators/'+member
 check('legacy pending profile not public REST', api(public_route)[0] == 404)
 check('pending page itself is HTTP 404', http(page)[0] == 404)
 check('pending profile absent from Explorer API', api('creators')[1] == [])

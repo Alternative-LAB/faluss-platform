@@ -18,7 +18,7 @@ const second = '123e4567-e89b-42d3-a456-426614174001';
     page.on('request', request => { if (new URL(request.url()).pathname.endsWith('/text-publications')) requests.push(new URL(request.url())); });
     for (const role of ['guest', 'fan', 'creator', 'admin']) {
       await cookie('fans_ui_role', role);
-      await page.goto(`${base}/faluss-fans/fan/explorer`);
+      await page.goto(`${base}/app/fan/explorer`);
       await page.getByRole('link', { name: 'Consulter la fiche publique, catégorie Musique' }).waitFor();
       const start = requests.length;
       await page.getByRole('link', { name: 'Consulter la fiche publique, catégorie Musique' }).click();
@@ -68,7 +68,7 @@ const second = '123e4567-e89b-42d3-a456-426614174001';
       await cookie('fans_ui_public_state', state);
       const before = requests.length;
       const id = state === 'missing' ? '123e4567-e89b-42d3-a456-426614174099' : second;
-      assert.equal((await page.goto(`${base}/faluss-fans/creators/${id}`)).status(), 404);
+      assert.equal((await page.goto(`${base}/app/creators/${id}`)).status(), 404);
       assert.equal(await page.locator('[data-fans-publications]').count(), 0);
       assert.equal(requests.length, before);
     }
@@ -80,7 +80,7 @@ const second = '123e4567-e89b-42d3-a456-426614174001';
       assert.equal(url.pathname, `/wp-json/faluss-fans/v1/text-publications/${second}/image/1`);
       return route.fulfill({ status: 503, json: {} });
     });
-    await page.goto(`${base}/faluss-fans/creators/${second}`); await loaded();
+    await page.goto(`${base}/app/creators/${second}`); await loaded();
     await page.getByRole('button', { name: 'Vérifier l’image associée' }).click();
     await page.getByText('Image indisponible.', { exact: false }).waitFor();
     console.log('Public profile publications: four roles, Explorer path, scoped pagination, foreign response refusal, closed/empty/error, document 404, BFcache and image URL passed.');

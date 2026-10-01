@@ -10,6 +10,7 @@ p.add_argument('--cli', required=True)
 p.add_argument('--test', action='store_true')
 p.add_argument('--keep', action='store_true')
 p.add_argument('--messaging', action='store_true')
+p.add_argument('--app', action='store_true')
 a = p.parse_args()
 root = pathlib.Path(tempfile.mkdtemp(prefix='fans-admission-wp-', dir='/var/tmp'))
 wp = root/'wordpress'
@@ -41,6 +42,7 @@ try:
     base = 'http://127.0.0.1:'+str(port)
     values = {'DB_NAME':'admission_recipe', 'DB_USER':'root', 'DB_PASSWORD':'', 'DB_HOST':'localhost:'+str(root/'sql.sock'), 'DB_CHARSET':'utf8mb4', 'DB_COLLATE':'', 'WP_HOME':'https://fans.example.test', 'WP_SITEURL':base, 'WP_HTTP_BLOCK_EXTERNAL':True, 'DISABLE_WP_CRON':True, 'WP_DEBUG':True, 'WP_DEBUG_DISPLAY':False, 'WP_DEBUG_LOG':str(root/'debug.log'), 'FALUSS_PLATFORM_ROLE':'fans', 'FALUSS_PLATFORM_FANS_SSO':True, 'FALUSS_PLATFORM_FANS_CREATOR_PROFILES':True, 'FALUSS_PLATFORM_FANS_EDITORIAL':True, 'FALUSS_PLATFORM_FANS_UI':True}
     for key in ('AUTH_KEY','SECURE_AUTH_KEY','LOGGED_IN_KEY','NONCE_KEY','AUTH_SALT','SECURE_AUTH_SALT','LOGGED_IN_SALT','NONCE_SALT'): values[key] = secrets.token_urlsafe(48)
+    if a.app: values['FALUSS_PLATFORM_FANS_TEXT_PUBLICATIONS'] = True
     config = '<?php\n'+''.join('define('+json.dumps(k)+','+json.dumps(v)+');\n' for k,v in values.items())
     config += "$table_prefix='wp_';\nif(!defined('ABSPATH')){define('ABSPATH',__DIR__.'/');}\nrequire_once ABSPATH.'wp-settings.php';\n"
     (wp/'wp-config.php').write_text(config); os.chmod(wp/'wp-config.php', 0o600)
@@ -50,6 +52,8 @@ try:
     shutil.copy2(pathlib.Path(a.source)/'tests/Fans/Profiles/recipe/admission-runtime.php', mu/'admission-fixture.php')
     cli('plugin', 'activate', 'faluss-platform')
     cli('eval-file', str(pathlib.Path(a.source)/'tests/Fans/Profiles/recipe/admission-seed.php'), str(root/'session.json'), '--use-include')
+    if a.app: cli('eval', "if(!\\Faluss\\Platform\\Fans\\Publications\\TextPublicationSchema::installOrVerify()){throw new RuntimeException('Fixture publications unavailable');}")
+    if a.app: cli('eval-file',str(pathlib.Path(a.source)/'tests/Fans/Ui/recipe/app-seed.php'),str(root/'session.json'),'--use-include')
     os.chmod(root/'session.json', 0o600)
     # Fixture flags are deliberately changed between HTTP checks; never cache wp-config.
     web = subprocess.Popen(['php', '-d', 'opcache.enable=0', '-d', 'opcache.enable_cli=0', '-S', '127.0.0.1:'+str(port), '-t', str(wp)], stdout=log, stderr=log, env=dict(os.environ, PHP_CLI_SERVER_WORKERS='4'), start_new_session=True)

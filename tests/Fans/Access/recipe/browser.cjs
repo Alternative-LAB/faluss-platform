@@ -22,7 +22,7 @@ const path = require('node:path');
       await context.route('**/*', route => new URL(route.request().url()).origin === base ? route.continue() : route.abort());
       for (const width of [1440, 390]) {
         await page.setViewportSize({ width, height: 900 });
-        for (const [name, route] of [['elementor', '/'], ['fans-hof', '/faluss-fans/fan/hof']]) {
+        for (const [name, route] of [['elementor', '/'], ['fans-hof', '/app/fan/hof']]) {
           const response = await page.goto(base + route);
           assert.equal(response.status(), 200, `${role} ${route}`);
           await page.evaluate(() => document.fonts.ready);
@@ -67,7 +67,7 @@ const path = require('node:path');
       if (role === 'guest') {
         await page.goto(base + '/');
         const ssoNonce = await page.locator('[name="faluss_fans_sso_nonce"]').inputValue();
-        const started = await context.request.post(base + '/wp-admin/admin-post.php', { form: { action: 'faluss_fans_sso_start', faluss_fans_sso_nonce: ssoNonce, faluss_fans_return_to: '/faluss-fans/fan/espace' }, maxRedirects: 0 });
+        const started = await context.request.post(base + '/wp-admin/admin-post.php', { form: { action: 'faluss_fans_sso_start', faluss_fans_sso_nonce: ssoNonce, faluss_fans_return_to: '/app/fan/espace' }, maxRedirects: 0 });
         assert.equal(started.status(), 302);
         assert.ok(started.headers().location.startsWith('https://faluss.me/oauth/authorize?'));
         // The external authorization redirect is inspected only; never followed.

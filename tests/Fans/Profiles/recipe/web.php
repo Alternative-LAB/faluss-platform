@@ -67,9 +67,9 @@ namespace {
         \Faluss\Platform\Fans\Moderation\ModerationPanel::render();
         echo '<script src="/assets/fans-moderation.js"></script></body></html>'; exit;
     }
-    if (preg_match('#^/faluss-fans/(fan|creator)/([a-z/-]+)/?$#D', $path, $matches)) {
+    if (preg_match('#^/app/(fan|creator)/([a-z/-]+)/?$#D', $path, $matches)) {
         $GLOBALS['fixtureQuery'] = ['faluss_fans_ui_role' => $matches[1], 'faluss_fans_ui_view' => $matches[2]];
-    } elseif (preg_match('#^/faluss-fans/creators/([0-9a-f-]{36})/?$#D', $path, $matches)) {
+    } elseif (preg_match('#^/app/creators/([0-9a-f-]{36})/?$#D', $path, $matches)) {
         $GLOBALS['fixtureQuery'] = ['faluss_fans_ui_view' => 'public-profile', 'faluss_fans_ui_creator' => $matches[1]];
     }
     \Faluss\Platform\Fans\Ui\FansUiRoutes::handle();

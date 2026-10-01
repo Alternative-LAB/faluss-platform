@@ -6,6 +6,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Ajouté
+
+- Entrée Fans `/app`, résolution du rôle et redirection des anciennes routes humaines ; callback SSO et API stables, accès application visible pour les membres liés.
+- Sélecteur Créer depuis chaque écran Créateur, compositeur de publication réel et aperçus commerciaux fermés, navigation clavier et mobile ; en-têtes compacts hors Accueil/Explorer/HoF.
+
 ### Corrigé
 
 - Présentations Fans : maintien de la dernière version approuvée pendant une modification ou un refus ; retrait et révocation immédiats, y compris après refus de la proposition, sans diffusion des champs en attente.
