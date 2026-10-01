@@ -33,6 +33,10 @@ namespace {
     }
 }
 
+namespace Faluss\Platform\Fans\Notifications {
+    function get_option(string $key, mixed $default=false): mixed { return $key===NotificationSchema::OPTION?'1':$default; }
+}
+
 namespace Faluss\Platform\Fans\Profiles {
     use PHPUnit\Framework\TestCase;
     use Faluss\Platform\Core\SiteRole;
@@ -111,6 +115,14 @@ namespace Faluss\Platform\Fans\Profiles {
         }
         public function get_results(string $query, mixed $output = null): array
         {
+            // Metadata adapter only; durable notification behaviours are exercised with real InnoDB.
+            if(str_contains($query,'faluss_fans_notifications')){
+                if(str_starts_with($query,'SHOW FULL COLUMNS')){
+                    $columns=['id'=>'bigint(20) unsigned','event_key'=>'char(64)','recipient'=>'bigint(20) unsigned','kind'=>'varchar(32)','object_id'=>'char(36)','reason'=>'varchar(32)','unread'=>'tinyint(1)','created_at'=>'datetime'];
+                    return array_map(static fn($k,$v)=>['Field'=>$k,'Type'=>$v,'Null'=>'NO','Extra'=>$k==='id'?'auto_increment':''],array_keys($columns),array_values($columns));
+                }
+                if(str_starts_with($query,'SHOW INDEX')){ $rows=[];foreach(['PRIMARY'=>[0,['id']],'event_key'=>[0,['event_key']],'recipient_id'=>[1,['recipient','id']],'expiry'=>[1,['created_at']]] as $name=>[$unique,$cols]){foreach($cols as $i=>$col){$rows[]=['Key_name'=>$name,'Non_unique'=>$unique,'Seq_in_index'=>$i+1,'Column_name'=>$col];}}return $rows;}
+            }
             if (str_contains($query, 'faluss_fans_creator_status_decisions')) {
                 if (str_starts_with($query, 'SHOW FULL COLUMNS')) {
                     return array_map(static fn (string $name, string $type): array => ['Field'=>$name,'Type'=>$type,'Null'=>'NO','Extra'=>''],
@@ -159,6 +171,7 @@ namespace Faluss\Platform\Fans\Profiles {
         }
         public function query(string $query): int|false
         {
+            if(str_starts_with($query,'INSERT INTO `wp_faluss_fans_notifications`')){return 1;}
             $last = end($this->prepared);
             if ($query === 'START TRANSACTION') { $this->snapshot = [$this->profile, $this->decisions]; }
             if ($query === 'ROLLBACK' && $this->snapshot !== null) { [$this->profile, $this->decisions] = $this->snapshot; }

@@ -1,0 +1,9 @@
+{
+  "browser": "154.0.8037.58",
+  "checks": [
+    "Actual WordPress Fan/Creator notification centers, 1440 and 390",
+    "Unread persisted through native POST and reload; exact decrement/replay restore",
+    "Communicable bio refusal; authorized real message link; no WP toolbar",
+    "Private no-store, no horizontal overflow, no JS error"
+  ]
+}

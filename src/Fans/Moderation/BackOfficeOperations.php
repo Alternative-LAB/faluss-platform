@@ -15,7 +15,7 @@ final class BackOfficeOperations
             if(!in_array($action,['messages_prepare','messages_purge'],true)){BackOfficeView::error('Opération invalide.',400);return;}
             if(!AdminActionLog::prepare() || ($event=AdminActionLog::begin($action))===null){BackOfficeView::error('Journal indisponible : aucune opération lancée.',503);return;}
             $result=$action==='messages_prepare'?MessageOperations::prepare():MessageOperations::purge();
-            $success=!($result instanceof \WP_Error);
+            $success=!($result instanceof \WP_Error) && ($result['error']??'')==='' && ($result['more']??false)===false;
             $journaled=AdminActionLog::finish($event,$success);
             if(!$success||!$journaled){BackOfficeView::error('Résultat incomplet ou non confirmé. Relisez le diagnostic et le journal avant de réessayer.',503);}
             else{echo '<p role="status">Opération terminée et journalisée. Les flags et l’attestation de politique restent inchangés.</p>';}

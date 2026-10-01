@@ -39,6 +39,8 @@ final class FansUiMessages
         }
         $route=match($v->section){'blocks'=>'messages/blocks','reports'=>'message-reports/mine',default=>'messages'};
         $v->listing=ModerationPanel::request('GET',$route,['cursor'=>ModerationPanel::field('cursor',$_GET)]);
+        $case=ModerationPanel::field('case',$_GET);
+        if($v->section==='reports'&&$case!==''){$row=\Faluss\Platform\Fans\Messaging\MessageReports::ownItem($case);$v->listing=new \WP_REST_Response(['items'=>is_array($row)?[$row]:[],'next_cursor'=>null],is_array($row)?200:404);}
         if($v->threadId!==''&&$v->section==='inbox') {
             $v->conversation=ModerationPanel::request('GET','messages/'.$v->threadId,['after'=>ModerationPanel::field('after',$_GET)?:'0']);
         }

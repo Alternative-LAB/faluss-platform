@@ -7,6 +7,7 @@ final class ReportRetention
     public static function erase(string $id): bool
     {
         global $wpdb;
+        if(!\Faluss\Platform\Fans\Notifications\NotificationEvents::forgetReport($id)){return false;}
         foreach(['report_events','legal_holds','reports'] as $kind) {
             if($wpdb->query($wpdb->prepare('DELETE FROM `'.MessageSchema::table($kind).'` WHERE case_id=%s',$id))===false) {return false;}
         }

@@ -136,6 +136,7 @@ final class TextPublicationService
             if ($wpdb->query($wpdb->prepare('UPDATE `' . TextPublicationSchema::table() . '` SET body=%s,state=%s,revision=%d,updated_at=%s'
                 . ' WHERE publication_id=%s AND revision=%d', $row['body'], $row['state'], $row['revision'], $row['updated_at'], $id, $revision)) !== 1
                 || !self::audit($row, $action === 'image' ? 'edit' : $action, $action === 'image' ? 'image_association' : ($moderation ? $reason : ($action === 'edit' ? 'awaiting_review' : 'creator_withdrawal')), $action === 'edit' ? $text : $oldText)
+                || ($moderation && !\Faluss\Platform\Fans\Notifications\NotificationEvents::record((int)(CreatorProfileService::administration($row['creator_id'])['wp_user_id']??0),'publication_'.$row['state'],$id,$row['revision'],(string)$reason))
                 || $wpdb->query('COMMIT') === false
             ) { return self::error('publication_write_failed', 503); }
             return $row;

@@ -5,6 +5,16 @@ namespace Faluss\Platform\Fans\Messaging;
 /** Minimal evidence extraction and participant recourse. Never returns the evidence copy to members. */
 final class MessageReports
 {
+    /** Recipient projection only: never loads proof, another participant, reason or internal journal. */
+    public static function ownItem(string $id): mixed
+    {
+        if(!MessagePolicy::uuid($id)||!ReportSchema::ready()){return MessagePolicy::error('report_not_found',404);}
+        return MessageService::run(static function()use($id):mixed{
+            global $wpdb;$user=get_current_user_id();
+            $row=$wpdb->get_row($wpdb->prepare('SELECT case_id,thread_id,state,revision,decision,created_at,reviewed_at,final_at FROM `'.MessageSchema::table('reports').'` WHERE case_id=%s AND (reporter_user=%d OR subject_user=%d) AND (state<>%s OR DATE_ADD(final_at,INTERVAL 12 MONTH)>UTC_TIMESTAMP())',$id,$user,$user,'final'),'ARRAY_A');
+            return MessageStore::failed()?MessagePolicy::error('reports_read_failed'):(is_array($row)?$row:MessagePolicy::error('report_not_found',404));
+        });
+    }
     public static function report(mixed $threadId,mixed $messageId,mixed $reason): mixed
     {
         if (!MessagePolicy::uuid($threadId)||!MessagePolicy::uuid($messageId)||!in_array($reason,['harassment','spam','prohibited_content','other'],true)) { return MessagePolicy::error('invalid_message_report',400); }

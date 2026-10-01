@@ -32,6 +32,8 @@ final class CreatorStatusReview
                     $id, $row['status_revision'] + 1, get_current_user_id(), $row['status'], $status, $now)) !== 1) {
                 return self::error('status_write_failed', 503);
             }
+            $owner=CreatorProfileService::administration($id);
+            if(!\Faluss\Platform\Fans\Notifications\NotificationEvents::record((int)($owner['wp_user_id']??0),'profile_'.$status,$id,$row['status_revision']+1)){return self::error('status_notification_failed',503);}
             return array_replace($row, ['status' => $status, 'updated_at' => $now, 'status_revision' => $row['status_revision'] + 1]);
         });
     }

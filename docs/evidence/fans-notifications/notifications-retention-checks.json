@@ -1,0 +1,22 @@
+{
+  "passed": 17,
+  "checks": [
+    "nontransactional notifications refuse emitting decision",
+    "invalid event store does not commit domain status",
+    "closed admission preserves notification center",
+    "closed admission preserves real conversation read",
+    "expired link omitted without read side effect",
+    "backoffice purge failure is not shown as success",
+    "purge failure is explicit",
+    "failed purge rolls back both stores",
+    "purge succeeds with admission closed",
+    "ordinary messages purged",
+    "conversation notifications purged together",
+    "purged conversation links absent",
+    "unrelated moderation notifications preserved",
+    "report events survive ordinary purge",
+    "expired report link absent",
+    "report events purged with expired finalized proof",
+    "no PHP fatal in runtime"
+  ]
+}

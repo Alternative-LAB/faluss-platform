@@ -86,6 +86,7 @@ final class BackOfficeView
         foreach (['accounts' => 'Liaisons SSO', 'profiles' => 'Profils Créateur', 'editorial' => 'Présentations', 'texts' => 'Publications', 'images' => 'Images privées', 'messages' => 'Signalements', 'catalog' => 'Catalogue'] as $key => $label) {
             echo '<tr><th>' . esc_html($label) . '</th><td>' . (isset($sections[$key]) ? 'Disponible pour votre compte' : 'Module fermé, prérequis absent ou habilitation insuffisante') . '</td></tr>';
         }
+        echo '<tr><th>Notifications privées</th><td>'.(\Faluss\Platform\Fans\Notifications\NotificationSchema::ready()?'Stockage vérifié ; lecture réservée au destinataire':'Stockage indisponible : décisions émettrices refusées').'</td></tr>';
         echo '<tr><th>HoF et classement calculé</th><td>Indisponibles : contrat Hub non ratifié</td></tr><tr><th>Paiement et réservations</th><td>Indisponibles</td></tr></tbody></table>';
         if (MessageOperations::allowed()) { echo '<p><a href="' . esc_url(BackOffice::url(['view' => 'operations'])) . '">Vérifier les schémas et la rétention messagerie →</a></p>'; }
     }

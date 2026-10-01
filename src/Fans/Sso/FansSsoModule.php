@@ -26,6 +26,7 @@ final class FansSsoModule implements Module
 
     public function boot(): void
     {
+        if (self::enabledForFans()) { add_action('init', [\Faluss\Platform\Fans\Notifications\NotificationSchema::class, 'upgrade'], 1); }
         if (!self::enabledForFans() || !FansSsoSchema::ready() || !FansSsoService::configured()) {
             return;
         }
