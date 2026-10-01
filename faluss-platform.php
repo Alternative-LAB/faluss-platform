@@ -111,6 +111,10 @@ register_deactivation_hook(
     [\Faluss\Platform\Fans\Sso\FansSsoModule::class, 'deactivate']
 );
 
+if (defined('WP_CLI') && WP_CLI) {
+    \WP_CLI::add_command('faluss fans-messaging', \Faluss\Platform\Fans\Messaging\MessageOperationsCli::class);
+}
+
 add_action('plugins_loaded', static function (): void {
     $role = \Faluss\Platform\Core\SiteRole::fromValue(
         defined('FALUSS_PLATFORM_ROLE') ? constant('FALUSS_PLATFORM_ROLE') : null

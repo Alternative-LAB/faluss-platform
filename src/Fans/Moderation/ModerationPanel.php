@@ -19,7 +19,8 @@ final class ModerationPanel
     {
         if (self::$registered) { return; }
         self::$registered = true;
-        add_action('admin_menu', [self::class, 'menu']);
+        // Retention registers before DashboardModule boots: wait for the parent menu.
+        add_action('admin_menu', [self::class, 'menu'], 20);
         add_action('admin_post_faluss_fans_preview', [self::class, 'preview']);
     }
 
@@ -70,6 +71,9 @@ final class ModerationPanel
     public static function load(): void
     {
         self::guard();
+        if (self::field('view', $_GET) === 'messages' && !\Faluss\Platform\Fans\Messaging\ReportModeration::allowed()) {
+            wp_die('Habilitation de modération privée requise.', '', ['response' => 403]);
+        }
         self::$result = null;
         if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') { return; }
         check_admin_referer('fans_moderation');

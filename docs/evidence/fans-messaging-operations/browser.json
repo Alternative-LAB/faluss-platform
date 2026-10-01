@@ -1,0 +1,47 @@
+{
+  "browser": "154.0.8037.58",
+  "checks": [
+    {
+      "device": "desktop",
+      "name": "closed-conversation",
+      "http": 200,
+      "noHorizontalOverflow": true,
+      "javaScriptDisabled": true
+    },
+    {
+      "device": "desktop",
+      "name": "closed-appeal",
+      "http": 200,
+      "noHorizontalOverflow": true,
+      "javaScriptDisabled": true
+    },
+    {
+      "device": "desktop",
+      "name": "moderator-proof",
+      "http": 200,
+      "noHorizontalOverflow": true,
+      "javaScriptDisabled": true
+    },
+    {
+      "device": "mobile",
+      "name": "closed-conversation",
+      "http": 200,
+      "noHorizontalOverflow": true,
+      "javaScriptDisabled": true
+    },
+    {
+      "device": "mobile",
+      "name": "closed-appeal",
+      "http": 200,
+      "noHorizontalOverflow": true,
+      "javaScriptDisabled": true
+    },
+    {
+      "device": "mobile",
+      "name": "moderator-proof",
+      "http": 200,
+      "noHorizontalOverflow": true,
+      "javaScriptDisabled": true
+    }
+  ]
+}
