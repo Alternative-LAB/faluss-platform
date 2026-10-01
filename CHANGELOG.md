@@ -6,15 +6,21 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+## [0.12.1] - 2026-10-01
+
 ### Corrigé
 
-- Fans : emplacements de navigation fixes, étiquettes hors flux au survol/focus (aide au premier toucher), logo SVG officiel et retrait des commentaires internes du profil et d’Explorer.
-- Compositeur Publication : images privées dans le parcours courant, texte conservé, sélection des images approuvées et soumission aux contrôles existants ; scroll, focus, fermeture et retour navigateur stabilisés. Galerie privée distincte et anciennes entrées compatibles.
-- Session locale Fan/Créateur lié : huit heures fixes, cookie persistant à échéance serveur exacte, déconnexion protégée près de la cloche, invalidation serveur et retrait des vues privées des autres onglets. Administrateurs et Identity Me inchangés ; changement de compte central explicite et manuel.
+- Fans : cases de navigation fixes, libellés flottants au survol/focus, aide tactile et logo SVG officiel ; retrait des commentaires internes du profil et d’Explorer.
+- Publication → Image → retour dans le compositeur courant avec conservation du texte, dépôt/aperçu privés et sélection des images approuvées. Galerie privée distincte, anciens formulaires et liens compatibles, scroll/focus/historique stabilisés.
+- Sessions locales des Fans/Créateurs liés : huit heures fixes, cookie persistant à échéance serveur exacte, déconnexion protégée près de la cloche, invalidation serveur et retrait des vues privées des autres onglets. Administrateurs WordPress et Identity Me inchangés.
+- Correctif et preuves : #135, `f209b71`.
 
 ### Documentation et compatibilité
 
-- Recettes réelles WordPress/MariaDB/HTTPS et navigateur isolées, captures comparatives et diagnostic des flux SSO concurrents. Aucun schéma métier, flag, secret ou paramètre de production modifié. Les sessions déjà ouvertes gardent leur échéance ; les nouveaux cookies utilisent huit heures.
+- Aucun schéma métier, flag, secret, paiement ou site de production modifié. Les sessions déjà ouvertes gardent leur échéance initiale ; les huit heures s’appliquent aux nouvelles connexions.
+- Identity ne fournit pas de sélecteur de compte : après déconnexion locale, l’aide décrit une action explicite et manuelle sur Me. Aucune déconnexion centrale silencieuse.
+- Un flux SSO propre réussit en HTTPS isolé ; deux flux partageant le cookie navigateur peuvent provoquer un refus selon l’ordre des retours. Cause reproduite localement, pas diagnostic confirmé du site cible.
+- 314 tests PHP, 294 assertions SQL/services, recettes réelles WordPress/MariaDB et navigateur, captures ordinateur/mobile. Voir `docs/evidence/fans-ui-navigation-fix/README.md`. Installation, Elementor cible et recette de production restent à l’exploitant.
 
 ## [0.12.0] - 2026-10-01
 
