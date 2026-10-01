@@ -1,0 +1,8 @@
+{
+  "browser": "154.0.8037.58",
+  "checks": [
+    "Real native owner submission preserves approved public projection; other owner and self-moderation denied",
+    "Native rejection purges draft only; native owner withdrawal after rejection removes prior public version",
+    "Concurrent real HTTP revocations: exactly one 200 and one 409; draft and published version removed atomically"
+  ]
+}

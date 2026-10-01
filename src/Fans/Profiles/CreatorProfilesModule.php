@@ -23,7 +23,8 @@ final class CreatorProfilesModule implements Module
             CreatorProfileRest::register();
             \Faluss\Platform\Fans\Moderation\ModerationPanel::register();
             add_action('admin_init', [self::class, 'upgradeStatusJournal']);
-            if (EditorialModule::available()) {
+            if (EditorialModule::enabled()) {
+                add_action('init', [EditorialModule::class, 'upgrade'], 0);
                 EditorialRest::register();
             }
         }

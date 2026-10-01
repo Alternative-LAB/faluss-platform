@@ -13,6 +13,7 @@ require_once __DIR__ . '/CreatorProfileTest.php';
 class EditorialDb extends CreatorProfileDb
 {
     public ?array $editorial = null;
+    public ?array $published = null;
     public array $audit = [];
     public bool $failAudit = false;
     public bool $failCommit = false;
@@ -30,6 +31,7 @@ class EditorialDb extends CreatorProfileDb
     }
     public function get_row(string $q, mixed $output = null): ?array
     {
+        if (str_starts_with($q, 'SELECT * FROM `wp_faluss_fans_editorial_approved`')) { return $this->published; }
         if (str_starts_with($q, 'SELECT * FROM `wp_faluss_fans_editorial`')) {
             return $this->editorial !== null && $this->editorial['creator_id'] === end($this->prepared)['args'][0] ? $this->editorial : null;
         }
@@ -64,9 +66,11 @@ class EditorialDb extends CreatorProfileDb
     public function query(string $q): int|false
     {
         $a = end($this->prepared)['args'] ?? [];
-        if ($q === 'START TRANSACTION') { $this->snapshot = [$this->editorial, $this->audit]; return 1; }
+        if ($q === 'START TRANSACTION') { $this->snapshot = [$this->editorial, $this->audit, $this->published]; return 1; }
         if ($q === 'COMMIT') { if ($this->failCommit) { return false; } $this->snapshot = null; return 1; }
-        if ($q === 'ROLLBACK') { if ($this->snapshot !== null) { [$this->editorial, $this->audit] = $this->snapshot; $this->snapshot = null; } return 1; }
+        if ($q === 'ROLLBACK') { if ($this->snapshot !== null) { [$this->editorial, $this->audit, $this->published] = $this->snapshot; $this->snapshot = null; } return 1; }
+        if (str_starts_with($q, 'REPLACE INTO `wp_faluss_fans_editorial_approved`')) { $this->published = $this->editorial; return 1; }
+        if (str_starts_with($q, 'DELETE FROM `wp_faluss_fans_editorial_approved`')) { $this->published = null; return 1; }
         if (str_starts_with($q, 'INSERT INTO `wp_faluss_fans_editorial_decisions`')) {
             if ($this->failAudit) { return false; }
             $this->audit[] = $a; return 1;
@@ -125,8 +129,43 @@ final class EditorialTest extends TestCase
         self::assertSame(['public_name', 'bio', 'revision', 'portrait'], array_keys(EditorialService::publicById(self::ID)));
         self::assertFalse(EditorialService::publicById(self::ID)['portrait']);
         $GLOBALS['profile_admin'] = false; $this->submit(2);
-        self::assertNull(EditorialService::publicById(self::ID));
+        self::assertSame(2, EditorialService::publicById(self::ID)['revision']);
         self::assertCount(3, $GLOBALS['wpdb']->audit);
+    }
+
+    public function testDraftRejectionPreservesApprovalAndOwnerCanWithdrawAfterRejection(): void
+    {
+        $this->submit(); $GLOBALS['profile_admin'] = true;
+        EditorialService::decide(self::ID, 1, 'approve', 'allowed_editorial');
+        $GLOBALS['profile_admin'] = false;
+        EditorialService::submit(2, 'Proposition privée', 'Bio privée', '', 0);
+        self::assertSame('Atelier de test', EditorialService::publicById(self::ID)['public_name']);
+        self::assertSame('Proposition privée', EditorialService::own()['public_name']);
+        $GLOBALS['profile_admin'] = true;
+        EditorialService::decide(self::ID, 3, 'reject', 'needs_revision');
+        self::assertSame(2, EditorialService::publicById(self::ID)['revision']);
+        $GLOBALS['profile_admin'] = false;
+        self::assertSame('withdrawn', EditorialService::decide(self::ID, 4, 'withdraw', '')['state']);
+        self::assertNull(EditorialService::publicById(self::ID));
+        self::assertNull(EditorialService::own()['published']);
+    }
+
+    public function testRevocationDuringDraftIsAdminOnlyAtomicAndRevisionBound(): void
+    {
+        $this->submit(); $GLOBALS['profile_admin'] = true;
+        EditorialService::decide(self::ID, 1, 'approve', 'allowed_editorial');
+        $GLOBALS['profile_admin'] = false; $this->submit(2);
+        self::assertSame(403, EditorialService::decide(self::ID, 3, 'revoke', 'prohibited_content')->get_error_data()['status']);
+        $GLOBALS['profile_admin'] = true;
+        self::assertSame(409, EditorialService::decide(self::ID, 2, 'revoke', 'prohibited_content')->get_error_data()['status']);
+        $GLOBALS['wpdb']->failCommit = true;
+        self::assertInstanceOf(\WP_Error::class, EditorialService::decide(self::ID, 3, 'revoke', 'prohibited_content'));
+        $GLOBALS['wpdb']->failCommit = false;
+        self::assertSame(2, EditorialService::publicById(self::ID)['revision']);
+        self::assertSame('pending', EditorialService::own()['state']);
+        self::assertSame('rejected', EditorialService::decide(self::ID, 3, 'revoke', 'prohibited_content')['state']);
+        self::assertNull(EditorialService::publicById(self::ID));
+        self::assertSame('', EditorialService::own()['public_name']);
     }
     public function testStaleRevisionForeignOwnerAndPermissionDenied(): void
     {

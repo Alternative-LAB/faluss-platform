@@ -89,6 +89,8 @@ final class ModerationPanel
         $kind = self::field('kind', $_POST);
         $revision = self::field('revision', $_POST);
         $reason = self::field('reason', $_POST);
+        $revoke = $kind === 'editorial' && $reason === 'revoke_prohibited_content';
+        if ($revoke) { $reason = 'prohibited_content'; }
         $allowedReason = match ($kind) { 'images' => 'allowed_image', 'editorial' => 'allowed_editorial', default => 'allowed_text' };
         if (!TextPublicationService::validId($id) || !in_array($kind, ['text-publications', 'images', 'editorial'], true)
             || preg_match('/^[1-9][0-9]{0,9}$/D', $revision) !== 1
@@ -96,7 +98,7 @@ final class ModerationPanel
             self::$result = new \WP_REST_Response(['code' => 'invalid_panel_input'], 400);
         } else {
             self::$result = self::request('POST', $kind . '/' . $id . '/moderate', ['revision' => (int) $revision,
-                'decision' => str_starts_with($reason, 'allowed_') ? 'approve' : 'reject', 'reason' => $reason]);
+                'decision' => $revoke ? 'revoke' : (str_starts_with($reason, 'allowed_') ? 'approve' : 'reject'), 'reason' => $reason]);
         }
         status_header(self::$result->get_status());
     }

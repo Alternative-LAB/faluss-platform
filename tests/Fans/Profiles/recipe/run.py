@@ -30,7 +30,7 @@ try:
     subprocess.run(command+['setup'], env=ENV, cwd=REPO, check=True)
     subprocess.run(command, env=ENV, cwd=REPO, check=True)
     with concurrent.futures.ThreadPoolExecutor(2) as pool:
-        futures = [pool.submit(subprocess.check_output, command+['race','7'], env=ENV, text=True) for _ in range(2)]
+        futures = [pool.submit(subprocess.check_output, command+['race','9'], env=ENV, text=True) for _ in range(2)]
         statuses = sorted(f.result().strip() for f in futures)
     assert statuses == ['200','409'], statuses
     print('PASS real concurrent CAS: one 200, one 409', flush=True)

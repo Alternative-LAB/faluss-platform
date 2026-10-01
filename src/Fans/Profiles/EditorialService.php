@@ -24,8 +24,10 @@ final class EditorialService
         return self::transaction(static function () use ($profile): array|\WP_Error {
             $row = self::row($profile['creator_id']);
             if ($row instanceof \WP_Error) { return $row; }
-            return $row ?? ['creator_id' => $profile['creator_id'], 'revision' => 0, 'state' => 'absent',
-                'public_name' => '', 'bio' => '', 'portrait_id' => '', 'portrait_revision' => 0];
+            $published = self::row($profile['creator_id'], true);
+            if ($published instanceof \WP_Error) { return $published; }
+            return ($row ?? ['creator_id' => $profile['creator_id'], 'revision' => 0, 'state' => 'absent',
+                'public_name' => '', 'bio' => '', 'portrait_id' => '', 'portrait_revision' => 0]) + ['published' => $published];
         });
     }
 
@@ -72,9 +74,9 @@ final class EditorialService
     public static function decide(string $id, int $revision, string $action, string $reason): array|\WP_Error
     {
         if (!self::validId($id) || $revision < 1 || $revision >= 2147483646
-            || !in_array($action, ['approve', 'reject', 'withdraw'], true)
+            || !in_array($action, ['approve', 'reject', 'revoke', 'withdraw'], true)
             || ($action === 'approve' && $reason !== 'allowed_editorial')
-            || ($action === 'reject' && !in_array($reason, ['needs_revision', 'prohibited_content'], true))) {
+            || (in_array($action, ['reject', 'revoke'], true) && !in_array($reason, ['needs_revision', 'prohibited_content'], true))) {
             return self::error('invalid_editorial_decision', 400);
         }
         $owner = $action === 'withdraw' ? CreatorProfileService::own() : null;
@@ -87,18 +89,28 @@ final class EditorialService
             $row = self::row($id);
             if ($row instanceof \WP_Error) { return $row; }
             if ($row === null) { return self::error('editorial_not_found', 404); }
-            if ((int) $row['revision'] !== $revision || !in_array($row['state'], ['pending', 'approved'], true)
+            $published = self::row($id, true);
+            if ($published instanceof \WP_Error) { return $published; }
+            $removal = in_array($action, ['withdraw', 'revoke'], true) && $published !== null;
+            if ((int) $row['revision'] !== $revision || (!$removal && !in_array($row['state'], ['pending', 'approved'], true))
+                || ($action === 'revoke' && $published === null)
                 || ($action === 'approve' && $row['state'] !== 'pending')) { return self::error('editorial_revision_conflict', 409); }
             if ($action === 'approve' && $row['portrait_id'] !== ''
                 && !PublicationImageReference::eligible($row['portrait_id'], $id, (int) $row['portrait_revision'], true)) {
                 return self::error('portrait_not_eligible', 409);
             }
-            $state = match ($action) { 'approve' => 'approved', 'reject' => 'rejected', default => 'withdrawn' };
+            $state = match ($action) { 'approve' => 'approved', 'reject', 'revoke' => 'rejected', default => 'withdrawn' };
             $purge = $action !== 'approve' ? ",public_name='',bio='',portrait_id='',portrait_revision=0" : '';
             if ($wpdb->query($wpdb->prepare('UPDATE `' . EditorialSchema::table() . '` SET state=%s,revision=revision+1,updated_at=UTC_TIMESTAMP()'
                 . $purge . ' WHERE creator_id=%s AND revision=%d', $state, $id, $revision)) !== 1
                 || !self::audit($id, $revision + 1, $action, $action === 'withdraw' ? 'creator_withdrawal' : $reason)) {
                 return self::error('editorial_write_failed');
+            }
+            if ($action === 'approve') {
+                if ($wpdb->query($wpdb->prepare('REPLACE INTO `' . EditorialSchema::publishedTable()
+                    . '` SELECT * FROM `' . EditorialSchema::table() . '` WHERE creator_id=%s', $id)) === false) { return self::error('editorial_write_failed'); }
+            } elseif ($action !== 'reject' || $row['state'] === 'approved') {
+                if ($wpdb->query($wpdb->prepare('DELETE FROM `' . EditorialSchema::publishedTable() . '` WHERE creator_id=%s', $id)) === false) { return self::error('editorial_write_failed'); }
             }
             return ['creator_id' => $id, 'revision' => $revision + 1, 'state' => $state];
         });
@@ -113,7 +125,7 @@ final class EditorialService
         if (!self::validId($id)) { return null; }
         $data = self::transaction(static function () use ($id): array|\WP_Error {
             if (CreatorProfileService::publicById($id, true) === null) { return self::error('editorial_not_found', 404); }
-            $row = self::row($id);
+            $row = self::row($id, true);
             if ($row instanceof \WP_Error) { return $row; }
             if ($row === null || $row['state'] !== 'approved') { return self::error('editorial_not_found', 404); }
             return ['public_name' => $row['public_name'], 'bio' => $row['bio'], 'revision' => (int) $row['revision'],
@@ -128,7 +140,7 @@ final class EditorialService
         if (!self::validId($id) || $revision < 1 || !ImageDisplayDerivative::enabled()) { return self::error('portrait_not_found', 404); }
         return self::transaction(static function () use ($id, $revision): string|\WP_Error {
             if (CreatorProfileService::publicById($id, true) === null) { return self::error('portrait_not_found', 404); }
-            $row = self::row($id);
+            $row = self::row($id, true);
             if ($row instanceof \WP_Error) { return $row; }
             if ($row === null || $row['state'] !== 'approved' || (int) $row['revision'] !== $revision || $row['portrait_id'] === '') {
                 return self::error('portrait_not_found', 404);
@@ -148,6 +160,11 @@ final class EditorialService
                 . '` WHERE state=%s AND creator_id>%s ORDER BY creator_id LIMIT 21', $state, $cursor), 'ARRAY_A');
             if (!is_array($rows) || $wpdb->last_error !== '') { return self::error('editorial_unavailable'); }
             $more = count($rows) > 20; $rows = array_slice($rows, 0, 20);
+            foreach ($rows as &$item) {
+                $item['published'] = self::row($item['creator_id'], true);
+                if ($item['published'] instanceof \WP_Error) { return $item['published']; }
+            }
+            unset($item);
             return ['items' => $rows, 'next_cursor' => $more ? $rows[19]['creator_id'] : null];
         });
     }
@@ -165,7 +182,8 @@ final class EditorialService
             $journal = $wpdb->get_results($wpdb->prepare('SELECT revision,actor_id,action,reason,occurred_at FROM `'
                 . EditorialSchema::table(true) . '` WHERE creator_id=%s ORDER BY revision DESC LIMIT 100', $id), 'ARRAY_A');
             if (!is_array($journal) || $wpdb->last_error !== '') { return self::error('editorial_unavailable'); }
-            return $row + ['journal' => $journal];
+            $published = self::row($id, true);
+            return $published instanceof \WP_Error ? $published : $row + ['journal' => $journal, 'published' => $published];
         });
     }
 
@@ -177,10 +195,10 @@ final class EditorialService
     }
 
     /** @return array<string,mixed>|\WP_Error|null */
-    private static function row(string $id): array|\WP_Error|null
+    private static function row(string $id, bool $published = false): array|\WP_Error|null
     {
         global $wpdb;
-        $row = $wpdb->get_row($wpdb->prepare('SELECT * FROM `' . EditorialSchema::table() . '` WHERE creator_id=%s FOR UPDATE', $id), 'ARRAY_A');
+        $row = $wpdb->get_row($wpdb->prepare('SELECT * FROM `' . ($published ? EditorialSchema::publishedTable() : EditorialSchema::table()) . '` WHERE creator_id=%s FOR UPDATE', $id), 'ARRAY_A');
         return $wpdb->last_error !== '' ? self::error('editorial_unavailable') : (is_array($row) ? $row : null);
     }
 

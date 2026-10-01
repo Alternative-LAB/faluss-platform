@@ -32,4 +32,10 @@ final class EditorialModule
             EditorialSchema::installOrVerify();
         }
     }
+
+    /** Additive upgrade of an existing opted-in installation, before any domain transaction. */
+    public static function upgrade(): void
+    {
+        if (get_option(EditorialSchema::OPTION) === '1') { self::activate(); }
+    }
 }
