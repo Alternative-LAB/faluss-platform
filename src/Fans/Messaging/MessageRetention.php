@@ -20,9 +20,10 @@ final class MessageRetention
         }
         if(!wp_next_scheduled(self::HOOK)) {wp_schedule_event(time()+60,'hourly',self::HOOK);}
     }
-    public static function run(): void
+    /** @return array<string,mixed>|\WP_Error */
+    public static function run(): array|\WP_Error
     {
-        if(!self::ownsData()) {return;}
+        if(!self::ownsData()) {return MessagePolicy::error('messages_unavailable');}
         $threads=0;$reports=0;$error='';$more=false;
         for($i=0;$i<10;$i++) {
             $ordinary=MessageStore::purge();
@@ -34,6 +35,9 @@ final class MessageRetention
             $more=$ordinary['purged']===100||$proof['purged']===100;
             if(!$more) {break;}
         }
-        update_option(self::STATUS,(string)wp_json_encode(['checked_at'=>time(),'ordinary_purged'=>$threads,'reports_purged'=>$reports,'more'=>$more,'error'=>$error]),false);
+        $status=['checked_at'=>time(),'ordinary_purged'=>$threads,'reports_purged'=>$reports,'more'=>$more,'error'=>$error];
+        $json=(string)wp_json_encode($status);
+        update_option(self::STATUS,$json,false);
+        return get_option(self::STATUS) === $json ? $status : MessagePolicy::error('message_retention_status_failed');
     }
 }

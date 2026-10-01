@@ -1,5 +1,7 @@
 # Messagerie Fans — politique et traitements avant activation
 
+[Procédure opérateur : habilitations, préparation fermée, cron, ouverture et fermeture](../operations/FANS-MESSAGING-RUNBOOK.md).
+
 Arbitrages utilisateur du 30 septembre 2026. Développement en lots de code ;
 aucune activation ou visite de site. Faluss Identity reste l’autorité du compte.
 

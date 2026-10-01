@@ -9,6 +9,7 @@ p.add_argument('--core', required=True)
 p.add_argument('--cli', required=True)
 p.add_argument('--test', action='store_true')
 p.add_argument('--keep', action='store_true')
+p.add_argument('--messaging', action='store_true')
 a = p.parse_args()
 root = pathlib.Path(tempfile.mkdtemp(prefix='fans-admission-wp-', dir='/var/tmp'))
 wp = root/'wordpress'
@@ -50,11 +51,13 @@ try:
     cli('plugin', 'activate', 'faluss-platform')
     cli('eval-file', str(pathlib.Path(a.source)/'tests/Fans/Profiles/recipe/admission-seed.php'), str(root/'session.json'), '--use-include')
     os.chmod(root/'session.json', 0o600)
-    web = subprocess.Popen(['php', '-S', '127.0.0.1:'+str(port), '-t', str(wp)], stdout=log, stderr=log, env=dict(os.environ, PHP_CLI_SERVER_WORKERS='4'), start_new_session=True)
+    # Fixture flags are deliberately changed between HTTP checks; never cache wp-config.
+    web = subprocess.Popen(['php', '-d', 'opcache.enable=0', '-d', 'opcache.enable_cli=0', '-S', '127.0.0.1:'+str(port), '-t', str(wp)], stdout=log, stderr=log, env=dict(os.environ, PHP_CLI_SERVER_WORKERS='4'), start_new_session=True)
     time.sleep(.5)
     print(json.dumps({'base':base, 'root':str(root), 'wordpress':cli('core', 'version').strip(), 'php':run(['php','-r','echo PHP_VERSION;']).strip()}), flush=True)
     if a.test:
-        run(['python3', str(pathlib.Path(a.source)/'tests/Fans/Profiles/recipe/admission-http.py'), '--root', str(root), '--base', base, '--cli', a.cli])
+        recipe = 'tests/Fans/Messaging/recipe/operations-wordpress.py' if a.messaging else 'tests/Fans/Profiles/recipe/admission-http.py'
+        run(['python3', str(pathlib.Path(a.source)/recipe), '--root', str(root), '--base', base, '--cli', a.cli])
         print((root/'checks.json').read_text(), flush=True)
         if not a.keep: (root/'STOP').touch()
     while not (root/'STOP').exists():
