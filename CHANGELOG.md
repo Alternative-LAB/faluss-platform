@@ -6,23 +6,29 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
-- Fans : publications courantes et archives privées paginées séparées ; aperçus publics dépliables et dates réelles, libellés de publication harmonisés.
+## [0.12.0] - 2026-10-01
 
 ### Ajouté
 
-- Notifications privées Fans persistées : cloche, compteur exact, lu/non lu, pagination, décisions communicables, messages et dossiers autorisés ; écriture atomique et purges liées à leur objet.
-
-- Administration Fans privée `/app/admin` : pills centrées, recherche et comptes, décisions partagées, statistiques réelles, catalogue fermé aux achats, habilitations concurrentes journalisées et opérations de rétention sans activation.
-
-- Contexte privé des comptes liés dans toutes les files et fiches de modération Fans ; recherche locale et refus des approbations sans liaison membre valide.
-
-- Entrée Fans `/app`, résolution du rôle et redirection des anciennes routes humaines ; callback SSO et API stables, accès application visible pour les membres liés.
-- Sélecteur Créer depuis chaque écran Créateur, compositeur de publication réel et aperçus commerciaux fermés, navigation clavier et mobile ; en-têtes compacts hors Accueil/Explorer/HoF.
+- Entrée Fans `/app`, résolution du rôle, anciennes routes redirigées et interaction Créer contextuelle depuis chaque écran Créateur ; publication réelle, navigation clavier/mobile et aperçus commerciaux fermés (#129, `4782af2`).
+- Publications courantes et archives privées paginées, cartes publiques dépliables avec dates réelles (#130, `787bc3e`).
+- Contexte privé des comptes liés dans toutes les files et fiches Fans, recherche et garde contre les approbations sans liaison valide (#131, `8fbfe80`).
+- Back-office privé `/app/admin` : navigation centrale, recherche transversale, comptes, décisions partagées, statistiques réelles, staff et opérations journalisées ; administration WordPress conservée (#132, `8913d30`).
+- Notifications Fan/Créateur persistées dans les transactions métier : destinataires exacts, motifs communicables, compteur, lu/non lu, pagination, déduplication et liens autorisés ; purges liées aux conversations et dossiers (#133, `7e9c7d7`).
 
 ### Corrigé
 
-- Présentations Fans : maintien de la dernière version approuvée pendant une modification ou un refus ; retrait et révocation immédiats, y compris après refus de la proposition, sans diffusion des champs en attente.
-- Consentement Identity après mise à jour : préparation additive avant les parcours publics, sans attendre une visite administrateur ; refus explicite si la mémorisation est indisponible, sans connexion présentée comme autorisée.
+- Consentement Identity après mise à jour : préparation additive avant autorisation, accord révocable et refus explicite si sa persistance échoue (#127, `f15a105`).
+- Maintien de la présentation approuvée pendant modification/refus ; retrait, révocation et suspension immédiatement respectés, sans diffusion de la proposition en attente (#128, `45b036d`).
+- Purge opérateur : un résultat incomplet ou en erreur ne peut plus être présenté comme une réussite complète (#133).
+
+### Migration et compatibilité
+
+- Schémas additifs : consentements Identity, instantané éditorial approuvé, notifications privées ; aucune conversion silencieuse des tables incompatibles. Le journal des opérations est préparé avant les premières mutations habilitées. Voir les contrats de modules et `docs/operations/FANS-REPASSE-DELIVERY.md`.
+- Aucun flag, secret, rôle existant ou attestation de politique activé. Callback SSO enregistré et routes REST préservés ; les nouvelles routes humaines ne remplacent pas le callback.
+- Captures et recettes WordPress/MariaDB isolées, matrice WordPress vers back-office et permissions incluses. Installation, vrai SSO et rendu Elementor cible restent à recetter par l’exploitant.
+- Messagerie : cron fiable, stockage privé, habilitations, notifications externes éventuelles, recours et archivage des métadonnées restent des responsabilités opérateur distinctes. Les durées ratifiées des messages/preuves sont inchangées ; les notifications dans Fans ne valent pas e-mail envoyé.
+- HoF/classements calculés, abonnement vérifié et parcours commerciaux restent fermés en l’absence des contrats serveurs correspondants. Retour arrière par le paquet précédent en conservant tables et journaux ; les événements anciens ne sont pas reconstitués.
 
 ## [0.11.1] - 2026-10-01
 
