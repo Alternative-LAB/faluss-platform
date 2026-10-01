@@ -16,7 +16,7 @@ add_action('template_redirect', static function (): void {
     if (!isset($_GET['button_fixture'])) { return; }
     // Only the configuration guard needs an HTTPS test home. All assets/actions stay loopback.
     add_filter('home_url', static fn (string $url, string $path) => 'https://fans.example.test/' . ltrim($path, '/'), 10, 2);
-    $shortcode = '[faluss_fans_sso_button return_to="/faluss-fans/fan/espace"]';
+    $shortcode = '[faluss_fans_sso_button return_to="/app/fan/espace"]';
     if (isset($_GET['fans_ui'])) {
         // Rendering-only creator fixture: no invented identity, profile or service data.
         $creator = isset($_GET['creator_view']) && in_array($_GET['creator_view'], ['accueil', 'explorer', 'hof', 'creer', 'boutique', 'progression', 'mon-profil'], true);

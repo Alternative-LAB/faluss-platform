@@ -1,5 +1,11 @@
 # Client SSO Faluss Fans
 
+> Mise à jour : l’entrée est désormais `/app` et les routes humaines sont sous
+> `/app/fan/`, `/app/creator/` et `/app/creators/`. Les anciennes adresses
+> mentionnées ci-dessous restent des alias redirigés. Callback SSO et REST
+> inchangés. Voir [le contrat actuel](FANS-APP-AND-CREATE.md).
+
+
 ## Portée implémentée
 
 `fans-sso` est un client local de l'autorité Identity sur `faluss.me`. Il ne partage ni les classes du client Hub, ni son adaptateur Apps Registry, ses widgets Elementor, ses tables, ses options, ses hooks ou ses routes. Me reste propriétaire du `faluss_id`, du code à usage unique de 60 secondes et de la session centrale. Fans garde son propre `wp_user_id` et sa session WordPress. Aucun profil créateur, publication, message ou droit commercial n'est créé par ce module.

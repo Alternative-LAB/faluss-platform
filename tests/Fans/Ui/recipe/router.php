@@ -206,10 +206,10 @@ namespace Faluss\Platform\Fans\Ui {
     require_once $root . '/src/Fans/Ui/FansUiAuthorView.php';
     require_once $root . '/src/Fans/Ui/FansUiAdmission.php';
     $GLOBALS['fixture_query'] = [];
-    if (preg_match('~^/faluss-fans/creators/([0-9a-f-]{36})/?$~', $path, $matches) === 1) {
+    if (preg_match('~^/app/creators/([0-9a-f-]{36})/?$~', $path, $matches) === 1) {
         $GLOBALS['fixture_query'][FansUiRoutes::VIEW_VAR] = 'public-profile';
         $GLOBALS['fixture_query'][FansUiRoutes::CREATOR_VAR] = $matches[1];
-    } elseif (preg_match('~^/faluss-fans/(fan|creator)/([a-z/-]+)/?$~', $path, $matches) === 1) {
+    } elseif (preg_match('~^/app/(fan|creator)/([a-z/-]+)/?$~', $path, $matches) === 1) {
         $GLOBALS['fixture_query'][FansUiRoutes::ROLE_VAR] = $matches[1];
         $GLOBALS['fixture_query'][FansUiRoutes::VIEW_VAR] = $matches[2];
     } else {

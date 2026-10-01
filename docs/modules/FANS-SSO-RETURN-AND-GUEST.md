@@ -1,5 +1,11 @@
 # Retour SSO et étude de l’invité
 
+> Mise à jour : l’entrée est désormais `/app` et les routes humaines sont sous
+> `/app/fan/`, `/app/creator/` et `/app/creators/`. Les anciennes adresses
+> mentionnées ci-dessous restent des alias redirigés. Callback SSO et REST
+> inchangés. Voir [le contrat actuel](FANS-APP-AND-CREATE.md).
+
+
 ## Scénarios avant ouverture
 
 Positifs : démarrer depuis Explorer, le HoF, un profil public ou une page privée

@@ -17,7 +17,7 @@ const loaded = 'Publications chargées. Les textes restent soumis à la modérat
       const next = page.locator('[data-text-next]');
       const refresh = page.locator('[data-text-refresh]');
       const focused = locator => locator.evaluate(node => node === document.activeElement);
-      await page.goto(`${base}/faluss-fans/fan/explorer`);
+      await page.goto(`${base}/app/fan/explorer`);
       await page.getByText(loaded, { exact: true }).waitFor();
       assert.equal(await focused(status), false, 'Automatic initial reading must not move focus');
 

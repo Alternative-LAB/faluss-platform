@@ -1,5 +1,11 @@
 # Fans UI V2 — matrice et premier lot
 
+> Mise à jour : l’entrée est désormais `/app` et les routes humaines sont sous
+> `/app/fan/`, `/app/creator/` et `/app/creators/`. Les anciennes adresses
+> mentionnées ci-dessous restent des alias redirigés. Callback SSO et REST
+> inchangés. Voir [le contrat actuel](FANS-APP-AND-CREATE.md).
+
+
 Cette matrice décrit le socle initial. Depuis le lot
 [Identité éditoriale](FANS-EDITORIAL.md), Mon profil permet de soumettre nom,
 bio et portrait à la modération ; Explorer et le profil lisent leur projection

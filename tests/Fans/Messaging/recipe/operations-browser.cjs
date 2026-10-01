@@ -12,8 +12,8 @@ const { chromium } = require('playwright');
     try {
         for (const [device, viewport] of [['desktop', { width: 1440, height: 1000 }], ['mobile', { width: 390, height: 844 }]]) {
             for (const [name, who, url, selector] of [
-                ['closed-conversation', 'member', '/faluss-fans/fan/messages?thread='+fixture.thread, '[data-fans-private-reading]'],
-                ['closed-appeal', 'member', '/faluss-fans/fan/messages?section=reports', '[data-fans-private-reading]'],
+                ['closed-conversation', 'member', '/app/fan/messages?thread='+fixture.thread, '[data-fans-private-reading]'],
+                ['closed-appeal', 'member', '/app/fan/messages?section=reports', '[data-fans-private-reading]'],
                 ['moderator-proof', 'admin-two', '/wp-admin/admin.php?page=faluss-fans-moderation&view=messages&item='+fixture.case, '.faluss-moderation']
             ]) {
                 const context = await browser.newContext({ viewport, javaScriptEnabled: false });

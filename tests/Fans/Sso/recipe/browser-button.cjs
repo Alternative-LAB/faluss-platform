@@ -63,7 +63,7 @@ const path = require('node:path');
       assert.deepEqual([...fields.keys()].sort(), ['action', 'faluss_fans_return_to', 'faluss_fans_sso_nonce']);
       assert.equal(fields.get('action'), 'faluss_fans_sso_start');
       assert.match(fields.get('faluss_fans_sso_nonce'), /^[a-z0-9]{10}$/);
-      assert.equal(fields.get('faluss_fans_return_to'), '/faluss-fans/fan/espace');
+      assert.equal(fields.get('faluss_fans_return_to'), '/app/fan/espace');
       // Same production form inside the standalone Fans shell, including its older button styles.
       await page.goto(base + '/?button_fixture=1&fans_ui=1');
       await page.evaluate(() => document.fonts.ready);

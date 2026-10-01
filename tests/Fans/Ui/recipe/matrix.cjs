@@ -50,7 +50,7 @@ const routes = {
         for (const state of ['missing', 'suspended', 'withdrawn']) {
           await context.addCookies([{ name: 'fans_ui_public_state', value: state, url: base }]);
           const id = state === 'missing' ? '123e4567-e89b-42d3-a456-426614174099' : '123e4567-e89b-42d3-a456-426614174000';
-          assert.equal((await page.goto(`${base}/faluss-fans/creators/${id}/`)).status(), 404);
+          assert.equal((await page.goto(`${base}/app/creators/${id}/`)).status(), 404);
           assert.equal(await page.locator('[data-api], form').count(), 0);
           assert.doesNotMatch(await page.locator('main').innerText(), /123e4567|suspendu|retiré/);
           await page.getByRole('link', { name: 'Retour à Explorer', exact: false }).waitFor();
@@ -58,7 +58,7 @@ const routes = {
           if (role === 'guest' && state === 'missing') await page.screenshot({ path: path.join(output, `profil-indisponible-${width}.png`) });
         }
         await context.addCookies([{ name: 'fans_ui_public_state', value: 'active', url: base }]);
-        assert.equal((await page.goto(`${base}/faluss-fans/creators/123e4567-e89b-42d3-a456-426614174000/`)).status(), 200);
+        assert.equal((await page.goto(`${base}/app/creators/123e4567-e89b-42d3-a456-426614174000/`)).status(), 200);
         for (const invalid of ['creator/creer//', 'creator//creer', 'creator/creer/extra']) {
           assert.equal((await page.goto(`${base}/faluss-fans/${invalid}`)).status(), 404, invalid);
         }

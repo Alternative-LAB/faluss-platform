@@ -22,7 +22,7 @@ update_post_meta($page, '_elementor_version', ELEMENTOR_VERSION);
 $data = [['id'=>'a001', 'elType'=>'section', 'settings'=>['background_background'=>'classic','background_color'=>'#030a07','padding'=>['unit'=>'px','top'=>'100','right'=>'24','bottom'=>'100','left'=>'24','isLinked'=>false]], 'elements'=>[['id'=>'b001','elType'=>'column','settings'=>['_column_size'=>100],'elements'=>[
     ['id'=>'c001','elType'=>'widget','widgetType'=>'heading','settings'=>['title'=>'Faluss Fans','align'=>'center','title_color'=>'#ffffff'],'elements'=>[]],
     ['id'=>'c002','elType'=>'widget','widgetType'=>'text-editor','settings'=>['editor'=>'<p>Recette Elementor locale — aucun compte réel.</p>','align'=>'center','text_color'=>'#ffffff'],'elements'=>[]],
-    ['id'=>'c003','elType'=>'widget','widgetType'=>'shortcode','settings'=>['shortcode'=>'[faluss_fans_sso_button return_to="/faluss-fans/fan/espace"]'],'elements'=>[]]
+    ['id'=>'c003','elType'=>'widget','widgetType'=>'shortcode','settings'=>['shortcode'=>'[faluss_fans_sso_button return_to="/app/fan/espace"]'],'elements'=>[]]
 ]]]]];
 update_post_meta($page, '_elementor_data', wp_slash(wp_json_encode($data)));
 update_option('page_on_front', $page);

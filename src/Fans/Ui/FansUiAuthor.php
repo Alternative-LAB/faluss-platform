@@ -24,7 +24,7 @@ final class FansUiAuthor
     public ?string $imageId = null;
     public ?\WP_REST_Response $imageOptions = null;
 
-    public static function load(): self
+    public static function load(bool $composeOnly = false): self
     {
         $view = new self();
         if (!TextPublicationsModule::available() || FansSsoService::currentLinkedSubject() === null
@@ -32,6 +32,7 @@ final class FansUiAuthor
         $view->available = true;
         $view->active = $profile['status'] === 'active';
         $view->key = wp_generate_uuid4();
+        if ($composeOnly) { return $view; }
         $post = ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && !isset($_POST['image_action']);
         if ($post) {
             $view->key = self::field('author_action', $_POST) === 'create' ? self::field('creation_key', $_POST) : '';

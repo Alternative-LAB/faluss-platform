@@ -49,7 +49,7 @@ final class WordPressAccessTest extends TestCase
         foreach (['subscriber', 'contributor', 'author', 'editor', 'custom_manager'] as $role) {
             $GLOBALS['access_roles'] = [$role];
             $GLOBALS['access_manage'] = true; // A delegated capability is not the administrator role.
-            foreach (['/', '/landing-elementor/', '/faluss-fans/fan/hof', '/?p=42'] as $path) {
+            foreach (['/', '/landing-elementor/', '/app/fan/hof', '/?p=42'] as $path) {
                 $_SERVER['REQUEST_URI'] = $path;
                 self::assertFalse(WordPressAccess::adminBarVisible(true));
                 self::assertFalse(WordPressAccess::adminBarVisible(false));

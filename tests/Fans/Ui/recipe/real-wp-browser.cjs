@@ -39,7 +39,7 @@ async function status(page, route, expected) {
 }
 
 async function publicChecks(page, expectedRole) {
-  await status(page, '/faluss-fans/fan/explorer', 200);
+  await status(page, '/app/fan/explorer', 200);
   await page.getByText('1 fiche publique structurée. Découverte en préparation.').waitFor();
   assert.equal(await page.locator('.fu-app').getAttribute('data-fans-role'), expectedRole);
   assert.equal(await page.locator('.fu-card').count(), 1);
@@ -50,7 +50,7 @@ async function publicChecks(page, expectedRole) {
   const style = await page.locator('.fu-app').evaluate((node) => getComputedStyle(node).display);
   assert.ok(['grid', 'block'].includes(style), 'Fans UI stylesheet applied');
   await page.locator('.fu-card__link').click();
-  assert.equal(new URL(page.url()).pathname, `/faluss-fans/creators/${fixture.active}`);
+  assert.equal(new URL(page.url()).pathname, `/app/creators/${fixture.active}`);
   await page.getByText('Profil public chargé.').waitFor();
   assert.equal(uuid.test(await page.locator('body').innerText()), false);
   assert.equal(await page.locator('.fu-app img').count(), 0);
@@ -71,31 +71,31 @@ async function noAdminBar(page) {
     await publicChecks(guestPage, 'visitor');
     assert.equal(await guestPage.locator('.fu-nav__item').count(), 2);
     await guestPage.screenshot({ path: path.join(output, 'real-wp-profile-guest-desktop.png'), fullPage: true });
-    await status(guestPage, '/faluss-fans/fan/explorer', 200);
+    await status(guestPage, '/app/fan/explorer', 200);
     await guestPage.getByText('1 fiche publique structurée. Découverte en préparation.').waitFor();
     await guestPage.screenshot({ path: path.join(output, 'real-wp-explorer-guest-desktop.png'), fullPage: true });
-    await status(guestPage, '/faluss-fans/creator/explorer', 200);
+    await status(guestPage, '/app/creator/explorer', 200);
     assert.equal(await guestPage.locator('.fu-nav__item').count(), 2);
-    await status(guestPage, '/faluss-fans/fan/hof', 200);
+    await status(guestPage, '/app/fan/hof', 200);
     assert.equal(await guestPage.locator('.fu-app').getAttribute('data-fans-role'), 'visitor');
     assert.equal(await guestPage.locator('.fu-nav__item').count(), 2);
     assert.equal(await guestPage.locator('.fu-nav__item[aria-current="page"]').getAttribute('aria-label'), 'HoF');
     await guestPage.locator('.fu-panel--status').getByText('Aucune session, aucun rang ni aucun point ne peut être affiché.').waitFor();
     assert.equal(await guestPage.locator('[data-fans-results]').count(), 0);
     await guestPage.screenshot({ path: path.join(output, 'real-wp-hof-guest-desktop.png'), fullPage: true });
-    await status(guestPage, '/faluss-fans/creator/hof', 200);
+    await status(guestPage, '/app/creator/hof', 200);
     assert.equal(await guestPage.locator('.fu-nav__item').count(), 2);
-    await status(guestPage, '/faluss-fans/fan/explorer/', 200);
-    await status(guestPage, '/faluss-fans/creator/hof/', 200);
-    await status(guestPage, `/faluss-fans/creators/${fixture.active}/`, 200);
-    await status(guestPage, '/faluss-fans/fan/hof/session/', 403);
-    await status(guestPage, '/faluss-fans/fan/accueil/', 403);
-    await status(guestPage, '/faluss-fans/fan/hof/session', 403);
-    await status(guestPage, '/faluss-fans/fan/classements', 403);
-    await status(guestPage, '/faluss-fans/fan/accueil', 403);
-    await status(guestPage, '/faluss-fans/creator/creer', 403);
+    await status(guestPage, '/app/fan/explorer/', 200);
+    await status(guestPage, '/app/creator/hof/', 200);
+    await status(guestPage, `/app/creators/${fixture.active}/`, 200);
+    await status(guestPage, '/app/fan/hof/session/', 403);
+    await status(guestPage, '/app/fan/accueil/', 403);
+    await status(guestPage, '/app/fan/hof/session', 403);
+    await status(guestPage, '/app/fan/classements', 403);
+    await status(guestPage, '/app/fan/accueil', 403);
+    await status(guestPage, '/app/creator/creer', 403);
     for (const key of ['suspended', 'withdrawn', 'unknown']) {
-      await status(guestPage, `/faluss-fans/creators/${fixture[key]}`, 404);
+      await status(guestPage, `/app/creators/${fixture[key]}`, 404);
       const rest = await guestPage.request.get(`${base}/wp-json/faluss-fans/v1/creators/${fixture[key]}`);
       assert.equal(rest.status(), 404, `REST ${key}`);
     }
@@ -108,9 +108,9 @@ async function noAdminBar(page) {
     await login(unlinkedPage, fixture.unlinked);
     await publicChecks(unlinkedPage, 'visitor');
     await noAdminBar(unlinkedPage);
-    await status(unlinkedPage, '/faluss-fans/fan/hof', 200);
+    await status(unlinkedPage, '/app/fan/hof', 200);
     await noAdminBar(unlinkedPage);
-    await status(unlinkedPage, '/faluss-fans/fan/accueil', 403);
+    await status(unlinkedPage, '/app/fan/accueil', 403);
     console.log('PASS unlinked WordPress user: public discovery 200, personal page 403.');
 
     const fan = await browser.newContext(desktop);
@@ -119,15 +119,15 @@ async function noAdminBar(page) {
     await publicChecks(fanPage, 'fan');
     await noAdminBar(fanPage);
     assert.equal(await fanPage.locator('.fu-nav__item').count(), 6);
-    await status(fanPage, '/faluss-fans/fan/accueil', 200);
+    await status(fanPage, '/app/fan/accueil', 200);
     await noAdminBar(fanPage);
-    await status(fanPage, '/faluss-fans/fan/hof', 200);
+    await status(fanPage, '/app/fan/hof', 200);
     await noAdminBar(fanPage);
     await fanPage.screenshot({ path: path.join(output, 'real-wp-hof-fan-desktop.png'), fullPage: true });
-    await status(fanPage, '/faluss-fans/fan/accueil/', 200);
-    await status(fanPage, '/faluss-fans/creator/creer', 404);
-    await status(fanPage, '/faluss-fans/creator/creer/', 404);
-    await status(fanPage, '/faluss-fans/creator/explorer', 200);
+    await status(fanPage, '/app/fan/accueil/', 200);
+    await status(fanPage, '/app/creator/creer', 404);
+    await status(fanPage, '/app/creator/creer/', 404);
+    await status(fanPage, '/app/creator/explorer', 200);
     assert.equal(await fanPage.locator('.fu-app').getAttribute('data-fans-role'), 'fan');
     await status(fanPage, '/', 200);
     assert.equal(await fanPage.locator('#wpadminbar').count(), 1, 'Other WordPress pages keep the normal toolbar preference');
@@ -139,12 +139,12 @@ async function noAdminBar(page) {
     await publicChecks(creatorPage, 'creator');
     await noAdminBar(creatorPage);
     assert.equal(await creatorPage.locator('.fu-nav__item').count(), 8);
-    await status(creatorPage, '/faluss-fans/creator/creer', 200);
+    await status(creatorPage, '/app/creator/creer', 200);
     await noAdminBar(creatorPage);
     assert.equal(await creatorPage.locator('.fu-choice').count(), 4);
-    await status(creatorPage, '/faluss-fans/creator/creer/', 200);
+    await status(creatorPage, '/app/creator/creer/', 200);
     await noAdminBar(creatorPage);
-    await status(creatorPage, '/faluss-fans/creator/explorer', 200);
+    await status(creatorPage, '/app/creator/explorer', 200);
     await creatorPage.getByText('1 fiche publique structurée. Découverte en préparation.').waitFor();
     await noAdminBar(creatorPage);
     await creatorPage.screenshot({ path: path.join(output, 'real-wp-explorer-creator-desktop.png'), fullPage: true });
@@ -156,10 +156,10 @@ async function noAdminBar(page) {
     await publicChecks(guestMobilePage, 'visitor');
     assert.equal(await guestMobilePage.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true);
     await guestMobilePage.screenshot({ path: path.join(output, 'real-wp-profile-guest-mobile.png'), fullPage: true });
-    await status(guestMobilePage, '/faluss-fans/fan/explorer', 200);
+    await status(guestMobilePage, '/app/fan/explorer', 200);
     await guestMobilePage.getByText('1 fiche publique structurée. Découverte en préparation.').waitFor();
     await guestMobilePage.screenshot({ path: path.join(output, 'real-wp-explorer-guest-mobile.png'), fullPage: true });
-    await status(guestMobilePage, '/faluss-fans/fan/hof', 200);
+    await status(guestMobilePage, '/app/fan/hof', 200);
     assert.equal(await guestMobilePage.locator('.fu-nav__item').count(), 2);
     assert.equal(await guestMobilePage.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true);
     await guestMobilePage.screenshot({ path: path.join(output, 'real-wp-hof-guest-mobile.png'), fullPage: true });
@@ -167,7 +167,7 @@ async function noAdminBar(page) {
     const creatorMobile = await browser.newContext(mobile);
     const creatorMobilePage = await creatorMobile.newPage();
     await login(creatorMobilePage, fixture.creator);
-    await status(creatorMobilePage, '/faluss-fans/creator/creer', 200);
+    await status(creatorMobilePage, '/app/creator/creer', 200);
     await noAdminBar(creatorMobilePage);
     assert.equal(await creatorMobilePage.locator('.fu-nav__item').count(), 8);
     assert.equal(await creatorMobilePage.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true);
@@ -175,15 +175,15 @@ async function noAdminBar(page) {
     const admin = await browser.newContext(desktop);
     const adminPage = await admin.newPage();
     await login(adminPage, fixture.admin);
-    await status(adminPage, '/faluss-fans/fan/hof', 200);
+    await status(adminPage, '/app/fan/hof', 200);
     assert.equal(await adminPage.locator('#wpadminbar').count(), 1);
     assert.equal(await adminPage.locator('#wp-admin-bar-site-name').isVisible(), true);
     await adminPage.screenshot({ path: path.join(output, 'real-wp-hof-admin-desktop.png'), fullPage: true });
-    await status(adminPage, '/faluss-fans/creator/creer', 403);
+    await status(adminPage, '/app/creator/creer', 403);
     const adminMobile = await browser.newContext(mobile);
     const adminMobilePage = await adminMobile.newPage();
     await login(adminMobilePage, fixture.admin);
-    await status(adminMobilePage, '/faluss-fans/fan/hof/', 200);
+    await status(adminMobilePage, '/app/fan/hof/', 200);
     assert.equal(await adminMobilePage.locator('#wpadminbar').isVisible(), true);
     assert.equal(await adminMobilePage.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true);
     await adminMobilePage.screenshot({ path: path.join(output, 'real-wp-hof-admin-mobile.png'), fullPage: true });

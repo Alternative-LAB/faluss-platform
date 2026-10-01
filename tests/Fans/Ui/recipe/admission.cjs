@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const launchBrowser = require('./browser-engine.cjs');
 const base = process.env.FANS_UI_BASE || 'http://127.0.0.1:8765';
-const url = `${base}/faluss-fans/fan/espace`;
+const url = `${base}/app/fan/espace`;
 const output = process.env.FANS_UI_OUTPUT || path.resolve(__dirname, '../../../../docs/evidence/fans-48h/lot-6');
 fs.mkdirSync(output, { recursive: true });
 (async () => {

@@ -26,7 +26,7 @@ const fs = require('node:fs');
     const localForms = p => p.locator('form[action]').evaluateAll((forms, origin) => {
       for (const form of forms) { const url=new URL(form.action); form.action=origin+url.pathname+url.search; }
     },base);
-    const own = '/faluss-fans/creator/mon-profil';
+    const own = '/app/creator/mon-profil';
     const panel = '/wp-admin/admin.php?page=faluss-fans-moderation&view=editorial&item='+id;
     const initial = (await api('guest','creators/'+id)).data.editorial;
     assert.ok(initial);

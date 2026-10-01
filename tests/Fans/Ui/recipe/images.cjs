@@ -20,7 +20,7 @@ const imageApi = '**/text-publications/*/image/*';
     const cookie = (name, value) => context.addCookies([{ name, value, url: base }]);
     const loaded = () => page.getByText('Publications chargées.', { exact: false }).waitFor();
     const button = () => page.getByRole('button', { name: 'Vérifier l’image associée' }).first();
-    await page.goto(`${base}/faluss-fans/fan/explorer`);
+    await page.goto(`${base}/app/fan/explorer`);
     await loaded();
     assert.equal(await button().count(), 0);
     await page.getByText('Les images de publications sont indisponibles pour le moment.').waitFor();
@@ -45,7 +45,7 @@ const imageApi = '**/text-publications/*/image/*';
     for (const role of ['guest', 'fan', 'creator', 'admin']) {
       await cookie('fans_ui_role', role);
       const before = count;
-      await page.goto(`${base}/faluss-fans/fan/explorer`);
+      await page.goto(`${base}/app/fan/explorer`);
       await loaded();
       assert.equal(count, before);
       assert.equal(await page.locator('.fu-publication-image img').count(), 0);

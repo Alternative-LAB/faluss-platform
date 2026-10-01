@@ -74,7 +74,7 @@ final class FansSsoReturnFlowTest extends TestCase
             self::assertSame('hidden', $input->getAttribute('type'));
             $fields[$input->getAttribute('name')] = $input->getAttribute('value');
         }
-        self::assertSame(['action' => FansSsoService::START_ACTION, 'faluss_fans_sso_nonce' => 'fixture-nonce'], $fields);
+        self::assertSame(['action' => FansSsoService::START_ACTION, 'faluss_fans_sso_nonce' => 'fixture-nonce', 'faluss_fans_return_to' => '/app'], $fields);
         $button = $dom->getElementsByTagName('button')->item(0);
         self::assertSame('submit', $button->getAttribute('type'));
         self::assertSame('Rejoindre avec Faluss Identity', $button->textContent);

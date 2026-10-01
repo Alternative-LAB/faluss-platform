@@ -33,7 +33,7 @@ const endpoint = `**/creators/${id}/followers/count`;
       for (const role of ['guest', 'fan', 'creator', 'admin']) {
         await context.addCookies([{ name: 'fans_ui_role', value: role, url: base }]);
         const before = countCalls;
-        assert.equal((await page.goto(`${base}/faluss-fans/creators/${id}`)).status(), 200);
+        assert.equal((await page.goto(`${base}/app/creators/${id}`)).status(), 200);
         await loaded('Suivis enregistrés : 7');
         assert.equal(countCalls, before + 1);
         assert.equal(await counter.getAttribute('role'), 'status');
@@ -87,7 +87,7 @@ const endpoint = `**/creators/${id}/followers/count`;
       await context.addCookies([{ name: 'fans_ui_public_state', value: state, url: base }]);
       const before = countCalls;
       const target = state === 'missing' ? id.replace(/000$/, '099') : id;
-      assert.equal((await page.goto(`${base}/faluss-fans/creators/${target}`)).status(), 404);
+      assert.equal((await page.goto(`${base}/app/creators/${target}`)).status(), 404);
       assert.equal(await counter.count(), 0);
       assert.equal(countCalls, before);
     }

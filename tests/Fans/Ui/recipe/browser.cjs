@@ -13,7 +13,7 @@ fs.mkdirSync(output, { recursive: true });
     const desktop = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
     await desktop.addCookies([{ name: 'fans_ui_role', value: 'fan', url: base }]);
     const fan = await desktop.newPage();
-    await fan.goto(`${base}/faluss-fans/fan/explorer`);
+    await fan.goto(`${base}/app/fan/explorer`);
     await fan.getByText('2 fiches publiques structurées. Découverte en préparation.').waitFor();
     assert.equal(await fan.locator('.fu-card').count(), 2);
     assert.equal(await fan.locator('.fu-nav__item[aria-current="page"]').count(), 1);
@@ -39,39 +39,39 @@ fs.mkdirSync(output, { recursive: true });
     await fan.screenshot({ path: path.join(output, 'classement-fans-desktop.png'), fullPage: true });
 
     await desktop.addCookies([{ name: 'fans_ui_role', value: 'guest', url: base }]);
-    const publicExplorer = await fan.goto(`${base}/faluss-fans/fan/explorer`);
+    const publicExplorer = await fan.goto(`${base}/app/fan/explorer`);
     assert.equal(publicExplorer.status(), 200);
     assert.equal(await fan.locator('.fu-nav__item').count(), 2);
     assert.equal(await fan.locator('.fu-app').getAttribute('data-fans-role'), 'visitor');
-    assert.equal(await fan.locator('input[name="faluss_fans_return_to"]').inputValue(), '/faluss-fans/fan/explorer');
+    assert.equal(await fan.locator('input[name="faluss_fans_return_to"]').inputValue(), '/app/fan/explorer');
     await fan.screenshot({ path: path.join(output, 'invitation-sso-desktop.png'), fullPage: true });
-    assert.equal((await fan.goto(`${base}/faluss-fans/fan/hof`)).status(), 200);
+    assert.equal((await fan.goto(`${base}/app/fan/hof`)).status(), 200);
     assert.equal(await fan.locator('.fu-nav__item[aria-current="page"]').getAttribute('aria-label'), 'HoF');
-    assert.equal((await fan.goto(`${base}/faluss-fans/fan/hof/session`)).status(), 403);
-    assert.equal((await fan.goto(`${base}/faluss-fans/fan/classement-fans`)).status(), 403);
-    const denied = await fan.goto(`${base}/faluss-fans/fan/accueil`);
+    assert.equal((await fan.goto(`${base}/app/fan/hof/session`)).status(), 403);
+    assert.equal((await fan.goto(`${base}/app/fan/classement-fans`)).status(), 403);
+    const denied = await fan.goto(`${base}/app/fan/accueil`);
     assert.equal(denied.status(), 403);
     assert.equal(await fan.locator('.fu-app').getAttribute('data-fans-role'), 'visitor');
-    assert.equal(await fan.locator('input[name="faluss_fans_return_to"]').inputValue(), '/faluss-fans/fan/accueil');
+    assert.equal(await fan.locator('input[name="faluss_fans_return_to"]').inputValue(), '/app/fan/accueil');
     await fan.screenshot({ path: path.join(output, 'connexion-requise-desktop.png'), fullPage: true });
-    const selectedText = '/faluss-fans/creator/creer?publication=123e4567-e89b-42d3-a456-426614174000';
+    const selectedText = '/app/creator/creer?publication=123e4567-e89b-42d3-a456-426614174000';
     for (const [destination, expected] of [
       [selectedText, selectedText],
       [selectedText.replace('creer?', 'creer/?'), selectedText],
-      [selectedText + '&nonce=discard', '/faluss-fans/creator/creer'],
-      [selectedText + '&publication=123e4567-e89b-42d3-a456-426614174001', '/faluss-fans/creator/creer'],
-      [selectedText.replace('publication=', 'publication[]='), '/faluss-fans/creator/creer'],
-      [selectedText.replace('-42d3-', '-12d3-'), '/faluss-fans/creator/creer'],
-      [selectedText.replace('creator/creer', 'fan/espace'), '/faluss-fans/fan/espace'],
+      [selectedText + '&nonce=discard', '/app/creator/creer'],
+      [selectedText + '&publication=123e4567-e89b-42d3-a456-426614174001', '/app/creator/creer'],
+      [selectedText.replace('publication=', 'publication[]='), '/app/creator/creer'],
+      [selectedText.replace('-42d3-', '-12d3-'), '/app/creator/creer'],
+      [selectedText.replace('creator/creer', 'fan/espace'), '/app/fan/espace'],
     ]) {
       assert.equal((await fan.goto(base + destination)).status(), 403);
       assert.equal(await fan.locator('input[name="faluss_fans_return_to"]').inputValue(), expected);
       assert.equal(await fan.locator('textarea, [data-publications]').count(), 0);
     }
-    assert.equal((await fan.goto(`${base}/faluss-fans/creators/123e4567-e89b-42d3-a456-426614174000`)).status(), 200);
-    assert.equal((await fan.goto(`${base}/faluss-fans/creators/123e4567-e89b-42d3-a456-426614174099`)).status(), 404);
+    assert.equal((await fan.goto(`${base}/app/creators/123e4567-e89b-42d3-a456-426614174000`)).status(), 200);
+    assert.equal((await fan.goto(`${base}/app/creators/123e4567-e89b-42d3-a456-426614174099`)).status(), 404);
     await desktop.addCookies([{ name: 'fans_ui_role', value: 'fan', url: base }]);
-    const creatorDenied = await fan.goto(`${base}/faluss-fans/creator/creer`);
+    const creatorDenied = await fan.goto(`${base}/app/creator/creer`);
     assert.equal(creatorDenied.status(), 404);
     assert.equal(await fan.locator('.fu-app[data-fans-role="fan"]').count(), 1);
     await fan.getByRole('link', { name: 'Retour à Explorer', exact: false }).waitFor();
@@ -82,7 +82,7 @@ fs.mkdirSync(output, { recursive: true });
       { name: 'fans_ui_data', value: 'empty', url: base }
     ]);
     const mobileFan = await mobile.newPage();
-    await mobileFan.goto(`${base}/faluss-fans/fan/explorer`);
+    await mobileFan.goto(`${base}/app/fan/explorer`);
     await mobileFan.getByText('Aucun profil créateur publié dans cette catégorie.').waitFor();
     assert.equal(await mobileFan.locator('.fu-card').count(), 0);
     assert.equal(await mobileFan.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true);
@@ -93,7 +93,7 @@ fs.mkdirSync(output, { recursive: true });
     assert.equal(await mobileFan.locator('.fu-card').count(), 0);
     assert.equal(await mobileFan.locator('.fu-empty').count(), 1);
 
-    await mobileFan.goto(`${base}/faluss-fans/fan/classement-fans`);
+    await mobileFan.goto(`${base}/app/fan/classement-fans`);
     await mobileFan.getByRole('heading', { name: 'Classement indisponible', exact: true }).waitFor();
     assert.equal(await mobileFan.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true);
     const rankingNav = mobileFan.getByRole('link', { name: 'Classement Fans', exact: true });
@@ -106,7 +106,7 @@ fs.mkdirSync(output, { recursive: true });
     const creator = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
     await creator.addCookies([{ name: 'fans_ui_role', value: 'creator', url: base }]);
     const creatorPage = await creator.newPage();
-    await creatorPage.goto(`${base}/faluss-fans/creator/creer`);
+    await creatorPage.goto(`${base}/app/creator/creer`);
     assert.equal(await creatorPage.locator('.fu-nav__item').count(), 8);
     assert.equal(await creatorPage.locator('.fu-nav__item[aria-current="page"]').getAttribute('aria-label'), 'Créer');
     assert.equal(await creatorPage.locator('.fu-choice').count(), 4);
@@ -117,21 +117,21 @@ fs.mkdirSync(output, { recursive: true });
     await creatorPage.locator('#fu-main').focus();
     await creatorPage.screenshot({ path: path.join(output, 'creer-desktop.png'), fullPage: true });
     for (const href of ['accueil', 'explorer', 'hof', 'hof/session', 'classements', 'messages', 'creer', 'boutique', 'progression', 'mon-profil']) {
-      const response = await creatorPage.goto(`${base}/faluss-fans/creator/${href}`);
+      const response = await creatorPage.goto(`${base}/app/creator/${href}`);
       assert.equal(response.status(), 200, href);
       assert.equal(await creatorPage.locator('.fu-nav__item').count(), 8, href);
       assert.equal(await creatorPage.locator('.fu-nav__item[aria-current="page"]').count(), 1, href);
     }
-    await creatorPage.goto(`${base}/faluss-fans/creators/123e4567-e89b-42d3-a456-426614174000`);
+    await creatorPage.goto(`${base}/app/creators/123e4567-e89b-42d3-a456-426614174000`);
     await creatorPage.getByText('Profil public chargé.').waitFor();
-    assert.equal(await creatorPage.locator('.fu-back').getAttribute('href'), `${base}/faluss-fans/creator/explorer`);
-    assert.equal((await creatorPage.goto(`${base}/faluss-fans/fan/classement-fans`)).status(), 200);
-    assert.equal((await creatorPage.goto(`${base}/faluss-fans/creator/classement-fans`)).status(), 404);
+    assert.equal(await creatorPage.locator('.fu-back').getAttribute('href'), `${base}/app/creator/explorer`);
+    assert.equal((await creatorPage.goto(`${base}/app/fan/classement-fans`)).status(), 200);
+    assert.equal((await creatorPage.goto(`${base}/app/creator/classement-fans`)).status(), 404);
 
     const creatorMobile = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
     await creatorMobile.addCookies([{ name: 'fans_ui_role', value: 'creator', url: base }]);
     const mobileCreator = await creatorMobile.newPage();
-    await mobileCreator.goto(`${base}/faluss-fans/creator/creer`);
+    await mobileCreator.goto(`${base}/app/creator/creer`);
     assert.equal(await mobileCreator.locator('.fu-nav__item').count(), 8);
     for (const width of [320, 390]) {
       await mobileCreator.setViewportSize({ width, height: 844 });
@@ -149,7 +149,7 @@ fs.mkdirSync(output, { recursive: true });
         assert.equal(await mobileCreator.locator('.fu-nav__item:not(.is-active) .fu-nav__label:visible').count(), 0);
       }
     }
-    await mobileCreator.goto(`${base}/faluss-fans/creator/creer`);
+    await mobileCreator.goto(`${base}/app/creator/creer`);
     assert.equal(await mobileCreator.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true);
     for (const label of ['Accueil', 'Explorer', 'HoF', 'Messages', 'Créer', 'Ma boutique', 'Progression', 'Mon profil']) {
       const item = mobileCreator.getByRole('link', { name: label, exact: true });
@@ -166,12 +166,12 @@ fs.mkdirSync(output, { recursive: true });
     assert.equal(await mobileCreator.locator('.fu-nav__item').count(), 8);
     for (const role of ['unlinked', 'admin']) {
       await desktop.addCookies([{ name: 'fans_ui_role', value: role, url: base }]);
-      assert.equal((await fan.goto(`${base}/faluss-fans/fan/classement-fans`)).status(), 403, role);
+      assert.equal((await fan.goto(`${base}/app/fan/classement-fans`)).status(), 403, role);
       assert.equal(await fan.getByRole('button', { name: 'Continuer avec Faluss', exact: true }).count(), role === 'admin' ? 0 : 1);
     }
     await mobile.addCookies([{ name: 'fans_ui_role', value: 'guest', url: base }]);
-    assert.equal((await mobileFan.goto(`${base}/faluss-fans/fan/classement-fans`)).status(), 403);
-    assert.equal(await mobileFan.locator('input[name="faluss_fans_return_to"]').inputValue(), '/faluss-fans/fan/classement-fans');
+    assert.equal((await mobileFan.goto(`${base}/app/fan/classement-fans`)).status(), 403);
+    assert.equal(await mobileFan.locator('input[name="faluss_fans_return_to"]').inputValue(), '/app/fan/classement-fans');
     assert.equal(await mobileFan.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true);
     await mobileFan.screenshot({ path: path.join(output, 'connexion-requise-mobile.png') });
     assert.equal((await mobileFan.goto(base + selectedText)).status(), 403);

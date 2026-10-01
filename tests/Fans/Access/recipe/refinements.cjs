@@ -19,7 +19,7 @@ const path = require('node:path');
         const page = await context.newPage();
         let reference;
         for (const view of ['explorer', 'hof', 'accueil', 'messages', 'classement-fans', 'espace']) {
-          await page.goto(base + '/faluss-fans/fan/' + view);
+          await page.goto(base + '/app/fan/' + view);
           await page.evaluate(() => document.fonts.ready);
           const box = await page.locator('.fu-main').boundingBox();
           const dimensions = [box.x, box.y, box.width];
