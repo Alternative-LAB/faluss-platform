@@ -344,4 +344,17 @@ final class TextPublicationService
     {
         return new \WP_Error($code, 'Publication indisponible.', ['status' => $status]);
     }
+
+    /** Private aggregate only, no content or financial data.
+     * @return array<string,int>|null */
+    public static function administrationCounts(string $creatorId): ?array
+    {
+        if (!current_user_can('manage_options') || !self::validId($creatorId) || !TextPublicationsModule::available()) { return null; }
+        global $wpdb;
+        $rows = $wpdb->get_results($wpdb->prepare('SELECT state,COUNT(*) AS total FROM `' . TextPublicationSchema::table() . '` WHERE creator_id=%s GROUP BY state', $creatorId), 'ARRAY_A');
+        if (!is_array($rows) || $wpdb->last_error !== '') { return null; }
+        $counts = ['pending'=>0,'approved'=>0,'rejected'=>0,'withdrawn'=>0];
+        foreach ($rows as $row) { if (!isset($counts[$row['state']]) || !is_numeric($row['total'])) { return null; } $counts[$row['state']] = (int) $row['total']; }
+        return $counts;
+    }
 }

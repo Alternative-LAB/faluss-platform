@@ -10,6 +10,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Administration Fans privée `/app/admin` : pills centrées, recherche et comptes, décisions partagées, statistiques réelles, catalogue fermé aux achats, habilitations concurrentes journalisées et opérations de rétention sans activation.
+
 - Contexte privé des comptes liés dans toutes les files et fiches de modération Fans ; recherche locale et refus des approbations sans liaison membre valide.
 
 - Entrée Fans `/app`, résolution du rôle et redirection des anciennes routes humaines ; callback SSO et API stables, accès application visible pour les membres liés.

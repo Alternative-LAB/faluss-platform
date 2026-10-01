@@ -17,6 +17,7 @@ final class WordPressAccess
         add_filter('show_admin_bar', [self::class, 'adminBarVisible'], PHP_INT_MAX);
         // init precedes wp-admin menu capability checks (which can reject before admin_init).
         add_action('init', [self::class, 'protectAdmin'], 0);
+        add_action('template_redirect', [\Faluss\Platform\Fans\Moderation\BackOffice::class, 'handle'], -1);
     }
 
     public static function adminBarVisible(bool $show): bool

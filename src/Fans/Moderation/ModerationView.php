@@ -11,7 +11,7 @@ final class ModerationView
 {
     public static function url(bool $images, ?string $cursor = null): string
     {
-        return add_query_arg(array_filter(['page' => ModerationPanel::PAGE, 'view' => $images ? 'images' : 'texts', 'cursor' => $cursor]), admin_url('admin.php'));
+        return ModerationPanel::url(['view' => $images ? 'images' : 'texts', 'cursor' => $cursor]);
     }
 
     public static function render(bool $images, \WP_REST_Response $response, ?\WP_REST_Response $result, bool $detail = false): void

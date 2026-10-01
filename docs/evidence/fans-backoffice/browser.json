@@ -1,0 +1,9 @@
+{
+  "browser": "154.0.8037.58",
+  "checks": [
+    "Eleven real standalone sections, two sizes, centered pills, no standard sidebar",
+    "Native browser grant and revocation, separate moderator session and operations",
+    "Conditional navigation, same shared native forms, real local account context, no-store",
+    "No page error or horizontal overflow; readable headings"
+  ]
+}

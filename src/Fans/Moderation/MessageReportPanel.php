@@ -9,7 +9,7 @@ use Faluss\Platform\Fans\Ui\FansUiMessages;
 final class MessageReportPanel
 {
     public static function url(string $item=''): string
-    {return add_query_arg(['page'=>ModerationPanel::PAGE,'view'=>'messages']+($item!==''?['item'=>$item]:[]),admin_url('admin.php'));}
+    {return ModerationPanel::url(['view'=>'messages']+($item!==''?['item'=>$item]:[]));}
     public static function nav(): void
     {if(ReportModeration::allowed()) {echo '<a href="'.esc_url(self::url()).'">Signalements privés</a>';}}
     public static function submit(): \WP_REST_Response

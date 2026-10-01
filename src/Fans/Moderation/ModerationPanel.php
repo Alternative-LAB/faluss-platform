@@ -137,9 +137,17 @@ final class ModerationPanel
     public static function field(string $key, array $source): string
     { return isset($source[$key]) && is_string($source[$key]) ? wp_unslash($source[$key]) : ''; }
 
+    /** @param array<string,string|null> $args */
+    public static function url(array $args): string
+    {
+        return BackOffice::isRequest() ? BackOffice::url($args)
+            : add_query_arg(array_filter(['page' => self::PAGE] + $args), admin_url('admin.php'));
+    }
+
     public static function render(): void
     {
         if (!self::allowed()) { wp_die('Accès non autorisé.', '', ['response' => 403]); }
+        if (!BackOffice::isRequest()) { echo '<p><a href="'.esc_url(BackOffice::url()).'">Ouvrir l’administration Fans unifiée →</a></p>'; }
         if (self::field('view', $_GET) === 'profiles' || (self::field('view', $_GET) === ''
             && \Faluss\Platform\Fans\Profiles\CreatorProfilesModule::available())) {
             CreatorAdmissionView::render(self::$result); return;
@@ -152,6 +160,11 @@ final class ModerationPanel
         $images = self::field('view', $_GET) === 'images';
         $cursor = self::field('cursor', $_GET);
         $item = self::field('item', $_GET);
+        if ($images && $item !== '') {
+            $row = \Faluss\Platform\Fans\Images\ImageService::administrationItem($item);
+            ModerationView::render(true, new \WP_REST_Response($row === null ? [] : ['items'=>[$row],'next_cursor'=>null], $row === null ? 404 : 200), self::$result, true);
+            return;
+        }
         if (!$images && $item !== '') {
             $response = TextPublicationService::validId($item) ? self::request('GET', 'text-publications/' . $item . '/private') : new \WP_REST_Response([], 400);
             if ($response->get_status() === 200) { $response = new \WP_REST_Response(['items' => [$response->get_data()], 'next_cursor' => null]); }
