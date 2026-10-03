@@ -19,6 +19,17 @@ final class ImageDisplayDerivative
     /** Caller owns the publication/profile locks and transaction. This method locks the image. */
     public static function forPublication(string $id, string $creatorId, int $revision): string|\WP_Error
     {
+        $source = self::sourceForPublication($id, $creatorId, $revision);
+        if ($source instanceof \WP_Error) { return $source; }
+        return self::render($source) ?? ImageService::error('display_unavailable');
+    }
+
+    /** Public eligibility only; no private reference or bytes escape. Caller owns the transaction. */
+    public static function availableForPublication(string $id, string $creatorId, int $revision): bool
+    { return is_string(self::sourceForPublication($id, $creatorId, $revision)); }
+
+    private static function sourceForPublication(string $id, string $creatorId, int $revision): string|\WP_Error
+    {
         if (!self::enabled() || !ImageStorage::validId($id) || $revision < 1) { return ImageService::error('display_not_found', 404); }
         global $wpdb;
         $row = $wpdb->get_row($wpdb->prepare('SELECT creator_id,state,revision,file_hash FROM `' . ImageSchema::table()
@@ -29,8 +40,7 @@ final class ImageDisplayDerivative
         }
         $root = ImageStorage::root();
         $source = $root === null ? null : ImageStorage::read($root, $id, $row['file_hash']);
-        $derived = $source === null ? null : self::render($source);
-        return $derived ?? ImageService::error('display_unavailable');
+        return $source ?? ImageService::error('display_unavailable');
     }
 
     /** Bounded fresh raster, opaque white background, no metadata or source-byte fallback. */

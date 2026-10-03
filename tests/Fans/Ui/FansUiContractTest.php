@@ -118,6 +118,30 @@ namespace Faluss\Platform\Fans\Ui {
             self::assertStringNotContainsString('faluss-fans/visitor/', $visitor);
         }
 
+        public function testDiscoveryCompositionIsRestrictedToTheTwoPublicViews(): void
+        {
+            $explorer = $this->render('visitor', 'explorer');
+            self::assertStringContainsString('class="fu-discovery"', $explorer);
+            self::assertStringNotContainsString('data-fans-publications', $explorer);
+            self::assertStringNotContainsString('Retrouvez votre espace', $explorer);
+            self::assertStringNotContainsString('class="fu-banner"', $explorer);
+            ob_start();
+            FansUiView::render('visitor', 'public-profile', '123e4567-e89b-42d3-a456-426614174000', 200, '<form method="post"><input name="nonce" value="fixture"><button>Connexion</button></form>');
+            $profile = (string) ob_get_clean();
+            self::assertStringContainsString('class="fu-public-creator"', $profile);
+            self::assertStringContainsString('data-presentation="profile"', $profile);
+            self::assertStringContainsString('<input name="nonce" value="fixture">', $profile);
+            self::assertStringNotContainsString('Retrouvez votre espace', $profile);
+            self::assertStringNotContainsString('Les images de publications sont indisponibles', $profile);
+            foreach (['accueil', 'hof', 'espace', 'classement-fans'] as $view) {
+                $html = $this->render('fan', $view);
+                self::assertStringNotContainsString('class="fu-discovery"', $html);
+                self::assertStringNotContainsString('class="fu-public-creator"', $html);
+                self::assertStringNotContainsString('data-presentation="profile"', $html);
+            }
+            self::assertStringContainsString('data-fans-publications', $this->render('fan', 'accueil'));
+        }
+
         public function testPublicHofShowsAnHonestUnavailableState(): void
         {
             $html = $this->render('visitor', 'hof');

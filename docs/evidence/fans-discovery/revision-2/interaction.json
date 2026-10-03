@@ -1,0 +1,8 @@
+{
+  "checks": [
+    "Real Chromium touch gesture scrolls the creator row horizontally",
+    "Explorer/profile overflow absent at 320,600,700,701,1024 pixels",
+    "Keyboard Explorer-to-profile navigation and browser back reload the real public projections (fixture host rewritten to loopback only)",
+    "Pending and missing profile pages return HTTP404 themselves"
+  ]
+}

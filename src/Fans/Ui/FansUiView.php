@@ -71,12 +71,14 @@ final class FansUiView
             return;
         }
         $title = $page[1];
+        $discovery = in_array($view, ['explorer', 'public-profile'], true);
         // Use native Unicode glyphs on the standalone app; do not fetch emoji images from a CDN.
         if (function_exists('remove_action')) { remove_action('wp_head', 'print_emoji_detection_script', 7); }
         if ($messages?->available) { $page[3]='Vos demandes et conversations privées. Chaque échange respecte le choix de son destinataire.'; }
         $api = rest_url('faluss-fans/v1/creators');
         $publicBase = home_url('/app/creators/');
         wp_enqueue_style('faluss-fans-ui-v2', plugins_url('assets/fans-ui-v2.css', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'));
+        if ($discovery) { wp_enqueue_style('faluss-fans-discovery', plugins_url('assets/fans-discovery.css', dirname(__DIR__, 3) . '/faluss-platform.php'), ['faluss-fans-ui-v2'], (string) constant('FALUSS_PLATFORM_VERSION')); }
         if ($messages !== null) { wp_enqueue_style('faluss-fans-messages', plugins_url('assets/fans-messages.css', dirname(__DIR__, 3) . '/faluss-platform.php'), ['faluss-fans-ui-v2'], (string)constant('FALUSS_PLATFORM_VERSION')); }
         wp_enqueue_script('faluss-fans-ui-v2', plugins_url('assets/fans-ui-v2.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true);
         wp_enqueue_script('faluss-fans-reading', plugins_url('assets/fans-ui-reading.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true);
@@ -101,36 +103,38 @@ final class FansUiView
     <?php self::navigation($role, $page[2]); ?>
     <main class="fu-main" id="fu-main" tabindex="-1">
         <?php FansUiNotifications::bell($role); ?>
+        <?php if (!$discovery): ?>
         <header class="<?php echo in_array($view, ['accueil', 'explorer', 'hof'], true) ? 'fu-banner' : 'fu-heading'; ?>">
             <div class="fu-banner__texture" aria-hidden="true"></div>
             <p class="fu-eyebrow"><?php echo esc_html($page[0]); ?></p>
             <h1><?php echo esc_html($title); ?></h1>
             <p class="fu-banner__subtitle"><?php echo esc_html($page[3]); ?></p>
         </header>
+        <?php endif; ?>
         <?php if ($role === 'visitor' && !$errorView) : ?>
             <?php if (isset($_GET['faluss_fans_session']) && $_GET['faluss_fans_session'] === 'closed'): ?>
                 <section class="fu-panel fu-session-notice"><h2>Vous êtes déconnecté de Fans</h2><p>Cette déconnexion concerne uniquement Fans. Elle ne ferme pas vos sessions sur Faluss Identity ou les autres sites.</p><details><summary>Utiliser un autre compte</summary><p>Fans ne dispose pas encore d’un sélecteur de compte Identity. Ouvrez Faluss Identity, déconnectez-vous explicitement de ce compte puis connectez-vous au compte souhaité avant de revenir sur Fans.</p><a class="fu-link" href="https://faluss.me/login" target="_blank" rel="noopener">Gérer ma connexion Faluss Identity ↗</a></details></section>
             <?php endif; ?>
+            <?php if (!$discovery): ?>
             <section class="fu-signin fu-panel" aria-label="Connexion Faluss">
                 <div><h2><?php echo $view === 'connexion' ? 'Connexion requise' : 'Retrouvez votre espace'; ?></h2>
                 <p>Connectez-vous ou créez votre compte sur Faluss Identity. Vous reviendrez sur cette page après connexion.</p>
                 <?php if ($signIn === '') : ?><p>Utilisez une session de membre pour continuer ; ce compte ne peut pas être lié par ce parcours.</p><?php endif; ?></div>
                 <?php echo $signIn; // Trusted server-rendered SSO form, all values escaped by FansSsoService. ?>
             </section>
+            <?php endif; ?>
         <?php endif; ?>
         <?php if ($view === 'notifications' && $notifications !== null) : ?>
             <?php FansUiNotifications::render($notifications,$role); ?>
         <?php elseif ($view === 'explorer') : ?>
-            <?php self::explorer($api, $publicBase); ?>
-            <?php FansUiReading::publications(); ?>
+            <?php FansUiDiscovery::explorer($api, $publicBase, $role === 'visitor' ? $signIn : ''); ?>
         <?php elseif ($view === 'accueil') : ?>
             <?php FansUiReading::home($role); ?>
         <?php elseif ($view === 'mon-profil') : ?>
             <?php FansUiReading::ownProfile(); ?>
             <?php if ($editorial !== null) { FansUiEditorial::render($editorial); } ?>
         <?php elseif ($view === 'public-profile' && $creatorId !== null) : ?>
-            <?php self::publicProfile($api, $creatorId, $role); ?>
-            <?php FansUiReading::publications($creatorId); ?>
+            <?php FansUiDiscovery::profile($api, $creatorId, $role, $role === 'visitor' ? $signIn : ''); ?>
         <?php elseif ($view === 'creer') : ?>
             <p class="fu-content"><a class="fu-link" href="#fu-author" data-create-open>Créer une publication</a> · <a class="fu-link" href="<?php echo esc_url(FansUiRoutes::url('creator', 'images')); ?>">Gérer ma galerie privée</a></p>
             <?php if ($author !== null) { FansUiAuthorView::render($author); } ?>
@@ -195,41 +199,6 @@ final class FansUiView
             <symbol id="fu-icon-chart" viewBox="0 0 24 24"><path d="M4 20h16M6 17l4-5 3 2 5-7"/></symbol>
             <symbol id="fu-icon-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></symbol>
         </svg>
-        <?php
-    }
-
-    private static function explorer(string $api, string $publicBase): void
-    {
-        ?>
-        <section class="fu-content" data-fans-explorer data-api="<?php echo esc_url($api); ?>" data-public-base="<?php echo esc_url($publicBase); ?>" aria-labelledby="fu-explore-title">
-            <div class="fu-section-heading"><div><p class="fu-panel__kicker">Découvrir</p><h2 id="fu-explore-title">Profils créateurs</h2></div></div>
-
-            <div class="fu-filters" role="group" aria-label="Filtrer par catégorie">
-                <button type="button" data-category="" aria-pressed="true">Toutes les catégories</button>
-                <button type="button" data-category="arts" aria-pressed="false">Arts</button>
-                <button type="button" data-category="music" aria-pressed="false">Musique</button>
-                <button type="button" data-category="games" aria-pressed="false">Jeux</button>
-                <button type="button" data-category="learning" aria-pressed="false">Savoirs</button>
-                <button type="button" data-category="lifestyle" aria-pressed="false">Art de vivre</button>
-            </div>
-            <p class="fu-live" data-fans-status role="status" aria-live="polite">Chargement des profils…</p>
-            <div class="fu-grid" data-fans-results></div>
-        </section>
-        <?php
-    }
-
-    private static function publicProfile(string $api, string $creatorId, string $role): void
-    {
-        ?>
-        <section class="fu-content" data-fans-profile data-api="<?php echo esc_url($api); ?>" data-creator-id="<?php echo esc_attr($creatorId); ?>" aria-labelledby="fu-profile-title">
-            <a class="fu-back" href="<?php echo esc_url(FansUiRoutes::url($role === 'visitor' ? 'fan' : $role, 'explorer')); ?>">← Explorer</a>
-            <h2 id="fu-profile-title">Informations publiques</h2>
-            <p class="fu-live" data-fans-status role="status" aria-live="polite">Chargement du profil…</p>
-            <div data-fans-results></div>
-            <?php if (\Faluss\Platform\Fans\Messaging\MessageModule::available() && \Faluss\Platform\Fans\Profiles\CreatorProfileService::activeOwner($creatorId)!==get_current_user_id()): ?>
-            <a class="fu-link" href="<?php echo esc_url(add_query_arg('creator',$creatorId,FansUiRoutes::url($role==='visitor'?'fan':$role,'messages'))); ?>">Adresser une demande de message ↗</a>
-            <?php endif; ?>
-        </section>
         <?php
     }
 

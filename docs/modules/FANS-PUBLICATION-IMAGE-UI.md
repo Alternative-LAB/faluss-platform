@@ -14,17 +14,25 @@
   de tabulation ; le garde JavaScript refuse tout second lancement.
 
 L’UI utilise uniquement le [contrat existant de diffusion](FANS-IMAGE-DELIVERY.md).
-Elle ne modifie ni la modération, ni la projection publique des textes, ni les
-prérequis d’hébergement, ni les flags. Version plugin inchangée.
+Elle ne modifie ni la modération, ni les prérequis d’hébergement, ni les flags.
+La lecture du profil public utilise une projection additive décrite ci-dessous. Version plugin inchangée.
 
 ## Parcours
 
-Explorer et les accueils présentent le bouton « Vérifier l’image associée »
-uniquement lorsque `ImageDisplayDerivative::enabled()` est vrai. La liste publique
-ne contient aucune information de présence d’image : le bouton ne prétend donc
-pas qu’une image existe. Aucune requête d’image automatique au chargement.
+Les accueils gardent « Vérifier l'image associée » et leur demande explicite,
+uniquement lorsque `ImageDisplayDerivative::enabled()` est vrai.
+Le profil public recomposé demande `public_image=1` avec `creator_id` : le serveur
+ajoute `has_public_image`, sans référence privée, après vérification du texte,
+du profil, de l'association, de l'image approuvée à sa révision et du stockage
+attesté. La projection par défaut reste identique.
 
-Chaque clic interroge la révision du texte chargé, sur la même origine, sans
+Sur ce profil uniquement, un texte seul n'a ni bouton ni requête d'image. Les
+images admissibles sont chargées séquentiellement au premier affichage, sans
+rejeu automatique ; le bouton permet de masquer puis de revoir l'image. La
+livraison revalide les droits, et un 404 retire le contrôle devenu sans objet.
+Voir [la recette réelle et le contrat précis](../evidence/fans-discovery/README.md).
+
+Chaque chargement interroge la révision du texte chargé, sur la même origine, sans
 redirection, query string, cache applicatif ou variante de format. Un seul clic
 peut charger une image à la fois dans la page ; les autres boutons sont désactivés
 pendant cette demande. Cela ne remplace pas la protection serveur entre visiteurs.
@@ -33,8 +41,8 @@ Un 503 permet une nouvelle tentative explicite, sans boucle de rejeu.
 Le corps JPEG est borné à 2 Mio pendant sa lecture. Le navigateur décode l’image
 avant affichage et vérifie le côté maximal de 1 280 pixels. L’URL Blob est révoquée
 lors du remplacement de liste, du masquage, du départ ou d’une erreur. Au retour,
-les textes sont relus et une nouvelle demande explicite est nécessaire pour
-l’image. Aucun stockage persistant, CDN, URL privée ou source originale.
+les textes sont relus ; le profil recharge seulement les images encore
+admissibles, les autres écrans attendent une demande explicite. Aucun stockage persistant, CDN, URL privée ou source originale.
 
 Ces contrôles ne rappellent pas les octets déjà reçus ou copiés. Une révocation
 serveur pendant que la page reste visible ne retire pas immédiatement ses pixels.

@@ -103,17 +103,19 @@ final class FansUiReading
         <?php
     }
 
-    public static function publications(?string $creatorId = null): void
+    public static function publications(?string $creatorId = null, bool $profilePresentation = false): void
     {
         $images = ImageDisplayDerivative::enabled();
         ?>
         <section class="fu-content" data-fans-publications data-api="<?php echo esc_url(rest_url('faluss-fans/v1/text-publications')); ?>"
-                 data-image-delivery="<?php echo $images ? 'true' : 'false'; ?>"
+                 <?php if ($profilePresentation): ?>data-presentation="profile" <?php endif; ?>data-image-delivery="<?php echo $images ? 'true' : 'false'; ?>"
                  <?php if ($creatorId !== null) : ?>data-creator-id="<?php echo esc_attr($creatorId); ?>"<?php endif; ?>
                  data-public-base="<?php echo esc_url(home_url('/app/creators/')); ?>" aria-labelledby="fu-texts-title">
-            <div class="fu-section-heading"><div><p class="fu-panel__kicker">Publications</p><h2 id="fu-texts-title"><?php echo $creatorId === null ? 'À découvrir dans la communauté' : 'Publications de ce profil'; ?></h2></div></div>
+            <div class="fu-section-heading"><div><p class="fu-panel__kicker">Publications</p><h2 id="fu-texts-title"><?php echo $creatorId === null ? 'À découvrir dans la communauté' : ($profilePresentation ? 'Publications' : 'Publications de ce profil'); ?></h2></div></div>
+            <?php if (!$profilePresentation): ?>
             <p class="fu-footnote"><?php echo $creatorId === null ? 'Les dernières publications approuvées. Retrouvez leur auteur sur sa fiche publique.' : 'Les publications approuvées de ce profil.'; ?></p>
             <p class="fu-footnote"><?php echo $images ? 'Une publication peut avoir une image approuvée. Vérifiez sa disponibilité à la demande.' : 'Les images de publications sont indisponibles pour le moment.'; ?></p>
+            <?php endif; ?>
             <p class="fu-live" data-text-status role="status">Chargement des publications…</p>
             <div class="fu-text-grid" data-text-results></div>
             <div class="fu-text-controls"><button type="button" data-text-refresh>Recommencer la lecture</button>

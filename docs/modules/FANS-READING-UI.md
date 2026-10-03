@@ -4,7 +4,7 @@
 
 Positifs : accueil Fan et Créateur avec liens de navigation réels ; profil propre
 avec catégorie et statut issus du service propriétaire ; lien public seulement
-si actif. Explorer et accueil lisent les pages de textes approuvés via le REST
+si actif. Les accueils et profils publics lisent les pages de textes approuvés via le REST
 existant, avec curseur et lien vers le profil public. Aucun nom, portrait ou score
 n’est déduit d’un UUID ou de l’identité SSO.
 
@@ -14,7 +14,7 @@ formée et page vide affichent un état explicite. Le texte est rendu comme text
 jamais en HTML. Changement de visibilité/retour navigateur recharge la première
 page et masque les anciennes réponses ; une réponse dépassée ne restaure rien.
 
-Explorer et les accueils gardent une liste globale, pas un fil personnalisé.
+Les accueils gardent une liste globale, pas un fil personnalisé. Explorer ne présente plus de publications depuis la repasse décrite dans [la recette comparative](../evidence/fans-discovery/README.md).
 Le profil public utilise maintenant le filtre serveur ajouté par #96 : chaque
 page est liée à son `creator_id`, et le navigateur refuse toute réponse contenant
 un texte d’un autre créateur. Aucun identifiant n’est affiché comme nom.
@@ -36,8 +36,9 @@ Le compteur décrit des relations enregistrées, pas des personnes uniques,
 une activité, un revenu ou un classement.
 
 Scénarios négatifs : route absente, erreur, réponse mal formée, compteur négatif,
-fractionnaire, trop grand ou relatif à un autre créateur = « Nombre de suivis
-indisponible », jamais zéro par défaut. Une fiche non publique ne déclenche
+fractionnaire, trop grand ou relatif à un autre créateur : compteur masqué dans
+le profil recomposé, jamais zéro par défaut. Le libellé « suivis » décrit les
+relations enregistrées et ne promet pas un nombre de personnes uniques. Une fiche non publique ne déclenche
 aucune lecture du compteur. Masquage/départ annulent les lectures et effacent les
 fiches ; retour visible/BFcache relit les API. Aucune réponse ancienne ne restaure
 un compteur. Pas de polling, stockage local, liste de followers ou bouton de suivi.

@@ -14,6 +14,8 @@
   status.tabIndex = -1;
   const id = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
   const creator = root.dataset.creatorId ?? null;
+  const profilePresentation = root.dataset.presentation === 'profile';
+  const imageLabel = profilePresentation ? 'Voir l’image' : 'Vérifier l’image associée';
   let cursor = null;
   let controller = null;
   let generation = 0;
@@ -32,7 +34,8 @@
     && (creator === null || item.creator_id === creator)
     && validRevision(item.revision)
     && typeof item.body === 'string' && item.body.length > 0 && item.body.length <= 16000
-    && typeof item.updated_at === 'string';
+    && typeof item.updated_at === 'string'
+    && (!profilePresentation || typeof item.has_public_image === 'boolean');
   function reset(keepNext = false) {
     controller?.abort();
     generation += 1;
@@ -43,10 +46,10 @@
     cursor = null;
     if (!keepNext) next.hidden = true;
   }
-  // The server permits one derivative generation at a time. No automatic image requests or retries.
+  // One derivative at a time. Only the public profile automatically loads explicitly eligible images; no retries.
   function imageControl(card, item, current, signal) {
     const figure = node('figure', '', 'fu-publication-image');
-    const button = node('button', 'Vérifier l’image associée');
+    const button = node('button', imageLabel);
     button.type = 'button';
     button.dataset.imageLoad = '';
     const message = node('p', '', 'fu-footnote');
@@ -55,12 +58,12 @@
     let shownUrl = null;
     figure.append(button, message, output);
     card.append(figure);
-    button.addEventListener('click', async () => {
+    const activate = async () => {
       if (imageBusy || signal.aborted || current !== generation) return;
       if (shownUrl !== null) {
         output.replaceChildren();
         URL.revokeObjectURL(shownUrl); objectUrls.delete(shownUrl); shownUrl = null;
-        button.textContent = 'Vérifier l’image associée';
+        button.textContent = imageLabel;
         message.textContent = 'Image masquée.';
         return;
       }
@@ -73,7 +76,8 @@
         if (url.origin !== location.origin || url.search || url.hash) throw new Error('invalid');
         const response = await fetch(url, { credentials: 'same-origin', cache: 'no-store', redirect: 'error', signal });
         if (response.status === 404) {
-          message.textContent = 'Aucune image publique disponible pour cette publication.';
+          message.textContent = profilePresentation ? '' : 'Aucune image publique disponible pour cette publication.';
+          if (profilePresentation) figure.hidden = true;
           return;
         }
         if (!response.ok || response.headers.get('Content-Type')?.split(';')[0].trim().toLowerCase() !== 'image/jpeg'
@@ -100,7 +104,7 @@
         if (signal.aborted || current !== generation) return;
         if (picture.naturalWidth > 1280 || picture.naturalHeight > 1280) throw new Error('invalid');
         output.replaceChildren(picture);
-        message.textContent = 'Image de la publication. La description détaillée n’est pas encore fournie.';
+        message.textContent = profilePresentation ? '' : 'Image de la publication. La description détaillée n’est pas encore fournie.';
         shownUrl = objectUrl;
         button.textContent = 'Masquer l’image';
       } catch (error) {
@@ -112,7 +116,9 @@
           root.querySelectorAll('[data-image-load]').forEach(control => { control.removeAttribute('aria-disabled'); });
         }
       }
-    });
+    };
+    button.addEventListener('click', activate);
+    return activate;
   }
   async function load(after = null, control = null) {
     reset(control === next);
@@ -132,6 +138,7 @@
       if (creator !== null) {
         if (!id.test(creator)) throw new Error('invalid');
         url.searchParams.set('creator_id', creator);
+        if (profilePresentation) url.searchParams.set('public_image', '1');
       }
       const response = await fetch(url, { credentials: 'same-origin', cache: 'no-store', signal });
       if (!response.ok) throw new Error('unavailable');
@@ -141,6 +148,7 @@
         || !(page.next_cursor === null || (typeof page.next_cursor === 'string' && page.next_cursor.length > 0 && page.next_cursor.length <= 512))
         || (page.next_cursor !== null && (page.items.length === 0 || page.next_cursor === after))) throw new Error('invalid');
       const fragment = document.createDocumentFragment();
+      const images = [];
       for (const item of page.items) {
         const card = node('article', '', 'fu-panel fu-text-card');
         card.append(node('p', 'Publication', 'fu-panel__kicker'));
@@ -163,7 +171,10 @@
           time.dateTime = item.updated_at.replace(' ', 'T') + 'Z';
           card.append(time);
         }
-        if (root.dataset.imageDelivery === 'true') imageControl(card, item, current, signal);
+        if (root.dataset.imageDelivery === 'true' && (!profilePresentation || item.has_public_image)) {
+          const activate = imageControl(card, item, current, signal);
+          if (profilePresentation) images.push(activate);
+        }
         if (creator === null) {
           const link = node('a', 'Voir la fiche de l’auteur ↗', 'fu-link');
           link.href = root.dataset.publicBase + encodeURIComponent(item.creator_id);
@@ -173,14 +184,20 @@
       }
       results.replaceChildren(fragment);
       cursor = page.next_cursor;
-      status.textContent = page.items.length === 0 ? 'Aucune publication publique disponible.' : 'Publications chargées. Les textes restent soumis à la modération.';
+      status.textContent = profilePresentation
+        ? (page.items.length === 0 ? 'Les premières publications arrivent bientôt.' : (control ? 'Publications affichées.' : ''))
+        : (page.items.length === 0 ? 'Aucune publication publique disponible.' : 'Publications chargées. Les textes restent soumis à la modération.');
       focusReading();
       next.hidden = cursor === null;
       next.removeAttribute('aria-disabled');
+      for (const activate of images) {
+        if (signal.aborted || current !== generation) break;
+        await activate();
+      }
     } catch (error) {
       if (signal.aborted || current !== generation) return;
       results.replaceChildren();
-      status.textContent = 'Publications indisponibles. Le service est fermé ou ne répond pas. Vous pouvez réessayer.';
+      status.textContent = profilePresentation ? 'Les publications ne sont pas disponibles pour le moment. Réessayez dans un instant.' : 'Publications indisponibles. Le service est fermé ou ne répond pas. Vous pouvez réessayer.';
       focusReading();
       next.hidden = true;
     }

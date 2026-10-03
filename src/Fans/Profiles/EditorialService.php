@@ -141,6 +141,55 @@ final class EditorialService
         return is_array($data) ? $data : null;
     }
 
+    /** Dedicated additive discovery read. Date is the Fans creator-profile request, not wp_users.user_registered.
+     * @return array{items:list<array<string,mixed>>,next_cursor:?string}|\WP_Error
+     */
+    public static function discovery(mixed $category = null, mixed $perPage = 20, mixed $cursor = null): array|\WP_Error
+    {
+        if (($category !== null && (!is_string($category) || !in_array($category, CreatorProfileService::CATEGORIES, true)))
+            || (!is_int($perPage) && !(is_string($perPage) && preg_match('/^[1-9][0-9]?$/D', $perPage) === 1))
+            || (int) $perPage < 1 || (int) $perPage > 20) { return self::error('invalid_discovery_page', 400); }
+        $prefix = 'd1.' . ($category ?? 'all') . '.';
+        $position = DiscoveryCursor::decode($cursor, $prefix);
+        if ($position === false) { return self::error('invalid_discovery_cursor', 400); }
+        return self::transaction(static function () use ($category, $perPage, $prefix, $position): array|\WP_Error {
+            global $wpdb;
+            $where = 'p.status=%s AND e.state=%s AND TRIM(e.public_name)<>%s';
+            $args = ['active', 'approved', ''];
+            if ($category !== null) { $where .= ' AND p.category=%s'; $args[] = $category; }
+            if ($position !== null) {
+                $where .= ' AND (p.created_at<%s OR (p.created_at=%s AND p.creator_id<%s))';
+                array_push($args, $position['date'], $position['date'], $position['id']);
+            }
+            $args[] = (int) $perPage + 1;
+            // Filter BEFORE ordering/limit. The join and row locks keep eligibility and projection consistent.
+            $rows = $wpdb->get_results($wpdb->prepare('SELECT p.creator_id,p.category,p.status,p.created_at,p.updated_at,'
+                . 'e.public_name,e.bio,e.revision,e.portrait_id,e.portrait_revision FROM `' . CreatorProfileSchema::table()
+                . '` p INNER JOIN `' . EditorialSchema::publishedTable() . '` e ON e.creator_id=p.creator_id WHERE '
+                . $where . ' ORDER BY p.created_at DESC,p.creator_id DESC LIMIT %d FOR UPDATE', ...$args), 'ARRAY_A');
+            if (!is_array($rows) || $wpdb->last_error !== '') { return self::error('discovery_unavailable'); }
+            $more = count($rows) > (int) $perPage;
+            $items = [];
+            foreach (array_slice($rows, 0, (int) $perPage) as $row) {
+                if (!self::validId($row['creator_id'] ?? null) || !in_array($row['category'] ?? null, CreatorProfileService::CATEGORIES, true)
+                    || !self::text($row['public_name'] ?? null, 80, false) || trim($row['public_name']) === ''
+                    || !self::text($row['bio'] ?? null, 1000, true) || (int) ($row['revision'] ?? 0) < 1
+                    || DiscoveryCursor::decode($prefix . str_replace(' ', 'T', (string) ($row['created_at'] ?? '')) . '.' . $row['creator_id'], $prefix) === false) {
+                    return self::error('discovery_unavailable');
+                }
+                $item = array_intersect_key($row, array_flip(['creator_id', 'category', 'status', 'created_at', 'updated_at']));
+                $item['identity_verified'] = false;
+                $item['editorial'] = ['public_name' => $row['public_name'], 'bio' => $row['bio'], 'revision' => (int) $row['revision'],
+                    'portrait' => $row['portrait_id'] !== '' && ImageDisplayDerivative::enabled()
+                        && PublicationImageReference::eligible($row['portrait_id'], $row['creator_id'], (int) $row['portrait_revision'], true)];
+                $items[] = $item;
+            }
+            $last = $items === [] ? null : $items[count($items) - 1];
+            return ['items' => $items, 'next_cursor' => $more && $last !== null
+                ? $prefix . str_replace(' ', 'T', $last['created_at']) . '.' . $last['creator_id'] : null];
+        });
+    }
+
     public static function portrait(string $id, int $revision): string|\WP_Error
     {
         if (!self::validId($id) || $revision < 1 || !ImageDisplayDerivative::enabled()) { return self::error('portrait_not_found', 404); }
