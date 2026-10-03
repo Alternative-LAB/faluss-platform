@@ -41,4 +41,3 @@ foreach ($fixture['discovery'] as $i => &$profile) {
 unset($profile);
 file_put_contents($args[0], wp_json_encode($fixture));
 echo "37 eligible creators (35 Arts), five excluded presentations/profiles; distinct WP registration dates.\n";
-

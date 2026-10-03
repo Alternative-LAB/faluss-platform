@@ -116,4 +116,3 @@ const assert = require('node:assert/strict'), fs = require('node:fs'), { execFil
     console.log(JSON.stringify({checks:checks.length,screenshots:shots.length,pageErrors:errors.length}));
   } finally {await browser.close();await api.dispose();}
 })().catch(error=>{console.error(error);process.exitCode=1});
-
