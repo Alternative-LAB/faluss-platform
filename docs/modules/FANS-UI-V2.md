@@ -200,16 +200,18 @@ Voir aussi [le correctif navigation, images et session](../evidence/fans-ui-navi
 ## Repasse Explorer et profil public (brouillon)
 
 Voir la [recette comparative](../evidence/fans-discovery/README.md). Le hero utilise
-**provisoirement, pour tests et recettes**, la date d’arrivée du profil Fans parmi
-les résultats publics admissibles reçus. Cette règle n’est pas la politique
+**provisoirement, pour tests et recettes**, les arrivées de profils Créateurs Fans les plus récentes en premier. Cette règle n’est pas la politique
 éditoriale définitive : elle pourra être remplacée par des règles décidées plus
 tard. Un profil unique est répété sur trois slides selon la consigne de recette.
 Aucun lien avec un score HoF, des PF ou une mise en avant payante.
 
-Le plafond actuel de vingt résultats par catégorie empêche de garantir un tri
-chronologique sur un catalogue plus grand. Le remplacer nécessitera un contrat
-de liste adapté ; les API ne sont pas modifiées dans cette repasse.
+La lecture dédiée `/creators/discovery` trie côté serveur par date de demande du
+profil Créateur décroissante, puis UUID décroissant à date égale. Elle sélectionne
+uniquement les profils actifs avec présentation approuvée avant sa limite.
+Le parcours « Voir tous » traverse des pages de dix au-delà de vingt profils.
+L'ancienne liste `/creators` reste inchangée pour les autres consommateurs.
 `FansUiDiscovery`, `fans-ui-v2.js` et les sélecteurs propres de
 `fans-discovery.css` portent ces deux compositions ; aucun style du shell ou de
-la sidebar n’est modifié. Les publications restent sur les profils et les
-accueils, avec leur vérification d’image existante.
+la sidebar n'est modifié. Les publications restent sur les profils et les
+accueils. Seul le profil utilise l'option `public_image=1` et charge les images
+publiquement admissibles indiquées par le service, séquentiellement sans rejeu.

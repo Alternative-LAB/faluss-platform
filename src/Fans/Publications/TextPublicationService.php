@@ -174,6 +174,32 @@ final class TextPublicationService
         return array_intersect_key($row, array_flip(['publication_id', 'creator_id', 'revision', 'body', 'updated_at']));
     }
 
+    /** Fresh public projection with one minimal eligibility bit, only on the opt-in profile read.
+     * @return array<string,mixed>|\WP_Error
+     */
+    private static function getForPublicProfile(string $id): array|\WP_Error
+    {
+        global $wpdb;
+        $suppressed = $wpdb->suppress_errors(true);
+        try {
+            if ($wpdb->query('START TRANSACTION') === false) { return self::error('publications_unavailable', 503); }
+            $row = self::read($id, true);
+            if (self::databaseError()) { return self::error('publications_unavailable', 503); }
+            if ($row === null || !self::publicReadable($row, true)) { return self::error('publication_not_found', 404); }
+            $image = false;
+            if (ImageDisplayDerivative::enabled()) {
+                $reference = $wpdb->get_row($wpdb->prepare('SELECT image_id,image_revision FROM `' . TextPublicationSchema::table('images')
+                    . '` WHERE publication_id=%s AND revision<=%d ORDER BY revision DESC LIMIT 1 FOR UPDATE', $id, $row['revision']), 'ARRAY_A');
+                if (self::databaseError()) { return self::error('publications_unavailable', 503); }
+                $image = is_array($reference) && self::validId($reference['image_id'] ?? null)
+                    && ImageDisplayDerivative::availableForPublication($reference['image_id'], $row['creator_id'], (int) $reference['image_revision']);
+            }
+            $result = array_intersect_key($row, array_flip(['publication_id', 'creator_id', 'revision', 'body', 'updated_at']));
+            $result['has_public_image'] = $image;
+            return $wpdb->query('COMMIT') === false ? self::error('publications_unavailable', 503) : $result;
+        } finally { $wpdb->query('ROLLBACK'); $wpdb->suppress_errors($suppressed); }
+    }
+
     /** @param array<string,mixed> $row */
     private static function publicReadable(array $row, bool $lockProfile = false): bool
     {
@@ -238,10 +264,11 @@ final class TextPublicationService
     }
 
     /** @return array{items:list<array<string,mixed>>,next_cursor:?string}|\WP_Error */
-    public static function listing(string $scope, mixed $perPage = 20, mixed $cursor = null, mixed $creatorId = null): array|\WP_Error
+    public static function listing(string $scope, mixed $perPage = 20, mixed $cursor = null, mixed $creatorId = null, bool $publicImage = false): array|\WP_Error
     {
         if (!TextPublicationsModule::available()) { return self::error('publications_unavailable', 503); }
-        if (!in_array($scope, ['public', 'own', 'current', 'archive', 'queue'], true)
+        if (($publicImage && ($scope !== 'public' || $creatorId === null))
+            || !in_array($scope, ['public', 'own', 'current', 'archive', 'queue'], true)
             || (!is_int($perPage) && !(is_string($perPage) && preg_match('/^[1-9][0-9]?$/D', $perPage) === 1))
             || (int) $perPage < 1 || (int) $perPage > 20
             || ($creatorId !== null && ($scope !== 'public' || !is_string($creatorId) || !self::validId($creatorId)))
@@ -288,7 +315,7 @@ final class TextPublicationService
                     return self::error('publications_unavailable', 503);
                 }
                 $position = ['updated_at' => $item['updated_at'], 'publication_id' => $item['publication_id']];
-                $value = self::get($item['publication_id'], $scope !== 'public');
+                $value = $publicImage ? self::getForPublicProfile($item['publication_id']) : self::get($item['publication_id'], $scope !== 'public');
                 if ($value instanceof \WP_Error) {
                     if (($value->get_error_data()['status'] ?? null) === 503) { return $value; }
                     continue;

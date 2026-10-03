@@ -1,0 +1,176 @@
+{
+  "environment": "Disposable WordPress 7.1.2 / MariaDB 11.8.6 / PHP 8.5.4 / TwentyTwentyFive; no target-site or external access",
+  "browser": "155.0.8059.26",
+  "checks": [
+    "Real guest REST: newest3, no-store, input validation, private reads denied, minimal image eligibility",
+    "one/guest/explorer/1440: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "one/guest/profile/1440: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "one/guest/explorer/390: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "one/guest/profile/390: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "one/fan/explorer/1440: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "one/fan/profile/1440: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "one/fan/explorer/390: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "one/fan/profile/390: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "many/guest/explorer/1440: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "guest/1440: Voir tous traversed all35, keyboard next/previous, last-page boundary, stable focus",
+    "many/guest/profile/1440: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "many/guest/explorer/390: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "guest/390: Voir tous traversed all35, keyboard next/previous, last-page boundary, stable focus",
+    "many/guest/profile/390: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "many/fan/explorer/1440: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "fan/1440: Voir tous traversed all35, keyboard next/previous, last-page boundary, stable focus",
+    "many/fan/profile/1440: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "many/fan/explorer/390: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "fan/390: Voir tous traversed all35, keyboard next/previous, last-page boundary, stable focus",
+    "many/fan/profile/390: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "no-media/guest/explorer/1440: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "no-media/guest/profile/1440: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "no-media/guest/explorer/390: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "no-media/guest/profile/390: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "no-media/fan/explorer/1440: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "no-media/fan/profile/1440: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "no-media/fan/explorer/390: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "no-media/fan/profile/390: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "empty/guest/explorer/1440: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "empty/guest/explorer/390: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "empty/fan/explorer/1440: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "empty/fan/explorer/390: HTTP200, order, media permission, keyboard, no overflow/UUID",
+    "guest/app/fan/hof: unrelated page HTTP200 and no discovery stylesheet",
+    "fan/app/fan/accueil: unrelated page HTTP200 and no discovery stylesheet",
+    "member/app/creator/progression: unrelated page HTTP200 and no discovery stylesheet",
+    "member/app/creator/mon-profil: unrelated page HTTP200 and no discovery stylesheet"
+  ],
+  "shots": [
+    "one-guest-explorer-1440.png",
+    "one-guest-profile-1440.png",
+    "one-guest-explorer-390.png",
+    "one-guest-profile-390.png",
+    "one-fan-explorer-1440.png",
+    "one-fan-profile-1440.png",
+    "one-fan-explorer-390.png",
+    "one-fan-profile-390.png",
+    "many-guest-explorer-1440.png",
+    "pagination-guest-1440.png",
+    "many-guest-profile-1440.png",
+    "many-guest-explorer-390.png",
+    "pagination-guest-390.png",
+    "many-guest-profile-390.png",
+    "many-fan-explorer-1440.png",
+    "pagination-fan-1440.png",
+    "many-fan-profile-1440.png",
+    "many-fan-explorer-390.png",
+    "pagination-fan-390.png",
+    "many-fan-profile-390.png",
+    "no-media-guest-explorer-1440.png",
+    "no-media-guest-profile-1440.png",
+    "no-media-guest-explorer-390.png",
+    "no-media-guest-profile-390.png",
+    "no-media-fan-explorer-1440.png",
+    "no-media-fan-profile-1440.png",
+    "no-media-fan-explorer-390.png",
+    "no-media-fan-profile-390.png",
+    "empty-guest-explorer-1440.png",
+    "empty-guest-explorer-390.png",
+    "empty-fan-explorer-1440.png",
+    "empty-fan-explorer-390.png"
+  ],
+  "requests": [
+    {
+      "scenario": "one",
+      "role": "guest",
+      "width": 1440,
+      "publicImageRequests": 1
+    },
+    {
+      "scenario": "one",
+      "role": "guest",
+      "width": 390,
+      "publicImageRequests": 1
+    },
+    {
+      "scenario": "one",
+      "role": "fan",
+      "width": 1440,
+      "publicImageRequests": 1
+    },
+    {
+      "scenario": "one",
+      "role": "fan",
+      "width": 390,
+      "publicImageRequests": 1
+    },
+    {
+      "scenario": "many",
+      "role": "guest",
+      "width": 1440,
+      "publicImageRequests": 1
+    },
+    {
+      "scenario": "many",
+      "role": "guest",
+      "width": 390,
+      "publicImageRequests": 1
+    },
+    {
+      "scenario": "many",
+      "role": "fan",
+      "width": 1440,
+      "publicImageRequests": 1
+    },
+    {
+      "scenario": "many",
+      "role": "fan",
+      "width": 390,
+      "publicImageRequests": 1
+    },
+    {
+      "scenario": "no-media",
+      "role": "guest",
+      "width": 1440,
+      "publicImageRequests": 0
+    },
+    {
+      "scenario": "no-media",
+      "role": "guest",
+      "width": 390,
+      "publicImageRequests": 0
+    },
+    {
+      "scenario": "no-media",
+      "role": "fan",
+      "width": 1440,
+      "publicImageRequests": 0
+    },
+    {
+      "scenario": "no-media",
+      "role": "fan",
+      "width": 390,
+      "publicImageRequests": 0
+    },
+    {
+      "scenario": "empty",
+      "role": "guest",
+      "width": 1440,
+      "publicImageRequests": 0
+    },
+    {
+      "scenario": "empty",
+      "role": "guest",
+      "width": 390,
+      "publicImageRequests": 0
+    },
+    {
+      "scenario": "empty",
+      "role": "fan",
+      "width": 1440,
+      "publicImageRequests": 0
+    },
+    {
+      "scenario": "empty",
+      "role": "fan",
+      "width": 390,
+      "publicImageRequests": 0
+    }
+  ],
+  "pageErrors": []
+}

@@ -16,7 +16,8 @@ final class EditorialRest
     public static function routes(): void
     {
         $id = '/editorial/(?P<creator_id>[0-9a-f-]{36})';
-        foreach ([['/creators/me/editorial', 'GET', 'own', 'member'],
+        foreach ([['/creators/discovery', 'GET', 'discovery', 'publicPermission'],
+            ['/creators/me/editorial', 'GET', 'own', 'member'],
             ['/creators/me/editorial', 'POST', 'submit', 'member'],
             [$id . '/withdraw', 'POST', 'withdraw', 'member'],
             ['/editorial/moderation', 'GET', 'moderation', 'admin'],
@@ -34,6 +35,8 @@ final class EditorialRest
     public static function admin(\WP_REST_Request $r): bool
     { return EditorialModule::available() && CreatorProfileRest::adminPermission($r); }
     public static function publicPermission(): bool { return EditorialModule::available(); }
+    public static function discovery(\WP_REST_Request $r): \WP_REST_Response
+    { return self::response(EditorialService::discovery($r->get_param('category'), $r->get_param('per_page') ?? 20, $r->get_param('cursor'))); }
     public static function own(): \WP_REST_Response { return self::response(EditorialService::own()); }
     public static function inspect(\WP_REST_Request $r): \WP_REST_Response
     { return self::response(EditorialService::inspect((string) $r->get_param('creator_id'))); }

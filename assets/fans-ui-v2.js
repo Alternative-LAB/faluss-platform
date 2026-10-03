@@ -112,7 +112,7 @@
 
   function hero(items, signal, current) {
     const selected = items.slice(0, 3);
-    // Provisional recipe rule, replaceable independently of cards/API: arrival order; repeat the sole creator.
+    // Provisional recipe rule, replaceable independently of cards/API: newest creator request first; repeat the sole creator.
     // See docs/evidence/fans-discovery/README.md; this is not a lasting editorial or commercial policy.
     if (selected.length === 1) selected.push(selected[0], selected[0]);
     const root = explorer.querySelector('[data-fans-hero]');
@@ -156,14 +156,14 @@
     controls.append(previous, dots, next, announce); region.append(slides, controls); root.append(region); show(0, false);
   }
 
-  function categoryRow(category, items, filtered, signal, current) {
+  function categoryRow(category, items, filtered, hasMore, signal, current) {
     const section = element('section', 'fu-discovery-row');
     const heading = element('div', 'fu-discovery-row__heading');
     const title = element('h2', '', categories[category]); title.id = `fu-discovery-title-${category}`;
     const track = element('div', 'fu-discovery-row__track' + (filtered ? ' fu-discovery-row__track--all' : '')); track.id = `fu-discovery-row-${category}`;
     track.setAttribute('role', 'list'); track.setAttribute('aria-labelledby', title.id); track.tabIndex = 0;
     const actions = element('div', 'fu-discovery-row__actions');
-    if (!filtered && items.length > 10) {
+    if (!filtered && hasMore) {
       const all = element('button', 'fu-link', 'Voir tous'); all.type = 'button';
       all.setAttribute('aria-label', `Voir tous les créateurs : ${categories[category]}`);
       all.addEventListener('click', () => { const filter = explorer.querySelector(`[data-category="${category}"]`); filter.focus(); filter.click(); });
@@ -185,11 +185,11 @@
     });
     track.addEventListener('scroll', update, { passive: true });
     const pending = [];
-    for (const item of items.slice(0, filtered ? 20 : 10)) {
+    for (const item of items.slice(0, 10)) {
       const { card, art } = creatorCard(item, explorer.dataset.publicBase); card.setAttribute('role', 'listitem');
       track.append(card); pending.push({ item, art });
     }
-    actions.append(previous, next); heading.append(title, actions); section.append(heading, track); results(explorer).append(section);
+    if (!filtered) actions.append(previous, next); heading.append(title, actions); section.append(heading, track); results(explorer).append(section);
     const resize = new ResizeObserver(update); resize.observe(track); observers.add(resize); update();
     // Off-screen portraits are not requested until their cards enter the viewport.
     const lazy = new IntersectionObserver(entries => {
@@ -201,29 +201,57 @@
     pending.forEach(job => lazy.observe(job.art)); observers.add(lazy);
   }
 
-  async function loadExplorer() {
+  // Category-scoped keyset pages. A refresh starts over so new arrivals can appear.
+  let discoveryPages = [null];
+  async function discoveryPage(category, limit, after, signal) {
+    const url = new URL(explorer.dataset.api.replace(/\/$/, '') + '/discovery', location.href);
+    if (category) url.searchParams.set('category', category);
+    url.searchParams.set('per_page', String(limit));
+    if (after !== null) url.searchParams.set('cursor', after);
+    const { data } = await get(url, signal);
+    if (!data || !Array.isArray(data.items) || data.items.length > limit
+      || !data.items.every(item => validProfile(item) && editorial(item) && (!category || item.category === category))
+      || new Set(data.items.map(item => item.creator_id)).size !== data.items.length
+      || !(data.next_cursor === null || (typeof data.next_cursor === 'string' && data.next_cursor.length > 0 && data.next_cursor.length <= 128))
+      || (data.next_cursor !== null && (!data.items.length || data.next_cursor === after))) throw new Error('invalid_response');
+    return data;
+  }
+  async function loadExplorer(pageIndex = 0, moveFocus = false) {
+    if (pageIndex === 0) discoveryPages = [null];
     const { signal, revision: current } = begin();
     const target = results(explorer); target.replaceChildren();
     status(explorer, 'Chargement des créateurs…');
     const category = explorer.querySelector('[data-category][aria-pressed="true"]')?.dataset.category || '';
     try {
-      // The unchanged API has a per-category limit; querying each category avoids hiding a populated universe.
-      const groups = await Promise.all((category ? [category] : Object.keys(categories)).map(async key => {
-        const url = new URL(explorer.dataset.api, location.href); url.searchParams.set('category', key);
-        const response = await get(url, signal);
-        if (!Array.isArray(response.data) || response.data.length > 20 || !response.data.every(item => validProfile(item)
-          && item.category === key && typeof item.created_at === 'string' && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(item.created_at))) throw new Error('invalid_response');
-        return [key, response.data.filter(item => editorial(item))];
-      }));
+      const [featured, groups] = await Promise.all([
+        discoveryPage(category, 3, null, signal),
+        Promise.all((category ? [category] : Object.keys(categories)).map(async key =>
+          [key, await discoveryPage(key, 10, category ? discoveryPages[pageIndex] : null, signal)]))
+      ]);
       if (signal.aborted || current !== revision) return;
-      const byArrival = (a, b) => a.created_at.localeCompare(b.created_at) || a.creator_id.localeCompare(b.creator_id);
-      const all = groups.flatMap(([, items]) => items).sort(byArrival);
-      if (!all.length) {
-        status(explorer, ''); showState(explorer, 'De nouveaux univers se préparent', 'Explorez une autre catégorie ou retrouvez-nous bientôt.'); return;
+      if (featured.items.length) hero(featured.items, signal, current);
+      for (const [key, page] of groups) if (page.items.length) {
+        categoryRow(key, page.items, Boolean(category), page.next_cursor !== null, signal, current);
       }
-      hero(all, signal, current);
-      for (const [key, items] of groups) if (items.length) categoryRow(key, items.sort(byArrival), Boolean(category), signal, current);
+      if (!groups.some(([, page]) => page.items.length)) {
+        showState(explorer, 'De nouveaux univers se préparent', 'Explorez une autre catégorie ou retrouvez-nous bientôt.');
+      }
+      if (category) {
+        const controls = element('nav', 'fu-discovery-pagination'); controls.setAttribute('aria-label', 'Pages de créateurs');
+        const previous = element('button', '', 'Précédents'); previous.type = 'button'; previous.disabled = pageIndex === 0;
+        previous.addEventListener('click', () => loadExplorer(pageIndex - 1, true));
+        const next = element('button', '', 'Suivants'); next.type = 'button'; next.disabled = groups[0][1].next_cursor === null;
+        next.addEventListener('click', () => {
+          discoveryPages[pageIndex + 1] = groups[0][1].next_cursor;
+          loadExplorer(pageIndex + 1, true);
+        });
+        controls.append(previous, element('span', '', `Page ${pageIndex + 1}`), next); target.append(controls);
+      }
       status(explorer, '');
+      if (moveFocus) {
+        const destination = target.querySelector('h2') || target;
+        destination.tabIndex = -1; destination.focus();
+      }
     } catch (error) {
       if (signal.aborted || current !== revision) return;
       target.replaceChildren(); status(explorer, '');

@@ -80,7 +80,9 @@ final class TextPublicationRest
 
     private static function page(\WP_REST_Request $r, string $scope): \WP_REST_Response
     {
-        return self::response(TextPublicationService::listing($scope, $r->get_param('per_page') ?? 20, $r->get_param('cursor'), $r->get_param('creator_id')));
+        $image = $r->get_param('public_image');
+        if ($image !== null && ($scope !== 'public' || $image !== '1' || $r->get_param('creator_id') === null)) { return self::response(self::badInput()); }
+        return self::response(TextPublicationService::listing($scope, $r->get_param('per_page') ?? 20, $r->get_param('cursor'), $r->get_param('creator_id'), $image === '1'));
     }
 
     /**
