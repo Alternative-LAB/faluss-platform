@@ -19,7 +19,7 @@ prérequis d’hébergement, ni les flags. Version plugin inchangée.
 
 ## Parcours
 
-Explorer et les accueils présentent le bouton « Vérifier l’image associée »
+Les accueils présentent le bouton « Vérifier l’image associée » ; le profil public recomposé utilise « Voir l’image si disponible ». Explorer ne présente plus de publications. Le bouton apparaît
 uniquement lorsque `ImageDisplayDerivative::enabled()` est vrai. La liste publique
 ne contient aucune information de présence d’image : le bouton ne prétend donc
 pas qu’une image existe. Aucune requête d’image automatique au chargement.

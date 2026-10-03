@@ -6,6 +6,12 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Modifié
+
+- Fans, Explorer et profil public uniquement : hero, rangées par catégorie, profil visuel, connexion contextuelle et grille de publications ; styles encapsulés, API et accès existants conservés. Publications retirées d’Explorer seulement.
+- Hero : ordre d’arrivée **provisoire pour tests et recettes**, trié sur les listes publiques disponibles ; trois slides du même profil quand il est seul, selon l’arbitrage de recette. Aucune politique commerciale ou de classement introduite.
+- Preuves : captures avant/après invité/Fan, ordinateur/mobile, WordPress/MariaDB isolés et limites des données publiques dans `docs/evidence/fans-discovery/README.md`. PR en brouillon pour validation visuelle, sans release ni changement de production.
+
 ## [0.12.1] - 2026-10-01
 
 ### Corrigé

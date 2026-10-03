@@ -1,0 +1,7 @@
+{
+  "checks": [
+    "guest: empty publications 1440/390, explicit refresh restores focus, pagehide clears identity and no stale name in heading",
+    "fan: empty publications 1440/390, explicit refresh restores focus, pagehide clears identity and no stale name in heading",
+    "empty catalogue has no hero and no anonymous card"
+  ]
+}

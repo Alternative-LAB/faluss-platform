@@ -195,3 +195,21 @@ Ni la liaison Me en réseau, ni Elementor, Safari physique, les droits en
 production ou une validation visuelle humaine finale ne sont prouvés ici.
 
 Voir aussi [le correctif navigation, images et session](../evidence/fans-ui-navigation-fix/README.md) : cases fixes, logo officiel, galerie privée distincte et compositeur sans perte de texte.
+
+
+## Repasse Explorer et profil public (brouillon)
+
+Voir la [recette comparative](../evidence/fans-discovery/README.md). Le hero utilise
+**provisoirement, pour tests et recettes**, la date d’arrivée du profil Fans parmi
+les résultats publics admissibles reçus. Cette règle n’est pas la politique
+éditoriale définitive : elle pourra être remplacée par des règles décidées plus
+tard. Un profil unique est répété sur trois slides selon la consigne de recette.
+Aucun lien avec un score HoF, des PF ou une mise en avant payante.
+
+Le plafond actuel de vingt résultats par catégorie empêche de garantir un tri
+chronologique sur un catalogue plus grand. Le remplacer nécessitera un contrat
+de liste adapté ; les API ne sont pas modifiées dans cette repasse.
+`FansUiDiscovery`, `fans-ui-v2.js` et les sélecteurs propres de
+`fans-discovery.css` portent ces deux compositions ; aucun style du shell ou de
+la sidebar n’est modifié. Les publications restent sur les profils et les
+accueils, avec leur vérification d’image existante.

@@ -14,6 +14,8 @@
   status.tabIndex = -1;
   const id = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
   const creator = root.dataset.creatorId ?? null;
+  const profilePresentation = root.dataset.presentation === 'profile';
+  const imageLabel = profilePresentation ? 'Voir l’image si disponible' : 'Vérifier l’image associée';
   let cursor = null;
   let controller = null;
   let generation = 0;
@@ -46,7 +48,7 @@
   // The server permits one derivative generation at a time. No automatic image requests or retries.
   function imageControl(card, item, current, signal) {
     const figure = node('figure', '', 'fu-publication-image');
-    const button = node('button', 'Vérifier l’image associée');
+    const button = node('button', imageLabel);
     button.type = 'button';
     button.dataset.imageLoad = '';
     const message = node('p', '', 'fu-footnote');
@@ -60,7 +62,7 @@
       if (shownUrl !== null) {
         output.replaceChildren();
         URL.revokeObjectURL(shownUrl); objectUrls.delete(shownUrl); shownUrl = null;
-        button.textContent = 'Vérifier l’image associée';
+        button.textContent = imageLabel;
         message.textContent = 'Image masquée.';
         return;
       }
@@ -100,7 +102,7 @@
         if (signal.aborted || current !== generation) return;
         if (picture.naturalWidth > 1280 || picture.naturalHeight > 1280) throw new Error('invalid');
         output.replaceChildren(picture);
-        message.textContent = 'Image de la publication. La description détaillée n’est pas encore fournie.';
+        message.textContent = profilePresentation ? '' : 'Image de la publication. La description détaillée n’est pas encore fournie.';
         shownUrl = objectUrl;
         button.textContent = 'Masquer l’image';
       } catch (error) {
@@ -173,14 +175,16 @@
       }
       results.replaceChildren(fragment);
       cursor = page.next_cursor;
-      status.textContent = page.items.length === 0 ? 'Aucune publication publique disponible.' : 'Publications chargées. Les textes restent soumis à la modération.';
+      status.textContent = profilePresentation
+        ? (page.items.length === 0 ? 'Les premières publications arrivent bientôt.' : (control ? 'Publications affichées.' : ''))
+        : (page.items.length === 0 ? 'Aucune publication publique disponible.' : 'Publications chargées. Les textes restent soumis à la modération.');
       focusReading();
       next.hidden = cursor === null;
       next.removeAttribute('aria-disabled');
     } catch (error) {
       if (signal.aborted || current !== generation) return;
       results.replaceChildren();
-      status.textContent = 'Publications indisponibles. Le service est fermé ou ne répond pas. Vous pouvez réessayer.';
+      status.textContent = profilePresentation ? 'Les publications ne sont pas disponibles pour le moment. Réessayez dans un instant.' : 'Publications indisponibles. Le service est fermé ou ne répond pas. Vous pouvez réessayer.';
       focusReading();
       next.hidden = true;
     }

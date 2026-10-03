@@ -1,0 +1,170 @@
+{
+  "browser": "155.0.8059.26",
+  "stage": "before",
+  "checks": [
+    "one/guest/explorer/1440: HTTP 200, no UUID, no overflow, real public projection",
+    "one/guest/profile/1440: HTTP 200, no UUID, no overflow, real public projection",
+    "one/guest/explorer/390: HTTP 200, no UUID, no overflow, real public projection",
+    "one/guest/profile/390: HTTP 200, no UUID, no overflow, real public projection",
+    "one/fan/explorer/1440: HTTP 200, no UUID, no overflow, real public projection",
+    "one/fan/profile/1440: HTTP 200, no UUID, no overflow, real public projection",
+    "one/fan/explorer/390: HTTP 200, no UUID, no overflow, real public projection",
+    "one/fan/profile/390: HTTP 200, no UUID, no overflow, real public projection",
+    "many/guest/explorer/1440: HTTP 200, no UUID, no overflow, real public projection",
+    "many/guest/profile/1440: HTTP 200, no UUID, no overflow, real public projection",
+    "many/guest/explorer/390: HTTP 200, no UUID, no overflow, real public projection",
+    "many/guest/profile/390: HTTP 200, no UUID, no overflow, real public projection",
+    "many/fan/explorer/1440: HTTP 200, no UUID, no overflow, real public projection",
+    "many/fan/profile/1440: HTTP 200, no UUID, no overflow, real public projection",
+    "many/fan/explorer/390: HTTP 200, no UUID, no overflow, real public projection",
+    "many/fan/profile/390: HTTP 200, no UUID, no overflow, real public projection",
+    "no-media/guest/explorer/1440: HTTP 200, no UUID, no overflow, real public projection",
+    "no-media/guest/profile/1440: HTTP 200, no UUID, no overflow, real public projection",
+    "no-media/guest/explorer/390: HTTP 200, no UUID, no overflow, real public projection",
+    "no-media/guest/profile/390: HTTP 200, no UUID, no overflow, real public projection",
+    "no-media/fan/explorer/1440: HTTP 200, no UUID, no overflow, real public projection",
+    "no-media/fan/profile/1440: HTTP 200, no UUID, no overflow, real public projection",
+    "no-media/fan/explorer/390: HTTP 200, no UUID, no overflow, real public projection",
+    "no-media/fan/profile/390: HTTP 200, no UUID, no overflow, real public projection"
+  ],
+  "sso": [
+    [
+      {
+        "method": "post",
+        "action": "/wp-admin/admin-post.php",
+        "fields": [
+          "action",
+          "faluss_fans_sso_nonce",
+          "faluss_fans_return_to"
+        ]
+      }
+    ],
+    [
+      {
+        "method": "post",
+        "action": "/wp-admin/admin-post.php",
+        "fields": [
+          "action",
+          "faluss_fans_sso_nonce",
+          "faluss_fans_return_to"
+        ]
+      }
+    ],
+    [
+      {
+        "method": "post",
+        "action": "/wp-admin/admin-post.php",
+        "fields": [
+          "action",
+          "faluss_fans_sso_nonce",
+          "faluss_fans_return_to"
+        ]
+      }
+    ],
+    [
+      {
+        "method": "post",
+        "action": "/wp-admin/admin-post.php",
+        "fields": [
+          "action",
+          "faluss_fans_sso_nonce",
+          "faluss_fans_return_to"
+        ]
+      }
+    ],
+    [
+      {
+        "method": "post",
+        "action": "/wp-admin/admin-post.php",
+        "fields": [
+          "action",
+          "faluss_fans_sso_nonce",
+          "faluss_fans_return_to"
+        ]
+      }
+    ],
+    [
+      {
+        "method": "post",
+        "action": "/wp-admin/admin-post.php",
+        "fields": [
+          "action",
+          "faluss_fans_sso_nonce",
+          "faluss_fans_return_to"
+        ]
+      }
+    ],
+    [
+      {
+        "method": "post",
+        "action": "/wp-admin/admin-post.php",
+        "fields": [
+          "action",
+          "faluss_fans_sso_nonce",
+          "faluss_fans_return_to"
+        ]
+      }
+    ],
+    [
+      {
+        "method": "post",
+        "action": "/wp-admin/admin-post.php",
+        "fields": [
+          "action",
+          "faluss_fans_sso_nonce",
+          "faluss_fans_return_to"
+        ]
+      }
+    ],
+    [
+      {
+        "method": "post",
+        "action": "/wp-admin/admin-post.php",
+        "fields": [
+          "action",
+          "faluss_fans_sso_nonce",
+          "faluss_fans_return_to"
+        ]
+      }
+    ],
+    [
+      {
+        "method": "post",
+        "action": "/wp-admin/admin-post.php",
+        "fields": [
+          "action",
+          "faluss_fans_sso_nonce",
+          "faluss_fans_return_to"
+        ]
+      }
+    ],
+    [
+      {
+        "method": "post",
+        "action": "/wp-admin/admin-post.php",
+        "fields": [
+          "action",
+          "faluss_fans_sso_nonce",
+          "faluss_fans_return_to"
+        ]
+      }
+    ],
+    [
+      {
+        "method": "post",
+        "action": "/wp-admin/admin-post.php",
+        "fields": [
+          "action",
+          "faluss_fans_sso_nonce",
+          "faluss_fans_return_to"
+        ]
+      }
+    ]
+  ],
+  "untouched": {
+    "/app/fan/hof": "5821e3b6252e855a65e58bc0a2154a724129947942b3ffbae5fa41659fb30a46",
+    "/app/fan/accueil": "9f13fee613dba6297834f5cec11bac33df04fe9b880c48fa596bc2b66991f193",
+    "/app/creator/progression": "e05cb6dff38d792036c1f43e93a82c9f7f0fd18b4191b132edaece09acbd3263",
+    "/app/creator/mon-profil": "2de942d9066796679679c772832f8fa4cd1281c5ac65b6c0ce495088ad564e33"
+  }
+}

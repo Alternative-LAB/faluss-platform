@@ -1,0 +1,7 @@
+{
+  "checks": [
+    "Guest/Fan/forged nonce cannot submit; pending and rejected edits keep exactly the last approved public identity in API/Explorer/profile",
+    "Creator/admin retain public reading; unchanged private route denials; suspended profile returns page HTTP 404 and rejects portrait",
+    "Withdrawn presentation removes hero/name/bio/portrait immediately; active profile remains HTTP 200 as before, without inventing an identity"
+  ]
+}
