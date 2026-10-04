@@ -1,8 +1,10 @@
-# Messagerie Fans — repasse V2 (brouillon)
+# Messagerie Fans — repasse V2
 
 Base : `7821460193ef806b8b5eb30e5864cd98e6f25e6d` (0.12.2). Référence : planche
-FANS-Messagerie-V2 fournie par l’utilisateur. Validation visuelle attendue avant
-Ready for review, fusion ou publication. Aucun site consulté ou modifié.
+FANS-Messagerie-V2 fournie par l’utilisateur. Lot initialement demandé en brouillon ; l’utilisateur a ensuite expressément
+autorisé sa fusion après revue et CI vertes, puis sa publication par les workflows
+habituels. La recette cible et l’installation restent à l’utilisateur. Aucun site
+consulté ou modifié.
 
 ## Composition et périmètre
 

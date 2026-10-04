@@ -8,7 +8,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Modifié
 
-- Messagerie Fans : panneau intérieur à deux colonnes, conversations textuelles, demandes et saisie intégrées ; navigation liste/échange sur mobile, portraits publics approuvés et outils de sécurité secondaires. Sidebar globale, API, permissions, quotas et rétention inchangés. Repasse en brouillon, validation visuelle attendue.
+- Messagerie Fans : panneau intérieur à deux colonnes, conversations textuelles, demandes et saisie intégrées ; navigation liste/échange sur mobile, portraits publics approuvés et outils de sécurité secondaires. Sidebar globale, API, permissions, quotas et rétention inchangés.
 
 ## [0.12.2] - 2026-10-03
 
