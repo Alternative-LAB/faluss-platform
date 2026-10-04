@@ -1,0 +1,10 @@
+{
+  "passed": 5,
+  "checks": [
+    "Transport errors back off from 24 to 48 seconds",
+    "Repeated online events never overlap notification requests",
+    "Successful real read clears transport error",
+    "Bell outside center uses count-only private read",
+    "Bell count remains server-provided"
+  ]
+}

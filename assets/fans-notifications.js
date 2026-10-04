@@ -1,7 +1,8 @@
 (() => {
   'use strict';
-  const bar=document.querySelector('[data-notifications-endpoint]');if(!bar)return;
-  const endpoint=new URL(bar.dataset.notificationsEndpoint,location.href);if(endpoint.origin!==location.origin)return;
+  const source=document.querySelector('[data-notifications-endpoint]');if(!source)return;
+  const bar=document.querySelector('.fu-notifications-bar');
+  const endpoint=new URL(source.dataset.notificationsEndpoint,location.href);if(endpoint.origin!==location.origin)return;
   const center=document.querySelector('.fu-notifications'),list=center?.querySelector('.fu-notification-list');
   let timer=null,controller=null,stopped=false,failures=0,again=false;
   const interval=center?12000:20000;
@@ -34,19 +35,22 @@
     if(controller){again=true;return;}again=false;controller=new AbortController();
     const timeout=setTimeout(()=>controller?.abort(),10000);
     try{
-      const url=new URL(endpoint);url.searchParams.set('role',bar.dataset.role);url.searchParams.set('part',center?'center':'count');
+      const url=new URL(endpoint);url.searchParams.set('role',source.dataset.role);url.searchParams.set('part',center?'center':'count');
       if(center){url.searchParams.set('filter',center.dataset.filter);url.searchParams.set('cursor',center.dataset.cursor);}
-      const response=await fetch(url,{credentials:'same-origin',cache:'no-store',redirect:'error',signal:controller.signal,headers:{'X-WP-Nonce':bar.dataset.notificationsNonce}});
+      const response=await fetch(url,{credentials:'same-origin',cache:'no-store',redirect:'error',signal:controller.signal,headers:{'X-WP-Nonce':source.dataset.notificationsNonce}});
       if(response.status===401||response.status===403){
-        stop();list?.replaceChildren();bar.querySelector('.fu-notification-count')?.remove();
+        stop();list?.replaceChildren();bar?.querySelector('.fu-notification-count')?.remove();
+        center?.querySelector('[data-unread-count]')?.replaceChildren('—');
         center?.querySelector('.fu-notification-pagination')?.replaceChildren();status('Session expirée ou accès indisponible. Reconnectez-vous.');return;
       }
       if(!response.ok)throw new Error('notifications');
       const data=await response.json();if(stopped||document.hidden||!navigator.onLine)return;
       if(!Number.isInteger(data.unread)||data.unread<0)throw new Error('notifications');
-      let count=bar.querySelector('.fu-notification-count');
-      if(!count){bar.querySelector('.fu-footnote')?.remove();count=document.createElement('span');count.className='fu-notification-count';bar.querySelector('.fu-bell').append(count);}
-      count.textContent=String(data.unread);count.setAttribute('aria-label',`${data.unread} non lues`);
+      if(bar){
+        let count=bar.querySelector('.fu-notification-count');
+        if(!count){bar.querySelector('.fu-footnote')?.remove();count=document.createElement('span');count.className='fu-notification-count';bar.querySelector('.fu-bell').append(count);}
+        count.textContent=String(data.unread);count.setAttribute('aria-label',`${data.unread} non lues`);
+      }
       center?.querySelector('[data-unread-count]')?.replaceChildren(String(data.unread));
       if(list){
         if(typeof data.html!=='string'||typeof data.pagination!=='string')throw new Error('notifications');

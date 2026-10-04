@@ -17,6 +17,7 @@ namespace Faluss\Platform\Fans\Ui {
     function status_header(int $status): void {}
     function wp_head(): void {}
     function wp_footer(): void {}
+    function add_query_arg(array|string $key, string $value, ?string $url=null): string { return ($url??$value).'?'.http_build_query(is_array($key)?$key:[$key=>$value]); }
     function wp_create_nonce(string $action): string { return 'fixture-nonce'; }
     function get_query_var(string $name): mixed { return $GLOBALS['fans_ui_query'][$name] ?? ''; }
     function current_user_can(string $capability): bool { return $capability === 'manage_options' && ($GLOBALS['fans_ui_admin'] ?? false); }
@@ -174,6 +175,23 @@ namespace Faluss\Platform\Fans\Ui {
             self::assertStringNotContainsString('aria-label="Classement Fans"', $this->render('creator', 'progression'));
         }
 
+        public function testNotificationChromeIsRemovedOnlyFromItsOwnRoute(): void
+        {
+            foreach (['fan','creator'] as $role) {
+                $html=$this->render($role,'notifications');
+                self::assertStringContainsString('<h1 class="fu-notifications-title">Notifications</h1>',$html);
+                self::assertStringContainsString('fu-notifications-page',$html);
+                foreach (['class="fu-notifications-bar"','<header','class="fu-footer"','Les décisions et échanges qui vous concernent.'] as $removed) {
+                    self::assertStringNotContainsString($removed,$html);
+                }
+                $other=$this->render($role,'hof');
+                self::assertStringContainsString('class="fu-notifications-bar"',$other);
+                self::assertStringContainsString('<header',$other);
+                self::assertStringContainsString('class="fu-footer"',$other);
+                self::assertStringNotContainsString('fu-notifications-page',$other);
+            }
+        }
+
         public function testToolbarPolicyIsNoLongerOwnedByOptionalUiRoutes(): void
         {
             FansUiRoutes::register();
@@ -202,7 +220,9 @@ namespace Faluss\Platform\Fans\Ui {
         private function render(string $role, string $view): string
         {
             ob_start();
-            FansUiView::render($role, $view, null);
+            $notifications=null;
+            if($view==='notifications'){$notifications=new FansUiNotifications();$notifications->page=['items'=>[],'next_cursor'=>null,'unread'=>0];}
+            FansUiView::render($role, $view, null, notifications:$notifications);
             return (string) ob_get_clean();
         }
     }

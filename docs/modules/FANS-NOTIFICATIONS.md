@@ -17,6 +17,15 @@ historique lu/non lu reste compatible, sans commandes visibles dans les lignes.
 Aucun second état « ouverte ». Les lignes simples font 56 px, sans bordure colorée,
 avec fond gris discret seulement pour les non lues et focus clavier visible.
 
+Sur ce seul écran, la barre Notifications/Déconnexion, l’en-tête visuel et le pied
+de page explicatif ne sont pas rendus. Un h1 « Notifications » reste accessible
+aux lecteurs d’écran. Les filtres commencent en haut à gauche ; la liste utilise
+la largeur disponible et le défilement naturel du document, sans panneau imbriqué.
+Le seul lien de pagination inférieur est « Page suivante », présent uniquement
+si le serveur fournit un curseur. « Toutes » revient à la première page. La
+configuration de lecture privée est portée par le centre, indépendamment de la
+cloche conservée sur les autres pages.
+
 Les nouvelles décisions sont capturées même si le flag UI est fermé. Il ne
 s’agit pas d’un service de push. Le centre relit sa page toutes les 12 secondes ;
 la cloche seule toutes les 20 secondes. Retour visible, focus ou reconnexion réseau
@@ -38,7 +47,7 @@ renouveler la session, en gardant une page masquée voilée jusqu’à revalidat
 
 Le filtre et le curseur restent inchangés. En première page, les nouveaux événements
 arrivent en tête (ID monotone décroissant). Sur une page ancienne, le compteur
-actualisé et « Revenir au début » donnent accès aux nouveautés sans déplacer la
+actualisé dans « Non lues » et le filtre « Toutes » donnent accès aux nouveautés sans déplacer la
 pagination. Les lignes inchangées gardent leur nœud ; une ligne visible sert d’ancre
 de défilement. Le focus reste sur la même notification, ou la suivante/le filtre si
 elle quitte le filtre non lu ou devient inaccessible. Aucun défilement forcé vers

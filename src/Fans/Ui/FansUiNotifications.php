@@ -72,7 +72,7 @@ final class FansUiNotifications
     public static function render(self $v,string $role): void
     {
         $url=FansUiRoutes::url($role,'notifications');
-        echo '<section class="fu-content fu-notifications" data-filter="'.esc_attr($v->filter).'" data-cursor="'.esc_attr($v->cursor).'">';
+        echo '<section class="fu-content fu-notifications" data-notifications-endpoint="'.esc_url(rest_url('faluss-fans/v1/notification-view')).'" data-notifications-nonce="'.esc_attr(wp_create_nonce('wp_rest')).'" data-role="'.esc_attr($role).'" data-filter="'.esc_attr($v->filter).'" data-cursor="'.esc_attr($v->cursor).'">';
         echo '<p class="fu-notification-status" role="status">'.($v->status>=400?'Ouverture ou lecture indisponible. Réessayez.':($v->changed?'État de lecture enregistré.':'')).'</p>';
         if($v->page instanceof \WP_Error){echo '</section>';return;}
         echo '<nav aria-label="Filtrer les notifications"><a class="fu-link" '.($v->filter==='all'?'aria-current="page" ':'').'href="'.esc_url($url).'">Toutes</a><a class="fu-link" '.($v->filter==='unread'?'aria-current="page" ':'').'href="'.esc_url(add_query_arg('filter','unread',$url)).'">Non lues (<span data-unread-count>'.(int)$v->page['unread'].'</span>)</a></nav>';
@@ -98,7 +98,6 @@ final class FansUiNotifications
     public static function pagination(string $filter,?string $next,string $role): void
     {
         $url=FansUiRoutes::url($role,'notifications');
-        echo '<a class="fu-link" href="'.esc_url(add_query_arg('filter',$filter,$url)).'">Revenir au début</a>';
         if($next!==null){echo '<a class="fu-link" href="'.esc_url(add_query_arg(['cursor'=>$next,'filter'=>$filter],$url)).'">Page suivante →</a>';}
     }
 }
