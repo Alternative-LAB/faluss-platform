@@ -102,7 +102,7 @@ aucune présentation publique approuvée n’existe, pas d’aperçu ni de non-l
 
 ## Résultats vérifiés
 
-- **114 contrôles navigateur** dans `browser.json`, plus **4 contrôles de navigation**
+- **114 contrôles navigateur** dans `browser.json`, plus **5 contrôles de navigation et résilience**
   dans [navigation.json](navigation.json) : geste tactile horizontal réel via CDP,
   huit destinations Créateur, focus visible, retour d’une conversation inaccessible,
   seuil mobile/ordinateur 700/701 px.

@@ -3,6 +3,7 @@
     "unavailable conversation keeps a visible working return",
     "native horizontal touch swipe reveals overflow tabs",
     "all eight destinations retained and keyboard focus revealed",
-    "mobile breakpoint switches cleanly to unchanged desktop sidebar"
+    "mobile breakpoint switches cleanly to unchanged desktop sidebar",
+    "transient session transport failure stays veiled and automatically revalidates"
   ]
 }

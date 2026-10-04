@@ -20,6 +20,9 @@ const {chromium}=require('playwright'),fs=require('fs'),assert=require('node:ass
  await p.screenshot({path:out+'/creator-navigation-touch-320.png'});
  await p.locator('.fu-nav__item').last().focus();assert.ok(await p.locator('.fu-nav__item').last().evaluate(n=>n.getBoundingClientRect().right<=innerWidth));checks.push('all eight destinations retained and keyboard focus revealed');
  for(const width of [700,701]){await p.setViewportSize({width,height:844});await p.waitForFunction(width=>Math.abs(innerWidth-width)<2,width);const rows=await p.locator('.fu-nav').evaluate(n=>getComputedStyle(n).flexDirection);assert.equal(rows,width===700?'row':'column');}checks.push('mobile breakpoint switches cleanly to unchanged desktop sidebar');
+ await p.route('**/faluss-fans/v1/session',r=>r.abort('connectionfailed'));
+ await p.evaluate(()=>window.dispatchEvent(new Event('focus')));await p.waitForFunction(()=>document.body.hidden);
+ await p.unroute('**/faluss-fans/v1/session');await p.waitForFunction(()=>!document.body.hidden,{},{timeout:10000});checks.push('transient session transport failure stays veiled and automatically revalidates');
  fs.writeFileSync(out+'/navigation.json',JSON.stringify({checks},null,2));console.log('PASS '+checks.length+' navigation checks');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e.stack);process.exit(1);});
