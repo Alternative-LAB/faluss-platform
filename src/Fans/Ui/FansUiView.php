@@ -99,13 +99,15 @@ final class FansUiView
 <title><?php echo esc_html($title); ?> · Faluss Fans</title>
 <?php wp_head(); ?>
 </head>
-<body class="faluss-fans-ui-page<?php echo $messages!==null?' fu-messages-page'.($messages->available?' fu-messages-ready':''):''; ?>" <?php if ($sessionExpiry !== null): ?>data-fans-session="<?php echo esc_url(rest_url('faluss-fans/v1/session')); ?>" data-session-nonce="<?php echo esc_attr(wp_create_nonce('wp_rest')); ?>" data-session-expires="<?php echo $sessionExpiry; ?>" data-session-now="<?php echo time(); ?>" data-session-public="<?php echo esc_attr((string) parse_url(home_url('/app/fan/explorer'), PHP_URL_PATH)); ?>"<?php endif; ?>>
+<body class="faluss-fans-ui-page<?php echo $view==='notifications'?' fu-notifications-page':''; ?><?php echo $messages!==null?' fu-messages-page'.($messages->available?' fu-messages-ready':''):''; ?>" <?php if ($sessionExpiry !== null): ?>data-fans-session="<?php echo esc_url(rest_url('faluss-fans/v1/session')); ?>" data-session-nonce="<?php echo esc_attr(wp_create_nonce('wp_rest')); ?>" data-session-expires="<?php echo $sessionExpiry; ?>" data-session-now="<?php echo time(); ?>" data-session-public="<?php echo esc_attr((string) parse_url(home_url('/app/fan/explorer'), PHP_URL_PATH)); ?>"<?php endif; ?>>
 <a class="fu-skip" href="#fu-main">Aller au contenu</a>
 <div class="fu-app" data-fans-role="<?php echo esc_attr($role); ?>">
     <?php self::navigation($role, $page[2]); ?>
     <main class="fu-main" id="fu-main" tabindex="-1">
-        <?php FansUiNotifications::bell($role); ?>
-        <?php if (!$discovery): ?>
+        <?php if ($view !== 'notifications') { FansUiNotifications::bell($role); } ?>
+        <?php if ($view === 'notifications'): ?>
+        <h1 class="fu-notifications-title">Notifications</h1>
+        <?php elseif (!$discovery): ?>
         <header class="<?php echo in_array($view, ['accueil', 'explorer', 'hof'], true) ? 'fu-banner' : 'fu-heading'; ?>">
             <div class="fu-banner__texture" aria-hidden="true"></div>
             <p class="fu-eyebrow"><?php echo esc_html($page[0]); ?></p>
@@ -162,7 +164,7 @@ final class FansUiView
             </section>
         <?php endif; ?>
         <?php if ($admission !== null) { FansUiReading::admission($admission); } ?>
-        <footer class="fu-footer">Faluss Fans · Certaines fonctionnalités arrivent progressivement.</footer>
+        <?php if ($view !== 'notifications'): ?><footer class="fu-footer">Faluss Fans · Certaines fonctionnalités arrivent progressivement.</footer><?php endif; ?>
     </main>
 </div>
 <?php if ($role === 'creator' && $composer !== null) { FansUiCreate::render($composer); } ?>

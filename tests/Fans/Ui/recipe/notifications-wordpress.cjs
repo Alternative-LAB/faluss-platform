@@ -16,7 +16,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{execFileSync}=
  const api=async(who,path,data,expected=200)=>{const res=await clients[who].fetch('/wp-json/faluss-fans/v1/'+path,{method:data?'POST':'GET',...(data?{data}:{})});assert.equal(res.status(),expected,path);return res.json();};
  const role=who=>who==='other'?'creator':'fan';
  const center=who=>'/app/'+role(who)+'/notifications';
- const go=async(who,query='')=>{const p=pages[who];assert.equal((await p.goto(base+center(who)+query)).status(),200);await p.evaluate(()=>document.fonts.ready);await p.waitForResponse(r=>r.url().includes('/notification-view')).catch(()=>{});return p;};
+ const go=async(who,query='')=>{const p=pages[who],read=p.waitForResponse(r=>r.url().includes('/notification-view'));assert.equal((await p.goto(base+center(who)+query)).status(),200);await read;await p.evaluate(()=>document.fonts.ready);return p;};
  const local=async p=>p.locator('a[href],form[action]').evaluateAll((els,base)=>els.forEach(el=>{const attr=el.tagName==='FORM'?'action':'href',u=new URL(el.getAttribute(attr),location.href);if(u.origin==='https://fans.example.test')el.setAttribute(attr,base+u.pathname+u.search+u.hash);}),base);
  const rows=who=>JSON.parse(cli('wp_set_current_user('+fixture.sessions[who].id+');echo wp_json_encode(\\Faluss\\Platform\\Fans\\Notifications\\NotificationService::listing());'));
  const mark=async(who,id,unread)=>{const res=await clients[who].get(center(who));const nonce=(await res.text()).match(/name="fans_notifications_nonce" value="([^"]+)"/)[1];return clients[who].post(center(who),{form:{fans_notifications_nonce:nonce,notification:String(id),unread:String(unread)},maxRedirects:0});};
@@ -36,10 +36,10 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{execFileSync}=
   const p=await go('other'),q=await go('fan');check('empty center remains usable',await p.locator('.fu-notification-empty').count()===1);
   let navigations=0;p.on('framenavigated',f=>{if(f===p.mainFrame())navigations++;});
   const thread=await api('fan','messages/requests',{creator_id:fixture.profiles.other,body:'Demande synthétique de recette.',key:crypto.randomUUID()});
-  await p.locator('.fu-notification').first().waitFor({timeout:18000});check('other SSO session request appears without reload',navigations===0&&Number(await p.locator('.fu-notification-count').innerText())===1);
+  await p.locator('.fu-notification').first().waitFor({timeout:18000});check('other SSO session request appears without reload',navigations===0&&Number(await p.locator('[data-unread-count]').innerText())===1);
   const notification=rows('other').items[0].id;
   await api('other','messages/'+thread.thread_id+'/decision',{revision:1,action:'accept'});
-  await q.locator('.fu-notification').first().waitFor({timeout:18000});check('acceptance updates Fan bell and list',Number(await q.locator('.fu-notification-count').innerText())===1);
+  await q.locator('.fu-notification').first().waitFor({timeout:18000});check('acceptance updates Fan filter count and list',Number(await q.locator('[data-unread-count]').innerText())===1);
   // Generate sufficient real domain events for pagination in both roles.
   for(let i=0;i<22;i++){
    await api('other','messages/'+thread.thread_id+'/send',{body:'Texte synthétique de recette '+i,key:crypto.randomUUID()});
@@ -55,6 +55,10 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{execFileSync}=
     check(who+' '+width+' compact tactile row',metrics.height>=48&&metrics.height<=60&&metrics.border==='0px');
     check(who+' '+width+' read unread states',await page.locator('[data-unread=true]').count()>0&&await page.locator('[data-unread=false]').count()>0);
     check(who+' '+width+' one interactive target per row',await page.locator('.fu-notification').evaluateAll(els=>els.every(el=>el.querySelectorAll('a,button,input:not([type=hidden])').length===1)));
+    check(who+' '+width+' no top bar, visual header or footer',await page.locator('.fu-notifications-bar,.fu-heading,.fu-footer').count()===0);
+    check(who+' '+width+' accessible title without layout space',await page.getByRole('heading',{name:'Notifications',exact:true}).evaluate(el=>el.getBoundingClientRect().height===1&&getComputedStyle(el).clipPath==='inset(50%)'));
+    check(who+' '+width+' filters start at top and list fills width',await page.evaluate(()=>{const main=document.querySelector('.fu-main').getBoundingClientRect(),filters=document.querySelector('nav[aria-label="Filtrer les notifications"]').getBoundingClientRect(),list=document.querySelector('.fu-notification-list').getBoundingClientRect();return filters.top<=16&&filters.left-main.left<=16&&main.right-list.right<=16;}));
+    check(who+' '+width+' no lower restart control or nested scrolling',await page.getByText('Revenir au début',{exact:true}).count()===0&&await page.locator('.fu-notification-list').evaluate(el=>getComputedStyle(el).overflowY==='visible'));
     if([1440,834,390].includes(width))await page.screenshot({path:out+'/'+role(who)+'-loaded-'+width+'.png'});
    }
   }
@@ -67,6 +71,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{execFileSync}=
   const next=rows('other').next_cursor;await go('other','?cursor='+next);const oldIds=await p.locator('.fu-notification').evaluateAll(els=>els.map(el=>el.dataset.id));
   await api('fan','messages/'+thread.thread_id+'/send',{body:'Arrivée pendant la page suivante.',key:crypto.randomUUID()});await p.waitForTimeout(13000);
   check('pagination stays on older page with no duplicate or jump',new URL(p.url()).searchParams.get('cursor')===next&&JSON.stringify(oldIds)===JSON.stringify(await p.locator('.fu-notification').evaluateAll(els=>els.map(el=>el.dataset.id))));
+  await local(p);await Promise.all([p.waitForURL(base+center('other')),p.getByRole('link',{name:'Toutes',exact:true}).click()]);check('Toutes returns from older page to first page',!new URL(p.url()).searchParams.has('cursor'));
   await go('other','?filter=unread');check('unread filter only unread rows',await p.locator('[data-unread=false]').count()===0);
   const first=p.locator('.fu-notification').first(),firstId=await first.getAttribute('data-id');await mark('other',firstId,0);await p.locator('[data-id="'+firstId+'"]').waitFor({state:'detached',timeout:18000});check('filter preserved while externally read row leaves',new URL(p.url()).searchParams.get('filter')==='unread');
   let polls=0;p.on('request',r=>{if(r.url().includes('/notification-view'))polls++;});await p.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,get:()=>true});document.dispatchEvent(new Event('visibilitychange'));});let n=polls;await p.waitForTimeout(14000);check('hidden suspends notification reads',polls===n);
@@ -78,9 +83,9 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{execFileSync}=
   res=await clients.other.post(center('other'),{form:{action:'open',notification:openId,fans_notifications_nonce:'wrong'},maxRedirects:0});check('forged open denied without marking',res.status()===403&&count('other')===before);
   res=await clients.other.post(center('other'),{form:{action:'open',notification:openId,fans_notifications_nonce:nonce,destination:'https://invalid.test'},maxRedirects:0});check('client supplied redirect refused',res.status()===400&&count('other')===before);
   const foreignNonce=(await (await clients.fan.get(center('fan'))).text()).match(/name="fans_notifications_nonce" value="([^"]+)"/)[1];res=await clients.fan.post(center('fan'),{form:{action:'open',notification:openId,fans_notifications_nonce:foreignNonce},maxRedirects:0});check('foreign notification cannot open',res.status()===404);
-  await local(p);await row.locator('button').focus();await Promise.all([p.waitForURL('**/messages?thread=*'),row.locator('button').press('Enter')]);check('keyboard POST marks read and redirects authorized target',count('other')===before-1);
+  await local(p);await row.locator('button').focus();await Promise.all([p.waitForURL('**/messages?thread=*'),row.locator('button').press('Enter')]);check('keyboard POST marks read and redirects authorized target',count('other')===before-1);check('other screen retains its bell and logout',await p.locator('.fu-notifications-bar .fu-bell').count()===1&&await p.locator('[data-fans-logout]').count()===1);
   // No-JavaScript native fallback.
-  const nc=await browser.newContext({javaScriptEnabled:false});await nc.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());await nc.addCookies(Object.entries(fixture.sessions.fan.cookies).map(([name,value])=>({name,value,url:base})));const np=await nc.newPage();await np.goto(base+center('fan'));await local(np);before=count('fan');await Promise.all([np.waitForURL('**/messages?thread=*'),np.locator('.fu-notification[data-unread=true] button').first().click()]);check('without JavaScript native POST and redirect work',count('fan')===before-1);await nc.close();
+  const nc=await browser.newContext({javaScriptEnabled:false});await nc.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());await nc.addCookies(Object.entries(fixture.sessions.fan.cookies).map(([name,value])=>({name,value,url:base})));const np=await nc.newPage();await np.goto(base+center('fan'));await local(np);await Promise.all([np.waitForURL('**/notifications?cursor=*'),np.getByRole('link',{name:'Page suivante →'}).click()]);check('without JavaScript next-page server cursor works',new URL(np.url()).searchParams.has('cursor'));await local(np);await Promise.all([np.waitForURL(base+center('fan')),np.getByRole('link',{name:'Toutes',exact:true}).click()]);await local(np);before=count('fan');await Promise.all([np.waitForURL('**/messages?thread=*'),np.locator('.fu-notification[data-unread=true] button').first().click()]);check('without JavaScript native POST and redirect work',count('fan')===before-1);await nc.close();
   await go('other');before=count('other');const stale=p.locator('.fu-notification[data-unread=true]').first(),staleId=await stale.getAttribute('data-id'),staleNonce=await stale.locator('[name=fans_notifications_nonce]').inputValue();
   // Actual retention makes the object unavailable; keep notification metadata solely to exercise a stale row.
   cli("global $wpdb;$wpdb->query(\"UPDATE wp_faluss_fans_dm_threads SET last_sent_at='2020-01-01 00:00:00'\");");

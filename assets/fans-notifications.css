@@ -1,3 +1,11 @@
+/* Only the notification route uses this content-first layout; scrolling belongs to the document. */
+.fu-notifications-page .fu-main{max-width:none;padding:16px;min-height:100vh;min-height:100dvh}
+.fu-notifications-page .fu-notifications{padding:0}
+.fu-notifications-page .fu-notifications-title{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.fu-notifications-page .fu-notifications nav{margin:0 0 8px}
+.fu-notifications-page .fu-notification-pagination{margin:8px 0 0}
+.fu-notifications-page .fu-notification-pagination:empty{display:none}
+@media(max-width:700px){.fu-notifications-page .fu-main{padding:8px;min-height:calc(100vh - var(--fu-mobile-nav-height));min-height:calc(100dvh - var(--fu-mobile-nav-height))}}
 /* Notification center only. The common shell, bell and root navigation retain their layout. */
 .fu-notifications nav{display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin:12px 0}
 .fu-notifications nav a{display:inline-flex;align-items:center;min-height:44px}

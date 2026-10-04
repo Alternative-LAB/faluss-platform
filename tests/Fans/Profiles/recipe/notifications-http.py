@@ -18,7 +18,7 @@ check('additive schema prepared before real decisions',cli('echo \\Faluss\\Platf
 check('real account decision delivered',any(r['kind']=='profile_active' for r in rows()['items']))
 code,body,headers=center()
 check('actual page private cache',code==200 and 'no-store' in headers.get('Cache-Control','') and 'no-store' in headers.get('CDN-Cache-Control',''))
-check('bell exact unread count',('aria-label="'+str(count())+' non lues"') in body)
+check('filter exact unread count without duplicated bell',('data-unread-count>'+str(count())+'</span>') in body and 'class="fu-notifications-bar"' not in body)
 check('no private account identity in notifications',session['profiles']['member'] not in re.sub(r'href="[^"]+"','',body))
 check('empty linked Fan center works',center('fan')[0]==200 and rows('fan')['items']==[])
 item=rows()['items'][0]['id'];before=count()
