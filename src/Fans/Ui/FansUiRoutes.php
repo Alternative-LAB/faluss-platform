@@ -23,6 +23,7 @@ final class FansUiRoutes
 
     public static function register(): void
     {
+        add_action('rest_api_init', [FansUiMessageRefresh::class, 'routes']);
         add_action('init', [self::class, 'rewrite'], 20);
         add_action('init', [self::class, 'upgradeRoutes'], 21);
         add_filter('query_vars', [self::class, 'queryVars']);

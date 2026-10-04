@@ -3,25 +3,30 @@
   const body=document.body,endpoint=body.dataset.fansSession;if(!endpoint)return;
   const publicUrl=new URL(body.dataset.sessionPublic,location.origin);if(publicUrl.origin!==location.origin)return;
   const channel='faluss-fans-session-closed',broadcast=typeof BroadcastChannel==='function'?new BroadcastChannel(channel):null;
-  let leaving=false,checking=false;
+  let leaving=false,checking=false,retry=null,retryDelay=4000;
   function leave(closed=false){
-    if(leaving)return;leaving=true;document.dispatchEvent(new Event('fans-session-ended'));body.replaceChildren();body.hidden=true;
+    if(leaving)return;leaving=true;clearTimeout(retry);document.dispatchEvent(new Event('fans-session-ended'));body.replaceChildren();body.hidden=true;
     if(closed)publicUrl.searchParams.set('faluss_fans_session','closed');location.replace(publicUrl.href);
   }
   function notify(){broadcast?.postMessage('closed');try{localStorage.setItem(channel,String(Date.now())+Math.random());}catch(error){/* Channel and server validation still apply. */}}
   broadcast?.addEventListener('message',event=>{if(event.data==='closed')leave(true);});
   window.addEventListener('storage',event=>{if(event.key===channel&&event.newValue)leave(true);});
   async function check(){
-    if(leaving||checking)return;checking=true;
-    try{const response=await fetch(endpoint,{credentials:'same-origin',cache:'no-store',redirect:'error',headers:{'X-WP-Nonce':body.dataset.sessionNonce}});const data=await response.json();if(!response.ok||data.active!==true){leave();return;}body.hidden=false;}
-    catch(error){leave();}finally{checking=false;}
+    if(leaving||checking)return;clearTimeout(retry);
+    // Messaging can wait through a network outage, but a hidden page stays veiled until revalidated.
+    const messaging=body.classList.contains('fu-messages-ready');
+    if(messaging&&(!navigator.onLine||document.hidden))return;checking=true;
+    const controller=messaging?new AbortController():null,timeout=controller?setTimeout(()=>controller.abort(),12000):null;
+    try{const response=await fetch(endpoint,{credentials:'same-origin',cache:'no-store',redirect:'error',...(controller?{signal:controller.signal}:{}),headers:{'X-WP-Nonce':body.dataset.sessionNonce}});const data=await response.json();if(!response.ok||data.active!==true){leave();return;}retryDelay=4000;body.hidden=false;}
+    catch(error){if(messaging){body.hidden=true;retry=setTimeout(check,retryDelay);retryDelay=Math.min(60000,retryDelay*2);}else leave();}finally{clearTimeout(timeout);checking=false;}
   }
   // The deadline comes from the verified server token, not a visit-based renewal or the client's wall clock.
   const remaining=Math.max(0,(Number(body.dataset.sessionExpires)-Number(body.dataset.sessionNow))*1000);
   setTimeout(()=>leave(),remaining);
   document.addEventListener('visibilitychange',()=>{if(document.hidden)body.hidden=true;else check();});
   window.addEventListener('focus',check);
-  window.addEventListener('pagehide',()=>{document.dispatchEvent(new Event('fans-session-ended'));body.replaceChildren();body.hidden=true;});
+  window.addEventListener('online',check);
+  window.addEventListener('pagehide',()=>{clearTimeout(retry);document.dispatchEvent(new Event('fans-session-ended'));body.replaceChildren();body.hidden=true;});
   window.addEventListener('pageshow',event=>{if(event.persisted){body.hidden=true;location.reload();}});
   body.querySelector('[data-fans-logout]')?.addEventListener('submit',async event=>{
     event.preventDefault();const form=event.target,button=form.querySelector('button');if(button.disabled)return;button.disabled=true;
