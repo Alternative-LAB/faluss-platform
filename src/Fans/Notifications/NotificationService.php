@@ -31,6 +31,15 @@ final class NotificationService
             return ['items'=>$rows,'next_cursor'=>$more?(string)$rows[19]['id']:null,'unread'=>$count];
         }catch(\Throwable){$wpdb->query('ROLLBACK');return self::error();}
     }
+    /** @return array<string,mixed>|\WP_Error */
+    public static function item(string $id): array|\WP_Error
+    {
+        if(!self::allowed()){return self::error(403);}
+        if(preg_match('/^[1-9][0-9]{0,17}$/D',$id)!==1){return self::error(400);}global $wpdb;
+        $row=$wpdb->get_row($wpdb->prepare('SELECT id,kind,object_id,reason,unread,created_at FROM `'.NotificationSchema::table().'` WHERE id=%d AND recipient=%d',(int)$id,get_current_user_id()),'ARRAY_A');
+        if($wpdb->last_error!==''){return self::error();}
+        return is_array($row)?$row:self::error(404);
+    }
     public static function mark(string $id,bool $unread): bool|\WP_Error
     {
         if(!self::allowed()){return self::error(403);}

@@ -1,0 +1,7 @@
+{
+  "passed": 2,
+  "checks": [
+    "Actual WordPress token expiration clears private rows on next poll",
+    "Expired session clears bell count without a page reload"
+  ]
+}

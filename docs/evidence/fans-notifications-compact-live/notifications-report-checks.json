@@ -1,0 +1,17 @@
+{
+  "passed": 12,
+  "checks": [
+    "report uses actual received message",
+    "moderator decision committed",
+    "exactly two recipient events",
+    "stale report decision no extra event",
+    "report event without internal reason member",
+    "participant opens authorized status only member",
+    "report event without internal reason fan",
+    "participant opens authorized status only fan",
+    "other member cannot resolve case",
+    "internal review emits no notification",
+    "finality requires real explicit parameter",
+    "fixture explicit finality produces both events"
+  ]
+}

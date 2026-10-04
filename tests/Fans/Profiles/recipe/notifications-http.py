@@ -70,14 +70,23 @@ before=table_count();send={'body':'Réponse privée sans copie en notification.'
 check('real new message delivered to Fan',api(route+'/send','member',send)[0]==200 and rows('fan')['items'][0]['kind']=='message_received' and table_count()==before+1)
 check('message replay deduplicated',api(route+'/send','member',send)[0]==200 and table_count()==before+1)
 check('notification carries no message body', 'Réponse privée' not in center('fan')[1] and 'Demande privée' not in center()[1])
-check('authorized conversation link present',('thread='+thread_id) in center('fan')[1])
+check('conversation opens through a protected form without exposed object link','name="action" value="open"' in center('fan')[1] and ('thread='+thread_id) not in center('fan')[1])
 before=table_count()
 cli("global $wpdb;$wpdb->query(\"CREATE TRIGGER fail_notification BEFORE INSERT ON wp_faluss_fans_notifications FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='fixture notification failure'\");")
 try:
     history=api(route,'fan')[1]
     check('message and event roll back together',api(route+'/send','member',{**send,'key':cli('echo wp_generate_uuid4();')})[0]==503 and api(route,'fan')[1]==history and table_count()==before)
 finally:cli('global $wpdb;$wpdb->query("DROP TRIGGER fail_notification");')
-check('external email never claimed','Aucun e-mail' in center('fan')[1])
+check('no external notification delivery claimed','e-mail envoyé' not in center('fan')[1])
+view='/wp-json/faluss-fans/v1/notification-view?role=fan&part=center'
+check('private refresh nonce required',http(view,'fan',rest=True,nonce=False)[0]==403)
+check('private refresh never accepts recipient',http(view+'&recipient=1','fan',rest=True)[0]==400)
+read=json.loads(http(view,'fan',rest=True)[1])
+check('private refresh shares native forms and exact count',read['unread']==count('fan') and 'name="action" value="open"' in read['html'])
+item=rows('fan')['items'][0]['id'];before=count('fan')
+check('GET open never changes stored read state',center('fan',query='?action=open&notification='+str(item))[0]==200 and count('fan')==before)
+code,body,headers=center('fan',{'fans_notifications_nonce':nonce('fan'),'notification':str(item),'action':'open'})
+check('POST open marks once then 303 to authorized conversation',code==303 and count('fan')==before-1 and ('thread='+thread_id) in headers.get('Location',''))
 session['notification_thread']=thread_id
 (root/'session.json').write_text(json.dumps(session))
 (root/'notifications-checks.json').write_text(json.dumps({'passed':len(passed),'checks':passed},indent=2))

@@ -6,13 +6,43 @@ La cloche des vues Fan/Créateur ouvre `/app/fan/notifications` ou
 `/app/creator/notifications`. Lecture réservée à un compte local ordinaire lié
 par SSO ; aucune lecture implicite de la boîte d’un membre pour un administrateur.
 Les huit accès Créateur restent identiques. Le centre fournit une pagination de
-20 événements, un filtre non lus, un compteur SQL exact et des formulaires natifs
-lu/non lu avec nonce `fans_notifications`. GET ne marque jamais une notification
-lue. Rejouer la même écriture ne décrémente pas un compteur artificiel.
+20 événements, un filtre non lus et un compteur SQL exact. Chaque ligne ouvrable
+est un unique bouton de formulaire POST avec nonce `fans_notifications` : le
+serveur relit la notification du membre, vérifie sa destination actuelle, marque
+lue puis redirige en 303. Ni destination ni destinataire ne viennent du formulaire.
+Un objet devenu inaccessible donne une ligne sans interaction ; un formulaire
+ancien donne 409 sans marquage. La destination vérifie encore ses droits après la
+redirection. GET, affichage et défilement ne changent jamais l’état. Le traitement
+historique lu/non lu reste compatible, sans commandes visibles dans les lignes.
+Aucun second état « ouverte ». Les lignes simples font 56 px, sans bordure colorée,
+avec fond gris discret seulement pour les non lues et focus clavier visible.
 
 Les nouvelles décisions sont capturées même si le flag UI est fermé. Il ne
-s’agit pas d’un service de push : une page déjà affichée se rafraîchit lors de la
-navigation/relecture. Aucun e-mail, SMTP, webhook ou permission Identity ajouté.
+s’agit pas d’un service de push. Le centre relit sa page toutes les 12 secondes ;
+la cloche seule toutes les 20 secondes. Retour visible, focus ou reconnexion réseau
+provoquent une lecture immédiate. Aucun e-mail, SMTP, webhook ou permission Identity ajouté.
+
+### Lecture dynamique privée
+
+`GET /faluss-fans/v1/notification-view` exige session SSO locale et nonce REST.
+Paramètres fermés : rôle de vue, partie `count`/`center`, filtre et curseur existants ;
+aucun destinataire. Réponse privée `no-store` (y compris refus de l’adaptateur),
+projection HTML échappée par le même rendu serveur que la page native. Pas de
+référence d’objet ni destination dans la projection ; les formulaires contiennent
+seulement l’identifiant de notification, leur nonce et l’action `open`.
+
+Une seule lecture en vol, timeout 10 s, pause/annulation hors ligne ou onglet masqué,
+reprise immédiate ; délai doublé sur erreur jusqu’à 120 s. L’expiration/refus efface
+la liste et le compteur privés. Le garde de session attend une reconnexion sans
+renouveler la session, en gardant une page masquée voilée jusqu’à revalidation.
+
+Le filtre et le curseur restent inchangés. En première page, les nouveaux événements
+arrivent en tête (ID monotone décroissant). Sur une page ancienne, le compteur
+actualisé et « Revenir au début » donnent accès aux nouveautés sans déplacer la
+pagination. Les lignes inchangées gardent leur nœud ; une ligne visible sert d’ancre
+de défilement. Le focus reste sur la même notification, ou la suivante/le filtre si
+elle quitte le filtre non lu ou devient inaccessible. Aucun défilement forcé vers
+le haut. Sans JavaScript, filtres/pagination/formulaires POST restent opérationnels.
 
 | Événement commité | Destinataire | Information communicable |
 |---|---|---|
