@@ -6,9 +6,15 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+## [0.12.3] - 2026-10-04
+
+### Documentation
+
+- Record authorized messaging review and publication (`e26fa89`)
+
 ### Modifié
 
-- Messagerie Fans : panneau intérieur à deux colonnes, conversations textuelles, demandes et saisie intégrées ; navigation liste/échange sur mobile, portraits publics approuvés et outils de sécurité secondaires. Sidebar globale, API, permissions, quotas et rétention inchangés.
+- Rebuild Fans messaging as a two-pane conversation workspace (`e26fa89`)
 
 ## [0.12.2] - 2026-10-03
 
