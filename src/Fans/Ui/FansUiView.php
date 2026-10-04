@@ -79,7 +79,7 @@ final class FansUiView
         $publicBase = home_url('/app/creators/');
         wp_enqueue_style('faluss-fans-ui-v2', plugins_url('assets/fans-ui-v2.css', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'));
         if ($discovery) { wp_enqueue_style('faluss-fans-discovery', plugins_url('assets/fans-discovery.css', dirname(__DIR__, 3) . '/faluss-platform.php'), ['faluss-fans-ui-v2'], (string) constant('FALUSS_PLATFORM_VERSION')); }
-        if ($messages !== null) { wp_enqueue_style('faluss-fans-messages', plugins_url('assets/fans-messages.css', dirname(__DIR__, 3) . '/faluss-platform.php'), ['faluss-fans-ui-v2'], (string)constant('FALUSS_PLATFORM_VERSION')); }
+        if ($messages !== null) { wp_enqueue_script('faluss-fans-messages', plugins_url('assets/fans-messages.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true); wp_enqueue_style('faluss-fans-messages', plugins_url('assets/fans-messages.css', dirname(__DIR__, 3) . '/faluss-platform.php'), ['faluss-fans-ui-v2'], (string)constant('FALUSS_PLATFORM_VERSION')); }
         wp_enqueue_script('faluss-fans-ui-v2', plugins_url('assets/fans-ui-v2.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true);
         wp_enqueue_script('faluss-fans-reading', plugins_url('assets/fans-ui-reading.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true);
         $sessionExpiry = \Faluss\Platform\Fans\Sso\FansLocalSession::expires();
@@ -97,7 +97,7 @@ final class FansUiView
 <title><?php echo esc_html($title); ?> · Faluss Fans</title>
 <?php wp_head(); ?>
 </head>
-<body class="faluss-fans-ui-page<?php echo $messages!==null?' fu-messages-page':''; ?>" <?php if ($sessionExpiry !== null): ?>data-fans-session="<?php echo esc_url(rest_url('faluss-fans/v1/session')); ?>" data-session-nonce="<?php echo esc_attr(wp_create_nonce('wp_rest')); ?>" data-session-expires="<?php echo $sessionExpiry; ?>" data-session-now="<?php echo time(); ?>" data-session-public="<?php echo esc_attr((string) parse_url(home_url('/app/fan/explorer'), PHP_URL_PATH)); ?>"<?php endif; ?>>
+<body class="faluss-fans-ui-page<?php echo $messages!==null?' fu-messages-page'.($messages->available?' fu-messages-ready':''):''; ?>" <?php if ($sessionExpiry !== null): ?>data-fans-session="<?php echo esc_url(rest_url('faluss-fans/v1/session')); ?>" data-session-nonce="<?php echo esc_attr(wp_create_nonce('wp_rest')); ?>" data-session-expires="<?php echo $sessionExpiry; ?>" data-session-now="<?php echo time(); ?>" data-session-public="<?php echo esc_attr((string) parse_url(home_url('/app/fan/explorer'), PHP_URL_PATH)); ?>"<?php endif; ?>>
 <a class="fu-skip" href="#fu-main">Aller au contenu</a>
 <div class="fu-app" data-fans-role="<?php echo esc_attr($role); ?>">
     <?php self::navigation($role, $page[2]); ?>

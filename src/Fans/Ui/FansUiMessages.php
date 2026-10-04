@@ -75,6 +75,19 @@ final class FansUiMessages
     {return max($this->result?->get_status()??200,$this->listing?->get_status()??200,$this->conversation?->get_status()??200);}
     /** @param array<string,string|int> $query */
     public function url(array $query=[]): string {return add_query_arg($query,FansUiRoutes::url($this->role,'messages'));}
+    /** @var array<string,array{name:string,portrait:string}> Request-local approved projections. */
+    private array $correspondents=[];
+    /** @return array{name:string,portrait:string} */
+    public function correspondent(bool $asCreator,string $id): array
+    {
+        if($asCreator) {return ['name'=>'Membre Fans','portrait'=>''];}
+        if(!isset($this->correspondents[$id])) {
+            $public=EditorialService::publicById($id);
+            $this->correspondents[$id]=['name'=>$public['public_name']??'Créateur',
+                'portrait'=>!empty($public['portrait'])?rest_url('faluss-fans/v1/creators/'.$id.'/portrait/'.$public['revision']):''];
+        }
+        return $this->correspondents[$id];
+    }
     public static function creatorName(string $id): string
     {return (string)(EditorialService::publicById($id)['public_name']??'Créateur · présentation indisponible');}
     public function recipientAvailable(): bool
