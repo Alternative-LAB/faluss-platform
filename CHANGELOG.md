@@ -6,9 +6,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+## [0.12.5] - 2026-10-04
+
 ### Corrigé
 
-- Notifications Fans compactes : ouverture unique par POST protégé, lecture privée dynamique de la cloche et du centre, conservation du filtre, de la pagination et du focus.
+- Compact Fans notifications and refresh private state safely (#143) (`43f696a`)
 
 ## [0.12.4] - 2026-10-04
 
