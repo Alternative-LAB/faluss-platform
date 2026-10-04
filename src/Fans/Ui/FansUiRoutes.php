@@ -24,6 +24,7 @@ final class FansUiRoutes
     public static function register(): void
     {
         add_action('rest_api_init', [FansUiMessageRefresh::class, 'routes']);
+        add_action('rest_api_init', [FansUiNotificationRefresh::class, 'routes']);
         add_action('init', [self::class, 'rewrite'], 20);
         add_action('init', [self::class, 'upgradeRoutes'], 21);
         add_filter('query_vars', [self::class, 'queryVars']);
@@ -182,7 +183,8 @@ final class FansUiRoutes
         $editorial = $role === 'creator' && $view === 'mon-profil' ? FansUiEditorial::load() : null;
         $messages = $view === 'messages' ? FansUiMessages::load((string)$role) : null;
         $composer = $role === 'creator' ? FansUiAuthor::load(true) : null;
-        $notifications=$view==='notifications'?FansUiNotifications::load():null;
+        $notifications=$view==='notifications'?FansUiNotifications::load((string)$role):null;
+        if($notifications?->destination!==null){wp_safe_redirect($notifications->destination,303);exit;}
         $status = max($author?->httpStatus() ?? 200, $images?->httpStatus() ?? 200, $admission?->httpStatus() ?? 200, $editorial?->httpStatus() ?? 200, $messages?->httpStatus() ?? 200);
         $status=max($status,$notifications->status??200);
         FansUiView::render((string) $role, $view, $publicProfile ? $creatorId : null, $status, $signIn, $author, $admission, $editorial, $images, $messages, $composer, $notifications);

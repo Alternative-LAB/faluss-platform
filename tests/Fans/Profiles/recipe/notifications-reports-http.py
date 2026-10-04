@@ -12,7 +12,7 @@ check('exactly two recipient events',cli("global $wpdb;echo $wpdb->get_var(\"SEL
 check('stale report decision no extra event',api(route+'/decision','admin-two',decision)[0]==409 and cli("global $wpdb;echo $wpdb->get_var(\"SELECT COUNT(*) FROM wp_faluss_fans_notifications WHERE object_id='"+case_id+"'\");")=='2')
 for who,role in [('member','creator'),('fan','fan')]:
     body=http('/app/'+role+'/notifications',who)[1]
-    check('report event without internal reason '+who,'Une décision est disponible' in body and 'INTERNAL_CANARY' not in body and ('case='+case_id) in body)
+    check('report event without internal reason '+who,'Une décision est disponible' in body and 'INTERNAL_CANARY' not in body and ('case='+case_id) not in body and 'name="action" value="open"' in body)
     detail=http('/app/'+role+'/messages?section=reports&case='+case_id,who)[1]
     check('participant opens authorized status only '+who,'absence de mesure' in detail and 'INTERNAL_CANARY' not in detail and message['body'] not in detail)
 check('other member cannot resolve case',cli('wp_set_current_user('+str(session['sessions']['other']['id'])+');echo is_wp_error(\\Faluss\\Platform\\Fans\\Messaging\\MessageReports::ownItem("'+case_id+'"))?"denied":"leak";')=='denied')

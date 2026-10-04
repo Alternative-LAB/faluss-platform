@@ -17,6 +17,7 @@ namespace Faluss\Platform\Fans\Ui {
     function status_header(int $status): void {}
     function wp_head(): void {}
     function wp_footer(): void {}
+    function wp_create_nonce(string $action): string { return 'fixture-nonce'; }
     function get_query_var(string $name): mixed { return $GLOBALS['fans_ui_query'][$name] ?? ''; }
     function current_user_can(string $capability): bool { return $capability === 'manage_options' && ($GLOBALS['fans_ui_admin'] ?? false); }
     function add_action(string $hook, callable $callback, int $priority = 10): void {}

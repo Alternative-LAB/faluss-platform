@@ -13,8 +13,8 @@
   window.addEventListener('storage',event=>{if(event.key===channel&&event.newValue)leave(true);});
   async function check(){
     if(leaving||checking)return;clearTimeout(retry);
-    // Messaging can wait through a network outage, but a hidden page stays veiled until revalidated.
-    const messaging=body.classList.contains('fu-messages-ready');
+    // Live private views wait through an outage; a hidden page stays veiled until revalidated.
+    const messaging=body.classList.contains('fu-messages-ready')||!!body.querySelector('[data-notifications-endpoint]');
     if(messaging&&(!navigator.onLine||document.hidden))return;checking=true;
     const controller=messaging?new AbortController():null,timeout=controller?setTimeout(()=>controller.abort(),12000):null;
     try{const response=await fetch(endpoint,{credentials:'same-origin',cache:'no-store',redirect:'error',...(controller?{signal:controller.signal}:{}),headers:{'X-WP-Nonce':body.dataset.sessionNonce}});const data=await response.json();if(!response.ok||data.active!==true){leave();return;}retryDelay=4000;body.hidden=false;}
