@@ -6,9 +6,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+## [0.12.6] - 2026-10-04
+
 ### Corrigé
 
-- Écran Notifications Fans centré sur les filtres et la liste : retrait de la barre supérieure, de l’en-tête visuel et du retour en début inférieur, avec lecture dynamique et pagination serveur conservées.
+- Put Fans notification filters and rows first (#145) (`5dbdb87`)
 
 ## [0.12.5] - 2026-10-04
 
