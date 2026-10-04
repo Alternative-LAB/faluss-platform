@@ -1,0 +1,11 @@
+{
+  "normalization": "LF",
+  "runtime_matches_checkout": true,
+  "files": {
+    "assets/fans-messages.css": "101b274c4ed04c243a7255727b74fd301927ababf8f55718438c93e57c2bdc43",
+    "assets/fans-messages.js": "572d22b4d8c8465a998eb312f99e1c2dbb36e42a670be348cdfce2b08f845c9f",
+    "src/Fans/Ui/FansUiMessageView.php": "c8d506f297ab5173c9a2c58ef4d00dee607a23369ebb3b7ab8cecbfd491b63a5",
+    "src/Fans/Ui/FansUiMessages.php": "d4193471a6a5e65b6243e8bce264b05f81d9daa3b7ee9de70318af0d932b4bde",
+    "src/Fans/Ui/FansUiView.php": "0c7c6170c74c0ac0b43d5b11a8cfbdb4810ec66f37f80c96f3102f2d40ec0f0c"
+  }
+}
