@@ -6,6 +6,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Corrigé
+
+- Messagerie Fans mobile pleine largeur : liste et conversation séparées, retour avec position conservée, saisie adaptée au viewport et navigation racine sur une seule ligne défilante.
+- Réception et décisions actualisées sans rechargement, rattrapage par séquence et réconciliation paginée de toute la liste, pauses réseau/arrière-plan et brouillons conservés sur échec.
+
 ## [0.12.3] - 2026-10-04
 
 ### Documentation

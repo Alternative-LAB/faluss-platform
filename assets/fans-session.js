@@ -12,15 +12,19 @@
   broadcast?.addEventListener('message',event=>{if(event.data==='closed')leave(true);});
   window.addEventListener('storage',event=>{if(event.key===channel&&event.newValue)leave(true);});
   async function check(){
-    if(leaving||checking)return;checking=true;
+    if(leaving||checking)return;
+    // Messaging can wait through a network outage, but a hidden page stays veiled until revalidated.
+    const messaging=body.classList.contains('fu-messages-ready');
+    if(messaging&&!navigator.onLine)return;checking=true;
     try{const response=await fetch(endpoint,{credentials:'same-origin',cache:'no-store',redirect:'error',headers:{'X-WP-Nonce':body.dataset.sessionNonce}});const data=await response.json();if(!response.ok||data.active!==true){leave();return;}body.hidden=false;}
-    catch(error){leave();}finally{checking=false;}
+    catch(error){if(messaging){body.hidden=true;}else leave();}finally{checking=false;}
   }
   // The deadline comes from the verified server token, not a visit-based renewal or the client's wall clock.
   const remaining=Math.max(0,(Number(body.dataset.sessionExpires)-Number(body.dataset.sessionNow))*1000);
   setTimeout(()=>leave(),remaining);
   document.addEventListener('visibilitychange',()=>{if(document.hidden)body.hidden=true;else check();});
   window.addEventListener('focus',check);
+  window.addEventListener('online',check);
   window.addEventListener('pagehide',()=>{document.dispatchEvent(new Event('fans-session-ended'));body.replaceChildren();body.hidden=true;});
   window.addEventListener('pageshow',event=>{if(event.persisted){body.hidden=true;location.reload();}});
   body.querySelector('[data-fans-logout]')?.addEventListener('submit',async event=>{

@@ -235,3 +235,10 @@ pas fonctionnelle**, faute de preuve propriétaire accessible depuis Fans.
 Le formulaire et l’aide le disent ; aucun rôle, paramètre, badge ou paiement
 ne simule cette capacité. La demande ordinaire et la conversation acceptée
 fonctionnent indépendamment de cette absence.
+
+## Actualisation et mobile (après 0.12.3)
+
+Les écrans mobiles et lectures périodiques sont décrits avec leurs limites dans
+[la recette mobile et actualisation privée](../evidence/fans-messaging-mobile-live/README.md).
+L’adaptateur privé `message-view` réutilise les lectures et formulaires existants ;
+aucune activation, migration ou modification de rétention/permissions n’est requise.

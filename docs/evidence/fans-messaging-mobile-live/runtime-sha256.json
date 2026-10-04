@@ -1,0 +1,11 @@
+{
+  "assets/fans-messages.js": "14788381e5c97fefe13be6abc9f3977f047b674c14e1d0d031d712d3e3f0a753",
+  "assets/fans-messages.css": "2fa987d0f7a5a07ff9814c5ecdb34efc518c0173ad2945233916ad4f40616b8d",
+  "assets/fans-navigation.js": "3afb0ff88448b805c85e90bc1eadd7d5fe201f48aff5dcb89bd1154a26c88f16",
+  "assets/fans-ui-v2.css": "de5df161e7b1b51c3ec0cb3a7cdd1f74faae3eab263c8d0ccd60f419943d5464",
+  "assets/fans-session.js": "294241aef0ebcaf65fe74823349b1321ace3c7df519e884a1ec1a452ab33d7e0",
+  "src/Fans/Ui/FansUiMessageRefresh.php": "20a2728322188352a5ddf014539500541ce0c23466c2606d6832e21402aebcfb",
+  "src/Fans/Ui/FansUiMessageView.php": "f4a05fba3dcc1c711f944145be29397d1f4ad16a3b4804d6aeac5b72d7c6d54f",
+  "src/Fans/Ui/FansUiRoutes.php": "ea2623b9ac732a1d976105eb9b7b53f1ce3c3daafc207efa4014d9df2f50b7d1",
+  "src/Fans/Messaging/MessageReading.php": "4f09364071bc5d4a0acd8ccf2664623fc5904db840fcf3244005eb5820c64bbb"
+}

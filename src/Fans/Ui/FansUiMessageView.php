@@ -9,7 +9,7 @@ final class FansUiMessageView
     {
         if(!$v->available) {echo '<section class="fu-panel fu-message-empty"><h2>Messagerie indisponible</h2><p>Le service n’est pas ouvert sur cette installation. Aucun message ne peut être envoyé.</p></section>';return;}
         ?>
-        <section class="fu-messages" data-fans-private-reading aria-label="Messagerie privée">
+        <section class="fu-messages" data-fans-private-reading aria-label="Messagerie privée" data-refresh="<?php echo esc_url(rest_url('faluss-fans/v1/message-view')); ?>" data-nonce="<?php echo esc_attr(wp_create_nonce('wp_rest')); ?>" data-role="<?php echo esc_attr($v->role); ?>" data-section="<?php echo esc_attr($v->section); ?>">
         <?php if(!\Faluss\Platform\Fans\Messaging\MessageModule::available()): ?><p class="fu-message-notice">Les nouveaux envois sont fermés. Vos conversations conservées, blocages, signalements et recours restent accessibles.</p><?php endif; ?>
         <?php if($v->result!==null): ?><p class="fu-message-notice" role="<?php echo $v->result->get_status()>=400?'alert':'status'; ?>"><?php echo esc_html($v->notice()); ?></p><?php endif; ?>
         <div class="fu-message-layout<?php echo $v->threadId!==''||$v->creatorId!==''||$v->section!=='inbox'?' has-selection':''; ?>">
@@ -48,14 +48,14 @@ final class FansUiMessageView
         </section>
         <?php
     }
-    private static function listing(FansUiMessages $v): void
+    public static function listing(FansUiMessages $v): void
     {
         $page=$v->listing?->get_data();
         if($v->listing?->get_status()!==200||!is_array($page)) {echo '<p role="alert">Liste indisponible. Réessayez plus tard.</p>';return;}
         if($page['items']===[]) {echo '<p class="fu-message-list-empty">Aucune conversation pour le moment.</p>';}
         foreach($page['items'] as $row):
             $person=$v->correspondent($row['as_creator'],$row['creator_id']); ?>
-            <a class="fu-message-preview" href="<?php echo esc_url($v->url(['thread'=>$row['thread_id']])); ?>" <?php echo $row['thread_id']===$v->threadId?'aria-current="true"':''; ?>>
+            <a class="fu-message-preview" data-thread="<?php echo esc_attr($row['thread_id']); ?>" href="<?php echo esc_url($v->url(['thread'=>$row['thread_id']])); ?>" <?php echo $row['thread_id']===$v->threadId?'aria-current="true"':''; ?>>
                 <?php self::avatar($person); ?><span class="fu-message-preview-text"><strong><?php echo esc_html($person['name']); ?></strong><small><?php echo esc_html(FansUiMessages::state($row['state'])); ?></small><?php self::date($row['last_sent_at']); ?></span>
             </a>
         <?php endforeach;
@@ -86,13 +86,13 @@ final class FansUiMessageView
         </form>
         <?php
     }
-    private static function conversation(FansUiMessages $v): void
+    public static function conversation(FansUiMessages $v): void
     {
         $row=$v->conversation?->get_data();
         if($v->conversation?->get_status()!==200||!is_array($row)) {echo '<div class="fu-message-empty"><h2>Conversation indisponible</h2><p>Elle a pu expirer ou vous n’y avez plus accès.</p></div>';return;}
         $person=$v->correspondent($row['as_creator'],$row['creator_id']);
         ?>
-        <header class="fu-message-heading"><?php self::avatar($person); ?><div><h2><?php echo esc_html($person['name']); ?></h2><p><?php echo esc_html(FansUiMessages::state($row['state'])); ?></p></div>
+        <header class="fu-message-heading" data-revision="<?php echo (int)$row['revision']; ?>" data-history-revision="<?php echo (int)$row['revision']-(int)$row['last_sequence']; ?>"><?php self::avatar($person); ?><div><h2><?php echo esc_html($person['name']); ?></h2><p><?php echo esc_html(FansUiMessages::state($row['state'])); ?></p></div>
             <details class="fu-message-options"><summary aria-label="Options de la conversation">•••</summary><div>
                 <a href="<?php echo esc_url($v->url(['thread'=>$row['thread_id']])); ?>">Actualiser l’échange</a>
                 <?php self::decision($v,$row,$row['blocked_by_me']?'unblock':'block',$row['blocked_by_me']?'Débloquer mon côté':'Bloquer cet échange'); ?>
@@ -105,7 +105,7 @@ final class FansUiMessageView
         <?php if(isset($_GET['after'])&&$_GET['after']!=='0'): ?><a class="fu-link" href="<?php echo esc_url($v->url(['thread'=>$row['thread_id']])); ?>">← Début de l’échange</a><?php endif; ?>
         <ol class="fu-message-log" aria-label="Messages conservés">
         <?php foreach($row['messages'] as $message): ?>
-            <li class="fu-message-bubble<?php echo $message['mine']?' is-mine':''; ?>"><p class="fu-message-sender"><?php echo $message['mine']?'Vous':esc_html($person['name']); ?></p>
+            <li data-sequence="<?php echo (int)$message['sequence']; ?>" class="fu-message-bubble<?php echo $message['mine']?' is-mine':''; ?>"><p class="fu-message-sender"><?php echo $message['mine']?'Vous':esc_html($person['name']); ?></p>
                 <p class="fu-message-body"><?php echo esc_html($message['body']!==''?$message['body']:'Message retiré par la modération.'); ?></p><?php self::date($message['sent_at']); ?>
                 <?php if(!$message['mine']&&$message['body']!==''): ?><details><summary>Signaler ce message</summary><form method="post" action="<?php echo esc_url($v->url(['thread'=>$row['thread_id']])); ?>">
                     <?php self::fields('report',['thread_id'=>$row['thread_id'],'message_id'=>$message['message_id']]); ?>
