@@ -28,6 +28,7 @@ def main():
     parser.add_argument('--output')
     parser.add_argument('--h1', action='store_true', help='Explicit closed H1 model recipe after unchanged H0 checks')
     parser.add_argument('--h2-reservations', action='store_true', help='Closed H2 reservations after H0 and H1')
+    parser.add_argument('--h2', action='store_true', help='Closed H2 consumption and recovery after H0, H1 and H2 reservations')
     options = parser.parse_args()
     source = pathlib.Path(options.source).resolve()
     core = pathlib.Path(options.core).resolve()
@@ -148,7 +149,7 @@ def main():
                       WP_DEBUG_DISPLAY=False, WP_DEBUG_LOG=str(root / 'debug.log'),
                       FALUSS_PLATFORM_ROLE='hub', FALUSS_PLATFORM_TOKEN_ENGINE=True,
                       FALUSS_HUB_PF_RECIPE_ONLY=True)
-        if options.h1 or options.h2_reservations:
+        if options.h1 or options.h2_reservations or options.h2:
             values['WP_ENVIRONMENT_TYPE'] = 'local'
         for key in ('AUTH_KEY', 'SECURE_AUTH_KEY', 'LOGGED_IN_KEY', 'NONCE_KEY',
                     'AUTH_SALT', 'SECURE_AUTH_SALT', 'LOGGED_IN_SALT', 'NONCE_SALT'):
@@ -264,12 +265,16 @@ def main():
         check('Closed future operations write nothing and generic ALB ledger stays separate',
               call('inspect')['pf_count'] == before and call('inspect')['generic_count'] == 0)
         h0_total = len(checks)
-        if options.h1 or options.h2_reservations:
+        if options.h1 or options.h2_reservations or options.h2:
             from h1_checks import run_checks
             run_checks(root, wp, check, call, sql, start, finish, parallel, await_file)
         h1_total = len(checks) - h0_total
-        if options.h2_reservations:
+        if options.h2_reservations or options.h2:
             from h2_reservation_checks import run_checks
+            run_checks(root, wp, check, call, sql, start, finish, parallel, await_file)
+        h2_reservations_total = len(checks) - h0_total - h1_total
+        if options.h2:
+            from h2_consumption_checks import run_checks
             run_checks(root, wp, check, call, sql, start, finish, parallel, await_file)
         report = dict(checks=checks, total=len(checks), failed=0, wordpress=cli('core', 'version').strip(),
                       php=command(['php', '-r', 'echo PHP_VERSION;']).strip(),
@@ -281,13 +286,17 @@ def main():
                                   'Target Hub configuration, production or staging', 'Future Fans to Hub HTTP protocol'])
         report['h0_total'] = h0_total
         report['h1_total'] = h1_total
-        report['h2_reservations_total'] = len(checks) - h0_total - h1_total
-        if options.h1 or options.h2_reservations:
+        report['h2_reservations_total'] = h2_reservations_total
+        report['h2_consumption_total'] = len(checks) - h0_total - h1_total - h2_reservations_total
+        if options.h1 or options.h2_reservations or options.h2:
             report['scope'] += '; closed H1 model explicitly installed only in this fixture'
             report['model_schema'] = '1 (closed_h1_model)'
-        if options.h2_reservations:
+        if options.h2_reservations or options.h2:
             report['scope'] += '; closed H2 synthetic ledger credits and reservations, not site operations'
             report['reservation_schema'] = '1 (closed_h2_reservations)'
+        if options.h2:
+            report['scope'] += '; closed synthetic consumption and atomic pending journal, no network admission'
+            report['consumption_schema'] = '1 (closed_h2_consumption)'
     finally:
         for process in workers:
             if process.poll() is None:

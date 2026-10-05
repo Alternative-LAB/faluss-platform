@@ -7,8 +7,8 @@ réservations et consommation atomiques avec le ledger officiel, journal dans la
 même transaction, lookup primaire après résultat incertain, même intention/clé
 après timeout. [Accord humain rapporté dans #147](https://github.com/Alternative-LAB/faluss-platform/issues/147#issuecomment-5991250215).
 
-Ce document décrit **H2a : réservations**. H2b apportera séparément la consommation
-et son journal atomique. H2 ne ratifie pas D3, D5 ni le reste de D6 ;
+Ce document décrit **H2a : réservations** puis **H2b : consommation et journal
+atomique**, dans deux PR dépendantes. H2 ne ratifie pas D3, D5 ni le reste de D6 ;
 [réduction après remboursement #149](https://github.com/Alternative-LAB/faluss-platform/issues/149)
 et [conservation #150](https://github.com/Alternative-LAB/faluss-platform/issues/150)
 restent ouverts. Aucun reçu signé, remboursement partiel, purge, réseau ou score.
@@ -36,7 +36,7 @@ Cinq tables InnoDB `token_engine_pf_h2_{schema,credits,reservations,allocations,
 distinctes du modèle H1 v1 et du schéma historique v5. `credits` contient uniquement
 la filiation du lot H1 synthétique vers son crédit officiel, pas un solde.
 Réservation globale immuable : client, membre, créateur, quantité, politique et
-empreinte, clé de réserve, UUID propriétaire, création/expiration. Les allocations
+  empreinte, clé de réserve, UUID propriétaire, création/expiration. Les allocations
 conservent lot/preuve/révision/quantité. Les clés sont hachées et liées au contenu.
 
 Installation : tables temporaires, contrôle strict colonnes/index/collations et
@@ -74,7 +74,8 @@ stateDiagram-v2
     [*] --> reserved : attribution nouvelle et capacité exacte
     reserved --> released : libération propriétaire
     reserved --> expired : échéance UTC atteinte
-    note right of reserved : H2a ne confirme ni ne consomme
+    reserved --> confirmed : source et échéance recontrôlées
+    note right of confirmed : débit + consommation + journal, une transaction
 ```
 
 ## Scénarios et preuves
@@ -94,7 +95,8 @@ retour `false` de wpdb est une injection, pas une panne réseau MariaDB.
 
 ## Limites et retour arrière
 
-H2a ne consomme aucun PF et ne journalise aucun événement. H2b reste à livrer.
+H2a ne consomme aucun PF. H2b décrit ci-dessous consomme seulement des crédits
+synthétiques et n'ouvre aucune nouvelle surface sur site.
 Les compensations historiques ne servent pas de protocole H4 : une compensation
 hors H2 d'un crédit synthétique ferme la filiation, sans recréer des PF disponibles.
 Avant toute ouverture future, l'exclusivité des corrections nouvelles, les reçus,
@@ -105,3 +107,50 @@ La recette ne prouve ni Hub cible, ni replica/restore, HTTP, identité/délégat
 Retour arrière par revert de la PR ; aucune donnée réelle à migrer. Ne pas
 installer les marqueurs, ni supprimer/corriger de table sur un site. La recette
 détruit uniquement sa racine/socket/processus privés.
+
+## H2b — consommation et journal de remise
+
+Trois tables séparées v1 `token_engine_pf_h2c_{schema,consumptions,journal}`, installées
+explicitement dans la même recette, sans migration des cinq tables H2a ni du
+schéma officiel v5. Unicités : attribution, réserve, référence de débit et événement.
+La consommation conserve les identités privées de contexte synthétique, quantité,
+politique, allocations exactes, empreinte d'intention/clé, date et lien au ledger.
+Le journal conserve le même payload/digest et reste **pending** : aucun worker,
+appel Events, cron, transport ou destinataire réseau n'est enregistré.
+
+`confirm` prend les mêmes verrous que la réserve puis vérifie le schéma, la clé,
+l'intention et l'état. Chaque allocation est contrôlée contre son crédit officiel,
+titulaire, politique et preuve/révision **encore identiques et confirmed**. Une
+révision même redevenue confirmed nécessite libération et nouvelle intention,
+sans modifier l'ancien plan. Quantités actives/consommées bornées par lot ; solde
+officiel suffisant pour cette consommation **et les autres réserves actives**.
+
+Le débit `funded/fans_support`, le fait immuable, le journal pending, la transition
+de réserve et la clé de confirmation sont commis ensemble. Le créateur n'est pas
+crédité et aucune mécanique PC/HoF n'est exécutée. La transition compare encore
+`expires_at > UTC_TIMESTAMP(6)` dans son UPDATE final ; une échéance dépassée
+pendant les écritures annule aussi débit/fait/journal. Sa décision est sérialisée
+avant COMMIT, pas une promesse d'absence de délai physique d'acquittement.
+
+Un rejeu utilise **la même clé de confirmation** et restitue le même fait/journal.
+Une autre clé de confirmation d'une attribution déjà confirmée est refusée.
+`lookup` primaire par clé réserve/confirm/release trouve le fait commis même
+après l'échéance de réserve ; contenu/client différent ne révèle aucune autre
+consommation. Tous les liens, payloads et digests sont recontrôlés. Un journal
+manquant/corrompu ou un lien de débit divergent ferme la lecture, sans synthétiser
+une preuve ou refaire le débit. Une erreur de COMMIT reste `h2_commit_unknown`.
+
+Le payload interne `closed_h2_consumption` **n'est pas le reçu D3**, ni une
+signature JCS/Ed25519, ni une preuve d'achat réel ou du statut actuel de la source.
+Une consommation historique et son journal restent immuables après évolution
+du modèle source ; la correction H4 est absente et aucune projection ne peut en
+déduire un score actuel. Aucun dispatcher ne peut publier ces fixtures.
+
+Recette `run.py --h2` : tous les contrôles H0/H1/H2a puis H2b. Huit confirmations
+identiques ou à clés différentes, deux intentions, courses confirm/release/source,
+expiration accélérée contrôlée (y compris horloge de connexion avant UPDATE),
+32/33 lots, défaut INSERT du fait/journal/clé, kill avant/après COMMIT et faux
+acquittement perdu. Les preuves et journal sont fictifs ; SQL, verrou, rollback,
+consommation et perte de réponse du processus sont réels. Aucune preuve HTTP,
+reprise depuis sauvegarde, cluster/réplica ou service réel. Les scripts de la
+base H2a sont rejoués séparément avant modification du gate CI.

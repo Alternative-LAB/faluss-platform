@@ -8,6 +8,9 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Ajouter H2b fermé : confirmation avec débit PF officiel, consommation immuable
+  et journal de remise atomiques ; lookup primaire et reprise à clé stable après
+  réponse perdue. Preuves fictives en recette uniquement, aucune admission réseau.
 - Ajouter H2a fermé : filiation des crédits fictifs au ledger PF officiel,
   réservations FIFO atomiques de 120 s sans renouvellement, libération et lookup
   primaire avec clé stable. Recette Hub isolée uniquement, aucun débit/site/API Fans.
@@ -18,6 +21,9 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Tests
 
+- Tester H2b sur Hub WordPress/MariaDB jetable : confirmations concurrentes,
+  confirmation/libération/expiration/révision source, 32 lots, COMMIT incertain et
+  crash après commit sans double débit ; conservation complète des anciens claims.
 - Vérifier H2a sur WordPress/MariaDB jetable : réserves/admissions concurrentes,
   expiration, quotas, reprises COMMIT, rollback et conservation des claims/lignes historiques.
 - Ajouter la recette WordPress/MariaDB Hub jetable des claims PF historiques,

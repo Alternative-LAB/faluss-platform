@@ -33,6 +33,14 @@ final class ClosedLedgerWriter
         return $this->append($member, $lot, $quantity, $policy, 'credit', 'pf_pack_purchase');
     }
 
+    public function appendDebit(string $member, string $attribution, string $quantity, string $policy): string
+    {
+        if ($this->balance($member) < (int) ModelValues::integer($quantity, true)) {
+            throw new ModelViolation('h2_ledger_quantity_unavailable');
+        }
+        return $this->append($member, $attribution, $quantity, $policy, 'debit', 'fans_support');
+    }
+
     private function append(string $member, string $reference, string $quantity, string $policy, string $direction, string $category): string
     {
         $this->connection->assertHeldSubject($member);
@@ -57,14 +65,24 @@ final class ClosedLedgerWriter
 
     public function verifyCredit(string $entry, string $member, string $lot, string $quantity, string $policy): void
     {
+        $this->verify($entry, $member, $lot, $quantity, $policy, 'credit', 'pf_pack_purchase');
+    }
+
+    public function verifyDebit(string $entry, string $member, string $attribution, string $quantity, string $policy): void
+    {
+        $this->verify($entry, $member, $attribution, $quantity, $policy, 'debit', 'fans_support');
+    }
+
+    private function verify(string $entry, string $member, string $reference, string $quantity, string $policy, string $direction, string $category): void
+    {
         $this->connection->assertHeldSubject($member);
         $table = \Token_Engine_Schema::pf_ledger_table();
         $row = $this->connection->row($table, 'entry_uuid=%s', [$entry]);
-        $expected = ['faluss_id' => $member, 'amount_pf' => $quantity, 'direction' => 'credit',
-            'economic_class' => 'funded', 'category' => 'pf_pack_purchase', 'category_version' => '1.0.0',
+        $expected = ['faluss_id' => $member, 'amount_pf' => $quantity, 'direction' => $direction,
+            'economic_class' => 'funded', 'category' => $category, 'category_version' => '1.0.0',
             'source_owner' => 'faluss-hub', 'policy_version' => $policy,
-            'source_event_reference' => 'fixture.h2.credit.' . $lot,
-            'idempotency_key' => 'pf.h2.credit.' . hash('sha256', $lot),
+            'source_event_reference' => 'fixture.h2.' . $direction . '.' . $reference,
+            'idempotency_key' => 'pf.h2.' . $direction . '.' . hash('sha256', $reference),
             'metadata' => ModelValues::encode(['closed_h2_recipe' => true])];
         foreach ($expected as $field => $value) {
             if ($row === null || (string) $row[$field] !== $value) {

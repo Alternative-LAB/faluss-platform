@@ -7,6 +7,8 @@ namespace Faluss\Platform\Tests\TokenEngine\PurchasedPf;
 use Faluss\Platform\TokenEngine\PurchasedPf\ClosedReservationDatabase;
 use Faluss\Platform\TokenEngine\PurchasedPf\ClosedReservationSchema;
 use Faluss\Platform\TokenEngine\PurchasedPf\ClosedReservationStore;
+use Faluss\Platform\TokenEngine\PurchasedPf\ClosedConsumptionSchema;
+use Faluss\Platform\TokenEngine\PurchasedPf\ClosedConsumptionStore;
 use Faluss\Platform\TokenEngine\PurchasedPf\ModelViolation;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
@@ -22,7 +24,9 @@ final class ClosedReservationGuardTest extends TestCase
         $database = new \wpdb();
         foreach ([static fn () => ClosedReservationSchema::installForRecipe($database),
             static fn () => new ClosedReservationStore($database, ['fixture.fans'], ['fixture.purchase']),
-            static fn () => new ClosedReservationDatabase($database)] as $action) {
+            static fn () => new ClosedReservationDatabase($database),
+            static fn () => ClosedConsumptionSchema::installForRecipe($database),
+            static fn () => new ClosedConsumptionStore($database, ['fixture.fans'], ['fixture.purchase'])] as $action) {
             try {
                 $action();
                 self::fail('An ordinary site must fail before its first query.');
