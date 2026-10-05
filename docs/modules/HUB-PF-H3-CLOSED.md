@@ -138,6 +138,9 @@ ou opération n'est ajouté au dispatcher Federation historique.
 - Hub : requête et contexte signés indépendamment, droits `pf.*` et délégation,
   fraîcheur de 60 s, audience/opération/nonce/clé immuables. Anti-rejeu SQL avant
   dispatch. Réponse signée avec nonce **et digest des octets complets** de la requête.
+- La délégation et la requête expirent au plus tôt entre échéance de session
+  locale et plafond de 60 s ; une session expirée pendant la préparation ne peut
+  pas émettre un contexte neuf. Aucun renouvellement de la session locale.
 - Fans : session WP authentifiée et nonce REST réel dans la fixture ; résolution
   par `currentLinkedSubject`, `activeOwner`, `linkedIdentity` et échéance absolue
   de cookie/token. Invité, non lié, compte privilégié, profil suspendu,

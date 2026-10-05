@@ -222,6 +222,21 @@ JSON;
         TransportMessage::response($payload,$peer,'confirm',str_repeat('a',64),str_repeat('b',64),$this->now);
     }
 
+    public function testSignedDelegationCannotOutliveItsLocalSession(): void
+    {
+        $deadline = time()+10;
+        $request = \Faluss\Platform\Fans\PfContract\ClosedClient::request(AttributionIntent::fromArray(ModelFixtures::intent()),
+            'reserve',str_repeat('b',64),'','recipe-k1',$deadline);
+        $outer = CanonicalJson::object($request['wire'],65536);
+        $payload = SignedEnvelope::open(SignedEnvelope::REQUEST,$outer,$this->peer,time());
+        $context = SignedEnvelope::open(SignedEnvelope::CONTEXT,$payload['context'],$this->peer,time());
+        self::assertSame($deadline,strtotime($payload['expires_at']));
+        self::assertSame($payload['expires_at'],$context['expires_at']);
+        $this->expectException(ModelViolation::class);
+        \Faluss\Platform\Fans\PfContract\ClosedClient::request(AttributionIntent::fromArray(ModelFixtures::intent()),
+            'reserve',str_repeat('b',64),'','recipe-k1',time());
+    }
+
     /** @return array<string,mixed> */
     private function context(): array
     {

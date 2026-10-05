@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Faluss\Platform\Fans\PfContract;
 
+use Faluss\Platform\Fans\Sso\FansLocalSession;
 use Faluss\Platform\TokenEngine\PurchasedPf\AttributionIntent;
 use Faluss\Platform\TokenEngine\PurchasedPf\ModelViolation;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\CanonicalJson;
@@ -36,7 +37,7 @@ final class ClosedClient
         $store = new ClosedProtocolStore($this->database);
         // Commit the stable key before sending. Unknown results never cause a replacement key.
         $key = $store->prepare($intent, $operation === 'lookup' ? $lookup : $operation, $operation === 'lookup');
-        $request = self::request($intent, $operation, $key, $lookup, $this->keyId);
+        $request = self::request($intent, $operation, $key, $lookup, $this->keyId, FansLocalSession::expires() ?? time());
         $wire = $request['wire'];
         $response = wp_remote_post($this->endpoint, ['body' => $wire, 'headers' => ['Content-Type' => 'application/json',
             'Accept' => 'application/json'], 'timeout' => 8, 'redirection' => 0, 'limit_response_size' => 65537,
@@ -55,7 +56,8 @@ final class ClosedClient
 
     /** Public construction is still bound to closed fixture intent; not a user endpoint.
      *  @return array{wire:string,nonce:string} */
-    public static function request(AttributionIntent $intent, string $operation, string $key, string $lookup, string $keyId): array
+    public static function request(AttributionIntent $intent, string $operation, string $key, string $lookup, string $keyId,
+        ?int $sessionExpires = null): array
     {
         TransportMessage::operation($operation, $lookup);
         \Faluss\Platform\TokenEngine\PurchasedPf\ModelValues::keyHash($key);
@@ -65,7 +67,8 @@ final class ClosedClient
         $context = ['contract' => DelegatedContext::CONTRACT, 'kind' => SignedEnvelope::CONTEXT,
             'issuer' => 'fixture.fans', 'audience' => 'fixture.hub', 'operation' => $operation, 'nonce' => $nonce,
             'key_sha256' => hash('sha256', $key), 'lookup_operation' => $lookup, 'intent' => $intent->values,
-            'issued_at' => gmdate('Y-m-d\TH:i:s\Z', $now), 'expires_at' => gmdate('Y-m-d\TH:i:s\Z', $now + 60)];
+            'issued_at' => gmdate('Y-m-d\TH:i:s\Z', $now), 'expires_at' => gmdate('Y-m-d\TH:i:s\Z', min($now + 60, $sessionExpires ?? $now + 60))];
+        DelegatedContext::fresh($context['issued_at'], $context['expires_at'], $now);
         $payload = ['contract' => DelegatedContext::CONTRACT, 'kind' => SignedEnvelope::REQUEST,
             'issuer' => 'fixture.fans', 'audience' => 'fixture.hub', 'operation' => $operation, 'nonce' => $nonce,
             'operation_key' => $key, 'lookup_operation' => $lookup,
