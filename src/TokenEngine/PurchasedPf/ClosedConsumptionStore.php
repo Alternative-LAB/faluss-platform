@@ -17,7 +17,7 @@ final class ClosedConsumptionStore
      * @param list<string> $clients
      * @param list<string> $sources
      */
-    public function __construct(\wpdb $database, array $clients, array $sources)
+    public function __construct(\wpdb $database, array $clients, array $sources, private readonly ?\Closure $recordReceipt = null)
     {
         $this->connection = new ClosedReservationDatabase($database);
         $this->reservations = new ClosedReservationStore($database, $clients, $sources);
@@ -87,6 +87,10 @@ final class ClosedConsumptionStore
                 'payload_sha256' => $digest, 'confirmed_at' => $now]);
             $this->connection->insert($this->tables['journal'], ['event_id' => $eventId, 'consumption_id' => $consumptionId,
                 'payload_json' => $json, 'payload_sha256' => $digest, 'state' => 'pending', 'recorded_at' => $now]);
+            // H3's private receipt joins this transaction; a signing/storage failure rolls back everything.
+            if ($this->recordReceipt !== null) {
+                ($this->recordReceipt)($payload);
+            }
             $reservationTables = ClosedReservationSchema::tables($this->connection->database);
             $this->connection->query($this->connection->database->prepare(
                 "UPDATE %i SET state='confirmed' WHERE attribution_id=%s AND state='reserved' AND expires_at>UTC_TIMESTAMP(6)",

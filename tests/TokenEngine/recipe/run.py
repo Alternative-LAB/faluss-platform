@@ -29,7 +29,10 @@ def main():
     parser.add_argument('--h1', action='store_true', help='Explicit closed H1 model recipe after unchanged H0 checks')
     parser.add_argument('--h2-reservations', action='store_true', help='Closed H2 reservations after H0 and H1')
     parser.add_argument('--h2', action='store_true', help='Closed H2 consumption and recovery after H0, H1 and H2 reservations')
+    parser.add_argument('--h3-proofs', action='store_true', help='Closed H3 signed receipt and nonce persistence after H2')
     options = parser.parse_args()
+    if options.h3_proofs:
+        options.h2 = True
     source = pathlib.Path(options.source).resolve()
     core = pathlib.Path(options.core).resolve()
     root = pathlib.Path(tempfile.mkdtemp(prefix='hub-pf-wp-', dir='/var/tmp')).resolve()
@@ -276,18 +279,24 @@ def main():
         if options.h2:
             from h2_consumption_checks import run_checks
             run_checks(root, wp, check, call, sql, start, finish, parallel, await_file)
+        h2_consumption_total = len(checks) - h0_total - h1_total - h2_reservations_total
+        h3_start = len(checks)
+        if options.h3_proofs:
+            from h3_proof_checks import run_checks
+            run_checks(root, wp, check, call, sql, start, finish, parallel, await_file)
         report = dict(checks=checks, total=len(checks), failed=0, wordpress=cli('core', 'version').strip(),
                       php=command(['php', '-r', 'echo PHP_VERSION;']).strip(),
                       database=sql('SELECT VERSION()'), schema='5',
                       owner_service_lf_sha256=hashlib.sha256((plugin / 'src/TokenEngine/Legacy/includes/class-token-engine-points-service.php').read_bytes().replace(b'\r\n', b'\n')).hexdigest(),
                       scope='Current Hub module on disposable WordPress/MariaDB; synthetic data only',
-                      not_proven=['Operational purchase proof, purchased PF consumption, reservations, signed receipts or partial refunds',
+                      not_proven=['Any real purchase producer, site operation, partial refund or current economic score',
                                   'Real network COMMIT acknowledgement loss or replica/restore recovery',
                                   'Target Hub configuration, production or staging', 'Future Fans to Hub HTTP protocol'])
         report['h0_total'] = h0_total
         report['h1_total'] = h1_total
         report['h2_reservations_total'] = h2_reservations_total
-        report['h2_consumption_total'] = len(checks) - h0_total - h1_total - h2_reservations_total
+        report['h2_consumption_total'] = h2_consumption_total
+        report['h3_proofs_total'] = len(checks) - h3_start
         if options.h1 or options.h2_reservations or options.h2:
             report['scope'] += '; closed H1 model explicitly installed only in this fixture'
             report['model_schema'] = '1 (closed_h1_model)'
@@ -297,6 +306,9 @@ def main():
         if options.h2:
             report['scope'] += '; closed synthetic consumption and atomic pending journal, no network admission'
             report['consumption_schema'] = '1 (closed_h2_consumption)'
+        if options.h3_proofs:
+            report['scope'] += '; closed H3 signed proofs and SQL nonces, no HTTP or actual SSO'
+            report['protocol_schema'] = '1 (closed_h3_hub)'
     finally:
         for process in workers:
             if process.poll() is None:

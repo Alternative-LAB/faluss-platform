@@ -9,8 +9,14 @@ final class ClosedModelEnvironment
 {
     public static function assertIsolated(\wpdb $database): void
     {
+        // Only an explicit H3 recipe may reach H2 over loopback HTTP. Never set WP_CLI for HTTP.
+        $httpRecipe = (!defined('WP_CLI') || constant('WP_CLI') !== true)
+            && defined('FALUSS_PF_H3_RECIPE_ONLY') && constant('FALUSS_PF_H3_RECIPE_ONLY') === true;
+        if ($httpRecipe) {
+            Protocol\ClosedEnvironment::assertIsolated($database, 'hub');
+        }
         if (PHP_INT_SIZE < 8
-            || !defined('WP_CLI') || constant('WP_CLI') !== true
+            || ((!defined('WP_CLI') || constant('WP_CLI') !== true) && !$httpRecipe)
             || !defined('FALUSS_HUB_PF_H1_RECIPE_ONLY') || constant('FALUSS_HUB_PF_H1_RECIPE_ONLY') !== true
             || !defined('FALUSS_PLATFORM_ROLE') || constant('FALUSS_PLATFORM_ROLE') !== 'hub'
             || !defined('FALUSS_PLATFORM_TOKEN_ENGINE') || constant('FALUSS_PLATFORM_TOKEN_ENGINE') !== true
