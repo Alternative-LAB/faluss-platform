@@ -44,6 +44,7 @@ final class HubPfRecipeDatabase extends wpdb
         }
         if (($this->fault === 'h2c-journal-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_h2c_journal` /', $query) === 1)
             || ($this->fault === 'h2c-record-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_h2c_consumptions` /', $query) === 1)
+            || ($this->fault === 'h3-receipt-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_h3_receipts` /', $query) === 1)
         ) {
             $this->fault = '';
             return false;
@@ -100,6 +101,49 @@ if (!empty($input['fault'])) {
     $wpdb->set_prefix($table_prefix);
     $wpdb->fault = $input['fault'];
     $wpdb->marker = $input['marker'];
+}
+
+if (str_starts_with($input['action'], 'h3-')) {
+    try {
+        require_once dirname(__DIR__, 3) . '/src/Federation/Legacy/includes/class-faluss-federation-crypto.php';
+        if ($input['action'] === 'h3-install') {
+            Faluss\Platform\TokenEngine\PurchasedPf\ClosedProtocolSchema::installForRecipe($wpdb);
+            $result = ['ready' => true];
+        } elseif ($input['action'] === 'h3-ready') {
+            $result = ['ready' => Faluss\Platform\TokenEngine\PurchasedPf\ClosedProtocolSchema::ready($wpdb)];
+        } elseif ($input['action'] === 'h3-public') {
+            $pair = sodium_crypto_sign_seed_keypair(Faluss_Federation_Crypto::base64url_decode(FALUSS_FEDERATION_PRIVATE_SEED, 32));
+            $result = ['public_key' => Faluss_Federation_Crypto::base64url_encode(sodium_crypto_sign_publickey($pair))];
+            sodium_memzero($pair);
+        } elseif ($input['action'] === 'h3-verify') {
+            $peer = new Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub', 'fixture.fans', [],
+                ['recipe-hub-k1' => ['public_key' => $input['public_key'], 'state' => 'active',
+                    'from' => '2026-01-01T00:00:00Z', 'until' => '2027-01-01T00:00:00Z']]);
+            $receipt = Faluss\Platform\TokenEngine\PurchasedPf\Protocol\SignedEnvelope::open(
+                Faluss\Platform\TokenEngine\PurchasedPf\Protocol\SignedEnvelope::RECEIPT, $input['receipt'], $peer, time());
+            Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PrivateReceipt::validate($receipt, 'fixture.hub', 'fixture.fans',
+                AttributionIntent::fromArray($input['payload']));
+            $result = ['verified' => true];
+        } else {
+            $protocol = new Faluss\Platform\TokenEngine\PurchasedPf\ClosedProtocolStore($wpdb, 'fixture.hub', 'recipe-hub-k1');
+            if ($input['action'] === 'h3-nonce') {
+                $protocol->acceptNonce('fixture.fans', $input['nonce'], $input['digest'], $input['member']);
+                $result = ['accepted' => true];
+            } else {
+                $intent = AttributionIntent::fromArray($input['payload']);
+                $consumptions = new ClosedConsumptionStore($wpdb, ['fixture.fans'], ['fixture.purchase'], $protocol->record(...));
+                $result = $input['action'] === 'h3-confirm' ? $consumptions->confirm($intent, $input['key'])
+                    : $consumptions->lookup($intent, $input['operation'] ?? 'confirm', $input['key']);
+                if ($result['state'] === 'confirmed') {
+                    $result['receipt'] = $protocol->receipt($intent, $result['consumption']);
+                }
+            }
+        }
+    } catch (ModelViolation $error) {
+        $result = ['error' => $error->reason];
+    }
+    echo wp_json_encode($result, JSON_THROW_ON_ERROR);
+    return;
 }
 
 if (str_starts_with($input['action'], 'h1-')) {

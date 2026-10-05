@@ -11,8 +11,9 @@ Aucune autorité d'achat réelle, paire de production, migration automatique,
 activation, score, paiement, déploiement ou flag de production.
 
 H3a livre les DTO/codecs publics de `TokenEngine/PurchasedPf/Protocol`, sans hook,
-route ou persistance. H3b raccordera le ledger H2, les reçus, la persistance
-anti-rejeu et une recette HTTP impossible à charger en configuration ordinaire.
+route ou persistance. H3b raccorde le ledger H2, les reçus et la persistance
+anti-rejeu. H3c raccordera la recette HTTP Hub/Fans impossible à charger en
+configuration ordinaire ; aucun bootstrap ni dispatcher n'est ajouté par H3b.
 Ces DTO sont le contrat étroit de lecture côté Fans : aucun accès aux tables Hub.
 
 ## Formats H3a
@@ -51,7 +52,7 @@ délégataire admis ; auto-attribution et UUID invalides refusés.
 Le serveur Fans doit résoudre le membre depuis une session/lien vérifiés et le
 créateur depuis son propriétaire actif ; une signature n'atteste pas, seule,
 le véritable SSO Me. Cette résolution sera exercée avec des liaisons fictives
-dans la recette H3b, sans réutiliser de code SSO ni fournir un UUID arbitraire.
+dans la recette H3c, sans réutiliser de code SSO ni fournir un UUID arbitraire.
 
 ## Reçu privé historique
 
@@ -73,8 +74,39 @@ reçu exact, contexte de 60 s et permissions explicites. Négatifs : clés et
 champs inconnus, encodage/duplicate/float/Unicode, signature/digest/payload
 altérés, audience/émetteur/opération/nonce/clé différents, contexte expiré ou
 futur, auto-attribution, identité invalide, allocations incohérentes et
-permissions historiques seules. H3b ajoutera concurrence/anti-rejeu SQL,
-réponses HTTP perdues après COMMIT et lookup sans second débit.
+permissions historiques seules. H3b teste concurrence/anti-rejeu SQL, crash et
+lookup sans second débit ; H3c ajoutera les réponses HTTP perdues et la délégation.
+
+## Persistance fermée H3b
+
+- Schéma propriétaire Hub `closed_h3_hub/1` explicitement installé après H2 :
+  marqueur, nonces et reçus. Installation partielle/divergente refusée ; aucun
+  upgrade normal, hook ou cron. Le schéma ledger historique reste en version 5.
+- Le callback facultatif de H2 écrit le reçu signé **dans la même transaction**
+  que débit officiel, consommation, journal et clé. En H2 sans callback, le
+  comportement historique de H2 reste inchangé. Échec de signature/INSERT :
+  rollback complet ; résultat COMMIT incertain : lookup primaire, même clé.
+- Le lookup vérifie les liens du fait immuable, du débit officiel et des lots,
+  puis réatteste les mêmes octets avec la clé courante. Pas de nouveau reçu
+  économique, débit, crédit Créateur, PF parallèle, projection ou PC.
+- Nonce SHA-256 et digest de requête persistés avant l'opération, verrou du pair
+  et transaction propres ; rejeu refusé. Limites **de recette fermée** : 60
+  requêtes/minute/membre et 600/minute/pair. Elles ne constituent aucune politique
+  publique de production. Après résultat incertain : nouveau nonce/contexte,
+  ancienne clé métier obligatoire, jamais une clé de remplacement.
+- Le garde exige environnement local, root `/var/tmp/hub-pf-wp-*` mode 0700,
+  WordPress exact, socket MariaDB privé, primaire et base dédiée ; H3 ajoute un
+  bail privé 0600 dont le digest est dans la configuration non exportable.
+  HTTP exige en plus **SAPI PHP cli-server**, écoute/Host/origine loopback exacts.
+  FPM et un site normal échouent avant leur première requête SQL, même si les
+  constantes de recette ont été copiées. Une constante ou un flag seul ne suffit
+  pas à ouvrir le protocole. Aucun fichier de test n'est chargé normalement.
+
+Recette : `python3 tests/TokenEngine/recipe/run.py --h3-proofs --source … --core …
+--cli … --output …`. Elle exécute d'abord les **161 contrôles H0/H1/H2** puis les
+preuves H3 SQL/signatures, supprime root, socket, base et processus appartenant
+à sa fixture, et n'exporte que libellés/résultats/versions. Ce lot ne démontre
+encore ni transport HTTP entre instances, ni SSO Me réel.
 
 Rollback : revert du lot ; aucun chargement normal ou changement de données
 réelles. Aucun secret, reçu privé, identifiant de personne ou payload dans les

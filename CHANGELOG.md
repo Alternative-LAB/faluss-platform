@@ -8,6 +8,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Ajouter H3b fermé : reçus privés atomiques avec consommation/débit/journal H2,
+  nonces durables et reprise primaire ; garde de recette isolée sans admission site.
 - Ajouter H3a fermé : formats canoniques restreints des reçus privés signés,
   contextes délégués et permissions PF dédiées, sans route ni activation.
 - Ajouter H2b fermé : confirmation avec débit PF officiel, consommation immuable
@@ -23,6 +25,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Tests
 
+- Tester H3b sur WordPress/MariaDB jetable : signature, concurrence, rollback du
+  reçu, crash et COMMIT inconnu, lookup stable et conservation des ledgers existants.
 - Tester H2b sur Hub WordPress/MariaDB jetable : confirmations concurrentes,
   confirmation/libération/expiration/révision source, 32 lots, COMMIT incertain et
   crash après commit sans double débit ; conservation complète des anciens claims.
