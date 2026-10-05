@@ -44,13 +44,13 @@ final class ClosedModelSchema
         }
         $rows = $database->get_results('SELECT id,version,scope FROM ' . self::quote($tables['schema']), 'ARRAY_A');
 
-        return !self::failed($database) && $rows === [['id' => '1', 'version' => self::VERSION, 'scope' => self::SCOPE]];
+        return $database->last_error === '' && $rows === [['id' => '1', 'version' => self::VERSION, 'scope' => self::SCOPE]];
     }
 
     public static function installForRecipe(\wpdb $database): void
     {
         ClosedModelEnvironment::assertIsolated($database);
-        if ($database->get_var('SELECT @@in_transaction') !== '0' || self::failed($database)) {
+        if ($database->get_var('SELECT @@in_transaction') !== '0' || $database->last_error !== '') {
             throw new ModelViolation('nested_transaction_refused');
         }
         $tables = self::tables($database);
@@ -105,7 +105,7 @@ final class ClosedModelSchema
     private static function exists(\wpdb $database, string $table): bool
     {
         $found = $database->get_var($database->prepare('SHOW TABLES LIKE %s', $database->esc_like($table)));
-        if (self::failed($database)) {
+        if ($database->last_error !== '') {
             throw new ModelViolation('model_schema_unavailable');
         }
 
@@ -136,15 +136,19 @@ final class ClosedModelSchema
     private static function verify(\wpdb $database, string $table, array $definition): bool
     {
         $status = $database->get_row($database->prepare('SHOW TABLE STATUS LIKE %s', $database->esc_like($table)), 'ARRAY_A');
+        $statusError = $database->last_error;
+        $columns = $database->get_results('SHOW FULL COLUMNS FROM ' . self::quote($table), 'ARRAY_A');
+        $columnsError = $database->last_error;
+        $rows = $database->get_results('SHOW INDEX FROM ' . self::quote($table), 'ARRAY_A');
+        $indexesError = $database->last_error;
+        // Snapshot each error before the next query replaces wpdb's mutable state.
         if (!is_array($status) || strcasecmp((string) ($status['Engine'] ?? ''), 'InnoDB') !== 0
-            || ($status['Collation'] ?? '') !== 'utf8mb4_bin' || self::failed($database)
+            || ($status['Collation'] ?? '') !== 'utf8mb4_bin'
+            || $statusError !== '' || $columnsError !== '' || $indexesError !== ''
         ) {
             return false;
         }
-        $columns = $database->get_results('SHOW FULL COLUMNS FROM ' . self::quote($table), 'ARRAY_A');
-        if (array_column($columns, 'Field') !== array_keys($definition['columns'])
-            || self::failed($database)
-        ) {
+        if (array_column($columns, 'Field') !== array_keys($definition['columns'])) {
             return false;
         }
         foreach ($columns as $column) {
@@ -159,10 +163,6 @@ final class ClosedModelSchema
             ) {
                 return false;
             }
-        }
-        $rows = $database->get_results('SHOW INDEX FROM ' . self::quote($table), 'ARRAY_A');
-        if (self::failed($database)) {
-            return false;
         }
         $indexes = [];
         foreach ($rows as $row) {
@@ -187,12 +187,6 @@ final class ClosedModelSchema
         }
 
         return true;
-    }
-
-    /** @phpstan-impure Database queries replace last_error on every call. */
-    private static function failed(\wpdb $database): bool
-    {
-        return $database->last_error !== '';
     }
 
     /** @return array<string,array{columns:array<string,string>,indexes:array<string,array{bool,list<string>}>}> */

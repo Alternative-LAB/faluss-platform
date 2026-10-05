@@ -24,6 +24,12 @@ final class HubPfRecipeDatabase extends wpdb
 
     public function query($query)
     {
+        if ($this->fault === 'h1-metadata-error' && str_starts_with($query, 'SHOW TABLE STATUS LIKE')) {
+            $this->fault = '';
+            $result = parent::query($query);
+            $this->last_error = 'fixture_metadata_error';
+            return $result;
+        }
         if ($this->fault === 'h1-key-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_h1_keys` /', $query) === 1) {
             $this->fault = '';
             return false;

@@ -237,6 +237,9 @@ def run_checks(root, wp, check, call, sql, start, finish, parallel, await_file):
     check('H1 divergent column set is refused without adoption', call('h1-ready') == dict(ready=False) and install_refused())
     sql('ALTER TABLE ' + prefix + 'keys DROP COLUMN unexpected')
     check('H1 restored fixture shape is revalidated', call('h1-ready') == dict(ready=True))
+    check('H1 metadata error is retained before later queries reset wpdb error state',
+          call('h1-ready', fault='h1-metadata-error', marker=str(root / 'unused')) == dict(ready=False)
+          and call('h1-ready') == dict(ready=True))
     before = counts()
     config.write_text(fixture_config.replace('"local"', '"production"'))
     check('H1 production environment is refused even with recipe marker',
