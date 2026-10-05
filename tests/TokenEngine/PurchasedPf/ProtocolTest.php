@@ -12,6 +12,7 @@ use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\DelegatedContext;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PrivateReceipt;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\SignedEnvelope;
+use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\TransportMessage;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
@@ -188,6 +189,52 @@ JSON;
         $receipt['allocations'][0]['purchased_pf'] = '1';
         $this->expectException(ModelViolation::class);
         PrivateReceipt::validate($receipt, 'fixture.hub', 'fixture.fans', $intent);
+    }
+
+    public function testWireRequestRequiresItsIndependentlySignedDelegation(): void
+    {
+        $context = $this->context();
+        $payload = ['contract' => DelegatedContext::CONTRACT, 'kind' => SignedEnvelope::REQUEST,
+            'issuer' => 'fixture.fans', 'audience' => 'fixture.hub', 'operation' => 'reserve',
+            'nonce' => $context['nonce'], 'operation_key' => str_repeat('b',64), 'lookup_operation' => '',
+            'issued_at' => $context['issued_at'], 'expires_at' => $context['expires_at'],
+            'context' => SignedEnvelope::seal(SignedEnvelope::CONTEXT, CanonicalJson::encode($context), 'recipe-k1')];
+        $request = TransportMessage::request($payload, $this->peer, $this->now);
+        self::assertSame(ModelFixtures::intent(), $request['intent']->values);
+        $payload['nonce'] = str_repeat('f',64);
+        $this->expectException(ModelViolation::class);
+        TransportMessage::request($payload, $this->peer, $this->now);
+    }
+
+    public function testUnknownResponseIsNotAnAuthoritativeAbsence(): void
+    {
+        $peer = new PeerPolicy('fixture.hub','fixture.fans',[],[]);
+        $payload = ['contract' => DelegatedContext::CONTRACT, 'kind' => SignedEnvelope::RESPONSE,
+            'issuer' => 'fixture.hub', 'audience' => 'fixture.fans', 'operation' => 'confirm',
+            'nonce' => str_repeat('a',64), 'request_sha256' => str_repeat('b',64),
+            'issued_at' => gmdate('Y-m-d\TH:i:s\Z',$this->now), 'expires_at' => gmdate('Y-m-d\TH:i:s\Z',$this->now+60),
+            'outcome' => 'unknown', 'result' => ['reason' => 'h2_commit_unknown']];
+        self::assertSame(['outcome'=>'unknown','result'=>['reason'=>'h2_commit_unknown']],
+            TransportMessage::response($payload,$peer,'confirm',str_repeat('a',64),str_repeat('b',64),$this->now));
+        $payload['outcome'] = 'ok';
+        $payload['result'] = ['state'=>'not_found','receipt'=>[]];
+        $this->expectException(ModelViolation::class);
+        TransportMessage::response($payload,$peer,'confirm',str_repeat('a',64),str_repeat('b',64),$this->now);
+    }
+
+    public function testSignedDelegationCannotOutliveItsLocalSession(): void
+    {
+        $deadline = time()+10;
+        $request = \Faluss\Platform\Fans\PfContract\ClosedClient::request(AttributionIntent::fromArray(ModelFixtures::intent()),
+            'reserve',str_repeat('b',64),'','recipe-k1',$deadline);
+        $outer = CanonicalJson::object($request['wire'],65536);
+        $payload = SignedEnvelope::open(SignedEnvelope::REQUEST,$outer,$this->peer,time());
+        $context = SignedEnvelope::open(SignedEnvelope::CONTEXT,$payload['context'],$this->peer,time());
+        self::assertSame($deadline,strtotime($payload['expires_at']));
+        self::assertSame($payload['expires_at'],$context['expires_at']);
+        $this->expectException(ModelViolation::class);
+        \Faluss\Platform\Fans\PfContract\ClosedClient::request(AttributionIntent::fromArray(ModelFixtures::intent()),
+            'reserve',str_repeat('b',64),'','recipe-k1',time());
     }
 
     /** @return array<string,mixed> */

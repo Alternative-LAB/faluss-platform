@@ -8,6 +8,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Ajouter H3c fermé : transport Hub/Fans signé et délégué sur loopback de recette,
+  intentions/clés stables et inbox privée vérifiée, sans API normale ni ledger Fans.
 - Ajouter H3b fermé : reçus privés atomiques avec consommation/débit/journal H2,
   nonces durables et reprise primaire ; garde de recette isolée sans admission site.
 - Ajouter H3a fermé : formats canoniques restreints des reçus privés signés,
@@ -25,6 +27,9 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Tests
 
+- Tester H3c entre deux WordPress/MariaDB jetables : permissions, signatures,
+  audiences/clés/expiration/rejeux, confirmation concurrente et perte HTTP après
+  consommation suivie d'un lookup sans second débit ; aucun SSO Me véritable annoncé.
 - Tester H3b sur WordPress/MariaDB jetable : signature, concurrence, rollback du
   reçu, crash et COMMIT inconnu, lookup stable et conservation des ledgers existants.
 - Tester H2b sur Hub WordPress/MariaDB jetable : confirmations concurrentes,

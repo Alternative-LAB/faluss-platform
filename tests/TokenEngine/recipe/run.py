@@ -1,7 +1,7 @@
-"""Characterize the unchanged Hub module on disposable WordPress/MariaDB.
+"""Characterize the Hub module on disposable WordPress/MariaDB.
 
-No HTTP server, remote Hub, payment, or production data. The only configuration
-changed is a generated wp-config.php inside a fresh 0700 temporary directory.
+Optional closed H1/H2/H3 and loopback HTTP use fictitious data only. Never remote
+sites, payment, or production data. Generated configuration stays in a fresh 0700 root.
 """
 import argparse
 import datetime
@@ -30,7 +30,10 @@ def main():
     parser.add_argument('--h2-reservations', action='store_true', help='Closed H2 reservations after H0 and H1')
     parser.add_argument('--h2', action='store_true', help='Closed H2 consumption and recovery after H0, H1 and H2 reservations')
     parser.add_argument('--h3-proofs', action='store_true', help='Closed H3 signed receipt and nonce persistence after H2')
+    parser.add_argument('--h3-http', action='store_true', help='Closed Hub/Fans HTTP after all owner proofs; not central SSO')
     options = parser.parse_args()
+    if options.h3_http:
+        options.h3_proofs = True
     if options.h3_proofs:
         options.h2 = True
     source = pathlib.Path(options.source).resolve()
@@ -284,6 +287,10 @@ def main():
         if options.h3_proofs:
             from h3_proof_checks import run_checks
             run_checks(root, wp, check, call, sql, start, finish, parallel, await_file)
+        h3_http_start = len(checks)
+        if options.h3_http:
+            from h3_http_checks import run_checks
+            run_checks(root, wp, source, core, options.cli, check, call, sql, command, workers, log)
         report = dict(checks=checks, total=len(checks), failed=0, wordpress=cli('core', 'version').strip(),
                       php=command(['php', '-r', 'echo PHP_VERSION;']).strip(),
                       database=sql('SELECT VERSION()'), schema='5',
@@ -296,7 +303,8 @@ def main():
         report['h1_total'] = h1_total
         report['h2_reservations_total'] = h2_reservations_total
         report['h2_consumption_total'] = h2_consumption_total
-        report['h3_proofs_total'] = len(checks) - h3_start
+        report['h3_proofs_total'] = h3_http_start - h3_start
+        report['h3_http_total'] = len(checks) - h3_http_start
         if options.h1 or options.h2_reservations or options.h2:
             report['scope'] += '; closed H1 model explicitly installed only in this fixture'
             report['model_schema'] = '1 (closed_h1_model)'
@@ -307,8 +315,16 @@ def main():
             report['scope'] += '; closed synthetic consumption and atomic pending journal, no network admission'
             report['consumption_schema'] = '1 (closed_h2_consumption)'
         if options.h3_proofs:
-            report['scope'] += '; closed H3 signed proofs and SQL nonces, no HTTP or actual SSO'
+            report['scope'] += '; closed H3 signed proofs and SQL nonces'
+            if not options.h3_http:
+                report['scope'] += ', no HTTP or actual SSO'
             report['protocol_schema'] = '1 (closed_h3_hub)'
+        if options.h3_http:
+            report['scope'] += '; real private loopback HTTP between distinct disposable Hub/Fans WP and databases, fictitious links/keys, not true SSO'
+            report['fans_protocol_schema'] = '1 (closed_h3_fans)'
+            report['not_proven'] = ['Real purchase producer, real account or target/staging configuration',
+                                    'True Faluss Identity passwordless/SSO, TLS and production peer admission',
+                                    'Refunds H4, score HoF F1, retention policy, replica/restore recovery']
     finally:
         for process in workers:
             if process.poll() is None:

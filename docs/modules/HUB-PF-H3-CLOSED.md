@@ -12,7 +12,7 @@ activation, score, paiement, déploiement ou flag de production.
 
 H3a livre les DTO/codecs publics de `TokenEngine/PurchasedPf/Protocol`, sans hook,
 route ou persistance. H3b raccorde le ledger H2, les reçus et la persistance
-anti-rejeu. H3c raccordera la recette HTTP Hub/Fans impossible à charger en
+anti-rejeu. H3c raccorde la recette HTTP Hub/Fans impossible à charger en
 configuration ordinaire ; aucun bootstrap ni dispatcher n'est ajouté par H3b.
 Ces DTO sont le contrat étroit de lecture côté Fans : aucun accès aux tables Hub.
 
@@ -51,7 +51,7 @@ signé dans un domaine distinct et lié à la requête. Client de l'intention =
 délégataire admis ; auto-attribution et UUID invalides refusés.
 Le serveur Fans doit résoudre le membre depuis une session/lien vérifiés et le
 créateur depuis son propriétaire actif ; une signature n'atteste pas, seule,
-le véritable SSO Me. Cette résolution sera exercée avec des liaisons fictives
+le véritable SSO Me. Cette résolution est exercée avec des liaisons fictives
 dans la recette H3c, sans réutiliser de code SSO ni fournir un UUID arbitraire.
 
 ## Reçu privé historique
@@ -75,7 +75,7 @@ champs inconnus, encodage/duplicate/float/Unicode, signature/digest/payload
 altérés, audience/émetteur/opération/nonce/clé différents, contexte expiré ou
 futur, auto-attribution, identité invalide, allocations incohérentes et
 permissions historiques seules. H3b teste concurrence/anti-rejeu SQL, crash et
-lookup sans second débit ; H3c ajoutera les réponses HTTP perdues et la délégation.
+lookup sans second débit ; H3c ajoute les réponses HTTP perdues et la délégation.
 
 ## Persistance fermée H3b
 
@@ -107,6 +107,80 @@ Recette : `python3 tests/TokenEngine/recipe/run.py --h3-proofs --source … --co
 preuves H3 SQL/signatures, supprime root, socket, base et processus appartenant
 à sa fixture, et n'exporte que libellés/résultats/versions. Ce lot ne démontre
 encore ni transport HTTP entre instances, ni SSO Me réel.
+
+## Scénarios HTTP H3c, avant implémentation de la recette
+
+Deux WordPress distincts, deux bases dans le même MariaDB privé, deux seeds et
+deux politiques explicites : demandes POST signées/déléguées, réserve/confirmation/
+libération/lookup, inbox privée dédoublonnée. Fans vérifie session WP absolue,
+lien local et propriétaire actif via leurs contrats privés ; ces liaisons sont
+**fictives**, sans échange réel avec Me. Un paramètre d'identité ne peut pas
+remplacer ces résolutions. Aucun nouveau droit d'achat ou UI d'attribution.
+
+Négatifs réseau : signatures de requête/contexte/réponse/reçu altérées, mauvaises
+audiences, clés inconnues/révoquées, expiration et mauvais nonce/digest/opération,
+identité navigateur falsifiée, invité/non lié/admin, auto-attribution, profil
+inactif, permissions wallet seules, GET, mauvais Host/bail de fixture. Rejeux
+réseau refusés, reprise métier avec nouveau nonce et ancienne clé ; confirmation
+concurrente unique. Une réponse HTTP est perdue **après consommation**, puis
+lookup restitue le reçu sans second débit. Rotation : réattestation du même fait
+immuable avec clé courante, ancienne clé révoquée refusée. Aucun log privé.
+
+## Transport et réception fermés H3c
+
+Le plugin ne charge **aucune route H3**. Seul `h3-http-adapter.php`, copié comme
+MU-loader dans les deux fixtures, enregistre un namespace de recette après le
+garde cumulatif H3. Il ne fait partie ni du bootstrap ni du ZIP installable.
+Les constantes copiées, un bail incorrect, un autre Host, FPM, une base distante
+ou un chemin de site ordinaire ne peuvent pas l'ouvrir. Aucun pair, permission
+ou opération n'est ajouté au dispatcher Federation historique.
+
+- Hub : requête et contexte signés indépendamment, droits `pf.*` et délégation,
+  fraîcheur de 60 s, audience/opération/nonce/clé immuables. Anti-rejeu SQL avant
+  dispatch. Réponse signée avec nonce **et digest des octets complets** de la requête.
+- La délégation et la requête expirent au plus tôt entre échéance de session
+  locale et plafond de 60 s ; une session expirée pendant la préparation ne peut
+  pas émettre un contexte neuf. Aucun renouvellement de la session locale.
+- Fans : session WP authentifiée et nonce REST réel dans la fixture ; résolution
+  par `currentLinkedSubject`, `activeOwner`, `linkedIdentity` et échéance absolue
+  de cookie/token. Invité, non lié, compte privilégié, profil suspendu,
+  auto-attribution et UUID de membre fourni par le navigateur sont refusés.
+  Ces liens sont semés fictivement ; aucune preuve Me n'est produite par ce test.
+- Le client conserve intention et clés d'opération **avant** tout envoi. Toute
+  modification du contenu est un conflit. Lookup lit la clé originale sans
+  en créer ; timeout, body altéré ou réponse perdue restent inconnus.
+  Nouveau nonce/contexte pour la reprise, jamais nouvelle clé métier.
+- Endpoint loopback fixe, POST JSON, zéro redirection/cookie central, délai borné,
+  limite 64 KiB et aucune URL/identité/clé dans les paramètres GET. Cache privé
+  `no-store` ; pas de logs des payloads, cookies, identités ou clés.
+- Inbox **privée Fans**, pas de ledger : intentions, clés et reçus canoniques.
+  Le client vérifie réponse fraîche et signature/audience/contenu du reçu avant
+  INSERT. Même reçu/digest : inertie ; contenu divergent : refus sans remplacement.
+  H3 reste à la révision 1, aucune correction H4 ou projection F1.
+- Le journal H2 reste `pending` : aucun event/score n'est annoncé comme remis
+  à une projection HoF. La réception privée ne prouve pas de net économique courant.
+
+```mermaid
+sequenceDiagram
+    participant M as Session WP fictive
+    participant F as Fans jetable
+    participant H as Hub jetable
+    M->>F: POST privé + nonce REST
+    F->>F: Résoudre identités et conserver clé stable
+    F->>H: Requête et contexte signés, TTL 60 s
+    H->>H: Nonce SQL puis débit/fait/journal/reçu atomiques
+    H--xF: Réponse HTTP perdue après consommation
+    F->>H: Lookup, nonce frais et ancienne clé
+    H-->>F: Réponse fraîche liée et reçu historique réattesté
+    F->>F: Vérification puis inbox privée dédoublonnée
+```
+
+`run.py --h3-http` exécute les contrôles antérieurs et la recette Hub/Fans HTTP.
+Deux WordPress/bases distincts, MariaDB sans écoute réseau, PHP cli-server local
+multiworkers ; root privé et tous ses processus supprimés à la fin.
+L'échec de retour HTTP est réel entre les deux instances ; le COMMIT SQL négatif
+injecté des lots H2/H3b reste une preuve distincte. Pas de SSO/passwordless Me,
+TLS de production, producteur d'achat, remboursement, réplica/restore ou score.
 
 Rollback : revert du lot ; aucun chargement normal ou changement de données
 réelles. Aucun secret, reçu privé, identifiant de personne ou payload dans les

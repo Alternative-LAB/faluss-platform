@@ -2,7 +2,9 @@
 
 ## Statut et autorité
 
-- Contrat **proposé, non ratifié par Hub** : `fans.hub-purchased-pf/0.1.0` ; état **dépendance Hub bloquée**.
+- Contrat de production **proposé, non ratifié intégralement par Hub** :
+  `fans.hub-purchased-pf/0.1.0`. Les accords fermés H1/H2/H3 sont distincts ;
+  aucune capacité économique n'est ouverte sur les sites.
 - Base examinée : `634eee2a8556f4b8458822641a03114e88334c3e`.
 - Référence produit : [ADR 0018](../adr/0018-fans-pf-pc-hof-v3.md).
 - Ce document est soumis au propriétaire Hub ; **sa validation n’est pas obtenue**.
@@ -16,11 +18,12 @@
 - Accord ultérieur du 5 octobre : **D1/D2/D4 seulement pour le modèle fermé H1**,
   décrit dans [HUB-PF-H1-MODEL.md](HUB-PF-H1-MODEL.md). Validateurs, schéma additif
   et persistance de recette ne ratifient pas les opérations économiques de ce
-  document ni la proposition R1 complète de #147. D3/D5/D6 restent proposés.
+  document ni la proposition R1 complète de #147. Les accords D6/H2 et D3/H3
+  limités à la recette fermée sont consignés ci-dessous ; D5/H4 et F1 restent proposés.
   L'ordre de réduction après remboursement et la conservation de 24 mois ne sont
   pas approuvés : décisions séparées [#149](https://github.com/Alternative-LAB/faluss-platform/issues/149)
   et [#150](https://github.com/Alternative-LAB/faluss-platform/issues/150) avant H4/ouverture.
-- Aucun producteur d'achat réel, crédit/débit nouveau, API/transport installé,
+- Aucun producteur d'achat réel, crédit/débit nouveau sur site, API/transport installé sur site,
   ledger parallèle Fans, paiement, score persistant, migration automatique sur
   un site réel, UI, flag de production ou activation. Les anciens claims restent inchangés.
 
@@ -30,10 +33,13 @@ Accord limité supplémentaire : **D3 pour H3 fermé seulement**, décrit dans
 [HUB-PF-H3-CLOSED.md](HUB-PF-H3-CLOSED.md). Cet accord permet les reçus et une
 recette de transport/délégation Hub ↔ Fans jetable, pas une admission de production,
 un achat réel ou la ratification de H4/F1, #149 et #150.
+Le wire de cette recette utilise `fans.hub-purchased-pf/0.2.0`, distinct du draft
+de production ci-dessous. Reçus atomiques, nonces SQL, inbox privée et HTTP ont
+leurs tests ; aucun ledger Fans, score, migration automatique ou route normale.
 
 Accord limité ultérieur : [H2 fermé](HUB-PF-H2-CLOSED.md) et garanties D6 nécessaires
 (transaction, journal, lookup primaire et clé stable) sont autorisés dans la seule
-recette Hub jetable. Cela ne ratifie ni D3, ni les remboursements/rétention, ni ce
+recette Hub jetable. Cet accord H2 seul ne ratifiait ni D3, ni les remboursements/rétention, ni ce
 protocole réseau. Aucun producteur réel ou consommation utilisable sur les sites.
 
 | Surface relue | Disponible | Manquant pour ce contrat |
