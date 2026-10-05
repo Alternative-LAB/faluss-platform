@@ -104,3 +104,17 @@ H1 apporte seulement le modèle décrit ici. Les lots suivants H2
 et F1 (projection Fans) restent bornés dans #147 et attendent leurs accords.
 Les décisions produit #149 et #150 doivent être obtenues avant H4/ouverture.
 Aucun achat ni score HoF réel ne doit être annoncé sur la seule base de ces tests.
+
+## H2a — réservations fermées
+
+L'accord H2 limité est décrit dans [HUB-PF-H2-CLOSED](../../../docs/modules/HUB-PF-H2-CLOSED.md).
+Exécuter `run.py --h2-reservations` avec les mêmes `--source`, `--core`, `--cli`
+et `--output`. H0 et H1 restent exécutés avant H2a. Le worker ajoute explicitement
+le marqueur H2 dans la seule fixture puis installe cinq tables neuves.
+
+Admissions synthétiques avec crédits dans le ledger **officiel**, réserves FIFO
+entières sans débit, 120 s non renouvelables, expiration/libération, quotas,
+unicités/conflits/concurrence et reprises COMMIT : moteur WordPress/MariaDB réel,
+preuves fictives. Comparaison intégrale des lignes historiques PF/ALB.
+Le rapport distingue les totaux H0/H1/H2a et ne contient ni payload ni identité.
+H2a ne prouve aucune consommation ou journal de remise : lot H2b suivant.

@@ -5,6 +5,8 @@ declare(strict_types=1);
 use Faluss\Platform\TokenEngine\PurchasedPf\AttributionIntent;
 use Faluss\Platform\TokenEngine\PurchasedPf\ClosedModelSchema;
 use Faluss\Platform\TokenEngine\PurchasedPf\ClosedModelStore;
+use Faluss\Platform\TokenEngine\PurchasedPf\ClosedReservationSchema;
+use Faluss\Platform\TokenEngine\PurchasedPf\ClosedReservationStore;
 use Faluss\Platform\TokenEngine\PurchasedPf\ModelViolation;
 use Faluss\Platform\TokenEngine\PurchasedPf\PurchaseEvidence;
 
@@ -31,6 +33,10 @@ final class HubPfRecipeDatabase extends wpdb
             return $result;
         }
         if ($this->fault === 'h1-key-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_h1_keys` /', $query) === 1) {
+            $this->fault = '';
+            return false;
+        }
+        if ($this->fault === 'h2-key-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_h2_keys` /', $query) === 1) {
             $this->fault = '';
             return false;
         }
@@ -100,6 +106,32 @@ if (str_starts_with($input['action'], 'h1-')) {
                 'h1-lookup' => $model->lookup($input['scope'], $input['operation'], $input['key']),
                 'h1-authority' => ['constructed' => true],
                 default => throw new RuntimeException('Unknown H1 fixture action.'),
+            };
+        }
+    } catch (ModelViolation $error) {
+        $result = ['error' => $error->reason];
+    }
+    echo wp_json_encode($result, JSON_THROW_ON_ERROR);
+    return;
+}
+
+if (str_starts_with($input['action'], 'h2-')) {
+    try {
+        if ($input['action'] === 'h2-install') {
+            ClosedReservationSchema::installForRecipe($wpdb);
+            $result = ['ready' => ClosedReservationSchema::ready($wpdb)];
+        } elseif ($input['action'] === 'h2-ready') {
+            $result = ['ready' => ClosedReservationSchema::ready($wpdb)];
+        } else {
+            $store = new ClosedReservationStore($wpdb, $input['client_authorities'] ?? ['fixture.fans', 'fixture.other'],
+                $input['evidence_authorities'] ?? ['fixture.purchase']);
+            $result = match ($input['action']) {
+                'h2-admit' => $store->admitLotForRecipe($input['lot_id'], $input['member'], $input['key']),
+                'h2-reserve' => $store->reserve(AttributionIntent::fromArray($input['payload']), $input['key']),
+                'h2-release' => $store->release(AttributionIntent::fromArray($input['payload']), $input['key']),
+                'h2-lookup' => $store->lookup(AttributionIntent::fromArray($input['payload']), $input['operation'], $input['key']),
+                'h2-authority' => ['constructed' => true],
+                default => throw new RuntimeException('Unknown H2 fixture action.'),
             };
         }
     } catch (ModelViolation $error) {

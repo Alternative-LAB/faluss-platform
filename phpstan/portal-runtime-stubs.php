@@ -55,6 +55,17 @@ final class Token_Engine_Schema
 {
     public const VERSION = 5;
 
+    /** @phpstan-impure */
+    public static function is_ready(): bool
+    {
+        return true;
+    }
+
+    public static function pf_ledger_table(): string
+    {
+        return 'wp_token_engine_pf_ledger';
+    }
+
     public static function maybe_install(): bool
     {
         return true;
