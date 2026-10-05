@@ -35,6 +35,13 @@ Les gains Hub `20 PF earned` et Me `75 PF earned` restent cumulables mais ne son
 
 ## Validation et retour arrière
 
+Le lot de [caractérisation H0](../../tests/TokenEngine/recipe/README.md) exerce le
+module actuel sur un WordPress/MariaDB Hub neuf et isolé : concurrence des claims,
+perte de réponse autour de COMMIT, rejeux et compensation entière. Il n'atteste
+ni environnement Hub cible, ni capacités PF achetés proposées dans #82. Le
+propriétaire habilité désigné est ALB-Origine ; l'accord sur ces nouvelles capacités
+reste attendu dans [#147](https://github.com/Alternative-LAB/faluss-platform/issues/147).
+
 Avant bascule, il reste obligatoire de tester sur une copie représentative du Hub : migration MySQL/InnoDB v1→v5, conservation et rapprochement de tous les projets/règles/permissions/droits/octrois/jetons et des deux ledgers, concurrence réelle, soldes par classe, compensations, routes Connector HTTPS, rotation de secret, administration responsive et round-trip avec les Connectors déployés. Ces contrôles ne sont pas une autorisation de production.
 
 Pour revenir en arrière : remettre `FALUSS_PLATFORM_TOKEN_ENGINE` à `false`, désactiver Faluss Platform si nécessaire, puis réactiver l’ancien plugin contre les mêmes tables et options. Ne supprimer, réécrire, recalculer, fusionner ou convertir aucune ligne de ledger. Toute opération sur des données réelles exige sauvegarde, inventaire exact, rapprochement et autorisation de production séparée.
