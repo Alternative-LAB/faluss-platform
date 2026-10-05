@@ -48,6 +48,11 @@ Les opérations économiques et D3/D5/D6 restent proposés dans
 réduction des scores (#149) et la conservation (#150) attendent une décision
 distincte avant H4/ouverture. Aucun ledger historique ni schéma v5 n'est modifié.
 
+[H2 fermé](HUB-PF-H2-CLOSED.md), autorisé séparément, ajoute des réservations de
+recette et des crédits fictifs liés au ledger officiel. Aucun appel bootstrap ou
+producteur réel ; aucune consommation utilisable sur site. Les classes historiques
+restent identiques et les lignes antérieures sont conservées.
+
 Avant bascule, il reste obligatoire de tester sur une copie représentative du Hub : migration MySQL/InnoDB v1→v5, conservation et rapprochement de tous les projets/règles/permissions/droits/octrois/jetons et des deux ledgers, concurrence réelle, soldes par classe, compensations, routes Connector HTTPS, rotation de secret, administration responsive et round-trip avec les Connectors déployés. Ces contrôles ne sont pas une autorisation de production.
 
 Pour revenir en arrière : remettre `FALUSS_PLATFORM_TOKEN_ENGINE` à `false`, désactiver Faluss Platform si nécessaire, puis réactiver l’ancien plugin contre les mêmes tables et options. Ne supprimer, réécrire, recalculer, fusionner ou convertir aucune ligne de ledger. Toute opération sur des données réelles exige sauvegarde, inventaire exact, rapprochement et autorisation de production séparée.

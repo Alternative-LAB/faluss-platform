@@ -26,6 +26,11 @@
 
 ## Capacités réellement disponibles
 
+Accord limité ultérieur : [H2 fermé](HUB-PF-H2-CLOSED.md) et garanties D6 nécessaires
+(transaction, journal, lookup primaire et clé stable) sont autorisés dans la seule
+recette Hub jetable. Cela ne ratifie ni D3, ni les remboursements/rétention, ni ce
+protocole réseau. Aucun producteur réel ou consommation utilisable sur les sites.
+
 | Surface relue | Disponible | Manquant pour ce contrat |
 | --- | --- | --- |
 | [TokenEngineContract](../../src/TokenEngine/TokenEngineContract.php) | `hubDailyStatus`, `claimHubDaily` | Tout le protocole acheté/réservé/consommé décrit ici |

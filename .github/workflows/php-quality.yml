@@ -110,10 +110,13 @@ jobs:
         run: python3 tests/TokenEngine/recipe/run.py --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-checks.json"
       - name: Hub H1 closed model persistence real WordPress
         run: python3 tests/TokenEngine/recipe/run.py --h1 --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-h1-checks.json"
+      - name: Hub H2 closed reservations real WordPress
+        run: python3 tests/TokenEngine/recipe/run.py --h2-reservations --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-h2-reservations-checks.json"
       - uses: actions/upload-artifact@v4
         with:
           name: hub-pf-runtime-checks
           path: |
             ${{ runner.temp }}/hub-pf-checks.json
             ${{ runner.temp }}/hub-pf-h1-checks.json
+            ${{ runner.temp }}/hub-pf-h2-reservations-checks.json
           if-no-files-found: error

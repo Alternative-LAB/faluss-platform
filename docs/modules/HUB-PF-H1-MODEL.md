@@ -15,6 +15,11 @@ protocoles économiques ratifiés par cet accord limité.
 La réduction des scores et une durée de 24 mois ne sont ni implémentées ni
 appliquées par H1. Ces décisions précèdent H4 et toute ouverture économique.
 
+Accord ultérieur : [H2 fermé](HUB-PF-H2-CLOSED.md) est autorisé séparément,
+avec seulement les garanties D6 nécessaires de transaction/journal/lookup primaire
+et clé stable. H1 garde son comportement non consommant ; D3 et les effets #149/#150
+ne sont pas ratifiés par cet accord.
+
 H1 n'enregistre aucun producteur d'achat réel, n'authentifie aucune preuve de
 paiement et n'accorde aucun droit depuis un UUID. Il ne crédite/débite aucun PF,
 ne réserve rien, ne génère aucun reçu signé, n'appelle aucun writer historique

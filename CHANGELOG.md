@@ -8,6 +8,9 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Ajouter H2a fermé : filiation des crédits fictifs au ledger PF officiel,
+  réservations FIFO atomiques de 120 s sans renouvellement, libération et lookup
+  primaire avec clé stable. Recette Hub isolée uniquement, aucun débit/site/API Fans.
 - Ajouter le modèle fermé H1 des preuves d'achat synthétiques, lots de provenance,
   intentions et plans FIFO : validateurs stricts, schéma additif propriétaire et
   persistance atomique testable uniquement dans la recette Hub isolée. Aucun
@@ -15,6 +18,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Tests
 
+- Vérifier H2a sur WordPress/MariaDB jetable : réserves/admissions concurrentes,
+  expiration, quotas, reprises COMMIT, rollback et conservation des claims/lignes historiques.
 - Ajouter la recette WordPress/MariaDB Hub jetable des claims PF historiques,
   de leur concurrence réelle, des pertes de réponse autour de COMMIT et des
   compensations intégrales, sans modifier les opérations économiques.
