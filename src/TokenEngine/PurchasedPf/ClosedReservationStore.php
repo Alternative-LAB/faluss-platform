@@ -321,13 +321,14 @@ final class ClosedReservationStore
         $lots = [];
         foreach ($credits as $credit) {
             $lot = $this->verifyCredit($credit, $intent->values['member_faluss_id']);
-            if ($lot['source_state'] !== 'confirmed' || $credit['policy_version'] !== $intent->values['policy_version']) {
+            $corrected = ClosedCorrectedLot::view($this->connection, $lot);
+            if (!$corrected['eligible'] || $credit['policy_version'] !== $intent->values['policy_version']) {
                 continue;
             }
             $allocated = $this->connection->rows($database->prepare(
                 "SELECT COALESCE(SUM(a.purchased_pf),0) AS total FROM %i a JOIN %i r ON r.attribution_id=a.attribution_id WHERE a.lot_id=%s AND (r.state='confirmed' OR (r.state='reserved' AND r.expires_at>%s))", $this->tables['allocations'], $this->tables['reservations'], $credit['lot_id'], $now));
             $used = (int) ModelValues::integer((string) $allocated[0]['total']);
-            $quantity = (int) ModelValues::integer((string) $credit['purchased_pf'], true);
+            $quantity = (int) ModelValues::integer((string) $credit['purchased_pf'], true) - $corrected['available_cancelled_pf'];
             if ($used > $quantity) {
                 throw new ModelViolation('h2_integrity_failure');
             }

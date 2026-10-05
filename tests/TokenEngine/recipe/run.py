@@ -31,7 +31,10 @@ def main():
     parser.add_argument('--h2', action='store_true', help='Closed H2 consumption and recovery after H0, H1 and H2 reservations')
     parser.add_argument('--h3-proofs', action='store_true', help='Closed H3 signed receipt and nonce persistence after H2')
     parser.add_argument('--h3-http', action='store_true', help='Closed Hub/Fans HTTP after all owner proofs; not central SSO')
+    parser.add_argument('--h4', action='store_true', help='Closed owner cumulative corrections and recovery after unchanged H0-H3')
     options = parser.parse_args()
+    if options.h4:
+        options.h3_http = True
     if options.h3_http:
         options.h3_proofs = True
     if options.h3_proofs:
@@ -291,6 +294,10 @@ def main():
         if options.h3_http:
             from h3_http_checks import run_checks
             run_checks(root, wp, source, core, options.cli, check, call, sql, command, workers, log)
+        h4_start = len(checks)
+        if options.h4:
+            from h4_correction_checks import run_checks
+            run_checks(root, wp, check, call, sql, start, finish, parallel, await_file)
         report = dict(checks=checks, total=len(checks), failed=0, wordpress=cli('core', 'version').strip(),
                       php=command(['php', '-r', 'echo PHP_VERSION;']).strip(),
                       database=sql('SELECT VERSION()'), schema='5',
@@ -304,7 +311,8 @@ def main():
         report['h2_reservations_total'] = h2_reservations_total
         report['h2_consumption_total'] = h2_consumption_total
         report['h3_proofs_total'] = h3_http_start - h3_start
-        report['h3_http_total'] = len(checks) - h3_http_start
+        report['h3_http_total'] = h4_start - h3_http_start
+        report['h4_total'] = len(checks) - h4_start
         if options.h1 or options.h2_reservations or options.h2:
             report['scope'] += '; closed H1 model explicitly installed only in this fixture'
             report['model_schema'] = '1 (closed_h1_model)'
@@ -325,6 +333,12 @@ def main():
             report['not_proven'] = ['Real purchase producer, real account or target/staging configuration',
                                     'True Faluss Identity passwordless/SSO, TLS and production peer admission',
                                     'Refunds H4, score HoF F1, retention policy, replica/restore recovery']
+        if options.h4:
+            report['scope'] += '; owner partial cumulative corrections, disputes and durable 100-allocation fragments with fictitious source proofs'
+            report['correction_schema'] = '1 (closed_h4_corrections)'
+            report['not_proven'] = ['Monetary refunds, real purchase source, target or staging sites',
+                                    'True SSO, public score F1, retention policy #150, replica or inconsistent backup restore',
+                                    'H4 complete cross-instance snapshots (next lot)']
     finally:
         for process in workers:
             if process.poll() is None:

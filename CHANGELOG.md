@@ -8,6 +8,9 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Ajouter H4a fermé : corrections PF cumulatives par primitive propriétaire,
+  litiges/résolutions et fragments durables de 100 allocations dans le ledger
+  officiel ; recettes fictives uniquement, sans purge ni score public.
 - Ajouter H3c fermé : transport Hub/Fans signé et délégué sur loopback de recette,
   intentions/clés stables et inbox privée vérifiée, sans API normale ni ledger Fans.
 - Ajouter H3b fermé : reçus privés atomiques avec consommation/débit/journal H2,
