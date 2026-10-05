@@ -8,6 +8,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Ajouter H3a fermé : formats canoniques restreints des reçus privés signés,
+  contextes délégués et permissions PF dédiées, sans route ni activation.
 - Ajouter H2b fermé : confirmation avec débit PF officiel, consommation immuable
   et journal de remise atomiques ; lookup primaire et reprise à clé stable après
   réponse perdue. Preuves fictives en recette uniquement, aucune admission réseau.

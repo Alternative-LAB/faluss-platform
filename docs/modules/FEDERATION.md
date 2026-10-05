@@ -79,7 +79,10 @@ L’inventaire statique Platform prouve que Federation est encore appelé par :
   lecture distante ;
 - Events pour les catalogues, `event.publish`, les workers et l’identité locale ;
 - Portal et Link pour leurs manifestes et catalogues Events ;
-- Analytics pour l’identité Hub et l’enregistrement de son consumer.
+- Analytics pour l’identité Hub et l’enregistrement de son consumer ;
+- le codec public des preuves PF H3 fermées pour les seules primitives
+  `sign/verify`, via `FederationBridge`. Aucun dispatcher ni pair historique
+  n'est modifié ; [H3 fermé](HUB-PF-H3-CLOSED.md) exige sa politique PF propre.
 
 La condition « aucun appel ne dépend encore de Federation » est donc fausse à
 ce stade. Aucun retrait n’est effectué. Supprimer le contrat, une route, une
