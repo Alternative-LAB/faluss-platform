@@ -219,6 +219,17 @@ final class FansSsoService
         return $userId > 0 && self::normalUser($userId) && self::isLinked($userId);
     }
 
+    /** Private server contract for explicit delegation; never projected by a public REST route. */
+    public static function linkedIdentity(int $userId): ?string
+    {
+        if (!self::linkedMember($userId) || !FansSsoSchema::ready()) { return null; }
+        global $wpdb;
+        $table = FansSsoSchema::tables()['links'] ?? null;
+        if ($table === null) { return null; }
+        $id = $wpdb->get_var($wpdb->prepare('SELECT faluss_id FROM ' . self::quote($table) . ' WHERE wp_user_id=%d LIMIT 1', $userId));
+        return $wpdb->last_error === '' && self::uuid($id) ? strtolower((string) $id) : null;
+    }
+
     public static function callbackUrl(): string
     {
         return self::callbackUri();

@@ -22,6 +22,13 @@ final class ClosedProtocolGuardTest extends TestCase
         $database = new \wpdb();
         foreach ([static fn () => ClosedProtocolSchema::installForRecipe($database),
             static fn () => new ClosedProtocolStore($database, 'fixture.hub', 'recipe-key'),
+            static fn () => \Faluss\Platform\Fans\PfContract\ClosedProtocolSchema::installForRecipe($database),
+            static fn () => new \Faluss\Platform\Fans\PfContract\ClosedProtocolStore($database),
+            static fn () => \Faluss\Platform\Fans\PfContract\ClosedDelegation::resolve($database, []),
+            static fn () => new \Faluss\Platform\Fans\PfContract\ClosedClient($database,
+                new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',[],[]), 'recipe-key', ''),
+            static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedGateway($database,
+                new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.fans','fixture.hub',[],[]), 'recipe-key'),
             static fn () => ClosedEnvironment::assertIsolated($database, 'fans')] as $operation) {
             try {
                 $operation();

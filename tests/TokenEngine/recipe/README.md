@@ -1,16 +1,16 @@
-# Recette Hub PF — H0 historique et H1 fermé
+# Recette Hub PF — historique H0 et lots fermés H1 à H3
 
 Cette recette appelle le **module Token Engine livré**, avec son bootstrap Platform,
 son schéma v5 et ses transactions réelles, sur un WordPress/MariaDB Hub jetable.
-Elle complète les modèles PHPUnit et le fake de #82. Elle n'implémente aucun
-protocole PF acheté et n'interroge aucun site cible.
+Elle complète les modèles PHPUnit et le fake de #82. Les options H1 à H3 exercent
+uniquement le protocole fermé avec données fictives ; aucun site cible n'est interrogé.
 
 ## Autorisation et décisions
 
 Le porteur du projet a désigné **ALB-Origine** comme propriétaire habilité Hub /
 Token Engine le 5 octobre 2026. Il autorise cette recette isolée avec données
 fictives, pas les opérations économiques nouvelles. Il valide ensuite D1/D2/D4
-**uniquement pour H1** ; D3/D5/D6 restent proposés dans
+**uniquement pour H1**, puis les garanties D6/H2 et D3/H3 fermés dans
 [l'issue #147](https://github.com/Alternative-LAB/faluss-platform/issues/147).
 Le [contrat 0.1.0](../../../docs/modules/FANS-HUB-PURCHASED-PF-CONTRACT.md)
 reste proposé, pas un protocole opérationnel ratifié. Le
@@ -37,8 +37,9 @@ une étape H1 distincte ; ses deux rapports sont joints à `hub-pf-runtime-check
 
 La recette crée un répertoire privé neuf `hub-pf-wp-*` sous `/var/tmp`, copie le
 plugin et le cœur sans wp-config existant, installe MariaDB sans écoute réseau
-et active le rôle Hub uniquement dans ce wp-config jetable. Aucun serveur HTTP
-n'est lancé. Les workers WP-CLI utilisent des connexions SQL distinctes.
+et active le rôle Hub uniquement dans ce wp-config jetable. Un serveur HTTP
+n'est lancé qu'avec `--h3-http`, sur loopback et sous le garde fermé H3.
+Les workers WP-CLI utilisent des connexions SQL distinctes.
 Les processus et le répertoire sont supprimés en fin de recette, y compris en
 cas d'échec. Le JSON exporté ne contient que noms de contrôles, résultats,
 versions et hash du service, aucune identité, écriture, clé ou configuration.
@@ -94,14 +95,14 @@ uniquement dans le wp-config privé créé par cette recette, jamais sur un site
 Le kill après COMMIT produit une vraie perte de réponse du processus appelant.
 Le retour `false` de wpdb après COMMIT est une **injection d'acquittement perdu**,
 pas une panne réseau entre PHP et MariaDB. Aucun restore, réplica, transport HTTP
-Fans ↔ Hub, achat, lot, reçu signé ou remboursement partiel n'est certifié.
+de site cible, achat réel ou remboursement partiel n'est certifié.
 Les données sont fictives ; aucun environnement Hub cible/préproduction n'est
 désigné. La recette de futures consommations concurrentes attend une capacité
 propriétaire opérationnelle et explicitement autorisée.
 
-H1 apporte seulement le modèle décrit ici. Les lots suivants H2
-(réserve/confirm/lookup/outbox), H3 (transport/reçus), H4 (corrections/snapshots)
-et F1 (projection Fans) restent bornés dans #147 et attendent leurs accords.
+H1 apporte seulement le modèle décrit ici. H2 (réserve/confirm/lookup/journal)
+et H3 (transport/reçus) ont ensuite des accords strictement fermés. H4
+(corrections/snapshots) et F1 (projection Fans) attendent leurs accords dans #147.
 Les décisions produit #149 et #150 doivent être obtenues avant H4/ouverture.
 Aucun achat ni score HoF réel ne doit être annoncé sur la seule base de ces tests.
 
@@ -135,4 +136,27 @@ Après kill, lookup et rejeu gardent le même débit/fait/journal sans seconde
 consommation. Le COMMIT perdu simulé reste distinct d'une panne réseau SQL.
 
 Le rapport distingue H0/H1/H2a/H2b, versions, hash historique et suppression de
-fixture ; aucune identité, clé ou payload exporté. D3, #149 et #150 restent ouverts.
+fixture ; aucune identité, clé ou payload exporté. L'accord ultérieur D3/H3 est
+strictement fermé ; #149 et #150 restent ouverts.
+
+## H3 — reçus et HTTP privés fermés
+
+Voir [le contrat fermé et ses limites](../../../docs/modules/HUB-PF-H3-CLOSED.md).
+`run.py --h3-proofs` exécute H0/H1/H2 puis signature, stockage atomique des reçus
+et anti-rejeu SQL. `run.py --h3-http` ajoute un Fans WordPress distinct, sa base,
+ses cookies/liens fictifs, policies/keys générées hors Git et deux PHP cli-server
+loopback multiworkers. Les API de recette sont chargées uniquement par le
+MU-loader de tests après vérification du root 0700, bail 0600, socket et primaire.
+Ni flag copié ni PHP FPM de site réel ne suffit pour les ouvrir.
+
+Requêtes/contexte/réponse/reçu signés, audience/digest/nonce/droits exacts,
+expiration, UUID navigateur refusé, compte/profil non admis, auto-attribution,
+quatre confirmations concurrentes, clé stable avant réseau, anti-rejeu et inbox
+dédoublonnée. Le body HTTP est réellement perdu après consommation puis récupéré
+par lookup sans second débit. Anciennes clés révoquées refusées et mêmes octets
+historiques réattestés avec la clé courante. Rapports limités à contrôles/versions,
+logs vérifiés sans contenu privé, root/processus supprimés, claims PF/ALB conservés.
+
+Cette preuve réseau **n'est pas un véritable SSO Me** : liens et identités sont
+fictifs, aucun authorize/token central testé. Pas de TLS/site/achat réel, de
+producteur/admission de production, de correction H4, de score F1 ou de release.
