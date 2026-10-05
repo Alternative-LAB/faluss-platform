@@ -11,11 +11,18 @@
 - Le 5 octobre 2026, le porteur du projet désigne **ALB-Origine** comme responsable
   habilité Hub / Token Engine. Les décisions précises et l'accord d'implémentation
   sont soumis dans [#147](https://github.com/Alternative-LAB/faluss-platform/issues/147).
-  Seule la [recette H0 du module actuel](../../tests/TokenEngine/recipe/README.md)
-  sur WordPress/MariaDB Hub jetable avec données fictives est autorisée à ce stade.
-  Cette désignation et cette recette ne ratifient pas le protocole économique.
-- Aucun Token Engine modifié, API/transport installé, ledger parallèle, accès aux
-  tables Hub, paiement, score persistant, migration, UI, flag ou activation.
+  La [recette H0 du module actuel](../../tests/TokenEngine/recipe/README.md)
+  sur WordPress/MariaDB Hub jetable avec données fictives est autorisée.
+- Accord ultérieur du 5 octobre : **D1/D2/D4 seulement pour le modèle fermé H1**,
+  décrit dans [HUB-PF-H1-MODEL.md](HUB-PF-H1-MODEL.md). Validateurs, schéma additif
+  et persistance de recette ne ratifient pas les opérations économiques de ce
+  document ni la proposition R1 complète de #147. D3/D5/D6 restent proposés.
+  L'ordre de réduction après remboursement et la conservation de 24 mois ne sont
+  pas approuvés : décisions séparées [#149](https://github.com/Alternative-LAB/faluss-platform/issues/149)
+  et [#150](https://github.com/Alternative-LAB/faluss-platform/issues/150) avant H4/ouverture.
+- Aucun producteur d'achat réel, crédit/débit nouveau, API/transport installé,
+  ledger parallèle Fans, paiement, score persistant, migration automatique sur
+  un site réel, UI, flag de production ou activation. Les anciens claims restent inchangés.
 
 ## Capacités réellement disponibles
 

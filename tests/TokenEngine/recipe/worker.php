@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+use Faluss\Platform\TokenEngine\PurchasedPf\AttributionIntent;
+use Faluss\Platform\TokenEngine\PurchasedPf\ClosedModelSchema;
+use Faluss\Platform\TokenEngine\PurchasedPf\ClosedModelStore;
+use Faluss\Platform\TokenEngine\PurchasedPf\ModelViolation;
+use Faluss\Platform\TokenEngine\PurchasedPf\PurchaseEvidence;
+
 // Executed only by wp-cli inside the fresh, private database created by run.py.
 if (!defined('FALUSS_HUB_PF_RECIPE_ONLY') || FALUSS_HUB_PF_RECIPE_ONLY !== true
     || !defined('FALUSS_PLATFORM_ROLE') || FALUSS_PLATFORM_ROLE !== 'hub'
@@ -18,6 +24,16 @@ final class HubPfRecipeDatabase extends wpdb
 
     public function query($query)
     {
+        if ($this->fault === 'h1-metadata-error' && str_starts_with($query, 'SHOW TABLE STATUS LIKE')) {
+            $this->fault = '';
+            $result = parent::query($query);
+            $this->last_error = 'fixture_metadata_error';
+            return $result;
+        }
+        if ($this->fault === 'h1-key-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_h1_keys` /', $query) === 1) {
+            $this->fault = '';
+            return false;
+        }
         if (strtoupper(trim($query)) !== 'COMMIT' || $this->fault === '') {
             return parent::query($query);
         }
@@ -65,6 +81,32 @@ if (!empty($input['fault'])) {
     $wpdb->set_prefix($table_prefix);
     $wpdb->fault = $input['fault'];
     $wpdb->marker = $input['marker'];
+}
+
+if (str_starts_with($input['action'], 'h1-')) {
+    try {
+        if ($input['action'] === 'h1-install') {
+            ClosedModelSchema::installForRecipe($wpdb);
+            $result = ['ready' => ClosedModelSchema::ready($wpdb)];
+        } elseif ($input['action'] === 'h1-ready') {
+            $result = ['ready' => ClosedModelSchema::ready($wpdb)];
+        } else {
+            // Explicit, synthetic allowlists in the test worker; no registry/producer.
+            $model = new ClosedModelStore($wpdb, $input['evidence_authorities'] ?? ['fixture.purchase'],
+                $input['client_authorities'] ?? ['fixture.fans', 'fixture.other']);
+            $result = match ($input['action']) {
+                'h1-evidence' => $model->recordEvidence(PurchaseEvidence::fromArray($input['payload']), $input['key']),
+                'h1-intent' => $model->recordIntent(AttributionIntent::fromArray($input['payload']), $input['key']),
+                'h1-lookup' => $model->lookup($input['scope'], $input['operation'], $input['key']),
+                'h1-authority' => ['constructed' => true],
+                default => throw new RuntimeException('Unknown H1 fixture action.'),
+            };
+        }
+    } catch (ModelViolation $error) {
+        $result = ['error' => $error->reason];
+    }
+    echo wp_json_encode($result, JSON_THROW_ON_ERROR);
+    return;
 }
 
 $hubProof = ['owner' => 'faluss-hub', 'identity_active' => true];
