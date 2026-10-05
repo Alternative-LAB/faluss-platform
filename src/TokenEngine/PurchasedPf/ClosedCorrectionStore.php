@@ -226,6 +226,9 @@ final class ClosedCorrectionStore
             throw new ModelViolation('h4_reconciliation_incomplete');
         }
         $payload = $this->payload($row);
+        if ($payload['source']['evidence_id'] !== $lot['latest_evidence_id'] || $payload['source']['state'] !== $lot['source_state']) {
+            throw new ModelViolation('h4_reconciliation_incomplete');
+        }
         $this->verifyCompleted($row, $payload);
         return $payload;
     }

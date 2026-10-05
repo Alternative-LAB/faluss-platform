@@ -46,6 +46,7 @@ final class HubPfRecipeDatabase extends wpdb
             || ($this->fault === 'h2c-record-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_h2c_consumptions` /', $query) === 1)
             || ($this->fault === 'h3-receipt-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_h3_receipts` /', $query) === 1)
             || ($this->fault === 'h4-fragment-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_h4_fragments` /', $query) === 1)
+            || ($this->fault === 'h4s-page-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_h4s_pages` /', $query) === 1)
         ) {
             $this->fault = '';
             return false;
@@ -102,6 +103,29 @@ if (!empty($input['fault'])) {
     $wpdb->set_prefix($table_prefix);
     $wpdb->fault = $input['fault'];
     $wpdb->marker = $input['marker'];
+}
+
+if (str_starts_with($input['action'], 'h4s-')) {
+    try {
+        if ($input['action'] === 'h4s-install') {
+            Faluss\Platform\TokenEngine\PurchasedPf\ClosedSnapshotSchema::installForRecipe($wpdb);
+            $result = ['ready' => true];
+        } elseif ($input['action'] === 'h4s-ready') {
+            $result = ['ready' => Faluss\Platform\TokenEngine\PurchasedPf\ClosedSnapshotSchema::ready($wpdb)];
+        } else {
+            $store = new Faluss\Platform\TokenEngine\PurchasedPf\ClosedSnapshotStore($wpdb, ['fixture.purchase']);
+            $result = match ($input['action']) {
+                'h4s-create' => $store->create($input['member'], $input['client'] ?? 'fixture.fans', $input['key']),
+                'h4s-page' => $store->page($input['member'], $input['client'] ?? 'fixture.fans', $input['snapshot_id'], $input['cursor']),
+                'h4s-finish' => $store->finish($input['member'], $input['client'] ?? 'fixture.fans', $input['snapshot_id']),
+                default => throw new RuntimeException('Unknown H4 snapshot fixture action.'),
+            };
+        }
+    } catch (ModelViolation $error) {
+        $result = ['error' => $error->reason];
+    }
+    echo wp_json_encode($result, JSON_THROW_ON_ERROR);
+    return;
 }
 
 if (str_starts_with($input['action'], 'h4-')) {
