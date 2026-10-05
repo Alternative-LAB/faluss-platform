@@ -8,6 +8,9 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Ajouter H4c fermé : transfert des snapshots complets signé, délégué et limité
+  aux deux instances jetables ; staging privé et reprise durable Fans, sans
+  ledger parallèle, projection de classement ou route ordinaire.
 - Ajouter H4b fermé : snapshots privés complets matérialisés en pages stables,
   filiation des attributions multi-lots, fence primaire et reprise après COMMIT
   incertain ; aucun score, transfert réseau, durée de conservation ou purge réelle.

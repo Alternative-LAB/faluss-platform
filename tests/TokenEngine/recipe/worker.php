@@ -143,7 +143,7 @@ if (str_starts_with($input['action'], 'h4-')) {
             for ($index = 0; $index < $input['count']; $index++) {
                 $wpdb->query('SET timestamp=' . ($clock + $index * 70));
                 $intent = AttributionIntent::fromArray(['attribution_id' => wp_generate_uuid4(), 'client_authority' => 'fixture.fans',
-                    'member_faluss_id' => $member, 'creator_faluss_id' => wp_generate_uuid4(), 'purchased_pf' => '1', 'policy_version' => '1.0.0']);
+                    'member_faluss_id' => $member, 'creator_faluss_id' => $input['creator'] ?? wp_generate_uuid4(), 'purchased_pf' => '1', 'policy_version' => '1.0.0']);
                 (new ClosedReservationStore($wpdb, ['fixture.fans'], ['fixture.purchase']))->reserve($intent, bin2hex(random_bytes(32)));
                 (new ClosedConsumptionStore($wpdb, ['fixture.fans'], ['fixture.purchase']))->confirm($intent, bin2hex(random_bytes(32)));
                 $results[] = $intent->values['attribution_id'];

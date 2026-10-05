@@ -29,7 +29,7 @@ final class PeerPolicy
 
     public function allow(string $permission): void
     {
-        if (!in_array($permission, ['pf.reserve', 'pf.confirm', 'pf.release', 'pf.lookup', 'pf.context.delegate'], true)
+        if (!in_array($permission, ['pf.reserve', 'pf.confirm', 'pf.release', 'pf.lookup', 'pf.context.delegate', 'pf.snapshot'], true)
             || !in_array($permission, $this->permissions, true)
         ) {
             throw new ModelViolation('pf_permission_denied');
