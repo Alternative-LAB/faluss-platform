@@ -139,6 +139,20 @@ final class ClosedConsumptionStore
         }
     }
 
+    /**
+     * Owner composition inside the held transaction, without starting another.
+     * @return array<string,mixed>
+     */
+    public function confirmedFact(AttributionIntent $intent): array
+    {
+        $this->connection->assertHeldSubject($intent->values['member_faluss_id']);
+        $row = $this->reservations->reservation($intent);
+        if ($row === null || $row['state'] !== 'confirmed') {
+            throw new ModelViolation('h4_filiation_failure');
+        }
+        return $this->confirmedResult($intent, $row, null)['consumption'];
+    }
+
     /** @param array<string,mixed> $reservation */
     private function validateAllocations(AttributionIntent $intent, array $reservation): void
     {
@@ -149,7 +163,8 @@ final class ClosedConsumptionStore
                 throw new ModelViolation('h2_integrity_failure');
             }
             $lot = $this->reservations->verifyCredit($credit, $intent->values['member_faluss_id']);
-            if ($lot['source_state'] !== 'confirmed' || $lot['policy_version'] !== $intent->values['policy_version']
+            $corrected = ClosedCorrectedLot::view($this->connection, $lot);
+            if (!$corrected['eligible'] || $lot['policy_version'] !== $intent->values['policy_version']
                 || $lot['latest_evidence_id'] !== $allocation['evidence_id'] || $lot['source_revision'] !== $allocation['source_revision']
             ) {
                 throw new ModelViolation('h2_source_changed');
@@ -158,7 +173,7 @@ final class ClosedConsumptionStore
             $used = $this->connection->rows($this->connection->database->prepare(
                 "SELECT COALESCE(SUM(a.purchased_pf),0) AS total FROM %i a JOIN %i r ON r.attribution_id=a.attribution_id WHERE a.lot_id=%s AND (r.state='confirmed' OR (r.state='reserved' AND r.expires_at>UTC_TIMESTAMP(6)))", $tables['allocations'], $tables['reservations'], $allocation['lot_id']));
             $total = (int) ModelValues::integer((string) $used[0]['total']);
-            if ($total < $quantity || $total > (int) $credit['purchased_pf']) {
+            if ($total < $quantity || $total > (int) $credit['purchased_pf'] - $corrected['available_cancelled_pf']) {
                 throw new ModelViolation('h2_integrity_failure');
             }
         }

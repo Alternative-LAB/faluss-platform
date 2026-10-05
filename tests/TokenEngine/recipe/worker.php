@@ -45,6 +45,7 @@ final class HubPfRecipeDatabase extends wpdb
         if (($this->fault === 'h2c-journal-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_h2c_journal` /', $query) === 1)
             || ($this->fault === 'h2c-record-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_h2c_consumptions` /', $query) === 1)
             || ($this->fault === 'h3-receipt-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_h3_receipts` /', $query) === 1)
+            || ($this->fault === 'h4-fragment-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_h4_fragments` /', $query) === 1)
         ) {
             $this->fault = '';
             return false;
@@ -101,6 +102,43 @@ if (!empty($input['fault'])) {
     $wpdb->set_prefix($table_prefix);
     $wpdb->fault = $input['fault'];
     $wpdb->marker = $input['marker'];
+}
+
+if (str_starts_with($input['action'], 'h4-')) {
+    try {
+        if ($input['action'] === 'h4-install') {
+            Faluss\Platform\TokenEngine\PurchasedPf\ClosedCorrectionSchema::installForRecipe($wpdb);
+            $result = ['ready' => true];
+        } elseif ($input['action'] === 'h4-ready') {
+            $result = ['ready' => Faluss\Platform\TokenEngine\PurchasedPf\ClosedCorrectionSchema::ready($wpdb)];
+        } elseif ($input['action'] === 'h4-seed-many') {
+            $member = $input['member'];
+            $results = [];
+            // Private test connection clock avoids fabricating production quota exceptions.
+            $clock = time();
+            for ($index = 0; $index < $input['count']; $index++) {
+                $wpdb->query('SET timestamp=' . ($clock + $index * 70));
+                $intent = AttributionIntent::fromArray(['attribution_id' => wp_generate_uuid4(), 'client_authority' => 'fixture.fans',
+                    'member_faluss_id' => $member, 'creator_faluss_id' => wp_generate_uuid4(), 'purchased_pf' => '1', 'policy_version' => '1.0.0']);
+                (new ClosedReservationStore($wpdb, ['fixture.fans'], ['fixture.purchase']))->reserve($intent, bin2hex(random_bytes(32)));
+                (new ClosedConsumptionStore($wpdb, ['fixture.fans'], ['fixture.purchase']))->confirm($intent, bin2hex(random_bytes(32)));
+                $results[] = $intent->values['attribution_id'];
+            }
+            $result = ['attributions' => $results];
+        } else {
+            $store = new Faluss\Platform\TokenEngine\PurchasedPf\ClosedCorrectionStore($wpdb, $input['evidence_authorities'] ?? ['fixture.purchase']);
+            $result = match ($input['action']) {
+                'h4-begin' => $store->begin(PurchaseEvidence::fromArray($input['payload']), $input['key']),
+                'h4-resume' => $store->resume($input['member'], $input['plan_id'], $input['fragment']),
+                'h4-lookup' => $store->lookup($input['member'], $input['key']),
+                default => throw new RuntimeException('Unknown H4 fixture action.'),
+            };
+        }
+    } catch (ModelViolation $error) {
+        $result = ['error' => $error->reason];
+    }
+    echo wp_json_encode($result, JSON_THROW_ON_ERROR);
+    return;
 }
 
 if (str_starts_with($input['action'], 'h3-')) {
@@ -224,6 +262,10 @@ if (str_starts_with($input['action'], 'h2c-')) {
 $hubProof = ['owner' => 'faluss-hub', 'identity_active' => true];
 $meProof = ['owner' => 'faluss-me', 'identity_active' => true, 'published_card' => true, 'reserved_handle' => true];
 $subject = $input['subject'] ?? '';
+// Expected recipe-only guard rejection must not log a private SQL statement.
+if ($input['action'] === 'compensate' && defined('FALUSS_PF_H4_RECIPE')) {
+    $wpdb->suppress_errors(true);
+}
 $result = match ($input['action']) {
     'hub' => Token_Engine_Points_Service::claim_hub_daily($subject, $input['proof'] ?? $hubProof),
     'me' => Token_Engine_Points_Service::claim_me_profile_daily($subject, $input['proof'] ?? $meProof),
