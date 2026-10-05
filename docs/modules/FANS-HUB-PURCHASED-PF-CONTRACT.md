@@ -26,6 +26,11 @@
 
 ## Capacités réellement disponibles
 
+Accord limité supplémentaire : **D3 pour H3 fermé seulement**, décrit dans
+[HUB-PF-H3-CLOSED.md](HUB-PF-H3-CLOSED.md). Cet accord permet les reçus et une
+recette de transport/délégation Hub ↔ Fans jetable, pas une admission de production,
+un achat réel ou la ratification de H4/F1, #149 et #150.
+
 Accord limité ultérieur : [H2 fermé](HUB-PF-H2-CLOSED.md) et garanties D6 nécessaires
 (transaction, journal, lookup primaire et clé stable) sont autorisés dans la seule
 recette Hub jetable. Cela ne ratifie ni D3, ni les remboursements/rétention, ni ce

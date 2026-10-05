@@ -45,6 +45,7 @@ final class FederationRetirementGateTest extends TestCase
             'src/Portal/LegacyPortalEventsCatalog.php',
             'src/Portal/LegacyPortalEventsRuntime.php',
             'src/Portal/LegacyPortalManifest.php',
+            'src/TokenEngine/PurchasedPf/Protocol/SignedEnvelope.php',
         ], $actual, 'Federation cannot be retired while this exact consumer inventory remains.');
     }
 }
