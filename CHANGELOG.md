@@ -8,6 +8,9 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Ajouter H4b fermé : snapshots privés complets matérialisés en pages stables,
+  filiation des attributions multi-lots, fence primaire et reprise après COMMIT
+  incertain ; aucun score, transfert réseau, durée de conservation ou purge réelle.
 - Ajouter H4a fermé : corrections PF cumulatives par primitive propriétaire,
   litiges/résolutions et fragments durables de 100 allocations dans le ledger
   officiel ; recettes fictives uniquement, sans purge ni score public.

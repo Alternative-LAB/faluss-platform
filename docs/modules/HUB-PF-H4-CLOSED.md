@@ -13,8 +13,9 @@ automatique n'est ajouté. F1 et la politique de conservation #150 restent ouver
 
 - H4a : primitive propriétaire distincte, annulation cumulative, gel des réserves,
   litige/résolution, fragments de 100 allocations au plus et journal durable.
-- H4b : snapshots matérialisés complets et rapprochement privé entre instances
-  jetables ; aucun ledger ni calcul de classement dans Fans.
+- H4b : snapshots propriétaires matérialisés complets et fence primaire.
+- H4c : transfert privé et reprise entre instances jetables ; aucun ledger ni
+  calcul de classement dans Fans.
 
 Positifs : lot 100, allocations 25 puis 15, annulations cumulatives 30/80/90 ;
 annulation partielle d'une allocation ; plusieurs lots dans une attribution ;
@@ -85,8 +86,43 @@ PHP 8.5.4 et MariaDB 11.8.6 ; la CI vérifie séparément son environnement PHP 
 Le code historique des claims reste à son empreinte LF
 `17bcf34819cd7de662ec61fb706fd3691ca9d2f608093d4961259a0f175d5281`.
 Les anciennes lignes PF/ALB sont comparées octet par octet ; les fixtures et leurs
-processus sont supprimés. Les snapshots complets et leur transfert sont le lot
-H4b suivant : un plan H4a complet n'est pas encore un accusé de rapprochement Fans.
+processus sont supprimés. Un plan H4a complet n'est pas encore un accusé de
+rapprochement Fans.
+
+## Snapshots H4b
+
+Le contrat privé `hub.purchased-pf.snapshot/1.0.0` photographie tous les lots
+admis du titulaire et toutes leurs allocations confirmées, y compris celles
+annulées ou suspendues. Il transmet des faits cumulatifs, pas des deltas à
+additionner. Les reçus H3 initiaux restent immuables. Un consommateur doit
+remplacer son état privé complet seulement après vérification de toutes les
+pages ; aucune projection partielle ne peut être déclarée exacte.
+
+L'installation explicite crée une époque UUID et un compteur de documents
+monotone. Chaque clé de lecture stable matérialise, dans une seule transaction,
+le manifeste et toutes les pages de 100 lignes au plus. Les curseurs opaques
+sont liés au snapshot, au titulaire et au client. Les lots sont ordonnés par
+UUID binaire, puis les allocations par attribution/lot ; cet ordre technique
+de pagination n'est pas la règle de réduction économique de #149.
+
+Le manifeste porte le hash canonique complet, les nombres de lignes/pages et
+les sommes des allocations originales, annulées, suspendues et nettes. Le
+disponible des lots est séparé et rapproché du ledger officiel. Chaque allocation
+conserve la filiation au débit et la quantité originale de son attribution ;
+une attribution multi-lots tronquée ou dont l'identité diverge est refusée.
+
+Les pages restent identiques pendant une correction ultérieure. La clôture
+relit les faits sur le primaire sous les verrous propriétaires : filiation,
+chaîne des curseurs, empreinte complète et sommes doivent correspondre. Une
+correction incomplète ou `review_required` refuse la clôture ; un document
+dépassé renvoie `pf_snapshot_superseded`. La reprise d'une réponse perdue
+utilise la même clé et ne crée ni nouveau document ni écriture économique.
+
+`run.py --h4-snapshots` conserve H0-H4a et ajoute la recette des pages, de
+leur intégrité et des pannes avant/après COMMIT. Le transfert signé vers Fans
+est H4c : H4b seul ne prétend pas livrer une projection ou un classement.
+L'époque doit être admise explicitement par le consommateur de recette ;
+une restauration incohérente de sauvegardes demeure hors des preuves obtenues.
 
 Retour arrière : revert du lot de code ; aucune donnée réelle à migrer/restaurer.
 Une fixture divergente est refusée, pas réparée automatiquement. Les schémas,
