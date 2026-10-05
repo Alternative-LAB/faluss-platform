@@ -6,6 +6,17 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Tests
+
+- Ajouter la recette WordPress/MariaDB Hub jetable des claims PF historiques,
+  de leur concurrence réelle, des pertes de réponse autour de COMMIT et des
+  compensations intégrales, sans modifier les opérations économiques.
+
+### Documentation
+
+- Consigner ALB-Origine comme propriétaire habilité Hub et soumettre les décisions
+  PF achetés dans #147 ; le contrat reste non ratifié avant accord explicite.
+
 ## [0.12.6] - 2026-10-04
 
 ### Corrigé

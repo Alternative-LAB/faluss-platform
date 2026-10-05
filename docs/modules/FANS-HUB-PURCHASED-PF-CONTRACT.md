@@ -8,6 +8,12 @@
 - Ce document est soumis au propriétaire Hub ; **sa validation n’est pas obtenue**.
   Les opérations ci-dessous sont des exigences et noms logiques proposés, pas des
   endpoints, permissions ou capacités opérationnelles. Aucune URL n’est publiée.
+- Le 5 octobre 2026, le porteur du projet désigne **ALB-Origine** comme responsable
+  habilité Hub / Token Engine. Les décisions précises et l'accord d'implémentation
+  sont soumis dans [#147](https://github.com/Alternative-LAB/faluss-platform/issues/147).
+  Seule la [recette H0 du module actuel](../../tests/TokenEngine/recipe/README.md)
+  sur WordPress/MariaDB Hub jetable avec données fictives est autorisée à ce stade.
+  Cette désignation et cette recette ne ratifient pas le protocole économique.
 - Aucun Token Engine modifié, API/transport installé, ledger parallèle, accès aux
   tables Hub, paiement, score persistant, migration, UI, flag ou activation.
 

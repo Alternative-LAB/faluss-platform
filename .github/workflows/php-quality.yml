@@ -106,3 +106,10 @@ jobs:
         run: python3 tests/Fans/Profiles/recipe/admission-wordpress.py --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --test
       - name: Fans messaging operator preparation real WordPress
         run: python3 tests/Fans/Profiles/recipe/admission-wordpress.py --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --test --messaging
+      - name: Hub historical PF concurrency and commit recovery real WordPress
+        run: python3 tests/TokenEngine/recipe/run.py --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-checks.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hub-pf-runtime-checks
+          path: ${{ runner.temp }}/hub-pf-checks.json
+          if-no-files-found: error
