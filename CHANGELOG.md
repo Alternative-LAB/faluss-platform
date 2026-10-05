@@ -6,16 +6,28 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Ajouté
+
+- Ajouter le modèle fermé H1 des preuves d'achat synthétiques, lots de provenance,
+  intentions et plans FIFO : validateurs stricts, schéma additif propriétaire et
+  persistance atomique testable uniquement dans la recette Hub isolée. Aucun
+  producteur réel, crédit/débit PF, réserve, reçu opérationnel ou API Fans.
+
 ### Tests
 
 - Ajouter la recette WordPress/MariaDB Hub jetable des claims PF historiques,
   de leur concurrence réelle, des pertes de réponse autour de COMMIT et des
   compensations intégrales, sans modifier les opérations économiques.
+- Vérifier H1 sur WordPress/MariaDB jetable : conflits de contenu, unicités
+  concurrentes, filiation, schémas divergents, rollback et COMMIT ambigu du modèle ;
+  ledgers PF/ALB et claims historiques conservés.
 
 ### Documentation
 
-- Consigner ALB-Origine comme propriétaire habilité Hub et soumettre les décisions
-  PF achetés dans #147 ; le contrat reste non ratifié avant accord explicite.
+- Consigner ALB-Origine comme propriétaire habilité Hub et l'accord limité D1/D2/D4
+  pour H1 dans #147. D3/D5/D6 restent proposés ; l'ordre de réduction après
+  remboursement (#149) et la conservation des preuves (#150) nécessitent chacun
+  une décision humaine distincte avant H4 ou ouverture économique.
 
 ## [0.12.6] - 2026-10-04
 

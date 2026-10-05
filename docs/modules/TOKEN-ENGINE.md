@@ -39,8 +39,14 @@ Le lot de [caractérisation H0](../../tests/TokenEngine/recipe/README.md) exerce
 module actuel sur un WordPress/MariaDB Hub neuf et isolé : concurrence des claims,
 perte de réponse autour de COMMIT, rejeux et compensation entière. Il n'atteste
 ni environnement Hub cible, ni capacités PF achetés proposées dans #82. Le
-propriétaire habilité désigné est ALB-Origine ; l'accord sur ces nouvelles capacités
-reste attendu dans [#147](https://github.com/Alternative-LAB/faluss-platform/issues/147).
+propriétaire habilité désigné est ALB-Origine. Son accord D1/D2/D4 porte seulement
+sur le [modèle fermé H1](HUB-PF-H1-MODEL.md) : validateurs, schéma additionnel de
+recette et persistance atomique, sans producteur réel, débit/crédit PF ou API Fans.
+Ce code n'est pas appelé par le bootstrap et ne s'installe pas sur un site réel.
+Les opérations économiques et D3/D5/D6 restent proposés dans
+[#147](https://github.com/Alternative-LAB/faluss-platform/issues/147) ; l'ordre de
+réduction des scores (#149) et la conservation (#150) attendent une décision
+distincte avant H4/ouverture. Aucun ledger historique ni schéma v5 n'est modifié.
 
 Avant bascule, il reste obligatoire de tester sur une copie représentative du Hub : migration MySQL/InnoDB v1→v5, conservation et rapprochement de tous les projets/règles/permissions/droits/octrois/jetons et des deux ledgers, concurrence réelle, soldes par classe, compensations, routes Connector HTTPS, rotation de secret, administration responsive et round-trip avec les Connectors déployés. Ces contrôles ne sont pas une autorisation de production.
 

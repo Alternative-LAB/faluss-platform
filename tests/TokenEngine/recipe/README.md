@@ -1,4 +1,4 @@
-# Recette du Hub PF actuel — lot H0
+# Recette Hub PF — H0 historique et H1 fermé
 
 Cette recette appelle le **module Token Engine livré**, avec son bootstrap Platform,
 son schéma v5 et ses transactions réelles, sur un WordPress/MariaDB Hub jetable.
@@ -9,11 +9,13 @@ protocole PF acheté et n'interroge aucun site cible.
 
 Le porteur du projet a désigné **ALB-Origine** comme propriétaire habilité Hub /
 Token Engine le 5 octobre 2026. Il autorise cette recette isolée avec données
-fictives, pas les opérations économiques nouvelles. Les décisions D1 à D6 et
-l'autorisation d'implémentation sont soumises dans
+fictives, pas les opérations économiques nouvelles. Il valide ensuite D1/D2/D4
+**uniquement pour H1** ; D3/D5/D6 restent proposés dans
 [l'issue #147](https://github.com/Alternative-LAB/faluss-platform/issues/147).
 Le [contrat 0.1.0](../../../docs/modules/FANS-HUB-PURCHASED-PF-CONTRACT.md)
-reste proposé et non ratifié.
+reste proposé, pas un protocole opérationnel ratifié. Le
+[modèle fermé H1](../../../docs/modules/HUB-PF-H1-MODEL.md) ne met en œuvre ni
+l'ordre des remboursements ni une durée de conservation de 24 mois.
 
 ## Exécution reproductible
 
@@ -28,6 +30,10 @@ python3 tests/TokenEngine/recipe/run.py \
   --cli /chemin/wp-cli.phar \
   --output /chemin/hub-pf-checks.json
 ```
+
+Sans option, ces commandes exécutent les 27 contrôles H0 inchangés. Ajouter
+`--h1` pour exécuter ensuite les 46 contrôles H1. La CI garde l'étape H0 et ajoute
+une étape H1 distincte ; ses deux rapports sont joints à `hub-pf-runtime-checks`.
 
 La recette crée un répertoire privé neuf `hub-pf-wp-*` sous `/var/tmp`, copie le
 plugin et le cœur sans wp-config existant, installe MariaDB sans écoute réseau
@@ -54,11 +60,34 @@ versions et hash du service, aucune identité, écriture, clé ou configuration.
 | Solde consommé par un débit de fixture explicitement préchargé | Compensation du crédit refusée pour insuffisance ; aucune ligne nouvelle, solde non négatif |
 | Appels concurrents aux cinq capacités futures | `pf_feature_not_enabled`, aucun achat/soutien/débit cosmétique/ajustement ; ledger ALB indépendant |
 
-Le seul débit synthétique est inséré comme **état initial de test** pour exercer
+Dans H0, le seul débit synthétique est inséré comme **état initial de test** pour exercer
 le refus de compensation faute de solde. Il ne passe pas par une API de soutien,
 ne contourne aucune garde de production et ne démontre aucune consommation PF
 achetée. Aucun fichier `src`, claim, politique, schéma ou ledger propriétaire
-n'est modifié par ce lot. Fans n'acquiert aucun ledger parallèle.
+n'est modifié par H0. Fans n'acquiert aucun ledger parallèle.
+
+## Scénarios H1 — persistance de modèle uniquement
+
+| Déclencheur | Résultat attendu |
+| --- | --- |
+| Bootstrap Hub, sans ou avec marqueur de recette | Aucune installation automatique ; installation explicite uniquement dans la racine/socket privés avec environnement local |
+| Groupe de tables partiel, index/colonne divergents ou moteur non InnoDB | Refus sans adoption ni réparation silencieuse ; installation neuve atomique de cinq tables validées |
+| Producteur réel ou autorité de fixture non admise | Refus, aucune ligne |
+| Preuve synthétique complète, même clé ou autre clé avec même référence/révision | Un lot et une preuve ; rejeu avec les mêmes références |
+| Même clé/révision, contenu changé ; UUID de preuve réutilisé | Conflit, original inchangé, aucune ligne orpheline |
+| Révision courante, révision ancienne, titulaire/politique/date modifiés | Historique append-only, lot stable, monotonie et origine immuable ; ancienne nouvelle clé refusée |
+| Plan FIFO, achat/bonus distincts, compte avec gains historiques seuls | Première admission confirmée Hub puis UUID ; uniquement quantité achetée du modèle ; pas de substitution par les balances historiques |
+| Attribution globale identique avec nouvelles clés ou contexte changé | Même intention ; autre client/membre/créateur/quantité refusé ; auto-attribution refusée |
+| Huit appels concurrents, conflits de clé ou référence | Un seul modèle/lot/intention pour une référence, rollback cohérent des autres transactions |
+| Arrêt avant/après COMMIT et acquittement perdu injecté | Aucun modèle partiel ; résultat durable retrouvé ; `model_commit_unknown` ne devient pas une déduction d'absence |
+| Échec du dernier INSERT, corruption de clé→preuve ou empreinte de plan | Rollback atomique ou erreur d'intégrité générique, sans divulguer un autre enregistrement |
+| Fin de H1 | Ledgers PF/ALB intégralement inchangés, schéma historique 5 et façade étroite conservés |
+
+Les intentions/plans restent **non consommants**, sans réservation ni balance
+économique. Leur répétition ne constitue pas une double dépense : aucune dépense
+n'existe dans H1. Les champs cumulés de preuve sont validés, sans calcul d'un
+remboursement ou d'un score. Le marqueur `FALUSS_HUB_PF_H1_RECIPE_ONLY` est écrit
+uniquement dans le wp-config privé créé par cette recette, jamais sur un site.
 
 ## Limites de preuve et lots suivants
 
@@ -70,8 +99,8 @@ Les données sont fictives ; aucun environnement Hub cible/préproduction n'est
 désigné. La recette de futures consommations concurrentes attend une capacité
 propriétaire opérationnelle et explicitement autorisée.
 
-Les lots proposés H1 (preuve/lots), H2 (réserve/confirm/lookup/outbox), H3
-(transport/reçus), H4 (corrections/snapshots) et F1 (projection Fans) sont bornés
-et ordonnés dans #147, avec les décisions nécessaires pour chacun. Ils ne sont
-pas implémentés pendant l'attente de ratification. Aucun achat ni score HoF réel
-ne doit être annoncé sur la seule base de ces tests.
+H1 apporte seulement le modèle décrit ici. Les lots suivants H2
+(réserve/confirm/lookup/outbox), H3 (transport/reçus), H4 (corrections/snapshots)
+et F1 (projection Fans) restent bornés dans #147 et attendent leurs accords.
+Les décisions produit #149 et #150 doivent être obtenues avant H4/ouverture.
+Aucun achat ni score HoF réel ne doit être annoncé sur la seule base de ces tests.

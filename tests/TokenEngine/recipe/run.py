@@ -26,6 +26,7 @@ def main():
     parser.add_argument('--core', required=True)
     parser.add_argument('--cli', required=True)
     parser.add_argument('--output')
+    parser.add_argument('--h1', action='store_true', help='Explicit closed H1 model recipe after unchanged H0 checks')
     options = parser.parse_args()
     source = pathlib.Path(options.source).resolve()
     core = pathlib.Path(options.core).resolve()
@@ -146,6 +147,8 @@ def main():
                       WP_DEBUG_DISPLAY=False, WP_DEBUG_LOG=str(root / 'debug.log'),
                       FALUSS_PLATFORM_ROLE='hub', FALUSS_PLATFORM_TOKEN_ENGINE=True,
                       FALUSS_HUB_PF_RECIPE_ONLY=True)
+        if options.h1:
+            values['WP_ENVIRONMENT_TYPE'] = 'local'
         for key in ('AUTH_KEY', 'SECURE_AUTH_KEY', 'LOGGED_IN_KEY', 'NONCE_KEY',
                     'AUTH_SALT', 'SECURE_AUTH_SALT', 'LOGGED_IN_SALT', 'NONCE_SALT'):
             values[key] = secrets.token_urlsafe(48)
@@ -259,14 +262,23 @@ def main():
                   all(result['error'] == 'pf_feature_not_enabled' for result in rejected))
         check('Closed future operations write nothing and generic ALB ledger stays separate',
               call('inspect')['pf_count'] == before and call('inspect')['generic_count'] == 0)
+        h0_total = len(checks)
+        if options.h1:
+            from h1_checks import run_checks
+            run_checks(root, wp, check, call, sql, start, finish, parallel, await_file)
         report = dict(checks=checks, total=len(checks), failed=0, wordpress=cli('core', 'version').strip(),
                       php=command(['php', '-r', 'echo PHP_VERSION;']).strip(),
                       database=sql('SELECT VERSION()'), schema='5',
                       owner_service_lf_sha256=hashlib.sha256((plugin / 'src/TokenEngine/Legacy/includes/class-token-engine-points-service.php').read_bytes().replace(b'\r\n', b'\n')).hexdigest(),
                       scope='Current Hub module on disposable WordPress/MariaDB; synthetic data only',
-                      not_proven=['Purchased PF consumption, lots, signed receipts or partial refunds',
+                      not_proven=['Operational purchase proof, purchased PF consumption, reservations, signed receipts or partial refunds',
                                   'Real network COMMIT acknowledgement loss or replica/restore recovery',
                                   'Target Hub configuration, production or staging', 'Future Fans to Hub HTTP protocol'])
+        report['h0_total'] = h0_total
+        report['h1_total'] = len(checks) - h0_total
+        if options.h1:
+            report['scope'] += '; closed H1 model explicitly installed only in this fixture'
+            report['model_schema'] = '1 (closed_h1_model)'
     finally:
         for process in workers:
             if process.poll() is None:
