@@ -49,7 +49,7 @@ réduction des scores (#149) et la conservation (#150) attendent une décision
 distincte avant H4/ouverture. Aucun ledger historique ni schéma v5 n'est modifié.
 
 [H2 fermé](HUB-PF-H2-CLOSED.md), autorisé séparément, ajoute des réservations de
-recette et des crédits fictifs liés au ledger officiel. Aucun appel bootstrap ou
+recette, crédits/débits fictifs dans le ledger officiel et journal atomique. Aucun appel bootstrap ou
 producteur réel ; aucune consommation utilisable sur site. Les classes historiques
 restent identiques et les lignes antérieures sont conservées.
 

@@ -118,3 +118,21 @@ unicités/conflits/concurrence et reprises COMMIT : moteur WordPress/MariaDB ré
 preuves fictives. Comparaison intégrale des lignes historiques PF/ALB.
 Le rapport distingue les totaux H0/H1/H2a et ne contient ni payload ni identité.
 H2a ne prouve aucune consommation ou journal de remise : lot H2b suivant.
+
+## H2b — consommation fermée et reprise
+
+`run.py --h2` exécute H0/H1/H2a puis les tests de confirmation réelle sur le
+ledger PF officiel et journal dans la même transaction. Trois tables supplémentaires
+de recette, aucune migration automatique ou source réelle. Aucun reçu signé D3,
+dispatcher, transport ou score public. Le journal est seulement pending.
+
+Confirmations identiques et différentes concurrentes ; confirm/release/source,
+expiration et transition finale UTC, 32/33 lots, faute des INSERT fait/journal/clé,
+kill avant/après COMMIT, reprise primaire avec clé stable, corruption détectée.
+Les expirations sont accélérées par timestamps/horloge de connexion **dans la
+fixture uniquement** ; le TTL enregistré de 120 secondes est également mesuré.
+Après kill, lookup et rejeu gardent le même débit/fait/journal sans seconde
+consommation. Le COMMIT perdu simulé reste distinct d'une panne réseau SQL.
+
+Le rapport distingue H0/H1/H2a/H2b, versions, hash historique et suppression de
+fixture ; aucune identité, clé ou payload exporté. D3, #149 et #150 restent ouverts.

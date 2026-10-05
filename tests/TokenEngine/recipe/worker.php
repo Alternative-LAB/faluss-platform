@@ -7,6 +7,8 @@ use Faluss\Platform\TokenEngine\PurchasedPf\ClosedModelSchema;
 use Faluss\Platform\TokenEngine\PurchasedPf\ClosedModelStore;
 use Faluss\Platform\TokenEngine\PurchasedPf\ClosedReservationSchema;
 use Faluss\Platform\TokenEngine\PurchasedPf\ClosedReservationStore;
+use Faluss\Platform\TokenEngine\PurchasedPf\ClosedConsumptionSchema;
+use Faluss\Platform\TokenEngine\PurchasedPf\ClosedConsumptionStore;
 use Faluss\Platform\TokenEngine\PurchasedPf\ModelViolation;
 use Faluss\Platform\TokenEngine\PurchasedPf\PurchaseEvidence;
 
@@ -39,6 +41,17 @@ final class HubPfRecipeDatabase extends wpdb
         if ($this->fault === 'h2-key-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_h2_keys` /', $query) === 1) {
             $this->fault = '';
             return false;
+        }
+        if (($this->fault === 'h2c-journal-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_h2c_journal` /', $query) === 1)
+            || ($this->fault === 'h2c-record-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_h2c_consumptions` /', $query) === 1)
+        ) {
+            $this->fault = '';
+            return false;
+        }
+        if ($this->fault === 'h2c-transition-expiry' && str_contains($query, "SET state='confirmed'")) {
+            $this->fault = '';
+            // Advance only this test connection's MariaDB clock before the guarded transition.
+            parent::query('SET timestamp=UNIX_TIMESTAMP()+121');
         }
         if (strtoupper(trim($query)) !== 'COMMIT' || $this->fault === '') {
             return parent::query($query);
@@ -132,6 +145,29 @@ if (str_starts_with($input['action'], 'h2-')) {
                 'h2-lookup' => $store->lookup(AttributionIntent::fromArray($input['payload']), $input['operation'], $input['key']),
                 'h2-authority' => ['constructed' => true],
                 default => throw new RuntimeException('Unknown H2 fixture action.'),
+            };
+        }
+    } catch (ModelViolation $error) {
+        $result = ['error' => $error->reason];
+    }
+    echo wp_json_encode($result, JSON_THROW_ON_ERROR);
+    return;
+}
+
+if (str_starts_with($input['action'], 'h2c-')) {
+    try {
+        if ($input['action'] === 'h2c-install') {
+            ClosedConsumptionSchema::installForRecipe($wpdb);
+            $result = ['ready' => ClosedConsumptionSchema::ready($wpdb)];
+        } elseif ($input['action'] === 'h2c-ready') {
+            $result = ['ready' => ClosedConsumptionSchema::ready($wpdb)];
+        } else {
+            $store = new ClosedConsumptionStore($wpdb, $input['client_authorities'] ?? ['fixture.fans', 'fixture.other'],
+                $input['evidence_authorities'] ?? ['fixture.purchase']);
+            $result = match ($input['action']) {
+                'h2c-confirm' => $store->confirm(AttributionIntent::fromArray($input['payload']), $input['key']),
+                'h2c-lookup' => $store->lookup(AttributionIntent::fromArray($input['payload']), $input['operation'], $input['key']),
+                default => throw new RuntimeException('Unknown H2c fixture action.'),
             };
         }
     } catch (ModelViolation $error) {
