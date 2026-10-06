@@ -17,6 +17,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Ajouter B3b1 fermé : barrières propriétaires versionnées d'origine, pays,
+  catégorie, session et admission, permissions dédiées, journal atomique et
+  lookup primaire après réponse perdue. Sélection exacte sous verrous ; aucune
+  consommation nouvelle, installation automatique, API de site ou activation.
+
 - Ajouter B3a fermé : intention/contexte/reçu 0.3 versionnés, précision UTC et
   ordre Hub obligatoires, sessions explicitement choisies, domaines de signature
   et permissions dédiées. Validateurs seulement ; anciens formats intacts,

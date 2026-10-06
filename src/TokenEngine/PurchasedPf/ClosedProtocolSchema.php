@@ -107,6 +107,13 @@ final class ClosedProtocolSchema
         }
     }
 
+    /** Strict metadata helpers shared only inside the owner module; old definitions and gates stay unchanged.
+     * @param array{columns:array<string,string>,indexes:array<string,array{bool,list<string>}>} $definition */
+    public static function metadataSql(string $table, array $definition): string { return self::createSql($table,$definition); }
+
+    /** @param array{columns:array<string,string>,indexes:array<string,array{bool,list<string>}>} $definition */
+    public static function verifyMetadata(\wpdb $database, string $table, array $definition): bool { return self::verify($database,$table,$definition); }
+
     private static function exists(\wpdb $database, string $table): bool
     {
         $found = $database->get_var($database->prepare('SHOW TABLES LIKE %s', $database->esc_like($table)));

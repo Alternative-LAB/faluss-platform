@@ -47,6 +47,7 @@ final class HubPfRecipeDatabase extends wpdb
             || ($this->fault === 'h3-receipt-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_h3_receipts` /', $query) === 1)
             || ($this->fault === 'h4-fragment-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_h4_fragments` /', $query) === 1)
             || ($this->fault === 'h4s-page-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_h4s_pages` /', $query) === 1)
+            || ($this->fault === 'b3b-event-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_b3b_events` /', $query) === 1)
         ) {
             $this->fault = '';
             return false;
@@ -103,6 +104,11 @@ if (!empty($input['fault'])) {
     $wpdb->set_prefix($table_prefix);
     $wpdb->fault = $input['fault'];
     $wpdb->marker = $input['marker'];
+}
+
+if (str_starts_with($input['action'], 'b3b-')) {
+    require __DIR__ . '/b3_barrier_worker.php';
+    return;
 }
 
 if (str_starts_with($input['action'], 'h4s-')) {
