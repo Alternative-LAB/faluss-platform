@@ -17,6 +17,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Ajouter B2b : critères territoriaux publics versionnés sans défaut, déclaration
+  privée du territoire d'activité principal, examen/recours motivés et contrôle
+  des ouvertures/admissions locale et nationale. Aucun pays de soutien Fan
+  autorisé implicitement, contexte Hub ou ouverture économique.
+
 - Ajouter B2a : sessions privées créées par les Créateurs, coorganisation
   explicitement acceptée, participation volontaire, programmation figée et
   plafonds vérifiés en concurrence. L'ouverture reste en attente de preuve Hub ;

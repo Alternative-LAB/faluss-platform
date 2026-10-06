@@ -14,6 +14,7 @@ p.add_argument('--app', action='store_true')
 p.add_argument('--backoffice', action='store_true')
 p.add_argument('--hof-b1', action='store_true', help='Explicit private HoF governance persistence checks only')
 p.add_argument('--hof-b2', action='store_true', help='Private session governance; no Hub acknowledgement or scores')
+p.add_argument('--hof-territory', action='store_true', help='Explicit fictitious principal territory examination only')
 p.add_argument('--output', help='Export check names and scope only, never local accounts or cookies')
 a = p.parse_args()
 root = pathlib.Path(tempfile.mkdtemp(prefix='fans-admission-wp-', dir='/var/tmp'))
@@ -70,7 +71,8 @@ try:
     time.sleep(.5)
     print(json.dumps({'base':base, 'root':str(root), 'wordpress':cli('core', 'version').strip(), 'php':run(['php','-r','echo PHP_VERSION;']).strip()}), flush=True)
     if a.test:
-        recipe = ('tests/Fans/Hof/recipe/b2_checks.py' if a.hof_b2 else
+        recipe = ('tests/Fans/Hof/recipe/territory_checks.py' if a.hof_territory else
+                  'tests/Fans/Hof/recipe/b2_checks.py' if a.hof_b2 else
                   'tests/Fans/Hof/recipe/b1_checks.py' if a.hof_b1 else
                   'tests/Fans/Messaging/recipe/operations-wordpress.py' if a.messaging else 'tests/Fans/Profiles/recipe/admission-http.py')
         run(['python3', str(pathlib.Path(a.source)/recipe), '--root', str(root), '--base', base, '--cli', a.cli])

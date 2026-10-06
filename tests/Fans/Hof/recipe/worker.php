@@ -8,6 +8,8 @@ use Faluss\Platform\Fans\Hof\RankingVisibility;
 use Faluss\Platform\Fans\Hof\SessionSchema;
 use Faluss\Platform\Fans\Hof\SessionService;
 use Faluss\Platform\Fans\Hof\SessionRoles;
+use Faluss\Platform\Fans\Hof\TerritorySchema;
+use Faluss\Platform\Fans\Hof\TerritoryService;
 use Faluss\Platform\Fans\Profiles\CreatorProfileService;
 use Faluss\Platform\Fans\Profiles\CreatorStatusSchema;
 use Faluss\Platform\Fans\Profiles\EditorialService;
@@ -33,6 +35,7 @@ $registry = new RankingRegistry($wpdb);
 $visibility = new RankingVisibility($wpdb);
 $sessions = new SessionService($wpdb);
 $roles = new SessionRoles($wpdb);
+$territories = new TerritoryService($wpdb);
 try {
     $result = match ($input['action']) {
         'install' => (static function () use ($wpdb): array { RankingSchema::installOrVerify($wpdb); return ['ready' => RankingSchema::ready($wpdb)]; })(),
@@ -54,7 +57,7 @@ try {
         'session_install' => (static function () use ($wpdb): array { SessionSchema::installOrVerify($wpdb); return ['ready' => SessionSchema::ready($wpdb)]; })(),
         'session_create' => $sessions->create($input['rules']),
         'session_edit' => $sessions->edit($input['session'], $input['revision'], $input['rules']),
-        'session_open' => $sessions->requestOpen($input['session'], $input['revision']),
+        'session_open' => $sessions->requestOpen($input['session'], $input['revision'], $input['policy'] ?? null),
         'session_close' => $sessions->close($input['session'], $input['revision'], $input['state']),
         'session_inspect' => $sessions->inspect($input['session']),
         'session_invite' => $roles->invite($input['session'], $input['revision'], $input['creator']),
@@ -62,6 +65,15 @@ try {
         'session_apply' => $roles->apply($input['session'], $input['revision'], $input['digest']),
         'session_admit' => $roles->admit($input['session'], $input['revision'], $input['creator'], $input['allow']),
         'session_withdraw' => $roles->withdraw($input['session'], $input['revision']),
+        'territory_install' => (static function () use ($wpdb): array { TerritorySchema::installOrVerify($wpdb); return ['ready' => TerritorySchema::ready($wpdb)]; })(),
+        'territory_policy' => $territories->registerPolicy($input['policy'], $input['rules']),
+        'territory_own' => $territories->own(),
+        'territory_submit' => $territories->submit($input['policy'], $input['country'], $input['territory'], $input['revision']),
+        'territory_decide' => $territories->decide($input['creator'], $input['revision'], $input['decision'], $input['reason']),
+        'territory_appeal' => $territories->appeal($input['revision'], $input['explanation']),
+        'territory_withdraw' => $territories->withdraw($input['revision']),
+        'territory_review' => $territories->review($input['after'] ?? ''),
+        'territory_bind_outside' => $territories->bind($input['session'], $input['policy']),
         default => throw new RuntimeException('Unknown fixture action'),
     };
     echo wp_json_encode($result instanceof WP_Error ? ['error' => $result->get_error_code()] : ['data' => $result]);
