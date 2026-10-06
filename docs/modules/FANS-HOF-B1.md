@@ -7,8 +7,8 @@ B1 est scindé en code mathématique/calendriers (B1a), puis registre persistant
 des dimensions, origine, consentements et pseudonymes (B1b). B2 suit pour les
 sessions. Aucune capacité cible n'est supprimée par ce découpage.
 
-Le [nouveau contrat Hub B3](HUB-PF-B3-RANKING-PROPOSAL.md) attend un accord
-distinct. Ces classes ne modifient ni H3/H4, ni ledger, claims, PF/PC ou sessions
+Le [nouveau contrat Hub B3](HUB-PF-B3-RANKING-PROPOSAL.md) a reçu son accord
+distinct pour la recette fermée, pas la production. Ces classes ne modifient ni H3/H4, ni ledger, claims, PF/PC ou sessions
 WordPress. Aucun bootstrap, REST, cron, flag, migration ou score public.
 
 ## B1a — calendriers et calcul pur
@@ -71,6 +71,72 @@ le véritable SSO ou un classement complet. Les tests historiques restent distin
 ## Retour arrière et exploitation
 
 Classes inertes et sans données persistées en B1a : revert du lot sans migration.
-B1b aura son installation explicite/testable et retour arrière propre. Aucun
+B1b conserve une installation explicite/testable et un retour arrière propre. Aucun
 appel ne réécrit les ledgers, claims ou anciennes projections F1a. Conservation
 #150 et stockage RustFS #161 distincts. Aucune activation réelle par publication.
+
+## B1b — scénarios écrits avant l'implémentation
+
+Registre privé Fans : dimensions versionnées (général, catégorie, mois), origine
+préparée **sans ouverture réelle**, pseudonyme soumis/approuvé et consentements
+Fan/Créateur séparés. Aucune origine implicite à l'installation ou à la première
+visite. Le futur adaptateur attesté enregistrera l'ouverture réelle ; B1b n'offre
+aucune action économique ou ouverture d'attribution.
+
+Positifs : installation explicite idempotente sur InnoDB ; dimensions stables et
+mois Paris ; soumission/modération du pseudonyme ; dernière version approuvée
+pendant une révision ; consentement explicite puis retrait immédiat ; décision
+et journal dans la même transaction ; relecture après redémarrage.
+
+Négatifs : invité, compte non lié ou privilégié comme membre ; modification d'un
+autre membre ; approbation sans permission ; fausse révision et décisions
+concurrentes ; alias non approuvé/publication sans consentement ; schema divergent
+ou non transactionnel ; installation pendant une transaction ; origine remplacée
+ou ouverture réelle inventée. Les pseudonymes sont éditoriaux Fans, jamais un
+changement de compte Faluss Identity.
+
+### Livraison du registre privé
+
+`RankingSchema` installe explicitement cinq tables propres, vérifie colonnes,
+index et InnoDB ; une installation partielle/divergente ou imbriquée est refusée.
+Création sur tables temporaires uniques puis renommage atomique. Aucun appel
+depuis le bootstrap, l'activation ou une visite normale ; pas de migration de site.
+
+`RankingRegistry` prépare une origine immuable à politique versionnée, puis des
+dimensions général/catégorie/mois aux bornes Paris persistées. L'état reste
+`prepared`, **sans date d'ouverture réelle**. Aucun calcul ne peut transformer
+cette préparation en attributions admissibles. L'enregistrement de la future
+ouverture attestée sera un adaptateur spécifique ; aucune origine par défaut.
+
+`RankingVisibility` : propriétaire SSO local normal seulement, révision attendue
+obligatoire, consentements Fan/Créateur distincts, modération `manage_options`,
+retrait immédiat, contrôle actif/présentation à chaque livraison Créateur. Alias
+simple de 2–80 caractères, vingt soumissions par heure, aucun repli sur le login
+technique ou les données Identity. Une révision en attente/rejetée conserve la
+dernière version approuvée, jamais son texte nouveau. Le retrait/révocation
+efface l'alias public ; le retrait du consentement masque sans modifier les faits.
+
+Chaque écriture membre et son journal sans texte libre sont dans la même
+transaction, sous verrou par membre et révision ; une décision concurrente est
+refusée. Les interfaces HTTP/formulaires avec nonce appartiendront aux adaptateurs
+B6. Ces classes ne sont pas enregistrées comme routes publiques ou actives.
+
+Recette reproductible :
+
+```sh
+python3 tests/Fans/Profiles/recipe/admission-wordpress.py \
+  --source "$SOURCE_ISOLEE" --core "$CORE_JETABLE" --cli "$CLI_JETABLE" \
+  --test --hof-b1 --output /var/tmp/fans-hof-b1-checks.json
+```
+
+WordPress réel et MariaDB privés, comptes locaux/filiations SSO fictifs injectés
+pour la recette. Cela ne prouve pas une connexion centrale sur Me. Aucune requête
+aux sites, score public, API Hub, flag de production ou donnée réelle.
+
+Les [preuves B1b](../evidence/fans-hof-b1/README.md) recensent cinquante vérifications,
+dont permissions, décisions concurrentes, rollback sur panne du journal,
+retrait/suspension et divergence des index. La CI rejoue la recette sur chaque PR.
+
+Retour arrière : revert des classes/adaptateurs ; conserver les tables privées
+pour réinstallation compatible, sans DROP automatique ni purge. Politique réelle
+de rétention #150 à décider avant activation. Aucun défaut de 24 mois ajouté.

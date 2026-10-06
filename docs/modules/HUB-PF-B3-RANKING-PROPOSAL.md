@@ -1,9 +1,12 @@
 # B3 — proposition Hub : ordre et contexte de classement attestés
 
-**Statut : contrat nouveau non validé.** Propriétaire habilité : ALB-Origine.
-Les règles produit [F1b R2](FANS-PF-F1B-PROPOSAL.md) sont approuvées, pas cette
-extension. Aucun code Hub, opération économique ou format H3/H4 changé par #163.
-Périmètre proposé : Hub/Fans jetables, identités, achats, pairs et clés fictifs ;
+**Statut : contrat approuvé le 6 octobre 2026 pour B3 fermé seulement.**
+Propriétaire habilité : ALB-Origine. Accord explicite sur le contenu au commit
+`2553e3769b478bf44deaf5e86152c915e145300a`, consigné dans
+[#147](https://github.com/Alternative-LAB/faluss-platform/issues/147#issuecomment-6018635441).
+Cet accord Hub est distinct des règles produit [F1b R2](FANS-PF-F1B-PROPOSAL.md).
+Aucun code Hub, opération économique ou format H3/H4 changé par #163.
+Périmètre autorisé : Hub/Fans jetables, identités, achats, pairs et clés fictifs ;
 aucune admission sur site ou source d'achat réelle.
 
 ## Constat vérifié
@@ -108,7 +111,7 @@ Verrous : ordre existant membre/lot/ledger préservé ; acquisitions additionnel
 en ordre stable ; aucune opération de fermeture ne prend un verrou membre en
 ordre inverse. Les tests de deadlock/reprise doivent valider l'ordre exact.
 
-Effet produit à approuver avec ce contrat : une fermeture peut rester « en cours »
+Effet produit approuvé pour cette recette : une fermeture peut rester « en cours »
 pendant une panne réseau, mais aucun nouveau choix/envoi Fans n'est ouvert ; la
 date effective attestée distingue les faits déjà confirmés des refus ultérieurs.
 
@@ -131,7 +134,7 @@ date effective attestée distingue les faits déjà confirmés des refus ultéri
 
 ## Accord demandé
 
-Autoriser séparément B3 fermé sur : versions/champs, compteur atomique propriétaire,
+Accord séparé B3 fermé reçu sur : versions/champs, compteur atomique propriétaire,
 contexte canonique et barrières de fermeture, permissions dédiées et effet « en
 cours » après résultat incertain. Chaque sous-lot sera une PR bornée, après accord.
 Aucune durée de conservation nouvelle, purge réelle, achat, admission de production,
