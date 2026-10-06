@@ -53,20 +53,42 @@ final class SessionService
         return $this->store->transaction(function () use ($creator, $id, $revision, $territoryPolicy): array {
             $row = $this->store->row($id); $this->store->manager($row, $creator, true); SessionStore::revision($row, $revision);
             if ($row['state'] !== 'draft' || $row['frozen_sha256'] !== '' || $row['ends_at'] <= $this->store->now()) { throw new ModelViolation('hof_invalid_session_transition'); }
-            $territories = null;
-            if ($row['scope'] !== 'international') {
-                if ($territoryPolicy === null) { throw new ModelViolation('hof_reviewed_territory_required'); }
-                $territories = new TerritoryService($this->store->db); $territories->bind($id, $territoryPolicy);
-            } elseif ($territoryPolicy !== null) { throw new ModelViolation('hof_invalid_territory_binding'); }
-            foreach ($this->store->roles($id) as $role) {
-                if ($role['role'] !== 'organizer') { continue; }
-                if ($role['state'] === 'invited') { throw new ModelViolation('hof_coorganizer_acceptance_required'); }
-                if ($role['state'] !== 'accepted') { continue; }
-                SessionStore::activeOwner($role['creator_id']); $this->store->quota($role['creator_id'], $id);
-                if ($territories !== null) { $territories->eligible($role['creator_id'], $territoryPolicy, $row); }
-            }
+            $this->organizers($row,$territoryPolicy);
+            (new SessionModeration($this->store->db))->requireApproval($row);
             return $this->store->change($row, ['state' => 'opening', 'frozen_sha256' => SessionRules::digest($row), 'barrier_version' => '1'], 'request_open');
         });
+    }
+
+    /** Effective suspension must already have been acknowledged by B3; this never fabricates that state.
+     * @return array<string,string> */
+    public function requestReadmission(string $id, int $revision): array
+    {
+        $creator = SessionStore::creator()['creator_id'];
+        return $this->store->transaction(function () use ($creator,$id,$revision): array {
+            $row = $this->store->row($id); $this->store->manager($row,$creator,true); SessionStore::revision($row,$revision);
+            if ($row['state'] !== 'suspended' || $row['ends_at'] <= $this->store->now() || $row['frozen_sha256'] !== SessionRules::digest($row)
+                || (int) $row['barrier_version'] < 1 || (int) $row['barrier_version'] >= 2147483646) { throw new ModelViolation('hof_readmission_not_available'); }
+            $policy = $row['scope'] !== 'international' ? (new TerritoryService($this->store->db))->boundPolicy($id) : null;
+            $this->organizers($row,$policy); (new SessionModeration($this->store->db))->requireApproval($row);
+            return $this->store->change($row,['state' => 'opening','closure_action' => '', 'barrier_version' => (string) ((int) $row['barrier_version'] + 1)],'request_readmission');
+        });
+    }
+
+    /** @param array<string,string> $row */
+    private function organizers(array $row, ?string $policy): void
+    {
+        $territories = null;
+        if ($row['scope'] !== 'international') {
+            if ($policy === null) { throw new ModelViolation('hof_reviewed_territory_required'); }
+            $territories = new TerritoryService($this->store->db); $territories->bind($row['session_id'],$policy);
+        } elseif ($policy !== null) { throw new ModelViolation('hof_invalid_territory_binding'); }
+        foreach ($this->store->roles($row['session_id']) as $role) {
+            if ($role['role'] !== 'organizer') { continue; }
+            if ($role['state'] === 'invited') { throw new ModelViolation('hof_coorganizer_acceptance_required'); }
+            if ($role['state'] !== 'accepted') { continue; }
+            SessionStore::activeOwner($role['creator_id']); $this->store->quota($role['creator_id'],$row['session_id']);
+            if ($territories !== null) { $territories->eligible($role['creator_id'],$policy,$row); }
+        }
     }
 
     /** @return array<string,string> */

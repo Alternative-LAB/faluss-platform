@@ -65,20 +65,7 @@ final class SessionRoles
         if ($allow && EditorialService::publicById($target) === null) { throw new ModelViolation('hof_approved_creator_required'); }
         return $this->store->transaction(function () use ($id, $revision, $creator, $target, $allow): array {
             $row = $this->store->row($id); $this->store->manager($row, $creator); SessionStore::revision($row, $revision);
-            if (!in_array($row['state'], ['opening', 'open'], true) || $row['ends_at'] <= $this->store->now()) { throw new ModelViolation('hof_invalid_session_transition'); }
-            $role = $this->store->role($id, $target, 'participant');
-            if ($role === null || $role['state'] !== 'requested' || $role['rules_sha256'] !== $row['frozen_sha256']) { throw new ModelViolation('hof_participation_conflict'); }
-            if ($allow) {
-                SessionStore::activeOwner($target);
-                if ($row['scope'] !== 'international') {
-                    $territories = new TerritoryService($this->store->db);
-                    $policy = $territories->boundPolicy($id) ?? throw new ModelViolation('hof_reviewed_territory_required');
-                    $territories->eligible($target, $policy, $row);
-                }
-            }
-            $this->writeRole($id, $target, 'participant', $allow ? 'admitted' : 'refused', (int) $role['revision'] + 1,
-                $role['rules_sha256'], $allow ? $this->store->now() : '', $allow ? 'allowed_participation' : 'criteria_not_met');
-            return $this->store->change($row, [], 'decide_participation', $target, $allow ? 'allowed' : 'refused');
+            return SessionAdmission::decide($this->store,$row,$target,$allow);
         });
     }
 

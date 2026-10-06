@@ -141,6 +141,18 @@ final class EditorialService
         return is_array($data) ? $data : null;
     }
 
+    /** Additive locking guard for another module's existing transaction; never begins or commits one. */
+    public static function approvedInTransaction(string $id): bool
+    {
+        if (!self::validId($id) || !EditorialModule::available()) { return false; }
+        global $wpdb;
+        if ((string) $wpdb->get_var('SELECT @@in_transaction') !== '1' || $wpdb->last_error !== ''
+            || CreatorProfileService::publicById($id, true) === null) { return false; }
+        $row = self::row($id, true);
+        return is_array($row) && $row['state'] === 'approved' && (int) $row['revision'] > 0
+            && self::text($row['public_name'], 80, false) && trim($row['public_name']) !== '' && self::text($row['bio'], 1000, true);
+    }
+
     /** Dedicated additive discovery read. Date is the Fans creator-profile request, not wp_users.user_registered.
      * @return array{items:list<array<string,mixed>>,next_cursor:?string}|\WP_Error
      */
