@@ -17,6 +17,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Formaliser B3c2a fermé : corpus privé exhaustif 1.0 approuvé, validateur de
+  faits/totaux/filiation H4 et pagination, permission dédiée et domaines de
+  signature séparés. Aucun stockage, transport, score ou activation ajouté.
+
 - Ajouter B3c1 fermé : snapshots privés complets 2.0 par membre, ordre/contexte
   d'origine attestés et net H4 rapproché, pages immuables et fence primaire.
   Anciennes allocations explicitement non classables ; aucune API de site,

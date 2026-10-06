@@ -103,9 +103,12 @@ Contexte expiré, fermeture ou admission retirée : refus avant consommation,
 sans supprimer silencieusement un choix. Après résultat incertain : intention
 et clé originales, lookup primaire, jamais un second débit ou une nouvelle clé.
 
-Cette capacité n'existe pas encore dans les DTO H3/H4. Son
-[extension Hub B3](HUB-PF-B3-RANKING-PROPOSAL.md) a reçu son accord séparé
-le 6 octobre pour la recette fermée seulement ; son implémentation reste à tester.
+Les anciens DTO H3/H4 ne portent pas ce contexte. L'[extension Hub B3](HUB-PF-B3-RANKING-PROPOSAL.md)
+a reçu son accord séparé le 6 octobre pour la recette fermée seulement ;
+validateurs 0.3, persistance de l'ordre/contexte et snapshots membres 2.0 ont
+leurs preuves isolées dans le [suivi B3](HUB-PF-B3-CLOSED.md). Transport, reprise
+Fans et [corpus exhaustif approuvé séparément](HUB-PF-B3-RANKING-CORPUS.md) restent
+à intégrer avant une lecture globale exacte ; aucune capacité de site activée.
 
 ## P3 — places uniques et date d'atteinte approuvées
 
@@ -138,10 +141,12 @@ Ne pas rechercher la première fois où le score avait été atteint dans l'hist
 **non corrigé** : cela préserverait l'ancienneté d'une contribution annulée.
 La date de notification, de remboursement, de pack, ou du navigateur est exclue.
 
-Le fait Hub actuel conserve `confirmed_at` et un UUID de ledger mais **aucun ordre
-autoritatif de consommation**. Un UUID trié, un auto-incrément local Fans ou l'ordre
-de réception réseau ne le remplacent pas. La projection de rang reste indisponible
-tant que cette autorité et un corpus complet ne sont pas attestés.
+Le fait Hub historique conserve `confirmed_at` et un UUID de ledger, sans ordre
+autoritatif de consommation. Le nouveau B3 0.3 conserve l'ordre attesté dans sa
+transaction fermée, avec ses tests isolés. Un UUID trié, un auto-incrément local
+Fans ou l'ordre de réception réseau ne le remplacent pas. La projection de rang
+reste indisponible tant que cette autorité et un corpus complet ne sont pas
+rapprochés de bout en bout.
 L'ancien F1a continue de calculer ses points privés sans devenir un classement.
 
 ### Exemples à traduire en tests B1/B4
