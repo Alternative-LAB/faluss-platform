@@ -12,7 +12,7 @@ use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\CorpusTransport;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\SignedEnvelope;
 
-/** One exchange only; its caller durably stores the read key before HTTP. No retry, browser route or inbox yet. */
+/** One exchange only; its caller durably stores the read key before HTTP. No automatic retry or browser route. */
 final class ClosedCorpusClient
 {
     public function __construct(private readonly \wpdb $db, private readonly PeerPolicy $peer, private readonly string $keyId,

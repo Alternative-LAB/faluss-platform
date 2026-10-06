@@ -84,6 +84,50 @@ enclave jetable ; aucune migration ou réparation de site n'est proposée.
 
 Les transports 0.3, snapshots membres 2.0 et barrières restent des sous-lots B3 parallèles à intégrer, avec leurs propres domaines. B4/B5 ne déclareront aucun classement exhaustif tant que le corpus propriétaire complet n'est pas rapproché.
 
+### Inbox privée B3c2c3a
+
+`ClosedCorpusInboxSchema` possède uniquement cinq tables Fans de métadonnées :
+version, lectures/checkpoints, demandes signées, pages et génération rapprochée.
+`ClosedCorpusInbox` n'appelle aucun stockage économique Hub ; il utilise ses
+validateurs et preuves publics. Installation explicite en enclave physique
+Fans, aucun bootstrap, cron, endpoint navigateur ou migration automatique.
+Un schéma partiel, divergent ou non transactionnel est refusé, sans réparation.
+
+Le collecteur commence par persister une clé aléatoire, puis effectue un lookup
+primaire. Les appels concurrents retrouvent la même lecture en cours. Une
+absence signée autorise start ; **avant** de transmettre cette demande, l'inbox
+persiste ses octets exacts, son nonce et son empreinte, puis checkpoint lookup.
+Une réponse perdue, un redémarrage ou un COMMIT local incertain ne justifie
+jamais une autre clé. Après une demande déjà admise, nouveau nonce signé mais
+même clé et même périmètre. Le collecteur automatique raccordé au client est
+le sous-lot suivant ; cette PR vérifie ces étapes via la recette CLI privée et
+le véritable transport HTTP fermé.
+
+Chaque réponse est liée à une demande préalablement enregistrée. Les pages
+sont vérifiées, stagées une seule fois, puis réauthentifiées et rapprochées
+ensemble : manifeste identique, chaîne de curseurs, nombre, unicités, quantités
+et digest global. Seule la fence primaire courante permet le remplacement
+atomique de la génération complète et du checkpoint. Pas de transaction SQL
+Fans maintenue pendant HTTP. Une correction ou consommation concurrente, un
+fragment H4 incomplet ou une preuve manquante laisse la lecture indisponible.
+L'ancienne génération est masquée dès le début d'une nouvelle réconciliation ;
+une ancienne réponse positive ne peut ni la restaurer ni écraser une révision
+plus récente. Un ancien refus ne masque pas une génération ultérieure achevée.
+
+Les témoins signés conservés sont revérifiés à leur instant d'émission pour
+permettre l'audit après les 60 secondes de transport. Une clé révoquée reste
+refusée. Cette lecture décrit la génération à **`verified_at`**, jamais une
+fraîcheur future garantie par TTL. B4/B5 et la relecture continue de production
+restent distincts. Aucun public ne reçoit ce corpus ou ses identifiants.
+
+Recette : instances et clés distinctes, concurrence, perte de réponse Hub
+après COMMIT, décès du processus Fans avant/après COMMIT, acquittement local
+perdu, pages manquantes/altérées, promotion atomique, nouvelles consommations,
+corrections partielles/totales, litiges/résolutions et anciennes preuves.
+Aucune durée réelle, purge de production ou admission réseau n'est introduite.
+Rollback limité à l'enclave jetable : retirer son collecteur de recette et
+supprimer la base privée. Aucun site ni claim historique ne doit être modifié.
+
 ### Forme canonique du corpus 1.0
 
 Le manifeste contient `contract`, `corpus_id`, `issuer`, `audience`, `origin_id`, `policy_version`, `ordering_epoch`, `epoch`, `revision`, `last_order`, `created_at`, `scope`, `fact_count`, `page_count`, `original_pf`, `cancelled_pf`, `suspended_pf`, `net_pf` et `full_sha256`. Identifiants UUID v4 opaques ; entiers décimaux en chaînes canoniques jusqu'à 9007199254740991 ; instant primaire UTC6. `scope` vaut exactement `all_confirmed_ranked_0.3_including_zero`. `last_order` est le sommet propriétaire global vérifié : des trous entre les seuls faits d'une origine peuvent correspondre aux autres origines, sans simuler une séquence locale.

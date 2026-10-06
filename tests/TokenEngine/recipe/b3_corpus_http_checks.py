@@ -42,7 +42,12 @@ def run_checks(root, wp, source, cli_path, check, call, sql, command, workers, l
     sql('CREATE DATABASE fans_pf_recipe')
 
     def cli(path,*args):return command(['php',cli_path,'--allow-root','--path='+str(path),*args])
-    def fan_sql(query):return command(['mariadb','--no-defaults','--socket='+str(root/'sql.sock'),'-uroot','--batch','--skip-column-names','fans_pf_recipe','-e',query]).strip()
+    def fan_sql(query):
+        # Large private pages must not pass through argv (Linux has a per-argument size limit).
+        result=subprocess.run(['mariadb','--no-defaults','--socket='+str(root/'sql.sock'),'-uroot','--batch','--skip-column-names','fans_pf_recipe'],
+                              input=query,text=True,capture_output=True,timeout=90)
+        if result.returncode:raise RuntimeError('Disposable Fans SQL failed; no private query printed.')
+        return result.stdout.strip()
     def worker(role,value):
         path=root/(uuid.uuid4().hex+'.json'); path.write_text(json.dumps(value)); path.chmod(0o600)
         return json.loads(cli(wp if role=='hub' else fans,'eval-file',str(source/'tests/TokenEngine/recipe/b3-corpus-network-worker.php'),str(path),'--use-include'))
@@ -231,3 +236,7 @@ def run_checks(root, wp, source, cli_path, check, call, sql, command, workers, l
     check('B3ch global HTTP reads never rewrite official historical claims or ledger rows',set(ledger.splitlines()).issubset(set(sql('SELECT * FROM wp_token_engine_pf_ledger ORDER BY id').splitlines()))
           and sql('SELECT * FROM wp_token_engine_ledger ORDER BY id')==old_claims)
     check('B3ch recipe adds no browser global read and no Fans PF ledger',fan_sql("SHOW TABLES LIKE 'wp_fans_pf_b3%'")=='')
+    # Private closures only for the next disposable SQL recipe, never an artifact or runtime API.
+    return dict(fans=fans,fan_sql=fan_sql,cli=cli,worker=worker,fields=fields,sign=sign,http=http,
+                policy=policy,policies=policies,set_clock=set_clock,origin=origin,proof=proof,
+                consume=consume,intent=intent,admit_origin=admit_origin)

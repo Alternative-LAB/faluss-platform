@@ -41,7 +41,10 @@ def main():
     parser.add_argument('--b3-corpus-source', action='store_true', help='Exhaustive closed owner inventory, H4 reconciliation and measured read mutex')
     parser.add_argument('--b3-corpus', action='store_true', help='Closed exhaustive immutable pages, stable primary recovery and final current fence')
     parser.add_argument('--b3-corpus-http', action='store_true', help='Closed signed owner corpus HTTP with dedicated SQL nonces and distinct fixture keys')
+    parser.add_argument('--b3-corpus-inbox', action='store_true', help='Durable private Fans staging, primary recovery and atomic complete corpus replacement')
     options = parser.parse_args()
+    if options.b3_corpus_inbox:
+        options.b3_corpus_http = True
     if options.b3_corpus_http:
         options.b3_corpus = True
     if options.b3_corpus:
@@ -360,9 +363,14 @@ def main():
             from b3_corpus_checks import run_checks
             corpus_fence_measurements = run_checks(root,wp,check,call,sql,start,finish,parallel,await_file)
         b3_corpus_http_start = len(checks)
+        corpus_fixture = None
         if options.b3_corpus_http:
             from b3_corpus_http_checks import run_checks
-            run_checks(root,wp,source,options.cli,check,call,sql,command,workers,log,start,finish,await_file)
+            corpus_fixture = run_checks(root,wp,source,options.cli,check,call,sql,command,workers,log,start,finish,await_file)
+        b3_corpus_inbox_start = len(checks)
+        if options.b3_corpus_inbox:
+            from b3_corpus_inbox_checks import run_checks
+            run_checks(root,source,options.cli,check,call,sql,command,workers,log,await_file,corpus_fixture)
         report = dict(checks=checks, total=len(checks), failed=0, wordpress=cli('core', 'version').strip(),
                       php=command(['php', '-r', 'echo PHP_VERSION;']).strip(),
                       database=sql('SELECT VERSION()'), schema='5',
@@ -386,7 +394,8 @@ def main():
         report['b3_snapshots_total'] = b3_corpus_source_start - b3_snapshots_start
         report['b3_corpus_source_total'] = b3_corpus_start - b3_corpus_source_start
         report['b3_corpus_total'] = b3_corpus_http_start - b3_corpus_start
-        report['b3_corpus_http_total'] = len(checks) - b3_corpus_http_start
+        report['b3_corpus_http_total'] = b3_corpus_inbox_start - b3_corpus_http_start
+        report['b3_corpus_inbox_total'] = len(checks) - b3_corpus_inbox_start
         report['corpus_source_measurements'] = corpus_measurements
         report['corpus_fence_measurements'] = corpus_fence_measurements
         if options.h1 or options.h2_reservations or options.h2:
@@ -461,6 +470,10 @@ def main():
             report['not_proven'] = ['Durable Fans corpus inbox, atomic replacement and continuous freshness',
                                     'True SSO, real purchase source, production admission, site operations, public score or retention policy',
                                     'Production sizing, TLS, real infrastructure COMMIT acknowledgement loss or replica/restore']
+        if options.b3_corpus_inbox:
+            report['scope'] += '; durable Fans key and signed request before HTTP, staged pages and atomic complete generation with primary fence'
+            report['fans_corpus_schema'] = '1 (closed_b3_corpus_fans)'
+            report['not_proven'][0] = 'Automated network reader, ranking projections B4/B5, continuous production freshness'
     finally:
         for process in workers:
             if process.poll() is None:
