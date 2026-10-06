@@ -33,6 +33,13 @@ Lint des PHP modifiés et compilation Python satisfaits ; 168 tests PF ciblés /
 276 assertions, suite complète 545 tests / 6 466 assertions, zéro échec/erreur,
 deux dépréciations préexistantes ; PHPStan ciblé/complet sans erreur.
 
+La première CI PHP 8.3 a rejeté l'annotation d'impureté d'une lecture de propriété
+passée en argument, acceptée par l'analyse locale PHP 8.5. Correctif : lire l'état
+WordPress global déjà garanti comme étant la même connexion par la garde H3,
+selon le modèle existant du registre Fans. Analyse complète reproduite avec
+`phpVersion: 80335`, sans erreur ; suite complète du tree exact 545 / 6 466 PASS.
+Cette configuration d'analyse ne remplace pas le runtime PHP 8.3 de la CI.
+
 Limites : B3b2 doit encore joindre contexte, ordre et reçu 0.3 au débit et
 journal officiels. B3c doit prouver transport Hub/Fans et fermeture « en cours ».
 Ni vrai SSO, site cible, achat, admission économique, score, rétention ou

@@ -52,9 +52,9 @@ final class ClosedBarrierSchema
     {
         ClosedEnvironment::assertIsolated($db,'hub');
         if (!ClosedProtocolSchema::ready($db)) { throw new ModelViolation('pf_protocol_schema_unavailable'); }
-        if ((string) $db->get_var('SELECT @@in_transaction') !== '0' || self::failed($db)) { throw new ModelViolation('nested_transaction_refused'); }
+        if ((string) $db->get_var('SELECT @@in_transaction') !== '0' || self::failed()) { throw new ModelViolation('nested_transaction_refused'); }
         $tables = self::tables($db); $lock = 'pf_b3_barrier_schema_' . substr(hash('sha256',$db->prefix),0,24); $temporary = [];
-        if ((string) $db->get_var($db->prepare('SELECT GET_LOCK(%s,10)',$lock)) !== '1' || self::failed($db)) { throw new ModelViolation('model_lock_unavailable'); }
+        if ((string) $db->get_var($db->prepare('SELECT GET_LOCK(%s,10)',$lock)) !== '1' || self::failed()) { throw new ModelViolation('model_lock_unavailable'); }
         try {
             $found = array_filter($tables,static fn (string $table): bool => self::exists($db,$table));
             if ($found !== []) {
@@ -86,6 +86,6 @@ final class ClosedBarrierSchema
 
     /** wpdb queries update last_error on the same connection.
      * @phpstan-impure */
-    private static function failed(\wpdb $db): bool
-    { return $db->last_error !== ''; }
+    private static function failed(): bool
+    { global $wpdb; return $wpdb->last_error !== ''; }
 }
