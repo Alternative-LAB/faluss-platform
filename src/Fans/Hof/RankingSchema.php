@@ -14,6 +14,7 @@ final class RankingSchema
     /** @return array<string,string> */
     public static function tables(\wpdb $db): array
     {
+        if (($GLOBALS['wpdb'] ?? null) !== $db) { throw new ModelViolation('hof_invalid_database'); }
         if (preg_match('/^[A-Za-z0-9_]{1,20}$/D', $db->prefix) !== 1) { throw new ModelViolation('hof_invalid_prefix'); }
         $tables = [];
         foreach (array_keys(self::definitions()) as $kind) { $tables[$kind] = $db->prefix . 'fans_hof_' . $kind; }
@@ -49,7 +50,7 @@ final class RankingSchema
             if (!self::verify($db, $tables[$kind], $definition)) { return false; }
         }
         return $db->get_results($db->prepare('SELECT id,version FROM %i', $tables['schema']), 'ARRAY_A') === [['id' => '1', 'version' => self::VERSION]]
-            && !self::failed($db);
+            && !self::failed();
     }
 
     /** No normal bootstrap calls this method. Incompatible/partial schemas fail closed. */
@@ -58,7 +59,7 @@ final class RankingSchema
         if (!current_user_can('manage_options') || !defined('FALUSS_PLATFORM_ROLE') || constant('FALUSS_PLATFORM_ROLE') !== 'fans') {
             throw new ModelViolation('hof_forbidden');
         }
-        if ((string) $db->get_var('SELECT @@in_transaction') !== '0' || self::failed($db)) { throw new ModelViolation('hof_nested_transaction'); }
+        if ((string) $db->get_var('SELECT @@in_transaction') !== '0' || self::failed()) { throw new ModelViolation('hof_nested_transaction'); }
         $tables = self::tables($db);
         $lock = 'fans_hof_schema_' . substr(hash('sha256', $db->prefix), 0, 32);
         if ((string) $db->get_var($db->prepare('SELECT GET_LOCK(%s,10)', $lock)) !== '1') { throw new ModelViolation('hof_busy'); }
@@ -67,7 +68,7 @@ final class RankingSchema
             $found = [];
             foreach ($tables as $table) {
                 $exists = $db->get_var($db->prepare('SHOW TABLES LIKE %s', $db->esc_like($table)));
-                if (self::failed($db)) { throw new ModelViolation('hof_storage_unavailable'); }
+                if (self::failed()) { throw new ModelViolation('hof_storage_unavailable'); }
                 if ($exists === $table) { $found[] = $table; }
             }
             if ($found !== []) {
@@ -99,12 +100,13 @@ final class RankingSchema
     }
 
     /** @param array{columns:array<string,string>,indexes:array<string,array{bool,list<string>}>} $definition */
-    private static function verify(\wpdb $db, string $table, array $definition): bool
+    public static function verify(\wpdb $db, string $table, array $definition): bool
     {
+        self::tables($db);
         $status = $db->get_row($db->prepare('SHOW TABLE STATUS LIKE %s', $db->esc_like($table)), 'ARRAY_A');
-        if (!is_array($status) || self::failed($db) || strtolower((string) ($status['Engine'] ?? '')) !== 'innodb') { return false; }
+        if (!is_array($status) || self::failed() || strtolower((string) ($status['Engine'] ?? '')) !== 'innodb') { return false; }
         $columns = $db->get_results($db->prepare('SHOW FULL COLUMNS FROM %i', $table), 'ARRAY_A');
-        if (!is_array($columns) || self::failed($db)) { return false; }
+        if (!is_array($columns) || self::failed()) { return false; }
         $actual = [];
         foreach ($columns as $row) {
             if (($row['Null'] ?? '') !== 'NO' || ($row['Extra'] ?? '') !== '') { return false; }
@@ -112,7 +114,7 @@ final class RankingSchema
         }
         if ($actual !== $definition['columns']) { return false; }
         $rows = $db->get_results($db->prepare('SHOW INDEX FROM %i', $table), 'ARRAY_A');
-        if (!is_array($rows) || self::failed($db)) { return false; }
+        if (!is_array($rows) || self::failed()) { return false; }
         $indexes = [];
         foreach ($rows as $row) {
             $name = (string) $row['Key_name'];
@@ -126,5 +128,5 @@ final class RankingSchema
     }
 
     /** @phpstan-impure Reads the most recent database operation's error. */
-    private static function failed(\wpdb $db): bool { return $db->last_error !== ''; }
+    private static function failed(): bool { global $wpdb; return $wpdb->last_error !== ''; }
 }

@@ -9,7 +9,7 @@ use Faluss\Platform\TokenEngine\PurchasedPf\ModelViolation;
 /** Transactions for this domain only. Never enters another module's transaction. */
 final class RankingStorage
 {
-    public function __construct(public readonly \wpdb $database) {}
+    public function __construct(public readonly \wpdb $database) { RankingSchema::tables($database); }
 
     /** @template T
      * @param callable():T $operation
@@ -49,5 +49,5 @@ final class RankingStorage
     }
 
     /** @phpstan-impure Reads the most recent database operation's error. */
-    private function failed(): bool { return $this->database->last_error !== ''; }
+    private function failed(): bool { global $wpdb; return $wpdb->last_error !== ''; }
 }
