@@ -178,7 +178,7 @@ final class ClosedReservationStore
     /** @return array<string,mixed> */
     public function sourceLot(string $lotId, string $member): array
     {
-        $this->connection->assertHeldSubject($member);
+        $this->connection->assertReadableSubject($member);
         $tables = ClosedModelSchema::tables($this->connection->database);
         $lot = $this->connection->row($tables['lots'], 'lot_id=%s', [$lotId]);
         if ($lot === null || $lot['member_faluss_id'] !== $member || !in_array($lot['authority_id'], $this->sources, true)) {
@@ -234,7 +234,7 @@ final class ClosedReservationStore
     /** @return array<string,mixed>|null */
     public function reservation(AttributionIntent $intent): ?array
     {
-        $this->connection->assertHeldSubject($intent->values['member_faluss_id']);
+        $this->connection->assertReadableSubject($intent->values['member_faluss_id']);
         $row = $this->connection->row($this->tables['reservations'], 'attribution_id=%s', [$intent->values['attribution_id']]);
         if ($row === null) {
             return null;

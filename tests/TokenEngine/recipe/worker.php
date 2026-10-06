@@ -25,9 +25,33 @@ final class HubPfRecipeDatabase extends wpdb
 {
     public string $fault = '';
     public string $marker = '';
+    public string $globalWaitMarker = '';
+    public float $globalHeldMs = 0.0;
+    private ?int $globalHeldSince = null;
 
     public function query($query)
     {
+        if (preg_match("/^SELECT (GET_LOCK|RELEASE_LOCK)\('token_engine_pf_h1_model_[a-f0-9]+'/",$query,$lockMatch) === 1) {
+            $acquiring = $lockMatch[1] === 'GET_LOCK';
+            if ($acquiring && $this->globalWaitMarker !== '') { file_put_contents($this->globalWaitMarker,'waiting'); }
+            $before = hrtime(true); $result = parent::query($query);
+            $value = isset($this->last_result[0]) ? array_values((array) $this->last_result[0])[0] : null;
+            if ((string) $value === '1') {
+                if ($acquiring) {
+                    $this->globalHeldSince = hrtime(true);
+                    if ($this->fault === 'b3o-hold-global') {
+                        $this->fault = ''; file_put_contents($this->marker,'locked'); $deadline = microtime(true) + 25;
+                        while (!is_file($this->marker . '.release')) {
+                            if (microtime(true) > $deadline) { throw new RuntimeException('Fixture corpus lock release timed out.'); }
+                            usleep(10000);
+                        }
+                    }
+                } elseif ($this->globalHeldSince !== null) {
+                    $this->globalHeldMs += ($before - $this->globalHeldSince) / 1000000; $this->globalHeldSince = null;
+                }
+            }
+            return $result;
+        }
         if ($this->fault === 'h1-metadata-error' && str_starts_with($query, 'SHOW TABLE STATUS LIKE')) {
             $this->fault = '';
             $result = parent::query($query);
@@ -111,11 +135,12 @@ if (!empty($input['barrier'])) {
         usleep(10000);
     }
 }
-if (!empty($input['fault'])) {
+if (!empty($input['fault']) || !empty($input['observe'])) {
     $wpdb = new HubPfRecipeDatabase(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
     $wpdb->set_prefix($table_prefix);
-    $wpdb->fault = $input['fault'];
-    $wpdb->marker = $input['marker'];
+    $wpdb->fault = $input['fault'] ?? '';
+    $wpdb->marker = $input['marker'] ?? '';
+    $wpdb->globalWaitMarker = $input['wait_marker'] ?? '';
 }
 
 if (str_starts_with($input['action'], 'b3b-')) {
@@ -128,6 +153,10 @@ if (str_starts_with($input['action'], 'b3r-')) {
 }
 if (str_starts_with($input['action'], 'b3s-')) {
     require __DIR__ . '/b3_snapshot_worker.php';
+    return;
+}
+if (str_starts_with($input['action'], 'b3o-')) {
+    require __DIR__ . '/b3_corpus_source_worker.php';
     return;
 }
 

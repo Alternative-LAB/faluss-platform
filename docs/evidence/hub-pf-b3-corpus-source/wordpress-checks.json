@@ -1,0 +1,58 @@
+{
+  "scope": "Closed B3c2b1 exhaustive Hub owner inventory on disposable WordPress/MariaDB; fictitious data, no site or public score",
+  "count": 38,
+  "checks": [
+    "B3o admitted origin without attribution yields an explicit exhaustive empty inventory",
+    "B3o global corpus permission is not inherited from snapshot wallet or delegated member",
+    "B3o other fixture peer or audience cannot read the Fans owner origin",
+    "B3o unknown origin or different policy is never treated as an empty eligible inventory",
+    "B3o raw owner composition outside its transaction is refused",
+    "B3o ordinary global write mutex without distinct read lease cannot enumerate another member",
+    "B3o read lease does not acquire member mutex or authorize credit debit correction or nested writes",
+    "B3o owner enumeration includes more than one page of genuine protocol consumptions",
+    "B3o Hub order epoch and primary confirmation agree across the entire owner inventory",
+    "B3o pack alone contributes no fact and no available balance or payment reference is transmitted",
+    "B3o newly consuming member unknown to Fans is discovered without a supplied member list",
+    "B3o confirmed attribution of another origin does not enter the requested origin",
+    "B3o historical unranked consumption is never promoted into a ranked corpus",
+    "B3o multi lot attribution remains one exhaustive fact with one original consumption",
+    "B3o multi lot partially_cancelled revision 2 composes latest source vector without duplicating consumption",
+    "B3o multi lot disputed revision 3 composes latest source vector without duplicating consumption",
+    "B3o multi lot partially_cancelled revision 4 composes latest source vector without duplicating consumption",
+    "B3o multi lot cancelled revision 5 composes latest source vector without duplicating consumption",
+    "B3o incomplete H4 reconciliation refuses the whole origin rather than silently skipping its member",
+    "B3o remaining correction fragment still prevents a falsely exact origin read",
+    "B3o cumulative reduction cancels available first then newest allocations with exact net",
+    "B3o latest H4 correction never changes original confirmation order or selected dimensions",
+    "B3o complete disputed revision 3 keeps every zero fact and exact current net",
+    "B3o complete partially_cancelled revision 4 keeps every zero fact and exact current net",
+    "B3o complete cancelled revision 5 keeps every zero fact and exact current net",
+    "B3o replay of an older correction never replaces the latest complete source revision",
+    "B3o closing origin preserves the attested historical inventory without reopening choices",
+    "B3o old receipt or H4 generation never restores cancelled points in a new owner read",
+    "B3o concurrent consumption waits on the same owner mutex without acquiring it in reverse order",
+    "B3o concurrent read is complete before subsequent reservation and preserves stable keys",
+    "B3o reread after concurrent confirmed consumption includes it exactly once",
+    "B3o concurrent correction waits for the same global read mutex",
+    "B3o complete read linearizes before correction and subsequent pending source is unavailable",
+    "B3o read recovers after the entire concurrent correction is durably reconciled",
+    "B3o contradictory owner ordering epoch refuses every partial inventory",
+    "B3o altered original receipt bytes or digest never silently exclude its member",
+    "B3o restored exact original metadata recovers the corrected complete inventory without economic repair",
+    "B3o exhaustive owner read emits no new PF ledger entry or delivery receipt"
+  ],
+  "measurements": [
+    {
+      "facts": 101,
+      "allocations": 101,
+      "bytes": 171802,
+      "global_lock_ms": "2298.666"
+    },
+    {
+      "facts": 102,
+      "allocations": 102,
+      "bytes": 173513,
+      "global_lock_ms": "2527.558"
+    }
+  ]
+}

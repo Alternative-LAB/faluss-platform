@@ -209,7 +209,7 @@ final class ClosedCorrectionStore
      */
     public function verifiedLotPlan(string $lotId, string $member): ?array
     {
-        $this->connection->assertHeldSubject($member);
+        $this->connection->assertReadableSubject($member);
         $this->assertSchema();
         $lot = $this->facts->lot($lotId, $member);
         $row = $this->latest($lotId);

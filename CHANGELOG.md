@@ -17,6 +17,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Ajouter B3c2b1 fermé : lecture propriétaire exhaustive de l'origine depuis
+  les consommations Hub 0.3 et le net H4 complet, sous verrou global et bail
+  distinct de lecture. Aucun paramètre de liste de membres, nouvelle écriture
+  économique, matérialisation, transport, score ou activation.
+
 - Formaliser B3c2a fermé : corpus privé exhaustif 1.0 approuvé, validateur de
   faits/totaux/filiation H4 et pagination, permission dédiée et domaines de
   signature séparés. Aucun stockage, transport, score ou activation ajouté.

@@ -76,7 +76,21 @@ final class ClosedRankingContext
      * @return array{ordering_epoch:string,last_order:string,last_confirmed_at:string} */
     public static function orderInOwnerTransaction(ClosedReservationDatabase $connection, string $member): array
     {
-        $connection->assertHeldSubject($member); $db = $connection->database;
+        $connection->assertReadableSubject($member);
+        return self::verifiedOrder($connection);
+    }
+
+    /** @return array{ordering_epoch:string,last_order:string,last_confirmed_at:string} */
+    public static function orderInCorpusTransaction(ClosedReservationDatabase $connection): array
+    {
+        ClosedCorpusTransaction::assertActive($connection->database);
+        return self::verifiedOrder($connection);
+    }
+
+    /** @return array{ordering_epoch:string,last_order:string,last_confirmed_at:string} */
+    private static function verifiedOrder(ClosedReservationDatabase $connection): array
+    {
+        $db = $connection->database;
         if (!ClosedRankingSchema::ready($db)) { throw new ModelViolation('pf_ranking_schema_unavailable'); }
         $tables = ClosedRankingSchema::tables($db);
         $counter = $connection->row($tables['counter'],'id=%s',['1']);
@@ -92,6 +106,18 @@ final class ClosedRankingContext
             throw new ModelViolation('pf_ranking_counter_divergent');
         }
         return ['ordering_epoch' => $epoch,'last_order' => (string) $last,'last_confirmed_at' => (string) $counter['last_confirmed_at']];
+    }
+
+    /** Exact existing binding only; no insertion, downgrade or retroactive association. */
+    public function assertBoundForOwnerRead(): void
+    {
+        ClosedCorpusTransaction::assertActive($this->db);
+        $base = $this->intent->base; $this->connection->assertReadableSubject($base->values['member_faluss_id']);
+        if (!ClosedRankingSchema::ready($this->db)) { throw new ModelViolation('pf_ranking_schema_unavailable'); }
+        $row = $this->connection->row($this->tables['bindings'],'attribution_id=%s',[$base->values['attribution_id']]);
+        if ($row === null || $row['base_sha256'] !== $base->fingerprint() || $row['ranked_sha256'] !== $this->intent->fingerprint()
+            || $row['member_faluss_id'] !== $base->values['member_faluss_id'] || $row['client_authority'] !== $base->values['client_authority']
+            || CanonicalJson::encode($this->intent->values) !== $row['payload_json']) { throw new ModelViolation('pf_ranking_context_conflict'); }
     }
 
     /** @param array<string,mixed> $payload */

@@ -310,3 +310,43 @@ dépendances historiques distinctes des erreurs. Cette preuve de validateur et
 de cryptographie ne remplace ni la matérialisation SQL exhaustive ni les tests
 réseau et de verrouillage des sous-lots suivants. La recette WordPress/MariaDB
 320 scénarios de B3c1 reste une preuve transactionnelle distincte.
+
+## B3c2b1 — lecture exhaustive par le propriétaire Hub
+
+`ClosedRankingCorpusSource` énumère les reçus 0.3 depuis Hub, avec les liaisons,
+consommations, débits officiels et journaux d'origine vérifiés. Origine/politique
+exactes et permission `pf.ranking.corpus` du seul pair `fixture.fans` ; l'origine
+doit avoir été admise par sa barrière propriétaire. Aucun membre demandé par
+Fans ni compte local utilisé comme inventaire. Packs sans attribution et
+anciennes consommations sans contexte exclus ; les faits à zéro restent présents.
+La fermeture d'origine laisse ses faits historiques lisibles, sans réouverture.
+
+La nouvelle transaction prend le verrou global H1/H2 commun aux consommations
+et corrections, puis un bail SQL de lecture distinct. Elle ne prend aucun mutex
+membre après le global. Les compositions en lecture H2/H4 peuvent vérifier les
+faits de plusieurs membres sous ce bail et relisent le net complet H4, sans
+copier les règles de correction. Écriture économique = mutex membre toujours
+requis ; débit/crédit/correction et transaction membre imbriquée refusés dans
+la lecture de corpus. Le bail de lecture ne vaut ni délégation Fan ni permission
+d'attribution. C'est une composition de code propriétaire Hub, pas un bac à sable
+SQL pour du code tiers : aucun accès PHP ou wpdb n'est accordé par le protocole.
+
+Avant les faits, compteur/époque/continuité propriétaires vérifiés. Chaque
+attribution originale multi-lots donne un seul fait avec les dernières révisions,
+annulations et suspensions H4 de ses allocations. Rapprochement inachevé d'un
+membre inclus, filiation manquante, digest altéré ou contradiction d'époque :
+refus de **toute** la lecture, jamais omission silencieuse d'un membre. La date
+primaire finale ne peut précéder une consommation confirmée.
+
+Bornes conservatrices de cette implémentation fermée : 1 000 reçus propriétaires
+au total, toutes origines confondues, et 32 MiB de faits canoniques par lecture.
+Un dépassement rend la lecture indisponible, sans tranche présentée comme
+exhaustive. Ces bornes ne sont ni des plafonds produit approuvés ni une validation
+de dimensionnement de production ; les mesures ci-dessous portent sur une
+recette locale et ne couvrent pas cette borne maximale.
+
+La [preuve de recette et les mesures](../evidence/hub-pf-b3-corpus-source/README.md)
+distinguent lectures courantes, concurrence et tests historiques. Aucune
+génération immuable, page signée, fence après transfert, inbox Fans ou score
+public n'est encore fourni par ce sous-lot. B3c2b2 et B3c2c suivent ; les nouvelles
+opérations restent inaccessibles hors de l'enclave physique jetable H3.
