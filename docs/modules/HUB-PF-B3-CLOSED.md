@@ -73,7 +73,8 @@ clé inconnue/révoquée, signature altérée et confusion des versions/domaines
 
 ## Ordre de livraison restant
 
-1. **B3b** : schéma de métadonnées, contexte immuable de l'intention et barrières ;
+1. **B3b1** : barrières propriétaires et lookup primaire (sous-lot présent).
+   **B3b2** : contexte immuable de l'intention et consommation ordonnée ;
    acquittement/lookup primaire, compteur transactionnel atomique avec le débit,
    reçu et journal officiels. Aucun ledger Fans ni allocation supplémentaire.
 2. **B3c** : snapshot `hub.purchased-pf.snapshot/2.0.0`, complet et rapproché,
@@ -96,3 +97,62 @@ PHP lint et PHPStan ciblé/complet sans erreur ; suite complète **534 tests /
 Scan ciblé de secrets, liens relatifs et `git diff --check` satisfaisants.
 Aucune preuve WordPress/réseau nouveau revendiquée par ce sous-lot sans stockage.
 La CI complète du head exact demeure le gate de revue et de fusion.
+
+## B3b1 — scénarios préalables des barrières propriétaires
+
+Barrières privées d'origine, politique de pays, catégorie du Créateur, session
+et admission individuelle. Le pair Fans propriétaire enregistre un contenu
+canonique et une version exacts avec bornes explicites. Une fermeture ne prend
+aucun verrou membre/lot/ledger. Confirmation future : mêmes lignes verrouillées
+en ordre canonique, version la plus récente, contenu/bornes/état exacts ; aucune
+sélection silencieusement réduite. Réadmission seulement par version suivante,
+après fermeture effective, jamais réactivation d'une version fermée.
+
+Positifs : installation explicite physiquement isolée ; permission dédiée ;
+registration/rejeu/lookup sur le primaire ; fermeture effective à l'horloge Hub ;
+concurrence, erreur avant COMMIT et réponse perdue après COMMIT ; même clé/requête,
+un événement durable ; nouvelles versions sans altérer l'ancienne. Une réponse
+de registration historique ne cache jamais l'état désormais fermé/supersédé.
+
+Négatifs : simple constante hors enclave, destinataire/propriétaire étranger,
+absence de permission, contenu/version modifié avec la même clé, nouvelle clé
+pour la même opération, réouverture d'une ancienne version, saut de version,
+schéma partiel/divergent ou journal défaillant ; aucune écriture économique.
+Le raccordement atomique à la consommation est B3b2, pas une preuve B3b1.
+
+### Contrat de stockage et reprise B3b1
+
+Quatre tables privées InnoDB `token_engine_pf_b3b_*`, installées uniquement par
+`ClosedBarrierSchema::installForRecipe()` après validation physique H3 (chemin
+jetable, bail privé 0600, base/socket primaire, rôle Hub et environnement local).
+Aucun appel du bootstrap ni option de migration. Les aides SQL de schéma H3
+sont réutilisées sans changer ses définitions ou formats historiques.
+
+Clé de barrière : SHA-256 de l'origine, type, objet et sujet canoniques, hors
+version. Contenu/version exacts, empreinte de descripteur et bornes UTC à six
+décimales. Une version initiale peut correspondre à une révision déjà examinée ;
+la suivante exige fermeture effective et numéro immédiatement suivant.
+
+Le verrou court de métadonnées sérialise registration/fermeture/lookup. Ces
+opérations ne prennent aucun verrou économique. La future consommation tient
+les lignes sélectionnées en ordre canonique dans la transaction officielle H2.
+La fermeture attend cette transaction : aucune inversion membre/lot/ledger.
+
+La clé et la requête complète demeurent identiques après résultat incertain.
+Un acquittement historique de registration ne permet jamais de réouvrir une
+version : le lookup rapporte son état actuel `closed` ou `superseded`. Une
+erreur primaire ne devient pas `not_found`. Le journal, l'état et la clé sont
+dans le même COMMIT ; une perte de réponse exige lookup, pas une nouvelle clé.
+
+Retour arrière : aucun schéma sur les sites ; dans la recette, suppression de
+l'enclave entière après les tests. Ne jamais adopter ou réparer silencieusement
+des tables divergentes ; aucune suppression de faits économiques historiques.
+
+### Vérifications B3b1
+
+[Preuve expurgée](../evidence/hub-pf-b3-barriers/README.md) : 37 scénarios nouveaux
+sur WordPress 7.1.2 / MariaDB 11.8.6 / PHP 8.5.4, après 186 scénarios historiques
+H0–H3. Suite PHP complète 545 tests / 6 466 assertions, zéro échec/erreur,
+deux dépréciations préexistantes ; PHPStan complet sans erreur. CI additive
+`--b3-barriers`, rapport vérifiable sous artefact GitHub, contrôles historiques
+conservés. Aucune preuve économique 0.3 ou fermeture réseau revendiquée.

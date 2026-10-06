@@ -35,7 +35,10 @@ def main():
     parser.add_argument('--h4-snapshots', action='store_true', help='Closed complete owner snapshots after H4 corrections')
     parser.add_argument('--h4-http', action='store_true', help='Closed private complete snapshot delivery between disposable Hub and Fans')
     parser.add_argument('--f1a', action='store_true', help='Closed private Fan/Creator rebuildable projections after unchanged H0-H4')
+    parser.add_argument('--b3-barriers', action='store_true', help='Closed B3 owner barriers on the primary; metadata only, no new consumption')
     options = parser.parse_args()
+    if options.b3_barriers:
+        options.h3_proofs = True
     if options.f1a:
         options.h4_http = True
     if options.h4_http:
@@ -319,6 +322,10 @@ def main():
         if options.f1a:
             from f1a_checks import run_checks
             run_checks(root, wp, source, options.cli, check, call, sql, command, workers, log)
+        b3_barriers_start = len(checks)
+        if options.b3_barriers:
+            from b3_barrier_checks import run_checks
+            run_checks(root, wp, check, call, sql, start, finish, parallel, await_file)
         report = dict(checks=checks, total=len(checks), failed=0, wordpress=cli('core', 'version').strip(),
                       php=command(['php', '-r', 'echo PHP_VERSION;']).strip(),
                       database=sql('SELECT VERSION()'), schema='5',
@@ -336,7 +343,8 @@ def main():
         report['h4_total'] = h4_snapshots_start - h4_start
         report['h4_snapshots_total'] = h4_http_start - h4_snapshots_start
         report['h4_http_total'] = f1a_start - h4_http_start
-        report['f1a_total'] = len(checks) - f1a_start
+        report['f1a_total'] = b3_barriers_start - f1a_start
+        report['b3_barriers_total'] = len(checks) - b3_barriers_start
         if options.h1 or options.h2_reservations or options.h2:
             report['scope'] += '; closed H1 model explicitly installed only in this fixture'
             report['model_schema'] = '1 (closed_h1_model)'
@@ -351,6 +359,11 @@ def main():
             if not options.h3_http:
                 report['scope'] += ', no HTTP or actual SSO'
             report['protocol_schema'] = '1 (closed_h3_hub)'
+        if options.b3_barriers:
+            report['scope'] += '; closed B3b1 owner barriers, SQL lookup and selection locks, no ranked economic operation'
+            report['barrier_schema'] = '1 (closed_b3_barriers)'
+            report['not_proven'] += ['B3 ranked atomic debit/order/receipt, cross-instance barrier transport and Fans closing state',
+                                     'Any production installation, real account, purchase, score or retention policy']
         if options.h3_http:
             report['scope'] += '; real private loopback HTTP between distinct disposable Hub/Fans WP and databases, fictitious links/keys, not true SSO'
             report['fans_protocol_schema'] = '1 (closed_h3_fans)'
