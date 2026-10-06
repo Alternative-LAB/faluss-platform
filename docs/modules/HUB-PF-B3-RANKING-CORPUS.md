@@ -40,15 +40,17 @@ Recette autorisée : deux Hub/Fans WordPress/MariaDB jetables, données fictives
 
 ## Sous-lots et état de preuve
 
-1. **B3c2a, cette PR** : validateur canonique du corpus, permission reconnue uniquement si explicitement présente, domaines Ed25519 distincts et tests de refus. Aucun schéma, stockage, route ou admission. Un validateur ne prouve pas la complétude de données réelles : elle doit être attestée par le propriétaire Hub.
-2. **B3c2b1, #174** : primitive propriétaire de lecture exhaustive sous verrou global, composition de chaque fait 0.3 avec le net H4. Mesurer le temps de détention des verrous, les attentes des consommations et corrections, puis la reprise d'une lecture pendant un rapprochement ; publication des seuls résultats expurgés et limites de dimensionnement de la recette. **B3c2b2, lot courant** : quatre tables de métadonnées uniquement, matérialisation atomique, pages immuables de 100 et vérification primaire finale, lookup/reprise par clé durable et refus d'une génération devenue obsolète. La preuve réseau signée et l'inbox Fans restent B3c2c.
-3. **B3c2c1, #176** : codec signé de lecture propriétaire, contexte exact par origine/politique/opération/clé, réponses liées à la requête et validateurs de pages/fences/refus. Aucun HTTP, nonce admis en SQL ou inbox dans ce sous-lot. **B3c2c2, lot courant** : transport HTTP physiquement fermé, nonce SQL distinct, clés de nœuds distinctes, refus et reprise après perte de réponse. **B3c2c3** : inbox Fans avec remplacement atomique après réception de toutes les pages et fence primaire ; ce transport seul ne prouve pas cette réception exhaustive.
+1. **B3c2a, #173** : validateur canonique du corpus, permission reconnue uniquement si explicitement présente, domaines Ed25519 distincts et tests de refus. Aucun schéma, stockage, route ou admission. Un validateur ne prouve pas la complétude de données réelles : elle doit être attestée par le propriétaire Hub.
+2. **B3c2b1, #174** : primitive propriétaire de lecture exhaustive sous verrou global, composition de chaque fait 0.3 avec le net H4 ; mesures de verrous, concurrence et reprises en recette. **B3c2b2, #175** : quatre tables de métadonnées uniquement, matérialisation atomique, pages immuables de 100 et vérification primaire finale, lookup/reprise par clé durable et refus d'une génération devenue obsolète.
+3. **B3c2c1, #176** : codec signé de lecture propriétaire, contexte exact par origine/politique/opération/clé, réponses liées à la requête et validateurs de pages/fences/refus. Aucun HTTP, nonce admis en SQL ou inbox dans ce sous-lot. **B3c2c2, #177** : transport HTTP physiquement fermé, nonce SQL distinct, clés de nœuds distinctes, refus et reprise après perte de réponse.
+4. **B3c2c3a, #178** : inbox Fans, clé et requêtes durables avant HTTP, staging vérifié et remplacement atomique après toutes les pages et fence primaire.
+5. **B3c2c3b, lot présent** : lecteur raccordant le client à l'inbox, avec budget borné, reprise primaire sous la même clé et vérifications réelles SQL/HTTP. Ces preuves fermées ne constituent aucune admission de site ni fraîcheur continue de production.
 
 ### Transport fermé B3c2c2
 
 **ClosedCorpusClient** effectue une seule lecture POST, sans redirection, cookie
 ou seconde clé automatique. Le propriétaire de la reprise doit **persister la
-clé avant HTTP** ; l'inbox qui automatisera cette garantie reste B3c2c3. Après
+clé avant HTTP** ; l'inbox B3c2c3a persiste cette garantie. Après
 résultat inconnu, lookup sur le primaire avec la même clé et un nouveau nonce
 signé ; réponse liée aux champs exacts, nonce et empreinte de la demande.
 L'absence de résultat signé valide n'est ni un corpus vide ni une preuve de
@@ -99,9 +101,9 @@ absence signée autorise start ; **avant** de transmettre cette demande, l'inbox
 persiste ses octets exacts, son nonce et son empreinte, puis checkpoint lookup.
 Une réponse perdue, un redémarrage ou un COMMIT local incertain ne justifie
 jamais une autre clé. Après une demande déjà admise, nouveau nonce signé mais
-même clé et même périmètre. Le collecteur automatique raccordé au client est
-le sous-lot suivant ; cette PR vérifie ces étapes via la recette CLI privée et
-le véritable transport HTTP fermé.
+même clé et même périmètre. Le lecteur B3c2c3b raccorde ces étapes au véritable
+client HTTP WordPress ; l'inbox reste également utilisable par les étapes
+explicites de la recette CLI privée.
 
 Chaque réponse est liée à une demande préalablement enregistrée. Les pages
 sont vérifiées, stagées une seule fois, puis réauthentifiées et rapprochées
@@ -128,6 +130,40 @@ Aucune durée réelle, purge de production ou admission réseau n'est introduite
 Rollback limité à l'enclave jetable : retirer son collecteur de recette et
 supprimer la base privée. Aucun site ni claim historique ne doit être modifié.
 
+### Lecteur borné B3c2c3b
+
+`ClosedCorpusReader::advance()` réalise au plus une à seize étapes, quatre par
+défaut. Son appelant conserve durablement l'ID du travail ; les appels concurrents
+reprennent celui déjà en attente. Le client enregistre la demande exacte dans
+l'inbox avant HTTP puis vérifie la réponse et la transmet au checkpoint SQL.
+Aucune transaction ni mutex Fans n'est conservé pendant la requête réseau.
+
+La perte de réseau, la réponse non authentifiable, un acquittement COMMIT
+incertain ou un checkpoint avancé par un autre worker renvoient `pending`,
+sans nouvelle clé. Une absence primaire arrivée trop tard ne fait pas revenir
+la lecture à start. Un refus Hub signé termine ce travail comme `unavailable` ;
+le lecteur ne lance pas automatiquement une autre génération pour le contourner.
+Après rapprochement explicite, un nouveau travail peut être demandé.
+
+Une génération complète renvoie `verified` avec son **instant** primaire
+`verified_at`. Une ancienne génération remplacée n'est que `historical`.
+Reprendre un travail terminé ne déclenche aucun HTTP supplémentaire. L'appelant
+doit demander un nouveau rapprochement pour une nouvelle preuve de fraîcheur ;
+aucun TTL, cron ou affichage public n'est créé par ce lot.
+
+Scénarios : budgets invalides sans écriture, étapes unitaires, quatre lecteurs
+concurrents, absence retardée, réponse perdue après COMMIT Hub, préparation locale
+incertaine, réseau perdu puis repris, redirection, signature altérée, HTTP en
+erreur, clé révoquée puis rétablie explicitement, source devenue obsolète et
+reconstruction sous une nouvelle demande explicite. La recette observe aussi
+l'enregistrement durable et l'absence de transaction/mutex Fans à chaque POST.
+Ces preuves utilisent les identités et clés fictives des deux WordPress jetables,
+sans prétendre tester le véritable SSO, des scores publics ou une infrastructure
+de production. Aucun schéma supplémentaire ni politique de rétention.
+
+La [recette expurgée du lecteur](../evidence/fans-pf-b3-corpus-reader/README.md)
+précise la source immuable, les scénarios réellement exécutés et leurs limites.
+
 ### Forme canonique du corpus 1.0
 
 Le manifeste contient `contract`, `corpus_id`, `issuer`, `audience`, `origin_id`, `policy_version`, `ordering_epoch`, `epoch`, `revision`, `last_order`, `created_at`, `scope`, `fact_count`, `page_count`, `original_pf`, `cancelled_pf`, `suspended_pf`, `net_pf` et `full_sha256`. Identifiants UUID v4 opaques ; entiers décimaux en chaînes canoniques jusqu'à 9007199254740991 ; instant primaire UTC6. `scope` vaut exactement `all_confirmed_ranked_0.3_including_zero`. `last_order` est le sommet propriétaire global vérifié : des trous entre les seuls faits d'une origine peuvent correspondre aux autres origines, sans simuler une séquence locale.
@@ -153,8 +189,8 @@ pair/audience/contrat exacts, nonce, instants UTC et empreinte de la même clé
 durable. Durée au plus 60 secondes, refus des clés inconnues/révoquées et des
 contextes expirés. La seule permission globale est `pf.ranking.corpus` :
 snapshot, wallet ou délégation d'un membre ne l'accordent jamais. La validation
-du nonce n'est pas son admission à usage unique ; celle-ci sera persistée en
-SQL avant opération par le lot HTTP fermé.
+du nonce n'est pas son admission à usage unique ; celle-ci est persistée en
+SQL avant opération par le lot HTTP fermé B3c2c2.
 
 La réponse Hub signée reprend exactement la demande et son SHA-256 complet.
 Start/lookup fournissent la première page immuable ou l'absence certaine au

@@ -121,8 +121,10 @@ final class ClosedCorpusInbox
                 return $this->save($row,$progress);
             }
             if ($answer['result'] === ['state' => 'absent']) {
-                if ($proof['fields']['operation'] !== 'lookup' || $progress['manifest'] !== null
-                    || !in_array($progress['phase'],['lookup','start'],true)) { throw new ModelViolation('pf_local_corpus_conflict'); }
+                if ($proof['fields']['operation'] !== 'lookup') { throw new ModelViolation('pf_local_corpus_conflict'); }
+                if ($progress['manifest'] !== null || !in_array($progress['phase'],['lookup','start'],true)) {
+                    throw new ModelViolation('pf_local_corpus_checkpoint_moved');
+                }
                 $progress['phase'] = 'start'; return $this->save($row,$progress);
             }
             if ($proof['fields']['operation'] === 'finish') { return $this->finish($row,$progress,$answer['result'],$proof); }

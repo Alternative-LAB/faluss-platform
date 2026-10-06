@@ -148,6 +148,8 @@ jobs:
         run: python3 tests/TokenEngine/recipe/run.py --b3-corpus-http --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-b3-corpus-http-checks.json"
       - name: Fans B3 durable complete corpus inbox real WordPress
         run: python3 tests/TokenEngine/recipe/run.py --b3-corpus-inbox --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/fans-pf-b3-corpus-inbox-checks.json"
+      - name: Fans B3 bounded durable corpus reader real WordPress
+        run: python3 tests/TokenEngine/recipe/run.py --b3-corpus-reader --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/fans-pf-b3-corpus-reader-checks.json"
       - uses: actions/upload-artifact@v4
         with:
           name: hub-pf-runtime-checks
@@ -169,6 +171,7 @@ jobs:
             ${{ runner.temp }}/hub-pf-b3-corpus-checks.json
             ${{ runner.temp }}/hub-pf-b3-corpus-http-checks.json
             ${{ runner.temp }}/fans-pf-b3-corpus-inbox-checks.json
+            ${{ runner.temp }}/fans-pf-b3-corpus-reader-checks.json
             ${{ runner.temp }}/fans-hof-b1-checks.json
             ${{ runner.temp }}/fans-hof-b2-checks.json
             ${{ runner.temp }}/fans-hof-territory-checks.json
