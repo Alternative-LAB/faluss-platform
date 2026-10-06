@@ -8,7 +8,8 @@ sans utiliser la jonction vendor du checkout Windows.
   dont concurrence, quatrième ouverture personnelle/coorganisée refusée,
   acceptation explicite, règles figées, retrait après suspension, journal atomique
   et refus d'un schéma non transactionnel.
-- Calculs B1 et règles B2 : **40 tests / 91 assertions**. PHP lint et PHPStan
+- Calculs B1 et règles B2 : **41 tests / 94 assertions**, dont les titres et règles
+  accentués sans changement du codec historique Hub. PHP lint et PHPStan
   ciblé/complet ; résultat final de CI du head exact requis avant fusion.
 - Suite complète isolée : **479 tests / 6 238 assertions**, aucun échec ou
   erreur ; deux dépréciations préexistantes.

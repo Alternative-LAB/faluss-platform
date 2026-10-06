@@ -33,6 +33,15 @@ final class SessionRulesTest extends TestCase
         self::assertNotSame(SessionRules::digest($local), SessionRules::digest($national));
     }
 
+    public function testEditorialAccentsDoNotChangeTheHistoricalHubCodec(): void
+    {
+        $ascii = $this->rules();
+        self::assertSame(hash('sha256', \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\CanonicalJson::encode($ascii)), SessionRules::digest($ascii));
+        $french = array_replace($ascii, ['title' => 'Lumières et création', 'rules_text' => 'Participation volontaire à une session éphémère.']);
+        self::assertSame(SessionRules::digest($french), SessionRules::digest(array_reverse($french, true)));
+        self::assertNotSame(SessionRules::digest($ascii), SessionRules::digest($french));
+    }
+
     public function testInvalidTerritoryShapeAndForeignEconomicFieldsFailClosed(): void
     {
         foreach ([['country' => 'FR'], ['scope' => 'national', 'country' => ''], ['scope' => 'local', 'country' => 'FR'], ['price' => '20'], ['score' => '10']] as $change) {

@@ -6,7 +6,6 @@ namespace Faluss\Platform\Fans\Hof;
 
 use Faluss\Platform\TokenEngine\PurchasedPf\ModelValues;
 use Faluss\Platform\TokenEngine\PurchasedPf\ModelViolation;
-use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\CanonicalJson;
 
 /** Structural rules only; territory/country admissibility is a separate reviewed policy. */
 final class SessionRules
@@ -45,6 +44,8 @@ final class SessionRules
     public static function digest(array $row): string
     {
         $fields = array_intersect_key($row, array_flip(['title', 'rules_text', 'category', 'scope', 'country', 'territory_ref', 'timezone', 'starts_at', 'ends_at']));
-        return hash('sha256', CanonicalJson::encode(self::validate($fields)));
+        $validated = self::validate($fields); ksort($validated, SORT_STRING);
+        // Editorial UTF-8 is not part of the historical ASCII-only Hub wire codec.
+        return hash('sha256', json_encode($validated, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     }
 }

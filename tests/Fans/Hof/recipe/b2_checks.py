@@ -40,7 +40,7 @@ def parallel(requests):
     return [finish(process) for process in processes]
 
 now=datetime.datetime.now(datetime.timezone.utc)
-rules=dict(title='Fictitious individual session',rules_text='Voluntary participation with individual corrected scores.',category='arts',scope='international',country='',territory_ref='',timezone='Europe/Paris',
+rules=dict(title='Session individuelle fictive — lumières',rules_text='Participation volontaire avec résultats individuels corrigés.',category='arts',scope='international',country='',territory_ref='',timezone='Europe/Paris',
            starts_at=(now+datetime.timedelta(hours=1)).strftime('%Y-%m-%d %H:%M:%S.%f'),ends_at=(now+datetime.timedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S.%f'))
 check('Normal activation creates no session schema',sql("SHOW TABLES LIKE 'wp_fans_hof_session_schema'")=='')
 data('admin','install');data('admin','session_install')
