@@ -17,6 +17,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Ajouter B2a : sessions privées créées par les Créateurs, coorganisation
+  explicitement acceptée, participation volontaire, programmation figée et
+  plafonds vérifiés en concurrence. L'ouverture reste en attente de preuve Hub ;
+  aucune route active, attribution ou score public.
+
 - Ajouter B1b : registre privé versionné des dimensions et origine préparée,
   pseudonymes éditoriaux modérés, consentements Fan/Créateur révocables et journal
   atomique. Installation explicite vérifiée InnoDB, recette WordPress/MariaDB ;
