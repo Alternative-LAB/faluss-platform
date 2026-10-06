@@ -51,6 +51,8 @@ final class HubPfRecipeDatabase extends wpdb
             || ($this->fault === 'b3r-binding-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_b3r_bindings` /', $query) === 1)
             || ($this->fault === 'b3r-receipt-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_b3r_receipts` /', $query) === 1)
             || ($this->fault === 'b3r-journal-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_b3r_journal` /', $query) === 1)
+            || ($this->fault === 'b3s-snapshot-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_b3s_snapshots` /', $query) === 1)
+            || ($this->fault === 'b3s-page-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_b3s_pages` /', $query) === 1)
         ) {
             $this->fault = '';
             return false;
@@ -122,6 +124,10 @@ if (str_starts_with($input['action'], 'b3b-')) {
 }
 if (str_starts_with($input['action'], 'b3r-')) {
     require __DIR__ . '/b3_ranked_worker.php';
+    return;
+}
+if (str_starts_with($input['action'], 'b3s-')) {
+    require __DIR__ . '/b3_snapshot_worker.php';
     return;
 }
 

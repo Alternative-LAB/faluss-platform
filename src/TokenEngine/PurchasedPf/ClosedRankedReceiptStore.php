@@ -57,29 +57,37 @@ final class ClosedRankedReceiptStore
      * @return array<string,string> */
     public function receipt(RankedIntent $intent, array $consumption): array
     {
-        return $this->connection->write($intent->base->values['member_faluss_id'],function () use ($intent,$consumption): array {
-            (new ClosedRankingContext($this->db,$intent,$this->keyId))->guard($intent->base,'lookup'); $this->owner($intent,$consumption);
-            $row = $this->connection->row($this->tables['receipts'],'attribution_id=%s',[$intent->base->values['attribution_id']]);
-            $journal = $this->connection->row($this->tables['journal'],'event_id=%s',[$consumption['event_id']]);
-            if ($row === null || $journal === null || $row['payload_sha256'] !== hash('sha256',$row['payload_json'])
-                || $journal['payload_json'] !== $row['payload_json'] || $journal['payload_sha256'] !== $row['payload_sha256']
-                || $journal['state'] !== 'pending' || $journal['attribution_id'] !== $intent->base->values['attribution_id']
-                || $journal['recorded_at'] !== $row['confirmed_at']) { throw new ModelViolation('pf_receipt_integrity'); }
-            $payload = CanonicalJson::object($row['payload_json']); RankedReceipt::validate($payload,'fixture.hub','fixture.fans',$intent);
-            foreach (['ordering_epoch','consumption_order','confirmed_at','receipt_id','attribution_id'] as $field) {
-                if ($row[$field] !== ($payload[$field] ?? null)) { throw new ModelViolation('pf_receipt_integrity'); }
-            }
-            foreach (['ledger_entry_uuid','confirmed_at','reservation_id'] as $field) {
-                if ($consumption[$field] !== $payload[$field]) { throw new ModelViolation('pf_receipt_integrity'); }
-            }
-            if ($payload['receipt_id'] !== $consumption['consumption_id']) { throw new ModelViolation('pf_receipt_integrity'); }
-            $allocations = array_map(static fn (array $allocation): array => array_intersect_key($allocation,array_flip(['lot_id','evidence_id','source_revision','purchased_pf'])),$payload['allocations']);
-            usort($allocations,static fn (array $a,array $b): int => strcmp($a['lot_id'],$b['lot_id']));
-            if (CanonicalJson::encode($allocations) !== CanonicalJson::encode($consumption['allocations'])) { throw new ModelViolation('pf_receipt_integrity'); }
-            $original = CanonicalJson::object($row['original_envelope_json']);
-            if (($original['payload_sha256'] ?? null) !== $row['payload_sha256'] || SignedEnvelope::decode($original['payload_base64url'] ?? '') !== $row['payload_json']) { throw new ModelViolation('pf_receipt_integrity'); }
-            return SignedEnvelope::seal(SignedEnvelope::RANKING_RECEIPT,$row['payload_json'],$this->keyId);
-        });
+        return $this->connection->write($intent->base->values['member_faluss_id'],fn (): array => SignedEnvelope::seal(
+            SignedEnvelope::RANKING_RECEIPT,CanonicalJson::encode($this->historicalFactInOwnerTransaction($intent,$consumption)),$this->keyId));
+    }
+
+    /** Owner read only, including after corrections/closure; never a current net.
+     * @param array<string,mixed> $consumption
+     * @return array<string,mixed> */
+    public function historicalFactInOwnerTransaction(RankedIntent $intent, array $consumption): array
+    {
+        $this->connection->assertHeldSubject($intent->base->values['member_faluss_id']);
+        (new ClosedRankingContext($this->db,$intent,$this->keyId))->guard($intent->base,'lookup'); $this->owner($intent,$consumption);
+        $row = $this->connection->row($this->tables['receipts'],'attribution_id=%s',[$intent->base->values['attribution_id']]);
+        $journal = $this->connection->row($this->tables['journal'],'event_id=%s',[$consumption['event_id']]);
+        if ($row === null || $journal === null || $row['payload_sha256'] !== hash('sha256',$row['payload_json'])
+            || $journal['payload_json'] !== $row['payload_json'] || $journal['payload_sha256'] !== $row['payload_sha256']
+            || $journal['state'] !== 'pending' || $journal['attribution_id'] !== $intent->base->values['attribution_id']
+            || $journal['recorded_at'] !== $row['confirmed_at']) { throw new ModelViolation('pf_receipt_integrity'); }
+        $payload = CanonicalJson::object($row['payload_json']); RankedReceipt::validate($payload,'fixture.hub','fixture.fans',$intent);
+        foreach (['ordering_epoch','consumption_order','confirmed_at','receipt_id','attribution_id'] as $field) {
+            if ($row[$field] !== ($payload[$field] ?? null)) { throw new ModelViolation('pf_receipt_integrity'); }
+        }
+        foreach (['ledger_entry_uuid','confirmed_at','reservation_id'] as $field) {
+            if ($consumption[$field] !== $payload[$field]) { throw new ModelViolation('pf_receipt_integrity'); }
+        }
+        if ($payload['receipt_id'] !== $consumption['consumption_id']) { throw new ModelViolation('pf_receipt_integrity'); }
+        $allocations = array_map(static fn (array $allocation): array => array_intersect_key($allocation,array_flip(['lot_id','evidence_id','source_revision','purchased_pf'])),$payload['allocations']);
+        usort($allocations,static fn (array $a,array $b): int => strcmp($a['lot_id'],$b['lot_id']));
+        if (CanonicalJson::encode($allocations) !== CanonicalJson::encode($consumption['allocations'])) { throw new ModelViolation('pf_receipt_integrity'); }
+        $original = CanonicalJson::object($row['original_envelope_json']);
+        if (($original['payload_sha256'] ?? null) !== $row['payload_sha256'] || SignedEnvelope::decode($original['payload_base64url'] ?? '') !== $row['payload_json']) { throw new ModelViolation('pf_receipt_integrity'); }
+        return $payload;
     }
 
     /** @param array<string,mixed> $consumption */

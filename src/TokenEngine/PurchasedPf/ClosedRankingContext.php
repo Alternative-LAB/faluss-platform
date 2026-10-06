@@ -61,24 +61,37 @@ final class ClosedRankingContext
     public function beforeDebit(AttributionIntent $base): string
     {
         $this->guard($base,'confirm');
-        $counter = $this->connection->row($this->tables['counter'],'id=%s',['1']);
-        if ($counter === null) { throw new ModelViolation('pf_ranking_counter_unavailable'); }
-        $epoch = ModelValues::uuid($counter['ordering_epoch']); $last = (int) ModelValues::integer($counter['last_order']);
+        $counter = self::orderInOwnerTransaction($this->connection,$base->values['member_faluss_id']);
+        $epoch = $counter['ordering_epoch']; $last = (int) $counter['last_order'];
         if ($last >= ModelValues::MAX_INTEGER) { throw new ModelViolation('pf_ranking_counter_exhausted'); }
-        $latest = $this->connection->rows($this->db->prepare('SELECT ordering_epoch,consumption_order,confirmed_at FROM %i ORDER BY consumption_order DESC LIMIT 1 FOR UPDATE',$this->tables['receipts']));
-        $count = $this->connection->scalar($this->db->prepare('SELECT COUNT(*) FROM %i',$this->tables['receipts']));
-        $inEpoch = $this->connection->scalar($this->db->prepare('SELECT COUNT(*) FROM %i WHERE ordering_epoch=%s AND consumption_order BETWEEN 1 AND %d',$this->tables['receipts'],$epoch,$last));
-        // With the unique order index, N rows in [1,N] of this epoch prove no gap or foreign epoch.
-        if ((string) $count !== (string) $last || (string) $inEpoch !== (string) $last || ($last === 0 ? ($latest !== [] || $counter['last_confirmed_at'] !== '')
-            : ($latest === [] || $latest[0]['ordering_epoch'] !== $epoch || $latest[0]['consumption_order'] !== (string) $last || $latest[0]['confirmed_at'] !== $counter['last_confirmed_at']))) {
-            throw new ModelViolation('pf_ranking_counter_divergent');
-        }
         // Counter then canonical barrier rows; close never takes the counter/member/lot locks.
         $now = (new ClosedBarrierStore($this->db))->lockSelection($this->intent);
         if ($counter['last_confirmed_at'] !== '' && $now < RankingValues::utc($counter['last_confirmed_at'])) { throw new ModelViolation('pf_primary_clock_regression'); }
         $this->staged = ['ordering_epoch' => $epoch,'consumption_order' => (string) ($last + 1),'confirmed_at' => $now];
         $this->connection->update($this->tables['counter'],['last_order' => $this->staged['consumption_order'],'last_confirmed_at' => $now],['id' => '1','last_order' => (string) $last]);
         return $now;
+    }
+
+    /** Read the same authority for receipts and snapshots; no new epoch or repair.
+     * @return array{ordering_epoch:string,last_order:string,last_confirmed_at:string} */
+    public static function orderInOwnerTransaction(ClosedReservationDatabase $connection, string $member): array
+    {
+        $connection->assertHeldSubject($member); $db = $connection->database;
+        if (!ClosedRankingSchema::ready($db)) { throw new ModelViolation('pf_ranking_schema_unavailable'); }
+        $tables = ClosedRankingSchema::tables($db);
+        $counter = $connection->row($tables['counter'],'id=%s',['1']);
+        if ($counter === null) { throw new ModelViolation('pf_ranking_counter_unavailable'); }
+        $epoch = ModelValues::uuid($counter['ordering_epoch']); $last = (int) ModelValues::integer($counter['last_order']);
+        if ($last >= ModelValues::MAX_INTEGER) { throw new ModelViolation('pf_ranking_counter_exhausted'); }
+        $latest = $connection->rows($db->prepare('SELECT ordering_epoch,consumption_order,confirmed_at FROM %i ORDER BY consumption_order DESC LIMIT 1 FOR UPDATE',$tables['receipts']));
+        $count = $connection->scalar($db->prepare('SELECT COUNT(*) FROM %i',$tables['receipts']));
+        $inEpoch = $connection->scalar($db->prepare('SELECT COUNT(*) FROM %i WHERE ordering_epoch=%s AND consumption_order BETWEEN 1 AND %d',$tables['receipts'],$epoch,$last));
+        // With the unique order index, N rows in [1,N] of this epoch prove no gap or foreign epoch.
+        if ((string) $count !== (string) $last || (string) $inEpoch !== (string) $last || ($last === 0 ? ($latest !== [] || $counter['last_confirmed_at'] !== '')
+            : ($latest === [] || $latest[0]['ordering_epoch'] !== $epoch || $latest[0]['consumption_order'] !== (string) $last || $latest[0]['confirmed_at'] !== $counter['last_confirmed_at']))) {
+            throw new ModelViolation('pf_ranking_counter_divergent');
+        }
+        return ['ordering_epoch' => $epoch,'last_order' => (string) $last,'last_confirmed_at' => (string) $counter['last_confirmed_at']];
     }
 
     /** @param array<string,mixed> $payload */
