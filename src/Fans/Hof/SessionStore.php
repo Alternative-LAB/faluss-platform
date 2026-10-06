@@ -124,5 +124,9 @@ final class SessionStore
 
     /** Locking approval guard uses a public contract, never the profile module's storage. */
     public static function activeOwner(string $creator): int
-    { return CreatorProfileService::activeOwner($creator, true) ?? throw new ModelViolation('hof_approved_creator_required'); }
+    {
+        $owner = CreatorProfileService::activeOwner($creator, true);
+        if ($owner === null || !EditorialService::approvedInTransaction($creator)) { throw new ModelViolation('hof_approved_creator_required'); }
+        return $owner;
+    }
 }

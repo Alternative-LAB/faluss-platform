@@ -19,6 +19,9 @@ def finish(process):
     return json.loads(out)
 def call(actor,action,**values):return finish(start(actor,action,**values))
 def data(actor,action,**values):
+    if action=='session_open':
+        approval=call(actor,'fixture_approve_session',session=values['session'])
+        if 'error' in approval:raise AssertionError('Explicit fixture moderation: '+approval['error'])
     result=call(actor,action,**values)
     if 'error' in result:raise AssertionError(action+': '+result['error'])
     return result['data']
@@ -91,6 +94,7 @@ check('Cancellation neither deletes history nor assigns a winner',sql("SELECT CO
 # The first closing session still consumes one organizer slot. Two racing openings must not create a fourth.
 drafts=[data('member','session_create',rules=dict(rules,title='Quota fixture '+str(i))) for i in range(3)]
 data('member','session_open',session=drafts[0]['session_id'],revision=1)
+for draft in drafts[1:]:data('member','fixture_approve_session',session=draft['session_id'])
 results=parallel([('member','session_open',dict(session=draft['session_id'],revision=1)) for draft in drafts[1:]])
 check('Concurrent openings reserve at most three organizer slots',sum('data' in result for result in results)==1 and sum(result.get('error')=='hof_session_quota' for result in results)==1)
 check('Coorganization counts in the recipient quota',sql("SELECT COUNT(*) FROM wp_fans_hof_session_roles r JOIN wp_fans_hof_session_records s ON r.session_id=s.session_id WHERE r.creator_id='"+profiles['other']+"' AND r.role='organizer' AND r.state='accepted' AND s.state='closing'")=='1')

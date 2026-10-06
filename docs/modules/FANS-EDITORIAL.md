@@ -67,6 +67,21 @@ Le journal conserve acteur local, action, motif, révision et date ; aucun nom,
 bio ou copie d’image. Aucune suppression automatique de ce journal n’est
 introduite. Aucun historique des versions remplacées n'est créé.
 
+### Contrat de contrôle transactionnel additif (B2c)
+
+`EditorialService::approvedInTransaction(creatorId): bool` permet au domaine
+HoF de contrôler une présentation approuvée sous **la transaction de son appelant**.
+L'identifiant doit être valide, les services Profils/Éditorial disponibles et
+une transaction déjà ouverte sur la connexion WordPress. Le contrôle verrouille
+le profil actif puis la version éditoriale approuvée ; il ne commence, ne valide
+et ne ferme aucune transaction. Il ne renvoie ni contenu, ni portrait, ni droits
+commerciaux. Erreur, absence, retrait ou appel hors transaction donnent `false`.
+
+Une révocation concurrente attend le verrou de cette décision ; la décision
+suivante constate le retrait. Les lectures publiques, routes, schémas et
+transactions éditoriales existants conservent leurs contrats. HoF n'accède à
+aucune table interne du module éditorial.
+
 ## Activation, compatibilité, retour arrière
 
 `CreatorProfilesModule::activate()` vérifie le schéma profils v1 puis installe

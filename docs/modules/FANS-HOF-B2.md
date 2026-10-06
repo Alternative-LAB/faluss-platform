@@ -144,3 +144,69 @@ Les critères, pays et territoires du rapport sont fictifs, sans habilitation
 de production. Aucun référentiel réel ni politique de pays autorisés n'a été
 fourni ou attesté ; leur désignation/examen opérateur reste nécessaire avant
 activation. B2c complète la modération des sessions et les recours de participation.
+
+## B2c — scénarios préalables : modération, recours et réadmission
+
+L'admission du profil ne valide pas les règles/contenus d'une session. Le
+propriétaire soumet son brouillon ; approbation explicite d'une empreinte exacte
+avant demande d'ouverture. Une édition invalide cette approbation pour l'ouverture,
+sans diffuser la nouvelle version. Refus motivé et recours privé. Révocation d'une
+session gelée ferme immédiatement les nouveaux choix, avec `closing` tant que B3
+n'atteste pas la fermeture. Aucun acquittement local inventé.
+
+La participation refusée a son recours distinct, réservé au candidat concerné et
+aux modérateurs. Une décision favorable ne permet qu'une admission future sous
+les mêmes règles, territoire, dates et permissions ; aucun rattachement rétroactif.
+Une session expirée/fermée ne peut être réouverte par un recours de participation.
+Le traitement motivé reste possible sans admission lorsque le contexte est fermé.
+
+Après suspension effective attestée, le propriétaire peut demander une réadmission
+versionnée : règles gelées conservées, nouvelle approbation, quotas/organisateurs
+et territoires revalidés, version de barrière incrémentée, attente d'acquittement
+primaire. Annulation ou échéance n'est jamais transformée en réouverture.
+
+Positifs : demande/modération distinctes du profil, exactitude d'empreinte,
+refus/recours/reprise, visibilité approuvée seulement, journaux atomiques ;
+participation refusée réexaminée et admission future ; lecture propriétaire
+après suspension ; fermeture en cours et réadmission versionnée après preuve.
+
+Négatifs : auto-approbation, édition après décision utilisée comme approbation,
+concurrence de décisions, recours d'un autre candidat, double recours pour la
+même décision, admission rétroactive/après échéance, contournement du territoire
+ou du quota, faux état `open`/fermeture acquittée sans preuve Hub, panne du journal.
+
+### Livraison et frontières B2c
+
+Cinq tables InnoDB propres : version de schéma, examen courant, instantanés
+privés exacts des règles et recours à chaque révision, dossiers de participation
+et décisions motivées. Installation explicite après B2a ; aucune route, hook,
+bootstrap ou migration automatique. L'ordre commun des transactions de session
+est préservé. Une admission et sa décision de recours ne sont jamais commises
+séparément de leurs journaux.
+
+Propriétaire : soumettre les règles courantes, consulter son examen et son
+historique, contester un refus. Candidat : un recours privé par décision de
+participation refusée ; aucun organisateur ne lit le texte privé d'un autre
+candidat. Administrateur Fans : approuver/refuser/révoquer une révision exacte,
+traiter un recours, admettre seulement sous les critères actuellement satisfaits
+ou clôturer sans admission en motivant le contexte. Files paginées à vingt et
+révisions CAS. Modifier un brouillon invalide sa précédente approbation ; une
+proposition modifiée peut être resoumise, sans conserver une validation périmée.
+
+Le [contrat transactionnel éditorial](FANS-EDITORIAL.md#contrat-de-contrôle-transactionnel-additif-b2c)
+verrouille l'approbation au moment de la décision ; un retrait concurrent ne
+passe pas entre contrôle et admission. Ce contrôle ne valide ni partenariat
+commercial, ni images, ni contenu de session. Les règles de session exigent
+leur propre examen.
+
+Les textes de recours et instantanés restent privés. Aucune durée réelle, défaut
+de vingt-quatre mois ou purge n'est ajouté : conservation [#150](https://github.com/Alternative-LAB/faluss-platform/issues/150)
+distincte, à décider avant toute donnée réelle. Aucun outil opérateur de ce lot
+n'atteste cette politique à la place de son responsable.
+
+Recette `--test --hof-review` : [preuves en base et limites](../evidence/fans-hof-review/README.md).
+Le test de réadmission injecte explicitement une **précondition de suspension
+effective** ; ce n'est pas une preuve de fermeture Hub. B3 doit remplacer cette
+précondition de recette par un acquittement/lookup primaire attesté, avec tests
+de panne et de concurrence. En attendant, les états `opening` et `closing` ne
+deviennent jamais `open` ou fermés par une assertion locale.

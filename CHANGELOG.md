@@ -17,6 +17,12 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Ajouter B2c : modération distincte des règles de session, historique privé
+  versionné, recours des candidats et réadmission après suspension effective.
+  Décisions exactes et journaux atomiques, approbation éditoriale verrouillée
+  dans la transaction ; fermeture/réadmission en attente de la preuve Hub B3.
+  Aucun nouvel endpoint, schéma installé automatiquement ou score public.
+
 - Ajouter B2b : critères territoriaux publics versionnés sans défaut, déclaration
   privée du territoire d'activité principal, examen/recours motivés et contrôle
   des ouvertures/admissions locale et nationale. Aucun pays de soutien Fan

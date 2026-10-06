@@ -16,6 +16,9 @@ def finish(process):
     return json.loads(out)
 def call(actor,action,**values):return finish(start(actor,action,**values))
 def data(actor,action,**values):
+    if action=='session_open':
+        approval=call(actor,'fixture_approve_session',session=values['session'])
+        if 'error' in approval:raise AssertionError('Explicit fixture moderation: '+approval['error'])
     result=call(actor,action,**values)
     if 'error' in result:raise AssertionError(action+': '+result['error'])
     return result['data']
