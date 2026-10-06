@@ -100,10 +100,10 @@ Les données sont fictives ; aucun environnement Hub cible/préproduction n'est
 désigné. La recette de futures consommations concurrentes attend une capacité
 propriétaire opérationnelle et explicitement autorisée.
 
-H1 apporte seulement le modèle décrit ici. H2 (réserve/confirm/lookup/journal)
-et H3 (transport/reçus) ont ensuite des accords strictement fermés. H4
-(corrections/snapshots) et F1 (projection Fans) attendent leurs accords dans #147.
-Les décisions produit #149 et #150 doivent être obtenues avant H4/ouverture.
+H1 apporte seulement le modèle décrit ici. H2 (réserve/confirm/lookup/journal),
+H3 (transport/reçus), H4 (corrections/snapshots) puis F1a (points privés) ont ensuite
+des accords strictement fermés dans #147. La règle #149 est validée pour H4 fermé ;
+#150 reste ouverte avant toute politique de données réelles. F1b est non validé.
 Aucun achat ni score HoF réel ne doit être annoncé sur la seule base de ces tests.
 
 ## H2a — réservations fermées
@@ -160,3 +160,38 @@ logs vérifiés sans contenu privé, root/processus supprimés, claims PF/ALB co
 Cette preuve réseau **n'est pas un véritable SSO Me** : liens et identités sont
 fictifs, aucun authorize/token central testé. Pas de TLS/site/achat réel, de
 producteur/admission de production, de correction H4, de score F1 ou de release.
+
+## H4 — corrections, snapshots et transfert privé
+
+Voir [le contrat fermé](../../../docs/modules/HUB-PF-H4-CLOSED.md).
+`--h4`, `--h4-snapshots` et `--h4-http` ajoutent respectivement corrections
+cumulatives/fragmentées, snapshots matérialisés complets/fence primaire puis
+transfert signé vers l'inbox privée Fans. H0–H3 restent exécutés sans remplacement.
+La dernière étape H4 conserve 349 contrôles, dont 107 H4 (34/22/51).
+Reprise durable, réponse perdue, litiges, pages manquantes, filiation et anciennes
+preuves sont vérifiés sur le vrai moteur SQL/HTTP jetable, pas sur un achat réel.
+
+## F1a — projections privées reconstruisibles
+
+`run.py --f1a` exécute H0–H4 puis la
+[recette de projection](f1a_checks.py), avec contrôleur CLI fermé sous
+`tests/Fans/PfProjection/recipe/worker.php`. [Contrat F1a](../../../docs/modules/FANS-PF-F1A-CLOSED.md).
+Cinq tables dérivées sont installées explicitement dans le seul Fans jetable.
+Les comptes/liens SSO, preuves d'achat, clés et pairs restent fictifs.
+
+Une attribution multi-lots reste un seul fait canonique, avec consommation/débit
+uniques ; points Fan/Créateur séparés, net H4 courant seulement. Le pack seul,
+son bonus, les claims historiques et PC ne participent pas. La reconstruction
+remplace atomiquement les dimensions ; aucune lecture périmée/partielle exacte.
+Les anciennes preuves ne rétablissent pas les points annulés.
+
+Fautes INSERT, COMMIT réellement exécuté mais acquittement injecté en erreur,
+SIGKILL avant/après COMMIT, corruption/suppression de dérivés et verrous InnoDB
+réels sur remplacement/insertion de source sont exercés. Les lignes PF/ALB restent
+comparées octet pour octet ; aucune route, API de score ou ledger Fans n'est créé.
+Le rapport distingue `f1a_total`, versions, hash et suppression complète de fixture.
+
+F1a prouve la génération sur son vecteur de faits rapprochés, pas la fraîcheur
+continue d'une production. Aucun consommateur Events/cron n'est enregistré.
+[F1b](../../../docs/modules/FANS-PF-F1B-PROPOSAL.md) est une recommandation produit
+non validée ; périodes/rangs/sessions/visibilité/récompenses restent fermés.

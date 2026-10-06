@@ -103,10 +103,14 @@ les projections multiples et les corrections, avec zéro PC. Elle ne remplace ni
 ne recalcule la v2 historique. Aucun protocole PF, remboursement réel, politique
 de victoire/suspension, API créateur ou activation ; les portes économiques restent fermées.
 
-## Protocole PF acheté — proposition non opérationnelle
+## Protocole PF acheté — recette fermée et production non admise
 
-Le [contrat Fans ↔ Hub 0.1.0](FANS-HUB-PURCHASED-PF-CONTRACT.md) et son plan de
-réconciliation sont soumis au propriétaire Hub. Preuves d’achat, réservations,
-consommations, reçus et corrections demandent des capacités propriétaires absentes.
-Faux serveur sous tests uniquement ; aucun accès aux tables Hub, ledger parallèle,
-score persistant ou activation. La compensation partielle reste bloquée.
+Le [draft de production Fans ↔ Hub](FANS-HUB-PURCHASED-PF-CONTRACT.md) reste fermé,
+mais H1–H4 sont implémentés sous accords limités : modèle, réserve/consommation
+officielle, reçus signés, corrections partielles cumulatives, litiges/résolutions
+et snapshots complets. Leur recette utilise WordPress/MariaDB Hub et Fans jetables,
+avec données fictives ; elle ne certifie ni producteur réel ni vrai SSO cible.
+[F1a fermé](FANS-PF-F1A-CLOSED.md) persiste et reconstruit séparément les points
+Fan/Créateur depuis les faits H4 rapprochés. Aucun ledger parallèle, score public,
+API économique normale ou activation. [F1b](FANS-PF-F1B-PROPOSAL.md) reste non
+validé ; la rétention #150 reste ouverte, sans défaut de 24 mois.

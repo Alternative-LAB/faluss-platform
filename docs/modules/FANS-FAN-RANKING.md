@@ -1,7 +1,9 @@
 # Classement Fans — contrat de préparation v0.1
 
-Statut : écran prêt, **service absent**. Aucun score persistant, route REST de
-classement, réception d’événement, cron, badge gagné ou tableau public ajouté.
+Statut public : écran prêt, **service de classement absent**. Le lot
+[F1a fermé](FANS-PF-F1A-CLOSED.md) apporte des projections de points persistantes
+et reconstruisibles dans la seule recette jetable. Aucune route REST de classement,
+réception d'événement en production, cron, badge gagné ou tableau public ajouté.
 La route privée `/faluss-fans/fan/classement-fans` est distincte des classements
 HoF `/faluss-fans/fan/classements`. Elle requiert une liaison SSO Fans ; un
 administrateur sans liaison ne contourne pas cette règle. Un Créateur lié peut
@@ -22,21 +24,22 @@ ni déduire un solde ou un revenu de l’une d’elles. Les classes de provenanc
 admises au classement Fan doivent être ratifiées avec Hub ; aucune ouverture
 implicite aux PF historiques `earned` ou `promotional`.
 
-## Garanties attendues — pas un moteur existant
+## Projections fermées existantes et portes du classement public
 
-Le [protocole Fans ↔ Hub](FANS-HUB-PURCHASED-PF-CONTRACT.md) reste proposé et
-non ratifié. Il manque les preuves, allocations, reçus canoniques, révisions,
-corrections et snapshots complets nécessaires. La compensation historique entière
-et unique du Token Engine ne fournit pas les remboursements partiels successifs.
-L’écran ne doit donc ni appeler ce protocole fictivement, ni lire les tables Hub,
-ni accepter des compteurs envoyés par le navigateur.
+Le [protocole Fans ↔ Hub](FANS-HUB-PURCHASED-PF-CONTRACT.md) de production reste
+fermé. H1–H4 sont implémentés et testés sous accords limités : preuves fictives,
+lots, consommations dans le ledger officiel, reçus privés, corrections cumulatives
+et snapshots complets sur WordPress/MariaDB jetables. H4 utilise une primitive
+propriétaire distincte, sans changer la compensation historique entière et unique.
+F1a lit leur inbox privée rapprochée ; l'écran ne l'appelle pas. Aucun accès aux
+tables Hub ou compteur navigateur, aucun producteur d'achat réel ou score public.
 
-La future projection reconstruira la somme des quantités nettes admissibles par
+La projection fermée reconstruit la somme des quantités nettes admissibles par
 identifiant canonique d’attribution, selon la dernière révision propriétaire
 acceptée. Les quantités sont des entiers, jamais des proratas calculés depuis un
 montant monétaire. Les originaux et corrections restent traçables.
 
-| Scénario futur à vérifier | Résultat exigé |
+| Scénario de calcul fermé / règle proposée | Résultat exigé |
 | --- | --- |
 | Pack de 300 PF acheté, rien attribué | Aucun point |
 | Attribution attestée de 120 PF, même reçu rejoué | 120, une seule contribution |
@@ -49,11 +52,16 @@ montant monétaire. Les originaux et corrections restent traçables.
 | Correction après clôture | Révision de la période d’origine ; pas de report arbitraire |
 | Gain de PC, achat Shop ou montant EUR | Aucun point ni affichage dans cette progression |
 
-Ces scénarios sont des exigences d’acceptation du futur moteur, **pas des tests
-runtime réalisés par ce lot**. Le simulateur HoF existant ne prouve pas leur
-implémentation pour un classement Fan.
+Les scénarios de net/doublon/correction/snapshot sont vérifiés par la
+[recette F1a](../../tests/TokenEngine/recipe/README.md#f1a--projections-privées-reconstruisibles),
+distincte des simulateurs. La correction après clôture et les politiques de rang
+restent des propositions F1b ; aucune période/rang n'est implémenté dans F1a.
 
 ## Propositions à arbitrer avant toute publication
+
+La [proposition complète F1b](FANS-PF-F1B-PROPOSAL.md), P1–P6, est **non validée** :
+périodes, sessions distinctes du relevé, égalités, visibilité, suspensions et
+corrections tardives. Ce tableau résume les portes, sans les ratifier.
 
 | Sujet | Proposition, non activée | Décision requise |
 | --- | --- | --- |

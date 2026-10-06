@@ -1,5 +1,10 @@
 # Preuve locale H0 — 5 octobre 2026
 
+Ce rapport décrit le périmètre historique H0. Au 6 octobre, H1–H4 et
+[F1a fermé](../../modules/FANS-PF-F1A-CLOSED.md) ont leurs implémentations et
+preuves isolées distinctes ; l'absence de capacités ci-dessous se rapporte à
+la base H0, pas au code actuel ni à une admission économique sur les sites.
+
 Base `main` : `254b4c971b23f0f44e5033fe2b8b4787df243c7e` (0.12.6).
 La [recette reproductible](../../../tests/TokenEngine/recipe/README.md) appelle
 le module propriétaire inchangé sur WordPress 7.1.2, MariaDB 11.8.6 et PHP 8.5.4.

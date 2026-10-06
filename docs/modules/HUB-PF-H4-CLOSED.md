@@ -6,7 +6,10 @@ ALB-Origine a validé #149 : PF disponibles d'abord, puis allocations du lot
 de la plus récente à la plus ancienne. H4 ne reçoit que des preuves fictives,
 sur des instances WordPress/MariaDB jetables. Aucun producteur d'achat réel,
 remboursement monétaire, admission de pair, score public ou installation
-automatique n'est ajouté. F1 et la politique de conservation #150 restent ouverts.
+automatique n'est ajouté. La politique de conservation #150 reste ouverte.
+L'accord ultérieur [F1a fermé](FANS-PF-F1A-CLOSED.md) autorise les projections
+privées reconstruisibles ; [F1b](FANS-PF-F1B-PROPOSAL.md) et les scores publics
+ne sont pas validés. H4 seul ne les implémente pas.
 **Aucune durée de conservation, valeur de 24 mois ou purge réelle n'est définie.**
 
 ## Lots et scénarios écrits avant implémentation

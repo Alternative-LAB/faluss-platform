@@ -43,6 +43,16 @@ La façade actuelle ne fournit que statut et claim quotidien Hub ; pack, support
 
 ## Corrections, litiges et remboursements
 
+**Mise en œuvre ultérieure, 6 octobre 2026 :** H1–H4 ont leurs accords limités et
+implémentations sur WordPress/MariaDB jetables avec preuves fictives. H4 ajoute
+une primitive propriétaire de correction cumulative distincte de la compensation
+historique décrite ci-dessus. [F1a](../modules/FANS-PF-F1A-CLOSED.md) persiste et
+reconstruit séparément les points Fan/Créateur depuis les snapshots H4 rapprochés.
+Le constat initial de capacité partielle absente ne décrit donc plus la recette
+fermée ; le parcours réel reste fermé. La [proposition F1b](../modules/FANS-PF-F1B-PROPOSAL.md)
+ne ratifie aucune période, session, égalité, visibilité, suspension ou clôture.
+La rétention #150 reste ouverte, sans défaut de 24 mois. Aucun achat/score public.
+
 - Conserver le fait original, son autorité, référence, politique, date et révisions. Même clé/révision et même contenu = rejeu sans effet ; contenu différent = conflit. Les corrections référencent l'original et ne modifient pas silencieusement l'historique.
 - Un remboursement de PF jamais attribués n'affecte aucun score. Après attribution, retrouver les allocations achetées concernées ; corriger chaque classement dérivé une fois, sans compter pack et attribution deux fois. La correction de score n'est pas une preuve de remboursement économique.
 - Aucun montant EUR n'est déduit du score ; aucun nombre de PF annulés n'est inventé à partir d'un prorata monétaire. Les remboursements partiels restent fermés tant que allocation, capacités propriétaires, insuffisance de solde et reprise après panne ne sont pas contractualisées.
