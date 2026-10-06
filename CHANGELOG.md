@@ -17,6 +17,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Ajouter B3a fermé : intention/contexte/reçu 0.3 versionnés, précision UTC et
+  ordre Hub obligatoires, sessions explicitement choisies, domaines de signature
+  et permissions dédiées. Validateurs seulement ; anciens formats intacts,
+  aucune consommation, persistance, route, migration ou activation.
+
 - Ajouter B2c : modération distincte des règles de session, historique privé
   versionné, recours des candidats et réadmission après suspension effective.
   Décisions exactes et journaux atomiques, approbation éditoriale verrouillée
