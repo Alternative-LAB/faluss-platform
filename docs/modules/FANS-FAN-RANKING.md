@@ -59,13 +59,16 @@ restent des propositions F1b ; aucune période/rang n'est implémenté dans F1a.
 
 ## Propositions à arbitrer avant toute publication
 
-La [proposition complète F1b](FANS-PF-F1B-PROPOSAL.md), P1–P6, est **non validée** :
-périodes, sessions distinctes du relevé, égalités, visibilité, suspensions et
-corrections tardives. Ce tableau résume les portes, sans les ratifier.
+La [proposition complète F1b R2](FANS-PF-F1B-PROPOSAL.md), P1–P6, est **non validée**.
+Elle distingue relevé mensuel privé, classements persistants général/par catégorie
+et sessions HoF ouvertes par les Créateurs seuls ou à plusieurs, aux portées
+locale, nationale ou internationale. Ces sessions ne sont pas réservées à
+l'administration. Ce tableau résume les portes, sans les ratifier.
 
 | Sujet | Proposition, non activée | Décision requise |
 | --- | --- | --- |
-| Période | Mois civil UTC, corrections rattachées à la date d’attribution originale | Fuseau, borne, historique et éventuel classement global |
+| Calendrier | Relevé par mois civil UTC proposé ; classements persistants sans remise à zéro mensuelle ; sessions à dates choisies | Fuseau du relevé, origine du cumul, bornes de sessions et historique |
+| Catégories et sessions | Contribution au général, catégories autorisées et plusieurs sessions admissibles, avec une seule consommation | Catégorie versionnée, choix explicite des sessions, contexte attesté et admissions territoriales |
 | Égalités | Même rang pour même score net, sans avantage de date ou de dépense monétaire | Rang dense ou compétition ; tri neutre stable sans départage artificiel |
 | Pseudonymes | Opt-in public révocable, alias approuvé ; score personnel privé par défaut | Modération, anonymisation, effet du retrait et rétention |
 | Invités | Exclus du tableau public tant que session, attribution attestée et reprise de compte ne sont pas garanties | Identité provisoire, consentement et rattachement atomique sans doublon |

@@ -6,6 +6,14 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Documentation
+
+- Corriger la proposition F1b R2 : distinguer relevé mensuel, classements
+  persistants général/par catégorie et sessions HoF créées seul ou à plusieurs
+  par les Créateurs, avec trois portées. Proposer calendriers, admissions,
+  rattachement multiple à consommation unique et lots B1–B6 ; aucune validation
+  F1b, modification de code ou activation.
+
 ### Ajouté
 
 - Ajouter F1a fermé : projections persistantes de points Fan et Créateur,

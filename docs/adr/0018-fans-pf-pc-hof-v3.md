@@ -53,6 +53,14 @@ fermée ; le parcours réel reste fermé. La [proposition F1b](../modules/FANS-P
 ne ratifie aucune période, session, égalité, visibilité, suspension ou clôture.
 La rétention #150 reste ouverte, sans défaut de 24 mois. Aucun achat/score public.
 
+**Cible précisée le 6 octobre 2026 :** relevé mensuel, classements persistants
+général/par catégorie et sessions HoF sont distincts. Les Créateurs doivent
+pouvoir ouvrir une session seuls ou à plusieurs, à portée locale, nationale ou
+internationale. [F1b R2](../modules/FANS-PF-F1B-PROPOSAL.md) propose calendriers,
+participation et rattachement multiple sans seconde consommation, avec lots
+successifs qui conservent ces capacités. F1b reste non validée ; aucune règle
+de calendrier, admission, plafond ou publication n'est activée par cette précision.
+
 - Conserver le fait original, son autorité, référence, politique, date et révisions. Même clé/révision et même contenu = rejeu sans effet ; contenu différent = conflit. Les corrections référencent l'original et ne modifient pas silencieusement l'historique.
 - Un remboursement de PF jamais attribués n'affecte aucun score. Après attribution, retrouver les allocations achetées concernées ; corriger chaque classement dérivé une fois, sans compter pack et attribution deux fois. La correction de score n'est pas une preuve de remboursement économique.
 - Aucun montant EUR n'est déduit du score ; aucun nombre de PF annulés n'est inventé à partir d'un prorata monétaire. Les remboursements partiels restent fermés tant que allocation, capacités propriétaires, insuffisance de solde et reprise après panne ne sont pas contractualisées.
