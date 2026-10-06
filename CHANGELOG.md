@@ -16,6 +16,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Ajouter B1a : calendrier Europe/Paris avec bornes UTC/été-hiver, programmation
+  locale désambiguïsée et calcul pur des places uniques depuis les nets corrigés.
+  Ordre propriétaire requis, anciens reçus/source incomplète refusés ; aucun
+  changement Hub, endpoint, migration ou classement public. Registre B1b à suivre.
+
 - Ajouter F1a fermé : projections persistantes de points Fan et Créateur,
   reconstruction atomique depuis les seuls faits H4 complets rapprochés,
   refus des générations périmées et reprises testées en recette jetable ; aucun
