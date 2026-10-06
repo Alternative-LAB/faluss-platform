@@ -77,6 +77,8 @@ final class HubPfRecipeDatabase extends wpdb
             || ($this->fault === 'b3r-journal-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_b3r_journal` /', $query) === 1)
             || ($this->fault === 'b3s-snapshot-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_b3s_snapshots` /', $query) === 1)
             || ($this->fault === 'b3s-page-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_b3s_pages` /', $query) === 1)
+            || ($this->fault === 'b3c-corpus-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_b3c_corpora` /', $query) === 1)
+            || ($this->fault === 'b3c-page-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_b3c_pages` /', $query) === 1)
         ) {
             $this->fault = '';
             return false;
@@ -157,6 +159,10 @@ if (str_starts_with($input['action'], 'b3s-')) {
 }
 if (str_starts_with($input['action'], 'b3o-')) {
     require __DIR__ . '/b3_corpus_source_worker.php';
+    return;
+}
+if (str_starts_with($input['action'], 'b3c-')) {
+    require __DIR__ . '/b3_corpus_worker.php';
     return;
 }
 
