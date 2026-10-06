@@ -47,18 +47,23 @@ final class SessionService
 
     /** Admission metadata can be prepared; economic opening waits for the primary Hub.
      * @return array<string,string> */
-    public function requestOpen(string $id, int $revision): array
+    public function requestOpen(string $id, int $revision, ?string $territoryPolicy = null): array
     {
         $creator = SessionStore::creator()['creator_id'];
-        return $this->store->transaction(function () use ($creator, $id, $revision): array {
+        return $this->store->transaction(function () use ($creator, $id, $revision, $territoryPolicy): array {
             $row = $this->store->row($id); $this->store->manager($row, $creator, true); SessionStore::revision($row, $revision);
             if ($row['state'] !== 'draft' || $row['frozen_sha256'] !== '' || $row['ends_at'] <= $this->store->now()) { throw new ModelViolation('hof_invalid_session_transition'); }
-            if ($row['scope'] !== 'international') { throw new ModelViolation('hof_reviewed_territory_required'); }
+            $territories = null;
+            if ($row['scope'] !== 'international') {
+                if ($territoryPolicy === null) { throw new ModelViolation('hof_reviewed_territory_required'); }
+                $territories = new TerritoryService($this->store->db); $territories->bind($id, $territoryPolicy);
+            } elseif ($territoryPolicy !== null) { throw new ModelViolation('hof_invalid_territory_binding'); }
             foreach ($this->store->roles($id) as $role) {
                 if ($role['role'] !== 'organizer') { continue; }
                 if ($role['state'] === 'invited') { throw new ModelViolation('hof_coorganizer_acceptance_required'); }
                 if ($role['state'] !== 'accepted') { continue; }
                 SessionStore::activeOwner($role['creator_id']); $this->store->quota($role['creator_id'], $id);
+                if ($territories !== null) { $territories->eligible($role['creator_id'], $territoryPolicy, $row); }
             }
             return $this->store->change($row, ['state' => 'opening', 'frozen_sha256' => SessionRules::digest($row), 'barrier_version' => '1'], 'request_open');
         });

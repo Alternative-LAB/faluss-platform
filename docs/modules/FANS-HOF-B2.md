@@ -89,3 +89,58 @@ de rétention ; #150 reste distincte.
 - B6 : formulaires avec nonce, parcours et DA V2, modération et recours accessibles.
 - Pays autorisés Faluss, véritable SSO/admission réseau et recette opérateur avant
   production ; conservation #150 et RustFS #161 distinctes.
+
+## B2b — scénarios préalables : examen territorial
+
+Registre explicite de critères publics et de territoires nommés, immuable par
+version. Il n'autorise pas les pays depuis lesquels les Fans peuvent soutenir :
+ce dernier contrat reste distinct. Aucun référentiel ou critère installé par
+défaut ; les données de recette sont expressément fictives.
+
+Positifs : déclaration propriétaire du territoire d'activité principal ;
+modérateur approuve la révision exacte selon la version déclarée ; ouverture
+nationale/localisée et participation compatibles avec le territoire examiné ;
+politique figée dans la session ; nouvelle politique sans réécriture du passé ;
+rejet motivé, recours privé et décision tracée ; retrait immédiatement opposable
+aux nouveaux choix, sans effacer les anciennes attestations.
+
+Négatifs : localisation déduite d'IP/SSO, déclaration étrangère, auto-approbation,
+politique absente/divergente, territoire inconnu, pays/localité non compatibles,
+révision obsolète/décisions concurrentes, version en attente/rejetée utilisée
+comme admission, changement implicite des règles d'une session gelée.
+
+Une nouvelle déclaration ferme l'éligibilité territoriale jusqu'à sa décision ;
+elle ne modifie aucune contribution historique. B3 devra fermer les versions
+de contexte correspondantes avec sa barrière et sa reprise attestée, avant toute
+ouverture économique. En B2b, aucune attribution n'est possible.
+
+### Livraison et frontières B2b
+
+Cinq tables InnoDB supplémentaires : versions immuables des critères et du
+référentiel nommé, déclaration actuelle, journal des décisions, rattachement
+immuable de la politique à la session et version de schéma. Installation explicite
+après B1/B2a, sans modifier leurs tables ou appeler un bootstrap.
+
+Les Créateurs déclarent leur territoire principal ; les administrateurs Fans
+examinent la révision exacte, motivent leur décision, traitent le recours privé
+et peuvent révoquer. Vingt soumissions par heure ; pseudonyme, identité, portrait,
+partenariat commercial et pays autorisés des Fans ne sont pas certifiés par cet
+examen. Une suspension du profil empêche les nouvelles admissions ; lecture
+privée, recours et retrait demeurent possibles selon la liaison propriétaire.
+
+En portée nationale, le pays examiné doit correspondre ; en portée locale,
+la référence nommée et le pays doivent correspondre. Tous les organisateurs et
+participants admis suivent ces mêmes conditions. En portée internationale,
+aucune restriction territoriale supplémentaire n'est ajoutée. La version des
+critères est liée à la session dans la transaction de gel ; un échec annule
+aussi ce rattachement. Changer de politique ne modifie pas les anciennes règles.
+
+Les empreintes des textes éditoriaux acceptent UTF-8. Elles sont distinctes du
+codec historique ASCII du protocole Hub, laissé inchangé. Aucun texte de critères,
+recours ou donnée éditoriale ne devient un champ économique Hub.
+
+Recette : option `--test --hof-territory`, [42 vérifications en base](../evidence/fans-hof-territory/README.md).
+Les critères, pays et territoires du rapport sont fictifs, sans habilitation
+de production. Aucun référentiel réel ni politique de pays autorisés n'a été
+fourni ou attesté ; leur désignation/examen opérateur reste nécessaire avant
+activation. B2c complète la modération des sessions et les recours de participation.

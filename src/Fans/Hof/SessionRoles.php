@@ -70,7 +70,11 @@ final class SessionRoles
             if ($role === null || $role['state'] !== 'requested' || $role['rules_sha256'] !== $row['frozen_sha256']) { throw new ModelViolation('hof_participation_conflict'); }
             if ($allow) {
                 SessionStore::activeOwner($target);
-                if ($row['scope'] !== 'international') { throw new ModelViolation('hof_reviewed_territory_required'); }
+                if ($row['scope'] !== 'international') {
+                    $territories = new TerritoryService($this->store->db);
+                    $policy = $territories->boundPolicy($id) ?? throw new ModelViolation('hof_reviewed_territory_required');
+                    $territories->eligible($target, $policy, $row);
+                }
             }
             $this->writeRole($id, $target, 'participant', $allow ? 'admitted' : 'refused', (int) $role['revision'] + 1,
                 $role['rules_sha256'], $allow ? $this->store->now() : '', $allow ? 'allowed_participation' : 'criteria_not_met');
