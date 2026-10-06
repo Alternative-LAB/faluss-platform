@@ -19,7 +19,9 @@
   décrit dans [HUB-PF-H1-MODEL.md](HUB-PF-H1-MODEL.md). Validateurs, schéma additif
   et persistance de recette ne ratifient pas les opérations économiques de ce
   document ni la proposition R1 complète de #147. Les accords D6/H2 et D3/H3
-  limités à la recette fermée sont consignés ci-dessous ; F1 reste à autoriser.
+  limités à la recette fermée sont consignés ci-dessous. **F1a fermé** est autorisé
+  séparément le 6 octobre : [projections privées](FANS-PF-F1A-CLOSED.md).
+  [F1b](FANS-PF-F1B-PROPOSAL.md) reste une proposition non validée.
   L'ordre de réduction de [#149](https://github.com/Alternative-LAB/faluss-platform/issues/149)
   est désormais validé **pour H4 fermé** : disponible d'abord, allocations récentes
   ensuite, corrections cumulatives ; voir [HUB-PF-H4-CLOSED.md](HUB-PF-H4-CLOSED.md).
@@ -27,7 +29,7 @@
   [#150](https://github.com/Alternative-LAB/faluss-platform/issues/150) reste ouverte
   avant toute politique de données réelles ; elle ne bloque pas la recette fictive H4.
 - Aucun producteur d'achat réel, crédit/débit nouveau sur site, API/transport installé sur site,
-  ledger parallèle Fans, paiement, score persistant, migration automatique sur
+  ledger parallèle Fans, paiement, score public, migration automatique sur
   un site réel, UI, flag de production ou activation. Les anciens claims restent inchangés.
 
 ## Capacités réellement disponibles
@@ -53,6 +55,18 @@ protocole réseau. Aucun producteur réel ou consommation utilisable sur les sit
 | [Token Engine](TOKEN-ENGINE.md) | Ledger PF append-only distinct d’ALB, idempotence et verrous internes | Preuve d’achat par lot, filiation lot→fan→tranche→attribution, réservation et reçu Fans |
 | Compensation PF | Montant intégral, même classe, une compensation par original | Compensations partielles successives, allocation des corrections et reprise distribuée |
 | Connector historique | Permissions `wallet.read`, `reward.claim`, `entitlements.read` | Aucune de ces permissions ne doit devenir implicitement un droit de consommation PF Fans |
+
+Cette matrice décrit les surfaces **normales de production**, inchangées. Les
+capacités suivantes existent dans le périmètre fermé, et ne doivent plus être
+présentées comme absentes du code :
+
+| Lot | Implémenté et testé sur instances jetables | Toujours fermé sur les sites |
+| --- | --- | --- |
+| [H1](HUB-PF-H1-MODEL.md) | Validateurs, preuves fictives, lots et filiation persistants | Enregistrement d'un producteur d'achat réel |
+| [H2](HUB-PF-H2-CLOSED.md) | Réserve/consomme/lookup, ledger officiel et journal atomiques, concurrence/reprise | Opérations économiques utilisables par un membre |
+| [H3](HUB-PF-H3-CLOSED.md) | Reçus privés signés/versionnés, droits dédiés, délégation, inbox et HTTP loopback | Pair/admission de production, preuve du vrai SSO/TLS |
+| [H4](HUB-PF-H4-CLOSED.md) | Corrections partielles cumulatives, litiges/résolutions, fragments et snapshots complets transférés | Remboursement monétaire, traitement d'une preuve réelle, rétention #150 |
+| [F1a](FANS-PF-F1A-CLOSED.md) | Points Fan/Créateur séparés, persistants, reconstruisibles depuis H4 complet | Score/rang public, période/session/récompense F1b |
 
 Préserver `20 PF earned` Hub et `75 PF earned` Me, leurs preuves et comportements.
 Aucun renommage PC, conversion de classe ou reprise des anciens soldes. Un solde
@@ -144,7 +158,10 @@ classe non admissible, conflit, quantité insuffisante, réservation fermée, in
 révision périmée et rattachement incomplet. Aucun code HTTP opérationnel attribué ici.
 Backoff borné sur contention/indisponibilité ; pas de retry automatique d’un conflit.
 
-## Reçu authentifié et anti-rejeu — exigences non implémentées
+## Reçu authentifié et anti-rejeu — proposition initiale de production
+
+H3 implémente le reçu fermé distinct décrit plus haut. Les exigences ci-dessous
+restent celles du draft de production, pas une absence de reçus dans la recette.
 
 Reçu : version du contrat/politique, émetteur Hub, audience Fans, identifiant unique,
 attribution, réservation, références des tranches/lots et preuves d’achat, identités
@@ -205,10 +222,10 @@ projections de la même attribution, y compris sessions clôturées, sans second
 compensation PF et sans choisir une politique de victoire/titre/suspension.
 
 Les corrections partielles exigent une ventilation exacte par tranche et attribution,
-sans prorata EUR→points inventé. **Ce parcours reste bloqué** : manque Hub d’un
-protocole de compensation partielle cumulée, bornée, répétable et réconciliable.
-Même une correction totale attestée est ici une exigence future, pas une nouvelle
-API économique. Pas de remboursement effectué par un calcul Fans.
+sans prorata EUR→points inventé. **Le parcours réel reste fermé**. H4 implémente
+désormais ces capacités cumulatives, bornées et réconciliables dans la recette
+fictive, avec disponible d'abord puis allocations récentes, accord #149. Ce n'est
+ni une ouverture d'API économique ni un remboursement effectué par un calcul Fans.
 
 ### Rattachement incomplet / traitement opérateur
 
@@ -227,6 +244,11 @@ leur propriétaire, jamais déduits du score. Conserver les traces et tombstones
 rétention, procédures opérateur et SLA à approuver avant ouverture.
 
 ## Faux serveur et limites des preuves
+
+Cette section décrit uniquement les tests documentaires historiques du draft.
+Les recettes propriétaires H0–H4/F1a décrites plus haut apportent séparément
+SQL, concurrence, persistance et transport sur WordPress/MariaDB jetables.
+Elles ne prouvent toujours ni achat réel, ni SSO cible, ni rétention de production.
 
 Les [tests](../../tests/Fans/PfContract/PurchasedPfContractTest.php) interrogent un
 [faux Hub en mémoire](../../tests/Fans/PfContract/FakeHub.php), uniquement sous `tests/`.
@@ -248,17 +270,20 @@ ou authentification réelle. Pagination, multi-lots, outbox/inbox durables, rés
 d’identité, garanties de rétention et workflow opérateur ne sont pas implémentés ni
 prouvés. Le batch de correction de test n’est pas le format final signé par Hub.
 
-## Portes et lot propriétaire requis
+## Portes de production restantes
 
 1. Revue/accord explicite du propriétaire Hub sur ce draft ; désigner l’autorité
    de preuve d’achat et approuver allocation, TTL, anti-rejeu, états et rétention.
-2. Lot Hub séparé et autorisé : capacités manquantes, protocole signé et transactionnel,
-   preuve de conservation des claims historiques. Aucun changement de ce type ici.
-3. Recettes réelles Hub et inter-applications : concurrence, panne après commit,
-   restauration, multi-lots, pages manquantes, rotation/révocation et compensation.
-4. Contrat de correction partielle et policies HoF/PC/Shop toujours fermés tant que
-   leurs arbitrages et capacités ne sont pas validés. Achat, attribution, remboursement
-   et événements dérivés produisent toujours zéro PC ; pack seul zéro score.
+2. H1–H4 et F1a fermés sont réalisés dans leurs lots autorisés, avec conservation
+   des claims. Leur admission de production n'est pas acquise ; aucune migration
+   ou opération réelle ne peut être déduite de l'accord de recette.
+3. Les recettes jetables vérifient concurrence, panne après commit, multi-lots,
+   pages manquantes, rotation/révocation et corrections. Restent le véritable SSO,
+   TLS/peers, producteur d'achat réel, exploitation et restauration coordonnée.
+4. La règle #149 est validée pour H4 fermé ; policies F1b/PC/Shop et rétention
+   #150 restent à décider avant leurs parcours réels. Achat, attribution,
+   remboursement et événements dérivés produisent toujours zéro PC ; pack seul zéro score.
 
-Rollback de ce lot : retirer docs et faux serveur/tests ; aucun schéma, donnée,
-consommateur ou config à restaurer. Aucune activation autorisée par le passage des tests.
+Rollback du draft documentaire initial : retirer docs et faux serveur/tests.
+Les retours arrière propres aux lots fermés sont décrits dans leurs contrats ;
+les fixtures sont détruites sans site réel. Aucune activation autorisée par les tests.

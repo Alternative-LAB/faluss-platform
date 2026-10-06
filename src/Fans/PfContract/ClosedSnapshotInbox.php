@@ -158,6 +158,63 @@ final class ClosedSnapshotInbox
         });
     }
 
+    /** Public private-facts fence for closed derived consumers. The callback shares this transaction.
+     * All current rows and the insertion range are locked; no Hub storage or stale receipt is exposed.
+     * @template T
+     * @param callable(list<array{manifest:array<string,mixed>,rows:list<array<string,string>>}>):T $operation
+     * @return T */
+    public function withReconciledSet(callable $operation): mixed
+    {
+        SnapshotEnvironment::assertIsolated($this->database, 'fans');
+        if (!ClosedSnapshotInboxSchema::ready($this->database)) { throw new ModelViolation('pf_snapshot_schema_unavailable'); }
+        $started = false;
+        $suppressed = $this->database->suppress_errors(true);
+        try {
+            if ((string) $this->database->get_var('SELECT @@in_transaction') !== '0') {
+                throw new ModelViolation('pf_local_storage_unavailable');
+            }
+            // A transaction-local isolation level keeps the full primary range stable during replacement.
+            $this->query('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ');
+            $this->query('START TRANSACTION');
+            $started = true;
+            $stored = $this->database->get_results($this->database->prepare(
+                'SELECT * FROM %i ORDER BY member_faluss_id FOR UPDATE', $this->tables['current']), 'ARRAY_A');
+            if ($this->database->last_error !== '' || !is_array($stored)) { throw new ModelViolation('pf_local_storage_unavailable'); }
+            if ($stored === []) { throw new ModelViolation('pf_reconciled_set_unavailable'); }
+            $snapshots = [];
+            foreach ($stored as $row) {
+                if ($row['state'] !== 'current') { throw new ModelViolation('pf_reconciled_set_unavailable'); }
+                $manifest = CanonicalJson::object($row['manifest_json']);
+                $rows = json_decode($row['rows_json'], true, 32, JSON_THROW_ON_ERROR);
+                if (!is_array($rows) || !array_is_list($rows)
+                    || $row['full_sha256'] !== hash('sha256', $row['rows_json'])
+                    || $row['proof_sha256'] !== hash('sha256', $row['proof_json'])
+                    || $row['epoch'] !== $this->epoch || $row['revision'] !== ($manifest['revision'] ?? null)
+                    || $row['full_sha256'] !== ($manifest['full_sha256'] ?? null)
+                ) { throw new ModelViolation('pf_snapshot_incomplete'); }
+                SnapshotDocument::manifest($manifest, $row['member_faluss_id'], $this->epoch);
+                SnapshotDocument::complete($manifest, $rows);
+                $snapshots[] = ['manifest' => $manifest, 'rows' => $rows];
+            }
+            $result = $operation($snapshots);
+            $this->commitReconciledSet();
+            $started = false;
+            return $result;
+        } catch (Throwable $error) {
+            if ($started) { $this->database->query('ROLLBACK'); }
+            throw $error;
+        } finally {
+            $this->database->suppress_errors($suppressed);
+        }
+    }
+
+    private function commitReconciledSet(): void
+    {
+        if ($this->database->query('COMMIT') === false || $this->database->last_error !== '') {
+            throw new ModelViolation('pf_local_commit_unknown');
+        }
+    }
+
     /** @param array<string,mixed> $row
      * @return array<string,mixed> */
     private function progress(array $row, string $member): array

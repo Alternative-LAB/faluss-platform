@@ -9,6 +9,15 @@ Le cadre temporel et les bilans planifiés sont annulés. Base initiale vérifi�
 `ad7c5857a0c1d65c84d8ec56b5fdbbd7dba178af`, alors en version 0.6.3.
 Les modifications Me/Link postérieures à #84 ont été conservées.
 
+**Archive de la matrice du 30 septembre ; complément PF au 6 octobre 2026 :**
+H1–H4 ne sont plus absents du code. Modèle, consommations officielles, reçus,
+corrections cumulatives et snapshots complets sont testés sur instances jetables
+avec données fictives. [F1a](FANS-PF-F1A-CLOSED.md) ajoute les points privés
+persistants/reconstruisibles. Les constats d'absence ci-dessous sont historiques ;
+le service **public** HoF/Classement Fans reste absent. [F1b](FANS-PF-F1B-PROPOSAL.md),
+producteur d'achat réel, admission réseau et rétention #150 restent à valider.
+Ce complément ne recrée ni échéance ni suivi programmé et ne certifie aucun site.
+
 Les publications autorisées 0.7.0 puis [0.8.0 (#109)](https://github.com/Alternative-LAB/faluss-platform/pull/109#issuecomment-5901824738)
 ont été accomplies par les workflows GitHub. La [preuve historique 0.7.0](#livraison-070) ne prouve ni sa proposition dans un
 WordPress licencié, ni une installation, ni la recette cible. Ces vérifications
@@ -117,9 +126,10 @@ documentaires postérieurs ne modifient pas le paquet publié.
 
 ## Ce qui empêche de déclarer Fans terminé
 
-1. **Contrat économique Hub non opérationnel** : preuves d’achat, attribution,
-   correction, remboursements partiels, rejeux et réconciliation manquent. Aucun
-   moteur Fans parallèle ne peut les remplacer. HoF : 1 PF acheté, attesté et
+1. **Contrat économique Hub non admis en production** : capacités H1–H4 et
+   points privés F1a disponibles en recette fermée ; producteur d'achat réel,
+   admission réseau, rétention et exploitation cible manquent. Aucun moteur
+   Fans parallèle ne les remplace. HoF : 1 PF acheté, attesté et
    effectivement attribué = 1 point ; classement Fan distinct, PC séparés.
 2. **Décisions du Classement Fans** : période, égalités, pseudonymes, invités et
    abus restent proposées dans [le contrat](FANS-FAN-RANKING.md), pas ratifiées.

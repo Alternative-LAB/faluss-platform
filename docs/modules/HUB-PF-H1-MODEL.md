@@ -20,6 +20,12 @@ avec seulement les garanties D6 nécessaires de transaction/journal/lookup prima
 et clé stable. H1 garde son comportement non consommant ; D3 et les effets #149/#150
 ne sont pas ratifiés par cet accord.
 
+**État ultérieur, 6 octobre :** [H3](HUB-PF-H3-CLOSED.md),
+[H4](HUB-PF-H4-CLOSED.md) et [F1a](FANS-PF-F1A-CLOSED.md) ont leurs accords et
+implémentations fermés distincts. #149 est validée pour H4 fermé ; #150 et
+[F1b](FANS-PF-F1B-PROPOSAL.md) restent ouverts. Les limites H1 ci-dessous
+décrivent ce modèle seul, sans ratifier la production ou une durée de 24 mois.
+
 H1 n'enregistre aucun producteur d'achat réel, n'authentifie aucune preuve de
 paiement et n'accorde aucun droit depuis un UUID. Il ne crédite/débite aucun PF,
 ne réserve rien, ne génère aucun reçu signé, n'appelle aucun writer historique
@@ -93,8 +99,8 @@ installation hors recette demande un nouveau lot autorisé et sa migration revue
 
 Un mutex consultatif propre au **modèle de recette** sérialise ses écritures,
 avec transaction InnoDB et délai de 10 secondes. Il ne remplace ni ne modifie
-les verrous économiques historiques sujet/classe ; les verrous et consommations
-H2 restent à implémenter après accord. Transactions imbriquées refusées.
+les verrous économiques historiques sujet/classe. H2 implémente désormais ses
+verrous/consommations dans son lot fermé distinct. Transactions imbriquées refusées.
 
 - Même clé et empreinte : résultat du modèle déjà enregistré ; autre contenu :
   conflit sans effet. Changer la clé ne permet pas de dupliquer une attribution.

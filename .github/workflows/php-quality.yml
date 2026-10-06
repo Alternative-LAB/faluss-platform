@@ -124,6 +124,8 @@ jobs:
         run: python3 tests/TokenEngine/recipe/run.py --h4-snapshots --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-h4-snapshots-checks.json"
       - name: Hub Fans H4 private complete snapshots real WordPress
         run: python3 tests/TokenEngine/recipe/run.py --h4-http --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-h4-http-checks.json"
+      - name: Fans F1a closed private projections real WordPress
+        run: python3 tests/TokenEngine/recipe/run.py --f1a --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/fans-pf-f1a-checks.json"
       - uses: actions/upload-artifact@v4
         with:
           name: hub-pf-runtime-checks
@@ -137,4 +139,5 @@ jobs:
             ${{ runner.temp }}/hub-pf-h4-corrections-checks.json
             ${{ runner.temp }}/hub-pf-h4-snapshots-checks.json
             ${{ runner.temp }}/hub-pf-h4-http-checks.json
+            ${{ runner.temp }}/fans-pf-f1a-checks.json
           if-no-files-found: error

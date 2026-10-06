@@ -6,7 +6,10 @@ Le 5 octobre 2026, **ALB-Origine** valide D3 de R1 pour H3 fermé uniquement :
 reçus privés signés/versionnés, permissions PF dédiées et délégation explicite
 Fan/Créateur. [Accord humain rapporté dans #147](https://github.com/Alternative-LAB/faluss-platform/issues/147#issuecomment-5992165128).
 Identités, achats, pairs et clés sont fictifs sur deux WordPress/MariaDB jetables.
-H4, F1, réduction après remboursement #149 et conservation #150 restent ouverts.
+Accords ultérieurs : [H4](HUB-PF-H4-CLOSED.md) implémente les corrections/snapshots
+fermés avec la règle #149 validée pour ce périmètre, puis
+[F1a](FANS-PF-F1A-CLOSED.md) les points privés reconstruisibles.
+[F1b](FANS-PF-F1B-PROPOSAL.md) et la conservation #150 restent non validés.
 Aucune autorité d'achat réelle, paire de production, migration automatique,
 activation, score, paiement, déploiement ou flag de production.
 
@@ -156,7 +159,8 @@ ou opération n'est ajouté au dispatcher Federation historique.
 - Inbox **privée Fans**, pas de ledger : intentions, clés et reçus canoniques.
   Le client vérifie réponse fraîche et signature/audience/contenu du reçu avant
   INSERT. Même reçu/digest : inertie ; contenu divergent : refus sans remplacement.
-  H3 reste à la révision 1, aucune correction H4 ou projection F1.
+  Le reçu H3 reste à la révision 1 : H4/F1a traitent séparément les corrections
+  et projections privées, sans muter ce reçu historique.
 - Le journal H2 reste `pending` : aucun event/score n'est annoncé comme remis
   à une projection HoF. La réception privée ne prouve pas de net économique courant.
 

@@ -8,6 +8,13 @@ Contrat documentaire cible `fans.economy-contract/3.0.0`, défini par
 anciennes décisions économiques de #71 ; les propositions restent non acceptées.
 Aucun moteur économique, changement Token Engine, migration ou activation.
 
+**État PF actualisé le 6 octobre 2026 :** la phrase précédente décrit le lot
+documentaire initial. H1–H4 puis [F1a](FANS-PF-F1A-CLOSED.md) sont implémentés et
+testés en recette fermée WordPress/MariaDB, preuves fictives. Aucun producteur
+réel ni opération économique/score public sur les sites. Les lignes hors PF de
+cette matrice conservent leur contexte historique ; [F1b](FANS-PF-F1B-PROPOSAL.md)
+reste non validé et #150 ouverte.
+
 ## Matrice des propriétaires
 
 | Moteur | Propriétaire des données et décisions | Consommateurs | Contrat public | État actuel |
@@ -19,7 +26,7 @@ Aucun moteur économique, changement Token Engine, migration ou activation.
 | Messagerie / bibliothèque | Fans : conversations, pièces jointes, collection de références et droits locaux | Fans | Contrats à implémenter, aucun accès par simple SSO | Absents |
 | Catalogue / commandes | Fans : fiches et futurs contrats de commandes/droits ; vendeur contractuel à décider | Fans | Catalogue REST v1 ; futurs contrats commerce distincts | #70 fusionnée : deux catégories, achats fermés ; commandes et reversements absents |
 | PC / progression membre | Propriétaire et barèmes PC à décider | Fans ; cosmétiques futurs | Contrat v3 documentaire ; pas de source PF | Gain, consommation et moteur PC fermés |
-| HoF | Fans : faits attestés et projections de classement ; Hub : consommation PF | Fans | Contrat v3 ; ratio validé, sessions à décider | Aucun score persistant ni moteur actif |
+| HoF | Fans : faits attestés et projections de classement ; Hub : consommation PF | Fans | Contrat v3 ; ratio validé, sessions à décider | F1a : points privés persistants reconstruisibles depuis H4 ; aucun classement/session public actif |
 | PF | Hub / Token Engine : ledger, classe économique et compensation | Fans via un contrat serveur à étendre ; Me/Hub actuels | Contrat PF existant, jamais accès direct aux tables | Implémenté sur Hub ; aucun débit cosmétique ou soutien Fans |
 | Cosmétiques | Catalogue commun proposé ; propriétaire PC et droits à décider ; dérivé : rendu | Fans en premier, Me compatible | Futur `faluss.cosmetics` v1 distinct de Catalog thèmes | Catalog actuel garde `faluss_catalog_card_themes` et `faluss-link` ; nouveau catalogue absent |
 | Faluss Max | Hub / Subscriptions : abonnement et entitlement ; application : fonction exposée | Fans, Pro ; autres dérivés ensuite | Projection de fonctionnalités versionnée à ajouter | Abonnements existants ; offre Max et droits dérivés non implémentés |
@@ -91,8 +98,10 @@ consommation unique, identités canoniques, référence, politique et révision.
 Aucune donnée navigateur ne constitue une preuve ; auto-attribution refusée.
 
 La compensation standard actuelle reprend le montant entier et n’autorise qu’une
-compensation par écriture. **Compensations partielles successives non disponibles** :
-parcours fermé jusqu’au contrat propriétaire, sans modifier le Token Engine ici.
+compensation par écriture. Elle ne fournit pas les compensations partielles
+successives ; H4 les implémente désormais par une primitive propriétaire distincte
+dans la recette fermée, sans modifier cette compensation historique. Le parcours
+réel reste fermé, sans producteur d'achat ni politique de rétention validés.
 Les anciens claims Me/Hub restent inchangés ; leur devenir n’est pas décidé.
 
 ### Corrections, remboursements et décisions ouvertes
@@ -191,8 +200,8 @@ Il ne ratifie ni protocole économique ni activation. Voir [Store](FANS-STORE.md
 
 1. Présent lot : ADR v3 et alignement documentaire uniquement.
 2. Simulateur v3 distinct sur fixtures, sans runtime ; ratio validé ; politiques de classement, protocole PF et autres portes restent fermés.
-3. Contrats propriétaires PF/PC, consommation et corrections ; capacités manquantes bloquantes.
-4. Moteurs, stockage, concurrence et recettes réelles dans des PR dédiées ; aucun second ledger PF.
+3. Contrats propriétaires : PF H1–H4 disponibles en recette fermée ; PC et ouverture réelle toujours à valider.
+4. Stockage/concurrence H1–H4 et points privés F1a testés sur instances jetables ; aucun second ledger PF.
 5. Shop autorisé après vendeur contractuel et autres portes ; social complet et messages séparés.
 6. UI, admission réseau et activation seulement après autorisation distincte.
 
@@ -203,11 +212,13 @@ historique `Alternative-LAB/faluss`, `docs/POINTS_FALUSS_CONTRACT.md` (PF-02A) e
 `docs/ECONOMY_PROTOCOL.md` (EC-01). Les formulations historiques « futur PF » ne
 remplacent pas l'état implémenté de Token Engine dans Platform.
 
-## Contrat Fans ↔ Hub pour PF achetés — dépendance bloquée
+## Contrat Fans ↔ Hub pour PF achetés — portes de production
 
 Le [draft versionné 0.1.0](FANS-HUB-PURCHASED-PF-CONTRACT.md) définit les exigences
 proposées de preuve par lot, réservation/confirmation, reçus et réconciliation.
-Validation du propriétaire Hub non obtenue ; aucune API opérationnelle ajoutée.
-La façade reste limitée aux claims quotidiens existants. Les tests sur faux serveur
-ne prouvent ni authentification réelle, concurrence SQL, reprise durable ou capacité
-de compensation partielle. Les claims Me/Hub et le Token Engine sont inchangés.
+Le propriétaire ALB-Origine a validé les périmètres fermés H1–H4/F1a ; la production
+et F1b ne le sont pas. La façade normale reste limitée aux claims quotidiens.
+Les anciens tests sur faux serveur ne prouvaient pas SQL/reprise ; les recettes
+fermées ajoutées les vérifient séparément, avec HTTP local et corrections partielles.
+Elles ne prouvent ni vrai SSO, ni paiement, ni cible réelle. Claims et ledger
+historique restent préservés ; aucune autorité PF parallèle Fans.

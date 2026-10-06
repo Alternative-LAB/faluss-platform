@@ -8,6 +8,14 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Ajouter F1a fermé : projections persistantes de points Fan et Créateur,
+  reconstruction atomique depuis les seuls faits H4 complets rapprochés,
+  refus des générations périmées et reprises testées en recette jetable ; aucun
+  ledger parallèle, score public, classement, session ou activation.
+- Proposer F1b séparément, sans validation ni implémentation : périodes, sessions,
+  égalités, visibilité, suspensions et corrections après clôture ; actualiser
+  l'état fermé H1–H4 dans les contrats sans ratifier la production ou la rétention.
+
 - Ajouter H4c fermé : transfert des snapshots complets signé, délégué et limité
   aux deux instances jetables ; staging privé et reprise durable Fans, sans
   ledger parallèle, projection de classement ou route ordinaire.
