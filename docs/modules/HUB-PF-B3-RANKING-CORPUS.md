@@ -42,7 +42,45 @@ Recette autorisée : deux Hub/Fans WordPress/MariaDB jetables, données fictives
 
 1. **B3c2a, cette PR** : validateur canonique du corpus, permission reconnue uniquement si explicitement présente, domaines Ed25519 distincts et tests de refus. Aucun schéma, stockage, route ou admission. Un validateur ne prouve pas la complétude de données réelles : elle doit être attestée par le propriétaire Hub.
 2. **B3c2b1, #174** : primitive propriétaire de lecture exhaustive sous verrou global, composition de chaque fait 0.3 avec le net H4. Mesurer le temps de détention des verrous, les attentes des consommations et corrections, puis la reprise d'une lecture pendant un rapprochement ; publication des seuls résultats expurgés et limites de dimensionnement de la recette. **B3c2b2, lot courant** : quatre tables de métadonnées uniquement, matérialisation atomique, pages immuables de 100 et vérification primaire finale, lookup/reprise par clé durable et refus d'une génération devenue obsolète. La preuve réseau signée et l'inbox Fans restent B3c2c.
-3. **B3c2c1, lot courant** : codec signé de lecture propriétaire, contexte exact par origine/politique/opération/clé, réponses liées à la requête et validateurs de pages/fences/refus. Aucun HTTP, nonce admis en SQL ou inbox dans ce sous-lot. **B3c2c2/c3** : transport HTTP physiquement fermé et inbox Fans avec remplacement atomique après réception de toutes les pages et fence primaire. Tests réseau des permissions, signatures, audiences, origines, clés, réponses perdues et refus d'une génération incomplète.
+3. **B3c2c1, #176** : codec signé de lecture propriétaire, contexte exact par origine/politique/opération/clé, réponses liées à la requête et validateurs de pages/fences/refus. Aucun HTTP, nonce admis en SQL ou inbox dans ce sous-lot. **B3c2c2, lot courant** : transport HTTP physiquement fermé, nonce SQL distinct, clés de nœuds distinctes, refus et reprise après perte de réponse. **B3c2c3** : inbox Fans avec remplacement atomique après réception de toutes les pages et fence primaire ; ce transport seul ne prouve pas cette réception exhaustive.
+
+### Transport fermé B3c2c2
+
+**ClosedCorpusClient** effectue une seule lecture POST, sans redirection, cookie
+ou seconde clé automatique. Le propriétaire de la reprise doit **persister la
+clé avant HTTP** ; l'inbox qui automatisera cette garantie reste B3c2c3. Après
+résultat inconnu, lookup sur le primaire avec la même clé et un nouveau nonce
+signé ; réponse liée aux champs exacts, nonce et empreinte de la demande.
+L'absence de résultat signé valide n'est ni un corpus vide ni une preuve de
+non-commit.
+
+**ClosedCorpusGateway** authentifie la demande et son contexte avant dispatch.
+**ClosedCorpusAdmission** consomme une seule fois le nonce du pair, sous le
+verrou global propriétaire puis bail de lecture. L'expiration est revérifiée
+après attente du verrou ; l'admission est le point de validation du contexte.
+Un nonce admis reste consommé même si la lecture ultérieure échoue : la reprise
+utilise la même clé durable, un nouveau nonce et un lookup. Les deux tables
+**token_engine_pf_b3ch_schema/nonces** contiennent uniquement métadonnées,
+empreintes et dates. Elles ne réutilisent pas un nonce Fan historique et ne
+créent aucune entrée économique. Aucun calendrier de purge réel n'est défini
+par ce lot ; toute la base fictive est supprimée à la fin de la recette.
+
+Les classes ne sont appelées par aucun bootstrap, hook public, cron ou UI.
+Le MU loader **de test**, copié explicitement, ne crée sa route que dans
+l'enclave physique H3 : racine POSIX privée, bail privé, primaire MariaDB
+sur socket privé et PHP CLI/server en loopback. Copier les constantes ou ce
+loader sur un WordPress ordinaire ne suffit pas à ouvrir une route. Fans ne
+peut appeler que l'URL exacte de recette sur **127.0.0.1**, sans destinataire
+fourni par un navigateur. Authentification par les signatures et la permission
+globale dédiée, sans détourner la session SSO d'un membre.
+
+Les délais de quotas historiques sont accélérés **sur la connexion SQL de
+recette**, par un fichier privé contrôlé par le test ; aucune date n'est
+acceptée depuis HTTP. Les signatures conservent leur horloge réelle et leur
+durée de 60 secondes. Les temps et quantités fictifs ne prouvent ni le
+dimensionnement de production, ni TLS, ni Faluss Identity SSO, ni une politique
+de conservation. Rollback : retirer le loader de recette et supprimer son
+enclave jetable ; aucune migration ou réparation de site n'est proposée.
 
 Les transports 0.3, snapshots membres 2.0 et barrières restent des sous-lots B3 parallèles à intégrer, avec leurs propres domaines. B4/B5 ne déclareront aucun classement exhaustif tant que le corpus propriétaire complet n'est pas rapproché.
 

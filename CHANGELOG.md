@@ -17,6 +17,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Ajouter B3c2c2 fermé : lectures HTTP signées du corpus propriétaire, admission
+  par nonce SQL distinct et reprise par lookup primaire après réponse perdue.
+  Recette physiquement limitée à deux WordPress jetables à clés distinctes ;
+  aucun endpoint de production, écriture économique ou inbox Fans ajouté.
+
 - Lier les lectures fermées du corpus exhaustif à l'origine, la politique,
   l'opération, la clé durable et au contexte signé exact, sans paramètre Fan.
   Vérifier les pages/fences privées et les refus sous les domaines dédiés,
