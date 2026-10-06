@@ -104,7 +104,8 @@ sans supprimer silencieusement un choix. Après résultat incertain : intention
 et clé originales, lookup primaire, jamais un second débit ou une nouvelle clé.
 
 Cette capacité n'existe pas encore dans les DTO H3/H4. Son
-[extension Hub proposée](HUB-PF-B3-RANKING-PROPOSAL.md) reste soumise à accord.
+[extension Hub B3](HUB-PF-B3-RANKING-PROPOSAL.md) a reçu son accord séparé
+le 6 octobre pour la recette fermée seulement ; son implémentation reste à tester.
 
 ## P3 — places uniques et date d'atteinte approuvées
 
@@ -193,17 +194,17 @@ La conservation réelle demeure #150, sans défaut de 24 mois ni purge ajoutée.
 | --- | --- | --- |
 | B1 | Dimensions, calendriers, origine enregistrée, catégories, consentements/pseudonymes ; calcul pur de départage | Règles ci-dessus ; tests été/hiver, bornes, net corrigé, permissions et versions |
 | B2 | Gestion privée des sessions solo/collectives, invitations/admissions, trois portées, dates et modération | B1 ; concurrence, limites, droits, gel et admission territoriale |
-| B3 | Contexte et ordre Hub attestés, rapprochement complet | B1/B2 et **accord Hub distinct avant implémentation** ; consommation unique, concurrence/reprise, compatibilité des anciennes preuves |
+| B3 | Contexte et ordre Hub attestés, rapprochement complet | B1/B2 ; **accord Hub séparé reçu pour B3 fermé** ; consommation unique, concurrence/reprise, compatibilité des anciennes preuves |
 | B4 | Relevés et classements persistants Créateurs/Fans reconstruisibles | B1/B3, faits H4 complets ; corrections et corpus exhaustif |
 | B5 | Projections de sessions dans tous les modes et portées | B2/B3 ; rattachement multiple, annulation, suspension et corrections après clôture |
 | B6 | Lectures autorisées et UI des trois objets dans la DA V2 | B4/B5 ; source à jour, visibilité, clavier/mobile, recette ; activation opérateur distincte |
 
-B2 et les préparatifs indépendants de B4/B6 avancent pendant l'attente d'un accord
-Hub ; leur livraison ne doit pas être présentée comme un classement opérationnel.
+B2 et les préparatifs indépendants de B4/B6 avancent pendant la construction B3 ;
+leur livraison ne doit pas être présentée comme un classement opérationnel.
 La séquence conserve toutes les capacités cible. Chaque lot passe par PR bornée,
 revue, contrôles et protections ; publication seulement par les workflows établis.
 
-Dépendances ouvertes : contrat Hub B3 ; producteur d'achat/preuve réelle ;
+Dépendances ouvertes : capacités B3 attestées à implémenter/tester ; producteur d'achat/preuve réelle ;
 admission réseau et vrai SSO ; corpus admissible exhaustif/fraîcheur et remise
 durable des corrections ; référentiel territorial et pays autorisés ;
 conservation #150, décisions PC/commerciales et recette opérateur avant activation.

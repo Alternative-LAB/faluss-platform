@@ -11,10 +11,16 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 - Consigner la validation F1b R2 : relevé Europe/Paris, classements persistants
   et sessions Créateur distincts, trois portées, plafonds et corrections après
   clôture. Formaliser les places uniques par date d'atteinte corrigée et ordre
-  propriétaire Hub ; proposer l'extension additive B3, non ratifiée. B1–B6
+  propriétaire Hub ; proposer l'extension additive B3, approuvée séparément
+  pour la recette fermée au commit `2553e376`. B1–B6
   autorisés selon leurs dépendances ; aucun code économique ou flag activé.
 
 ### Ajouté
+
+- Ajouter B1b : registre privé versionné des dimensions et origine préparée,
+  pseudonymes éditoriaux modérés, consentements Fan/Créateur révocables et journal
+  atomique. Installation explicite vérifiée InnoDB, recette WordPress/MariaDB ;
+  aucune ouverture réelle, endpoint public, migration automatique ou score.
 
 - Ajouter B1a : calendrier Europe/Paris avec bornes UTC/été-hiver, programmation
   locale désambiguïsée et calcul pur des places uniques depuis les nets corrigés.

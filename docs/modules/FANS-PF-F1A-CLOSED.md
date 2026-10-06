@@ -82,8 +82,9 @@ le ledger officiel sont inchangés. Aucun site, achat, score public ou activatio
 
 [F1b R2](FANS-PF-F1B-PROPOSAL.md) a sa validation produit du 6 octobre 2026 :
 relevé Europe/Paris, persistants et sessions distincts, places uniques corrigibles.
-B1–B6 sont autorisés selon les dépendances ; l'extension Hub B3 exige son accord
-propre. F1a n'implémente pas ces règles ou un classement public par cet accord.
+B1–B6 sont autorisés selon les dépendances ; l'extension Hub B3 a reçu son accord
+propre pour la seule recette fermée le 6 octobre. F1a n'implémente pas ces règles
+ou un classement public par cet accord.
 #150 reste ouverte : aucune durée réelle, défaut de 24 mois ou purge de production.
 Les [preuves locales](../evidence/fans-pf-f1a/README.md) sont celles de SQL et HTTP
 isolés : 388/388 contrôles, dont 39 F1a après les 349 antérieurs, fixtures supprimées.

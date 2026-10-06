@@ -70,7 +70,7 @@ elle ne ratifie aucun nouveau contrat Hub, achat réel ou activation.
 | --- | --- | --- |
 | Calendrier | Relevé Europe/Paris été/hiver ; persistants sans remise à zéro mensuelle depuis l'ouverture réelle enregistrée ; sessions à dates choisies | Services de calendrier/origine ; aucune donnée fictive ou historique sans contexte |
 | Catégories et sessions | Général/catégories et plusieurs sessions explicitement choisies, une seule consommation ; 90 jours / 3 ouvertes par organisateur / 10 par attribution | Contexte attesté B3, catégorie versionnée, admissions territoriales et pays autorisés |
-| Départage | Places uniques : net décroissant, date d'atteinte reconstruite après corrections, ordre Hub puis identité immuable non affichée | Extension Hub d'ordre autoritatif à approuver ; aucun ordre réseau ou UUID trié comme substitut |
+| Départage | Places uniques : net décroissant, date d'atteinte reconstruite après corrections, ordre Hub puis identité immuable non affichée | Extension Hub B3 approuvée séparément pour recette fermée, à implémenter/tester ; aucun ordre réseau ou UUID trié comme substitut |
 | Pseudonymes | Opt-in public révocable, alias approuvé ; score personnel privé par défaut | Service, modération, anonymisation et conservation #150 |
 | Invités | Exclus du tableau public tant que session, attribution attestée et reprise de compte ne sont pas garanties | Identité provisoire, consentement et rattachement atomique sans doublon |
 | Abus | Refus auto-attribution côté propriétaire, preuve d’origine, idempotence, limitations et revue des anomalies | Collusion, multi-comptes, suspension, recours et durée de conservation |

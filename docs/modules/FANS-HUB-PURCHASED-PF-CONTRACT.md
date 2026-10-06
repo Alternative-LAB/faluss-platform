@@ -24,8 +24,10 @@
   [F1b R2](FANS-PF-F1B-PROPOSAL.md) a ses règles produit approuvées le 6 octobre :
   relevé Europe/Paris, classements persistants et sessions Créateur, places uniques
   avec date d'atteinte reconstruite après corrections. B1–B6 sont autorisés ;
-  aucun nouveau contrat Hub n'est ratifié implicitement. L'[extension B3 proposée](HUB-PF-B3-RANKING-PROPOSAL.md)
-  pour ordre autoritatif et dimensions attestées exige un accord avant code.
+  aucun nouveau contrat Hub n'est ratifié implicitement. L'[extension B3](HUB-PF-B3-RANKING-PROPOSAL.md)
+  pour ordre autoritatif et dimensions attestées a reçu le 6 octobre un accord
+  **séparé pour la recette fermée**, sur le contenu au commit `2553e376`.
+  Capacités à implémenter/tester ; aucune admission de production déduite.
   L'ordre de réduction de [#149](https://github.com/Alternative-LAB/faluss-platform/issues/149)
   est désormais validé **pour H4 fermé** : disponible d'abord, allocations récentes
   ensuite, corrections cumulatives ; voir [HUB-PF-H4-CLOSED.md](HUB-PF-H4-CLOSED.md).
