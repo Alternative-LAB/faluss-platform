@@ -6,6 +6,7 @@ Propriétaire habilité : ALB-Origine. Accord explicite sur le contenu au commit
 [#147](https://github.com/Alternative-LAB/faluss-platform/issues/147#issuecomment-6018635441).
 Cet accord Hub est distinct des règles produit [F1b R2](FANS-PF-F1B-PROPOSAL.md).
 Aucun code Hub, opération économique ou format H3/H4 changé par #163.
+Implémentation par sous-lots : [B3 fermé et frontières de preuve](HUB-PF-B3-CLOSED.md).
 Périmètre autorisé : Hub/Fans jetables, identités, achats, pairs et clés fictifs ;
 aucune admission sur site ou source d'achat réelle.
 

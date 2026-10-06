@@ -9,7 +9,9 @@ Identités, achats, pairs et clés sont fictifs sur deux WordPress/MariaDB jetab
 Accords ultérieurs : [H4](HUB-PF-H4-CLOSED.md) implémente les corrections/snapshots
 fermés avec la règle #149 validée pour ce périmètre, puis
 [F1a](FANS-PF-F1A-CLOSED.md) les points privés reconstruisibles.
-[F1b](FANS-PF-F1B-PROPOSAL.md) et la conservation #150 restent non validés.
+[F1b R2](FANS-PF-F1B-PROPOSAL.md) est approuvé, ainsi que
+[B3 fermé](HUB-PF-B3-CLOSED.md) par accord Hub distinct ; leurs nouveaux formats
+ne remplacent pas H3. La conservation #150 reste non validée.
 Aucune autorité d'achat réelle, paire de production, migration automatique,
 activation, score, paiement, déploiement ou flag de production.
 
