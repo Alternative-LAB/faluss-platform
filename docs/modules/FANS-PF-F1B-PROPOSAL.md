@@ -1,308 +1,210 @@
-# F1b — proposition produit à valider, révision R2
+# F1b R2 — règles produit approuvées, capacités à livrer
 
-**Statut : recommandations non validées. Aucun comportement F1b implémenté ou
-activé par F1a.** Décideur : ALB-Origine. Révision du 6 octobre 2026 suivant sa
-demande de préserver la cible produit. Elle remplace P1/P2 de R1 et précise P6.
-[F1a](FANS-PF-F1A-CLOSED.md) est livré en recette fermée : ses points privés ne
-définissent ni rang, ni calendrier produit, ni session.
+**Décideur : ALB-Origine. Validation explicite du 6 octobre 2026.**
+La validation remplace les recommandations de R2 sur le fuseau du relevé et les
+égalités. B1–B6 sont autorisés selon leurs dépendances ; tout contrat Hub nouveau
+ou modifié exige un accord distinct avant son implémentation.
+[F1a](FANS-PF-F1A-CLOSED.md) reste une projection privée fermée, pas un classement
+public opérationnel. Fusion de code, publication et activation sont trois actes
+distincts. Aucun accès aux sites, achat réel, migration de production ou flag.
 
-## Cible demandée et objets distincts
+## Trois objets approuvés
 
-| Objet | Fonction et calendrier | Gestion |
+| Objet | Calendrier et fonction | Gestion |
 | --- | --- | --- |
-| Relevé mensuel | Vue privée des attributions du mois et de leur net corrigé ; pas une compétition ou une remise à zéro des autres projections | Consultation par le membre autorisé |
-| Classements persistants | HoF Créateurs général et par catégorie, distinct du classement Fans ; accumulation des contributions admissibles sans remise à zéro mensuelle | Calcul serveur reconstruisible et visibilité autorisée |
-| Sessions HoF | Compétitions ou parcours bornés dans le temps, distincts du relevé et des classements persistants ; portée locale, nationale ou internationale | Créateurs seuls ou à plusieurs ; administration chargée de la modération et des recours |
+| Relevé mensuel privé | Mois civil Europe/Paris ; vue des contributions et de leur net corrigé dans le mois d'origine | Membre autorisé, sans compétition ni remise à zéro d'un classement |
+| Classements persistants | Général et catégories, projections Créateurs/Fans séparées ; cumul sans remise à zéro mensuelle | Origine d'ouverture réelle des attributions admissibles, enregistrée explicitement |
+| Sessions HoF | Compétitions bornées, indépendantes du relevé ; portées locale, nationale et internationale | Créateurs seuls ou avec coorganisateurs acceptant leur rôle ; administration pour modération et recours |
 
-L'ouverture et la gestion de sessions par les Créateurs font partie de la cible.
-Les sessions ne sont pas réservées à l'administration. Un découpage en lots ne
-supprime ni la création collective, ni une portée, ni les classements persistants.
-Les recommandations ci-dessous précisent les règles encore à valider ; cette
-correction documentaire n'autorise pas F1b ou une ouverture économique.
+Un relevé Créateur ne présente ni wallet, solde PF, montant, reçu privé d'achat
+ou information financière des Fans. Aucun ledger PF parallèle. Achat du pack
+seul = zéro score ; PC et PF historiques non admissibles sont exclus.
 
-Le relevé Créateur présente seulement les points et informations de contribution
-autorisées, sans wallet, montant, solde PF, reçu privé d'achat ou détail financier
-des Fans. Il ne constitue pas un ledger PF parallèle.
+## P1 — calendrier et origine approuvés
 
-## P1 — calendrier du relevé et classements persistants
+- Relevé par mois civil **Europe/Paris**, début inclus / fin exclue, avec gestion
+  été/hiver. Construire les bornes dans ce fuseau, puis comparer en UTC.
+- Instants techniques stockés en UTC ; dates de présentation avec fuseau indiqué.
+  Le back-office utilise le fuseau configuré dans WordPress.
+- Une correction révise l'attribution dans son mois d'origine, déterminé par
+  `confirmed_at` Hub ; ni sa réception réseau ni la date de correction ne changent
+  ce rattachement.
+- Classements persistants général et catégories, familles Créateurs/Fans séparées,
+  sans remise à zéro au changement de mois. Catégorie approuvée fixée dans le
+  contexte de contribution ; aucune édition de profil ne déplace l'historique.
+- Origine : instant de l'ouverture **réelle** des attributions admissibles,
+  explicitement enregistré et versionné. Aucune origine de recette ne devient
+  une ouverture réelle ; aucune donnée fictive ou historique sans contexte attesté.
+- Net positif et visibilité admissible requis pour une place publique. Aucun rang
+  inventé pour un compte absent, masqué ou à zéro.
 
-### Recommandation
+Exemples : mars 2026 commence à `2026-02-28T23:00:00Z` et finit à
+`2026-03-31T22:00:00Z` (743 heures). Octobre 2026 commence à
+`2026-09-30T22:00:00Z` et finit à `2026-10-31T23:00:00Z` (745 heures).
+Une attribution confirmée le 31 mars à 22:00 UTC appartient à avril à Paris.
+Une correction reçue en mai reste dans le mois de cette confirmation.
 
-- Relevé : mois civil **UTC**, début inclus et fin exclue, selon la date de
-  consommation confirmée par Hub. Une correction révise le net de l'attribution
-  dans son mois d'origine ; elle ne devient pas une seconde attribution.
-- Classements persistants : cumul depuis une origine d'admission explicite et
-  versionnée, sans expiration au changement de mois. Général et catégories sont
-  des projections distinctes des mêmes contributions ; jamais des soldes PF.
-  Recommander comme origine l'instant futur de début des attributions économiques
-  admises, validé par l'opérateur, et la date de confirmation Hub pour l'inclusion.
-  Aucune donnée fictive F1a n'entre dans ce cumul réel.
-- Maintenir séparées les familles Créateurs et Fans. Pour la famille Fans,
-  recommander également général et catégories des contributions aux Créateurs ;
-  l'étendue de cette déclinaison par catégorie reste un choix à valider.
-- Fixer la catégorie approuvée de la contribution lors de son attribution.
-  Une édition ultérieure du profil ne déplace pas automatiquement son historique.
-  L'ensemble général reste indépendant des catégories et des sessions.
-- Afficher seulement les participants admissibles au net positif dans les
-  tableaux publics ; aucun rang inventé pour un compte absent ou à zéro.
+## P2 — sessions, participation et plafonds approuvés
 
-**Conséquences :** un nouveau mois ouvre un relevé, sans effacer un rang ou le
-cumul des classements persistants. Une correction tardive peut changer à la fois
-le relevé original, le classement persistant et les sessions concernées. UTC
-donne une frontière commune, décalée de minuit à Paris selon la saison. Un relevé
-Europe/Paris est une alternative, avec calendrier et changements d'heure propres.
-Une vue mensuelle comparative éventuelle serait un objet supplémentaire ; elle
-ne remplacerait pas les classements persistants.
+### Création et droits
 
-Les instants techniques restent UTC. La présentation indique son fuseau ; les
-horaires du back-office utilisent le fuseau WordPress. Cette présentation ne
-change ni les bornes du relevé ni celles des sessions.
+Créateur lié par SSO, actif et doté d'une présentation approuvée : création solo
+ou invitation de coorganisateurs. Chaque coorganisateur accepte explicitement
+son rôle. L'initiateur gère programmation, annulation et nomination ; les
+coorganisateurs invitent et traitent les admissions avec droits revalidés à chaque
+action, sans transfert implicite de propriété ni édition de score.
 
-**À valider :** calendrier UTC ou Europe/Paris du relevé, origine du cumul
-admissible, catégorie figée par contribution et déclinaison catégorielle Fans.
-Les PF historiques non admissibles restent exclus. Un historique sans contexte
-de catégorie ne reçoit pas la catégorie actuelle par supposition ; aucune
-reclassification rétroactive avant une décision et une preuve versionnée.
+Organisateur et participant sont distincts. Création solo n'impose pas un seul
+participant ; création collective ne crée ni compte collectif ni solde commun.
+Scores individuels ; participation volontaire, règles acceptées et admission
+selon critères annoncés. Les organisateurs peuvent participer avec cette qualité
+visible et les mêmes contrôles. Refus motivé et recours accessibles.
+Une session à un seul participant ne fabrique ni compétition ni récompense.
 
-## P2 — sessions ouvertes par les Créateurs
+Règles, dates, catégorie et portée figées après ouverture. Une admission tardive
+concerne seulement les attributions futures. Changement structurel : nouvelle
+version avant ouverture ou nouvelle session, sans transfert silencieux des faits.
+Admission du profil et participation ne valident aucun partenariat commercial.
 
-### Création solo et collective
+### Portées et calendrier
 
-Recommandation : un Créateur SSO lié, actif et doté d'une présentation approuvée
-peut créer, programmer et ouvrir une session depuis Fans. Il peut être seul ou
-inviter des coorganisateurs ; chacun accepte explicitement avant d'obtenir des
-droits. Organisateurs et participants sont deux rôles distincts : une création
-solo n'impose pas un seul participant, et une création collective n'invente pas
-un compte collectif ou un solde commun.
-
-Chaque participant Créateur accepte les règles et son admission. Dans une
-session collective, garder des scores individuels par Créateur ; un classement
-d'équipes serait une règle supplémentaire, pas une somme implicite. Un
-organisateur peut participer, avec cette qualité visible et sans pouvoir éditer
-les scores. Une session à un seul participant reste possible, sans fausse
-concurrence, titre ou récompense automatique.
-
-Le propriétaire de session gère invitations, programmation et demandes de
-participation ; les coorganisateurs obtiennent des droits explicites. La
-recommandation précise est : initiateur responsable de la programmation,
-annulation et nomination des coorganisateurs ; coorganisateurs autorisés à
-inviter et traiter les admissions, sans cession de propriété ou édition de score.
-Chaque action revalide son habilitation. La modération éditoriale, suspension
-et procédure de recours restent obligatoires
-selon leurs contrats. L'administrateur peut intervenir pour ces fonctions ; il
-ne devient pas le seul acteur autorisé à ouvrir les sessions. Admission de
-profil et participation ne valident aucun partenariat commercial.
-
-### Portées et participation
-
-| Portée cible | Recommandation de périmètre | Condition à construire |
+| Portée | Règle approuvée | Dépendance à construire |
 | --- | --- | --- |
-| Locale | Territoire d'activité nommé et stable, rattaché à un pays ; participants Créateurs admis pour ce territoire | Référentiel territorial, déclaration du Créateur et décision d'un modérateur Fans habilité |
-| Nationale | Pays d'activité explicite ; participants Créateurs admis pour ce pays | Même admission territoriale et critères publics |
-| Internationale | Aucune restriction de pays pour les participants | Identité liée, profil actif, présentation approuvée, règles acceptées |
+| Locale | Territoire d'activité principal du Créateur, nommé et rattaché à un pays | Référentiel, déclaration et examen selon critères publics |
+| Nationale | Pays du territoire d'activité principal déclaré et examiné | Même procédure d'admission territoriale |
+| Internationale | Aucune restriction territoriale de session pour les Créateurs | Identité liée, profil actif, présentation approuvée et règles acceptées |
 
-Recommander que la portée encadre les participants Créateurs, sans limiter le
-soutien aux Fans du même territoire. Un Fan lié peut attribuer selon ses droits,
-quel que soit son pays ; auto-attribution refusée. Une restriction territoriale
-des Fans serait un choix différent avec ses propres preuves et conséquences.
-Ni IP, ni langue, ni identité Me ne prouvent un domicile. Le profil public actuel
-ne fournit pas de preuve territoriale suffisante : locale et nationale attendent
-ce service dans leur lot, sans être retirées de la cible ni présentées comme
-vérifiées avant son implémentation.
+Les Fans peuvent soutenir depuis les **pays autorisés par Faluss**, sans
+restriction territoriale supplémentaire liée à la session. Aucune autorisation
+universelle de pays n'est inventée. IP, langue et SSO ne certifient pas un domicile.
+L'examen territorial est une admission éditoriale, pas une certification d'identité.
 
-Recommander le territoire d'activité principal déclaré, examiné selon des
-critères publics par la modération Fans, plutôt qu'une adresse de résidence.
-Cette admission éditoriale n'est pas une certification de domicile ou d'identité.
-Le choix activité/résidence et le niveau de justification restent à valider.
+Dates choisies par les Créateurs, indépendantes du mois civil, début inclus / fin
+exclue. Fuseau IANA conservé ; instants enregistrés/comparés en UTC. Heure locale
+inexistante refusée, heure ambiguë explicitement désambiguïsée.
 
-Recommander une entrée volontaire des participants, acceptée par les
-organisateurs selon des critères annoncés, avec motif et recours en cas de refus.
-Une admission après ouverture ne vaut que pour les attributions futures. Le
-retrait ou la suspension ferme les nouvelles participations ; l'effet sur les
-surfaces et résultats antérieurs relève de P5/P6, sans annulation PF locale.
+Plafonds initiaux : **90 jours par session**, **trois sessions simultanément
+ouvertes par organisateur**, coorganisation comprise, **dix sessions par attribution**.
+Révision future explicite ; aucune modification silencieuse des règles déjà
+ouvertes. La durée maximale est vérifiée entre les instants, sans calcul de mois.
 
-### Dates et règles stables
+### Attribution à plusieurs projections
 
-Recommander des dates choisies par les Créateurs, **début inclus / fin exclue**,
-indépendantes du mois civil. Le fuseau IANA choisi à la programmation est conservé
-pour expliquer le calendrier ; le serveur enregistre et compare les instants UTC.
-Une heure locale inexistante est refusée ; une heure ambiguë exige un choix
-explicite d'occurrence. La date de consommation confirmée Hub détermine
-l'appartenance, jamais celle de réception réseau.
+Sessions choisies explicitement **avant attribution**, parmi celles auxquelles le
+Créateur est admis. Une seule consommation Hub alimente le général, les catégories,
+la projection Fan et les sessions admissibles : une contribution par attribution
+et dimension. Aucun rattachement rétroactif ni ajout automatique à toutes les
+sessions. Les dimensions ne s'additionnent pas en total économique.
 
-Au lancement proposé : durée maximale de **90 jours** et **trois sessions
-simultanément ouvertes par organisateur**, coorganisation comprise. Ce sont des
-plafonds à valider pour limiter les abus, pas des règles actives ni une suppression
-des sessions collectives. Une autre limite modifie disponibilité et charge.
-Recommander le gel des dates, portée, catégorie et règles après ouverture ; de
-nouveaux participants peuvent être admis prospectivement. Une modification
-structurelle nécessite un nouveau brouillon, sans transfert silencieux des faits.
+Le contexte canonique (origine, politique, catégorie, versions de session et
+admissions) doit être attesté et lié à la consommation. Le choix navigateur,
+une association SQL locale ou le profil actuel ne suffisent pas.
+Contexte expiré, fermeture ou admission retirée : refus avant consommation,
+sans supprimer silencieusement un choix. Après résultat incertain : intention
+et clé originales, lookup primaire, jamais un second débit ou une nouvelle clé.
 
-### Rattachement d'une attribution aux projections autorisées
+Cette capacité n'existe pas encore dans les DTO H3/H4. Son
+[extension Hub proposée](HUB-PF-B3-RANKING-PROPOSAL.md) reste soumise à accord.
 
-Une attribution admissible peut alimenter le général, les catégories autorisées,
-la projection Fan et **plusieurs sessions admissibles**, avec **une seule
-consommation officielle**. Ne pas additionner ces dimensions pour créer un total
-économique. La même attribution ne compte qu'une fois dans chaque dimension.
-La contribution est unique par `attribution_id` et dimension ; une révision
-remplace son net, elle n'ajoute pas une seconde contribution.
+## P3 — places uniques et date d'atteinte approuvées
 
-Recommander un choix explicite des sessions par le Fan, parmi celles auxquelles
-le Créateur participe ; aucun ajout automatique à toutes ses sessions. Proposer
-au plus **dix sessions par attribution**, plafond de traitement à valider qui
-préserve le rattachement multiple. Une limite d'une session serait un choix produit
-différent, pas une conséquence implicite du premier lot.
+Ordre identique pour Créateurs, Fans et sessions :
 
-Recommander des sessions cumulables par défaut, avec cette règle annoncée avant
-ouverture. Une éventuelle exclusivité entre sessions demande une décision
-explicite et un contrôle serveur du jeu de sessions sélectionné.
+1. Score net corrigé décroissant.
+2. À score égal, date d'atteinte du score croissante, reconstruite depuis les
+   consommations confirmées Hub encore admissibles après corrections.
+3. À horodatage identique, ordre autoritatif stable des attributions Hub.
+4. Ultime départage : identifiant immuable non affiché.
 
-Fans valide côté serveur un ensemble canonique de dimensions : identifiant,
-révision de politique, catégorie, session et admission du participant. Ce contexte
-doit être lié de manière attestée au fait propriétaire de consommation avant
-qu'une projection puisse l'utiliser. Les identifiants choisis dans le navigateur
-ou la catégorie actuelle du profil ne suffisent pas. Chaque session doit être
-ouverte et chaque admission valide à la confirmation ; contexte expiré ou choix
-devenu inadmissible = refus avant consommation, sans supprimer silencieusement
-une session choisie. Les courses fermeture/confirmation doivent échouer fermées.
+### Définition reconstruisible
 
-Après réponse incertaine, reprendre l'intention et la clé originales ; changer
-de sessions ne contourne pas le lookup primaire. Aucun rattachement rétroactif
-à une session créée après l'attribution. Une correction Hub actualise toutes
-les projections associées, sans nouvelle consommation ou compensation Fans.
+Pour un participant et une dimension, regrouper les allocations d'une attribution
+une seule fois. Pour chaque attribution `a`, retenir le net `n(a)` de la dernière
+révision complète attestée, après corrections/litige et règles d'admission.
+Retirer les contributions nulles et non admissibles ; aucune valeur négative,
+PC, achat du pack ou ancien reçu n'entre dans le calcul.
 
-**Conséquences :** création réellement déléguée aux Créateurs, soutien compréhensible
-et corrections communes. Le choix multiple peut donner les mêmes points dans
-plusieurs compétitions distinctes ; cela doit être annoncé aux participants.
-L'admission territoriale et le contexte attesté demandent des capacités nouvelles.
-Les coûts, récompenses, PC ou avantages commerciaux ne sont pas induits.
+Ordonner les contributions par `(confirmed_at Hub, ordre Hub)`.
+Le score `S = somme n(a)` ; le préfixe `C_i = somme des n(a_j), j <= i`.
+La date d'atteinte est celle du **premier préfixe corrigé tel que C_i = S**.
+Puisque les contributions conservées sont positives, il s'agit de la dernière
+contribution encore admissible ; son ordre Hub départage une date identique.
+Une contribution totalement annulée ou en litige ne conserve donc aucun avantage.
+Une réduction partielle conserve uniquement le net restant à sa date d'origine.
+La résolution n'invente pas une nouvelle consommation.
 
-**À valider :** droits des coorganisateurs, admission et participation des
-organisateurs, preuve territoriale, accès des Fans indépendamment du territoire,
-gel des règles, calendrier et plafonds proposés, sélection multiple explicite
-des sessions, cumul/exclusivité et contrat de rattachement attesté.
+Ne pas rechercher la première fois où le score avait été atteint dans l'historique
+**non corrigé** : cela préserverait l'ancienneté d'une contribution annulée.
+La date de notification, de remboursement, de pack, ou du navigateur est exclue.
 
-## P3 — égalités
+Le fait Hub actuel conserve `confirmed_at` et un UUID de ledger mais **aucun ordre
+autoritatif de consommation**. Un UUID trié, un auto-incrément local Fans ou l'ordre
+de réception réseau ne le remplacent pas. La projection de rang reste indisponible
+tant que cette autorité et un corpus complet ne sont pas attestés.
+L'ancien F1a continue de calculer ses points privés sans devenir un classement.
 
-Recommandation : rang de compétition (1, 2, 2, 4) ; même net admissible = même
-rang. Aucun avantage de date d'achat, de vitesse d'attribution ou de montant
-monétaire. Pour afficher les ex æquo : nom public approuvé puis identifiant
-opaque comme dernier ordre technique stable, sans départage du rang.
+### Exemples à traduire en tests B1/B4
 
-Conséquences : aucun encouragement à dépenser plus tôt ; les rangs suivants
-peuvent sauter. Le rang dense (1, 2, 2, 3) serait plus compact mais changerait le
-sens des places. Aucun titre ni récompense en cas d'égalité avant une politique
-distincte. **À valider : rang de compétition et ordre visuel neutre.**
+Les heures et ordres ci-dessous sont fictifs et propriétaires dans les fixtures ;
+ils ne constituent pas une extension Hub déjà opérationnelle.
 
-## P4 — visibilité des Fans et Créateurs
-
-Recommandation : points personnels privés par défaut ; apparition du Fan dans
-le tableau public sur consentement explicite, révocable, avec pseudonyme public
-approuvé. Le tableau porte sur les participants visibles, pas sur tous les
-comptes ; aucun rang global privé ne doit révéler implicitement les membres
-masqués. Le retrait masque la ligne, puis recalcule les rangs publics sans
-changer les faits privés. UUID, e-mail, achat et montant restent invisibles.
-
-Créateurs : profil actif, présentation approuvée et consentement explicite à
-l'affichage du classement ; l'admission commerciale reste distincte. Invités
-exclus tant que leur identité, attribution et reprise n'ont pas leur contrat.
-
-Conséquences : choix réel de visibilité et périmètre public compréhensible ; le
-rang public peut changer sans variation des points. Une participation publique
-obligatoire ou un rang incluant les comptes cachés serait une autre politique.
-**À valider : consentement, périmètre visible et règles d'historique/anonymisation.**
-La durée de conservation demeure la décision #150, sans défaut proposé ici.
-Le service de pseudonyme public approuvé et consentement Fan n'existe pas encore ;
-aucune identité locale WordPress ou alias technique ne peut le remplacer.
-
-## P5 — suspensions
-
-Recommandation : suspension locale d'un profil/compte = retrait des surfaces et
-classements publics, sans réécriture des attributions Hub. Les points privés
-restent des faits, accessibles seulement selon les permissions encore valides.
-Une suspicion de fraude permet de masquer provisoirement une ligne ; elle ne
-permet pas à Fans d'inventer une annulation économique.
-Suspendre une session ferme ses nouvelles participations sans effacer le général
-ou les autres sessions.
-
-Litige propriétaire Hub : contribution suspendue, net comptabilisable zéro
-jusqu'à résolution plus récente ; seule la part non annulée revient. Reprise
-d'un profil local : recalcul à partir des faits corrigés et du consentement
-encore valide, jamais restauration d'un ancien rang mémorisé.
-
-Conséquences : modération et économie restent séparées ; suspendre un Créateur
-ne supprime pas arbitrairement les points de ses Fans. Une sanction de classement
-au-delà du masquage nécessiterait une décision, un motif et un recours propres.
-**À valider : portée des suspensions, motifs, recours et réadmission.**
-
-## P6 — clôture et corrections tardives
-
-Recommandation : le relevé mensuel peut avoir des révisions datées ; les
-classements persistants restent cumulatifs et corrigibles, sans clôture mensuelle.
-La fin d'une session ferme ses nouvelles attributions, pas les corrections.
-Une correction attestée révise chaque projection concernée : relevé d'origine,
-persistant général/catégorie, sessions sélectionnées même clôturées. Ne pas
-déplacer la correction dans une autre session ou un nouveau mois pour éviter de
-corriger l'original. Les anciens reçus ne rétablissent jamais un net annulé.
-
-Pas de délai arbitraire « définitif » ou de récompense irréversible au lancement :
-les délais de contestation/remboursement du futur achat ne sont pas définis.
-Titres, PC, cosmétiques et autres récompenses demandent leurs propres décisions.
-Une trace privée de la cause conserve les droits d'accès ; elle n'expose pas
-d'identité, reçu d'achat ou détail de litige dans le tableau public.
-
-Conséquences : historique fidèle mais résultats de sessions révisables ; un gel
-irréversible rendrait les remboursements et litiges incompatibles avec le score
-exact. **À valider : historique révisable, présentation des corrections et sort
-des résultats de session après annulation ou suspension.**
-
-## Capacités actuelles et ordre des lots proposé
-
-F1a calcule seulement Fan/Créateur sur `reconciled_members`, pas un inventaire
-global ou une fraîcheur continue. Les DTO H3/H4 actuels et F1a n'attestent ni
-catégorie, ni session, ni territoire, ni admission à une session. Une simple
-association SQL ou un champ navigateur ne comble pas cette absence. Les contrats
-historiques, le ledger officiel et les tests existants doivent rester intacts.
-
-Après **validation explicite de F1b et autorisation de chaque périmètre** :
-
-| Ordre | Lot borné recommandé | Dépendance et preuve attendue |
+| Cas | Contributions encore admissibles | Résultat attendu |
 | --- | --- | --- |
-| B1 | Registre des dimensions et calendriers, origine du cumul, catégories versionnées, consentements et pseudonymes | Règles validées ; visibilité privée/publique, droits et révisions testés en isolation |
-| B2 | Gestion privée des sessions par les Créateurs : solo/collectif, invitations, admissions, trois portées, dates et modération | B1 ; construire la preuve territoriale locale/nationale, pas les déclarer disponibles sur simple libellé ; tests concurrence et permissions |
-| B3 | Extension additive et versionnée du contexte attesté d'attribution et de son rapprochement complet | B1/B2 + accord Hub propre ; contexte et bornes vérifiés à la consommation unique, reprise à clé stable, anciennes preuves préservées |
-| B4 | Relevé mensuel et classements persistants général/par catégorie, familles Créateurs/Fans séparées | B1/B3 + faits H4 rapprochés ; reconstruire, corriger sans remise à zéro mensuelle, vérifier le corpus admissible complet |
-| B5 | Projections de sessions solo/collectives et locales/nationales/internationales, sans nouvelle consommation | B2/B3 ; rattachement multiple, clôture concurrente, corrections tardives et suspensions testés |
-| B6 | Lectures autorisées et UI des trois objets, puis recette avant toute ouverture publique | B4/B5 ; consentements, modération, source à jour, clavier/mobile et parcours SSO ; activation reste une décision opérateur séparée |
+| Égalité simple | A : 10 à 09:00 ; B : 10 à 09:05 | A puis B, places uniques 1 et 2 |
+| Remboursement partiel | A : 10 à 09:00 + 3 nets à 10:00 (5 originaux) ; B : 13 à 09:30 | B puis A ; A atteint 13 à 10:00, sans garder les 2 annulés |
+| Annulation totale | A : 10 à 09:00, seconde contribution entièrement annulée ; B : 10 à 09:30 | A puis B ; la seconde contribution n'intervient plus |
+| Litige puis résolution | Seconde contribution de A suspendue à zéro, puis résolue à 3 nets | Pendant litige, seule la première date ; après résolution, date de la seconde pour le nouveau score ; jamais 5 restaurés |
+| Corrections désordonnées | Révision 3 annule une contribution, puis arrivent révision 2 et ancien reçu | La révision 3 reste l'autorité ; score et date ne sont pas restaurés |
+| Horodatage identique | A et B : 12 à 09:00 ; ordres Hub respectifs 42 et 41 | B puis A ; ordre réseau et UUID de transport ignorés |
+| Même fait dans deux familles | Fan et Créateur tirent leur score de la même attribution | Même confirmation/ordre, une consommation ; dernier départage par identité immuable dans chaque tableau |
+| Snapshot incomplet / ordre absent | Manque une page, une filiation ou l'ordre Hub | Indisponible, aucune place calculée par approximation |
 
-B2 peut avancer en parallèle des préparatifs de B4 après B1 ; le calcul
-catégoriel de B4 attend B3. Le découpage reporte une implémentation, pas une
-capacité cible. Aucun lot n'autorise à lui seul achat réel, score public,
-récompense, flag ou déploiement. RustFS reste un sujet séparé dans #161.
+## P4 — visibilité approuvée
 
-## Scénarios à traduire en tests après validation
+Fan privé par défaut ; classement public avec pseudonyme approuvé et consentement
+révocable. Le tableau classe les seuls participants visibles ; le retrait masque
+la ligne et recalcule les places publiques sans changer les faits. Aucun rang
+caché ne révèle des comptes masqués. UUID, e-mail, achat et montant invisibles.
 
-- Changement de mois : nouveau relevé, points/rangs persistants non remis à zéro.
-- Même attribution vers général/catégorie/Fan et plusieurs sessions : un débit,
-  une contribution par dimension ; rejeu sans doublon et correction commune.
-- Création solo puis collective ; refus d'une invitation, permissions retirées,
-  profil suspendu ; aucune création ou admission par un tiers non habilité.
-- Trois portées ; déclaration territoriale falsifiée ou non vérifiée, Fan
-  d'un autre pays ; refus conforme à la règle validée, sans inférence d'IP.
-- Heure ambiguë/inexistante, début/fin exacts, confirmation concurrente avec
-  clôture ou retrait ; résultat incertain repris sans nouveau débit.
-- Catégorie éditée après attribution ; pas de réaffectation silencieuse.
-- Correction partielle/totale, litige, ancien reçu, snapshot incomplet et
-  session clôturée ; aucune réapparition de points annulés ou rang non attesté.
+Créateur : profil actif, présentation approuvée et accord explicite de classement
+distinct du partenariat commercial. Invités exclus avant leur contrat
+identité/attribution/reprise. Service d'alias et consentement Fan à construire.
+La conservation réelle demeure #150, sans défaut de 24 mois ni purge ajoutée.
 
-## Portes avant F1b/publication
+## P5/P6 — annulation, suspension et corrections approuvées
 
-1. Validation explicite P1–P6 R2 et du périmètre des lots ; aucune recommandation
-   ne devient une règle active par sa publication dans le dépôt ou #147.
-2. Services de dimensions/admission, rattachement attesté, consentements et
-   modération ; pas de réservation commerciale ou paiement implicite.
-3. Avant exploitation réelle : propriétaire d'achat/preuve, admission réseau,
-   vrai SSO, inventaire admissible complet et fraîcheur/livraison durable des
-   corrections ; politique #150 sans défaut de 24 mois.
-4. Permissions, recours et validation cible avant flags/activation par l'opérateur.
-   Les tests isolés de F1a ne remplissent pas ces portes.
+- Annulation de session : fermer les nouvelles contributions, conserver
+  l'historique, afficher l'état annulé et **aucun vainqueur**. Ni annulation
+  économique ni suppression des scores persistants associés.
+- Suspension temporaire : fermer et masquer les surfaces appropriées sans
+  réécriture économique. Corrections Hub toujours appliquées ; réadmission
+  reconstruite depuis les faits corrigés et permissions/consentements valides.
+- Litige attesté Hub : net non comptabilisable jusqu'à résolution plus récente ;
+  seule la part non annulée revient.
+- Correction attestée : réviser le relevé du mois d'origine, les persistants
+  général/catégories et toutes les sessions associées, **même clôturées**.
+  Historique versionné, résultats et dates d'atteinte recalculés.
+- Aucune récompense irréversible, titre ou PC induit. Aucun ancien reçu ne
+  restaure des points annulés ; aucun report dans un mois ou une session future.
+
+## Lots autorisés et portes distinctes
+
+| Ordre | Lot | Dépendance / preuve |
+| --- | --- | --- |
+| B1 | Dimensions, calendriers, origine enregistrée, catégories, consentements/pseudonymes ; calcul pur de départage | Règles ci-dessus ; tests été/hiver, bornes, net corrigé, permissions et versions |
+| B2 | Gestion privée des sessions solo/collectives, invitations/admissions, trois portées, dates et modération | B1 ; concurrence, limites, droits, gel et admission territoriale |
+| B3 | Contexte et ordre Hub attestés, rapprochement complet | B1/B2 et **accord Hub distinct avant implémentation** ; consommation unique, concurrence/reprise, compatibilité des anciennes preuves |
+| B4 | Relevés et classements persistants Créateurs/Fans reconstruisibles | B1/B3, faits H4 complets ; corrections et corpus exhaustif |
+| B5 | Projections de sessions dans tous les modes et portées | B2/B3 ; rattachement multiple, annulation, suspension et corrections après clôture |
+| B6 | Lectures autorisées et UI des trois objets dans la DA V2 | B4/B5 ; source à jour, visibilité, clavier/mobile, recette ; activation opérateur distincte |
+
+B2 et les préparatifs indépendants de B4/B6 avancent pendant l'attente d'un accord
+Hub ; leur livraison ne doit pas être présentée comme un classement opérationnel.
+La séquence conserve toutes les capacités cible. Chaque lot passe par PR bornée,
+revue, contrôles et protections ; publication seulement par les workflows établis.
+
+Dépendances ouvertes : contrat Hub B3 ; producteur d'achat/preuve réelle ;
+admission réseau et vrai SSO ; corpus admissible exhaustif/fraîcheur et remise
+durable des corrections ; référentiel territorial et pays autorisés ;
+conservation #150, décisions PC/commerciales et recette opérateur avant activation.
+RustFS #161 est distinct. La validation produit ne ratifie aucun de ces contrats.

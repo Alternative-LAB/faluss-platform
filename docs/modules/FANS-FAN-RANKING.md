@@ -55,25 +55,31 @@ montant monétaire. Les originaux et corrections restent traçables.
 Les scénarios de net/doublon/correction/snapshot sont vérifiés par la
 [recette F1a](../../tests/TokenEngine/recipe/README.md#f1a--projections-privées-reconstruisibles),
 distincte des simulateurs. La correction après clôture et les politiques de rang
-restent des propositions F1b ; aucune période/rang n'est implémenté dans F1a.
+sont approuvées dans F1b R2 ; aucune période/rang n'est implémenté dans F1a.
 
-## Propositions à arbitrer avant toute publication
+## Règles F1b R2 approuvées et dépendances distinctes
 
-La [proposition complète F1b R2](FANS-PF-F1B-PROPOSAL.md), P1–P6, est **non validée**.
+Le [contrat F1b R2](FANS-PF-F1B-PROPOSAL.md) a sa validation produit du 6 octobre 2026.
 Elle distingue relevé mensuel privé, classements persistants général/par catégorie
 et sessions HoF ouvertes par les Créateurs seuls ou à plusieurs, aux portées
 locale, nationale ou internationale. Ces sessions ne sont pas réservées à
-l'administration. Ce tableau résume les portes, sans les ratifier.
+l'administration. La validation produit autorise B1–B6 selon leurs dépendances ;
+elle ne ratifie aucun nouveau contrat Hub, achat réel ou activation.
 
-| Sujet | Proposition, non activée | Décision requise |
+| Sujet | Règle approuvée, non activée | Dépendance restante |
 | --- | --- | --- |
-| Calendrier | Relevé par mois civil UTC proposé ; classements persistants sans remise à zéro mensuelle ; sessions à dates choisies | Fuseau du relevé, origine du cumul, bornes de sessions et historique |
-| Catégories et sessions | Contribution au général, catégories autorisées et plusieurs sessions admissibles, avec une seule consommation | Catégorie versionnée, choix explicite des sessions, contexte attesté et admissions territoriales |
-| Égalités | Même rang pour même score net, sans avantage de date ou de dépense monétaire | Rang dense ou compétition ; tri neutre stable sans départage artificiel |
-| Pseudonymes | Opt-in public révocable, alias approuvé ; score personnel privé par défaut | Modération, anonymisation, effet du retrait et rétention |
+| Calendrier | Relevé Europe/Paris été/hiver ; persistants sans remise à zéro mensuelle depuis l'ouverture réelle enregistrée ; sessions à dates choisies | Services de calendrier/origine ; aucune donnée fictive ou historique sans contexte |
+| Catégories et sessions | Général/catégories et plusieurs sessions explicitement choisies, une seule consommation ; 90 jours / 3 ouvertes par organisateur / 10 par attribution | Contexte attesté B3, catégorie versionnée, admissions territoriales et pays autorisés |
+| Départage | Places uniques : net décroissant, date d'atteinte reconstruite après corrections, ordre Hub puis identité immuable non affichée | Extension Hub d'ordre autoritatif à approuver ; aucun ordre réseau ou UUID trié comme substitut |
+| Pseudonymes | Opt-in public révocable, alias approuvé ; score personnel privé par défaut | Service, modération, anonymisation et conservation #150 |
 | Invités | Exclus du tableau public tant que session, attribution attestée et reprise de compte ne sont pas garanties | Identité provisoire, consentement et rattachement atomique sans doublon |
 | Abus | Refus auto-attribution côté propriétaire, preuve d’origine, idempotence, limitations et revue des anomalies | Collusion, multi-comptes, suspension, recours et durée de conservation |
 | Badges/récompenses | Aucun badge de niveau ni gain PC automatique | Critères, consentement et retrait après correction |
+
+Annulation : fermer les nouvelles contributions, conserver l'historique et afficher
+l'état annulé sans vainqueur ; aucun effet économique ou suppression des persistants.
+Suspension : fermer/masquer, continuer les corrections Hub et reconstruire à la
+réadmission. Résultats versionnés et révisables, même après clôture.
 
 ## Scénarios de l’interface et retour arrière
 

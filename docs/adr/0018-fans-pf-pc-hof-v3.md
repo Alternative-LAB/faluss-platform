@@ -49,23 +49,32 @@ une primitive propriétaire de correction cumulative distincte de la compensatio
 historique décrite ci-dessus. [F1a](../modules/FANS-PF-F1A-CLOSED.md) persiste et
 reconstruit séparément les points Fan/Créateur depuis les snapshots H4 rapprochés.
 Le constat initial de capacité partielle absente ne décrit donc plus la recette
-fermée ; le parcours réel reste fermé. La [proposition F1b](../modules/FANS-PF-F1B-PROPOSAL.md)
-ne ratifie aucune période, session, égalité, visibilité, suspension ou clôture.
+fermée ; le parcours réel reste fermé. [F1b R2](../modules/FANS-PF-F1B-PROPOSAL.md)
+a ensuite été validée explicitement le 6 octobre 2026 selon les règles ci-dessous ;
+ses lots et les nouvelles dépendances Hub restent distincts de F1a.
 La rétention #150 reste ouverte, sans défaut de 24 mois. Aucun achat/score public.
 
 **Cible précisée le 6 octobre 2026 :** relevé mensuel, classements persistants
 général/par catégorie et sessions HoF sont distincts. Les Créateurs doivent
 pouvoir ouvrir une session seuls ou à plusieurs, à portée locale, nationale ou
-internationale. [F1b R2](../modules/FANS-PF-F1B-PROPOSAL.md) propose calendriers,
-participation et rattachement multiple sans seconde consommation, avec lots
-successifs qui conservent ces capacités. F1b reste non validée ; aucune règle
-de calendrier, admission, plafond ou publication n'est activée par cette précision.
+internationale. **Règles F1b R2 approuvées ensuite le même jour :** relevé mensuel
+Europe/Paris, persistants sans remise à zéro mensuelle depuis une ouverture réelle
+enregistrée, sessions solo/collectives avec rôles acceptés et règles figées après
+ouverture, trois portées fondées sur l'activité déclarée/examinée, admissions tardives
+prospectives, plafonds 90 jours / 3 sessions ouvertes par organisateur / 10 par
+attribution. Visibilité consentie, corrections toutes projections après clôture,
+session annulée sans vainqueur ni annulation économique, suspension réversible.
+Places uniques : net décroissant, date d'atteinte corrigée Hub croissante, ordre
+autoritatif Hub, puis identifiant immuable non affiché. Les anciens reçus ou données
+sans contexte attesté ne conservent pas de rang ou avantage d'ancienneté.
+B1–B6 sont autorisés ; les nouveaux contrats Hub, achat réel, conservation #150
+et activation restent soumis à leurs portes. Aucun flag ouvert par cette ADR.
 
 - Conserver le fait original, son autorité, référence, politique, date et révisions. Même clé/révision et même contenu = rejeu sans effet ; contenu différent = conflit. Les corrections référencent l'original et ne modifient pas silencieusement l'historique.
 - Un remboursement de PF jamais attribués n'affecte aucun score. Après attribution, retrouver les allocations achetées concernées ; corriger chaque classement dérivé une fois, sans compter pack et attribution deux fois. La correction de score n'est pas une preuve de remboursement économique.
 - Aucun montant EUR n'est déduit du score ; aucun nombre de PF annulés n'est inventé à partir d'un prorata monétaire. Les remboursements partiels restent fermés tant que allocation, capacités propriétaires, insuffisance de solde et reprise après panne ne sont pas contractualisées.
 - Un litige doit rendre non comptabilisable la contribution identifiée jusqu'à résolution authentifiée ; une révision plus récente peut restaurer uniquement le net valide. Un événement ancien ne rétablit pas un score annulé. Le protocole runtime reste à construire.
-- Une correction de session clôturée doit rester traçable et produire une nouvelle révision du classement d'origine, pas un débit dans une nouvelle session. Politique des sessions et sort des titres/cosmétiques après correction non décidés : clôture avec récompense et attribution de titres restent fermées.
+- Une correction de session clôturée doit rester traçable et produire une nouvelle révision du classement d'origine, pas un débit dans une nouvelle session. F1b R2 valide des résultats révisables et aucune récompense irréversible ; titres/cosmétiques et leur politique propre restent fermés.
 - Achat, attribution, remboursement et correction PF : delta PC nul. Une correction PC éventuelle relève de son propre fait gagnant et d'une politique PC séparée. Aucun wallet créateur n'est crédité ou débité.
 
 ## Arbitrages et parcours fermés
@@ -74,7 +83,7 @@ de calendrier, admission, plafond ou publication n'est activée par cette préci
 | --- | --- |
 | Propriétaire PC, sources gagnantes, barèmes, plafonds, fraude, expiration et corrections | Gain/dépense PC et acquisition de cosmétiques |
 | Devenir des anciens claims Me/Hub et PF historiques | Toute nouvelle conversion, reprise ou extinction de claims ; les implémentations existantes sont préservées |
-| Sessions, dimensions, multi-classements, suspensions et critères du badge | Classements actifs, sessions et badge calculé |
+| Règles F1b R2 validées ; ordre/contexte Hub attestés et implémentation B1–B6 à livrer ; critères du badge non décidés | Classement/session calculés et badge public, ouverture économique |
 | Allocation et remboursements partiels, insuffisance de solde, coordination des autorités | Remboursement partiel et ouverture économique qui en dépend |
 | Sort des titres et cosmétiques après correction | Attribution définitive de récompenses de classement |
 | Vendeur contractuel Shop, responsabilités et traitement financier hors surfaces créateur | Vente, paiement, commande et délivrance commerciale |

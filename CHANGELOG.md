@@ -8,11 +8,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Documentation
 
-- Corriger la proposition F1b R2 : distinguer relevé mensuel, classements
-  persistants général/par catégorie et sessions HoF créées seul ou à plusieurs
-  par les Créateurs, avec trois portées. Proposer calendriers, admissions,
-  rattachement multiple à consommation unique et lots B1–B6 ; aucune validation
-  F1b, modification de code ou activation.
+- Consigner la validation F1b R2 : relevé Europe/Paris, classements persistants
+  et sessions Créateur distincts, trois portées, plafonds et corrections après
+  clôture. Formaliser les places uniques par date d'atteinte corrigée et ordre
+  propriétaire Hub ; proposer l'extension additive B3, non ratifiée. B1–B6
+  autorisés selon leurs dépendances ; aucun code économique ou flag activé.
 
 ### Ajouté
 
