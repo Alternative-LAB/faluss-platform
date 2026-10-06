@@ -17,6 +17,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Ajouter B3b2 fermé : contexte 0.3 immuable, ordre Hub global attesté et reçu
+  signé dans la transaction du débit officiel et des journaux, reprise par clé
+  identique sur le primaire. Compatibilité H2/H3/H4 préservée ; aucune route,
+  source d'achat, installation automatique ou activation sur les sites.
+
 - Ajouter B3b1 fermé : barrières propriétaires versionnées d'origine, pays,
   catégorie, session et admission, permissions dédiées, journal atomique et
   lookup primaire après réponse perdue. Sélection exacte sous verrous ; aucune

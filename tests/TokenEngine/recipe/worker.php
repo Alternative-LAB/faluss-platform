@@ -48,6 +48,9 @@ final class HubPfRecipeDatabase extends wpdb
             || ($this->fault === 'h4-fragment-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_h4_fragments` /', $query) === 1)
             || ($this->fault === 'h4s-page-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_h4s_pages` /', $query) === 1)
             || ($this->fault === 'b3b-event-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_b3b_events` /', $query) === 1)
+            || ($this->fault === 'b3r-binding-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_b3r_bindings` /', $query) === 1)
+            || ($this->fault === 'b3r-receipt-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_b3r_receipts` /', $query) === 1)
+            || ($this->fault === 'b3r-journal-insert' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_b3r_journal` /', $query) === 1)
         ) {
             $this->fault = '';
             return false;
@@ -56,6 +59,13 @@ final class HubPfRecipeDatabase extends wpdb
             $this->fault = '';
             // Advance only this test connection's MariaDB clock before the guarded transition.
             parent::query('SET timestamp=UNIX_TIMESTAMP()+121');
+        }
+        if ($this->fault === 'b3r-hold-counter' && preg_match('/^UPDATE `[^`]+token_engine_pf_b3r_counter` /',$query) === 1) {
+            $this->fault = ''; file_put_contents($this->marker,'locked'); $deadline = microtime(true) + 25;
+            while (!is_file($this->marker . '.release')) {
+                if (microtime(true) > $deadline) { throw new RuntimeException('Fixture counter release timed out.'); }
+                usleep(10000);
+            }
         }
         if (strtoupper(trim($query)) !== 'COMMIT' || $this->fault === '') {
             return parent::query($query);
@@ -108,6 +118,10 @@ if (!empty($input['fault'])) {
 
 if (str_starts_with($input['action'], 'b3b-')) {
     require __DIR__ . '/b3_barrier_worker.php';
+    return;
+}
+if (str_starts_with($input['action'], 'b3r-')) {
+    require __DIR__ . '/b3_ranked_worker.php';
     return;
 }
 

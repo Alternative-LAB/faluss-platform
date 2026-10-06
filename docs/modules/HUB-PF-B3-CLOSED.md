@@ -156,3 +156,74 @@ H0–H3. Suite PHP complète 545 tests / 6 466 assertions, zéro échec/erreur,
 deux dépréciations préexistantes ; PHPStan complet sans erreur. CI additive
 `--b3-barriers`, rapport vérifiable sous artefact GitHub, contrôles historiques
 conservés. Aucune preuve économique 0.3 ou fermeture réseau revendiquée.
+
+## B3b2 — scénarios préalables de consommation ordonnée
+
+Intention 0.3 immuable liée à la réservation, aucune attache rétroactive d'une
+intention 0.2. Les points d'entrée anciens refusent une attribution liée au
+format nouveau ; les anciennes attributions et leurs clés restent inchangées.
+Un compteur propriétaire verrouillé, les barrières exactes et l'horloge primaire
+précèdent immédiatement le débit officiel. Ordre, contexte, reçu signé, journaux,
+réservation et clé participent au même COMMIT. Rollback = aucun ordre consommé ;
+acquittement incertain = lookup avec la même intention et clé.
+
+Positifs : réservations/contextes exacts, plusieurs membres/lots/dimensions,
+ordre global unique y compris à date identique, clôture concurrente, reçu/journal
+et débit atomiques, expiration, réponse perdue, reprise historique après clôture.
+Négatifs : contexte changé, tentative de downgrade, rattachement rétroactif,
+barrière inconnue/fermée/expirée, compteur divergent/épuisé, panne avant COMMIT ou
+signature/journal défaillant. Corrections H4 gardent le fait d'origine intact ;
+le reçu n'est jamais présenté comme un score net courant.
+
+### Stockage propriétaire B3b2
+
+`ClosedRankingSchema::installForRecipe()` ajoute explicitement cinq tables
+InnoDB `token_engine_pf_b3r_*` : version, compteur d'ordre, intentions liées,
+reçus et journal. Garde physique H3 et schéma des barrières requis ; tables
+temporaires vérifiées et renommage atomique. Aucun bootstrap, activation ou
+visite ne l'appelle. Aucun solde, crédit ou ledger supplémentaire dans ce schéma.
+
+`ClosedRankedStore` compose les propriétaires H2 existants. Réservation : liaison
+canonique 0.3 et sélection entière admise dans la transaction ; une ancienne
+réservation ne peut pas être convertie après coup. Confirmation : mêmes verrous
+officiels membre/lot/ledger, puis compteur propriétaire et barrières canoniques.
+Horloge primaire après acquisition des verrous ; expiration et régression
+d'horloge refusées avant débit. Le compteur atteste un ordre total entre membres
+et conserve la même époque. Nombre, domaine des ordres et époque des reçus doivent
+concorder avec le compteur : restauration incomplète/contradictoire refusée,
+aucune réparation ou nouvelle époque automatique.
+
+Le débit `purchased` officiel, consommation, clé, état de réservation, reçu H3
+historique, reçu signé 0.3, ordre et journaux partagent **un seul COMMIT**.
+Le reçu historique reste nécessaire au propriétaire H4 et ne crée aucun deuxième
+débit. Un échec de signature ou d'une écriture annule toute la transaction.
+Le journal 0.3 est `pending` ; cela ne prouve pas encore une remise réseau.
+
+Les points d'entrée H2 historiques restent identiques pour les attributions
+anciennes. Si une intention 0.3 est déjà liée, ils refusent sa consommation ou
+reprise sans contexte, y compris par clé nouvelle. La primitive de reçu exige
+une liaison valide, le débit propriétaire et l'ordre staged de la transaction :
+elle ne peut pas donner une autorité F1b rétroactive à un fait ancien.
+
+Après résultat incertain, lookup **primaire** avec la même intention, opération
+et clé. Confirmation/reçu retrouvés : mêmes ordre, contexte et bytes signés ;
+absence confirmée : rejeu de la même opération, jamais une clé de contournement.
+Clôture ou expiration n'effacent pas le fait déjà commité. Une correction H4
+révise le net, pas la date/ordre/contexte d'origine ; un ancien reçu n'est pas
+une projection courante et ne restaure pas les PF annulés.
+
+### Vérifications et limites B3b2
+
+La [recette expurgée](../evidence/hub-pf-b3-ranked/README.md) distingue les
+scénarios historiques, les barrières B3b1 et les consommations ordonnées B3b2.
+Deux membres au même instant primaire, huit confirmations concurrentes,
+plusieurs lots/sessions, clôture concurrente, panne de journal/signature,
+expiration, processus tué avant/après COMMIT, réponse perdue et corrections
+partielles/totales/litiges/résolutions sont exercés sur WordPress/MariaDB jetables.
+
+Le format snapshot 2.0, sa livraison Hub/Fans et la reprise locale « fermeture
+en cours » restent B3c. Aucun serveur cible, vrai SSO ou producteur d'achat
+réel n'est démontré. Un snapshot complet **par membre** ne prouve pas, à lui
+seul, le corpus de tous les membres pour un classement général. Cette autorité
+exhaustive et sa fraîcheur doivent être explicitement attestées, jamais déduites
+du dernier reçu connu. Aucun score public ni règle de conservation #150 ajoutée.

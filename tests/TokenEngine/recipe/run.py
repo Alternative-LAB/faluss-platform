@@ -36,7 +36,10 @@ def main():
     parser.add_argument('--h4-http', action='store_true', help='Closed private complete snapshot delivery between disposable Hub and Fans')
     parser.add_argument('--f1a', action='store_true', help='Closed private Fan/Creator rebuildable projections after unchanged H0-H4')
     parser.add_argument('--b3-barriers', action='store_true', help='Closed B3 owner barriers on the primary; metadata only, no new consumption')
+    parser.add_argument('--b3-ranked', action='store_true', help='Closed B3 ranked consumption with official debit; fictitious owner proofs only')
     options = parser.parse_args()
+    if options.b3_ranked:
+        options.b3_barriers = True
     if options.b3_barriers:
         options.h3_proofs = True
     if options.f1a:
@@ -326,6 +329,10 @@ def main():
         if options.b3_barriers:
             from b3_barrier_checks import run_checks
             run_checks(root, wp, check, call, sql, start, finish, parallel, await_file)
+        b3_ranked_start = len(checks)
+        if options.b3_ranked:
+            from b3_ranked_checks import run_checks
+            run_checks(root, wp, check, call, sql, start, finish, parallel, await_file)
         report = dict(checks=checks, total=len(checks), failed=0, wordpress=cli('core', 'version').strip(),
                       php=command(['php', '-r', 'echo PHP_VERSION;']).strip(),
                       database=sql('SELECT VERSION()'), schema='5',
@@ -344,7 +351,8 @@ def main():
         report['h4_snapshots_total'] = h4_http_start - h4_snapshots_start
         report['h4_http_total'] = f1a_start - h4_http_start
         report['f1a_total'] = b3_barriers_start - f1a_start
-        report['b3_barriers_total'] = len(checks) - b3_barriers_start
+        report['b3_barriers_total'] = b3_ranked_start - b3_barriers_start
+        report['b3_ranked_total'] = len(checks) - b3_ranked_start
         if options.h1 or options.h2_reservations or options.h2:
             report['scope'] += '; closed H1 model explicitly installed only in this fixture'
             report['model_schema'] = '1 (closed_h1_model)'
@@ -364,6 +372,12 @@ def main():
             report['barrier_schema'] = '1 (closed_b3_barriers)'
             report['not_proven'] += ['B3 ranked atomic debit/order/receipt, cross-instance barrier transport and Fans closing state',
                                      'Any production installation, real account, purchase, score or retention policy']
+        if options.b3_ranked:
+            report['scope'] += '; closed B3b2 atomic owner order/context/signed receipt and official H2 debit, partial H4 corrections with fictitious evidence'
+            report['ranked_schema'] = '1 (closed_b3_ranked)'
+            report['not_proven'] = ['B3 cross-instance ranked HTTP, snapshot 2.0 and Fans closure recovery',
+                                    'Real account/SSO, purchase producer, production admission, activation, public score or retention policy',
+                                    'Real network COMMIT loss, replica or inconsistent backup restore']
         if options.h3_http:
             report['scope'] += '; real private loopback HTTP between distinct disposable Hub/Fans WP and databases, fictitious links/keys, not true SSO'
             report['fans_protocol_schema'] = '1 (closed_h3_fans)'
