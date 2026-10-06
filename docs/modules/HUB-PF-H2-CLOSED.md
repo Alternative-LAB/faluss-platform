@@ -11,7 +11,13 @@ Ce document décrit **H2a : réservations** puis **H2b : consommation et journal
 atomique**, dans deux PR dépendantes. H2 ne ratifie pas D3, D5 ni le reste de D6 ;
 [réduction après remboursement #149](https://github.com/Alternative-LAB/faluss-platform/issues/149)
 et [conservation #150](https://github.com/Alternative-LAB/faluss-platform/issues/150)
-restent ouverts. Aucun reçu signé, remboursement partiel, purge, réseau ou score.
+restent hors de l'accord H2. H2 seul ne produit aucun reçu signé, remboursement
+partiel, purge, réseau ou score.
+
+**État ultérieur, 6 octobre :** H3 apporte les reçus/transport fermés,
+[H4](HUB-PF-H4-CLOSED.md) les corrections et snapshots (règle #149 validée
+pour la recette fictive), puis [F1a](FANS-PF-F1A-CLOSED.md) les points privés
+reconstruisibles. #150 et F1b restent ouverts, ainsi que toute admission réelle.
 
 ## Fermeture et propriété
 
@@ -143,8 +149,9 @@ une preuve ou refaire le débit. Une erreur de COMMIT reste `h2_commit_unknown`.
 Le payload interne `closed_h2_consumption` **n'est pas le reçu D3**, ni une
 signature JCS/Ed25519, ni une preuve d'achat réel ou du statut actuel de la source.
 Une consommation historique et son journal restent immuables après évolution
-du modèle source ; la correction H4 est absente et aucune projection ne peut en
-déduire un score actuel. Aucun dispatcher ne peut publier ces fixtures.
+du modèle source ; ce reçu H2 seul ne contient pas les corrections H4 et ne
+permet pas d'en déduire le net actuel. H4/F1a fournissent leurs faits/projections
+fermés distincts. Aucun dispatcher ne peut publier ces fixtures.
 
 Recette `run.py --h2` : tous les contrôles H0/H1/H2a puis H2b. Huit confirmations
 identiques ou à clés différentes, deux intentions, courses confirm/release/source,
