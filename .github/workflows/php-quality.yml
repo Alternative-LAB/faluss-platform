@@ -108,6 +108,8 @@ jobs:
         run: python3 tests/Fans/Profiles/recipe/admission-wordpress.py --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --test --messaging
       - name: Fans B1 private ranking governance real WordPress
         run: python3 tests/Fans/Profiles/recipe/admission-wordpress.py --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --test --hof-b1 --output "$RUNNER_TEMP/fans-hof-b1-checks.json"
+      - name: Fans B2 private session governance real WordPress
+        run: python3 tests/Fans/Profiles/recipe/admission-wordpress.py --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --test --hof-b2 --output "$RUNNER_TEMP/fans-hof-b2-checks.json"
       - name: Hub historical PF concurrency and commit recovery real WordPress
         run: python3 tests/TokenEngine/recipe/run.py --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-checks.json"
       - name: Hub H1 closed model persistence real WordPress
@@ -143,4 +145,5 @@ jobs:
             ${{ runner.temp }}/hub-pf-h4-http-checks.json
             ${{ runner.temp }}/fans-pf-f1a-checks.json
             ${{ runner.temp }}/fans-hof-b1-checks.json
+            ${{ runner.temp }}/fans-hof-b2-checks.json
           if-no-files-found: error

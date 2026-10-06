@@ -5,6 +5,9 @@ declare(strict_types=1);
 use Faluss\Platform\Fans\Hof\RankingRegistry;
 use Faluss\Platform\Fans\Hof\RankingSchema;
 use Faluss\Platform\Fans\Hof\RankingVisibility;
+use Faluss\Platform\Fans\Hof\SessionSchema;
+use Faluss\Platform\Fans\Hof\SessionService;
+use Faluss\Platform\Fans\Hof\SessionRoles;
 use Faluss\Platform\Fans\Profiles\CreatorProfileService;
 use Faluss\Platform\Fans\Profiles\CreatorStatusSchema;
 use Faluss\Platform\Fans\Profiles\EditorialService;
@@ -28,6 +31,8 @@ if (isset($input['barrier'])) {
 }
 $registry = new RankingRegistry($wpdb);
 $visibility = new RankingVisibility($wpdb);
+$sessions = new SessionService($wpdb);
+$roles = new SessionRoles($wpdb);
 try {
     $result = match ($input['action']) {
         'install' => (static function () use ($wpdb): array { RankingSchema::installOrVerify($wpdb); return ['ready' => RankingSchema::ready($wpdb)]; })(),
@@ -46,6 +51,17 @@ try {
         'editorial_submit' => EditorialService::submit($input['revision'], 'Local creator fixture', 'Fictitious recipe biography', '', 0),
         'editorial_decide' => EditorialService::decide($input['creator'], $input['revision'], $input['decision'], $input['reason']),
         'nested_install' => (static function () use ($wpdb): mixed { $wpdb->query('START TRANSACTION'); try { RankingSchema::installOrVerify($wpdb); } finally { $wpdb->query('ROLLBACK'); } return null; })(),
+        'session_install' => (static function () use ($wpdb): array { SessionSchema::installOrVerify($wpdb); return ['ready' => SessionSchema::ready($wpdb)]; })(),
+        'session_create' => $sessions->create($input['rules']),
+        'session_edit' => $sessions->edit($input['session'], $input['revision'], $input['rules']),
+        'session_open' => $sessions->requestOpen($input['session'], $input['revision']),
+        'session_close' => $sessions->close($input['session'], $input['revision'], $input['state']),
+        'session_inspect' => $sessions->inspect($input['session']),
+        'session_invite' => $roles->invite($input['session'], $input['revision'], $input['creator']),
+        'session_answer' => $roles->answer($input['session'], $input['revision'], $input['accept']),
+        'session_apply' => $roles->apply($input['session'], $input['revision'], $input['digest']),
+        'session_admit' => $roles->admit($input['session'], $input['revision'], $input['creator'], $input['allow']),
+        'session_withdraw' => $roles->withdraw($input['session'], $input['revision']),
         default => throw new RuntimeException('Unknown fixture action'),
     };
     echo wp_json_encode($result instanceof WP_Error ? ['error' => $result->get_error_code()] : ['data' => $result]);
