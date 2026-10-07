@@ -17,6 +17,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Composer les relevés privés Europe/Paris et les classements persistants
+  Fan/Créateur par catégorie depuis un corpus B3 complet déjà authentifié.
+  Calcul pur testé, sans publication, stockage supplémentaire ni consommation.
+
 - Ajouter le lecteur B3 fermé raccordant l'inbox durable Fans au véritable
   client HTTP WordPress : étapes bornées, lookup primaire après résultat
   incertain, concurrence sans nouvelle clé et promotion signée exhaustive.
