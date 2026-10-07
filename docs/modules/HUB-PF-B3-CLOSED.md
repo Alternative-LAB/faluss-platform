@@ -440,3 +440,37 @@ PHP complète et l'analyse statique. Voir les
 Bornes fermées du sous-lot propriétaire conservées, avec refus total ; page à
 4 MiB maximum. [Preuve et mesures](../evidence/hub-pf-b3-corpus/README.md),
 sans attestation de dimensionnement ou d'exploitation de production.
+
+## B3c3b2 — gateway propriétaire 0.3 en HTTP isolé
+
+`ClosedRankedGateway` compose le codec 0.3, les nonces privés H3 et le propriétaire
+transactionnel. La signature externe, le contexte signé, leurs audiences,
+permissions, dates et l'intention complète sont validés avant l'admission du
+nonce. Le garde temporel obligatoire accompagne ensuite les quatre opérations
+jusqu'au contrôle avant COMMIT. Rejouer le même nonce réseau est refusé ; une
+enveloppe fraîche avec la même intention et clé retrouve l'opération existante.
+
+Le débit, l'ordre et le reçu sont atomiques chez le propriétaire. La lecture
+du reçu pour fabriquer la réponse intervient après cette transaction : un échec
+de cette lecture reste `unknown`, jamais une preuve de rollback. Le lookup
+primaire garde la même clé. Un reçu d'origine ne remplace pas les faits H4
+corrigés et ne permet pas de restaurer des points.
+
+Aucun hook, API Fans, schéma, installateur ou admission de pair n'est ajouté.
+Seul le loader MU de la recette expose POST dans l'enclave physique déjà
+définie par H3 : racine POSIX privée, bail éphémère, socket MariaDB local et
+instances fictives. Copier ses constantes ou ce fichier sur un WordPress
+ordinaire ne suffit pas à enregistrer une route. La route de recette et ses
+workers sont exclus du paquet distribué comme tous les tests.
+
+La commande `tests/TokenEngine/recipe/run.py --b3-ranked-http` crée deux
+WordPress et bases distincts. Le contrôleur transmet leurs enveloppes via
+loopback ; les clés privées restent dans les configurations temporaires.
+Ce test n'est pas encore le client Fans durable et ne prouve pas le vrai SSO
+ni la résolution d'un membre connecté. Ce raccordement, les barrières HTTP et
+leurs états locaux restent des lots suivants. Aucun classement public,
+admission économique ou politique de conservation n'est ouvert.
+
+Recette obtenue : **339 contrôles satisfaits, dont 38 nouveaux**, deux WordPress
+jetables et clés distinctes ; suite PHP complète 650 tests / 6 965 assertions.
+[Preuves HTTP et limites](../evidence/hub-pf-b3-ranked-http/README.md).

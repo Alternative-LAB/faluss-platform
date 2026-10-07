@@ -29,6 +29,8 @@ final class ClosedProtocolGuardTest extends TestCase
                 new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',[],[]), 'recipe-key', ''),
             static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedGateway($database,
                 new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.fans','fixture.hub',[],[]), 'recipe-key'),
+            static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedRankedGateway($database,
+                new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.fans','fixture.hub',[],[]),'recipe-key'),
             static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedCorpusTransaction($database),
             static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedRankingCorpusSource($database,[],'recipe-key'),
             static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedRankingCorpusStore($database,[],'recipe-key'),
@@ -73,6 +75,8 @@ final class ClosedProtocolGuardTest extends TestCase
             self::assertSame('isolated_h3_recipe_required', $error->reason);
         }
         foreach ([static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedCorpusTransaction($database),
+            static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedRankedGateway($database,
+                new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.fans','fixture.hub',[],[]),'recipe-key'),
             static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedRankingCorpusSource($database,[],'recipe-key'),
             static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedRankingCorpusStore($database,[],'recipe-key'),
             static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedCorpusAdmission($database),
@@ -91,6 +95,7 @@ final class ClosedProtocolGuardTest extends TestCase
         eval('namespace { class wpdb { public int $queries=0; public function get_row($q,$a=null) { $this->queries++; return null; } } function add_action($name,$callback) { $callback(); } function register_rest_route(...$args) { $GLOBALS["recipe_routes"]++; } }');
         $database = new \wpdb(); $GLOBALS['wpdb'] = $database; $GLOBALS['recipe_routes'] = 0;
         require dirname(__DIR__) . '/recipe/b3-corpus-http-adapter.php';
+        require dirname(__DIR__) . '/recipe/b3-ranked-http-adapter.php';
         self::assertSame(0,$database->queries); self::assertSame(0,$GLOBALS['recipe_routes']);
     }
 
