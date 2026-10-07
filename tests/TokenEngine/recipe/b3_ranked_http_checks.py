@@ -160,3 +160,4 @@ def run_checks(root,wp,source,cli_path,check,call,sql,command,workers,log,start,
         admitted=nonces()==count+1;time.sleep(4.2);pathlib.Path(str(marker)+'.release').touch();finish(held);answer=pending.result()
     check('B3rh signed request expiring behind the owner mutex cannot debit',admitted and answer[0]==200
           and accept(blocked,'confirm',request,answer[1])==dict(outcome='refused',result=dict(reason='pf_context_expired')) and debits()==before)
+    return dict(fans=fans,proof=proof,fixture=fixture,exchange=exchange,http=http,sign=sign,accept=accept,policies=policies,policy=policy,debits=debits)

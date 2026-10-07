@@ -38,6 +38,7 @@ def main():
     parser.add_argument('--b3-barriers', action='store_true', help='Closed B3 owner barriers on the primary; metadata only, no new consumption')
     parser.add_argument('--b3-ranked', action='store_true', help='Closed B3 ranked consumption with official debit; fictitious owner proofs only')
     parser.add_argument('--b3-ranked-http', action='store_true', help='Closed 0.3 owner gateway over loopback between disposable WordPress signers')
+    parser.add_argument('--b3-ranked-inbox', action='store_true', help='Closed durable Fans ranked intentions keys and signed receipt inbox after HTTP recipe')
     parser.add_argument('--b3-snapshots', action='store_true', help='Closed member snapshots 2.0 with original ranked facts and latest H4 net')
     parser.add_argument('--b3-corpus-source', action='store_true', help='Exhaustive closed owner inventory, H4 reconciliation and measured read mutex')
     parser.add_argument('--b3-corpus', action='store_true', help='Closed exhaustive immutable pages, stable primary recovery and final current fence')
@@ -45,6 +46,8 @@ def main():
     parser.add_argument('--b3-corpus-inbox', action='store_true', help='Durable private Fans staging, primary recovery and atomic complete corpus replacement')
     parser.add_argument('--b3-corpus-reader', action='store_true', help='Bounded durable corpus orchestration with real private WordPress HTTP and recovery')
     options = parser.parse_args()
+    if options.b3_ranked_inbox:
+        options.b3_ranked_http = True
     if options.b3_ranked_http:
         if any((options.h3_http, options.h4, options.h4_snapshots, options.h4_http, options.f1a,
                 options.b3_corpus_http, options.b3_corpus_inbox, options.b3_corpus_reader)):
@@ -386,9 +389,14 @@ def main():
             from b3_corpus_reader_checks import run_checks
             run_checks(root,source,options.cli,check,call,sql,command,corpus_fixture)
         b3_ranked_http_start = len(checks)
+        ranked_fixture = None
         if options.b3_ranked_http:
             from b3_ranked_http_checks import run_checks
-            run_checks(root,wp,source,options.cli,check,call,sql,command,workers,log,start,finish,await_file,ranked_helpers)
+            ranked_fixture = run_checks(root,wp,source,options.cli,check,call,sql,command,workers,log,start,finish,await_file,ranked_helpers)
+        b3_ranked_inbox_start = len(checks)
+        if options.b3_ranked_inbox:
+            from b3_ranked_inbox_checks import run_checks
+            run_checks(root,source,options.cli,check,command,workers,await_file,ranked_fixture)
         report = dict(checks=checks, total=len(checks), failed=0, wordpress=cli('core', 'version').strip(),
                       php=command(['php', '-r', 'echo PHP_VERSION;']).strip(),
                       database=sql('SELECT VERSION()'), schema='5',
@@ -415,7 +423,8 @@ def main():
         report['b3_corpus_http_total'] = b3_corpus_inbox_start - b3_corpus_http_start
         report['b3_corpus_inbox_total'] = b3_corpus_reader_start - b3_corpus_inbox_start
         report['b3_corpus_reader_total'] = b3_ranked_http_start - b3_corpus_reader_start
-        report['b3_ranked_http_total'] = len(checks) - b3_ranked_http_start
+        report['b3_ranked_http_total'] = b3_ranked_inbox_start - b3_ranked_http_start
+        report['b3_ranked_inbox_total'] = len(checks) - b3_ranked_inbox_start
         report['corpus_source_measurements'] = corpus_measurements
         report['corpus_fence_measurements'] = corpus_fence_measurements
         if options.h1 or options.h2_reservations or options.h2:
@@ -502,6 +511,9 @@ def main():
             report['not_proven'] = ['Durable ranked Fans client, linked-user delegation, barrier HTTP and closure recovery',
                                     'True SSO, real purchase source, production admission, site operations, public score or retention policy',
                                     'Production sizing, TLS, infrastructure COMMIT acknowledgement loss or replica/restore']
+        if options.b3_ranked_inbox:
+            report['scope'] += '; durable Fans full intentions and stable keys before controller-transferred HTTP, signed receipt inbox after confirmed primary recovery'
+            report['not_proven'][0] = 'Integrated ranked Fans HTTP client, linked-user delegation, barrier HTTP and closure recovery'
     finally:
         for process in workers:
             if process.poll() is None:
