@@ -17,7 +17,7 @@ nouveaux champs ; aucune ancienne preuve ne reçoit une autorité rétroactive.
 L'intention 0.3 contient les six champs historiques, `ranking_context` et son
 `context_sha256`. Son empreinte canonique comprend **tout** le contexte ; changer
 de catégorie/session/version n'est jamais un rejeu identique. Sa composition
-`base` sert seulement à réutiliser les validations historiques et, dans le futur
+`base` sert seulement à réutiliser les validations historiques et, dans
 B3b, le ledger officiel. Les anciennes fonctions ne reçoivent pas directement
 la nouvelle intention élargie.
 
@@ -221,9 +221,73 @@ plusieurs lots/sessions, clôture concurrente, panne de journal/signature,
 expiration, processus tué avant/après COMMIT, réponse perdue et corrections
 partielles/totales/litiges/résolutions sont exercés sur WordPress/MariaDB jetables.
 
-Le format snapshot 2.0, sa livraison Hub/Fans et la reprise locale « fermeture
-en cours » restent B3c. Aucun serveur cible, vrai SSO ou producteur d'achat
+Le format snapshot 2.0 est traité en B3c1 ci-dessous ; sa livraison Hub/Fans
+et la reprise locale « fermeture en cours » restent B3c2. Aucun serveur cible, vrai SSO ou producteur d'achat
 réel n'est démontré. Un snapshot complet **par membre** ne prouve pas, à lui
 seul, le corpus de tous les membres pour un classement général. Cette autorité
 exhaustive et sa fraîcheur doivent être explicitement attestées, jamais déduites
 du dernier reçu connu. Aucun score public ni règle de conservation #150 ajoutée.
+
+## B3c1 — snapshots complets par membre, version 2.0
+
+Scénarios positifs : snapshot vide, génération idempotente sous concurrence,
+plus de cent allocations, plusieurs lots d'un même fait, même ordre/date/contexte
+dans reçu et snapshot, net H4 le plus récent, litige/résolution et annulation,
+rejeu de la même clé après panne avant/après COMMIT, ancienne allocation
+explicitement sans contexte de classement.
+
+Scénarios négatifs : schéma partiel ou non InnoDB, membre/client/curseur étranger,
+pages manquantes/altérées, contexte absent/contradictoire entre lots, ordre
+dupliqué, époque divergente, chronologie primaire inversée, correction H4 non
+rapprochée et consommation/correction entre matérialisation et fence finale.
+Ni page courante recomposée pour remplacer une page perdue, ni attestation ancienne
+promue par déduction, ni génération partielle présentée comme complète.
+
+### Format et composition propriétaire
+
+`hub.purchased-pf.snapshot/2.0.0` conserve les lignes de lots/allocations et
+invariants de somme/filiation H4. Le manifeste ajoute **`ordering_epoch`**.
+Chaque allocation ajoute **`ranking`** : époque/ordre d'origine, contexte 0.3
+et empreinte canonique ; le `confirmed_at` H4 reste identique au reçu propriétaire.
+Pour les anciens faits 0.2, `ranking` est **explicitement `null`**. Une absence
+du champ est une erreur ; aucune catégorie/session/chronologie rétroactive.
+Toutes les allocations d'un fait portent la même autorité. L'ordre global Hub
+reste unique entre faits, même lorsqu'ils sont dans plusieurs pages.
+
+Le validateur 1.0 et ses bytes/domaines demeurent inchangés ; il refuse les nouveaux
+champs. Le validateur 2.0 compose les invariants historiques après validation
+stricte des champs nouveaux, puis contrôle l'empreinte du document enrichi entier.
+Les domaines snapshot-context/request/response `/2` sont explicites ; réponse
+maximale 1 MiB pour cent lignes avec jusqu'à dix rattachements chacune, sans
+élargir les limites `/1`. Cela ne prouve pas encore une admission HTTP B3c2.
+
+`ClosedRankedSnapshotSchema` : quatre tables nouvelles version/compteur/générations/
+pages, installées explicitement sous garde physique H3 avec dépendances H4/B3.
+`ClosedRankedSnapshotStore` appelle le propriétaire H4 pour le **net rapproché**
+et le propriétaire B3b2 pour le **fait d'origine** dans la même transaction
+primaire H2. Aucune nouvelle consommation, quantité du navigateur ou lecture
+de storage Hub par Fans. Epoch/ordre sont relus depuis le même compteur vérifié
+que le débit, jamais un ordre de réception.
+
+Le compteur de génération vérifie une époque unique, une révision unique par
+génération et l'ensemble des révisions dans `[1,N]`. Une restauration contradictoire
+ne déclenche ni nouvelle époque, ni réemploi de révision, ni réparation. Les pages
+restent des documents historiques ; seule une fence primaire complète atteste le
+jeu courant. La [recette expurgée](../evidence/hub-pf-b3-snapshots/README.md)
+sépare les preuves SQL, les injections de panne et les limites non démontrées.
+
+Les pages de cent lignes sont matérialisées et immuables. La fence primaire
+reconstruit l'ensemble du membre, vérifie pages, chaîne, sommes et empreintes,
+puis compare aux faits courants. Correction incomplète : indisponible ; nouveaux
+faits ou corrections : `superseded`, aucune activation locale. La fence atteste
+son instant, aucune promesse de fraîcheur future. Le transport signé et la
+persistance de réception Fans appartiennent au sous-lot B3c2.
+
+Un document complet **par membre** n'atteste pas l'exhaustivité de l'origine.
+L'[extension de corpus soumise à ALB-Origine](https://github.com/Alternative-LAB/faluss-platform/issues/147#issuecomment-6021094562)
+a reçu son accord distinct dans cette conversation le 6 octobre 2026, uniquement
+pour la recette fermée. Son implémentation suit les snapshots 2.0, avec mesures
+des durées de verrouillage, concurrence et reprise après obsolescence ; aucune
+validation de dimensionnement de production ne sera déduite de cette recette.
+Les projections globales ne doivent pas présenter le jeu de membres connus comme
+un classement exhaustif. Conservation #150 et RustFS #161 restent distincts.

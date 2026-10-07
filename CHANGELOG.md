@@ -17,6 +17,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Ajouter B3c1 fermé : snapshots privés complets 2.0 par membre, ordre/contexte
+  d'origine attestés et net H4 rapproché, pages immuables et fence primaire.
+  Anciennes allocations explicitement non classables ; aucune API de site,
+  migration automatique, nouvelle consommation ou activation.
+
 - Ajouter B3b2 fermé : contexte 0.3 immuable, ordre Hub global attesté et reçu
   signé dans la transaction du débit officiel et des journaux, reprise par clé
   identique sur le primaire. Compatibilité H2/H3/H4 préservée ; aucune route,
