@@ -17,10 +17,11 @@ final class ClosedConsumptionStore
      * @param list<string> $clients
      * @param list<string> $sources
      */
-    public function __construct(\wpdb $database, array $clients, array $sources, private readonly ?\Closure $recordReceipt = null)
+    public function __construct(\wpdb $database, array $clients, array $sources, private readonly ?\Closure $recordReceipt = null,
+        private readonly ?ClosedRankingContext $ranking = null)
     {
         $this->connection = new ClosedReservationDatabase($database);
-        $this->reservations = new ClosedReservationStore($database, $clients, $sources);
+        $this->reservations = new ClosedReservationStore($database, $clients, $sources, $ranking);
         $this->ledger = new ClosedLedgerWriter($this->connection);
         $this->tables = ClosedConsumptionSchema::tables($database);
     }
@@ -31,6 +32,8 @@ final class ClosedConsumptionStore
         $this->reservations->assertClient($intent);
         $hash = ModelValues::keyHash($key);
         return $this->connection->write($intent->values['member_faluss_id'], function () use ($intent, $hash): array {
+            if ($this->ranking !== null) { $this->ranking->guard($intent,'confirm'); }
+            else { ClosedRankingContext::guardLegacy($this->connection,$intent); }
             $this->assertSchema();
             $known = $this->reservations->key($intent->values['client_authority'], 'confirm', $hash, $intent->fingerprint());
             $row = $this->reservations->reservation($intent);
@@ -67,6 +70,10 @@ final class ClosedConsumptionStore
             $eventId = wp_generate_uuid4();
             ModelValues::uuid($consumptionId);
             ModelValues::uuid($eventId);
+            if ($this->ranking !== null) {
+                $now = $this->ranking->beforeDebit($intent);
+                if ($row['expires_at'] <= $now) { throw new ModelViolation('h2_reservation_closed'); }
+            }
             $entry = $this->ledger->appendDebit($intent->values['member_faluss_id'], $intent->values['attribution_id'],
                 $intent->values['purchased_pf'], $intent->values['policy_version']);
             $payload = ['kind' => ClosedConsumptionSchema::SCOPE, 'consumption_id' => $consumptionId,
@@ -88,7 +95,9 @@ final class ClosedConsumptionStore
             $this->connection->insert($this->tables['journal'], ['event_id' => $eventId, 'consumption_id' => $consumptionId,
                 'payload_json' => $json, 'payload_sha256' => $digest, 'state' => 'pending', 'recorded_at' => $now]);
             // H3's private receipt joins this transaction; a signing/storage failure rolls back everything.
-            if ($this->recordReceipt !== null) {
+            if ($this->ranking !== null) {
+                $this->ranking->record($payload);
+            } elseif ($this->recordReceipt !== null) {
                 ($this->recordReceipt)($payload);
             }
             $reservationTables = ClosedReservationSchema::tables($this->connection->database);
@@ -118,6 +127,8 @@ final class ClosedConsumptionStore
         }
         $hash = ModelValues::keyHash($key);
         return $this->connection->write($intent->values['member_faluss_id'], function () use ($intent, $operation, $hash): array {
+            if ($this->ranking !== null) { $this->ranking->guard($intent,'lookup'); }
+            else { ClosedRankingContext::guardLegacy($this->connection,$intent); }
             $this->assertSchema();
             $known = $this->reservations->key($intent->values['client_authority'], $operation, $hash, $intent->fingerprint());
             if ($known === null) {

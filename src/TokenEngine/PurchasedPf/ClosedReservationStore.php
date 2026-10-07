@@ -17,7 +17,8 @@ final class ClosedReservationStore
      * @param list<string> $clients
      * @param list<string> $sources
      */
-    public function __construct(\wpdb $database, private readonly array $clients, private readonly array $sources)
+    public function __construct(\wpdb $database, private readonly array $clients, private readonly array $sources,
+        private readonly ?ClosedRankingContext $ranking = null)
     {
         $this->connection = new ClosedReservationDatabase($database);
         $this->ledger = new ClosedLedgerWriter($this->connection);
@@ -75,6 +76,7 @@ final class ClosedReservationStore
         $this->assertClient($intent);
         $hash = ModelValues::keyHash($key);
         return $this->connection->write($intent->values['member_faluss_id'], function () use ($intent, $hash): array {
+            $this->guardRanking($intent,'reserve');
             $now = $this->connection->now();
             $this->expire($intent->values['member_faluss_id'], $now);
             $known = $this->key($intent->values['client_authority'], 'reserve', $hash, $intent->fingerprint());
@@ -97,6 +99,7 @@ final class ClosedReservationStore
             if ($this->reservedQuantity($intent->values['member_faluss_id'], $now) > $this->ledger->balance($intent->values['member_faluss_id']) - (int) $intent->values['purchased_pf']) {
                 throw new ModelViolation('h2_ledger_quantity_unavailable');
             }
+            if ($this->ranking !== null) { $this->ranking->validateSelection($intent); }
             $row = ['attribution_id' => $intent->values['attribution_id'], 'reservation_id' => wp_generate_uuid4(),
                 'client_authority' => $intent->values['client_authority'], 'member_faluss_id' => $intent->values['member_faluss_id'],
                 'creator_faluss_id' => $intent->values['creator_faluss_id'], 'purchased_pf' => $intent->values['purchased_pf'],
@@ -118,6 +121,7 @@ final class ClosedReservationStore
         $this->assertClient($intent);
         $hash = ModelValues::keyHash($key);
         return $this->connection->write($intent->values['member_faluss_id'], function () use ($intent, $hash): array {
+            $this->guardRanking($intent,'release');
             $now = $this->connection->now();
             $this->expire($intent->values['member_faluss_id'], $now);
             $known = $this->key($intent->values['client_authority'], 'release', $hash, $intent->fingerprint());
@@ -152,6 +156,7 @@ final class ClosedReservationStore
         }
         $hash = ModelValues::keyHash($key);
         return $this->connection->write($intent->values['member_faluss_id'], function () use ($intent, $operation, $hash): array {
+            $this->guardRanking($intent,'lookup');
             $known = $this->key($intent->values['client_authority'], $operation, $hash, $intent->fingerprint());
             if ($known === null) {
                 return ['kind' => ClosedReservationSchema::SCOPE, 'state' => 'not_found'];
@@ -162,6 +167,12 @@ final class ClosedReservationStore
             }
             return $this->result($row, $this->connection->now());
         });
+    }
+
+    private function guardRanking(AttributionIntent $intent, string $operation): void
+    {
+        if ($this->ranking !== null) { $this->ranking->guard($intent,$operation); }
+        else { ClosedRankingContext::guardLegacy($this->connection,$intent); }
     }
 
     /** @return array<string,mixed> */
