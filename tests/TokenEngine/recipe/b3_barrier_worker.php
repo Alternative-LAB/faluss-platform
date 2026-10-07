@@ -13,7 +13,17 @@ use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\RankingBarrier;
 
 // Included by the physically isolated CLI worker, never registered as a site route.
 try {
-    if ($input['action'] === 'b3b-ready') {
+    if ($input['action'] === 'b3b-admission-ready') {
+        $result = ['ready' => \Faluss\Platform\TokenEngine\PurchasedPf\ClosedBarrierTransportSchema::ready($wpdb)];
+    } elseif ($input['action'] === 'b3b-admission-install') {
+        \Faluss\Platform\TokenEngine\PurchasedPf\ClosedBarrierTransportSchema::installForRecipe($wpdb);
+        $result = ['ready' => \Faluss\Platform\TokenEngine\PurchasedPf\ClosedBarrierTransportSchema::ready($wpdb)];
+    } elseif ($input['action'] === 'b3b-admit') {
+        $peer = new PeerPolicy($input['peer'] ?? 'fixture.fans','fixture.hub',
+            $input['permissions'] ?? ['pf.ranking.context.register','pf.ranking.context.close','pf.lookup'],[]);
+        (new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedBarrierAdmission($wpdb))->accept($peer,$input['request'],$input['digest']);
+        $result = ['admitted' => true];
+    } elseif ($input['action'] === 'b3b-ready') {
         $result = ['ready' => ClosedBarrierSchema::ready($wpdb)];
     } elseif ($input['action'] === 'b3b-install') {
         ClosedBarrierSchema::installForRecipe($wpdb);

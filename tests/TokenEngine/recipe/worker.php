@@ -38,6 +38,13 @@ final class HubPfRecipeDatabase extends wpdb
             if ((string) $value === '1' && $this->fault === 'b3bc-hold-write') { $this->holdBarrierFixture(); }
             return $result;
         }
+        if (preg_match("/^SELECT GET_LOCK\('pf_b3bh_[a-f0-9]+'/",$query) === 1 && $this->globalWaitMarker !== '') {
+            file_put_contents($this->globalWaitMarker,'waiting');
+        }
+        if (preg_match('/^INSERT INTO `[^`]+token_engine_pf_b3bh_nonces` /',$query) === 1) {
+            if ($this->fault === 'b3bh-insert') { $this->fault = ''; return false; }
+            if ($this->fault === 'b3bh-tail') { $result = parent::query($query); $this->holdBarrierFixture(); return $result; }
+        }
         if ($this->fault === 'b3bc-tail' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_b3b_events` /',$query) === 1) {
             $result = parent::query($query); $this->holdBarrierFixture(); return $result;
         }
