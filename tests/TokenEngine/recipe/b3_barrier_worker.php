@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Faluss\Platform\TokenEngine\PurchasedPf\ClosedBarrierSchema;
 use Faluss\Platform\TokenEngine\PurchasedPf\ClosedBarrierStore;
+use Faluss\Platform\TokenEngine\PurchasedPf\ClosedBarrierContext;
 use Faluss\Platform\TokenEngine\PurchasedPf\ClosedReservationDatabase;
 use Faluss\Platform\TokenEngine\PurchasedPf\ModelViolation;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy;
@@ -40,10 +41,11 @@ try {
                 return ['checked' => true,'confirmed_at' => $now];
             });
         } else {
+            $context = isset($input['transport']) ? new ClosedBarrierContext($input['transport'],$input['fresh_from'],$input['fresh_until']) : null;
             $result = match ($input['action']) {
-                'b3b-register' => $store->register($peer,$input['payload'],$input['key']),
-                'b3b-close' => $store->close($peer,$input['payload'],$input['key']),
-                'b3b-lookup' => $store->lookup($peer,$input['operation'],$input['payload'],$input['key']),
+                'b3b-register' => $store->register($peer,$input['payload'],$input['key'],$context),
+                'b3b-close' => $store->close($peer,$input['payload'],$input['key'],$context),
+                'b3b-lookup' => $store->lookup($peer,$input['operation'],$input['payload'],$input['key'],$context),
                 default => throw new RuntimeException('Unknown B3b fixture action.'),
             };
         }

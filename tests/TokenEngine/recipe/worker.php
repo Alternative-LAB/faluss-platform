@@ -31,6 +31,16 @@ final class HubPfRecipeDatabase extends wpdb
 
     public function query($query)
     {
+        if (preg_match("/^SELECT GET_LOCK\('pf_b3_barrier_write_[a-f0-9]+'/",$query) === 1) {
+            if ($this->globalWaitMarker !== '') { file_put_contents($this->globalWaitMarker,'waiting'); }
+            $result = parent::query($query);
+            $value = isset($this->last_result[0]) ? array_values((array) $this->last_result[0])[0] : null;
+            if ((string) $value === '1' && $this->fault === 'b3bc-hold-write') { $this->holdBarrierFixture(); }
+            return $result;
+        }
+        if ($this->fault === 'b3bc-tail' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_b3b_events` /',$query) === 1) {
+            $result = parent::query($query); $this->holdBarrierFixture(); return $result;
+        }
         if (preg_match("/^SELECT (GET_LOCK|RELEASE_LOCK)\('token_engine_pf_h1_model_[a-f0-9]+'/",$query,$lockMatch) === 1) {
             $acquiring = $lockMatch[1] === 'GET_LOCK';
             if ($acquiring && $this->globalWaitMarker !== '') { file_put_contents($this->globalWaitMarker,'waiting'); }
@@ -122,6 +132,15 @@ final class HubPfRecipeDatabase extends wpdb
             usleep(10000);
         }
         throw new RuntimeException('Fixture controller did not terminate worker.');
+    }
+
+    private function holdBarrierFixture(): void
+    {
+        $this->fault = ''; file_put_contents($this->marker,'held'); $deadline = microtime(true)+25;
+        while (!is_file($this->marker . '.release')) {
+            if (microtime(true)>$deadline) { throw new RuntimeException('Fixture barrier release timed out.'); }
+            usleep(10000);
+        }
     }
 }
 

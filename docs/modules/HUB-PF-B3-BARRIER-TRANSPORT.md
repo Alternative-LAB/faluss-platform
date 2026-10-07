@@ -83,3 +83,42 @@ Retour arrière : revert des classes/domaines nouveaux, sans migration ou
 donnée persistante à supprimer. Voir le
 [registre propriétaire B3](HUB-PF-B3-CLOSED.md) et le
 [contrat B3 approuvé](HUB-PF-B3-RANKING-PROPOSAL.md).
+
+## B3b3b — contexte dans la transaction propriétaire
+
+`ClosedBarrierContext` est la composition interne qui suit l'authentification
+du codec ; il ne vérifie pas une signature et ne doit pas recevoir un contexte
+de navigateur. Les méthodes propriétaires acceptent ce contexte en complément
+du contrat SQL historique, qui reste inchangé lorsqu'il est absent.
+
+La clé est liée au digest canonique du contrat, de l'action opaque, de l'origine,
+de la politique, de l'opération cible et de l'objet exact. Lookup conserve cette
+liaison ; un autre nonce ou instant ne change pas l'action. Une clé historique
+ne peut être adoptée par ce transport ni l'inverse. La colonne de digest
+existante suffit : aucune table ou migration nouvelle dans ce sous-lot.
+
+Pour close et son lookup, la version exacte du descripteur est lue et verrouillée
+dans la transaction. Son empreinte, son propriétaire, sa référence et ses
+origine/politique doivent correspondre. L'origine annoncée dans une référence
+close pauvre n'est donc jamais une preuve à elle seule. Une ancienne version
+fermée peut toujours être retrouvée ; le résultat propriétaire reste fermé
+ou supersédé, sans rouvrir cette version.
+
+La fraîcheur est vérifiée avant l'attente, après le verrou propriétaire et
+avant la décision COMMIT. Une expiration pendant un verrou de ligne ou après
+l'insertion de l'événement provoque le rollback de tous les effets préparés.
+Le point de contrôle précède la décision COMMIT ; il ne promet pas une limite
+de durée de la persistance physique de MariaDB. L'ancien comportement SQL sans
+contexte n'acquiert pas artificiellement une autorité réseau.
+
+Scénarios écrits avant recette : quatre opérations/cibles positives et expirées,
+rejeux concurrents, même clé autre action, incompatibilité de clé historique,
+origine/politique étrangères, expiration derrière le mutex propriétaire et
+après insertion de l'événement, lookup et reprise avec la même action.
+Le ledger doit rester byte-identique. Le nonce réseau dédié, le gateway HTTP
+et la persistance Fans opening/closing restent les raccordements suivants.
+Aucune recette de site ou véritable SSO n'est revendiquée.
+
+Recette obtenue : **251 contrôles WordPress/MariaDB satisfaits, dont 28 nouveaux** ;
+suite PHP complète 655 tests / 6 976 assertions et analyse statique sans erreur.
+[Preuves et limites](../evidence/hub-pf-b3-barrier-context/README.md).

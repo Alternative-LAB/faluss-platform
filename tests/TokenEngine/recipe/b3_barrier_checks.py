@@ -168,3 +168,5 @@ def run_checks(root, wp, check, call, sql, start, finish, parallel, await_file):
           and sql('SELECT * FROM wp_token_engine_pf_h2c_journal ORDER BY event_id') == journal
           and sql('SELECT * FROM wp_token_engine_pf_h3_receipts ORDER BY attribution_id') == legacy_receipts
           and sql('SELECT * FROM wp_token_engine_ledger ORDER BY id') == alb)
+    from b3_barrier_context_checks import run_checks as context_checks
+    context_checks(root,check,call,sql,start,finish,parallel,await_file,fixture,close_ref)
