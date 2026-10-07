@@ -11,7 +11,25 @@ use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\RankedIntent;
 // Only the disposable CLI worker includes this; no hook or real site admission.
 try {
     require_once dirname(__DIR__, 3) . '/src/Federation/Legacy/includes/class-faluss-federation-crypto.php';
-    if ($input['action'] === 'b3r-ready') {
+    if ($input['action'] === 'b3r-hold-row') {
+        // A separate real SQL connection holds only the selected metadata row, not owner mutexes.
+        $table = match ($input['row_kind']) {
+            'counter' => ClosedRankingSchema::tables($wpdb)['counter'],
+            'barrier' => Faluss\Platform\TokenEngine\PurchasedPf\ClosedBarrierSchema::tables($wpdb)['barriers'],
+            default => throw new RuntimeException('Unknown isolated row.'),
+        };
+        $wpdb->query('START TRANSACTION');
+        $where = $input['row_kind'] === 'counter' ? 'id=1' : $wpdb->prepare('barrier_key=%s',$input['row_key']);
+        if ($wpdb->get_row($wpdb->prepare('SELECT * FROM %i WHERE ' . $where . ' FOR UPDATE',$table)) === null || $wpdb->last_error !== '') {
+            throw new RuntimeException('Isolated row not found.');
+        }
+        file_put_contents($input['marker'],'locked'); $deadline = microtime(true)+25;
+        while (!is_file($input['marker'] . '.release')) {
+            if (microtime(true)>$deadline) { throw new RuntimeException('Isolated row release timed out.'); }
+            usleep(10000);
+        }
+        $wpdb->query('COMMIT'); $result = ['released' => true];
+    } elseif ($input['action'] === 'b3r-ready') {
         $result = ['ready' => ClosedRankingSchema::ready($wpdb)];
     } elseif ($input['action'] === 'b3r-install') {
         ClosedRankingSchema::installForRecipe($wpdb);
@@ -34,7 +52,10 @@ try {
         $peer = new PeerPolicy($input['peer'] ?? 'fixture.fans','fixture.hub',
             $input['permissions'] ?? ['pf.reserve','pf.confirm','pf.release','pf.lookup'],[]);
         $store = new ClosedRankedStore($wpdb,$input['key_id'] ?? 'recipe-hub-k1');
-        $result = $store->execute($peer,$intent,substr($input['action'],4),$input['key'],$input['operation'] ?? null);
+        $fresh = isset($input['fresh_until']) ? static function () use ($input): void {
+            Faluss\Platform\TokenEngine\PurchasedPf\Protocol\DelegatedContext::fresh($input['fresh_from'],$input['fresh_until'],time());
+        } : null;
+        $result = $store->execute($peer,$intent,substr($input['action'],4),$input['key'],$input['operation'] ?? null,$fresh);
     }
 } catch (ModelViolation $error) {
     $result = ['error' => $error->reason];

@@ -17,6 +17,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Revalider la délégation 0.3 après les verrous propriétaires et avant COMMIT,
+  avec rollback des effets préparés si elle expire. Recette réelle fermée
+  de concurrence et reprise, sans route, schéma ou activation supplémentaire.
+
 - Ajouter le codec signé 0.3 fermé pour réserver, confirmer, libérer et retrouver
   une attribution à contexte de classement immuable. Réponses liées à la requête
   et reçus d'origine vérifiés, sans admission HTTP ni consommation supplémentaire.

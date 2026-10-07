@@ -421,6 +421,22 @@ local PHP 8.5.4. Les clés des tests sont éphémères ; les identités sont fic
 La CI PHP 8.3 du head final reste exigée avant fusion. Aucun test HTTP 0.3
 ou WordPress/MariaDB nouveau n'est revendiqué pour ce codec pur.
 
+## B3c3b1 — expiration dans la transaction propriétaire
+
+Le propriétaire 0.3 accepte un garde de fraîcheur issu de la délégation
+authentifiée. Il le revalide après les verrous membre/global, puis les lignes
+compteur/barrières et immédiatement avant la décision COMMIT. Une expiration
+pendant la dernière écriture annule aussi le staging préalable du débit, du
+reçu, des journaux, de l'ordre et de la clé. Réponse incertaine après un COMMIT
+effectif : lookup primaire sous la même clé, jamais un second débit.
+
+Cette composition est optionnelle pour les usages propriétaires historiques ;
+le futur gateway signé 0.3 doit obligatoirement fournir ce garde. Aucun HTTP,
+schéma ou hook n'est ajouté ici. Les 279 tests propriétaires précédents et
+22 nouveaux cas ont réussi sur WordPress/MariaDB jetable, ainsi que la suite
+PHP complète et l'analyse statique. Voir les
+[preuves et leurs limites](../evidence/hub-pf-b3-ranked-freshness/README.md).
+
 Bornes fermées du sous-lot propriétaire conservées, avec refus total ; page à
 4 MiB maximum. [Preuve et mesures](../evidence/hub-pf-b3-corpus/README.md),
 sans attestation de dimensionnement ou d'exploitation de production.

@@ -20,7 +20,7 @@ final class ClosedConsumptionStore
     public function __construct(\wpdb $database, array $clients, array $sources, private readonly ?\Closure $recordReceipt = null,
         private readonly ?ClosedRankingContext $ranking = null)
     {
-        $this->connection = new ClosedReservationDatabase($database);
+        $this->connection = new ClosedReservationDatabase($database,$ranking === null ? null : $ranking->assertFresh(...));
         $this->reservations = new ClosedReservationStore($database, $clients, $sources, $ranking);
         $this->ledger = new ClosedLedgerWriter($this->connection);
         $this->tables = ClosedConsumptionSchema::tables($database);

@@ -26,11 +26,17 @@ final class HubPfRecipeDatabase extends wpdb
     public string $fault = '';
     public string $marker = '';
     public string $globalWaitMarker = '';
+    public string $rowWaitMarker = '';
+    public string $rowWaitTable = '';
     public float $globalHeldMs = 0.0;
     private ?int $globalHeldSince = null;
 
     public function query($query)
     {
+        if ($this->rowWaitMarker !== '' && str_contains($query,'FOR UPDATE')
+            && str_contains($query,'`' . $this->prefix . $this->rowWaitTable . '`')) {
+            file_put_contents($this->rowWaitMarker,'waiting');
+        }
         if (preg_match("/^SELECT (GET_LOCK|RELEASE_LOCK)\('token_engine_pf_h1_model_[a-f0-9]+'/",$query,$lockMatch) === 1) {
             $acquiring = $lockMatch[1] === 'GET_LOCK';
             if ($acquiring && $this->globalWaitMarker !== '') { file_put_contents($this->globalWaitMarker,'waiting'); }
@@ -95,6 +101,13 @@ final class HubPfRecipeDatabase extends wpdb
                 usleep(10000);
             }
         }
+        if ($this->fault === 'b3r-hold-tail' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_h2_keys` /',$query) === 1) {
+            $this->fault = ''; file_put_contents($this->marker,'staged'); $deadline = microtime(true) + 25;
+            while (!is_file($this->marker . '.release')) {
+                if (microtime(true) > $deadline) { throw new RuntimeException('Fixture final journal release timed out.'); }
+                usleep(10000);
+            }
+        }
         if (strtoupper(trim($query)) !== 'COMMIT' || $this->fault === '') {
             return parent::query($query);
         }
@@ -143,6 +156,8 @@ if (!empty($input['fault']) || !empty($input['observe'])) {
     $wpdb->fault = $input['fault'] ?? '';
     $wpdb->marker = $input['marker'] ?? '';
     $wpdb->globalWaitMarker = $input['wait_marker'] ?? '';
+    $wpdb->rowWaitMarker = $input['row_wait_marker'] ?? '';
+    $wpdb->rowWaitTable = $input['row_wait_table'] ?? '';
 }
 
 if (str_starts_with($input['action'], 'b3b-')) {

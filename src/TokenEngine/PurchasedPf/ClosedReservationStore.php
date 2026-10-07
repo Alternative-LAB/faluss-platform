@@ -20,7 +20,7 @@ final class ClosedReservationStore
     public function __construct(\wpdb $database, private readonly array $clients, private readonly array $sources,
         private readonly ?ClosedRankingContext $ranking = null)
     {
-        $this->connection = new ClosedReservationDatabase($database);
+        $this->connection = new ClosedReservationDatabase($database,$ranking === null ? null : $ranking->assertFresh(...));
         $this->ledger = new ClosedLedgerWriter($this->connection);
         $this->tables = ClosedReservationSchema::tables($database);
         foreach (array_merge($clients, $sources) as $authority) {
