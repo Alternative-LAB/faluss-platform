@@ -63,7 +63,9 @@ final class ClosedRankingProjectionStore
         if (!ClosedRankingProjectionSchema::ready($this->db)) { throw new ModelViolation('hof_projection_schema_unavailable'); }
         return $this->inbox->withCurrent(function (?array $verified) use ($operation): mixed {
             if ($verified === null) { throw new ModelViolation('hof_projection_source_unavailable'); }
-            return $operation(RankingCorpusProjection::build($verified));
+            $document = RankingCorpusProjection::build($verified);
+            $sessions = RankingSessionProjection::build($verified);
+            return $operation($document + ['cache_format' => '2','sessions' => $sessions['sessions']]);
         });
     }
 

@@ -221,7 +221,16 @@ def run_checks(root, wp, source, cli_path, check, call, sql, command, workers, l
         assert call('b3r-confirm',payload=value,key=secrets.token_hex(32),clock_value=now_value)['state']=='confirmed'
     for _ in range(101):consume(dict(intent,attribution_id=str(uuid.uuid4())))
     ledger=sql('SELECT * FROM wp_token_engine_pf_ledger ORDER BY id');old_claims=sql('SELECT * FROM wp_token_engine_ledger ORDER BY id')
-    f=fields(origin);key_value=secrets.token_hex(32);first=exchange(f,key_value)['result']['page'];second=exchange(fields(origin,'page',first),key_value)['result']['page']
+    def positive_page(f,key):
+        value=exchange(f,key)
+        if value.get('outcome')!='ok':
+            raise RuntimeError('Expurgated positive corpus diagnostics: '+json.dumps(dict(
+                operation=f['operation'],error=value.get('error','none'),outcome=value.get('outcome','none'),
+                hub_reason=(root/'corpus-http-diagnostic').read_text() if (root/'corpus-http-diagnostic').exists() else 'none',
+                client=json.loads((root/'corpus-client-diagnostic').read_text()) if (root/'corpus-client-diagnostic').exists() else {},
+                phase=json.loads((root/'corpus-http-phase').read_text()) if (root/'corpus-http-phase').exists() else {})))
+        return value['result']['page']
+    f=fields(origin);key_value=secrets.token_hex(32);first=positive_page(f,key_value);second=positive_page(fields(origin,'page',first),key_value)
     check('B3ch signed immutable pagination delivers 101 genuine facts without duplication',len(first['facts'])==100 and len(second['facts'])==1
           and first['manifest']==second['manifest'] and second['next_cursor'] is None and len({x['attribution_id'] for x in first['facts']+second['facts']})==101)
     check('B3ch final signed primary fence attests the complete current manifest',exchange(fields(origin,'finish',first),key_value)['result']['state']=='current')

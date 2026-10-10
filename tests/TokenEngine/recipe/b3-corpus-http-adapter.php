@@ -28,6 +28,8 @@ add_action('rest_api_init',static function (): void {
             global $wpdb;
             try {
                 ClosedEnvironment::assertIsolated($wpdb,'hub');
+                $phase = dirname(rtrim(ABSPATH,'/')) . '/corpus-http-phase'; $began = microtime(true);
+                file_put_contents($phase,json_encode(['phase' => 'entered','elapsed_ms' => 0],JSON_THROW_ON_ERROR));
                 if (strtolower($request->get_header('content-type')) !== 'application/json'
                     || strlen($request->get_body()) > CorpusTransport::MAX_REQUEST_WIRE) { throw new ModelViolation('pf_request_rejected'); }
                 // Accelerate this fixture's primary SQL clock only. Never accept a clock from HTTP.
@@ -37,7 +39,9 @@ add_action('rest_api_init',static function (): void {
                 if (preg_match('/^[1-9][0-9]{9}\.[0-9]{6}$/D',$clock) !== 1 || $wpdb->query('SET timestamp=' . $clock) === false) {
                     throw new ModelViolation('pf_fixture_clock_required');
                 }
+                file_put_contents($phase,json_encode(['phase' => 'handling','elapsed_ms' => round((microtime(true)-$began)*1000,3)],JSON_THROW_ON_ERROR));
                 $wire = (new ClosedCorpusGateway($wpdb,b3_corpus_recipe_peer(),'recipe-hub-k1'))->handle($request->get_body());
+                file_put_contents($phase,json_encode(['phase' => 'handled','elapsed_ms' => round((microtime(true)-$began)*1000,3)],JSON_THROW_ON_ERROR));
                 $fault = dirname(rtrim(ABSPATH,'/')) . '/corpus-http-fault';
                 if (is_file($fault) && file_get_contents($fault) === 'drop-after-materialize') {
                     unlink($fault);

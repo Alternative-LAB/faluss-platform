@@ -33,8 +33,8 @@ du dernier net rapproché, y compris après l'échéance d'une session.
 Ce calcul pur ne vérifie pas de signature, ne possède pas de stockage et ne
 constate pas l'ouverture ou la clôture. Son appelant doit utiliser la génération
 courante authentifiée de l'inbox, jamais une ancienne réponse restituée seule.
-B5b doit persister/reconstruire sous cette même transaction et refuser les
-anciennes générations comme B4b. Ce premier sous-lot ne le revendique pas.
+Le sous-lot B5b décrit ci-dessous persiste/reconstruit sous cette même transaction
+et refuse les anciennes générations comme B4b ; B5a seul ne le revendique pas.
 
 Les règles éditoriales et la catégorie propre à une session sont obtenues de
 la gouvernance B2 avec égalité de l'empreinte figée ; elles ne sont pas déduites
@@ -61,3 +61,40 @@ Ces tests purs ne sont ni une recette réseau, ni la preuve du véritable SSO,
 ni une ouverture sur site. Aucun bootstrap, hook, route, migration, cron,
 flag ou score public n'est ajouté. Retour arrière : retirer ce calcul inerte.
 Conservation #150, RustFS #161, producteur d'achat et publication sont distincts.
+
+## B5b — génération dérivée atomique des trois objets
+
+`ClosedRankingProjectionStore` compose les sessions avec général/catégories et
+relevés mensuels dans le même document, sous le mutex/transaction de l'inbox
+courante. Aucune lecture d'une ancienne preuve ou correction isolée ne fournit
+de quantité. La reconstruction authentifie de nouveau la génération complète.
+La sérialisation des sessions reste une liste : les UUID sont des valeurs,
+aucune règle du codec signé Hub n'est relâchée.
+
+Le format **local dérivé** porte `cache_format=2`. Les colonnes et le schéma B4
+ne changent pas ; une génération format 1 n'est pas présentée comme complète.
+Une reconstruction explicite est nécessaire dans la fixture : aucun upgrade
+de site, migration ou purge automatique. Un ancien lecteur refuse également
+les nouveaux octets et ferme l'accès, sans perte des faits Hub.
+
+DELETE et remplacement sont atomiques pour toutes les dimensions. Une perte
+d'acquittement de COMMIT ou la mort d'un processus ne justifie pas la promotion
+d'une ancienne génération. La lecture primaire vérifie les octets contre le
+corpus courant authentifié ; un cache corrompu se reconstruit. Tout transfert
+ou rapprochement H4 incomplet rend les trois objets indisponibles ensemble.
+
+Recette `run.py --b5-sessions` après les contrôles B3/B4 existants : deux instances
+WordPress/MariaDB jetables, HTTP privé réellement signé, un débit propriétaire
+fictif alimentant deux sessions, corrections partielles/totales, litige/résolution,
+COMMIT inconnu, arrêts avant/après COMMIT et restauration d'un ancien format.
+La CI ajoute ces contrôles au job du lecteur complet, sans supprimer ses gates.
+Les [preuves B5b](../evidence/fans-hof-b5-cache/README.md) recensent 592 contrôles
+WordPress/MariaDB, dont 16 nouveaux sur cette génération. Aucun résultat de
+production n'est annoncé.
+
+Coût : validation complète et calcul des dimensions, bornés par la recette B3
+(au plus dix sessions par attribution), sans validation de charge de production.
+La confiance actuelle et le corpus vérifié à un instant primaire ne constituent
+pas une garantie de fraîcheur future : actualisation, origine ouverte, barrières
+B2 et visibilité B6 restent nécessaires. Le cache ne désigne aucun vainqueur ni
+niveau d'abonnement et n'ouvre aucun accès public.
