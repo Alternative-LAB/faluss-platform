@@ -17,6 +17,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Composer le corpus/cache privés avec une transaction propriétaire de barrière, avec ordre de mutex vérifié et rollback commun, sans nouvelle preuve Hub ou route publique ; recette transactionnelle B6 fermée.
+
 - Projection d'affichage HoF/Fans : filtrage par identité approuvée et visibilité courante, places recalculées parmi les seuls profils visibles, sans diffuser identité technique ou rang privé ; préparatif B6 sans route ni score public.
 
 - Persistance fermée des sessions dans la même génération dérivée que les classements/relevés, reconstruction après correction et reprise primaire après panne ; aucun état public ou gagnant ajouté.

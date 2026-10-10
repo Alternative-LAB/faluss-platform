@@ -35,6 +35,10 @@ pas un score Hub attesté. La recette ne constitue pas une lecture complète B6.
 
 ## Raccordements suivants
 
+La [composition transactionnelle](FANS-HOF-B6-CORPUS-TRANSACTION.md) permet de
+lire le cache dans la transaction propriétaire des barrières, sans imbrication
+ou COMMIT implicite. Le mutex seul ne constitue jamais un acquittement Hub.
+
 Origine/acquittements B1/B2, choix d'attribution, source primaire à jour, mapping
 des filiations et visibilité doivent être composés avec B4/B5 avant livraison.
 Les relevés mensuels resteront privés, liés au membre courant ; les tableaux

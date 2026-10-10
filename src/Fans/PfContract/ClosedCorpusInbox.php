@@ -159,6 +159,42 @@ final class ClosedCorpusInbox
     public function withCurrent(callable $operation): mixed
     { return $this->write(fn (): mixed => $operation($this->readCurrent())); }
 
+    /** Trusted composition after the barrier origin mutex, in its caller-owned transaction.
+     * This checks lock ownership, not an acknowledgement: the caller must authenticate its barriers first.
+     * No BEGIN, COMMIT, ROLLBACK or HTTP here; the outer facade owns rollback after any exception.
+     * @template T
+     * @param callable(array{manifest:array<string,mixed>,facts:list<array<string,mixed>>,verified_at:string}|null):T $operation
+     * @return T */
+    public function withCurrentInTransaction(callable $operation): mixed
+    {
+        ClosedEnvironment::assertIsolated($this->db,'fans');
+        $barrier = 'fans_pf_b3b_' . substr(hash('sha256',$this->db->prefix . ':' . $this->origin . ':' . $this->policy),0,40);
+        $lock = $this->corpusLock(); $held = false; $suppressed = $this->db->suppress_errors(true);
+        try {
+            $scope = $this->db->get_row($this->db->prepare(
+                'SELECT @@in_transaction AS active, IS_USED_LOCK(%s)=CONNECTION_ID() AS barrier_owner, IS_USED_LOCK(%s)=CONNECTION_ID() AS corpus_owner',
+                $barrier,$lock),'ARRAY_A');
+            if (self::failed() || $scope === null || (string) $scope['active'] !== '1'
+                || (string) $scope['barrier_owner'] !== '1' || (string) $scope['corpus_owner'] === '1') {
+                throw new ModelViolation('pf_corpus_barrier_transaction_required');
+            }
+            if ((string) $this->db->get_var($this->db->prepare('SELECT GET_LOCK(%s,10)',$lock)) !== '1' || self::failed()) {
+                throw new ModelViolation('pf_local_corpus_busy');
+            }
+            $held = true;
+            if (!ClosedCorpusInboxSchema::ready($this->db)) { throw new ModelViolation('pf_local_corpus_schema'); }
+            $result = $operation($this->readCurrent());
+            if ((string) $this->db->get_var('SELECT @@in_transaction') !== '1' || self::failed()) {
+                throw new ModelViolation('pf_corpus_barrier_transaction_required');
+            }
+            return $result;
+        } finally {
+            $released = !$held || (string) $this->db->get_var($this->db->prepare('SELECT RELEASE_LOCK(%s)',$lock)) === '1';
+            $this->db->suppress_errors($suppressed);
+            if (!$released) { throw new ModelViolation('pf_local_corpus_commit_unknown'); }
+        }
+    }
+
     /** @return array{manifest:array<string,mixed>,facts:list<array<string,mixed>>,verified_at:string}|null */
     private function readCurrent(): ?array
     {
@@ -288,7 +324,7 @@ final class ClosedCorpusInbox
     private function write(callable $callback): mixed
     {
         ClosedEnvironment::assertIsolated($this->db,'fans'); $held = $started = false; $suppressed = $this->db->suppress_errors(true);
-        $lock = 'fans_pf_b3_corpus_' . substr(hash('sha256',$this->db->prefix . ':' . $this->origin . ':' . $this->policy),0,32);
+        $lock = $this->corpusLock();
         try {
             if ((string) $this->db->get_var('SELECT @@in_transaction') !== '0' || self::failed()) { throw new ModelViolation('nested_transaction_refused'); }
             if ((string) $this->db->get_var($this->db->prepare('SELECT GET_LOCK(%s,10)',$lock)) !== '1' || self::failed()) { throw new ModelViolation('pf_local_corpus_busy'); }
@@ -303,6 +339,9 @@ final class ClosedCorpusInbox
             $this->db->suppress_errors($suppressed); if (!$released) { throw new ModelViolation('pf_local_corpus_commit_unknown'); }
         }
     }
+
+    private function corpusLock(): string
+    { return 'fans_pf_b3_corpus_' . substr(hash('sha256',$this->db->prefix . ':' . $this->origin . ':' . $this->policy),0,32); }
 
     /** @param literal-string $where
      * @param list<string> $values
