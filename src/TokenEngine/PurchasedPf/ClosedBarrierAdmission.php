@@ -21,12 +21,12 @@ final class ClosedBarrierAdmission
 
     /** The gateway must authenticate both signature domains before calling.
      * @param array<string,mixed> $request */
-    public function accept(PeerPolicy $peer, array $request, string $digest): void
+    public function accept(PeerPolicy $peer, array $request, string $digest, string $contract = BarrierTransport::CONTRACT): void
     {
         ClosedEnvironment::assertIsolated($this->db,'hub');
         ModelValues::exactKeys($request,['operation','action_id','origin_id','policy_version','lookup_operation','object',
             'operation_key','nonce','issued_at','expires_at']);
-        BarrierTransport::fields(array_diff_key($request,array_flip(['operation_key','nonce','issued_at','expires_at'])));
+        BarrierTransport::fields(array_diff_key($request,array_flip(['operation_key','nonce','issued_at','expires_at'])),$contract);
         if ($peer->node !== 'fixture.fans' || $peer->audience !== 'fixture.hub') { throw new ModelViolation('pf_invalid_peer'); }
         $target = $request['operation'] === 'lookup' ? $request['lookup_operation'] : $request['operation'];
         $peer->allow('pf.ranking.context.' . $target);

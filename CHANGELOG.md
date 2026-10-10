@@ -8,6 +8,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Dispatch signé fermé des barrières 1.1 : fin de session et lookup primaire sur la même action, compatibilité 1.0 et recette HTTP avec réponse perdue ; aucun pair réel ou cycle de vie public.
+
 - Primitive propriétaire fermée 1.1 de fin de session : échéance figée vérifiée après les verrous sur le primaire, audit atomique et lookup de reprise sur la même action/clé ; aucune API ou écriture économique.
 
 - Codec fermé explicitement versionné des barrières 1.1 pour la raison de fin de session approuvée ; contrat 1.0 conservé, sans raccordement propriétaire ou HTTP dans ce sous-lot.

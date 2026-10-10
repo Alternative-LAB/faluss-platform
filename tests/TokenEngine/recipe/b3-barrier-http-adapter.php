@@ -26,6 +26,15 @@ add_action('rest_api_init',static function (): void {
                 $path = $root . '/hub-barrier-trust.json';
                 if (!is_file($path) || is_link($path) || (fileperms($path)&0777)!==0600) { throw new ModelViolation('pf_fixture_policy_required'); }
                 $policy = json_decode(file_get_contents($path),true,20,JSON_THROW_ON_ERROR);
+                // Private primary clock fixture only; never an HTTP field, site setting or production hook.
+                $clock = $root . '/barrier-primary-clock';
+                if (is_file($clock)) {
+                    if (is_link($clock) || (fileperms($clock)&0777)!==0600
+                        || preg_match('/^[0-9]{1,11}\.[0-9]{6}$/D',file_get_contents($clock)) !== 1) {
+                        throw new ModelViolation('pf_fixture_clock_required');
+                    }
+                    if ($wpdb->query('SET timestamp=' . file_get_contents($clock)) === false) { throw new ModelViolation('pf_fixture_clock_required'); }
+                }
                 $peer = new PeerPolicy($policy['node'],$policy['audience'],$policy['permissions'],$policy['keys']);
                 $wire = (new ClosedBarrierGateway($wpdb,$peer,'recipe-hub-k1'))->handle($request->get_body());
                 $fault = $root . '/barrier-http-fault';
