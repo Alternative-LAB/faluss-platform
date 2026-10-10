@@ -17,6 +17,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Lier les opérations propriétaires de barrières au contexte signé de leur
+  action, vérifier l'origine d'une fermeture sur le descripteur stocké et
+  revalider la fraîcheur avant COMMIT, uniquement dans l'enclave de recette.
+
 - Ajouter le codec privé approuvé des barrières de classement : register,
   close et lookup signés, action et clé stables, permissions dédiées et réponses
   liées à la requête. Aucun endpoint, schéma ou changement économique ajouté.
