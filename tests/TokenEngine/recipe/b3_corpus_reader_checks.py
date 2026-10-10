@@ -11,11 +11,23 @@ def run_checks(root, source, cli_path, check, call, sql, command, fixture):
     if fixture is None: raise RuntimeError('Closed inbox fixture required.')
     fans=fixture['fans'];origin=fixture['origin'];fan_sql=fixture['fan_sql'];inbox=fixture['inbox']
     recipe=source/'tests/TokenEngine/recipe/b3-corpus-inbox-worker.php'
+    diagnostics={}
+    original_check=check
+    def check(name, result):
+        if not result:raise RuntimeError('Expurgated reader diagnostics: '+json.dumps(dict(check=name,**diagnostics)))
+        original_check(name,result)
     def reader(read, steps=4, selected=origin, **extra):
         fixture['set_clock']()
         value=dict(action='advance',origin=selected,read_id=read,steps=steps,**extra)
         path=root/(uuid.uuid4().hex+'.json');path.write_text(json.dumps(value));path.chmod(0o600)
-        return json.loads(command(['php',cli_path,'--allow-root','--path='+str(fans),'eval-file',str(recipe),str(path),'--use-include']))
+        diagnostic=root/'corpus-http-diagnostic'
+        diagnostic.unlink(missing_ok=True)
+        result=json.loads(command(['php',cli_path,'--allow-root','--path='+str(fans),'eval-file',str(recipe),str(path),'--use-include']))
+        metrics=path.with_name(path.name+'.http-metrics')
+        diagnostics.update({k:result.get(k) for k in ('state','reason','completed_steps')})
+        diagnostics.update(transport=json.loads(metrics.read_text()) if metrics.exists() else [],
+                           hub_reason=diagnostic.read_text() if diagnostic.exists() else 'none')
+        return result
     def lit(value):return "'"+value.replace('\\','\\\\').replace("'","''")+"'"
     def rows(read, table='requests'):return int(fan_sql('SELECT COUNT(*) FROM wp_fans_pf_b3c_'+table+' WHERE read_id='+lit(read)))
     def progress(read, selected=origin):return inbox('prepare',selected,read_id=read)
@@ -139,3 +151,6 @@ def run_checks(root, source, cli_path, check, call, sql, command, fixture):
     check('B3cr reader keeps historical claims and adds no Fans economic ledger',sql('SELECT * FROM wp_token_engine_ledger ORDER BY id')==historical
           and set(economic.splitlines()).issubset(set(sql('SELECT * FROM wp_token_engine_pf_ledger ORDER BY id').splitlines()))
           and fan_sql("SHOW TABLES LIKE 'wp_fans%ledger%'")=='')
+
+    from b4_projection_checks import run_checks as projection_checks
+    projection_checks(root,source,cli_path,check,command,fixture,reader,call)

@@ -150,4 +150,19 @@ final class RankingCorpusProjectionTest extends TestCase
             catch (ModelViolation $error) { self::assertNotSame('',$error->reason); }
         }
     }
+
+    public function testLocalCacheSerializesMonthValuesWithoutRelaxingTheSignedHubCodec(): void
+    {
+        $document = RankingCorpusProjection::build(self::source([
+            self::fact(1,10,20,'arts','2026-03-31 21:59:59.999999'),
+            self::fact(2,10,20,'arts','2026-03-31 22:00:00.000000')]));
+        $bytes = \Faluss\Platform\Fans\Hof\RankingProjectionDocument::encode($document);
+        $stored = \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\CanonicalJson::object($bytes);
+        self::assertSame(['2026-03','2026-04'],array_column($stored['months'],'month'));
+        self::assertSame($document['months']['2026-03']['fans'],$stored['months'][0]['fans']);
+        self::assertSame($bytes,\Faluss\Platform\Fans\Hof\RankingProjectionDocument::encode($document));
+        self::assertSame(['2026-03','2026-04'],array_keys($document['months']));
+        $this->expectException(ModelViolation::class);
+        \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\CanonicalJson::encode($document);
+    }
 }

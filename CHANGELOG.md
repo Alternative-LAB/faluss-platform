@@ -17,6 +17,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Persister les projections privées B4 depuis le corpus courant authentifié,
+  avec reconstruction atomique et refus des générations anciennes ou
+  incomplètes. Recette Fans jetable uniquement, sans score public ni ledger.
+
 - Composer les relevés privés Europe/Paris et les classements persistants
   Fan/Créateur par catégorie depuis un corpus B3 complet déjà authentifié.
   Calcul pur testé, sans publication, stockage supplémentaire ni consommation.

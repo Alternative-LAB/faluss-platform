@@ -15,6 +15,8 @@ ClosedEnvironment::assertIsolated($wpdb,'fans');
 if (!defined('WP_CLI') || !WP_CLI) { throw new RuntimeException('Fixture CLI only.'); }
 require_once WP_PLUGIN_DIR . '/faluss-platform/src/Federation/Legacy/includes/class-faluss-federation-crypto.php';
 $input = json_decode(file_get_contents($args[0]),true,40,JSON_THROW_ON_ERROR);
+require_once __DIR__ . '/corpus-http-metrics.php';
+corpus_recipe_http_metrics($args[0]);
 
 /** Fails around actual private-primary COMMITs, without an HTTP or production hook. */
 final class FansCorpusRecipeDatabase extends wpdb
@@ -24,6 +26,7 @@ final class FansCorpusRecipeDatabase extends wpdb
 
     public function query($query)
     {
+        if ($this->fault === 'cache-insert' && str_starts_with($query,'INSERT INTO `wp_fans_hof_b4_generation`')) { $this->fault = ''; return false; }
         if (($this->fault === 'page-insert' && str_starts_with($query,'INSERT INTO `wp_fans_pf_b3c_pages`'))
             || ($this->fault === 'current-write' && preg_match('/^(INSERT INTO|UPDATE) `wp_fans_pf_b3c_current`/',$query) === 1)) {
             $this->fault = ''; return false;
@@ -46,7 +49,9 @@ final class FansCorpusRecipeDatabase extends wpdb
 }
 
 try {
-    if ($input['action'] === 'ready') { $result = ['ready' => ClosedCorpusInboxSchema::ready($wpdb)]; }
+    if ($input['action'] === 'cache-ready') { $result = ['ready' => \Faluss\Platform\Fans\Hof\ClosedRankingProjectionSchema::ready($wpdb)]; }
+    elseif ($input['action'] === 'cache-install') { \Faluss\Platform\Fans\Hof\ClosedRankingProjectionSchema::installForRecipe($wpdb); $result = ['ready' => true]; }
+    elseif ($input['action'] === 'ready') { $result = ['ready' => ClosedCorpusInboxSchema::ready($wpdb)]; }
     elseif ($input['action'] === 'install') {
         ClosedCorpusInboxSchema::installForRecipe($wpdb); $result = ['ready' => ClosedCorpusInboxSchema::ready($wpdb)];
     } else {
@@ -77,6 +82,8 @@ try {
             'request' => $inbox->request($input['fields'],$input['sealed']),
             'accept' => $inbox->accept($input['proof']),
             'current' => ['current' => $inbox->current()],
+            'cache-rebuild' => (new \Faluss\Platform\Fans\Hof\ClosedRankingProjectionStore($wpdb,$peer,$input['origin'],'1.0.0'))->rebuild(),
+            'cache-read' => (new \Faluss\Platform\Fans\Hof\ClosedRankingProjectionStore($wpdb,$peer,$input['origin'],'1.0.0'))->read(),
             default => throw new RuntimeException('Unknown closed inbox operation.'),
         };
         if (($input['monitor'] ?? false) === true) { $result['http_trace'] = $trace; }
