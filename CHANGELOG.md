@@ -8,6 +8,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Pont fermé entre gouvernance des sessions Fans et acquittements primaires Hub : actions immuables, décisions et journal atomiques, annulation/suspension distinctes de la fin attestée ; uniquement en recette jetable, sans route ou ouverture économique.
+
 - Façade privée d'acquittement de barrière : preuve signée et confiance actuelle vérifiées sous la transaction de l'application locale, sans exposer la clé de reprise ni ouvrir le cycle de vie sur site.
 
 - Reprise Fans fermée 1.1 : version persistée avant HTTP avec l'action/clé, clôture en attente de l'échéance primaire et lookup après panne, sans réinterprétation des actions 1.0.
