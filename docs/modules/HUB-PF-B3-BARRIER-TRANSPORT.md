@@ -156,3 +156,19 @@ restent les étapes suivantes du contrat déjà approuvé.
 Recette obtenue : **272 contrôles WordPress/MariaDB satisfaits, dont 21 nouveaux** ;
 655 tests PHP / 7 000 assertions et PHPStan complet sans erreur.
 [Preuves et limites](../evidence/hub-pf-b3-barrier-admission/README.md).
+
+## B3b3d — gateway privé et recette HTTP
+
+`ClosedBarrierGateway` authentifie les deux signatures et le pair exact, puis
+admet le nonce distinct avant l'opération propriétaire. Le contexte frais
+reste contrôlé dans la transaction Hub. La réponse signée lie l'action,
+l'objet, la requête et le nonce ; un résultat incertain reste `unknown`.
+Les opérations ne changent aucune quantité PF.
+
+Le MU-adaptateur existe uniquement sous `tests/`, hors archive livrée. Il exige
+l'enclave physique sur chaque lecture, une politique de pair 0600 et un POST
+privé. Aucun hook du plugin, route de site ou admission réelle n'est ajouté.
+Les [preuves HTTP](../evidence/hub-pf-b3-barrier-http/README.md) distinguent
+303 contrôles isolés du véritable SSO et du client Fans encore à raccorder.
+La persistance durable opening/closing et la concurrence réseau avec la
+consommation restent les prochains sous-lots du contrat déjà approuvé.

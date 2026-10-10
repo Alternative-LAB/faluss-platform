@@ -136,6 +136,8 @@ jobs:
         run: python3 tests/TokenEngine/recipe/run.py --f1a --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/fans-pf-f1a-checks.json"
       - name: Hub B3 closed owner barriers real WordPress
         run: python3 tests/TokenEngine/recipe/run.py --b3-barriers --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-b3-barriers-checks.json"
+      - name: Hub B3 signed barriers isolated HTTP
+        run: python3 tests/TokenEngine/recipe/run.py --b3-barrier-http --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-b3-barrier-http-checks.json"
       - name: Hub B3 closed ranked consumption real WordPress
         run: python3 tests/TokenEngine/recipe/run.py --b3-ranked --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-b3-ranked-checks.json"
       - name: Hub B3 closed ranked member snapshots real WordPress
@@ -165,6 +167,7 @@ jobs:
             ${{ runner.temp }}/hub-pf-h4-http-checks.json
             ${{ runner.temp }}/fans-pf-f1a-checks.json
             ${{ runner.temp }}/hub-pf-b3-barriers-checks.json
+            ${{ runner.temp }}/hub-pf-b3-barrier-http-checks.json
             ${{ runner.temp }}/hub-pf-b3-ranked-checks.json
             ${{ runner.temp }}/hub-pf-b3-snapshots-checks.json
             ${{ runner.temp }}/hub-pf-b3-corpus-source-checks.json

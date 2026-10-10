@@ -36,6 +36,7 @@ def main():
     parser.add_argument('--h4-http', action='store_true', help='Closed private complete snapshot delivery between disposable Hub and Fans')
     parser.add_argument('--f1a', action='store_true', help='Closed private Fan/Creator rebuildable projections after unchanged H0-H4')
     parser.add_argument('--b3-barriers', action='store_true', help='Closed B3 owner barriers on the primary; metadata only, no new consumption')
+    parser.add_argument('--b3-barrier-http', action='store_true')
     parser.add_argument('--b3-ranked', action='store_true', help='Closed B3 ranked consumption with official debit; fictitious owner proofs only')
     parser.add_argument('--b3-snapshots', action='store_true', help='Closed member snapshots 2.0 with original ranked facts and latest H4 net')
     parser.add_argument('--b3-corpus-source', action='store_true', help='Exhaustive closed owner inventory, H4 reconciliation and measured read mutex')
@@ -58,6 +59,8 @@ def main():
         options.b3_ranked = True
     if options.b3_ranked:
         options.b3_barriers = True
+    if options.b3_barrier_http:
+        options.b3_barriers = True
     if options.b3_barriers:
         options.h3_proofs = True
     if options.f1a:
@@ -72,6 +75,8 @@ def main():
         options.h3_proofs = True
     if options.h3_proofs:
         options.h2 = True
+    if options.b3_barrier_http and (options.h3_http or options.h4_http or options.b3_corpus_http):
+        parser.error('Barrier HTTP requires a dedicated fresh Fans fixture.')
     source = pathlib.Path(options.source).resolve()
     core = pathlib.Path(options.core).resolve()
     root = pathlib.Path(tempfile.mkdtemp(prefix='hub-pf-wp-', dir='/var/tmp')).resolve()
@@ -346,7 +351,10 @@ def main():
         b3_barriers_start = len(checks)
         if options.b3_barriers:
             from b3_barrier_checks import run_checks
-            run_checks(root, wp, check, call, sql, start, finish, parallel, await_file)
+            barrier_helpers = run_checks(root, wp, check, call, sql, start, finish, parallel, await_file)
+        if options.b3_barrier_http:
+            from b3_barrier_http_checks import run_checks
+            run_checks(root,wp,source,options.cli,check,call,sql,command,workers,log,start,finish,await_file,barrier_helpers)
         b3_ranked_start = len(checks)
         if options.b3_ranked:
             from b3_ranked_checks import run_checks
@@ -396,7 +404,8 @@ def main():
         report['h4_snapshots_total'] = h4_http_start - h4_snapshots_start
         report['h4_http_total'] = f1a_start - h4_http_start
         report['f1a_total'] = b3_barriers_start - f1a_start
-        report['b3_barriers_total'] = b3_ranked_start - b3_barriers_start
+        report['b3_barrier_http_total'] = sum(name.startswith('B3bh ') for name in checks)
+        report['b3_barriers_total'] = b3_ranked_start - b3_barriers_start - report['b3_barrier_http_total']
         report['b3_ranked_total'] = b3_snapshots_start - b3_ranked_start
         report['b3_snapshots_total'] = b3_corpus_source_start - b3_snapshots_start
         report['b3_corpus_source_total'] = b3_corpus_start - b3_corpus_source_start
@@ -417,7 +426,7 @@ def main():
             report['consumption_schema'] = '1 (closed_h2_consumption)'
         if options.h3_proofs:
             report['scope'] += '; closed H3 signed proofs and SQL nonces'
-            if not options.h3_http:
+            if not (options.h3_http or options.b3_barrier_http):
                 report['scope'] += ', no HTTP or actual SSO'
             report['protocol_schema'] = '1 (closed_h3_hub)'
         if options.b3_barriers:
@@ -425,6 +434,11 @@ def main():
             report['barrier_schema'] = '1 (closed_b3_barriers)'
             report['not_proven'] += ['B3 ranked atomic debit/order/receipt, cross-instance barrier transport and Fans closing state',
                                      'Any production installation, real account, purchase, score or retention policy']
+        if options.b3_barrier_http:
+            report['scope'] += '; private signed barrier register/close/lookup HTTP between distinct disposable WordPress nodes, nonces and lost-body primary recovery'
+            report['not_proven'] = ['Durable Fans opening/closing state, integrated client and network confirmation versus closure',
+                                    'Real SSO, accounts, purchase producer, production admission, activation, public score or retention policy',
+                                    'Real infrastructure COMMIT loss, replica or inconsistent backup restore']
         if options.b3_ranked:
             report['scope'] += '; closed B3b2 atomic owner order/context/signed receipt and official H2 debit, partial H4 corrections with fictitious evidence'
             report['ranked_schema'] = '1 (closed_b3_ranked)'

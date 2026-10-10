@@ -17,6 +17,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Raccorder le transport privé fermé des barrières au gateway Hub : signatures,
+  nonces dédiés et lookup primaire après réponse HTTP perdue. Deux WordPress
+  jetables uniquement ; aucun ledger, route de site ou activation ajouté.
+
 - Ajouter l'admission SQL fermée des nonces de barrières : stockage dédié,
   permissions, concurrence et expiration après attente et avant COMMIT,
   sans opération économique, route ou migration automatique.

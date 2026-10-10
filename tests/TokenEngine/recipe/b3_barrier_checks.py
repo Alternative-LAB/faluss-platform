@@ -173,3 +173,5 @@ def run_checks(root, wp, check, call, sql, start, finish, parallel, await_file):
 
     from b3_barrier_admission_checks import run_checks as admission_checks
     admission_checks(root,check,call,sql,start,finish,parallel,await_file,fixture)
+
+    return fixture,close_ref
