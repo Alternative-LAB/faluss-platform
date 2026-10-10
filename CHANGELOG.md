@@ -17,6 +17,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Lier les lectures fermées du corpus exhaustif à l'origine, la politique,
+  l'opération, la clé durable et au contexte signé exact, sans paramètre Fan.
+  Vérifier les pages/fences privées et les refus sous les domaines dédiés,
+  sans route HTTP ni admission ajoutée par ce sous-lot de validateurs.
+
 - Ajouter B3c2b2 fermé : générations exhaustives immuables du corpus 1.0,
   pages de 100 faits et lookup primaire par clé stable ; vérification finale
   des sources H4 actuelles et refus du corpus obsolète, sans écriture

@@ -42,7 +42,7 @@ Recette autorisée : deux Hub/Fans WordPress/MariaDB jetables, données fictives
 
 1. **B3c2a, cette PR** : validateur canonique du corpus, permission reconnue uniquement si explicitement présente, domaines Ed25519 distincts et tests de refus. Aucun schéma, stockage, route ou admission. Un validateur ne prouve pas la complétude de données réelles : elle doit être attestée par le propriétaire Hub.
 2. **B3c2b1, #174** : primitive propriétaire de lecture exhaustive sous verrou global, composition de chaque fait 0.3 avec le net H4. Mesurer le temps de détention des verrous, les attentes des consommations et corrections, puis la reprise d'une lecture pendant un rapprochement ; publication des seuls résultats expurgés et limites de dimensionnement de la recette. **B3c2b2, lot courant** : quatre tables de métadonnées uniquement, matérialisation atomique, pages immuables de 100 et vérification primaire finale, lookup/reprise par clé durable et refus d'une génération devenue obsolète. La preuve réseau signée et l'inbox Fans restent B3c2c.
-3. **B3c2c** : transport HTTP physiquement fermé et inbox Fans avec remplacement atomique après réception de toutes les pages et fence primaire. Tests des permissions, signatures, audiences, origines, clés, réponses perdues et refus d'une génération incomplète.
+3. **B3c2c1, lot courant** : codec signé de lecture propriétaire, contexte exact par origine/politique/opération/clé, réponses liées à la requête et validateurs de pages/fences/refus. Aucun HTTP, nonce admis en SQL ou inbox dans ce sous-lot. **B3c2c2/c3** : transport HTTP physiquement fermé et inbox Fans avec remplacement atomique après réception de toutes les pages et fence primaire. Tests réseau des permissions, signatures, audiences, origines, clés, réponses perdues et refus d'une génération incomplète.
 
 Les transports 0.3, snapshots membres 2.0 et barrières restent des sous-lots B3 parallèles à intégrer, avec leurs propres domaines. B4/B5 ne déclareront aucun classement exhaustif tant que le corpus propriétaire complet n'est pas rapproché.
 
@@ -55,3 +55,35 @@ Chaque fait garde attribution, consommation, filiation du débit, membre et Cré
 Les faits sont triés par ordre Hub strictement croissant, avec confirmations UTC6 non décroissantes et contexte conforme au manifeste. L'empreinte complète porte sur le tableau canonique **de tous** les faits. Pagination de 100, une page vide pour un corpus vide ; curseur opaque et manifeste exact sur chaque page. La réception complète vérifie aussi les unicités entre pages, totaux, dernières révisions par lot et empreinte globale. Lire les pages individuellement ne prouve pas l'exhaustivité.
 
 Domaines distincts : `faluss.hub-purchased-pf.corpus-context/1`, `corpus-request/1` et `corpus-response/1`. Requêtes bornées à 49 152 octets, contexte à 32 768, réponse à 4 MiB pour couvrir une page de 100 faits avec dix sessions et 32 allocations chacun ; aucun agrandissement d'un ancien domaine. Une réponse trop grande sera refusée, jamais tronquée. Le seuil de matérialisation totale et le dimensionnement seront documentés par le lot propriétaire, sans annoncer une capacité de production depuis cette borne de transport.
+
+### Codec de transport B3c2c1
+
+`CorpusTransport` admet uniquement `start`, `lookup`, `page` et `finish`.
+Champs communs : `read_id` opaque du collecteur durable Fans, `origin_id`,
+`policy_version`, `corpus_id` et `cursor`. Ces deux derniers sont vides pour
+start/lookup ; page exige les deux UUID de la génération ; finish n'admet
+aucun curseur. Aucun paramètre de membre, liste de comptes, offset ou opération
+économique. L'origine doit toujours être admise par le store propriétaire,
+pas déduite d'un contexte envoyé par le navigateur.
+
+Le contexte Fans signé et la requête reprennent ces champs identiques, avec
+pair/audience/contrat exacts, nonce, instants UTC et empreinte de la même clé
+durable. Durée au plus 60 secondes, refus des clés inconnues/révoquées et des
+contextes expirés. La seule permission globale est `pf.ranking.corpus` :
+snapshot, wallet ou délégation d'un membre ne l'accordent jamais. La validation
+du nonce n'est pas son admission à usage unique ; celle-ci sera persistée en
+SQL avant opération par le lot HTTP fermé.
+
+La réponse Hub signée reprend exactement la demande et son SHA-256 complet.
+Start/lookup fournissent la première page immuable ou l'absence certaine au
+lookup ; page fournit seulement le curseur demandé ; finish valide le manifeste,
+son digest et `verified_at` primaire. Refus et résultat incertain contiennent
+seulement un motif canonique, aucune page. Une signature de page ne prouve
+pas encore la complétude entre pages ni la fraîcheur continue.
+
+Les bornes du **payload signé** restent inchangées. L'enveloppe externe canonique
+ajoute base64 et métadonnées : 66 048 octets pour une requête, 5 593 088 pour une
+réponse, afin de transporter réellement un payload de 4 MiB. Aucune ancienne
+limite ou domaine Federation/PF élargi. Pas de route, admission, hooks, schéma,
+clé ou flag de production dans ce sous-lot pur ; réseau et remplacement Fans
+restent à prouver séparément avec clés de nœuds distinctes en isolation.
