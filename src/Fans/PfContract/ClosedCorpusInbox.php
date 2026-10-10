@@ -55,6 +55,28 @@ final class ClosedCorpusInbox
         });
     }
 
+    /** Explicit primary recheck of the same complete generation. No replacement ID/key on uncertainty.
+     * A new response challenge is persisted before HTTP; an older finish cannot satisfy this recheck.
+     * @return array<string,mixed> */
+    public function prepareRefresh(string $readId): array
+    {
+        ModelValues::uuid($readId);
+        return $this->write(function () use ($readId): array {
+            $row = $this->required($readId); $progress = $this->progress($row);
+            if ($progress['phase'] !== 'current') { return $progress; }
+            $current = $this->readCurrent();
+            $stored = $this->row('current','origin_id=%s AND policy_version=%s',[$this->origin,$this->policy]);
+            if ($current === null || $stored === null || $stored['read_id'] !== $readId
+                || CanonicalJson::encode($current['manifest']) !== CanonicalJson::encode($progress['manifest'])) {
+                throw new ModelViolation('pf_local_corpus_checkpoint_moved');
+            }
+            $progress['phase'] = 'finish'; $progress['fence_request_sha256'] = 'pending';
+            $this->query($this->db->prepare("UPDATE %i SET state='refreshing' WHERE origin_id=%s AND policy_version=%s AND read_id=%s",
+                $this->tables['current'],$this->origin,$this->policy,$readId));
+            return $this->save($row,$progress);
+        });
+    }
+
     /** Persist the exact signed request/digest before any HTTP; response binding survives restart.
      * @param array<string,mixed> $fields
      * @param array<string,mixed> $sealed
@@ -80,11 +102,17 @@ final class ClosedCorpusInbox
             DelegatedContext::fresh($payload['issued_at'],$payload['expires_at'],time());
             $hash = hash('sha256',$sealed['wire']); $nonceHash = hash('sha256',$sealed['nonce']);
             $known = $this->row('requests','read_id=%s AND nonce_sha256=%s',[$fields['read_id'],$nonceHash]);
+            if (isset($progress['fence_request_sha256']) && $known !== null) {
+                throw new ModelViolation('pf_local_corpus_checkpoint_moved');
+            }
             if ($known !== null) {
                 if ($known['request_sha256'] !== $hash || $known['wire_json'] !== $sealed['wire']) { throw new ModelViolation('pf_local_corpus_conflict'); }
             } else {
                 $this->insert('requests',['read_id' => $fields['read_id'],'nonce_sha256' => $nonceHash,'request_sha256' => $hash,
                     'fields_json' => CanonicalJson::encode($fields),'wire_json' => $sealed['wire']]);
+            }
+            if (isset($progress['fence_request_sha256'])) {
+                $progress['fence_request_sha256'] = $hash; return $this->save($row,$progress);
             }
             // A lost start response always resumes at primary lookup, never under a replacement key.
             if ($progress['phase'] === 'start') { $progress['phase'] = 'lookup'; return $this->save($row,$progress); }
@@ -112,6 +140,9 @@ final class ClosedCorpusInbox
     {
         return $this->write(function () use ($proof): array {
             $answer = $this->verified($proof,false); $row = $this->required($proof['fields']['read_id']); $progress = $this->progress($row);
+            if (isset($progress['fence_request_sha256']) && $progress['fence_request_sha256'] !== $proof['request_sha256']) {
+                throw new ModelViolation('pf_local_corpus_checkpoint_moved');
+            }
             if ($answer['outcome'] === 'unknown') { throw new ModelViolation('pf_transport_unknown'); }
             if ($answer['outcome'] === 'refused') {
                 if ($progress['phase'] === 'refused') { return $progress; }
@@ -252,7 +283,14 @@ final class ClosedCorpusInbox
      * @return array<string,mixed> */
     private function progress(array $row): array
     {
-        $value = CanonicalJson::object($row['progress_json']); ModelValues::exactKeys($value,['read_id','origin_id','policy_version','read_key','phase','manifest','next_index','next_cursor']);
+        $value = CanonicalJson::object($row['progress_json']);
+        $keys = ['read_id','origin_id','policy_version','read_key','phase','manifest','next_index','next_cursor'];
+        if (array_key_exists('fence_request_sha256',$value)) {
+            $keys[] = 'fence_request_sha256';
+            if (!in_array($value['phase'] ?? '',['finish','current','refused'],true)) { throw new ModelViolation('pf_local_corpus_conflict'); }
+            if ($value['fence_request_sha256'] !== 'pending') { RankingValues::digest($value['fence_request_sha256']); }
+        }
+        ModelValues::exactKeys($value,$keys);
         if ($row['progress_sha256'] !== hash('sha256',$row['progress_json']) || $value['origin_id'] !== $this->origin || $value['policy_version'] !== $this->policy
             || $row['read_id'] !== $value['read_id'] || $row['origin_id'] !== $this->origin || $row['policy_version'] !== $this->policy
             || $row['phase'] !== $value['phase'] || $row['read_key'] !== $value['read_key']) { throw new ModelViolation('pf_local_corpus_conflict'); }

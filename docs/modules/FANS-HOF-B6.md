@@ -35,6 +35,12 @@ pas un score Hub attesté. La recette ne constitue pas une lecture complète B6.
 
 ## Raccordements suivants
 
+La relecture primaire explicite est décrite dans
+[B6 — fraîcheur primaire](FANS-HOF-B6-PRIMARY-REFRESH.md). Elle réutilise le
+`finish` existant, sans nouvelle permission ou contrat Hub. Un acquittement
+antérieur ne peut pas répondre à une nouvelle demande de fraîcheur ; aucune
+durée de cache n'est assimilée à une preuve actuelle.
+
 Origine/acquittements B1/B2, choix d'attribution, source primaire à jour, mapping
 des filiations et visibilité doivent être composés avec B4/B5 avant livraison.
 Les relevés mensuels resteront privés, liés au membre courant ; les tableaux

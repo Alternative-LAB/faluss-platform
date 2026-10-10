@@ -149,7 +149,7 @@ jobs:
       - name: Fans B3 durable complete corpus inbox real WordPress
         run: python3 tests/TokenEngine/recipe/run.py --b3-corpus-inbox --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/fans-pf-b3-corpus-inbox-checks.json"
       - name: Fans B3 bounded durable corpus reader real WordPress
-        run: python3 tests/TokenEngine/recipe/run.py --b3-corpus-reader --b5-sessions --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/fans-pf-b3-corpus-reader-checks.json"
+        run: python3 tests/TokenEngine/recipe/run.py --b3-corpus-reader --b5-sessions --b6-primary-refresh --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/fans-pf-b3-corpus-reader-checks.json"
       - uses: actions/upload-artifact@v4
         with:
           name: hub-pf-runtime-checks

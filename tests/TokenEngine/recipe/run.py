@@ -44,7 +44,10 @@ def main():
     parser.add_argument('--b3-corpus-inbox', action='store_true', help='Durable private Fans staging, primary recovery and atomic complete corpus replacement')
     parser.add_argument('--b3-corpus-reader', action='store_true', help='Bounded durable corpus orchestration with real private WordPress HTTP and recovery')
     parser.add_argument('--b5-sessions', action='store_true', help='Private session projections and recovery from the complete current corpus')
+    parser.add_argument('--b6-primary-refresh', action='store_true', help='Explicit same-generation primary freshness and uncertain response recovery')
     options = parser.parse_args()
+    if options.b6_primary_refresh:
+        options.b5_sessions = True
     if options.b5_sessions:
         options.b3_corpus_reader = True
     if options.b3_corpus_reader:
@@ -384,6 +387,9 @@ def main():
         if options.b5_sessions:
             from b5_projection_checks import run_checks
             run_checks(root,source,options.cli,check,command,corpus_fixture,corpus_reader,call,sql)
+        if options.b6_primary_refresh:
+            from b6_primary_refresh_checks import run_checks
+            run_checks(root,source,options.cli,check,command,corpus_fixture,corpus_reader,call,sql)
         report = dict(checks=checks, total=len(checks), failed=0, wordpress=cli('core', 'version').strip(),
                       php=command(['php', '-r', 'echo PHP_VERSION;']).strip(),
                       database=sql('SELECT VERSION()'), schema='5',
@@ -411,7 +417,8 @@ def main():
         report['b3_corpus_inbox_total'] = b3_corpus_reader_start - b3_corpus_inbox_start
         report['b4_projection_total'] = sum(name.startswith('B4b ') for name in checks)
         report['b5_projection_total'] = sum(name.startswith('B5b ') for name in checks)
-        report['b3_corpus_reader_total'] = len(checks) - b3_corpus_reader_start - report['b4_projection_total'] - report['b5_projection_total']
+        report['b6_primary_refresh_total'] = sum(name.startswith('B6pr ') for name in checks)
+        report['b3_corpus_reader_total'] = len(checks) - b3_corpus_reader_start - report['b4_projection_total'] - report['b5_projection_total'] - report['b6_primary_refresh_total']
         report['corpus_source_measurements'] = corpus_measurements
         report['corpus_fence_measurements'] = corpus_fence_measurements
         if options.h1 or options.h2_reservations or options.h2:
@@ -496,6 +503,8 @@ def main():
         if options.b5_sessions:
             report['scope'] += '; private session projections in the same atomic derived generation, without winner or public admission'
             report['not_proven'][0] = 'Ranked member and barrier HTTP, B2 session lifecycle, public visibility and attested opening, continuous production freshness'
+        if options.b6_primary_refresh:
+            report['scope'] += '; explicit existing finish primary recheck of the same generation, no new wire contract or continuous freshness claim'
     finally:
         for process in workers:
             if process.poll() is None:
