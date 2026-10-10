@@ -17,8 +17,8 @@ Ni négociation implicite ni interprétation rétroactive d'une ancienne preuve.
 
 `BarrierCompletion::reference()` valide seulement la syntaxe de la nouvelle
 raison, pas une échéance ou une admission. Le sous-lot propriétaire décrit ci-dessous
-l'utilise explicitement ; le gateway et la reprise Fans restent à raccorder.
-Aucun appel HTTP 1.1 ne peut encore clôturer une session.
+l'utilise explicitement ; le dispatch signé 1.1 décrit ci-dessous le raccorde
+uniquement en isolation. La reprise durable Fans 1.1 reste à raccorder.
 
 ## Règle approuvée à raccorder ensuite
 
@@ -34,7 +34,7 @@ Ancien ACK d'ouverture, timeout ou réponse perdue ne créent aucune nouvelle
 clé ni réouverture. Les contributions antérieures et corrections après clôture
 restent conservées ; aucun titre, récompense ou avantage irréversible.
 
-Sous-lots suivants : dispatch HTTP explicitement versionné ; persistance/reprise Fans ; raccordement
+Sous-lots suivants : persistance/reprise Fans 1.1 ; raccordement
 de la gouvernance B2. Le ledger, les claims, la version 1.0 et leurs écritures
 restent inchangés. Aucun contrat supplémentaire n'est déduit de cet accord.
 
@@ -82,3 +82,27 @@ Cette recette propriétaire ne prouve ni le réseau 1.1 ni le véritable SSO.
 La [preuve isolée](../evidence/hub-pf-b3-barrier-completion-owner/README.md)
 joint 309 contrôles, dont 37 nouveaux, et la destruction de la fixture.
 Retour arrière : retirer ces entrées fermées et la fixture ; aucun site migré.
+
+## Dispatch HTTP 1.1 fermé
+
+Le gateway authentifie la version explicite dans les deux domaines signés,
+puis admet le nonce et choisit la primitive propriétaire. Seuls close et lookup
+avec la raison `session_completed` en 1.1 appellent les entrées distinctes ;
+le défaut 1.0 et ses usages continuent sans réinterprétation. La réponse signée
+conserve la version, l'action, la clé, le nonce et l'empreinte du contenu.
+Version inconnue, substitution de contexte ou réponse d'une autre version :
+refus fermé. La fermeture n'effectue aucune consommation économique.
+
+La recette `run.py --b3-barrier-completion-http` utilise les deux WordPress
+jetables, leurs clés fictives distinctes et un HTTP POST loopback. Elle couvre
+les signatures/versions/audiences/permissions invalides, avant et après
+échéance primaire, huit nonces concurrents pour la même action, le rejeu d'un
+nonce, la perte du corps HTTP après COMMIT puis lookup sur la même clé,
+et la compatibilité du lookup d'ouverture 1.0 sans réouverture.
+Un fichier privé 0600 dans la fixture fixe l'horloge SQL pour les bornes ; il
+n'est ni un champ HTTP ni une option et reste derrière la barrière physique
+de recette. La preuve d'attente réelle des verrous demeure celle du lot
+propriétaire. Aucun véritable SSO, pair réel ou cycle de vie B2 n'est attesté.
+
+La reprise durable Fans 1.1 doit encore persister la version de l'action avant
+le premier HTTP. Aucun code de cette PR ne lance une fermeture sur les sites.
