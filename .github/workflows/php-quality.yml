@@ -107,7 +107,7 @@ jobs:
       - name: Fans messaging operator preparation real WordPress
         run: python3 tests/Fans/Profiles/recipe/admission-wordpress.py --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --test --messaging
       - name: Fans B1 private ranking governance real WordPress
-        run: python3 tests/Fans/Profiles/recipe/admission-wordpress.py --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --test --hof-b1 --output "$RUNNER_TEMP/fans-hof-b1-checks.json"
+        run: python3 tests/Fans/Profiles/recipe/admission-wordpress.py --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --test --hof-b1 --hof-b6-visibility --output "$RUNNER_TEMP/fans-hof-b1-checks.json"
       - name: Fans B2 private session governance real WordPress
         run: python3 tests/Fans/Profiles/recipe/admission-wordpress.py --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --test --hof-b2 --output "$RUNNER_TEMP/fans-hof-b2-checks.json"
       - name: Fans B2 private territory examination real WordPress

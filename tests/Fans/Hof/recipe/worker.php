@@ -55,6 +55,11 @@ try {
         'review' => $visibility->review($input['after'] ?? 0),
         'visible_fan' => $visibility->visibleFan($input['member']),
         'visible_creator' => $visibility->visibleCreator($input['creator']),
+        'visible_projection' => \Faluss\Platform\Fans\Hof\RankingVisibleProjection::build($input['ranked'],static function (string $id) use ($input,$visibility): ?string {
+            $local = $input['mapping'][$id] ?? null;
+            if ($local === null) { return null; }
+            return $input['family'] === 'fan' ? $visibility->visibleFan((int) $local) : $visibility->visibleCreator($local);
+        }),
         'admit' => (static function () use ($input): mixed { CreatorStatusSchema::installOrVerify(); return CreatorProfileService::setStatus($input['creator'], $input['status']); })(),
         'editorial_submit' => EditorialService::submit($input['revision'], 'Local creator fixture', 'Fictitious recipe biography', '', 0),
         'editorial_decide' => EditorialService::decide($input['creator'], $input['revision'], $input['decision'], $input['reason']),
