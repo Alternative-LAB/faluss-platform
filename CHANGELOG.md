@@ -17,6 +17,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Ajouter le codec signé 0.3 fermé pour réserver, confirmer, libérer et retrouver
+  une attribution à contexte de classement immuable. Réponses liées à la requête
+  et reçus d'origine vérifiés, sans admission HTTP ni consommation supplémentaire.
+
 - Ajouter le lecteur B3 fermé raccordant l'inbox durable Fans au véritable
   client HTTP WordPress : étapes bornées, lookup primaire après résultat
   incertain, concurrence sans nouvelle clé et promotion signée exhaustive.

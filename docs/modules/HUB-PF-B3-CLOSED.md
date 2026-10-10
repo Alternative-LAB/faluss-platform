@@ -379,6 +379,48 @@ jamais pour contourner une réponse incertaine. Ce store propriétaire ne consti
 pas encore le client durable ou une livraison réseau signée. Le transport fermé
 et le remplacement atomique Fans restent B3c2c.
 
+## B3c3a — messages privés 0.3, sans admission
+
+Le codec `RankedTransport` applique le contrat approuvé au commit `2553e376`
+aux quatre opérations `reserve`, `confirm`, `release` et `lookup`. Il signe la
+requête et sa délégation dans les domaines 0.3 déjà réservés, en liant exactement
+le contexte catégorie/sessions, l'identité déléguée, la clé d'opération, le nonce,
+la cible du lookup et la durée de validité. Celle-ci ne dépasse ni 60 secondes
+ni l'expiration de la session déléguée. La reprise conservera l'intention et la
+clé durables ; une nouvelle enveloppe fraîche ne constitue pas une nouvelle
+attribution.
+
+La réponse attendue est liée au digest de la requête, à son opération et à son
+nonce. Une confirmation exige un reçu 0.3 signé correspondant à l'intention
+complète ; son ordre Hub est une preuve d'origine, jamais le score corrigé
+courant. Les lectures H4/corpus rapprochées restent nécessaires pour ce dernier.
+Les refus authentifiés et résultats inconnus demeurent distincts. Les anciennes
+formes et signatures ne sont pas élargies pour admettre ces messages.
+
+Ce sous-lot est un validateur pur, sans route, nonce SQL, installateur, client
+actif ou débit. Il ne revendique aucune preuve réseau entre deux instances.
+Le transport propriétaire et le client durable suivent en B3c3b : contrôle de
+fraîcheur après l'attente des verrous et avant COMMIT, clés persistées avant
+HTTP, délégation serveur et reprise d'une consommation après réponse perdue.
+Les barrières signées et leur reprise locale suivent dans un lot distinct,
+selon l'accord complémentaire de #147.
+
+Scénarios du codec : quatre opérations positives, contexte altéré, permissions
+absentes, expiration, mauvaise audience, ancien domaine, réponse étrangère,
+signature de reçu altérée, clé inconnue et contexte du reçu différent. Une
+identité explicitement changée par le pair autorisé constitue une autre
+intention : le propriétaire doit refuser son rejeu sous une liaison existante.
+Le test pur ne simule pas cette garantie SQL.
+
+Vérification du 7 octobre 2026 en copie Git immuable
+`e5992279e2bc29b9281901ea30f46080a42d9795`, dépendances au verrou exact :
+27 tests ciblés / 57 assertions ; suite complète 650 tests / 6 954 assertions,
+zéro échec et deux dépréciations historiques ; PHPStan complet cible PHP 8.3,
+lint des deux PHP, liens relatifs, scan ciblé et diff check satisfaits. Runtime
+local PHP 8.5.4. Les clés des tests sont éphémères ; les identités sont fictives.
+La CI PHP 8.3 du head final reste exigée avant fusion. Aucun test HTTP 0.3
+ou WordPress/MariaDB nouveau n'est revendiqué pour ce codec pur.
+
 Bornes fermées du sous-lot propriétaire conservées, avec refus total ; page à
 4 MiB maximum. [Preuve et mesures](../evidence/hub-pf-b3-corpus/README.md),
 sans attestation de dimensionnement ou d'exploitation de production.
