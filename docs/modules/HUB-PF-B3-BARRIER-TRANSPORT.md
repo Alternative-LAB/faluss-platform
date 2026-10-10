@@ -9,6 +9,10 @@ réseau de production, migration automatique, flag ou opération réelle.
 
 ## Forme approuvée
 
+Extension 1.1 de clôture normale approuvée séparément le 10 octobre :
+[contrat et découpage](HUB-PF-B3-SESSION-COMPLETION.md). Le défaut 1.0 et ses
+validateurs restent inchangés ; le codec 1.1 seul n'ouvre aucun parcours.
+
 `BarrierTransport` définit `register`, `close` et `lookup`, cette dernière avec
 une cible explicite register/close. Champs exacts : `contract`, `kind`, `issuer`,
 `audience`, `operation`, `action_id`, `origin_id`, `policy_version`,

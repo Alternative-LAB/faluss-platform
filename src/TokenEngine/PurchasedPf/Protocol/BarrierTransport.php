@@ -11,12 +11,14 @@ use Faluss\Platform\TokenEngine\PurchasedPf\ModelViolation;
 final class BarrierTransport
 {
     public const CONTRACT = 'hub.purchased-pf.ranking-barriers/1.0.0';
+    public const COMPLETION_CONTRACT = 'hub.purchased-pf.ranking-barriers/1.1.0';
     public const MAX_WIRE = 66048;
     private const FIELDS = ['operation','action_id','origin_id','policy_version','lookup_operation','object'];
 
     /** @param array<string,mixed> $fields */
-    public static function fields(array $fields): void
+    public static function fields(array $fields, string $contract = self::CONTRACT): void
     {
+        if (!in_array($contract,[self::CONTRACT,self::COMPLETION_CONTRACT],true)) { throw new ModelViolation('pf_barrier_contract_mismatch'); }
         ModelValues::exactKeys($fields,self::FIELDS);
         ModelValues::uuid($fields['action_id']); ModelValues::uuid($fields['origin_id']); ModelValues::version($fields['policy_version']);
         if (!in_array($fields['operation'],['register','close','lookup'],true) || !is_array($fields['object'])
@@ -29,15 +31,15 @@ final class BarrierTransport
             if ($descriptor['content']['origin_id'] !== $fields['origin_id'] || $descriptor['content']['policy_version'] !== $fields['policy_version']) {
                 throw new ModelViolation('pf_barrier_context_mismatch');
             }
-        } else { RankingBarrier::closeReference($fields['object']); }
+        } else { self::closeReference($fields['object'],$contract); }
     }
 
     /** @param array<string,mixed> $fields
      * @return array{wire:string,nonce:string} */
-    public static function sealRequest(array $fields, string $key, string $keyId, int $expires): array
+    public static function sealRequest(array $fields, string $key, string $keyId, int $expires, string $contract = self::CONTRACT): array
     {
-        self::fields($fields); ModelValues::keyHash($key); $now = time(); $nonce = bin2hex(random_bytes(32));
-        $base = ['contract' => self::CONTRACT,'issuer' => 'fixture.fans','audience' => 'fixture.hub','nonce' => $nonce,
+        self::fields($fields,$contract); ModelValues::keyHash($key); $now = time(); $nonce = bin2hex(random_bytes(32));
+        $base = ['contract' => $contract,'issuer' => 'fixture.fans','audience' => 'fixture.hub','nonce' => $nonce,
             'issued_at' => gmdate('Y-m-d\TH:i:s\Z',$now),'expires_at' => gmdate('Y-m-d\TH:i:s\Z',min($now+60,$expires))] + $fields;
         DelegatedContext::fresh($base['issued_at'],$base['expires_at'],$now);
         $context = ['kind' => SignedEnvelope::BARRIER_CONTEXT,'key_sha256' => hash('sha256',$key),
@@ -52,11 +54,11 @@ final class BarrierTransport
     /** Outer signature must already be authenticated in the BARRIER_REQUEST domain.
      * @param array<string,mixed> $payload
      * @return array<string,mixed> */
-    public static function request(array $payload, PeerPolicy $peer, int $now): array
+    public static function request(array $payload, PeerPolicy $peer, int $now, string $contract = self::CONTRACT): array
     {
         ModelValues::exactKeys($payload,array_merge(self::FIELDS,['contract','kind','issuer','audience','operation_key','nonce','issued_at','expires_at','context']));
-        $fields = array_intersect_key($payload,array_flip(self::FIELDS)); self::fields($fields);
-        if ($payload['contract'] !== self::CONTRACT || $payload['kind'] !== SignedEnvelope::BARRIER_REQUEST
+        $fields = array_intersect_key($payload,array_flip(self::FIELDS)); self::fields($fields,$contract);
+        if ($payload['contract'] !== $contract || $payload['kind'] !== SignedEnvelope::BARRIER_REQUEST
             || $peer->node !== 'fixture.fans' || $peer->audience !== 'fixture.hub'
             || $payload['issuer'] !== $peer->node || $payload['audience'] !== $peer->audience
             || !is_string($payload['operation_key']) || !is_array($payload['context'])) { throw new ModelViolation('pf_barrier_request_mismatch'); }
@@ -73,20 +75,20 @@ final class BarrierTransport
     /** No session content is echoed in a response. Its digest binds the complete request action.
      * @param array<string,mixed> $fields
      * @return array<string,mixed> */
-    public static function responseFields(array $fields): array
+    public static function responseFields(array $fields, string $contract = self::CONTRACT): array
     {
-        self::fields($fields);
+        self::fields($fields,$contract);
         return ['object_sha256' => hash('sha256',CanonicalJson::encode($fields['object']))] + array_diff_key($fields,['object' => true]);
     }
 
     /** @param array<string,mixed> $payload
      * @param array<string,mixed> $fields
      * @return array{outcome:string,result:array<string,mixed>} */
-    public static function response(array $payload, PeerPolicy $peer, array $fields, string $nonce, string $digest, int $now): array
+    public static function response(array $payload, PeerPolicy $peer, array $fields, string $nonce, string $digest, int $now, string $contract = self::CONTRACT): array
     {
-        $expected = self::responseFields($fields); DelegatedContext::nonce($nonce); RankingValues::digest($digest);
+        $expected = self::responseFields($fields,$contract); DelegatedContext::nonce($nonce); RankingValues::digest($digest);
         ModelValues::exactKeys($payload,array_merge(array_keys($expected),['contract','kind','issuer','audience','nonce','request_sha256','issued_at','expires_at','outcome','result']));
-        if ($payload['contract'] !== self::CONTRACT || $payload['kind'] !== SignedEnvelope::BARRIER_RESPONSE
+        if ($payload['contract'] !== $contract || $payload['kind'] !== SignedEnvelope::BARRIER_RESPONSE
             || $peer->node !== 'fixture.hub' || $peer->audience !== 'fixture.fans'
             || $payload['issuer'] !== $peer->node || $payload['audience'] !== $peer->audience
             || CanonicalJson::encode(array_intersect_key($payload,$expected)) !== CanonicalJson::encode($expected)
@@ -100,7 +102,7 @@ final class BarrierTransport
         } elseif ($fields['operation'] !== 'lookup' || $result !== ['state' => 'not_found']) {
             $operation = self::operation($fields);
             ModelValues::exactKeys($result,array_merge(['operation','barrier_key','version','content_sha256','effective_at','state'],$operation === 'close' ? ['reason'] : []));
-            $ref = $operation === 'register' ? RankingBarrier::reference($fields['object']['content']) : RankingBarrier::closeReference($fields['object']);
+            $ref = $operation === 'register' ? RankingBarrier::reference($fields['object']['content']) : self::closeReference($fields['object'],$contract);
             foreach (array_intersect_key($ref,array_flip(['barrier_key','version','content_sha256','reason'])) as $field => $value) {
                 if ($result[$field] !== $value) { throw new ModelViolation('pf_barrier_response_mismatch'); }
             }
@@ -119,4 +121,9 @@ final class BarrierTransport
     /** @param array<string,mixed> $fields */
     private static function permission(PeerPolicy $peer, array $fields): void
     { $peer->allow('pf.ranking.context.' . self::operation($fields)); if ($fields['operation'] === 'lookup') { $peer->allow('pf.lookup'); } }
+
+    /** @param array<array-key,mixed> $input
+     * @return array<string,string> */
+    private static function closeReference(array $input, string $contract): array
+    { return $contract === self::COMPLETION_CONTRACT ? BarrierCompletion::reference($input) : RankingBarrier::closeReference($input); }
 }
