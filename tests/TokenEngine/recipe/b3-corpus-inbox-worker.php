@@ -75,6 +75,9 @@ try {
             },10,2);
         }
         $result = match ($input['action']) {
+            'refresh' => (new ClosedCorpusReader($inbox,new ClosedCorpusClient($wpdb,$peer,'recipe-fans-k1',
+                $input['endpoint'] ?? file_get_contents($root . '/corpus-endpoint'),$input['origin'],'1.0.0')))->refresh($input['read_id'],$input['steps'] ?? 4),
+            'prepare-refresh' => $inbox->prepareRefresh($input['read_id']),
             'advance' => (new ClosedCorpusReader($inbox,new ClosedCorpusClient($wpdb,$peer,'recipe-fans-k1',
                 $input['endpoint'] ?? file_get_contents($root . '/corpus-endpoint'),$input['origin'],'1.0.0')))->advance($input['read_id'],$input['steps'] ?? 4),
             'prepare' => $inbox->prepare($input['read_id']),
