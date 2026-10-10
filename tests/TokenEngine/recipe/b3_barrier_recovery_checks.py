@@ -123,3 +123,4 @@ def run_checks(root,fans,source,cli_path,check,command,hub_sql,network,policy,po
           and invoke('advance',lost['origin_id'],action_id=lost['action_id'],endpoint=endpoint,steps=0)['error']=='pf_local_barrier_budget')
     check('B3br recovery never mutates PF or creates a parallel ledger',hub_sql('SELECT * FROM wp_token_engine_pf_ledger ORDER BY id')==ledger
           and sql("SHOW TABLES LIKE 'wp_fans%ledger%'")=='')
+    return dict(invoke=invoke,sql=sql,prepare=prepare,recover=recover,advance=advance,literal=literal,table=table,endpoint=endpoint,fans=fans)

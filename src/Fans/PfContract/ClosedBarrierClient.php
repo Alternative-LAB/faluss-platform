@@ -38,7 +38,8 @@ final class ClosedBarrierClient
                         'completed_steps' => (string) $completed,'reason' => 'pf_local_barrier_opening_refused'];
                 }
                 $fields = $this->inbox->fields($progress);
-                $sealed = BarrierTransport::sealRequest($fields,$progress['operation_key'],$this->keyId,time()+60);
+                $sealed = BarrierTransport::sealRequest($fields,$progress['operation_key'],$this->keyId,time()+60,
+                    $progress['contract'] ?? BarrierTransport::CONTRACT);
                 $this->inbox->request($fields,$sealed);
                 $wire = $this->post($sealed['wire']);
                 // Invalid or unauthenticated delivery remains uncertain, never a trusted owner refusal.

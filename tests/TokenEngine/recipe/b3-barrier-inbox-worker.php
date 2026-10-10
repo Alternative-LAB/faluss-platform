@@ -8,6 +8,7 @@ use Faluss\Platform\Fans\PfContract\ClosedBarrierInboxSchema;
 use Faluss\Platform\TokenEngine\PurchasedPf\ModelViolation;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\ClosedEnvironment;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy;
+use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\BarrierTransport;
 
 global $wpdb;
 ClosedEnvironment::assertIsolated($wpdb,'fans');
@@ -67,7 +68,7 @@ try {
         }
         if ($input['action'] === 'request') { $inbox->request($input['fields'],$input['sealed']); $result = ['accepted' => true]; }
         else { $result = match ($input['action']) {
-            'prepare' => $inbox->prepare($input['fields']),
+            'prepare' => $inbox->prepare($input['fields'],$input['contract'] ?? BarrierTransport::CONTRACT),
             'recover' => $inbox->recover($input['action_id']),
             'accept' => $inbox->accept($input['proof']),
             'advance' => (new ClosedBarrierClient($wpdb,$inbox,'recipe-fans-k1',$input['endpoint']))->advance($input['action_id'],$input['steps'] ?? 4),

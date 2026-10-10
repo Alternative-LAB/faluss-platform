@@ -39,6 +39,7 @@ def main():
     parser.add_argument('--b3-barrier-http', action='store_true')
     parser.add_argument('--b3-barrier-completion', action='store_true', help='Explicit 1.1 session completion on the disposable primary only')
     parser.add_argument('--b3-barrier-completion-http', action='store_true', help='Explicit signed 1.1 session completion over private loopback')
+    parser.add_argument('--b3-barrier-completion-recovery', action='store_true', help='Durable explicit Fans completion action and same-key recovery')
     parser.add_argument('--b3-ranked', action='store_true', help='Closed B3 ranked consumption with official debit; fictitious owner proofs only')
     parser.add_argument('--b3-snapshots', action='store_true', help='Closed member snapshots 2.0 with original ranked facts and latest H4 net')
     parser.add_argument('--b3-corpus-source', action='store_true', help='Exhaustive closed owner inventory, H4 reconciliation and measured read mutex')
@@ -47,6 +48,8 @@ def main():
     parser.add_argument('--b3-corpus-inbox', action='store_true', help='Durable private Fans staging, primary recovery and atomic complete corpus replacement')
     parser.add_argument('--b3-corpus-reader', action='store_true', help='Bounded durable corpus orchestration with real private WordPress HTTP and recovery')
     options = parser.parse_args()
+    if options.b3_barrier_completion_recovery:
+        options.b3_barrier_completion_http = True
     if options.b3_barrier_completion_http:
         options.b3_barrier_http = True
     if options.b3_corpus_reader:
@@ -365,6 +368,9 @@ def main():
         if options.b3_barrier_completion_http:
             from b3_barrier_completion_http_checks import run_checks
             run_checks(root,check,call,sql,barrier_http)
+        if options.b3_barrier_completion_recovery:
+            from b3_barrier_completion_recovery_checks import run_checks
+            run_checks(root,source,options.cli,check,sql,barrier_http)
         b3_ranked_start = len(checks)
         if options.b3_ranked:
             from b3_ranked_checks import run_checks
@@ -417,8 +423,9 @@ def main():
         report['b3_barrier_recovery_total'] = sum(name.startswith('B3br ') for name in checks)
         report['b3_barrier_completion_total'] = sum(name.startswith('B3be ') for name in checks)
         report['b3_barrier_completion_http_total'] = sum(name.startswith('B3beh ') for name in checks)
+        report['b3_barrier_completion_recovery_total'] = sum(name.startswith('B3ber ') for name in checks)
         report['b3_barrier_http_total'] = sum(name.startswith('B3bh ') for name in checks)
-        report['b3_barriers_total'] = b3_ranked_start - b3_barriers_start - report['b3_barrier_http_total'] - report['b3_barrier_recovery_total'] - report['b3_barrier_completion_http_total']
+        report['b3_barriers_total'] = b3_ranked_start - b3_barriers_start - report['b3_barrier_http_total'] - report['b3_barrier_recovery_total'] - report['b3_barrier_completion_http_total'] - report['b3_barrier_completion_recovery_total']
         report['b3_ranked_total'] = b3_snapshots_start - b3_ranked_start
         report['b3_snapshots_total'] = b3_corpus_source_start - b3_snapshots_start
         report['b3_corpus_source_total'] = b3_corpus_start - b3_corpus_source_start
@@ -455,7 +462,9 @@ def main():
         if options.b3_barrier_completion:
             report['scope'] += '; explicit 1.1 owner session completion at frozen primary deadline after locks, atomic audit and same-key COMMIT recovery; no 1.1 HTTP or Fans lifecycle bridge'
         if options.b3_barrier_completion_http:
-            report['scope'] += '; explicit signed 1.1 completion and primary lookup over loopback; no durable Fans 1.1 lifecycle bridge'
+            report['scope'] += '; explicit signed 1.1 completion and primary lookup over loopback; no B1/B2 lifecycle bridge'
+        if options.b3_barrier_completion_recovery:
+            report['scope'] += '; durable explicit Fans 1.1 action/key/version and primary recovery; no B1/B2 lifecycle bridge or real SSO'
         if options.b3_ranked:
             report['scope'] += '; closed B3b2 atomic owner order/context/signed receipt and official H2 debit, partial H4 corrections with fictitious evidence'
             report['ranked_schema'] = '1 (closed_b3_ranked)'

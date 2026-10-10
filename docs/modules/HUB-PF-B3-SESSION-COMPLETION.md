@@ -18,7 +18,8 @@ Ni négociation implicite ni interprétation rétroactive d'une ancienne preuve.
 `BarrierCompletion::reference()` valide seulement la syntaxe de la nouvelle
 raison, pas une échéance ou une admission. Le sous-lot propriétaire décrit ci-dessous
 l'utilise explicitement ; le dispatch signé 1.1 décrit ci-dessous le raccorde
-uniquement en isolation. La reprise durable Fans 1.1 reste à raccorder.
+uniquement en isolation. La reprise durable Fans 1.1 est décrite ci-dessous ;
+le raccordement à la gouvernance B1/B2 reste nécessaire.
 
 ## Règle approuvée à raccorder ensuite
 
@@ -34,7 +35,7 @@ Ancien ACK d'ouverture, timeout ou réponse perdue ne créent aucune nouvelle
 clé ni réouverture. Les contributions antérieures et corrections après clôture
 restent conservées ; aucun titre, récompense ou avantage irréversible.
 
-Sous-lots suivants : persistance/reprise Fans 1.1 ; raccordement
+Sous-lot suivant : raccordement
 de la gouvernance B2. Le ledger, les claims, la version 1.0 et leurs écritures
 restent inchangés. Aucun contrat supplémentaire n'est déduit de cet accord.
 
@@ -104,5 +105,38 @@ n'est ni un champ HTTP ni une option et reste derrière la barrière physique
 de recette. La preuve d'attente réelle des verrous demeure celle du lot
 propriétaire. Aucun véritable SSO, pair réel ou cycle de vie B2 n'est attesté.
 
-La reprise durable Fans 1.1 doit encore persister la version de l'action avant
-le premier HTTP. Aucun code de cette PR ne lance une fermeture sur les sites.
+La reprise durable Fans 1.1 persiste la version de l'action avant
+le premier HTTP. Aucun code de ces lots ne lance une fermeture sur les sites.
+
+## Reprise Fans 1.1 fermée
+
+L'action est composée uniquement par le serveur de confiance. `prepare()`
+requiert une version explicite pour la fin normale ; son défaut reste 1.0 et
+refuse cette raison. Les anciennes lignes gardent exactement leurs octets.
+Les nouvelles actions portent une enveloppe locale `contract/fields` hachée
+dans la colonne existante : aucune migration ou réinterprétation d'un ancien
+ACK. La version est relue et vérifiée à chaque checkpoint, signature de demande,
+réponse et récupération historique avec confiance Hub actuelle.
+
+La préparation de la fermeture et l'action/clé sont atomiques ; état `closing`
+immédiat. Une ouverture 1.0 incertaine est d'abord résolue, sans réouvrir les
+choix locaux. Un refus signé `pf_barrier_completion_not_due` reste pending,
+sur la même action/clé : l'heure Fans ne remplace pas celle du primaire Hub.
+Le nombre d'échanges par avance reste borné ; aucune boucle de fond ajoutée.
+Absence primaire, livraison puis réponse perdue suivent le même protocole de
+lookup ; aucune autre clé n'est créée pour contourner l'attente ou la panne.
+
+Le schéma privé à quatre tables est inchangé. Les HTTP sont effectués après
+enregistrement durable, hors transaction et mutex local. Version substituée,
+nouvelle action concurrente, type autre qu'une session, preuve d'un pair/clé
+non autorisé ou anciens octets corrompus : refus fermé. Une clé Hub révoquée
+ne peut pas habiliter une preuve persistée. Les anciens ACK ne réouvrent pas.
+
+Recette `--b3-barrier-completion-recovery` : préparation concurrente, demande
+de mauvaise version, échéance non atteinte puis lookup/close, corps perdu
+après COMMIT, erreur d'insertion, COMMIT local incertain et mort du processus
+avant/après COMMIT ; reprise avec action, clé et version d'origine. Comparaison
+des actions 1.0 historiques et du ledger. La preuve réseau est celle des deux
+WordPress jetables et non celle du véritable SSO ou de la gouvernance B2.
+La [preuve isolée de reprise](../evidence/fans-hof-b3-completion-recovery/README.md)
+joint 385 contrôles, dont 28 nouveaux, et la destruction de la fixture.
