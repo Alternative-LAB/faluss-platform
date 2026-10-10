@@ -135,7 +135,7 @@ jobs:
       - name: Fans F1a closed private projections real WordPress
         run: python3 tests/TokenEngine/recipe/run.py --f1a --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/fans-pf-f1a-checks.json"
       - name: Hub B3 closed owner barriers real WordPress
-        run: python3 tests/TokenEngine/recipe/run.py --b3-barriers --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-b3-barriers-checks.json"
+        run: python3 tests/TokenEngine/recipe/run.py --b3-barriers --b3-barrier-completion --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-b3-barriers-checks.json"
       - name: Hub B3 signed barriers isolated HTTP
         run: python3 tests/TokenEngine/recipe/run.py --b3-barrier-http --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-b3-barrier-http-checks.json"
       - name: Hub B3 closed ranked consumption real WordPress

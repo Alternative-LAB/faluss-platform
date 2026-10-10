@@ -51,11 +51,15 @@ try {
                 return ['checked' => true,'confirmed_at' => $now];
             });
         } else {
-            $context = isset($input['transport']) ? new ClosedBarrierContext($input['transport'],$input['fresh_from'],$input['fresh_until']) : null;
+            if (isset($input['primary_timestamp'])) { $wpdb->query('SET timestamp=' . (float) $input['primary_timestamp']); }
+            $context = isset($input['transport']) ? new ClosedBarrierContext($input['transport'],$input['fresh_from'],$input['fresh_until'],
+                $input['contract'] ?? \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\BarrierTransport::CONTRACT) : null;
             $result = match ($input['action']) {
                 'b3b-register' => $store->register($peer,$input['payload'],$input['key'],$context),
                 'b3b-close' => $store->close($peer,$input['payload'],$input['key'],$context),
                 'b3b-lookup' => $store->lookup($peer,$input['operation'],$input['payload'],$input['key'],$context),
+                'b3b-complete' => $context === null ? throw new ModelViolation('pf_barrier_context_mismatch') : $store->completeSession($peer,$input['payload'],$input['key'],$context),
+                'b3b-lookup-completion' => $context === null ? throw new ModelViolation('pf_barrier_context_mismatch') : $store->lookupCompletion($peer,$input['payload'],$input['key'],$context),
                 default => throw new RuntimeException('Unknown B3b fixture action.'),
             };
         }
