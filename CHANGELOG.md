@@ -17,6 +17,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Lecture minimale du nom éditorial approuvé dans la transaction existante de classement, sans COMMIT implicite ; contrôles de profil et consentement conservés et rollback vérifié en recette isolée.
+
 - Projection d'affichage HoF/Fans : filtrage par identité approuvée et visibilité courante, places recalculées parmi les seuls profils visibles, sans diffuser identité technique ou rang privé ; préparatif B6 sans route ni score public.
 
 - Persistance fermée des sessions dans la même génération dérivée que les classements/relevés, reconstruction après correction et reprise primaire après panne ; aucun état public ou gagnant ajouté.
