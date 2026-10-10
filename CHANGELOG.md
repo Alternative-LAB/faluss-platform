@@ -17,6 +17,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Calcul privé des sessions à partir du corpus Hub complet : une contribution par dimension, trois portées, réadmission sans remise à zéro et ancienneté corrigée ; aucune ouverture ou lecture publique.
+
 - Persister les projections privées B4 depuis le corpus courant authentifié,
   avec reconstruction atomique et refus des générations anciennes ou
   incomplètes. Recette Fans jetable uniquement, sans score public ni ledger.

@@ -108,6 +108,8 @@ Limites : ce cache atteste un instant primaire, aucune fraîcheur future implici
 Chaque lecture recompose la génération complète : coût linéaire borné par la
 recette B3, sans garantie de débit de production. Ouverture réelle enregistrée,
 gouvernance de visibilité et de consentement, sessions B5 et UI B6 restent des
-raccordements distincts. Aucun rang public ou parcours testable sur site annoncé.
+raccordements distincts. Le [calcul pur B5a](FANS-HOF-B5.md) conserve les sessions
+comme dimensions distinctes ; sa persistance et sa visibilité restent à raccorder.
+Aucun rang public ou parcours testable sur site annoncé.
 Conservation #150 et RustFS #161 demeurent distincts. Retour arrière : retirer
 le code fermé et détruire la fixture ; aucune migration de site à inverser.
