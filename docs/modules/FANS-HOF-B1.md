@@ -140,3 +140,10 @@ retrait/suspension et divergence des index. La CI rejoue la recette sur chaque P
 Retour arrière : revert des classes/adaptateurs ; conserver les tables privées
 pour réinstallation compatible, sans DROP automatique ni purge. Politique réelle
 de rétention #150 à décider avant activation. Aucun défaut de 24 mois ajouté.
+
+## Ouverture d'origine attestée en recette fermée
+
+Le [pont d'acquittement d'origine](FANS-HOF-B1-ORIGIN-ACK.md) distingue désormais
+la préparation de l'origine de son admission attestée, uniquement entre instances
+jetables. Aucun compte, achat, réception réseau ou ancienne donnée ne fixe cette
+origine ; aucun accès public ni activation réelle n'en découle.
