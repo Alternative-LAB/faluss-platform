@@ -17,6 +17,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Ajouter le codec privé approuvé des barrières de classement : register,
+  close et lookup signés, action et clé stables, permissions dédiées et réponses
+  liées à la requête. Aucun endpoint, schéma ou changement économique ajouté.
+
 - Ajouter le lecteur B3 fermé raccordant l'inbox durable Fans au véritable
   client HTTP WordPress : étapes bornées, lookup primaire après résultat
   incertain, concurrence sans nouvelle clé et promotion signée exhaustive.
