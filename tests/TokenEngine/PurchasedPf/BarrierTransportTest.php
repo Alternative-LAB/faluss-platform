@@ -186,4 +186,76 @@ final class BarrierTransportTest extends TestCase
         }
         $this->expectException(ModelViolation::class); TransportMessage::request($this->request(),$this->fans,time());
     }
+
+    /** @return array<string,mixed> */
+    private function completionFields(string $operation = 'close'): array
+    {
+        $refs = RankingBarrier::references(RankedIntent::fromArray(RankedFixtures::intent()));
+        $ref = array_values(array_filter($refs,static fn (array $ref): bool => $ref['content']['kind'] === 'session'))[0];
+        $fields = $this->fields($operation,$operation === 'lookup' ? 'close' : '');
+        $fields['object'] = array_intersect_key($ref,array_flip(['barrier_key','version','content_sha256'])) + ['reason' => 'session_completed'];
+        return $fields;
+    }
+
+    public function testCompletionRequiresExplicitVersionForCloseAndItsSameActionLookup(): void
+    {
+        foreach (['close','lookup'] as $operation) {
+            $fields = $this->completionFields($operation);
+            $sealed = BarrierTransport::sealRequest($fields,str_repeat('a',64),'recipe-key',time()+60,BarrierTransport::COMPLETION_CONTRACT);
+            $payload = SignedEnvelope::open(SignedEnvelope::BARRIER_REQUEST,CanonicalJson::object($sealed['wire'],BarrierTransport::MAX_WIRE),$this->fans,time());
+            $accepted = BarrierTransport::request($payload,$this->fans,time(),BarrierTransport::COMPLETION_CONTRACT);
+            self::assertSame('session_completed',$accepted['object']['reason']);
+            self::assertSame($fields['action_id'],$accepted['action_id']);
+            self::assertSame(str_repeat('a',64),$accepted['operation_key']);
+            try { BarrierTransport::request($payload,$this->fans,time()); self::fail('The legacy validator must reject 1.1.'); }
+            catch (ModelViolation $error) { self::assertNotSame('',$error->reason); }
+        }
+    }
+
+    public function testLegacyReferenceAndDefaultSignerStillRefuseCompletion(): void
+    {
+        $fields = $this->completionFields();
+        try { RankingBarrier::closeReference($fields['object']); self::fail('The historical reference must stay unchanged.'); }
+        catch (ModelViolation $error) { self::assertSame('pf_barrier_invalid_reason',$error->reason); }
+        $this->expectException(ModelViolation::class);
+        BarrierTransport::sealRequest($fields,str_repeat('a',64),'recipe-key',time()+60);
+    }
+
+    public function testContractCannotBeChangedOutsideItsSignedDelegation(): void
+    {
+        $payload = $this->request(); $payload['contract'] = BarrierTransport::COMPLETION_CONTRACT;
+        $this->expectException(ModelViolation::class);
+        BarrierTransport::request($payload,$this->fans,time(),BarrierTransport::COMPLETION_CONTRACT);
+    }
+
+    public function testCompletionResponseBindsContractReasonActionAndPrimaryInstant(): void
+    {
+        $fields = $this->completionFields();
+        $result = ['operation' => 'close','state' => 'closed','effective_at' => '2026-11-01 00:00:00.000000'] + $fields['object'];
+        $reply = ['contract' => BarrierTransport::COMPLETION_CONTRACT,'kind' => SignedEnvelope::BARRIER_RESPONSE,
+            'issuer' => 'fixture.hub','audience' => 'fixture.fans','nonce' => str_repeat('b',64),'request_sha256' => str_repeat('c',64),
+            'issued_at' => gmdate('Y-m-d\TH:i:s\Z'),'expires_at' => gmdate('Y-m-d\TH:i:s\Z',time()+60),'outcome' => 'ok','result' => $result]
+            + BarrierTransport::responseFields($fields,BarrierTransport::COMPLETION_CONTRACT);
+        self::assertSame(['outcome' => 'ok','result' => $result],BarrierTransport::response($reply,$this->hub,$fields,
+            str_repeat('b',64),str_repeat('c',64),time(),BarrierTransport::COMPLETION_CONTRACT));
+        foreach (['legacy-contract','wrong-reason','wrong-action','extra-field'] as $change) {
+            $bad = $reply;
+            if ($change === 'legacy-contract') { $bad['contract'] = BarrierTransport::CONTRACT; }
+            elseif ($change === 'wrong-reason') { $bad['result']['reason'] = 'session_cancelled'; }
+            elseif ($change === 'wrong-action') { $bad['action_id'] = RankedFixtures::ORIGIN; }
+            else { $bad['result']['winner'] = ModelFixtures::MEMBER; }
+            try { BarrierTransport::response($bad,$this->hub,$fields,str_repeat('b',64),str_repeat('c',64),time(),BarrierTransport::COMPLETION_CONTRACT); self::fail('Exact 1.1 response required.'); }
+            catch (ModelViolation $error) { self::assertNotSame('',$error->reason); }
+        }
+    }
+
+    public function testUnknownVersionAndUnapprovedCompletionReasonRemainClosed(): void
+    {
+        foreach ([BarrierTransport::CONTRACT,'hub.purchased-pf.ranking-barriers/1.2.0'] as $contract) {
+            try { BarrierTransport::fields($this->completionFields(),$contract); self::fail('Unsupported contract must fail.'); }
+            catch (ModelViolation $error) { self::assertNotSame('',$error->reason); }
+        }
+        $fields = $this->completionFields(); $fields['object']['reason'] = 'session_finished_early';
+        $this->expectException(ModelViolation::class); BarrierTransport::fields($fields,BarrierTransport::COMPLETION_CONTRACT);
+    }
 }

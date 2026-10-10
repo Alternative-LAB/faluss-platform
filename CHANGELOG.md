@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Ajouté
+
+- Codec fermé explicitement versionné des barrières 1.1 pour la raison de fin de session approuvée ; contrat 1.0 conservé, sans raccordement propriétaire ou HTTP dans ce sous-lot.
+
 ### Documentation
 
 - Consigner la validation F1b R2 : relevé Europe/Paris, classements persistants
