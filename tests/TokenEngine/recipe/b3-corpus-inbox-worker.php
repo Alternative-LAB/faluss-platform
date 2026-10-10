@@ -48,6 +48,41 @@ final class FansCorpusRecipeDatabase extends wpdb
     }
 }
 
+/** A trusted outer facade probe, not a fabricated Hub acknowledgement. */
+function corpus_recipe_compose(wpdb $db, PeerPolicy $peer, array $input): array
+{
+    $origin = $input['origin']; $scope = $input['scope'] ?? 'valid'; $held = $started = false;
+    $lock = 'fans_pf_b3b_' . substr(hash('sha256',$db->prefix . ':' . ($scope === 'wrong-origin' ? $input['other_origin'] : $origin) . ':1.0.0'),0,40);
+    $cache = new \Faluss\Platform\Fans\Hof\ClosedRankingProjectionStore($db,$peer,$origin,'1.0.0');
+    try {
+        if ($scope !== 'no-lock') {
+            if ((string) $db->get_var($db->prepare('SELECT GET_LOCK(%s,10)',$lock)) !== '1') { throw new RuntimeException('Fixture outer lock failed.'); }
+            $held = true;
+        }
+        if ($scope !== 'no-transaction') {
+            if ($db->query('START TRANSACTION') === false) { throw new RuntimeException('Fixture outer transaction failed.'); }
+            $started = true;
+        }
+        $value = $cache->withReadInTransaction(static function (array $generation) use ($db,$cache,$input,$scope): array {
+            if ($db->query('INSERT INTO wp_corpus_tx_probe (id) VALUES (1)') !== 1) { throw new RuntimeException('Fixture probe write failed.'); }
+            if ($scope === 'recursive') { $cache->withReadInTransaction(static fn (array $row): array => $row); }
+            if ($scope === 'ordinary-nested') { $cache->read(); }
+            if ($scope === 'reject') { throw new ModelViolation('pf_fixture_apply_refused'); }
+            if (isset($input['marker'])) {
+                file_put_contents($input['marker'],'ready'); $deadline = microtime(true)+20;
+                while (!is_file($input['release']) && microtime(true) < $deadline) { usleep(10000); }
+                if (!is_file($input['release'])) { throw new RuntimeException('Fixture release missing.'); }
+            }
+            return ['state' => $generation['state'],'generation' => $generation['generation'],
+                'transaction' => (string) $db->get_var('SELECT @@in_transaction')];
+        });
+        $active = (string) $db->get_var('SELECT @@in_transaction');
+        if ($db->query(($input['rollback'] ?? false) ? 'ROLLBACK' : 'COMMIT') === false) { throw new ModelViolation('pf_fixture_outer_commit_unknown'); }
+        $started = false; return $value + ['outer_transaction' => $active];
+    } catch (Throwable $error) { if ($started) { $db->query('ROLLBACK'); } throw $error; }
+    finally { if ($held && (string) $db->get_var($db->prepare('SELECT RELEASE_LOCK(%s)',$lock)) !== '1') { throw new RuntimeException('Fixture outer lock release failed.'); } }
+}
+
 try {
     if ($input['action'] === 'cache-ready') { $result = ['ready' => \Faluss\Platform\Fans\Hof\ClosedRankingProjectionSchema::ready($wpdb)]; }
     elseif ($input['action'] === 'cache-install') { \Faluss\Platform\Fans\Hof\ClosedRankingProjectionSchema::installForRecipe($wpdb); $result = ['ready' => true]; }
@@ -84,6 +119,7 @@ try {
             'current' => ['current' => $inbox->current()],
             'cache-rebuild' => (new \Faluss\Platform\Fans\Hof\ClosedRankingProjectionStore($wpdb,$peer,$input['origin'],'1.0.0'))->rebuild(),
             'cache-read' => (new \Faluss\Platform\Fans\Hof\ClosedRankingProjectionStore($wpdb,$peer,$input['origin'],'1.0.0'))->read(),
+            'cache-compose' => corpus_recipe_compose($wpdb,$peer,$input),
             default => throw new RuntimeException('Unknown closed inbox operation.'),
         };
         if (($input['monitor'] ?? false) === true) { $result['http_trace'] = $trace; }

@@ -43,30 +43,47 @@ final class ClosedRankingProjectionStore
      * @return array<string,mixed> */
     public function read(): array
     {
-        return $this->fenced(function (array $document): array {
-            $bytes = RankingProjectionDocument::encode($document); $digest = hash('sha256',$bytes);
-            $row = $this->db->get_row($this->db->prepare('SELECT document_json,document_sha256 FROM %i WHERE origin_id=%s AND policy_version=%s FOR UPDATE',
-                $this->table,$this->origin,$this->policy),'ARRAY_A');
-            if ($this->db->last_error !== '' || $row !== ['document_json' => $bytes,'document_sha256' => $digest]) {
-                throw new ModelViolation('hof_projection_not_reconciled');
-            }
-            return ['state' => 'reconciled','generation' => $digest,'document' => $document];
-        });
+        return $this->fenced(fn (array $document): array => $this->readCached($document));
+    }
+
+    /** Private source composition with authenticated barriers and visibility in the caller's transaction.
+     * A named lock alone is not a Hub proof, identity mapping or public delivery grant.
+     * @template T
+     * @param callable(array<string,mixed>):T $operation
+     * @return T */
+    public function withReadInTransaction(callable $operation): mixed
+    {
+        return $this->fenced(fn (array $document): mixed => $operation($this->readCached($document)),true);
     }
 
     /** @template T
      * @param callable(array<string,mixed>):T $operation
      * @return T */
-    private function fenced(callable $operation): mixed
+    private function fenced(callable $operation, bool $callerTransaction = false): mixed
     {
         ClosedEnvironment::assertIsolated($this->db,'fans');
         if (!ClosedRankingProjectionSchema::ready($this->db)) { throw new ModelViolation('hof_projection_schema_unavailable'); }
-        return $this->inbox->withCurrent(function (?array $verified) use ($operation): mixed {
+        $compose = function (?array $verified) use ($operation): mixed {
             if ($verified === null) { throw new ModelViolation('hof_projection_source_unavailable'); }
+            /** @var array{manifest:array<string,mixed>,facts:list<array<string,mixed>>,verified_at:string} $verified Authenticated inbox callback shape. */
             $document = RankingCorpusProjection::build($verified);
             $sessions = RankingSessionProjection::build($verified);
             return $operation($document + ['cache_format' => '2','sessions' => $sessions['sessions']]);
-        });
+        };
+        return $callerTransaction ? $this->inbox->withCurrentInTransaction($compose) : $this->inbox->withCurrent($compose);
+    }
+
+    /** @param array<string,mixed> $document
+     * @return array<string,mixed> */
+    private function readCached(array $document): array
+    {
+        $bytes = RankingProjectionDocument::encode($document); $digest = hash('sha256',$bytes);
+        $row = $this->db->get_row($this->db->prepare('SELECT document_json,document_sha256 FROM %i WHERE origin_id=%s AND policy_version=%s FOR UPDATE',
+            $this->table,$this->origin,$this->policy),'ARRAY_A');
+        if ($this->db->last_error !== '' || $row !== ['document_json' => $bytes,'document_sha256' => $digest]) {
+            throw new ModelViolation('hof_projection_not_reconciled');
+        }
+        return ['state' => 'reconciled','generation' => $digest,'document' => $document];
     }
 
     private function query(string $sql): void
