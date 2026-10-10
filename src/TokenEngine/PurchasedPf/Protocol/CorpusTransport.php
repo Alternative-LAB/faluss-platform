@@ -64,7 +64,8 @@ final class CorpusTransport
         $expected = ['kind' => SignedEnvelope::CORPUS_CONTEXT,'key_sha256' => hash('sha256',$payload['read_key'])]
             + array_diff_key($payload,array_flip(['kind','read_key','context']));
         if (CanonicalJson::encode($context) !== CanonicalJson::encode($expected)) { throw new ModelViolation('pf_corpus_context_mismatch'); }
-        return $fields + ['nonce' => $payload['nonce'],'read_key' => $payload['read_key']];
+        return $fields + ['nonce' => $payload['nonce'],'read_key' => $payload['read_key'],
+            'issued_at' => $payload['issued_at'],'expires_at' => $payload['expires_at']];
     }
 
     /** A page is authenticated here; exhaustive cross-page completion remains the durable inbox's responsibility.

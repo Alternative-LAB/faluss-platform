@@ -40,7 +40,10 @@ def main():
     parser.add_argument('--b3-snapshots', action='store_true', help='Closed member snapshots 2.0 with original ranked facts and latest H4 net')
     parser.add_argument('--b3-corpus-source', action='store_true', help='Exhaustive closed owner inventory, H4 reconciliation and measured read mutex')
     parser.add_argument('--b3-corpus', action='store_true', help='Closed exhaustive immutable pages, stable primary recovery and final current fence')
+    parser.add_argument('--b3-corpus-http', action='store_true', help='Closed signed owner corpus HTTP with dedicated SQL nonces and distinct fixture keys')
     options = parser.parse_args()
+    if options.b3_corpus_http:
+        options.b3_corpus = True
     if options.b3_corpus:
         options.b3_corpus_source = True
     if options.b3_corpus_source:
@@ -356,6 +359,10 @@ def main():
         if options.b3_corpus:
             from b3_corpus_checks import run_checks
             corpus_fence_measurements = run_checks(root,wp,check,call,sql,start,finish,parallel,await_file)
+        b3_corpus_http_start = len(checks)
+        if options.b3_corpus_http:
+            from b3_corpus_http_checks import run_checks
+            run_checks(root,wp,source,options.cli,check,call,sql,command,workers,log,start,finish,await_file)
         report = dict(checks=checks, total=len(checks), failed=0, wordpress=cli('core', 'version').strip(),
                       php=command(['php', '-r', 'echo PHP_VERSION;']).strip(),
                       database=sql('SELECT VERSION()'), schema='5',
@@ -378,7 +385,8 @@ def main():
         report['b3_ranked_total'] = b3_snapshots_start - b3_ranked_start
         report['b3_snapshots_total'] = b3_corpus_source_start - b3_snapshots_start
         report['b3_corpus_source_total'] = b3_corpus_start - b3_corpus_source_start
-        report['b3_corpus_total'] = len(checks) - b3_corpus_start
+        report['b3_corpus_total'] = b3_corpus_http_start - b3_corpus_start
+        report['b3_corpus_http_total'] = len(checks) - b3_corpus_http_start
         report['corpus_source_measurements'] = corpus_measurements
         report['corpus_fence_measurements'] = corpus_fence_measurements
         if options.h1 or options.h2_reservations or options.h2:
@@ -447,6 +455,12 @@ def main():
             report['scope'] += '; private persistent rebuildable Fan/Creator points from complete latest H4 facts only'
             report['fans_projection_schema'] = '1 (closed_f1a_fans)'
             report['not_proven'][-1] = 'F1b periods/ranks/visibility/sessions, public scores, continuous production freshness and asynchronous delivery'
+        if options.b3_corpus_http:
+            report['scope'] += '; signed global corpus reads over private loopback from distinct disposable WordPress/keys, real owner commits and lost HTTP response'
+            report['corpus_transport_schema'] = '1 (closed_b3_corpus_http)'
+            report['not_proven'] = ['Durable Fans corpus inbox, atomic replacement and continuous freshness',
+                                    'True SSO, real purchase source, production admission, site operations, public score or retention policy',
+                                    'Production sizing, TLS, real infrastructure COMMIT acknowledgement loss or replica/restore']
     finally:
         for process in workers:
             if process.poll() is None:
