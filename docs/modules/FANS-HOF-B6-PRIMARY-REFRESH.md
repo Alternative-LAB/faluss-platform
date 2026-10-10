@@ -1,5 +1,11 @@
 # B6 — relecture primaire explicite, périmètre fermé
 
+**Point de pause du 10 octobre : implémentation en brouillon, fraîcheur non
+validée.** La [recette partielle](../evidence/fans-hof-b6-primary-refresh/README.md)
+a échoué après 599 contrôles achevés ; le prédicat fautif de la promotion de la
+même génération reste à isoler. Les garanties ci-dessous décrivent le contrat
+visé, pas une livraison B6 fonctionnelle attestée.
+
 ## Contrat et scénarios
 
 Le corpus signé complet atteste un instant. Il ne prouve pas l'absence d'une
