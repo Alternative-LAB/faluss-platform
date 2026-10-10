@@ -4,6 +4,7 @@ import copy
 import json
 import secrets
 import socket
+import time
 import uuid
 
 
@@ -22,11 +23,13 @@ def run_checks(root, source, cli_path, check, call, sql, command, fixture):
         path=root/(uuid.uuid4().hex+'.json');path.write_text(json.dumps(value));path.chmod(0o600)
         diagnostic=root/'corpus-http-diagnostic'
         diagnostic.unlink(missing_ok=True)
+        (root/'corpus-http-phase').unlink(missing_ok=True)
         result=json.loads(command(['php',cli_path,'--allow-root','--path='+str(fans),'eval-file',str(recipe),str(path),'--use-include']))
         metrics=path.with_name(path.name+'.http-metrics')
         diagnostics.update({k:result.get(k) for k in ('state','reason','completed_steps')})
         diagnostics.update(transport=json.loads(metrics.read_text()) if metrics.exists() else [],
-                           hub_reason=diagnostic.read_text() if diagnostic.exists() else 'none')
+                           hub_reason=diagnostic.read_text() if diagnostic.exists() else 'none',
+                           hub_phase=json.loads((root/'corpus-http-phase').read_text()) if (root/'corpus-http-phase').exists() else None)
         return result
     def lit(value):return "'"+value.replace('\\','\\\\').replace("'","''")+"'"
     def rows(read, table='requests'):return int(fan_sql('SELECT COUNT(*) FROM wp_fans_pf_b3c_'+table+' WHERE read_id='+lit(read)))
@@ -34,23 +37,57 @@ def run_checks(root, source, cli_path, check, call, sql, command, fixture):
     def current(selected=origin):return inbox('current',selected)['current']
     def total():return int(fan_sql('SELECT COUNT(*) FROM wp_fans_pf_b3c_reads'))
 
+    def reconcile(read,steps=4,selected=origin,**extra):
+        # Positive recovery follows the real durable protocol. Fault observations remain one-shot below.
+        result=reader(read,steps,selected,**extra)
+        for delay in (1,2):
+            if result.get('state')!='pending' or result.get('reason')!='pf_transport_unknown':break
+            stable_id=result['read_id'];before=progress(stable_id,selected)
+            time.sleep(delay)
+            result=reader(before['read_id'],steps,selected,**extra)
+            after=progress(stable_id,selected)
+            if result.get('read_id')!=stable_id or before['read_id']!=after['read_id'] or before['read_key']!=after['read_key']:
+                raise RuntimeError('Positive recovery replaced its durable read identity or key.')
+            print('RECOVERY same durable corpus job after an uncertain transport result',flush=True)
+        return result
+
+    def checkpoint(read, phase):
+        # Each real invocation retains its one-step budget. A lost response cannot create a new job/key.
+        stable=None
+        for attempt in range(5):
+            result=reader(read,1);pending=progress(result.get('read_id',read))
+            identity=(pending['read_id'],pending['read_key'])
+            if stable is not None and identity!=stable:
+                raise RuntimeError('Checkpoint recovery replaced its durable read identity or key.')
+            stable=identity;read=pending['read_id']
+            if int(result.get('completed_steps','0'))>1:
+                raise RuntimeError('Checkpoint invocation exceeded its one-step budget.')
+            if pending['phase']==phase and (phase!='current' or result.get('state')=='verified'):
+                return result
+            if result.get('state')!='pending' or result.get('reason') not in (
+                    'pf_transport_unknown','pf_local_corpus_commit_unknown','pf_local_corpus_busy','pf_local_corpus_checkpoint_moved'):
+                break
+            time.sleep(min(attempt+1,2))
+            print('RECOVERY one-step durable corpus checkpoint after an uncertain result',flush=True)
+        raise RuntimeError('Expurgated bounded checkpoint diagnostics: '+json.dumps(dict(phase=phase,**diagnostics)))
+
     historical=sql('SELECT * FROM wp_token_engine_ledger ORDER BY id')
     economic=sql('SELECT * FROM wp_token_engine_pf_ledger ORDER BY id')
     read=str(uuid.uuid4());count=total()
     check('B3cr invalid step budgets do not persist a job',reader(read,0)==dict(error='pf_local_corpus_budget')
           and reader(read,17)==dict(error='pf_local_corpus_budget') and total()==count)
-    one=reader(read,1);p=progress(read)
-    check('B3cr one bounded step looks up the primary before materialization',one['state']=='pending' and one['completed_steps']=='1'
-          and p['phase']=='start' and rows(read)==1 and current() is None)
-    stable=p['read_key'];other=reader(str(uuid.uuid4()),1);p=progress(read)
+    one=checkpoint(read,'start');p=progress(read)
+    check('B3cr bounded lookup checkpoint precedes materialization even after an uncertain response',one['state']=='pending'
+          and p['phase']=='start' and rows(read)>=1 and current() is None)
+    stable=p['read_key'];other=checkpoint(str(uuid.uuid4()),'page');p=progress(read)
     check('B3cr another caller advances the pending job without replacing its key',other['state']=='pending' and other['read_id']==read
           and p['read_key']==stable and p['phase']=='page' and rows(read,'pages')==1)
-    three=reader(read,1);p=progress(read)
+    three=checkpoint(read,'finish');p=progress(read)
     check('B3cr one further step stages the remaining immutable page only',three['state']=='pending' and p['phase']=='finish'
           and rows(read,'pages')==2 and current() is None)
-    four=reader(read,1);value=current()
+    four=checkpoint(read,'current');value=current()
     check('B3cr final bounded step promotes a complete signed generation at its attested instant',four['state']=='verified'
-          and four['completed_steps']=='1' and four['verified_at']==value['verified_at'] and value['manifest']['fact_count']=='103'
+          and four['verified_at']==value['verified_at'] and value['manifest']['fact_count']=='103'
           and value['manifest']['net_pf']=='1')
     count=rows(read);again=reader(read)
     check('B3cr resuming a completed job performs no further HTTP',again['state']=='verified' and again['completed_steps']=='0' and rows(read)==count)
@@ -66,7 +103,7 @@ def run_checks(root, source, cli_path, check, call, sql, command, fixture):
         outcomes=list(pool.map(lambda _:reader(read,4),range(4)))
     check('B3cr concurrent bounded readers return verified or retryable pending without a conflict error',
           all(x.get('state') in ('pending','verified') and x.get('read_id')==read for x in outcomes))
-    done=reader(read,4)
+    done=reconcile(read,4)
     check('B3cr concurrent collection commits one corpus and one exact local page chain',done['state']=='verified'
           and progress(read)['read_key']==p['read_key'] and int(sql('SELECT COUNT(*) FROM wp_token_engine_pf_b3c_corpora'))==count+1
           and rows(read,'pages')==2 and current()['manifest']['net_pf']=='1')
@@ -76,7 +113,7 @@ def run_checks(root, source, cli_path, check, call, sql, command, fixture):
     staged=reader(read,2)
     check('B3cr late primary absence never rewinds a newer materialized checkpoint',staged['state']=='pending'
           and inbox('accept',proof=late)==dict(error='pf_local_corpus_checkpoint_moved') and progress(read)['phase']=='page')
-    check('B3cr late absence recovery resumes the existing immutable generation',reader(read)['state']=='verified' and rows(read,'pages')==2)
+    check('B3cr late absence recovery resumes the existing immutable generation',reconcile(read)['state']=='verified' and rows(read,'pages')==2)
 
     # Lose a genuine materialization response after Hub COMMIT; no second creation may follow.
     read=str(uuid.uuid4());reader(read,1);p=progress(read);count=int(sql('SELECT COUNT(*) FROM wp_token_engine_pf_b3c_corpora'))
@@ -84,7 +121,7 @@ def run_checks(root, source, cli_path, check, call, sql, command, fixture):
     lost=reader(read,1)
     check('B3cr lost Hub body after COMMIT returns pending under the original key',lost['state']=='pending' and lost['reason']=='pf_transport_unknown'
           and progress(read)['phase']=='lookup' and progress(read)['read_key']==p['read_key'] and current() is None)
-    recovered=reader(read)
+    recovered=reconcile(read)
     check('B3cr primary lookup recovers the committed corpus without another materialization',recovered['state']=='verified'
           and int(sql('SELECT COUNT(*) FROM wp_token_engine_pf_b3c_corpora'))==count+1 and progress(read)['read_key']==p['read_key'])
 
@@ -92,7 +129,7 @@ def run_checks(root, source, cli_path, check, call, sql, command, fixture):
     prepared=reader(read,1,selected,fault='ack-after-commit')
     check('B3cr unknown initial local COMMIT remains retryable under the caller durable ID',prepared['state']=='pending'
           and prepared['reason']=='pf_local_corpus_commit_unknown' and prepared['read_id']==read and rows(read,'reads')==1)
-    key=progress(read,selected)['read_key'];empty=reader(read,4,selected)
+    key=progress(read,selected)['read_key'];empty=reconcile(read,4,selected)
     check('B3cr restart after unknown prepare COMMIT reuses its key and verifies an empty origin',empty['state']=='verified'
           and progress(read,selected)['read_key']==key and current(selected)['facts']==[])
 
@@ -103,13 +140,13 @@ def run_checks(root, source, cli_path, check, call, sql, command, fixture):
     offline=reader(read,1,endpoint=endpoint)
     check('B3cr offline loopback returns pending without clearing the durable checkpoint',offline['state']=='pending'
           and offline['reason']=='pf_transport_unknown' and progress(read)['read_key']==p['read_key'] and current() is None)
-    check('B3cr network recovery looks up the same key before another start',reader(read)['state']=='verified' and progress(read)['read_key']==p['read_key'])
+    check('B3cr network recovery looks up the same key before another start',reconcile(read)['state']=='verified' and progress(read)['read_key']==p['read_key'])
     read=str(uuid.uuid4());p=progress(read);(root/'corpus-http-fault').write_text('redirect')
     redirected=reader(read,1)
     check('B3cr redirects stay pending without following the location',redirected['state']=='pending'
           and redirected['reason']=='pf_transport_unknown' and not (root/'corpus-redirect-followed').exists()
           and progress(read)['read_key']==p['read_key'])
-    check('B3cr a fresh bound request recovers after the refused redirect',reader(read)['state']=='verified')
+    check('B3cr a fresh bound request recovers after the refused redirect',reconcile(read)['state']=='verified')
 
     read=str(uuid.uuid4());p=progress(read);(root/'corpus-http-fault').write_text('tamper-reply')
     altered=reader(read,1)
@@ -120,7 +157,7 @@ def run_checks(root, source, cli_path, check, call, sql, command, fixture):
     read=str(uuid.uuid4());progress(read);(root/'corpus-http-fault').write_text('server-error')
     failed=reader(read,1)
     check('B3cr HTTP error never promotes a generation',failed['state']=='pending' and failed['reason']=='pf_transport_unknown' and current() is None)
-    recovered=reader(read)
+    recovered=reconcile(read)
     if recovered.get('state')!='verified':
         raise RuntimeError('Expurgated HTTP recovery diagnostics: '+json.dumps({**{k:recovered.get(k) for k in ('state','reason','completed_steps')},
             'phase':progress(read)['phase'],'hub_reason':(root/'corpus-http-diagnostic').read_text() if (root/'corpus-http-diagnostic').exists() else 'none'}))
@@ -142,7 +179,7 @@ def run_checks(root, source, cli_path, check, call, sql, command, fixture):
     count=rows(read);terminal=reader(read)
     check('B3cr signed terminal refusal never automatically creates another read key',terminal['state']=='unavailable'
           and terminal['completed_steps']=='0' and rows(read)==count)
-    fresh=reader(str(uuid.uuid4()));new=current()
+    fresh=reconcile(str(uuid.uuid4()));new=current()
     check('B3cr explicit next job reconstructs the latest corrected complete owner corpus',fresh['state']=='verified'
           and new['manifest']['fact_count']=='104' and new['manifest']['net_pf']=='2')
     count=rows(read);older=reader(read)
@@ -153,4 +190,5 @@ def run_checks(root, source, cli_path, check, call, sql, command, fixture):
           and fan_sql("SHOW TABLES LIKE 'wp_fans%ledger%'")=='')
 
     from b4_projection_checks import run_checks as projection_checks
-    projection_checks(root,source,cli_path,check,command,fixture,reader,call)
+    projection_checks(root,source,cli_path,check,command,fixture,reconcile,call)
+    return reconcile

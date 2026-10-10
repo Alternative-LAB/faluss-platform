@@ -43,7 +43,10 @@ def main():
     parser.add_argument('--b3-corpus-http', action='store_true', help='Closed signed owner corpus HTTP with dedicated SQL nonces and distinct fixture keys')
     parser.add_argument('--b3-corpus-inbox', action='store_true', help='Durable private Fans staging, primary recovery and atomic complete corpus replacement')
     parser.add_argument('--b3-corpus-reader', action='store_true', help='Bounded durable corpus orchestration with real private WordPress HTTP and recovery')
+    parser.add_argument('--b5-sessions', action='store_true', help='Private session projections and recovery from the complete current corpus')
     options = parser.parse_args()
+    if options.b5_sessions:
+        options.b3_corpus_reader = True
     if options.b3_corpus_reader:
         options.b3_corpus_inbox = True
     if options.b3_corpus_inbox:
@@ -377,7 +380,10 @@ def main():
         b3_corpus_reader_start = len(checks)
         if options.b3_corpus_reader:
             from b3_corpus_reader_checks import run_checks
-            run_checks(root,source,options.cli,check,call,sql,command,corpus_fixture)
+            corpus_reader = run_checks(root,source,options.cli,check,call,sql,command,corpus_fixture)
+        if options.b5_sessions:
+            from b5_projection_checks import run_checks
+            run_checks(root,source,options.cli,check,command,corpus_fixture,corpus_reader,call,sql)
         report = dict(checks=checks, total=len(checks), failed=0, wordpress=cli('core', 'version').strip(),
                       php=command(['php', '-r', 'echo PHP_VERSION;']).strip(),
                       database=sql('SELECT VERSION()'), schema='5',
@@ -404,7 +410,8 @@ def main():
         report['b3_corpus_http_total'] = b3_corpus_inbox_start - b3_corpus_http_start
         report['b3_corpus_inbox_total'] = b3_corpus_reader_start - b3_corpus_inbox_start
         report['b4_projection_total'] = sum(name.startswith('B4b ') for name in checks)
-        report['b3_corpus_reader_total'] = len(checks) - b3_corpus_reader_start - report['b4_projection_total']
+        report['b5_projection_total'] = sum(name.startswith('B5b ') for name in checks)
+        report['b3_corpus_reader_total'] = len(checks) - b3_corpus_reader_start - report['b4_projection_total'] - report['b5_projection_total']
         report['corpus_source_measurements'] = corpus_measurements
         report['corpus_fence_measurements'] = corpus_fence_measurements
         if options.h1 or options.h2_reservations or options.h2:
@@ -486,6 +493,9 @@ def main():
         if options.b3_corpus_reader:
             report['scope'] += '; bounded durable Fans reader with primary lookup and exact signed HTTP checkpoints; private rebuildable B4 general/category/month cache under the current corpus transaction'
             report['not_proven'][0] = 'Ranked member and barrier HTTP, B5 session projections, public visibility and attested opening, continuous production freshness'
+        if options.b5_sessions:
+            report['scope'] += '; private session projections in the same atomic derived generation, without winner or public admission'
+            report['not_proven'][0] = 'Ranked member and barrier HTTP, B2 session lifecycle, public visibility and attested opening, continuous production freshness'
     finally:
         for process in workers:
             if process.poll() is None:
