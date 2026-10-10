@@ -79,6 +79,23 @@ final class ClosedBarrierInbox
     public function recover(string $action): array
     { ModelValues::uuid($action); return $this->write(fn (): array => $this->progress($this->required($action))); }
 
+    /** Apply trusted local governance under the same origin lock and transaction as the current proof.
+     * No HTTP or nested transaction is allowed in the callback; no operation key or wire escapes this facade.
+     * @template T
+     * @param callable(array{fields:array<string,mixed>,contract:string,result:array<string,mixed>,local_state:string}):T $operation
+     * @return T */
+    public function withAcknowledgement(string $action, callable $operation): mixed
+    {
+        ModelValues::uuid($action);
+        return $this->write(function () use ($action,$operation): mixed {
+            $row = $this->required($action); $progress = $this->progress($row);
+            if ($progress['phase'] !== 'acknowledged') { throw new ModelViolation('pf_local_barrier_acknowledgement_required'); }
+            $proof = CanonicalJson::object($row['proof_json'],131072); $answer = $this->verified($proof,true);
+            return $operation(['fields' => $progress['fields'],'contract' => $progress['contract'] ?? BarrierTransport::CONTRACT,
+                'result' => $answer['result'],'local_state' => $progress['state']]);
+        });
+    }
+
     /** Registration uncertainty must be resolved before a queued close can be sent.
      * @param array<string,mixed> $progress
      * @return array<string,mixed> */
