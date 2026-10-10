@@ -350,3 +350,35 @@ distinguent lectures courantes, concurrence et tests historiques. Aucune
 génération immuable, page signée, fence après transfert, inbox Fans ou score
 public n'est encore fourni par ce sous-lot. B3c2b2 et B3c2c suivent ; les nouvelles
 opérations restent inaccessibles hors de l'enclave physique jetable H3.
+
+## B3c2b2 — génération immuable et vérification primaire finale
+
+`ClosedRankingCorpusSchema` ajoute uniquement quatre tables de métadonnées
+fermées : époque/compteur, corpus et pages avec clé de reprise. Installation
+explicite dans l'enclave physique H3, sans hook ou migration automatique. Aucun
+montant, disponible, PC, nom ou second ledger ; aucune politique #150 ajoutée.
+
+`ClosedRankingCorpusStore` matérialise la lecture exhaustive propriétaire dans
+la même transaction que sa génération et ses pages. Une clé stable du pair Fans
+est liée à l'origine et à la politique ; changer le contenu en reprise est refusé.
+Réponse perdue : lookup sur le primaire, puis reprise de la même clé. Une clé
+inconnue après rollback retourne `absent` ; un COMMIT incertain ne prouve jamais
+un rollback. Les générations historiques et leurs curseurs restent immuables.
+
+La fence relit toutes les pages, leur chaîne et leurs empreintes, puis reconstruit
+les faits H4 actuels sous le même mutex propriétaire. Consommation nouvelle,
+preuve de correction différente même à net inchangé, page absente, époque
+contradictoire ou fragment inachevé : aucun résultat présenté comme courant.
+Les corrections ne sont pas recopiées dans Fans et les anciens reçus ne peuvent
+restaurer un net annulé. Une fermeture d'origine conserve les faits confirmés.
+
+`verified_at` indique l'instant primaire UTC6 de cette vérification ; il ne
+garantit aucune fraîcheur future. Une génération explicitement rafraîchie utilise
+une nouvelle opération seulement après résolution certaine de la précédente,
+jamais pour contourner une réponse incertaine. Ce store propriétaire ne constitue
+pas encore le client durable ou une livraison réseau signée. Le transport fermé
+et le remplacement atomique Fans restent B3c2c.
+
+Bornes fermées du sous-lot propriétaire conservées, avec refus total ; page à
+4 MiB maximum. [Preuve et mesures](../evidence/hub-pf-b3-corpus/README.md),
+sans attestation de dimensionnement ou d'exploitation de production.

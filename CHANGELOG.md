@@ -17,6 +17,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Ajouter B3c2b2 fermé : générations exhaustives immuables du corpus 1.0,
+  pages de 100 faits et lookup primaire par clé stable ; vérification finale
+  des sources H4 actuelles et refus du corpus obsolète, sans écriture
+  économique, transport ouvert ou score public.
+
 - Ajouter B3c2b1 fermé : lecture propriétaire exhaustive de l'origine depuis
   les consommations Hub 0.3 et le net H4 complet, sous verrou global et bail
   distinct de lecture. Aucun paramètre de liste de membres, nouvelle écriture
