@@ -17,6 +17,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Ajouter l'admission SQL fermée des nonces de barrières : stockage dédié,
+  permissions, concurrence et expiration après attente et avant COMMIT,
+  sans opération économique, route ou migration automatique.
+
 - Lier les opérations propriétaires de barrières au contexte signé de leur
   action, vérifier l'origine d'une fermeture sur le descripteur stocké et
   revalider la fraîcheur avant COMMIT, uniquement dans l'enclave de recette.

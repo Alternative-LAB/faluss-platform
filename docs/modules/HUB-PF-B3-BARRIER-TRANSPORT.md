@@ -122,3 +122,37 @@ Aucune recette de site ou véritable SSO n'est revendiquée.
 Recette obtenue : **251 contrôles WordPress/MariaDB satisfaits, dont 28 nouveaux** ;
 suite PHP complète 655 tests / 6 976 assertions et analyse statique sans erreur.
 [Preuves et limites](../evidence/hub-pf-b3-barrier-context/README.md).
+
+## B3b3c — admission SQL des nonces de transport
+
+`ClosedBarrierTransportSchema` possède deux tables privées distinctes des nonces
+historiques et du corpus. Installation explicite dans l'enclave Hub jetable,
+jamais au bootstrap. Le schéma InnoDB exact est exigé ; un état partiel n'est
+ni adopté ni réparé automatiquement. Aucune durée de conservation ou purge
+réelle n'est introduite.
+
+Après authentification des deux signatures par le futur gateway,
+`ClosedBarrierAdmission` revalide forme, pair propriétaire, permission dédiée,
+nonce, empreinte, action et validité. Un mutex par pair/nonce sérialise les
+rejeux identiques sans prendre de verrou économique. La validité est relue
+après l'attente et après insertion, avant la décision COMMIT ; une expiration
+à ces étapes annule l'admission. Le registre ne modifie ni barrière ni ledger.
+
+L'admission est une transaction distincte de register/close/lookup. Si son
+acquittement est perdu, le même nonce réseau ne peut être réadmis. Une nouvelle
+enveloppe fraîche reprend la même action et clé métier ; le propriétaire
+retrouve alors l'opération éventuelle. La clé métier ne doit jamais être
+remplacée pour contourner un timeout. Le journal de nonces ne conserve ni
+objet complet, identité de membre, clé en clair, signature ou contenu privé.
+
+Scénarios : huit admissions simultanées, autre action sous un nonce connu,
+nouvelle enveloppe sous la même action, permissions anciennes insuffisantes,
+lookup sans permission cible ou lookup, schéma partiel/MyISAM, échec d'insertion,
+COMMIT sans acquittement, expiration derrière mutex et après insertion. Le
+ledger officiel doit rester byte-identique. La recette SQL n'est pas une
+preuve d'authentification HTTP ; gateway et reprise Fans opening/closing
+restent les étapes suivantes du contrat déjà approuvé.
+
+Recette obtenue : **272 contrôles WordPress/MariaDB satisfaits, dont 21 nouveaux** ;
+655 tests PHP / 7 000 assertions et PHPStan complet sans erreur.
+[Preuves et limites](../evidence/hub-pf-b3-barrier-admission/README.md).
