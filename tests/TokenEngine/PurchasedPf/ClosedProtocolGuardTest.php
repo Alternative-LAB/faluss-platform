@@ -24,6 +24,8 @@ final class ClosedProtocolGuardTest extends TestCase
             static fn () => new ClosedProtocolStore($database, 'fixture.hub', 'recipe-key'),
             static fn () => \Faluss\Platform\Fans\PfContract\ClosedProtocolSchema::installForRecipe($database),
             static fn () => new \Faluss\Platform\Fans\PfContract\ClosedProtocolStore($database),
+            static fn () => \Faluss\Platform\Fans\PfContract\ClosedRankedProtocolSchema::installForRecipe($database),
+            static fn () => new \Faluss\Platform\Fans\PfContract\ClosedRankedProtocolStore($database),
             static fn () => \Faluss\Platform\Fans\PfContract\ClosedDelegation::resolve($database, []),
             static fn () => new \Faluss\Platform\Fans\PfContract\ClosedClient($database,
                 new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',[],[]), 'recipe-key', ''),
@@ -106,6 +108,8 @@ final class ClosedProtocolGuardTest extends TestCase
             'FALUSS_PF_H3_LEASE_SHA256' => str_repeat('a',64),'ABSPATH' => __DIR__ . '/','DB_HOST' => 'localhost','WP_CLI' => true] as $key => $value) { define($key,$value); }
         $database = new \wpdb(); $GLOBALS['wpdb'] = $database;
         foreach ([static fn () => \Faluss\Platform\Fans\PfContract\ClosedCorpusInboxSchema::installForRecipe($database),
+            static fn () => \Faluss\Platform\Fans\PfContract\ClosedRankedProtocolSchema::installForRecipe($database),
+            static fn () => new \Faluss\Platform\Fans\PfContract\ClosedRankedProtocolStore($database),
             static fn () => new \Faluss\Platform\Fans\PfContract\ClosedCorpusInbox($database,
                 new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',['pf.ranking.corpus'],[]),'','')] as $operation) {
             try { $operation(); self::fail('Copied settings cannot stage private global facts.'); }

@@ -17,6 +17,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Persister dans Fans jetable les intentions complètes 0.3, leurs clés stables
+  avant envoi et les reçus privés signés ; tester la reprise après panne et
+  réponse perdue, sans ledger PF, migration automatique ni API active.
+
 - Raccorder le gateway propriétaire 0.3 aux signatures, nonces privés et contrôles
   transactionnels existants dans la seule enclave jetable. Recette HTTP avec
   clés distinctes, rejeux et réponse perdue après consommation ; aucune route

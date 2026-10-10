@@ -474,3 +474,37 @@ admission économique ou politique de conservation n'est ouvert.
 Recette obtenue : **339 contrôles satisfaits, dont 38 nouveaux**, deux WordPress
 jetables et clés distinctes ; suite PHP complète 650 tests / 6 965 assertions.
 [Preuves HTTP et limites](../evidence/hub-pf-b3-ranked-http/README.md).
+
+## B3c3b3 — intention durable et boîte de reçus Fans 0.3
+
+`ClosedRankedProtocolSchema` et `ClosedRankedProtocolStore` conservent uniquement
+l'intention complète immuable, une clé stable par opération et le reçu original
+signé. Ces métadonnées privées ne constituent ni un ledger PF ni un score.
+L'installation est explicite dans l'enclave physique Fans jetable ; elle ne
+s'exécute jamais à l'activation du plugin. Un schéma partiel ou non InnoDB est
+refusé, sans adoption ni réparation silencieuse.
+
+La préparation transactionnelle précède l'envoi HTTP. Après résultat incertain,
+le lookup reprend la clé persistée ; il ne peut en créer une. La récupération
+exige le membre propriétaire et restitue son contexte d'origine, même si les
+conditions actuelles ne permettent plus une nouvelle attribution. Le futur
+appelant résout ce membre côté serveur depuis la session liée ; cette classe
+interne n'est pas une API acceptant une identité fournie par le navigateur.
+
+La boîte vérifie la signature Hub et l'intention complète avant de conserver
+l'enveloppe originale. Les rejeux sont idempotents, y compris après perte de
+l'acquittement du COMMIT local. Une preuve stockée corrompue ou une clé Hub
+révoquée ferme la lecture ; un ancien reçu ne rétablit aucun score corrigé.
+L'appelant doit également vérifier la liaison fraîche de la réponse HTTP avant
+la remise à la boîte. Le client complet reliant session, délégation, HTTP et
+reprise durable reste un sous-lot distinct.
+
+La recette `--b3-ranked-inbox` compose deux WordPress/MariaDB jetables avec
+le gateway 0.3 précédent. Elle couvre préparations concurrentes, contexte
+modifié, membre étranger, échec d'écriture, arrêt avant/après COMMIT, perte de
+réponse HTTP après consommation et rejeux de reçus. Le contrôleur transfère
+les enveloppes fictives : cette preuve ne valide pas le SSO réel, TLS, les
+sites ou une admission économique. Aucun hook, route publique, cron, règle
+de conservation ou projection active n'est ajouté.
+
+[Résultats et limites de la recette](../evidence/hub-pf-b3-ranked-inbox/README.md).
