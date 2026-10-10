@@ -403,7 +403,8 @@ def main():
         report['b3_corpus_total'] = b3_corpus_http_start - b3_corpus_start
         report['b3_corpus_http_total'] = b3_corpus_inbox_start - b3_corpus_http_start
         report['b3_corpus_inbox_total'] = b3_corpus_reader_start - b3_corpus_inbox_start
-        report['b3_corpus_reader_total'] = len(checks) - b3_corpus_reader_start
+        report['b4_projection_total'] = sum(name.startswith('B4b ') for name in checks)
+        report['b3_corpus_reader_total'] = len(checks) - b3_corpus_reader_start - report['b4_projection_total']
         report['corpus_source_measurements'] = corpus_measurements
         report['corpus_fence_measurements'] = corpus_fence_measurements
         if options.h1 or options.h2_reservations or options.h2:
@@ -483,8 +484,8 @@ def main():
             report['fans_corpus_schema'] = '1 (closed_b3_corpus_fans)'
             report['not_proven'][0] = 'Automated network reader, ranking projections B4/B5, continuous production freshness'
         if options.b3_corpus_reader:
-            report['scope'] += '; bounded durable Fans reader with primary lookup and exact signed HTTP checkpoints'
-            report['not_proven'][0] = 'Ranked member and barrier HTTP, ranking projections B4/B5, continuous production freshness'
+            report['scope'] += '; bounded durable Fans reader with primary lookup and exact signed HTTP checkpoints; private rebuildable B4 general/category/month cache under the current corpus transaction'
+            report['not_proven'][0] = 'Ranked member and barrier HTTP, B5 session projections, public visibility and attested opening, continuous production freshness'
     finally:
         for process in workers:
             if process.poll() is None:

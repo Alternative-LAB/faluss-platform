@@ -149,24 +149,34 @@ final class ClosedCorpusInbox
     /** A historical, completely verified generation at its attested instant, not future freshness.
      * @return array{manifest:array<string,mixed>,facts:list<array<string,mixed>>,verified_at:string}|null */
     public function current(): ?array
+    { return $this->withCurrent(static fn (?array $generation): ?array => $generation); }
+
+    /** Trusted Fans composition under the same origin mutex and transaction as corpus promotion.
+     * No HTTP or nested transaction inside this callback; exceptions roll back every composed write.
+     * @template T
+     * @param callable(array{manifest:array<string,mixed>,facts:list<array<string,mixed>>,verified_at:string}|null):T $operation
+     * @return T */
+    public function withCurrent(callable $operation): mixed
+    { return $this->write(fn (): mixed => $operation($this->readCurrent())); }
+
+    /** @return array{manifest:array<string,mixed>,facts:list<array<string,mixed>>,verified_at:string}|null */
+    private function readCurrent(): ?array
     {
-        return $this->write(function (): ?array {
-            $row = $this->row('current','origin_id=%s AND policy_version=%s',[$this->origin,$this->policy]);
-            if ($row === null || $row['state'] !== 'current') { return null; }
-            $manifest = CanonicalJson::object($row['manifest_json']);
-            $facts = CanonicalJson::object('{"facts":' . $row['facts_json'] . '}',33554448)['facts'];
-            $proof = CanonicalJson::object($row['proof_json'],8388608);
-            if (!is_array($facts) || !array_is_list($facts) || $row['full_sha256'] !== hash('sha256',$row['facts_json'])
-                || $row['proof_sha256'] !== hash('sha256',$row['proof_json'])) { throw new ModelViolation('pf_corpus_incomplete'); }
-            RankingCorpusDocument::manifest($manifest,$this->origin,$this->policy); RankingCorpusDocument::complete($manifest,$facts);
-            $verified = $this->verified($proof,true);
-            if ($verified['outcome'] !== 'ok' || $verified['result']['state'] !== 'current'
-                || CanonicalJson::encode($verified['result']['manifest']) !== CanonicalJson::encode($manifest)
-                || $row['read_id'] !== $proof['fields']['read_id'] || $row['epoch'] !== $manifest['epoch']
-                || $row['ordering_epoch'] !== $manifest['ordering_epoch'] || $row['revision'] !== $manifest['revision']
-                || $row['verified_at'] !== $verified['result']['verified_at']) { throw new ModelViolation('pf_local_corpus_conflict'); }
-            return ['manifest' => $manifest,'facts' => $facts,'verified_at' => $row['verified_at']];
-        });
+        $row = $this->row('current','origin_id=%s AND policy_version=%s',[$this->origin,$this->policy]);
+        if ($row === null || $row['state'] !== 'current') { return null; }
+        $manifest = CanonicalJson::object($row['manifest_json']);
+        $facts = CanonicalJson::object('{"facts":' . $row['facts_json'] . '}',33554448)['facts'];
+        $proof = CanonicalJson::object($row['proof_json'],8388608);
+        if (!is_array($facts) || !array_is_list($facts) || $row['full_sha256'] !== hash('sha256',$row['facts_json'])
+            || $row['proof_sha256'] !== hash('sha256',$row['proof_json'])) { throw new ModelViolation('pf_corpus_incomplete'); }
+        RankingCorpusDocument::manifest($manifest,$this->origin,$this->policy); RankingCorpusDocument::complete($manifest,$facts);
+        $verified = $this->verified($proof,true);
+        if ($verified['outcome'] !== 'ok' || $verified['result']['state'] !== 'current'
+            || CanonicalJson::encode($verified['result']['manifest']) !== CanonicalJson::encode($manifest)
+            || $row['read_id'] !== $proof['fields']['read_id'] || $row['epoch'] !== $manifest['epoch']
+            || $row['ordering_epoch'] !== $manifest['ordering_epoch'] || $row['revision'] !== $manifest['revision']
+            || $row['verified_at'] !== $verified['result']['verified_at']) { throw new ModelViolation('pf_local_corpus_conflict'); }
+        return ['manifest' => $manifest,'facts' => $facts,'verified_at' => $row['verified_at']];
     }
 
     /** @param array<string,string> $row
