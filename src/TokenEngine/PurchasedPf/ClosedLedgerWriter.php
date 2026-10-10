@@ -13,7 +13,7 @@ final class ClosedLedgerWriter
 
     public function balance(string $member): int
     {
-        $this->connection->assertHeldSubject($member);
+        $this->connection->assertReadableSubject($member);
         $database = $this->connection->database;
         $value = $database->get_var($database->prepare(
             "SELECT COALESCE(SUM(CASE WHEN e.direction='credit' THEN e.amount_pf WHEN e.direction='debit' THEN -e.amount_pf WHEN e.direction='compensation' AND o.direction='credit' THEN -e.amount_pf WHEN e.direction='compensation' AND o.direction='debit' THEN e.amount_pf ELSE 0 END),0) FROM %i e LEFT JOIN %i o ON o.entry_uuid=e.compensates_entry_uuid WHERE e.faluss_id=%s AND e.economic_class='funded'",
@@ -75,7 +75,7 @@ final class ClosedLedgerWriter
 
     private function verify(string $entry, string $member, string $reference, string $quantity, string $policy, string $direction, string $category): void
     {
-        $this->connection->assertHeldSubject($member);
+        $this->connection->assertReadableSubject($member);
         $table = \Token_Engine_Schema::pf_ledger_table();
         $row = $this->connection->row($table, 'entry_uuid=%s', [$entry]);
         $expected = ['faluss_id' => $member, 'amount_pf' => $quantity, 'direction' => $direction,

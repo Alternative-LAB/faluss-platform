@@ -156,7 +156,7 @@ final class ClosedConsumptionStore
      */
     public function confirmedFact(AttributionIntent $intent): array
     {
-        $this->connection->assertHeldSubject($intent->values['member_faluss_id']);
+        $this->connection->assertReadableSubject($intent->values['member_faluss_id']);
         $row = $this->reservations->reservation($intent);
         if ($row === null || $row['state'] !== 'confirmed') {
             throw new ModelViolation('h4_filiation_failure');

@@ -140,6 +140,8 @@ jobs:
         run: python3 tests/TokenEngine/recipe/run.py --b3-ranked --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-b3-ranked-checks.json"
       - name: Hub B3 closed ranked member snapshots real WordPress
         run: python3 tests/TokenEngine/recipe/run.py --b3-snapshots --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-b3-snapshots-checks.json"
+      - name: Hub B3 exhaustive owner corpus source real WordPress
+        run: python3 tests/TokenEngine/recipe/run.py --b3-corpus-source --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-b3-corpus-source-checks.json"
       - uses: actions/upload-artifact@v4
         with:
           name: hub-pf-runtime-checks
@@ -157,6 +159,7 @@ jobs:
             ${{ runner.temp }}/hub-pf-b3-barriers-checks.json
             ${{ runner.temp }}/hub-pf-b3-ranked-checks.json
             ${{ runner.temp }}/hub-pf-b3-snapshots-checks.json
+            ${{ runner.temp }}/hub-pf-b3-corpus-source-checks.json
             ${{ runner.temp }}/fans-hof-b1-checks.json
             ${{ runner.temp }}/fans-hof-b2-checks.json
             ${{ runner.temp }}/fans-hof-territory-checks.json

@@ -122,6 +122,20 @@ final class ClosedSnapshotStore
     public function currentRows(string $member): array
     {
         $this->connection->assertHeldSubject($member);
+        return $this->verifiedRows($member);
+    }
+
+    /** Same H4 owner checks under the distinct global corpus lease, not a member delegation.
+     * @return list<array<string,string>> */
+    public function currentRowsForCorpus(string $member): array
+    {
+        ClosedCorpusTransaction::assertActive($this->connection->database); $this->connection->assertReadableSubject($member);
+        return $this->verifiedRows($member);
+    }
+
+    /** @return list<array<string,string>> */
+    private function verifiedRows(string $member): array
+    {
         $database = $this->connection->database;
         $h1 = ClosedModelSchema::tables($database);
         $h2 = ClosedReservationSchema::tables($database);

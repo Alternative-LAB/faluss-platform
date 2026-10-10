@@ -67,7 +67,24 @@ final class ClosedRankedReceiptStore
     public function historicalFactInOwnerTransaction(RankedIntent $intent, array $consumption): array
     {
         $this->connection->assertHeldSubject($intent->base->values['member_faluss_id']);
-        (new ClosedRankingContext($this->db,$intent,$this->keyId))->guard($intent->base,'lookup'); $this->owner($intent,$consumption);
+        (new ClosedRankingContext($this->db,$intent,$this->keyId))->guard($intent->base,'lookup');
+        return $this->verifiedHistoricalFact($intent,$consumption);
+    }
+
+    /** @param array<string,mixed> $consumption
+     * @return array<string,mixed> */
+    public function historicalFactInCorpusTransaction(RankedIntent $intent, array $consumption): array
+    {
+        ClosedCorpusTransaction::assertActive($this->db);
+        (new ClosedRankingContext($this->db,$intent,$this->keyId))->assertBoundForOwnerRead();
+        return $this->verifiedHistoricalFact($intent,$consumption);
+    }
+
+    /** @param array<string,mixed> $consumption
+     * @return array<string,mixed> */
+    private function verifiedHistoricalFact(RankedIntent $intent, array $consumption): array
+    {
+        $this->owner($intent,$consumption);
         $row = $this->connection->row($this->tables['receipts'],'attribution_id=%s',[$intent->base->values['attribution_id']]);
         $journal = $this->connection->row($this->tables['journal'],'event_id=%s',[$consumption['event_id']]);
         if ($row === null || $journal === null || $row['payload_sha256'] !== hash('sha256',$row['payload_json'])

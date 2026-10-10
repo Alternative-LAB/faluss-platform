@@ -38,7 +38,10 @@ def main():
     parser.add_argument('--b3-barriers', action='store_true', help='Closed B3 owner barriers on the primary; metadata only, no new consumption')
     parser.add_argument('--b3-ranked', action='store_true', help='Closed B3 ranked consumption with official debit; fictitious owner proofs only')
     parser.add_argument('--b3-snapshots', action='store_true', help='Closed member snapshots 2.0 with original ranked facts and latest H4 net')
+    parser.add_argument('--b3-corpus-source', action='store_true', help='Exhaustive closed owner inventory, H4 reconciliation and measured read mutex')
     options = parser.parse_args()
+    if options.b3_corpus_source:
+        options.b3_snapshots = True
     if options.b3_snapshots:
         options.b3_ranked = True
     if options.b3_ranked:
@@ -340,6 +343,11 @@ def main():
         if options.b3_snapshots:
             from b3_snapshot_checks import run_checks
             run_checks(root, wp, check, call, sql, start, finish, parallel, await_file)
+        b3_corpus_source_start = len(checks)
+        corpus_measurements = []
+        if options.b3_corpus_source:
+            from b3_corpus_source_checks import run_checks
+            corpus_measurements = run_checks(root,wp,check,call,sql,start,finish,parallel,await_file)
         report = dict(checks=checks, total=len(checks), failed=0, wordpress=cli('core', 'version').strip(),
                       php=command(['php', '-r', 'echo PHP_VERSION;']).strip(),
                       database=sql('SELECT VERSION()'), schema='5',
@@ -360,7 +368,9 @@ def main():
         report['f1a_total'] = b3_barriers_start - f1a_start
         report['b3_barriers_total'] = b3_ranked_start - b3_barriers_start
         report['b3_ranked_total'] = b3_snapshots_start - b3_ranked_start
-        report['b3_snapshots_total'] = len(checks) - b3_snapshots_start
+        report['b3_snapshots_total'] = b3_corpus_source_start - b3_snapshots_start
+        report['b3_corpus_source_total'] = len(checks) - b3_corpus_source_start
+        report['corpus_source_measurements'] = corpus_measurements
         if options.h1 or options.h2_reservations or options.h2:
             report['scope'] += '; closed H1 model explicitly installed only in this fixture'
             report['model_schema'] = '1 (closed_h1_model)'
@@ -392,6 +402,11 @@ def main():
             report['not_proven'] = ['B3 cross-instance ranked HTTP and Fans closure recovery; exhaustive owner member inventory',
                                     'Real account/SSO, purchase producer, production admission, activation, public score or retention policy',
                                     'Real network COMMIT loss, replica or inconsistent backup restore']
+        if options.b3_corpus_source:
+            report['scope'] += '; exhaustive owner origin inventory with reconciled H4, isolated read mutex measurements'
+            report['not_proven'] = ['Corpus immutable generation/page/fence and signed HTTP delivery; atomic Fans replacement and continuous freshness',
+                                    'Production sizing, real SSO/purchase/network admission, public score, activation or retention policy',
+                                    'Real infrastructure failure, replica or inconsistent backup restore']
         if options.h3_http:
             report['scope'] += '; real private loopback HTTP between distinct disposable Hub/Fans WP and databases, fictitious links/keys, not true SSO'
             report['fans_protocol_schema'] = '1 (closed_h3_fans)'

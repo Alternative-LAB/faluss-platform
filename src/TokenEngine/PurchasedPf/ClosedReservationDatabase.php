@@ -86,6 +86,18 @@ final class ClosedReservationDatabase
         }
     }
 
+    /** Additional read authority only. Economic mutations must keep assertHeldSubject. */
+    public function assertReadableSubject(string $member): void
+    {
+        ClosedReservationEnvironment::assertIsolated($this->database); ModelValues::uuid($member);
+        $row = $this->database->get_row($this->database->prepare(
+            'SELECT @@in_transaction AS active, IS_USED_LOCK(%s)=CONNECTION_ID() AS subject, (IS_USED_LOCK(%s)=CONNECTION_ID() AND IS_USED_LOCK(%s)=CONNECTION_ID()) AS corpus',
+            self::subjectLock($member),ClosedCorpusTransaction::globalLock($this->database),ClosedCorpusTransaction::leaseLock($this->database)),'ARRAY_A');
+        if ($this->database->last_error !== '' || $row === null || (string) $row['active'] !== '1'
+            || ((string) $row['subject'] !== '1' && (string) $row['corpus'] !== '1')) { throw new ModelViolation('owner_transaction_required'); }
+        if ((string) $row['subject'] !== '1') { ClosedCorpusTransaction::assertActive($this->database); }
+    }
+
     public function query(string $sql): void
     {
         if ($this->database->query($sql) === false || $this->database->last_error !== '') {
