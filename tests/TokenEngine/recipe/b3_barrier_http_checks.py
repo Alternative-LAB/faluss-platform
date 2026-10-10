@@ -160,3 +160,6 @@ def run_checks(root,wp,source,cli_path,check,call,sql,command,workers,log,start,
           and accept(pending_fields,request,answer[1])==dict(outcome='refused',result=dict(reason='pf_context_expired'))
           and exchange(look,key_value)['result']['state']=='active')
     check('B3bh barrier HTTP never modifies historical ledger bytes',sql('SELECT * FROM wp_token_engine_pf_ledger ORDER BY id')==before_ledger)
+
+    from b3_barrier_recovery_checks import run_checks as recovery_checks
+    recovery_checks(root,fans,source,cli_path,check,command,sql,worker,policy,policies,fixture,close_ref,fields,sign,accept,http,endpoint,events)

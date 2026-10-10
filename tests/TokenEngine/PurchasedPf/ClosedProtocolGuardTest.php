@@ -34,6 +34,9 @@ final class ClosedProtocolGuardTest extends TestCase
             static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedRankingCorpusStore($database,[],'recipe-key'),
             static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedCorpusAdmission($database),
             static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedBarrierAdmission($database),
+            static fn () => \Faluss\Platform\Fans\PfContract\ClosedBarrierInboxSchema::installForRecipe($database),
+            static fn () => new \Faluss\Platform\Fans\PfContract\ClosedBarrierInbox($database,
+                new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',[],[]),'',''),
             static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedBarrierGateway($database,
                 new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.fans','fixture.hub',[],[]),'recipe-key'),
             static fn () => \Faluss\Platform\TokenEngine\PurchasedPf\ClosedBarrierTransportSchema::installForRecipe($database),
@@ -82,6 +85,9 @@ final class ClosedProtocolGuardTest extends TestCase
             static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedRankingCorpusStore($database,[],'recipe-key'),
             static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedCorpusAdmission($database),
             static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedBarrierAdmission($database),
+            static fn () => \Faluss\Platform\Fans\PfContract\ClosedBarrierInboxSchema::installForRecipe($database),
+            static fn () => new \Faluss\Platform\Fans\PfContract\ClosedBarrierInbox($database,
+                new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',[],[]),'',''),
             static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedBarrierGateway($database,
                 new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.fans','fixture.hub',[],[]),'recipe-key'),
             static fn () => \Faluss\Platform\TokenEngine\PurchasedPf\ClosedBarrierTransportSchema::installForRecipe($database),
@@ -111,11 +117,26 @@ final class ClosedProtocolGuardTest extends TestCase
             'FALUSS_PF_H3_LEASE_SHA256' => str_repeat('a',64),'ABSPATH' => __DIR__ . '/','DB_HOST' => 'localhost','WP_CLI' => true] as $key => $value) { define($key,$value); }
         $database = new \wpdb(); $GLOBALS['wpdb'] = $database;
         foreach ([static fn () => \Faluss\Platform\Fans\PfContract\ClosedCorpusInboxSchema::installForRecipe($database),
+            static fn () => \Faluss\Platform\Fans\PfContract\ClosedBarrierInboxSchema::installForRecipe($database),
+            static fn () => new \Faluss\Platform\Fans\PfContract\ClosedBarrierInbox($database,
+                new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',[],[]),'',''),
             static fn () => new \Faluss\Platform\Fans\PfContract\ClosedCorpusInbox($database,
                 new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',['pf.ranking.corpus'],[]),'','')] as $operation) {
             try { $operation(); self::fail('Copied settings cannot stage private global facts.'); }
             catch (ModelViolation $error) { self::assertSame('isolated_h3_recipe_required',$error->reason); }
         }
+        self::assertSame(0,$database->queries);
+    }
+
+    public function testBarrierClientCannotBypassThePhysicalGate(): void
+    {
+        eval('namespace { class wpdb { public int $queries=0; } }');
+        $database = new \wpdb();
+        $inbox = (new \ReflectionClass(\Faluss\Platform\Fans\PfContract\ClosedBarrierInbox::class))->newInstanceWithoutConstructor();
+        try {
+            new \Faluss\Platform\Fans\PfContract\ClosedBarrierClient($database,$inbox,'recipe-key','');
+            self::fail('The closed client must refuse an ordinary WordPress before HTTP.');
+        } catch (ModelViolation $error) { self::assertSame('isolated_h3_recipe_required',$error->reason); }
         self::assertSame(0,$database->queries);
     }
 

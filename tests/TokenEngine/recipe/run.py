@@ -404,8 +404,9 @@ def main():
         report['h4_snapshots_total'] = h4_http_start - h4_snapshots_start
         report['h4_http_total'] = f1a_start - h4_http_start
         report['f1a_total'] = b3_barriers_start - f1a_start
+        report['b3_barrier_recovery_total'] = sum(name.startswith('B3br ') for name in checks)
         report['b3_barrier_http_total'] = sum(name.startswith('B3bh ') for name in checks)
-        report['b3_barriers_total'] = b3_ranked_start - b3_barriers_start - report['b3_barrier_http_total']
+        report['b3_barriers_total'] = b3_ranked_start - b3_barriers_start - report['b3_barrier_http_total'] - report['b3_barrier_recovery_total']
         report['b3_ranked_total'] = b3_snapshots_start - b3_ranked_start
         report['b3_snapshots_total'] = b3_corpus_source_start - b3_snapshots_start
         report['b3_corpus_source_total'] = b3_corpus_start - b3_corpus_source_start
@@ -435,8 +436,8 @@ def main():
             report['not_proven'] += ['B3 ranked atomic debit/order/receipt, cross-instance barrier transport and Fans closing state',
                                      'Any production installation, real account, purchase, score or retention policy']
         if options.b3_barrier_http:
-            report['scope'] += '; private signed barrier register/close/lookup HTTP between distinct disposable WordPress nodes, nonces and lost-body primary recovery'
-            report['not_proven'] = ['Durable Fans opening/closing state, integrated client and network confirmation versus closure',
+            report['scope'] += '; private signed barrier register/close/lookup HTTP between distinct disposable WordPress nodes, nonces and lost-body primary recovery; durable Fans actions/keys, immediate closing and bounded WordPress HTTP client'
+            report['not_proven'] = ['Integration of private barrier lifecycle with B1/B2 governance and real SSO; network confirmation versus closure',
                                     'Real SSO, accounts, purchase producer, production admission, activation, public score or retention policy',
                                     'Real infrastructure COMMIT loss, replica or inconsistent backup restore']
         if options.b3_ranked:

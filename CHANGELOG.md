@@ -17,6 +17,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Persister les actions et clés des barrières côté Fans avant chaque HTTP,
+  conserver opening/closing après panne et reprendre par lookup primaire,
+  uniquement dans l'enclave Hub/Fans jetable. Aucun parcours de site ouvert.
+
 - Raccorder le transport privé fermé des barrières au gateway Hub : signatures,
   nonces dédiés et lookup primaire après réponse HTTP perdue. Deux WordPress
   jetables uniquement ; aucun ledger, route de site ou activation ajouté.

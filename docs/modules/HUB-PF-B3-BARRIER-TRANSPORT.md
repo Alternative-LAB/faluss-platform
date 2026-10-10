@@ -170,5 +170,55 @@ l'enclave physique sur chaque lecture, une politique de pair 0600 et un POST
 privé. Aucun hook du plugin, route de site ou admission réelle n'est ajouté.
 Les [preuves HTTP](../evidence/hub-pf-b3-barrier-http/README.md) distinguent
 303 contrôles isolés du véritable SSO et du client Fans encore à raccorder.
-La persistance durable opening/closing et la concurrence réseau avec la
-consommation restent les prochains sous-lots du contrat déjà approuvé.
+La persistance durable opening/closing est décrite ci-dessous ; la concurrence
+réseau avec la consommation et le raccordement à la gouvernance B1/B2 restent
+des sous-lots distincts du contrat déjà approuvé.
+
+## B3b3e — reprise durable du client WordPress Fans
+
+`ClosedBarrierInboxSchema` possède quatre tables InnoDB privées : version du
+schéma, versions de descripteurs, actions immuables et requêtes signées. Aucun
+ledger, cron, hook ou installation automatique. L'installation explicite exige
+l'enclave physique Fans ; constantes copiées, schéma partiel ou MyISAM ne
+permettent pas d'ouvrir ce transport sur un site ordinaire.
+
+`ClosedBarrierInbox` persiste l'action et sa clé aléatoire avant tout HTTP. Une
+ouverture reste `opening` jusqu'à l'acquittement primaire signé. Une fermeture
+crée l'action et passe immédiatement à `closing` dans une même transaction :
+aucun nouveau choix ne doit être proposé dans cet état. Si register est encore
+incertain, sa même action est rapprochée avant d'envoyer close. Le code ne
+remplace jamais une clé pour contourner un timeout.
+
+`ClosedBarrierClient` avance de un à seize échanges par appel (quatre par
+défaut), uniquement vers le MU-adaptateur de recette sur loopback. Il ne suit
+aucune redirection et n'envoie aucun cookie. Chaque requête est enregistrée
+avant livraison, hors transaction et hors mutex pendant le réseau. Après un
+résultat incertain, reprise par lookup primaire ; une absence attestée permet
+le rejeu de la même opération sous la même clé. Les erreurs de signature ou de
+transport restent incertaines, jamais assimilées à un refus Hub authentifié.
+
+Une fermeture queued ne devient effective que sur acquittement register puis
+close, ou sur leur lookup. Un ancien résultat register ne réouvre ni closing
+ni closed. Les preuves persistées sont revérifiées avec la confiance courante ;
+clé Hub révoquée, ancienne ligne active isolée ou preuve liée à une autre
+action ferment l'accès. Une étiquette SQL `active` sans preuve ne suffit pas.
+Après refus définitif de register, la fermeture reste bloquée localement et
+requiert la résolution de gouvernance, sans fausse déclaration de fermeture.
+
+Scénarios préalables : préparations concurrentes, fermeture pendant opening,
+ancien acquittement retardé, corps HTTP réellement perdu après register/close,
+erreur après insertion d'action/requête, perte de COMMIT local, arrêt des
+processus avant/après COMMIT, reprise avec les mêmes clés, confiance révoquée et
+restauration contradictoire. Les quantités et écritures PF restent inchangées.
+Recette complète : **336 contrôles WordPress/MariaDB satisfaits, dont 33
+nouveaux de reprise** ; 657 tests PHP / 7 048 assertions et analyse statique
+sans erreur. [Preuves expurgées](../evidence/hub-pf-b3-barrier-recovery/README.md).
+
+Ce client attend des champs composés par un serveur de confiance ; ce n'est
+pas un endpoint membre. Le raccordement à l'origine B1, aux transitions de
+session/territoire/participation B2 et à la sélection d'attribution reste à
+implémenter et tester. Aucun véritable SSO, ouverture économique, fraîcheur de
+production ou capacité de classement sur les sites n'est revendiqué. Aucun
+nouveau contrat Hub n'est introduit. Retour arrière : retirer ces composants
+inertes et détruire la fixture ; aucune migration de site à annuler.
+Conservation #150 et RustFS #161 restent distinctes.
