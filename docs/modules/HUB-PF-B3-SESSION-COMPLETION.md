@@ -140,3 +140,33 @@ des actions 1.0 historiques et du ledger. La preuve réseau est celle des deux
 WordPress jetables et non celle du véritable SSO ou de la gouvernance B2.
 La [preuve isolée de reprise](../evidence/fans-hof-b3-completion-recovery/README.md)
 joint 385 contrôles, dont 28 nouveaux, et la destruction de la fixture.
+
+## Acquittement courant pour le raccordement local
+
+`ClosedBarrierInbox::withAcknowledgement()` est une façade serveur fermée,
+sans route, bootstrap ou installation. Elle vérifie les octets persistés,
+la signature historique et la confiance Hub actuelle sous le mutex de l'origine
+et la transaction primaire Fans. Une préparation, une réponse perdue ou un
+refus ne déclenche jamais l'application locale. Le callback de confiance reçoit
+uniquement les champs immuables, le contrat, le résultat primaire et l'état
+local actuel ; aucune clé d'opération, requête ou réponse signée n'est exposée.
+
+Le callback doit utiliser la connexion fournie par l'appelant, sans HTTP ni
+transaction imbriquée. Les mutations de gouvernance et leur journal pourront
+ainsi être atomiques avec cette vérification. Il reste responsable de leur
+idempotence, des permissions, des règles figées et des verrous propres au
+domaine. Ce sous-lot ne raccorde pas encore B1/B2 : aucune session ne devient
+ouverte ou terminée par la seule présence de cette façade.
+
+Un ancien ACK d'ouverture fournit l'état local `closing` ou `closed`, même si
+son résultat primaire historique porte `active` : il ne permet pas de rouvrir.
+Une fin 1.1 conserve le motif et l'instant effectif attesté. Le retrait de la
+confiance Hub, des octets corrompus ou une autre origine ferme l'application.
+Une erreur dans le callback annule ses écritures ; un COMMIT incertain exige
+une relecture primaire, sans nouvelle opération Hub. Aucun schéma n'est ajouté.
+
+Scénarios positifs : ouverture 1.0, annulation et fin 1.1, transaction effective,
+rollback du callback et reprise de COMMIT. Négatifs : pending, autre origine,
+signature/digest corrompu, confiance révoquée, transaction imbriquée et ancien
+ACK pendant fermeture. Recette `--b3-barrier-acknowledgement` en instances
+jetables avec preuves fictives ; aucune preuve de SSO central ou de site réel.

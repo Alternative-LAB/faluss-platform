@@ -71,6 +71,16 @@ try {
             'prepare' => $inbox->prepare($input['fields'],$input['contract'] ?? BarrierTransport::CONTRACT),
             'recover' => $inbox->recover($input['action_id']),
             'accept' => $inbox->accept($input['proof']),
+            'ack' => $inbox->withAcknowledgement($input['action_id'],static function (array $ack) use ($wpdb,$input,$inbox): array {
+                if (($input['probe'] ?? false) === true) {
+                    if ($wpdb->query($wpdb->prepare('INSERT INTO wp_barrier_ack_probe (action_id) VALUES (%s)',$input['action_id'])) !== 1) {
+                        throw new ModelViolation('pf_fixture_probe_failed');
+                    }
+                }
+                if (($input['reject_apply'] ?? false) === true) { throw new ModelViolation('pf_fixture_apply_refused'); }
+                if (($input['nested'] ?? false) === true) { $inbox->recover($input['action_id']); }
+                return $ack + ['transaction' => (string) $wpdb->get_var('SELECT @@in_transaction')];
+            }),
             'advance' => (new ClosedBarrierClient($wpdb,$inbox,'recipe-fans-k1',$input['endpoint']))->advance($input['action_id'],$input['steps'] ?? 4),
             default => throw new RuntimeException('Unknown fixture action.'),
         }; }
