@@ -31,7 +31,13 @@ final class ClosedRankedStore
             'confirm' => $consumptions->confirm($intent->base,$key),
             'lookup' => $consumptions->lookup($intent->base,(string) $lookupOperation,$key),
         };
-        if ($result['state'] === 'confirmed') { $result['receipt'] = (new ClosedRankedReceiptStore($this->db,$this->keyId))->receipt($intent,$result['consumption']); }
+        if ($result['state'] === 'confirmed') {
+            try { $result['receipt'] = (new ClosedRankedReceiptStore($this->db,$this->keyId))->receipt($intent,$result['consumption']); }
+            catch (ModelViolation) {
+                // The debit is already committed; unavailable proof retrieval cannot assert a refusal/rollback.
+                throw new ModelViolation('pf_ranked_receipt_unknown');
+            }
+        }
         return $result;
     }
 }

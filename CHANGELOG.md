@@ -17,6 +17,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Raccorder le gateway propriétaire 0.3 aux signatures, nonces privés et contrôles
+  transactionnels existants dans la seule enclave jetable. Recette HTTP avec
+  clés distinctes, rejeux et réponse perdue après consommation ; aucune route
+  distribuée ni activation sur les sites.
+
 - Revalider la délégation 0.3 après les verrous propriétaires et avant COMMIT,
   avec rollback des effets préparés si elle expire. Recette réelle fermée
   de concurrence et reprise, sans route, schéma ou activation supplémentaire.

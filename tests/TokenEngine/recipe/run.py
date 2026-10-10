@@ -37,6 +37,7 @@ def main():
     parser.add_argument('--f1a', action='store_true', help='Closed private Fan/Creator rebuildable projections after unchanged H0-H4')
     parser.add_argument('--b3-barriers', action='store_true', help='Closed B3 owner barriers on the primary; metadata only, no new consumption')
     parser.add_argument('--b3-ranked', action='store_true', help='Closed B3 ranked consumption with official debit; fictitious owner proofs only')
+    parser.add_argument('--b3-ranked-http', action='store_true', help='Closed 0.3 owner gateway over loopback between disposable WordPress signers')
     parser.add_argument('--b3-snapshots', action='store_true', help='Closed member snapshots 2.0 with original ranked facts and latest H4 net')
     parser.add_argument('--b3-corpus-source', action='store_true', help='Exhaustive closed owner inventory, H4 reconciliation and measured read mutex')
     parser.add_argument('--b3-corpus', action='store_true', help='Closed exhaustive immutable pages, stable primary recovery and final current fence')
@@ -44,6 +45,11 @@ def main():
     parser.add_argument('--b3-corpus-inbox', action='store_true', help='Durable private Fans staging, primary recovery and atomic complete corpus replacement')
     parser.add_argument('--b3-corpus-reader', action='store_true', help='Bounded durable corpus orchestration with real private WordPress HTTP and recovery')
     options = parser.parse_args()
+    if options.b3_ranked_http:
+        if any((options.h3_http, options.h4, options.h4_snapshots, options.h4_http, options.f1a,
+                options.b3_corpus_http, options.b3_corpus_inbox, options.b3_corpus_reader)):
+            parser.error('Ranked HTTP requires its own fresh disposable Fans node.')
+        options.b3_ranked = True
     if options.b3_corpus_reader:
         options.b3_corpus_inbox = True
     if options.b3_corpus_inbox:
@@ -348,9 +354,10 @@ def main():
             from b3_barrier_checks import run_checks
             run_checks(root, wp, check, call, sql, start, finish, parallel, await_file)
         b3_ranked_start = len(checks)
+        ranked_helpers = None
         if options.b3_ranked:
             from b3_ranked_checks import run_checks
-            run_checks(root, wp, check, call, sql, start, finish, parallel, await_file)
+            ranked_helpers = run_checks(root, wp, check, call, sql, start, finish, parallel, await_file)
         b3_snapshots_start = len(checks)
         if options.b3_snapshots:
             from b3_snapshot_checks import run_checks
@@ -378,6 +385,10 @@ def main():
         if options.b3_corpus_reader:
             from b3_corpus_reader_checks import run_checks
             run_checks(root,source,options.cli,check,call,sql,command,corpus_fixture)
+        b3_ranked_http_start = len(checks)
+        if options.b3_ranked_http:
+            from b3_ranked_http_checks import run_checks
+            run_checks(root,wp,source,options.cli,check,call,sql,command,workers,log,start,finish,await_file,ranked_helpers)
         report = dict(checks=checks, total=len(checks), failed=0, wordpress=cli('core', 'version').strip(),
                       php=command(['php', '-r', 'echo PHP_VERSION;']).strip(),
                       database=sql('SELECT VERSION()'), schema='5',
@@ -403,7 +414,8 @@ def main():
         report['b3_corpus_total'] = b3_corpus_http_start - b3_corpus_start
         report['b3_corpus_http_total'] = b3_corpus_inbox_start - b3_corpus_http_start
         report['b3_corpus_inbox_total'] = b3_corpus_reader_start - b3_corpus_inbox_start
-        report['b3_corpus_reader_total'] = len(checks) - b3_corpus_reader_start
+        report['b3_corpus_reader_total'] = b3_ranked_http_start - b3_corpus_reader_start
+        report['b3_ranked_http_total'] = len(checks) - b3_ranked_http_start
         report['corpus_source_measurements'] = corpus_measurements
         report['corpus_fence_measurements'] = corpus_fence_measurements
         if options.h1 or options.h2_reservations or options.h2:
@@ -485,6 +497,11 @@ def main():
         if options.b3_corpus_reader:
             report['scope'] += '; bounded durable Fans reader with primary lookup and exact signed HTTP checkpoints'
             report['not_proven'][0] = 'Ranked member and barrier HTTP, ranking projections B4/B5, continuous production freshness'
+        if options.b3_ranked_http:
+            report['scope'] += '; signed 0.3 owner gateway over loopback between distinct WordPress signers and keys, controller-transferred requests and lost HTTP body after commit'
+            report['not_proven'] = ['Durable ranked Fans client, linked-user delegation, barrier HTTP and closure recovery',
+                                    'True SSO, real purchase source, production admission, site operations, public score or retention policy',
+                                    'Production sizing, TLS, infrastructure COMMIT acknowledgement loss or replica/restore']
     finally:
         for process in workers:
             if process.poll() is None:
