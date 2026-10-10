@@ -40,6 +40,10 @@ exception du callback, clé Hub révoquée, cache altéré, rapprochement en cou
 et génération non reconstruite. Les tests installent un témoin InnoDB privé
 pour vérifier les écritures ; ils ne fabriquent pas d'acquittement Hub.
 
+La [preuve isolée](../evidence/fans-hof-b6-corpus-transaction/README.md) comporte
+610 contrôles WordPress/MariaDB réussis, dont 18 nouveaux transactionnels,
+avec témoin de rollback et attente réelle du collecteur ; fixtures détruites.
+
 Cette primitive ne constitue pas la jonction complète B6 : l'appelant doit
 encore authentifier les barrières courantes, examiner l'origine admise et les
 participations, mapper les filiations SSO et appliquer la visibilité. Une
