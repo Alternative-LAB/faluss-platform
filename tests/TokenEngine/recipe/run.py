@@ -430,7 +430,7 @@ def main():
         report['b3_barrier_completion_total'] = sum(name.startswith('B3be ') for name in checks)
         report['b3_barrier_completion_http_total'] = sum(name.startswith('B3beh ') for name in checks)
         report['b3_barrier_completion_recovery_total'] = sum(name.startswith('B3ber ') for name in checks)
-        report['b3_barrier_acknowledgement_total'] = sum(name.startswith('B3ba ') for name in checks)
+        report['b3_barrier_acknowledgement_total'] = sum(name.startswith('B3ack ') for name in checks)
         report['b3_barrier_http_total'] = sum(name.startswith('B3bh ') for name in checks)
         report['b3_barriers_total'] = b3_ranked_start - b3_barriers_start - report['b3_barrier_http_total'] - report['b3_barrier_recovery_total'] - report['b3_barrier_completion_http_total'] - report['b3_barrier_completion_recovery_total'] - report['b3_barrier_acknowledgement_total']
         report['b3_ranked_total'] = b3_snapshots_start - b3_ranked_start
