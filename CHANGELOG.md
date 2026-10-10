@@ -8,6 +8,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Reprise Fans fermée 1.1 : version persistée avant HTTP avec l'action/clé, clôture en attente de l'échéance primaire et lookup après panne, sans réinterprétation des actions 1.0.
+
 - Dispatch signé fermé des barrières 1.1 : fin de session et lookup primaire sur la même action, compatibilité 1.0 et recette HTTP avec réponse perdue ; aucun pair réel ou cycle de vie public.
 
 - Primitive propriétaire fermée 1.1 de fin de session : échéance figée vérifiée après les verrous sur le primaire, audit atomique et lookup de reprise sur la même action/clé ; aucune API ou écriture économique.

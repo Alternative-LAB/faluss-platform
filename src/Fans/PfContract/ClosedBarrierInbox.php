@@ -7,6 +7,7 @@ namespace Faluss\Platform\Fans\PfContract;
 use Faluss\Platform\TokenEngine\PurchasedPf\ModelValues;
 use Faluss\Platform\TokenEngine\PurchasedPf\ModelViolation;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\BarrierTransport;
+use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\BarrierCompletion;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\CanonicalJson;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\ClosedEnvironment;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\DelegatedContext;
@@ -33,13 +34,14 @@ final class ClosedBarrierInbox
     /** Persist server-composed immutable action/key before HTTP. Close blocks local choices immediately.
      * @param array<string,mixed> $fields
      * @return array<string,mixed> */
-    public function prepare(array $fields): array
+    public function prepare(array $fields, string $contract = BarrierTransport::CONTRACT): array
     {
-        $this->scope($fields);
+        $this->scope($fields,$contract);
         if ($fields['operation'] === 'lookup') { throw new ModelViolation('pf_local_barrier_action'); }
-        $ref = $fields['operation'] === 'register' ? RankingBarrier::reference($fields['object']['content']) : RankingBarrier::closeReference($fields['object']);
-        return $this->write(function () use ($fields,$ref): array {
-            $bytes = CanonicalJson::encode($fields);
+        $ref = $this->reference($fields,$contract);
+        return $this->write(function () use ($fields,$ref,$contract): array {
+            // Legacy rows retain their exact bytes. New explicit versions are bound before any delivery.
+            $bytes = CanonicalJson::encode($contract === BarrierTransport::CONTRACT ? $fields : ['contract' => $contract,'fields' => $fields]);
             $known = $this->row('actions','barrier_key=%s AND version=%s AND operation=%s',[$ref['barrier_key'],$ref['version'],$fields['operation']]);
             if ($known !== null) {
                 if ($known['fields_json'] !== $bytes || $known['fields_sha256'] !== hash('sha256',$bytes)) { throw new ModelViolation('pf_local_barrier_conflict'); }
@@ -58,6 +60,9 @@ final class ClosedBarrierInbox
             } else {
                 if ($version === null || !in_array($version['state'],['opening','active'],true)) { throw new ModelViolation('pf_local_barrier_conflict'); }
                 $descriptor = $this->descriptor($version); $expected = RankingBarrier::reference($descriptor['content']);
+                if (($ref['reason'] ?? '') === 'session_completed' && $descriptor['content']['kind'] !== 'session') {
+                    throw new ModelViolation('pf_barrier_completion_requires_session');
+                }
                 foreach (['barrier_key','version','content_sha256'] as $name) {
                     if ($ref[$name] !== $expected[$name]) { throw new ModelViolation('pf_local_barrier_conflict'); }
                 }
@@ -82,7 +87,7 @@ final class ClosedBarrierInbox
         if (!in_array($progress['phase'],['lookup','register','close'],true)) { throw new ModelViolation('pf_local_barrier_terminal'); }
         $fields = $progress['fields'];
         if ($progress['phase'] === 'lookup') { $fields['lookup_operation'] = $fields['operation']; $fields['operation'] = 'lookup'; }
-        $this->scope($fields); return $fields;
+        $this->scope($fields,$progress['contract'] ?? BarrierTransport::CONTRACT); return $fields;
     }
 
     /** Exact request is durable before delivery. Every uncertain mutation resumes at lookup.
@@ -90,9 +95,11 @@ final class ClosedBarrierInbox
      * @param array{wire:string,nonce:string} $sealed */
     public function request(array $fields, array $sealed): void
     {
-        $this->scope($fields); ModelValues::exactKeys($sealed,['wire','nonce']); DelegatedContext::nonce($sealed['nonce']);
+        ModelValues::exactKeys($sealed,['wire','nonce']); DelegatedContext::nonce($sealed['nonce']);
         $this->write(function () use ($fields,$sealed): void {
-            $action = $this->required($fields['action_id']); $progress = $this->progress($action);
+            ModelValues::uuid($fields['action_id'] ?? null);
+            $action = $this->required($fields['action_id']); [, $contract] = $this->storedAction($action);
+            $this->scope($fields,$contract); $progress = $this->progress($action);
             if ($progress['blocking_action_id'] !== '' || CanonicalJson::encode($this->fields($progress)) !== CanonicalJson::encode($fields)) {
                 throw new ModelViolation('pf_local_barrier_checkpoint_moved');
             }
@@ -100,7 +107,7 @@ final class ClosedBarrierInbox
             $payload = CanonicalJson::object(SignedEnvelope::decode($outer['payload_base64url'] ?? '',49152),49152);
             if (CanonicalJson::encode(array_intersect_key($payload,$fields)) !== CanonicalJson::encode($fields)
                 || ($payload['operation_key'] ?? null) !== $action['operation_key'] || ($payload['nonce'] ?? null) !== $sealed['nonce']
-                || ($payload['contract'] ?? null) !== BarrierTransport::CONTRACT || ($payload['kind'] ?? null) !== SignedEnvelope::BARRIER_REQUEST
+                || ($payload['contract'] ?? null) !== $contract || ($payload['kind'] ?? null) !== SignedEnvelope::BARRIER_REQUEST
                 || ($payload['issuer'] ?? null) !== 'fixture.fans' || ($payload['audience'] ?? null) !== 'fixture.hub') {
                 throw new ModelViolation('pf_local_barrier_request');
             }
@@ -126,6 +133,12 @@ final class ClosedBarrierInbox
             if (in_array($action['phase'],['acknowledged','refused'],true)) { return $this->progress($action); }
             if ($answer['outcome'] === 'unknown') { throw new ModelViolation('pf_transport_unknown'); }
             if ($answer['outcome'] === 'refused') {
+                [, $contract] = $this->storedAction($action);
+                if ($contract === BarrierTransport::COMPLETION_CONTRACT
+                    && $answer['result']['reason'] === 'pf_barrier_completion_not_due') {
+                    // A local clock cannot attest the deadline. Retry later, with the same durable action/key.
+                    return $this->progress($action);
+                }
                 $this->update('actions',['phase' => 'refused'],['action_id' => $action['action_id']]);
                 return $this->progress($this->required($action['action_id']));
             }
@@ -150,8 +163,8 @@ final class ClosedBarrierInbox
      * @return array<string,mixed> */
     private function progress(array $action): array
     {
-        $fields = CanonicalJson::object($action['fields_json']); $this->scope($fields); ModelValues::keyHash($action['operation_key']);
-        $ref = $fields['operation'] === 'register' ? RankingBarrier::reference($fields['object']['content']) : RankingBarrier::closeReference($fields['object']);
+        [$fields,$contract] = $this->storedAction($action); ModelValues::keyHash($action['operation_key']);
+        $ref = $this->reference($fields,$contract);
         if ($action['fields_sha256'] !== hash('sha256',$action['fields_json']) || $action['action_id'] !== $fields['action_id']
             || $action['operation'] !== $fields['operation'] || $action['barrier_key'] !== $ref['barrier_key'] || $action['version'] !== $ref['version']
             || !in_array($action['phase'],['lookup',$action['operation'],'acknowledged','refused'],true)) { throw new ModelViolation('pf_local_barrier_conflict'); }
@@ -181,7 +194,8 @@ final class ClosedBarrierInbox
             if ($opening['phase'] !== 'acknowledged') { $blocking = $opening['action_id']; }
         }
         return ['action_id' => $action['action_id'],'operation_key' => $action['operation_key'],'fields' => $fields,
-            'phase' => $action['phase'],'state' => $version['state'],'blocking_action_id' => $blocking];
+            'phase' => $action['phase'],'state' => $version['state'],'blocking_action_id' => $blocking]
+            + ($contract === BarrierTransport::CONTRACT ? [] : ['contract' => $contract]);
     }
 
     /** @param array<string,mixed> $proof
@@ -190,7 +204,9 @@ final class ClosedBarrierInbox
     {
         ModelValues::exactKeys($proof,['wire','fields','nonce','request_sha256']);
         if (!is_string($proof['wire']) || !is_array($proof['fields'])) { throw new ModelViolation('pf_local_barrier_request'); }
-        $fields = $proof['fields']; $this->scope($fields); DelegatedContext::nonce($proof['nonce']); ModelValues::keyHash($proof['request_sha256']);
+        $fields = $proof['fields']; ModelValues::uuid($fields['action_id'] ?? null);
+        [, $contract] = $this->storedAction($this->required($fields['action_id']));
+        $this->scope($fields,$contract); DelegatedContext::nonce($proof['nonce']); ModelValues::keyHash($proof['request_sha256']);
         $request = $this->row('requests','action_id=%s AND nonce_sha256=%s',[$fields['action_id'],hash('sha256',$proof['nonce'])]);
         if ($request === null || $request['request_sha256'] !== $proof['request_sha256'] || hash('sha256',$request['wire_json']) !== $proof['request_sha256']
             || $request['fields_json'] !== CanonicalJson::encode($fields)) { throw new ModelViolation('pf_local_barrier_request'); }
@@ -201,14 +217,38 @@ final class ClosedBarrierInbox
             if ($at > time()) { throw new ModelViolation('pf_local_barrier_request'); }
         }
         $payload = SignedEnvelope::open(SignedEnvelope::BARRIER_RESPONSE,$outer,$this->peer,$at);
-        return BarrierTransport::response($payload,$this->peer,$fields,$proof['nonce'],$proof['request_sha256'],$at);
+        return BarrierTransport::response($payload,$this->peer,$fields,$proof['nonce'],$proof['request_sha256'],$at,$contract);
     }
 
     /** @param array<string,mixed> $fields */
-    private function scope(array $fields): void
+    private function scope(array $fields, string $contract = BarrierTransport::CONTRACT): void
     {
-        BarrierTransport::fields($fields);
+        BarrierTransport::fields($fields,$contract);
         if ($fields['origin_id'] !== $this->origin || $fields['policy_version'] !== $this->policy) { throw new ModelViolation('pf_barrier_context_mismatch'); }
+    }
+
+    /** @param array<string,string> $action
+     * @return array{array<string,mixed>,string} */
+    private function storedAction(array $action): array
+    {
+        if ($action['fields_sha256'] !== hash('sha256',$action['fields_json'])) { throw new ModelViolation('pf_local_barrier_conflict'); }
+        $value = CanonicalJson::object($action['fields_json']); $contract = BarrierTransport::CONTRACT;
+        if (array_key_exists('contract',$value)) {
+            ModelValues::exactKeys($value,['contract','fields']);
+            if ($value['contract'] !== BarrierTransport::COMPLETION_CONTRACT || !is_array($value['fields'])) {
+                throw new ModelViolation('pf_local_barrier_conflict');
+            }
+            $contract = $value['contract']; $value = $value['fields'];
+        }
+        $this->scope($value,$contract); return [$value,$contract];
+    }
+
+    /** @param array<string,mixed> $fields
+     * @return array<string,mixed> */
+    private function reference(array $fields, string $contract): array
+    {
+        return $fields['operation'] === 'register' ? RankingBarrier::reference($fields['object']['content'])
+            : ($contract === BarrierTransport::COMPLETION_CONTRACT ? BarrierCompletion::reference($fields['object']) : RankingBarrier::closeReference($fields['object']));
     }
 
     /** @param array<string,string> $row
