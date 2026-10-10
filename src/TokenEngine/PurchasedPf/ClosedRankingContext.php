@@ -18,7 +18,8 @@ final class ClosedRankingContext
     /** @var array{ordering_epoch:string,consumption_order:string,confirmed_at:string}|null */
     private ?array $staged = null;
 
-    public function __construct(private readonly \wpdb $db, public readonly RankedIntent $intent, private readonly string $keyId)
+    public function __construct(private readonly \wpdb $db, public readonly RankedIntent $intent, private readonly string $keyId,
+        private readonly ?\Closure $fresh = null)
     {
         ClosedEnvironment::assertIsolated($db,'hub');
         $this->connection = new ClosedReservationDatabase($db); $this->tables = ClosedRankingSchema::tables($db);
@@ -56,7 +57,10 @@ final class ClosedRankingContext
     }
 
     public function validateSelection(AttributionIntent $base): void
-    { $this->available($base); (new ClosedBarrierStore($this->db))->lockSelection($this->intent); }
+    { $this->available($base); (new ClosedBarrierStore($this->db))->lockSelection($this->intent); $this->assertFresh(); }
+
+    public function assertFresh(): void
+    { if ($this->fresh !== null) { ($this->fresh)(); } }
 
     public function beforeDebit(AttributionIntent $base): string
     {
@@ -66,6 +70,7 @@ final class ClosedRankingContext
         if ($last >= ModelValues::MAX_INTEGER) { throw new ModelViolation('pf_ranking_counter_exhausted'); }
         // Counter then canonical barrier rows; close never takes the counter/member/lot locks.
         $now = (new ClosedBarrierStore($this->db))->lockSelection($this->intent);
+        $this->assertFresh();
         if ($counter['last_confirmed_at'] !== '' && $now < RankingValues::utc($counter['last_confirmed_at'])) { throw new ModelViolation('pf_primary_clock_regression'); }
         $this->staged = ['ordering_epoch' => $epoch,'consumption_order' => (string) ($last + 1),'confirmed_at' => $now];
         $this->connection->update($this->tables['counter'],['last_order' => $this->staged['consumption_order'],'last_confirmed_at' => $now],['id' => '1','last_order' => (string) $last]);
@@ -133,6 +138,7 @@ final class ClosedRankingContext
 
     private function available(AttributionIntent $base): void
     {
+        $this->assertFresh();
         ClosedEnvironment::assertIsolated($this->db,'hub'); $this->connection->assertHeldSubject($base->values['member_faluss_id']);
         if ($base->fingerprint() !== $this->intent->base->fingerprint()) { throw new ModelViolation('pf_ranking_context_conflict'); }
         if (!ClosedRankingSchema::ready($this->db)) { throw new ModelViolation('pf_ranking_schema_unavailable'); }

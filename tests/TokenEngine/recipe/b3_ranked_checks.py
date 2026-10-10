@@ -282,3 +282,6 @@ def run_checks(root, wp, check, call, sql, start, finish, parallel, await_file):
           call('b3r-confirm',payload=data,key=key) == dict(error='pf_ranking_schema_unavailable')
           and call('h2c-confirm',payload=base(data),key=key) == dict(error='pf_ranking_schema_unavailable') and counts() == before)
     sql('ALTER TABLE ' + prefix + 'journal ENGINE=InnoDB')
+
+    from b3_ranked_freshness_checks import run_checks as freshness_checks
+    freshness_checks(root, check, call, sql, start, finish, await_file, proof, fixture, fresh)
