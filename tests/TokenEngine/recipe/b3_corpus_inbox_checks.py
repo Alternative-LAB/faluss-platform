@@ -201,3 +201,5 @@ def run_checks(root, source, cli_path, check, call, sql, command, workers, log, 
     check('B3ci malformed local checkpoint fails closed without a type error',inbox('prepare',closed['origin_id'],read_id=closed['read_id'])==dict(error='pf_local_corpus_conflict'))
     check('B3ci inbox adds no Fan ledger and preserves all historical claims',len(fan_sql("SHOW TABLES LIKE 'wp_fans_pf_b3c_%'").splitlines())==5
           and fan_sql("SHOW TABLES LIKE 'wp_fans%ledger%'")=='' and sql('SELECT * FROM wp_token_engine_ledger ORDER BY id')==historical)
+    # In-memory private fixture closures only, never runtime configuration or an artifact.
+    return dict(fixture,inbox=inbox,request=request,proof_for=proof_for)

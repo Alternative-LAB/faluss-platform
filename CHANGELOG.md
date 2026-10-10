@@ -17,6 +17,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Ajouter le lecteur B3 fermé raccordant l'inbox durable Fans au véritable
+  client HTTP WordPress : étapes bornées, lookup primaire après résultat
+  incertain, concurrence sans nouvelle clé et promotion signée exhaustive.
+  Aucun classement public, cron, installation automatique ou activation.
+
 - Ajouter l'inbox privée B3c2c3a : clé et demande signée persistées avant HTTP,
   staging des pages, reprise primaire après résultat incertain et remplacement
   atomique après fence du corpus exhaustif. Installation explicite sur Fans

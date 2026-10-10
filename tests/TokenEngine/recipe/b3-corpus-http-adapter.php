@@ -48,7 +48,17 @@ add_action('rest_api_init',static function (): void {
                 if (is_file($fault) && file_get_contents($fault) === 'redirect') {
                     unlink($fault); $response = new WP_REST_Response(null,302);
                     $response->header('Location',WP_HOME . '/index.php?rest_route=/faluss-b3-recipe/v1/follow-probe');
-                } else { $response = new WP_REST_Response(['corpus_wire' => $wire],200); }
+                } elseif (is_file($fault) && file_get_contents($fault) === 'server-error') {
+                    unlink($fault); $response = new WP_REST_Response(null,503);
+                } else {
+                    if (is_file($fault) && file_get_contents($fault) === 'tamper-reply') {
+                        unlink($fault); $envelope = json_decode($wire,true,8,JSON_THROW_ON_ERROR);
+                        $signature = $envelope['signature_base64url'];
+                        $envelope['signature_base64url'] = ($signature[0] === 'A' ? 'B' : 'A') . substr($signature,1);
+                        $wire = wp_json_encode($envelope,JSON_THROW_ON_ERROR);
+                    }
+                    $response = new WP_REST_Response(['corpus_wire' => $wire],200);
+                }
             } catch (ModelViolation $error) {
                 file_put_contents(dirname(rtrim(ABSPATH,'/')) . '/corpus-http-diagnostic',$error->reason);
                 $response = new WP_REST_Response(['error' => 'pf_request_rejected'],403);
