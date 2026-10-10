@@ -16,9 +16,9 @@ fait partie du contexte signé et de la réponse liée à l'action/nonce/emprein
 Ni négociation implicite ni interprétation rétroactive d'une ancienne preuve.
 
 `BarrierCompletion::reference()` valide seulement la syntaxe de la nouvelle
-raison, pas une échéance ou une admission. Ce codec n'est **pas encore raccordé**
-au gateway, à la primitive propriétaire ou à la reprise Fans. Aucun appel 1.1
-ne peut donc clôturer une session avec ce seul sous-lot.
+raison, pas une échéance ou une admission. Le sous-lot propriétaire décrit ci-dessous
+l'utilise explicitement ; le gateway et la reprise Fans restent à raccorder.
+Aucun appel HTTP 1.1 ne peut encore clôturer une session.
 
 ## Règle approuvée à raccorder ensuite
 
@@ -34,8 +34,7 @@ Ancien ACK d'ouverture, timeout ou réponse perdue ne créent aucune nouvelle
 clé ni réouverture. Les contributions antérieures et corrections après clôture
 restent conservées ; aucun titre, récompense ou avantage irréversible.
 
-Sous-lots suivants : primitive distincte propriétaire et barrière temporelle ;
-dispatch HTTP explicitement versionné ; persistance/reprise Fans ; raccordement
+Sous-lots suivants : dispatch HTTP explicitement versionné ; persistance/reprise Fans ; raccordement
 de la gouvernance B2. Le ledger, les claims, la version 1.0 et leurs écritures
 restent inchangés. Aucun contrat supplémentaire n'est déduit de cet accord.
 
@@ -50,3 +49,36 @@ Les tests du codec ne prouvent pas l'heure primaire, les verrous, la panne
 après COMMIT ou le véritable SSO. Ces recettes suivent dans leurs sous-lots,
 avant toute déclaration de raccordement fonctionnel. Retour arrière : retirer
 ce codec inerte, sans tables, hooks, routes, migration ou données à réécrire.
+
+## Primitive propriétaire 1.1 fermée
+
+`ClosedBarrierStore::completeSession()` et `lookupCompletion()` sont distincts
+des entrées historiques. Ils exigent le contexte 1.1 authentifié par leur futur
+appelant, la permission de fermeture et, pour lookup, celle de lecture primaire.
+Le contexte lie action, clé, objet, origine et politique ; la version fait partie
+de son empreinte. La composition ne vérifie pas une signature à la place du gateway.
+
+Sous le mutex propriétaire et une transaction InnoDB, la version exacte et la
+version courante sont verrouillées. Le descripteur stocké, son empreinte et son
+type `session` sont vérifiés. L'heure UTC6 est ensuite lue sur cette connexion
+primaire : avant `valid_until`, aucun état, action ni événement ne change ; à
+l'échéance exacte ou après, état fermé, opération et audit sont atomiques.
+Un arrêt anticipé reste `session_cancelled`. Une session déjà annulée ne devient
+pas terminée. Aucun gagnant, score ou récompense n'est calculé ici.
+
+Les rejeux et lookups conservent l'instant de la première clôture et la même
+action/clé. La perte d'acquittement de COMMIT est inconnue, jamais un rollback
+affirmé ; le primaire départage absence et résultat confirmé. La fraîcheur du
+contexte est vérifiée avant et après attente, puis avant COMMIT. Aucun verrou
+économique n'est pris dans une fermeture ; les consommations déjà confirmées
+et corrections restent intactes. Les schémas historiques ne sont pas modifiés.
+
+Recette `run.py --b3-barrier-completion` : avant/à/après échéance primaire,
+mauvais type/origine/politique/permission, concurrence, fermeture après attente
+d'une sélection en cours, contexte expiré, annulation anticipée, erreur d'audit,
+perte de réponse et arrêt du processus avant/après COMMIT. Les tables du ledger,
+claims, consommations, reçus et journaux sont comparées sans diffusion de données.
+Cette recette propriétaire ne prouve ni le réseau 1.1 ni le véritable SSO.
+La [preuve isolée](../evidence/hub-pf-b3-barrier-completion-owner/README.md)
+joint 309 contrôles, dont 37 nouveaux, et la destruction de la fixture.
+Retour arrière : retirer ces entrées fermées et la fixture ; aucun site migré.

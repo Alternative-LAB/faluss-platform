@@ -13,8 +13,12 @@ use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\RankingBarrier;
 final class ClosedBarrierContext
 {
     /** @param array<string,mixed> $fields */
-    public function __construct(private readonly array $fields, private readonly string $issuedAt, private readonly string $expiresAt)
-    { BarrierTransport::fields($fields); $this->assertFresh(); }
+    public function __construct(private readonly array $fields, private readonly string $issuedAt, private readonly string $expiresAt,
+        private readonly string $contract = BarrierTransport::CONTRACT)
+    { BarrierTransport::fields($fields,$contract); $this->assertFresh(); }
+
+    public function assertContract(string $expected): void
+    { if ($this->contract !== $expected) { throw new ModelViolation('pf_barrier_context_mismatch'); } }
 
     public function assertFresh(): void
     { DelegatedContext::fresh($this->issuedAt,$this->expiresAt,time()); }
@@ -27,7 +31,7 @@ final class ClosedBarrierContext
         if ($target !== $operation || CanonicalJson::encode($object) !== CanonicalJson::encode($this->fields['object'])) {
             throw new ModelViolation('pf_barrier_context_mismatch');
         }
-        return hash('sha256',CanonicalJson::encode(['contract' => BarrierTransport::CONTRACT,'action_id' => $this->fields['action_id'],
+        return hash('sha256',CanonicalJson::encode(['contract' => $this->contract,'action_id' => $this->fields['action_id'],
             'origin_id' => $this->fields['origin_id'],'policy_version' => $this->fields['policy_version'],'operation' => $operation,'object' => $object]));
     }
 

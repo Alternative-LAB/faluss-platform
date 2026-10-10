@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Faluss\Platform\TokenEngine\PurchasedPf;
 
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\CanonicalJson;
+use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\BarrierCompletion;
+use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\BarrierTransport;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\ClosedEnvironment;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\RankedIntent;
@@ -79,6 +81,49 @@ final class ClosedBarrierStore
         return $this->write(function () use ($peer,$operation,$hash,$digest,$request,$context): array {
             if ($operation === 'close') { $context?->assertOwner($this->version($request)); }
             $known = $this->known($peer->node,$operation,$hash,$digest); return $known === null ? ['state' => 'not_found'] : $this->current($known);
+        },$context);
+    }
+
+    /** Explicit 1.1 owner entry; never admitted by the historical 1.0 close validator.
+     * @param array<array-key,mixed> $input
+     * @return array<string,mixed> */
+    public function completeSession(PeerPolicy $peer, array $input, string $key, ClosedBarrierContext $context): array
+    { return $this->completion($peer,$input,$key,$context,false); }
+
+    /** Same immutable action and key, read from the primary after an uncertain completion.
+     * @param array<array-key,mixed> $input
+     * @return array<string,mixed> */
+    public function lookupCompletion(PeerPolicy $peer, array $input, string $key, ClosedBarrierContext $context): array
+    { return $this->completion($peer,$input,$key,$context,true); }
+
+    /** @param array<array-key,mixed> $input
+     * @return array<string,mixed> */
+    private function completion(PeerPolicy $peer, array $input, string $key, ClosedBarrierContext $context, bool $lookup): array
+    {
+        self::peer($peer,'close'); if ($lookup) { $peer->allow('pf.lookup'); }
+        $context->assertContract(BarrierTransport::COMPLETION_CONTRACT); $ref = BarrierCompletion::reference($input);
+        if ($ref['reason'] !== 'session_completed') { throw new ModelViolation('pf_barrier_invalid_reason'); }
+        $hash = ModelValues::keyHash($key); $digest = $context->digest('close',$ref);
+        return $this->write(function () use ($peer,$ref,$hash,$digest,$context,$lookup): array {
+            $version = $this->version($ref); $context->assertOwner($version);
+            if ($version === null) { throw new ModelViolation('pf_barrier_origin_unavailable'); }
+            $descriptor = RankingBarrier::descriptor(CanonicalJson::object($version['descriptor_json']));
+            if ($descriptor['content']['kind'] !== 'session') { throw new ModelViolation('pf_barrier_completion_requires_session'); }
+            // Acquire every relevant row before sampling the authoritative primary clock.
+            $latest = $this->latest($ref['barrier_key']); $now = $this->connection->now();
+            if ($now < $descriptor['valid_until']) { throw new ModelViolation('pf_barrier_completion_not_due'); }
+            $known = $this->known($peer->node,'close',$hash,$digest);
+            if ($known !== null) { return $this->current($known); }
+            if ($lookup) { return ['state' => 'not_found']; }
+            if ($latest === null || $latest['version'] !== $ref['version'] || $latest['content_sha256'] !== $ref['content_sha256']
+                || $latest['state'] !== 'active' || $latest['owner'] !== $peer->node) {
+                throw new ModelViolation('pf_barrier_stable_key_or_version_required');
+            }
+            $this->connection->update($this->tables['barriers'],['state' => 'closed','closed_at' => $now],
+                ['barrier_key' => $ref['barrier_key'],'version' => $ref['version'],'state' => 'active']);
+            $result = ['operation' => 'close','barrier_key' => $ref['barrier_key'],'version' => $ref['version'],
+                'content_sha256' => $ref['content_sha256'],'reason' => $ref['reason'],'effective_at' => $now];
+            $this->remember($peer->node,'close',$hash,$digest,$result,$now); return $this->current($result);
         },$context);
     }
 
