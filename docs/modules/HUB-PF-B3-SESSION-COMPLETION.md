@@ -170,3 +170,7 @@ rollback du callback et reprise de COMMIT. Négatifs : pending, autre origine,
 signature/digest corrompu, confiance révoquée, transaction imbriquée et ancien
 ACK pendant fermeture. Recette `--b3-barrier-acknowledgement` en instances
 jetables avec preuves fictives ; aucune preuve de SSO central ou de site réel.
+
+La [preuve de branche](../evidence/fans-hof-b3-acknowledgement/README.md)
+joint 399 contrôles, dont 14 nouveaux, avec fixture détruite. Le raccordement
+des états B2 et son propre journal restent distincts de cette façade.
