@@ -291,3 +291,22 @@ des durées de verrouillage, concurrence et reprise après obsolescence ; aucune
 validation de dimensionnement de production ne sera déduite de cette recette.
 Les projections globales ne doivent pas présenter le jeu de membres connus comme
 un classement exhaustif. Conservation #150 et RustFS #161 restent distincts.
+
+## B3c2a — contrat exhaustif approuvé, validateur fermé
+
+Le [contrat corpus](HUB-PF-B3-RANKING-CORPUS.md), son accord explicite et les sous-lots propriétaires sont désormais consignés avec le code : validateur canonique 1.0, permission `pf.ranking.corpus` dédiée et domaines de signature distincts. Aucun transport, schéma, admission, lecture globale ou score n'est ouvert par ce sous-lot. Les snapshots membres 2.0 précédents restent distincts ; leur réunion ne prouve pas l'inventaire.
+
+35 nouveaux cas : corpus vide explicite, 101 faits avec membre encore inconnu de
+Fans et fait annulé à zéro, corrections/litiges/résolutions, filiation de lots et
+révisions cohérentes entre faits/pages, ordre/époque/confirmation, plafonds de
+forme, dépassement des sommes, pages manquantes et signatures/domaines/permissions.
+Une page à dix sessions et 32 allocations par fait dépasse 1 MiB ; elle reste
+dans le nouveau budget séparé de 4 MiB, sans élargir les anciens domaines.
+
+210 tests PF / 414 assertions ; suite complète 587 tests / 6 676 assertions et
+PHPStan complet cible PHP 8.3, lints PHP, liens, secrets et diff propre en copie
+LF isolée du verrou exact. Runtime local PHP 8.5.4, deux dépréciations de
+dépendances historiques distinctes des erreurs. Cette preuve de validateur et
+de cryptographie ne remplace ni la matérialisation SQL exhaustive ni les tests
+réseau et de verrouillage des sous-lots suivants. La recette WordPress/MariaDB
+320 scénarios de B3c1 reste une preuve transactionnelle distincte.

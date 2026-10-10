@@ -26,6 +26,10 @@ final class SignedEnvelope
     public const RANKING_SNAPSHOT_REQUEST = 'faluss.hub-purchased-pf.snapshot-request/2';
     public const RANKING_SNAPSHOT_RESPONSE = 'faluss.hub-purchased-pf.snapshot-response/2';
 
+    public const CORPUS_CONTEXT = 'faluss.hub-purchased-pf.corpus-context/1';
+    public const CORPUS_REQUEST = 'faluss.hub-purchased-pf.corpus-request/1';
+    public const CORPUS_RESPONSE = 'faluss.hub-purchased-pf.corpus-response/1';
+
     /** @return array<string,string> */
     public static function seal(string $domain, string $bytes, string $key): array
     {
@@ -85,7 +89,8 @@ final class SignedEnvelope
         if (!in_array($domain, [self::RECEIPT, self::CONTEXT, self::REQUEST, self::RESPONSE,
             self::SNAPSHOT_CONTEXT, self::SNAPSHOT_REQUEST, self::SNAPSHOT_RESPONSE,
             self::RANKING_RECEIPT,self::RANKING_CONTEXT,self::RANKING_REQUEST,self::RANKING_RESPONSE,
-            self::RANKING_SNAPSHOT_CONTEXT,self::RANKING_SNAPSHOT_REQUEST,self::RANKING_SNAPSHOT_RESPONSE], true)) {
+            self::RANKING_SNAPSHOT_CONTEXT,self::RANKING_SNAPSHOT_REQUEST,self::RANKING_SNAPSHOT_RESPONSE,
+            self::CORPUS_CONTEXT,self::CORPUS_REQUEST,self::CORPUS_RESPONSE], true)) {
             throw new ModelViolation('pf_invalid_domain');
         }
         return $domain . "\nkid:" . PeerPolicy::keyId($key) . "\nsha256:" . $digest;
@@ -96,9 +101,10 @@ final class SignedEnvelope
         return match ($domain) {
             self::REQUEST, self::RESPONSE, self::SNAPSHOT_REQUEST => 49152,
             self::RANKING_REQUEST, self::RANKING_RESPONSE => 49152,
-            self::RANKING_SNAPSHOT_REQUEST => 49152,
+            self::RANKING_SNAPSHOT_REQUEST, self::CORPUS_REQUEST => 49152,
             self::SNAPSHOT_RESPONSE => 262144,
             self::RANKING_SNAPSHOT_RESPONSE => 1048576,
+            self::CORPUS_RESPONSE => 4194304,
             default => 32768,
         };
     }

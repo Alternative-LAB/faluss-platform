@@ -184,6 +184,49 @@ final class RankedProtocolTest extends TestCase
     public static function badSignature(): iterable
     { foreach (['old_domain','unknown','revoked','tamper'] as $change) { yield $change => [$change]; } }
 
+    public function testCorpusDomainsAreDistinctFromEveryMemberSnapshotAndEconomicEnvelope(): void
+    {
+        $bytes = CanonicalJson::encode(['origin_id' => RankedFixtures::ORIGIN,'scope' => 'all_confirmed_ranked_0.3_including_zero']);
+        foreach ([SignedEnvelope::CORPUS_CONTEXT,SignedEnvelope::CORPUS_REQUEST,SignedEnvelope::CORPUS_RESPONSE] as $domain) {
+            $sealed = SignedEnvelope::seal($domain,$bytes,'recipe-k1');
+            self::assertSame($bytes,CanonicalJson::encode(SignedEnvelope::open($domain,$sealed,$this->peer,$this->now)));
+            foreach ([SignedEnvelope::CONTEXT,SignedEnvelope::REQUEST,SignedEnvelope::RESPONSE,
+                SignedEnvelope::SNAPSHOT_CONTEXT,SignedEnvelope::SNAPSHOT_REQUEST,SignedEnvelope::SNAPSHOT_RESPONSE,
+                SignedEnvelope::RANKING_REQUEST,SignedEnvelope::RANKING_SNAPSHOT_RESPONSE] as $oldDomain) {
+                try { SignedEnvelope::open($oldDomain,$sealed,$this->peer,$this->now); self::fail('Cross-domain replay must fail.'); }
+                catch (ModelViolation) { self::assertTrue(true); }
+            }
+        }
+    }
+
+    #[DataProvider('badCorpusSignature')]
+    public function testCorpusSignatureAndTrustedKeyRulesRemainEnforced(string $change): void
+    {
+        $domain = SignedEnvelope::CORPUS_RESPONSE; $bytes = CanonicalJson::encode(['origin_id' => RankedFixtures::ORIGIN]);
+        $sealed = SignedEnvelope::seal($domain,$bytes,$change === 'revoked' ? 'recipe-revoked' : 'recipe-k1');
+        if ($change === 'unknown') { $sealed['key_id'] = 'unknown'; }
+        if ($change === 'tamper') { $sealed['payload_base64url'] = SignedEnvelope::encode(CanonicalJson::encode(['origin_id' => RankedFixtures::SESSION])); }
+        if ($change === 'wrong_domain') { $domain = SignedEnvelope::CORPUS_REQUEST; }
+        $this->expectException(ModelViolation::class); SignedEnvelope::open($domain,$sealed,$this->peer,$this->now);
+    }
+
+    public static function badCorpusSignature(): iterable
+    { foreach (['unknown','revoked','tamper','wrong_domain'] as $change) { yield $change => [$change]; } }
+
+    public function testOnlyCorpusResponseHasTheNewFourMiBLimit(): void
+    {
+        $bytes = CanonicalJson::encode(['synthetic_padding' => str_repeat('a',1100000)]);
+        $sealed = SignedEnvelope::seal(SignedEnvelope::CORPUS_RESPONSE,$bytes,'recipe-k1');
+        self::assertSame($bytes,CanonicalJson::encode(SignedEnvelope::open(SignedEnvelope::CORPUS_RESPONSE,$sealed,$this->peer,$this->now)));
+        foreach ([SignedEnvelope::CORPUS_CONTEXT,SignedEnvelope::CORPUS_REQUEST,SignedEnvelope::RANKING_SNAPSHOT_RESPONSE,
+            SignedEnvelope::SNAPSHOT_RESPONSE,SignedEnvelope::RECEIPT] as $domain) {
+            try { SignedEnvelope::seal($domain,$bytes,'recipe-k1'); self::fail('An old/request limit cannot be enlarged.'); }
+            catch (ModelViolation) { self::assertTrue(true); }
+        }
+        $this->expectException(ModelViolation::class);
+        SignedEnvelope::seal(SignedEnvelope::CORPUS_RESPONSE,CanonicalJson::encode(['synthetic_padding' => str_repeat('a',4194304)]),'recipe-k1');
+    }
+
     /** @return array<string,mixed> */
     private function delegation(): array
     { return ['contract' => RankedIntent::CONTRACT,'kind' => SignedEnvelope::RANKING_CONTEXT,'issuer' => 'fixture.fans','audience' => 'fixture.hub',
