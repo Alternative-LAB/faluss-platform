@@ -13,6 +13,7 @@ p.add_argument('--messaging', action='store_true')
 p.add_argument('--app', action='store_true')
 p.add_argument('--backoffice', action='store_true')
 p.add_argument('--hof-b1', action='store_true', help='Explicit private HoF governance persistence checks only')
+p.add_argument('--hof-b6-visibility', action='store_true', help='Display filtering with actual private consent/editorial state, synthetic ranked rows only')
 p.add_argument('--hof-b2', action='store_true', help='Private session governance; no Hub acknowledgement or scores')
 p.add_argument('--hof-territory', action='store_true', help='Explicit fictitious principal territory examination only')
 p.add_argument('--hof-review', action='store_true', help='Private session moderation and recourse, no attested close')
@@ -30,6 +31,7 @@ shutil.copytree(a.source, plugin, ignore=shutil.ignore_patterns('.git', '.cache'
 shutil.copytree(pathlib.Path(a.core)/'wp-content/themes/twentytwentyfive', wp/'wp-content/themes/twentytwentyfive')
 
 db = web = None
+visibility_report = None
 log = open(root/'runtime.log', 'w')
 def run(args):
     result = subprocess.run(args, capture_output=True, text=True)
@@ -75,11 +77,13 @@ try:
         recipe = ('tests/Fans/Hof/recipe/review_checks.py' if a.hof_review else
                   'tests/Fans/Hof/recipe/territory_checks.py' if a.hof_territory else
                   'tests/Fans/Hof/recipe/b2_checks.py' if a.hof_b2 else
+                  'tests/Fans/Hof/recipe/b6_visibility_checks.py' if a.hof_b6_visibility else
                   'tests/Fans/Hof/recipe/b1_checks.py' if a.hof_b1 else
                   'tests/Fans/Messaging/recipe/operations-wordpress.py' if a.messaging else 'tests/Fans/Profiles/recipe/admission-http.py')
         run(['python3', str(pathlib.Path(a.source)/recipe), '--root', str(root), '--base', base, '--cli', a.cli])
         print((root/'checks.json').read_text(), flush=True)
         if a.output: pathlib.Path(a.output).write_text((root/'checks.json').read_text())
+        if a.hof_b6_visibility: visibility_report = json.loads((root/'checks.json').read_text())
         if not a.keep: (root/'STOP').touch()
     while not (root/'STOP').exists():
         if web.poll() is not None: raise RuntimeError('Fixture stopped unexpectedly')
@@ -90,3 +94,10 @@ finally:
         os.killpg(web.pid, signal.SIGTERM); web.wait(timeout=10)
     if db is not None: db.terminate(); db.wait(timeout=20)
     log.close()
+    if a.hof_b6_visibility and not a.keep:
+        if root.parent != pathlib.Path('/var/tmp') or not root.name.startswith('fans-admission-wp-'):
+            raise RuntimeError('Unexpected disposable cleanup root')
+        shutil.rmtree(root)
+        if visibility_report is not None and a.output:
+            visibility_report['fixture_removed'] = not root.exists()
+            pathlib.Path(a.output).write_text(json.dumps(visibility_report,indent=2))
