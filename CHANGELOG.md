@@ -17,6 +17,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Ajouter l'inbox privée B3c2c3a : clé et demande signée persistées avant HTTP,
+  staging des pages, reprise primaire après résultat incertain et remplacement
+  atomique après fence du corpus exhaustif. Installation explicite sur Fans
+  jetable uniquement, sans ledger, route, migration ou score public.
+
 - Ajouter B3c2c2 fermé : lectures HTTP signées du corpus propriétaire, admission
   par nonce SQL distinct et reprise par lookup primaire après réponse perdue.
   Recette physiquement limitée à deux WordPress jetables à clés distinctes ;
