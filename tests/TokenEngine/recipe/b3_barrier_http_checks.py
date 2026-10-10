@@ -163,3 +163,5 @@ def run_checks(root,wp,source,cli_path,check,call,sql,command,workers,log,start,
 
     from b3_barrier_recovery_checks import run_checks as recovery_checks
     recovery_checks(root,fans,source,cli_path,check,command,sql,worker,policy,policies,fixture,close_ref,fields,sign,accept,http,endpoint,events)
+    return dict(worker=worker,policy=policy,policies=policies,fixture=fixture,fields=fields,sign=sign,accept=accept,
+                http=http,events=events,nonces=nonces,bad_signature=bad_signature)

@@ -19,7 +19,7 @@ try {
         $pair = sodium_crypto_sign_seed_keypair(SignedEnvelope::decode(FALUSS_FEDERATION_PRIVATE_SEED,32));
         $result = ['public_key' => SignedEnvelope::encode(sodium_crypto_sign_publickey($pair))]; sodium_memzero($pair);
     } elseif ($input['action']==='sign') {
-        $sealed = BarrierTransport::sealRequest($input['fields'],$input['key'],'recipe-fans-k1',time()+60);
+        $sealed = BarrierTransport::sealRequest($input['fields'],$input['key'],'recipe-fans-k1',time()+60,$input['contract'] ?? BarrierTransport::CONTRACT);
         $outer = CanonicalJson::object($sealed['wire'],BarrierTransport::MAX_WIRE);
         $payload = CanonicalJson::object(SignedEnvelope::decode($outer['payload_base64url'],49152),49152);
         $context = CanonicalJson::object(SignedEnvelope::decode($payload['context']['payload_base64url']));
@@ -40,7 +40,7 @@ try {
         $peer = new PeerPolicy($policy['node'],$policy['audience'],$policy['permissions'],$policy['keys']);
         $payload = SignedEnvelope::open(SignedEnvelope::BARRIER_RESPONSE,CanonicalJson::object($input['wire'],BarrierTransport::MAX_WIRE),$peer,time());
         $result = BarrierTransport::response($payload,$peer,$input['fields'],
-            $input['nonce'],$input['digest'],time());
+            $input['nonce'],$input['digest'],time(),$input['contract'] ?? BarrierTransport::CONTRACT);
     }
 } catch (ModelViolation $error) { $result = ['error' => $error->reason]; }
 echo wp_json_encode($result,JSON_THROW_ON_ERROR);
