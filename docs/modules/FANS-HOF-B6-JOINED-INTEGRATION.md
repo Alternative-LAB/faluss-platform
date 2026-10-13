@@ -16,8 +16,8 @@ locale avant ACK de fermeture. Aucun mapping SSO réel ni score public testé.
 Arbre de vérification `4fdb52453b6da61aac1d3a91ab497c661819b7bf` : suite PHP
 **722/7 483**, HoF **84/291**, analyse statique cible 8.3 sans erreur ; deux
 dépréciations historiques. Deux PHP lintés, deux Python compilés, scan ciblé,
-égalité LF, YAML et diff vérifiés. Recette SQL engagée avant la pause : résultat
-à consigner une fois terminée. Aucun succès des nouveaux contrôles annoncé.
+égalité LF, YAML et diff vérifiés. Recette SQL arrêtée en échec avant les nouveaux contrôles : 598 vérifications achevées. Résultat
+consigné dans ../evidence/fans-hof-consolidation-partial. Aucun succès des nouveaux contrôles annoncé.
 
 Le point de pause précis et les SHA sont conservés dans le suivi local.
 La PR #203 reste en brouillon ; aucune fusion ou publication pour cette pause.
