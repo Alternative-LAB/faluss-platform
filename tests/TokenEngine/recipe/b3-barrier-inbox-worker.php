@@ -9,6 +9,10 @@ use Faluss\Platform\TokenEngine\PurchasedPf\ModelViolation;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\ClosedEnvironment;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\BarrierTransport;
+use Faluss\Platform\Fans\Hof\ClosedOriginOpening;
+use Faluss\Platform\Fans\Hof\ClosedOriginOpeningSchema;
+use Faluss\Platform\Fans\Hof\RankingRegistry;
+use Faluss\Platform\Fans\Hof\RankingSchema;
 
 global $wpdb;
 ClosedEnvironment::assertIsolated($wpdb,'fans');
@@ -27,6 +31,9 @@ final class FansBarrierRecipeDatabase extends wpdb
                 $this->fault = ''; return false;
             }
         }
+        if ($this->fault==='origin-open-write' && str_starts_with($query,'UPDATE `wp_fans_hof_origin_records` SET state=')) {
+            $this->fault='';return false;
+        }
         if (strtoupper(trim($query)) !== 'COMMIT' || !in_array($this->fault,['before-commit','after-commit','commit-unknown'],true)) { return parent::query($query); }
         $fault = $this->fault; $this->fault = '';
         if ($fault === 'before-commit') { $this->pause(); }
@@ -44,7 +51,16 @@ final class FansBarrierRecipeDatabase extends wpdb
 }
 
 try {
-    if ($input['action'] === 'ready') { $result = ['ready' => ClosedBarrierInboxSchema::ready($wpdb)]; }
+    if (str_starts_with($input['action'],'origin-')) {
+        $admin=get_user_by('login','fixture');wp_set_current_user((int)($input['actor']??$admin->ID));
+    }
+    if ($input['action']==='origin-seed') {
+        RankingRegistry::administrator();RankingSchema::installOrVerify($wpdb);
+        $result=(new RankingRegistry($wpdb))->prepareOrigin($input['origin']);
+    }
+    elseif ($input['action']==='origin-ready') { $result=['ready'=>ClosedOriginOpeningSchema::ready($wpdb)]; }
+    elseif ($input['action']==='origin-install') { RankingRegistry::administrator();ClosedOriginOpeningSchema::installForRecipe($wpdb);$result=['ready'=>true]; }
+    elseif ($input['action'] === 'ready') { $result = ['ready' => ClosedBarrierInboxSchema::ready($wpdb)]; }
     elseif ($input['action'] === 'install') { ClosedBarrierInboxSchema::installForRecipe($wpdb); $result = ['ready' => true]; }
     else {
         if (isset($input['fault'])) {
@@ -55,6 +71,7 @@ try {
         $policy = json_decode(file_get_contents($root . '/fans-barrier-trust.json'),true,20,JSON_THROW_ON_ERROR);
         $peer = new PeerPolicy($policy['node'],$policy['audience'],$policy['permissions'],$policy['keys']);
         $inbox = new ClosedBarrierInbox($wpdb,$peer,$input['origin'],'1.0.0');
+        $opening=str_starts_with($input['action'],'origin-')?new ClosedOriginOpening($wpdb,$inbox,$input['origin']):null;
         $trace = [];
         if (($input['monitor'] ?? false) === true) {
             add_filter('pre_http_request',static function ($pre, $args) use ($wpdb,$input,&$trace) {
@@ -82,6 +99,9 @@ try {
                 return $ack + ['transaction' => (string) $wpdb->get_var('SELECT @@in_transaction')];
             }),
             'advance' => (new ClosedBarrierClient($wpdb,$inbox,'recipe-fans-k1',$input['endpoint']))->advance($input['action_id'],$input['steps'] ?? 4),
+            'origin-prepare' => $opening->prepare($input['descriptor']),
+            'origin-apply' => $opening->apply($input['action_id']),
+            'origin-read' => $opening->read(),
             default => throw new RuntimeException('Unknown fixture action.'),
         }; }
         if (($input['monitor'] ?? false) === true) { $result['http_trace'] = $trace; }
