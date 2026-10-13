@@ -39,6 +39,10 @@ final class ClosedProtocolGuardTest extends TestCase
                 new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.fans','fixture.hub',['pf.ranking.corpus'],[]),'recipe-key'),
             static fn () => new \Faluss\Platform\Fans\PfContract\ClosedCorpusClient($database,
                 new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',['pf.ranking.corpus'],[]),'recipe-key','','',''),
+            static fn () => \Faluss\Platform\Fans\PfContract\ClosedCorpusInboxSchema::installForRecipe($database),
+            static fn () => \Faluss\Platform\Fans\PfContract\ClosedCorpusInboxSchema::ready($database),
+            static fn () => new \Faluss\Platform\Fans\PfContract\ClosedCorpusInbox($database,
+                new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',['pf.ranking.corpus'],[]),'',''),
             static fn () => \Faluss\Platform\TokenEngine\PurchasedPf\ClosedRankingCorpusSchema::installForRecipe($database),
             static fn () => \Faluss\Platform\TokenEngine\PurchasedPf\ClosedCorpusTransaction::assertActive($database),
             static fn () => ClosedEnvironment::assertIsolated($database, 'fans')] as $operation) {
@@ -88,5 +92,20 @@ final class ClosedProtocolGuardTest extends TestCase
         $database = new \wpdb(); $GLOBALS['wpdb'] = $database; $GLOBALS['recipe_routes'] = 0;
         require dirname(__DIR__) . '/recipe/b3-corpus-http-adapter.php';
         self::assertSame(0,$database->queries); self::assertSame(0,$GLOBALS['recipe_routes']);
+    }
+
+    public function testCopiedFansSettingsCannotOpenTheDurableInbox(): void
+    {
+        eval('namespace { class wpdb { public int $queries=0; public function get_row($q,$a=null) { $this->queries++; return null; } } function wp_get_environment_type(): string { return "local"; } }');
+        foreach (['FALUSS_PF_H3_RECIPE_ONLY' => true,'FALUSS_PLATFORM_ROLE' => 'fans','WP_HTTP_BLOCK_EXTERNAL' => true,
+            'FALUSS_PF_H3_LEASE_SHA256' => str_repeat('a',64),'ABSPATH' => __DIR__ . '/','DB_HOST' => 'localhost','WP_CLI' => true] as $key => $value) { define($key,$value); }
+        $database = new \wpdb(); $GLOBALS['wpdb'] = $database;
+        foreach ([static fn () => \Faluss\Platform\Fans\PfContract\ClosedCorpusInboxSchema::installForRecipe($database),
+            static fn () => new \Faluss\Platform\Fans\PfContract\ClosedCorpusInbox($database,
+                new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',['pf.ranking.corpus'],[]),'','')] as $operation) {
+            try { $operation(); self::fail('Copied settings cannot stage private global facts.'); }
+            catch (ModelViolation $error) { self::assertSame('isolated_h3_recipe_required',$error->reason); }
+        }
+        self::assertSame(0,$database->queries);
     }
 }
