@@ -33,6 +33,23 @@ final class HubPfRecipeDatabase extends wpdb
 
     public function query($query)
     {
+        if (preg_match("/^SELECT GET_LOCK\('pf_b3_barrier_write_[a-f0-9]+'/",$query) === 1) {
+            if ($this->globalWaitMarker !== '') { file_put_contents($this->globalWaitMarker,'waiting'); }
+            $result = parent::query($query);
+            $value = isset($this->last_result[0]) ? array_values((array) $this->last_result[0])[0] : null;
+            if ((string) $value === '1' && $this->fault === 'b3bc-hold-write') { $this->holdBarrierFixture(); }
+            return $result;
+        }
+        if (preg_match("/^SELECT GET_LOCK\('pf_b3bh_[a-f0-9]+'/",$query) === 1 && $this->globalWaitMarker !== '') {
+            file_put_contents($this->globalWaitMarker,'waiting');
+        }
+        if (preg_match('/^INSERT INTO `[^`]+token_engine_pf_b3bh_nonces` /',$query) === 1) {
+            if ($this->fault === 'b3bh-insert') { $this->fault = ''; return false; }
+            if ($this->fault === 'b3bh-tail') { $result = parent::query($query); $this->holdBarrierFixture(); return $result; }
+        }
+        if ($this->fault === 'b3bc-tail' && preg_match('/^INSERT INTO `[^`]+token_engine_pf_b3b_events` /',$query) === 1) {
+            $result = parent::query($query); $this->holdBarrierFixture(); return $result;
+        }
         if ($this->rowWaitMarker !== '' && str_contains($query,'FOR UPDATE')
             && str_contains($query,'`' . $this->prefix . $this->rowWaitTable . '`')) {
             file_put_contents($this->rowWaitMarker,'waiting');
@@ -135,6 +152,15 @@ final class HubPfRecipeDatabase extends wpdb
             usleep(10000);
         }
         throw new RuntimeException('Fixture controller did not terminate worker.');
+    }
+
+    private function holdBarrierFixture(): void
+    {
+        $this->fault = ''; file_put_contents($this->marker,'held'); $deadline = microtime(true)+25;
+        while (!is_file($this->marker . '.release')) {
+            if (microtime(true)>$deadline) { throw new RuntimeException('Fixture barrier release timed out.'); }
+            usleep(10000);
+        }
     }
 }
 

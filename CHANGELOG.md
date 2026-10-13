@@ -6,6 +6,21 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Ajouté
+
+- Origine HoF fermée : ouverture locale enregistrée seulement sur acquittement primaire Hub actuel, intervalle d'admission figé et reprise de la même action après COMMIT incertain ; aucun achat, score public ou schéma installé sur site.
+- Pont fermé entre gouvernance des sessions Fans et acquittements primaires Hub : actions immuables, décisions et journal atomiques, annulation/suspension distinctes de la fin attestée ; uniquement en recette jetable, sans route ou ouverture économique.
+
+- Façade privée d'acquittement de barrière : preuve signée et confiance actuelle vérifiées sous la transaction de l'application locale, sans exposer la clé de reprise ni ouvrir le cycle de vie sur site.
+
+- Reprise Fans fermée 1.1 : version persistée avant HTTP avec l'action/clé, clôture en attente de l'échéance primaire et lookup après panne, sans réinterprétation des actions 1.0.
+
+- Dispatch signé fermé des barrières 1.1 : fin de session et lookup primaire sur la même action, compatibilité 1.0 et recette HTTP avec réponse perdue ; aucun pair réel ou cycle de vie public.
+
+- Primitive propriétaire fermée 1.1 de fin de session : échéance figée vérifiée après les verrous sur le primaire, audit atomique et lookup de reprise sur la même action/clé ; aucune API ou écriture économique.
+
+- Codec fermé explicitement versionné des barrières 1.1 pour la raison de fin de session approuvée ; contrat 1.0 conservé, sans raccordement propriétaire ou HTTP dans ce sous-lot.
+
 ### Documentation
 
 - Consigner la validation F1b R2 : relevé Europe/Paris, classements persistants
@@ -33,6 +48,25 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 - Composer les relevés privés Europe/Paris et les classements persistants
   Fan/Créateur par catégorie depuis un corpus B3 complet déjà authentifié.
   Calcul pur testé, sans publication, stockage supplémentaire ni consommation.
+- Persister les actions et clés des barrières côté Fans avant chaque HTTP,
+  conserver opening/closing après panne et reprendre par lookup primaire,
+  uniquement dans l'enclave Hub/Fans jetable. Aucun parcours de site ouvert.
+
+- Raccorder le transport privé fermé des barrières au gateway Hub : signatures,
+  nonces dédiés et lookup primaire après réponse HTTP perdue. Deux WordPress
+  jetables uniquement ; aucun ledger, route de site ou activation ajouté.
+
+- Ajouter l'admission SQL fermée des nonces de barrières : stockage dédié,
+  permissions, concurrence et expiration après attente et avant COMMIT,
+  sans opération économique, route ou migration automatique.
+
+- Lier les opérations propriétaires de barrières au contexte signé de leur
+  action, vérifier l'origine d'une fermeture sur le descripteur stocké et
+  revalider la fraîcheur avant COMMIT, uniquement dans l'enclave de recette.
+
+- Ajouter le codec privé approuvé des barrières de classement : register,
+  close et lookup signés, action et clé stables, permissions dédiées et réponses
+  liées à la requête. Aucun endpoint, schéma ou changement économique ajouté.
 - Persister dans Fans jetable les intentions complètes 0.3, leurs clés stables
   avant envoi et les reçus privés signés ; tester la reprise après panne et
   réponse perdue, sans ledger PF, migration automatique ni API active.
