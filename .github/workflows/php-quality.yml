@@ -30,6 +30,8 @@ jobs:
         run: composer analyse
       - name: Unit tests
         run: composer test
+      - name: Isolated recipe clock concurrency
+        run: python3 -m unittest discover -s tests/TokenEngine/recipe -p 'test_recipe_clock.py'
       - name: Faluss Link transactional behavior contract
         run: php tests/Link/link-hotfix-behavior-test.php
       - name: Faluss Subscriptions historical behavior contracts

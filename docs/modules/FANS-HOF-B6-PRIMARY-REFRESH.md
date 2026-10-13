@@ -52,3 +52,12 @@ revendiqué par ce sous-lot. #150 et #161 restent distinctes, version publiée
 inchangée, aucun score public ou admission de production.
 
 Diagnostic du 13 octobre : l'échec initial porte uniquement sur l'horloge SQL figée du harnais ; la correction de recette est en validation. Voir la preuve expurgée liée ci-dessus. Aucun correctif runtime déduit de cet échec.
+
+La CI des heads `69bf2cc` (#202) et `f93ff15` (#203) démontre ensuite une
+course entre threads de recette : lecture du fichier d'horloge pendant sa
+troncature (`decimal.InvalidOperation`). La publication utilise désormais
+un remplacement atomique d'un fichier 0600 ; le minimum de la relecture
+primaire est appliqué avant cette publication, sans lecture intermédiaire.
+Quatre tests Python couvrent lecteurs/concurrence, permissions et échec du
+remplacement. Aucun délai du plugin ou contrat réseau n'est modifié. La
+recette WordPress/MariaDB complète reste un gate avant intégration.

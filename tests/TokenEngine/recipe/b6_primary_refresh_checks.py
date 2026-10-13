@@ -43,8 +43,7 @@ def run_checks(root,source,cli_path,check,command,fixture,reader,hub,hub_sql):
     minimum_clock=decimal.Decimal(int(datetime.datetime.fromisoformat(old_at).replace(tzinfo=datetime.timezone.utc).timestamp())+1)
     original_clock=fixture['set_clock']
     def subsequent_primary_clock():
-        original_clock();path=root/'corpus-sql-clock'
-        path.write_text(format(max(decimal.Decimal(path.read_text()),minimum_clock),'.6f'))
+        original_clock(minimum_clock)
     fixture['set_clock']=subsequent_primary_clock
     check('B6pr invalid refresh budgets do not modify the current primary checkpoint',
           invoke('refresh',read_id=read,steps=0)==dict(error='pf_local_corpus_budget')

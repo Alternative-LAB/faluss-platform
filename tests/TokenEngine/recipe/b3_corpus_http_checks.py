@@ -16,6 +16,8 @@ import urllib.error
 import urllib.request
 import uuid
 
+from recipe_clock import publish_clock
+
 
 def run_checks(root, wp, source, cli_path, check, call, sql, command, workers, log, start, finish, await_file):
     fans=root/'fans'
@@ -92,8 +94,8 @@ def run_checks(root, wp, source, cli_path, check, call, sql, command, workers, l
         last=sql('SELECT last_confirmed_at FROM wp_token_engine_pf_b3r_counter')
         latest=datetime.datetime.fromisoformat(last).replace(tzinfo=datetime.timezone.utc) if last else datetime.datetime.now(datetime.timezone.utc)
         return str(max(int(sql('SELECT UNIX_TIMESTAMP()')),int(latest.timestamp()))+7)+'.000000'
-    def set_clock():
-        path=root/'corpus-sql-clock';path.write_text(clock());path.chmod(0o600)
+    def set_clock(minimum=0):
+        publish_clock(root/'corpus-sql-clock',clock(),minimum)
     def http(body=None,method='POST',headers=None):
         extra={'Content-Type':'application/json','Accept':'application/json'};extra.update(headers or {})
         request=urllib.request.Request(endpoint,data=body.encode() if body is not None else None,headers=extra,method=method)
