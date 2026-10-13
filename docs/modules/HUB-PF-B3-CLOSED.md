@@ -379,6 +379,132 @@ jamais pour contourner une réponse incertaine. Ce store propriétaire ne consti
 pas encore le client durable ou une livraison réseau signée. Le transport fermé
 et le remplacement atomique Fans restent B3c2c.
 
+## B3c3a — messages privés 0.3, sans admission
+
+Le codec `RankedTransport` applique le contrat approuvé au commit `2553e376`
+aux quatre opérations `reserve`, `confirm`, `release` et `lookup`. Il signe la
+requête et sa délégation dans les domaines 0.3 déjà réservés, en liant exactement
+le contexte catégorie/sessions, l'identité déléguée, la clé d'opération, le nonce,
+la cible du lookup et la durée de validité. Celle-ci ne dépasse ni 60 secondes
+ni l'expiration de la session déléguée. La reprise conservera l'intention et la
+clé durables ; une nouvelle enveloppe fraîche ne constitue pas une nouvelle
+attribution.
+
+La réponse attendue est liée au digest de la requête, à son opération et à son
+nonce. Une confirmation exige un reçu 0.3 signé correspondant à l'intention
+complète ; son ordre Hub est une preuve d'origine, jamais le score corrigé
+courant. Les lectures H4/corpus rapprochées restent nécessaires pour ce dernier.
+Les refus authentifiés et résultats inconnus demeurent distincts. Les anciennes
+formes et signatures ne sont pas élargies pour admettre ces messages.
+
+Ce sous-lot est un validateur pur, sans route, nonce SQL, installateur, client
+actif ou débit. Il ne revendique aucune preuve réseau entre deux instances.
+Le transport propriétaire et le client durable suivent en B3c3b : contrôle de
+fraîcheur après l'attente des verrous et avant COMMIT, clés persistées avant
+HTTP, délégation serveur et reprise d'une consommation après réponse perdue.
+Les barrières signées et leur reprise locale suivent dans un lot distinct,
+selon l'accord complémentaire de #147.
+
+Scénarios du codec : quatre opérations positives, contexte altéré, permissions
+absentes, expiration, mauvaise audience, ancien domaine, réponse étrangère,
+signature de reçu altérée, clé inconnue et contexte du reçu différent. Une
+identité explicitement changée par le pair autorisé constitue une autre
+intention : le propriétaire doit refuser son rejeu sous une liaison existante.
+Le test pur ne simule pas cette garantie SQL.
+
+Vérification du 7 octobre 2026 en copie Git immuable
+`e5992279e2bc29b9281901ea30f46080a42d9795`, dépendances au verrou exact :
+27 tests ciblés / 57 assertions ; suite complète 650 tests / 6 954 assertions,
+zéro échec et deux dépréciations historiques ; PHPStan complet cible PHP 8.3,
+lint des deux PHP, liens relatifs, scan ciblé et diff check satisfaits. Runtime
+local PHP 8.5.4. Les clés des tests sont éphémères ; les identités sont fictives.
+La CI PHP 8.3 du head final reste exigée avant fusion. Aucun test HTTP 0.3
+ou WordPress/MariaDB nouveau n'est revendiqué pour ce codec pur.
+
+## B3c3b1 — expiration dans la transaction propriétaire
+
+Le propriétaire 0.3 accepte un garde de fraîcheur issu de la délégation
+authentifiée. Il le revalide après les verrous membre/global, puis les lignes
+compteur/barrières et immédiatement avant la décision COMMIT. Une expiration
+pendant la dernière écriture annule aussi le staging préalable du débit, du
+reçu, des journaux, de l'ordre et de la clé. Réponse incertaine après un COMMIT
+effectif : lookup primaire sous la même clé, jamais un second débit.
+
+Cette composition est optionnelle pour les usages propriétaires historiques ;
+le futur gateway signé 0.3 doit obligatoirement fournir ce garde. Aucun HTTP,
+schéma ou hook n'est ajouté ici. Les 279 tests propriétaires précédents et
+22 nouveaux cas ont réussi sur WordPress/MariaDB jetable, ainsi que la suite
+PHP complète et l'analyse statique. Voir les
+[preuves et leurs limites](../evidence/hub-pf-b3-ranked-freshness/README.md).
+
 Bornes fermées du sous-lot propriétaire conservées, avec refus total ; page à
 4 MiB maximum. [Preuve et mesures](../evidence/hub-pf-b3-corpus/README.md),
 sans attestation de dimensionnement ou d'exploitation de production.
+
+## B3c3b2 — gateway propriétaire 0.3 en HTTP isolé
+
+`ClosedRankedGateway` compose le codec 0.3, les nonces privés H3 et le propriétaire
+transactionnel. La signature externe, le contexte signé, leurs audiences,
+permissions, dates et l'intention complète sont validés avant l'admission du
+nonce. Le garde temporel obligatoire accompagne ensuite les quatre opérations
+jusqu'au contrôle avant COMMIT. Rejouer le même nonce réseau est refusé ; une
+enveloppe fraîche avec la même intention et clé retrouve l'opération existante.
+
+Le débit, l'ordre et le reçu sont atomiques chez le propriétaire. La lecture
+du reçu pour fabriquer la réponse intervient après cette transaction : un échec
+de cette lecture reste `unknown`, jamais une preuve de rollback. Le lookup
+primaire garde la même clé. Un reçu d'origine ne remplace pas les faits H4
+corrigés et ne permet pas de restaurer des points.
+
+Aucun hook, API Fans, schéma, installateur ou admission de pair n'est ajouté.
+Seul le loader MU de la recette expose POST dans l'enclave physique déjà
+définie par H3 : racine POSIX privée, bail éphémère, socket MariaDB local et
+instances fictives. Copier ses constantes ou ce fichier sur un WordPress
+ordinaire ne suffit pas à enregistrer une route. La route de recette et ses
+workers sont exclus du paquet distribué comme tous les tests.
+
+La commande `tests/TokenEngine/recipe/run.py --b3-ranked-http` crée deux
+WordPress et bases distincts. Le contrôleur transmet leurs enveloppes via
+loopback ; les clés privées restent dans les configurations temporaires.
+Ce test n'est pas encore le client Fans durable et ne prouve pas le vrai SSO
+ni la résolution d'un membre connecté. Ce raccordement, les barrières HTTP et
+leurs états locaux restent des lots suivants. Aucun classement public,
+admission économique ou politique de conservation n'est ouvert.
+
+Recette obtenue : **339 contrôles satisfaits, dont 38 nouveaux**, deux WordPress
+jetables et clés distinctes ; suite PHP complète 650 tests / 6 965 assertions.
+[Preuves HTTP et limites](../evidence/hub-pf-b3-ranked-http/README.md).
+
+## B3c3b3 — intention durable et boîte de reçus Fans 0.3
+
+`ClosedRankedProtocolSchema` et `ClosedRankedProtocolStore` conservent uniquement
+l'intention complète immuable, une clé stable par opération et le reçu original
+signé. Ces métadonnées privées ne constituent ni un ledger PF ni un score.
+L'installation est explicite dans l'enclave physique Fans jetable ; elle ne
+s'exécute jamais à l'activation du plugin. Un schéma partiel ou non InnoDB est
+refusé, sans adoption ni réparation silencieuse.
+
+La préparation transactionnelle précède l'envoi HTTP. Après résultat incertain,
+le lookup reprend la clé persistée ; il ne peut en créer une. La récupération
+exige le membre propriétaire et restitue son contexte d'origine, même si les
+conditions actuelles ne permettent plus une nouvelle attribution. Le futur
+appelant résout ce membre côté serveur depuis la session liée ; cette classe
+interne n'est pas une API acceptant une identité fournie par le navigateur.
+
+La boîte vérifie la signature Hub et l'intention complète avant de conserver
+l'enveloppe originale. Les rejeux sont idempotents, y compris après perte de
+l'acquittement du COMMIT local. Une preuve stockée corrompue ou une clé Hub
+révoquée ferme la lecture ; un ancien reçu ne rétablit aucun score corrigé.
+L'appelant doit également vérifier la liaison fraîche de la réponse HTTP avant
+la remise à la boîte. Le client complet reliant session, délégation, HTTP et
+reprise durable reste un sous-lot distinct.
+
+La recette `--b3-ranked-inbox` compose deux WordPress/MariaDB jetables avec
+le gateway 0.3 précédent. Elle couvre préparations concurrentes, contexte
+modifié, membre étranger, échec d'écriture, arrêt avant/après COMMIT, perte de
+réponse HTTP après consommation et rejeux de reçus. Le contrôleur transfère
+les enveloppes fictives : cette preuve ne valide pas le SSO réel, TLS, les
+sites ou une admission économique. Aucun hook, route publique, cron, règle
+de conservation ou projection active n'est ajouté.
+
+[Résultats et limites de la recette](../evidence/hub-pf-b3-ranked-inbox/README.md).
