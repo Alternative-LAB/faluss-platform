@@ -34,6 +34,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 - Composer le corpus/cache privés avec une transaction propriétaire de barrière, avec ordre de mutex vérifié et rollback commun, sans nouvelle preuve Hub ou route publique ; recette transactionnelle B6 fermée.
 - Lecture minimale du nom éditorial approuvé dans la transaction existante de classement, sans COMMIT implicite ; contrôles de profil et consentement conservés et rollback vérifié en recette isolée.
+- Relecture primaire explicite du corpus fermé avant livraison : même génération et clé, nouvelle réponse liée à une requête durable, cache indisponible pendant le rapprochement ; aucun contrat Hub, route ou flag ajouté.
 
 - Projection d'affichage HoF/Fans : filtrage par identité approuvée et visibilité courante, places recalculées parmi les seuls profils visibles, sans diffuser identité technique ou rang privé ; préparatif B6 sans route ni score public.
 

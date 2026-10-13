@@ -54,8 +54,9 @@ def main():
     parser.add_argument('--b3-corpus-reader', action='store_true', help='Bounded durable corpus orchestration with real private WordPress HTTP and recovery')
     parser.add_argument('--b5-sessions', action='store_true', help='Private session projections and recovery from the complete current corpus')
     parser.add_argument('--b6-corpus-transaction', action='store_true', help='Caller-owned barrier/corpus transaction and rollback, without public delivery')
+    parser.add_argument('--b6-primary-refresh', action='store_true', help='Explicit same-generation primary freshness and uncertain response recovery')
     options = parser.parse_args()
-    if options.b6_corpus_transaction:
+    if options.b6_corpus_transaction or options.b6_primary_refresh:
         options.b5_sessions = True
     if options.b5_sessions:
         options.b3_corpus_reader = True
@@ -143,11 +144,13 @@ def main():
                                     'eval-file', str(source / 'tests/TokenEngine/recipe/worker.php'),
                                     str(input_file), '--use-include'], stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE, text=True, start_new_session=True)
+        # This bounded bulk fixture executes 101 genuine owner transactions before returning.
+        process.recipe_timeout = 180 if data.get('action')=='b3s-seed-ranked' and data.get('count')=='101' else 40
         workers.append(process)
         return process
 
     def finish(process):
-        output, errors = process.communicate(timeout=40)
+        output, errors = process.communicate(timeout=getattr(process,'recipe_timeout',40))
         if process.returncode:
             raise RuntimeError('Hub fixture worker failed: ' + errors[-800:])
         return json.loads(output)
@@ -441,6 +444,9 @@ def main():
         if options.b5_sessions:
             from b5_projection_checks import run_checks
             run_checks(root,source,options.cli,check,command,corpus_fixture,corpus_reader,call,sql)
+        if options.b6_primary_refresh:
+            from b6_primary_refresh_checks import run_checks
+            run_checks(root,source,options.cli,check,command,corpus_fixture,corpus_reader,call,sql)
         if options.b6_corpus_transaction:
             from b6_corpus_transaction_checks import run_checks
             run_checks(root,source,options.cli,check,command,corpus_fixture,corpus_reader)
@@ -489,8 +495,9 @@ def main():
         report['b3_corpus_inbox_total'] = b3_corpus_reader_start - b3_corpus_inbox_start
         report['b4_projection_total'] = sum(name.startswith('B4b ') for name in checks)
         report['b5_projection_total'] = sum(name.startswith('B5b ') for name in checks)
+        report['b6_primary_refresh_total'] = sum(name.startswith('B6pr ') for name in checks)
         report['b6_corpus_transaction_total'] = sum(name.startswith('B6tx ') for name in checks)
-        report['b3_corpus_reader_total'] = b3_ranked_http_start - b3_corpus_reader_start - report['b4_projection_total'] - report['b5_projection_total'] - report['b6_corpus_transaction_total']
+        report['b3_corpus_reader_total'] = b3_ranked_http_start - b3_corpus_reader_start - report['b4_projection_total'] - report['b5_projection_total'] - report['b6_corpus_transaction_total'] - report['b6_primary_refresh_total']
         report['b3_ranked_http_total'] = b3_ranked_inbox_start - b3_ranked_http_start
         report['b3_ranked_inbox_total'] = len(checks) - b3_ranked_inbox_start
         report['corpus_source_measurements'] = corpus_measurements
@@ -609,6 +616,8 @@ def main():
         if options.b3_ranked_inbox:
             report['scope'] += '; durable Fans full intentions and stable keys before controller-transferred HTTP, signed receipt inbox after confirmed primary recovery'
             report['not_proven'][0] = 'Integrated ranked Fans HTTP client, linked-user delegation, barrier HTTP and closure recovery'
+        if options.b6_primary_refresh:
+            report['scope'] += '; explicit existing finish primary recheck of the same generation, no new wire contract or continuous freshness claim'
     finally:
         for process in workers:
             if process.poll() is None:
