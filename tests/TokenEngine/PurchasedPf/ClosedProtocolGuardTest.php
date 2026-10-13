@@ -108,4 +108,21 @@ final class ClosedProtocolGuardTest extends TestCase
         }
         self::assertSame(0,$database->queries);
     }
+
+    public function testReaderCannotBypassThePhysicalGateOrPersistAnUnboundedJob(): void
+    {
+        eval('namespace { class wpdb { public int $queries=0; } }');
+        $database = new \wpdb();
+        $type = new \ReflectionClass(\Faluss\Platform\Fans\PfContract\ClosedCorpusInbox::class);
+        $inbox = $type->newInstanceWithoutConstructor(); $type->getProperty('db')->setValue($inbox,$database);
+        $client = (new \ReflectionClass(\Faluss\Platform\Fans\PfContract\ClosedCorpusClient::class))->newInstanceWithoutConstructor();
+        $reader = new \Faluss\Platform\Fans\PfContract\ClosedCorpusReader($inbox,$client);
+        foreach ([0,17] as $budget) {
+            try { $reader->advance('11111111-1111-4111-8111-111111111111',$budget); self::fail('The work budget must be bounded.'); }
+            catch (ModelViolation $error) { self::assertSame('pf_local_corpus_budget',$error->reason); }
+        }
+        try { $reader->advance('11111111-1111-4111-8111-111111111111'); self::fail('Ordinary WordPress cannot run the private reader.'); }
+        catch (ModelViolation $error) { self::assertSame('isolated_h3_recipe_required',$error->reason); }
+        self::assertSame(0,$database->queries);
+    }
 }

@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use Faluss\Platform\Fans\PfContract\ClosedCorpusInbox;
+use Faluss\Platform\Fans\PfContract\ClosedCorpusClient;
+use Faluss\Platform\Fans\PfContract\ClosedCorpusReader;
 use Faluss\Platform\Fans\PfContract\ClosedCorpusInboxSchema;
 use Faluss\Platform\TokenEngine\PurchasedPf\ModelViolation;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\ClosedEnvironment;
@@ -55,7 +57,21 @@ try {
         $root = dirname(rtrim(ABSPATH,'/')); $policy = json_decode(file_get_contents($root . '/fans-corpus-trust.json'),true,20,JSON_THROW_ON_ERROR);
         $peer = new PeerPolicy($policy['node'],$policy['audience'],$policy['permissions'],$policy['keys']);
         $inbox = new ClosedCorpusInbox($wpdb,$peer,$input['origin'],'1.0.0');
+        $trace = [];
+        if (($input['monitor'] ?? false) === true) {
+            add_filter('pre_http_request',static function ($pre, $args) use ($wpdb,$input,&$trace) {
+                $lock = 'fans_pf_b3_corpus_' . substr(hash('sha256',$wpdb->prefix . ':' . $input['origin'] . ':1.0.0'),0,32);
+                $trace[] = ['transaction' => (string) $wpdb->get_var('SELECT @@in_transaction'),
+                    'mutex_free' => (string) $wpdb->get_var($wpdb->prepare('SELECT IS_FREE_LOCK(%s)',$lock)),
+                    'registered' => (string) $wpdb->get_var($wpdb->prepare(
+                        'SELECT COUNT(*) FROM %i q JOIN %i r ON q.read_id=r.read_id WHERE r.origin_id=%s AND r.policy_version=%s AND q.request_sha256=%s',
+                        $wpdb->prefix . 'fans_pf_b3c_requests',$wpdb->prefix . 'fans_pf_b3c_reads',$input['origin'],'1.0.0',hash('sha256',$args['body'])))];
+                return $pre;
+            },10,2);
+        }
         $result = match ($input['action']) {
+            'advance' => (new ClosedCorpusReader($inbox,new ClosedCorpusClient($wpdb,$peer,'recipe-fans-k1',
+                $input['endpoint'] ?? file_get_contents($root . '/corpus-endpoint'),$input['origin'],'1.0.0')))->advance($input['read_id'],$input['steps'] ?? 4),
             'prepare' => $inbox->prepare($input['read_id']),
             'fields' => $inbox->fields($inbox->prepare($input['read_id'])),
             'request' => $inbox->request($input['fields'],$input['sealed']),
@@ -63,6 +79,7 @@ try {
             'current' => ['current' => $inbox->current()],
             default => throw new RuntimeException('Unknown closed inbox operation.'),
         };
+        if (($input['monitor'] ?? false) === true) { $result['http_trace'] = $trace; }
     }
 } catch (ModelViolation $error) { $result = ['error' => $error->reason]; }
 echo wp_json_encode($result,JSON_THROW_ON_ERROR);

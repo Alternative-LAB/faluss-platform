@@ -42,7 +42,10 @@ def main():
     parser.add_argument('--b3-corpus', action='store_true', help='Closed exhaustive immutable pages, stable primary recovery and final current fence')
     parser.add_argument('--b3-corpus-http', action='store_true', help='Closed signed owner corpus HTTP with dedicated SQL nonces and distinct fixture keys')
     parser.add_argument('--b3-corpus-inbox', action='store_true', help='Durable private Fans staging, primary recovery and atomic complete corpus replacement')
+    parser.add_argument('--b3-corpus-reader', action='store_true', help='Bounded durable corpus orchestration with real private WordPress HTTP and recovery')
     options = parser.parse_args()
+    if options.b3_corpus_reader:
+        options.b3_corpus_inbox = True
     if options.b3_corpus_inbox:
         options.b3_corpus_http = True
     if options.b3_corpus_http:
@@ -370,7 +373,11 @@ def main():
         b3_corpus_inbox_start = len(checks)
         if options.b3_corpus_inbox:
             from b3_corpus_inbox_checks import run_checks
-            run_checks(root,source,options.cli,check,call,sql,command,workers,log,await_file,corpus_fixture)
+            corpus_fixture = run_checks(root,source,options.cli,check,call,sql,command,workers,log,await_file,corpus_fixture)
+        b3_corpus_reader_start = len(checks)
+        if options.b3_corpus_reader:
+            from b3_corpus_reader_checks import run_checks
+            run_checks(root,source,options.cli,check,call,sql,command,corpus_fixture)
         report = dict(checks=checks, total=len(checks), failed=0, wordpress=cli('core', 'version').strip(),
                       php=command(['php', '-r', 'echo PHP_VERSION;']).strip(),
                       database=sql('SELECT VERSION()'), schema='5',
@@ -395,7 +402,8 @@ def main():
         report['b3_corpus_source_total'] = b3_corpus_start - b3_corpus_source_start
         report['b3_corpus_total'] = b3_corpus_http_start - b3_corpus_start
         report['b3_corpus_http_total'] = b3_corpus_inbox_start - b3_corpus_http_start
-        report['b3_corpus_inbox_total'] = len(checks) - b3_corpus_inbox_start
+        report['b3_corpus_inbox_total'] = b3_corpus_reader_start - b3_corpus_inbox_start
+        report['b3_corpus_reader_total'] = len(checks) - b3_corpus_reader_start
         report['corpus_source_measurements'] = corpus_measurements
         report['corpus_fence_measurements'] = corpus_fence_measurements
         if options.h1 or options.h2_reservations or options.h2:
@@ -474,6 +482,9 @@ def main():
             report['scope'] += '; durable Fans key and signed request before HTTP, staged pages and atomic complete generation with primary fence'
             report['fans_corpus_schema'] = '1 (closed_b3_corpus_fans)'
             report['not_proven'][0] = 'Automated network reader, ranking projections B4/B5, continuous production freshness'
+        if options.b3_corpus_reader:
+            report['scope'] += '; bounded durable Fans reader with primary lookup and exact signed HTTP checkpoints'
+            report['not_proven'][0] = 'Ranked member and barrier HTTP, ranking projections B4/B5, continuous production freshness'
     finally:
         for process in workers:
             if process.poll() is None:
