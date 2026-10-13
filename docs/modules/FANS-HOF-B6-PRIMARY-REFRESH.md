@@ -58,6 +58,15 @@ course entre threads de recette : lecture du fichier d'horloge pendant sa
 troncature (`decimal.InvalidOperation`). La publication utilise désormais
 un remplacement atomique d'un fichier 0600 ; le minimum de la relecture
 primaire est appliqué avant cette publication, sans lecture intermédiaire.
-Quatre tests Python couvrent lecteurs/concurrence, permissions et échec du
+Des tests Python couvrent lecteurs/concurrence, permissions et échec du
 remplacement. Aucun délai du plugin ou contrat réseau n'est modifié. La
 recette WordPress/MariaDB complète reste un gate avant intégration.
+
+La reprise au tree `2f728925` passe 670 contrôles mais retrouve l'instant
+inchangé : le générateur de preuve conserve une ancienne copie du dictionnaire
+de fixture et rétablit l'horloge initiale. Ce comportement a été reproduit sans
+modifier Hub. L'objet d'horloge partagé conserve désormais le minimum explicite
+à travers toutes les closures/copies ; les mises à jour concurrentes sont
+sérialisées avant publication atomique. Deux tests supplémentaires reproduisent
+la copie ancienne et vérifient l'absence de recul. Les scénarios B6 complets
+restent à repasser ; aucun succès de jonction n'est déduit de cette itération.
