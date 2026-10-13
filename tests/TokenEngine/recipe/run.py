@@ -115,8 +115,8 @@ def main():
                                     'eval-file', str(source / 'tests/TokenEngine/recipe/worker.php'),
                                     str(input_file), '--use-include'], stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE, text=True, start_new_session=True)
-        # This bounded bulk fixture executes 101 genuine owner transactions before returning.
-        process.recipe_timeout = 180 if data.get('action')=='b3s-seed-ranked' and data.get('count')=='101' else 40
+        # These bounded bulk fixtures execute many genuine owner transactions before returning.
+        process.recipe_timeout = 180 if data.get('action')=='b3s-seed-ranked' else 40
         workers.append(process)
         return process
 
