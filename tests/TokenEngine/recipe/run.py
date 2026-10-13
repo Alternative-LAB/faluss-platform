@@ -626,6 +626,9 @@ def main():
             report['not_proven'][0] = 'Integrated ranked Fans HTTP client, linked-user delegation, barrier HTTP and closure recovery'
         if options.b6_primary_refresh:
             report['scope'] += '; explicit existing finish primary recheck of the same generation, no new wire contract or continuous freshness claim'
+        if options.b6_joined_integration:
+            report['scope'] += '; actual signed barrier gateway and exact corpus cache composed on the same Fans primary, with rollback, revoked trust and closing suppression'
+            report['not_proven'][0] = 'B1/B2 full delivery composition, participant/creator/country governance barriers, intent choices, Identity mapping and public B6 delivery, continuous production freshness'
     finally:
         for process in workers:
             if process.poll() is None:
