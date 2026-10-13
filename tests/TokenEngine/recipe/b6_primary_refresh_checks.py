@@ -41,10 +41,8 @@ def run_checks(root,source,cli_path,check,command,fixture,reader,hub,hub_sql):
     economic=hub_sql('SELECT * FROM wp_token_engine_pf_ledger ORDER BY id');initial=counts();old_at=current()['verified_at']
     # The prefix deliberately freezes SQL time. This scenario needs a later primary attestation.
     minimum_clock=decimal.Decimal(int(datetime.datetime.fromisoformat(old_at).replace(tzinfo=datetime.timezone.utc).timestamp())+1)
-    original_clock=fixture['set_clock']
-    def subsequent_primary_clock():
-        original_clock(minimum_clock)
-    fixture['set_clock']=subsequent_primary_clock
+    # Existing proof/request closures retain older fixture dictionaries, but the clock object is shared.
+    fixture['set_clock'](minimum_clock)
     check('B6pr invalid refresh budgets do not modify the current primary checkpoint',
           invoke('refresh',read_id=read,steps=0)==dict(error='pf_local_corpus_budget')
           and invoke('refresh',read_id=read,steps=17)==dict(error='pf_local_corpus_budget') and counts()==initial
