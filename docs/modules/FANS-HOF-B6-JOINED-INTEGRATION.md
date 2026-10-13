@@ -1,4 +1,4 @@
-# Jonction fermée des barrières et projections — en validation
+# Jonction fermée des barrières et projections — preuve de branche
 
 Cette recette de consolidation utilise le gateway de barrières signé et la
 lecture réelle du corpus/cache sur les mêmes WordPress/MariaDB jetables.
@@ -9,40 +9,55 @@ Le routeur est exclusivement un MU-plugin de recette sous bail POSIX isolé,
 avec marqueur local, clés de test et écoute loopback. Aucun endpoint n'est
 ajouté au plugin distribué ou à un site ordinaire.
 
-Scénarios prévus : absence d'ACK, HTTP signé, même origine, rollback commun,
-COMMIT du cache dans la transaction de barrière, confiance révoquée et fermeture
-locale avant ACK de fermeture. Aucun mapping SSO réel ni score public testé.
+## Résultat du 13 octobre 2026
 
-Arbre de vérification `4fdb52453b6da61aac1d3a91ab497c661819b7bf` : suite PHP
-**722/7 483**, HoF **84/291**, analyse statique cible 8.3 sans erreur ; deux
-dépréciations historiques. Deux PHP lintés, deux Python compilés, scan ciblé,
-égalité LF, YAML et diff vérifiés. Recette SQL arrêtée en échec avant les nouveaux contrôles : 598 vérifications achevées. Résultat
-consigné dans ../evidence/fans-hof-consolidation-partial. Aucun succès des nouveaux contrôles annoncé.
+Arbre exécuté `1e1aa0e9c2e540743300afe7854356f1c318c54a`, commit source
+`1391adab21e3e0e0ec8d68be6e026924580c2806` : **727 contrôles réussis**,
+dont **28 B6pr**, **18 B6tx** et **18 B6join**. Le
+[rapport expurgé](../evidence/fans-hof-b6-joined-integration/wordpress-checks.json)
+confirme le nettoyage final. Cette preuve concerne la branche de #203,
+pas le `main` consolidé ni les sites.
 
-Le point de pause précis et les SHA sont conservés dans le suivi local.
-La PR #203 reste en brouillon ; aucune fusion ou publication pour cette pause.
+La recette ouvre une nouvelle origine fictive par le vrai client et gateway
+signé, sans adopter une origine enregistrée auparavant avec une autre clé.
+Elle vérifie l'action persistée avant HTTP, le refus sans ACK, un corpus signé
+complet vide, un pack sans point, puis une consommation officielle fictive
+alimentant les projections Fan/Créateur et sa correction partielle attestée.
+Le nombre de consommations reste inchangé pendant la reconstruction.
 
-## Reprise et correction de la recette
+Le cache et la barrière sont lus dans la même transaction propriétaire :
+rollback commun, COMMIT réel, révocation de confiance, fermeture locale avant
+ACK et refus d'un ancien acquittement sont vérifiés. La livraison doit exiger
+`active` ; la façade de gouvernance expose aussi `closing` et `closed`.
 
-L'horloge partagée corrigée passe **28 contrôles de relecture primaire** et
-**18 contrôles transactionnels** sur le tree `67e05e54`. La jonction suivante
-refuse une préparation de fixture incomplète ; `lookup_operation` obligatoire
-a été ajouté sans modifier le contrat. La tentative au tree `4f6e6b25` achevé
-712 contrôles s'arrête encore avant l'ACK réseau. Sa fixture essayait d'adopter
-une origine précédemment enregistrée directement par Hub avec une autre clé
-et un autre contexte. La règle de reprise interdit cette adoption ; aucune
-modification de la persistance ou des contrats n'en est déduite.
+## Corrections de recette et historique
 
-La recette ouvre désormais une **nouvelle origine fictive par le vrai client
-et gateway signé avant lecture du corpus**, sans toucher l'origine précédente.
-Elle vérifie un corpus exhaustif vide, un pack fictif sans point, puis une seule
-consommation officielle fictive alimentant les projections Fan/Créateur et sa
-dernière correction partielle. La transaction authentifiée ne livre qu'une
-origine encore `active` : la façade de gouvernance expose aussi `closing` et
-`closed`, et son consommateur doit les refuser pour cette livraison.
+- L'horloge Python publie atomiquement un fichier privé et partage son minimum
+  entre toutes les closures. **Six tests déterministes** couvrent les écritures
+  concurrentes et les copies de fixture. Aucun délai du plugin n'est augmenté.
+- `lookup_operation` obligatoire est persisté avec tous les champs avant HTTP.
+- Une action réseau propre à la nouvelle origine remplace la tentative
+  d'adoption incompatible avec la règle de reprise. Les contrats et la
+  persistance de production restent inchangés.
+- Les échecs précédents sont conservés séparément :
+  [ancienne recette partielle](../evidence/fans-hof-consolidation-partial/README.md).
+  Ils ne constituent aucune preuve de succès de la jonction.
 
-Les nouvelles étapes doivent encore passer ensemble. B1/B2 complet, mapping
-SSO, barrières de participation et pays, choix d'intention et UI publique restent
-distincts ; aucun classement de site, vrai achat, remboursement monétaire ou
-nouvelle permission/contrat Hub annoncé. Les diagnostics publient uniquement
-états et motifs techniques, jamais clés, wire, identités ou contenu privé.
+Les sources métier et les tests PHP hors fixtures restent identiques à l'arbre
+qualité `4fdb52453b6da61aac1d3a91ab497c661819b7bf` : **722 tests / 7 483
+assertions**, HoF **84 / 291**, PHPStan cible 8.3 sans erreur et deux
+dépréciations historiques. Les nouveaux PHP de recette sont lintés séparément.
+Voir les [conditions et limites de preuve](../evidence/fans-hof-b6-joined-integration/README.md).
+
+## Ce qui reste à raccorder
+
+Cette jonction ne prouve pas encore B1/B2 complet dans la livraison B6, les
+barrières de participation/Créateur/pays, les choix d'intention, les filiations
+Identity, la visibilité dans cette transaction ni l'UI publique. La recette
+B1/B2 dispose d'une [preuve distincte](../evidence/fans-hof-barrier-consolidation/README.md).
+Une fence atteste son instant primaire, jamais une fraîcheur future continue.
+
+Aucun vrai SSO, classement de site, achat réel, remboursement monétaire,
+dimensionnement de production ou publication officielle n'est attesté.
+Les diagnostics contiennent uniquement états et motifs techniques, sans clés,
+wire, identités ou contenu privé. #150 et #161 restent distinctes.
