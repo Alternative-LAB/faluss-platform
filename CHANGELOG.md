@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+- Fiabiliser l'horloge de recette du corpus par publication atomique privée,
+  y compris pendant les relectures concurrentes ; aucun comportement des sites
+  ou durée d'attestation du plugin modifié.
+
 ### Documentation
 
 - Consigner la validation F1b R2 : relevé Europe/Paris, classements persistants
