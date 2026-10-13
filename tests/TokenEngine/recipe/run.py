@@ -55,7 +55,11 @@ def main():
     parser.add_argument('--b5-sessions', action='store_true', help='Private session projections and recovery from the complete current corpus')
     parser.add_argument('--b6-corpus-transaction', action='store_true', help='Caller-owned barrier/corpus transaction and rollback, without public delivery')
     parser.add_argument('--b6-primary-refresh', action='store_true', help='Explicit same-generation primary freshness and uncertain response recovery')
+    parser.add_argument('--b6-joined-integration', action='store_true', help='Actual signed barrier HTTP and corpus/cache on the same Fans primary')
     options = parser.parse_args()
+    if options.b6_joined_integration:
+        options.b6_corpus_transaction = True
+        options.b6_primary_refresh = True
     if options.b6_corpus_transaction or options.b6_primary_refresh:
         options.b5_sessions = True
     if options.b5_sessions:
@@ -450,6 +454,9 @@ def main():
         if options.b6_corpus_transaction:
             from b6_corpus_transaction_checks import run_checks
             run_checks(root,source,options.cli,check,command,corpus_fixture,corpus_reader)
+        if options.b6_joined_integration:
+            from b6_joined_checks import run_checks
+            run_checks(root,source,options.cli,check,command,corpus_fixture,sql)
         b3_ranked_http_start = len(checks)
         ranked_fixture = None
         if options.b3_ranked_http:
@@ -497,7 +504,8 @@ def main():
         report['b5_projection_total'] = sum(name.startswith('B5b ') for name in checks)
         report['b6_primary_refresh_total'] = sum(name.startswith('B6pr ') for name in checks)
         report['b6_corpus_transaction_total'] = sum(name.startswith('B6tx ') for name in checks)
-        report['b3_corpus_reader_total'] = b3_ranked_http_start - b3_corpus_reader_start - report['b4_projection_total'] - report['b5_projection_total'] - report['b6_corpus_transaction_total'] - report['b6_primary_refresh_total']
+        report['b6_joined_integration_total'] = sum(name.startswith('B6join ') for name in checks)
+        report['b3_corpus_reader_total'] = b3_ranked_http_start - b3_corpus_reader_start - report['b4_projection_total'] - report['b5_projection_total'] - report['b6_corpus_transaction_total'] - report['b6_primary_refresh_total'] - report['b6_joined_integration_total']
         report['b3_ranked_http_total'] = b3_ranked_inbox_start - b3_ranked_http_start
         report['b3_ranked_inbox_total'] = len(checks) - b3_ranked_inbox_start
         report['corpus_source_measurements'] = corpus_measurements

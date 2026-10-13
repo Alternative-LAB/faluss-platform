@@ -22,6 +22,21 @@ add_action('rest_api_init',static function (): void {
     try { ClosedEnvironment::assertIsolated($wpdb,'hub'); }
     catch (ModelViolation) { return; }
     require_once WP_PLUGIN_DIR . '/faluss-platform/src/Federation/Legacy/includes/class-faluss-federation-crypto.php';
+    if (is_file(dirname(rtrim(ABSPATH,'/')) . '/b6-joined-enabled')) {
+        register_rest_route('faluss-b3-recipe/v1','/barrier',[
+            'methods' => 'POST','permission_callback' => '__return_true',
+            'callback' => static function (WP_REST_Request $request): WP_REST_Response {
+                global $wpdb;
+                try {
+                    ClosedEnvironment::assertIsolated($wpdb,'hub');
+                    $wire=(new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedBarrierGateway($wpdb,b3_corpus_recipe_peer(),'recipe-hub-k1'))->handle($request->get_body());
+                    $response=new WP_REST_Response(['barrier_wire'=>$wire],200);
+                } catch (Throwable) { $response=new WP_REST_Response(['error'=>'pf_fixture_unavailable'],503); }
+                $response->header('Cache-Control','private, no-store, max-age=0');
+                return $response;
+            },
+        ]);
+    }
     register_rest_route('faluss-b3-recipe/v1','/corpus',[
         'methods' => 'POST','permission_callback' => '__return_true',
         'callback' => static function (WP_REST_Request $request): WP_REST_Response {
@@ -83,6 +98,8 @@ add_action('rest_api_init',static function (): void {
     ]);
     add_filter('rest_pre_serve_request',static function (bool $served, WP_HTTP_Response $response, WP_REST_Request $request): bool {
         $data = $response->get_data();
+        if ($request->get_route() === '/faluss-b3-recipe/v1/barrier' && $response->get_status() === 200
+            && is_array($data) && is_string($data['barrier_wire'] ?? null)) { echo $data['barrier_wire']; return true; }
         if ($request->get_route() === '/faluss-b3-recipe/v1/corpus' && $response->get_status() === 200
             && is_array($data) && is_string($data['corpus_wire'] ?? null)) { echo $data['corpus_wire']; return true; }
         return $served;
