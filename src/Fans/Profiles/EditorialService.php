@@ -143,14 +143,19 @@ final class EditorialService
 
     /** Additive locking guard for another module's existing transaction; never begins or commits one. */
     public static function approvedInTransaction(string $id): bool
+    { return self::publicNameInTransaction($id) !== null; }
+
+    /** Minimal approved editorial field under the caller's transaction; never starts or commits one. */
+    public static function publicNameInTransaction(string $id): ?string
     {
-        if (!self::validId($id) || !EditorialModule::available()) { return false; }
+        if (!self::validId($id) || !EditorialModule::available()) { return null; }
         global $wpdb;
         if ((string) $wpdb->get_var('SELECT @@in_transaction') !== '1' || $wpdb->last_error !== ''
-            || CreatorProfileService::publicById($id, true) === null) { return false; }
+            || CreatorProfileService::publicById($id, true) === null) { return null; }
         $row = self::row($id, true);
         return is_array($row) && $row['state'] === 'approved' && (int) $row['revision'] > 0
-            && self::text($row['public_name'], 80, false) && trim($row['public_name']) !== '' && self::text($row['bio'], 1000, true);
+            && self::text($row['public_name'], 80, false) && trim($row['public_name']) !== '' && self::text($row['bio'], 1000, true)
+            ? $row['public_name'] : null;
     }
 
     /** Dedicated additive discovery read. Date is the Fans creator-profile request, not wp_users.user_registered.

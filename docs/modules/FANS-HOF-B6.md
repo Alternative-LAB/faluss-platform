@@ -38,6 +38,16 @@ pas un score Hub attesté. La recette ne constitue pas une lecture complète B6.
 La [composition transactionnelle](FANS-HOF-B6-CORPUS-TRANSACTION.md) permet de
 lire le cache dans la transaction propriétaire des barrières, sans imbrication
 ou COMMIT implicite. Le mutex seul ne constitue jamais un acquittement Hub.
+La lecture du nom Créateur dispose d'un contrat éditorial minimal dans une
+transaction appelante déjà active : elle verrouille les données approuvées sans
+démarrer ou terminer une transaction. Les lectures de consentement et de statut
+suivent alors les mêmes verrous. La lecture publique éditoriale habituelle reste
+inchangée hors de ce contexte. Ce raccordement préserve le rollback de la future
+composition B6 et ne permet pas à une présentation en attente de devenir visible.
+La [preuve transactionnelle](../evidence/fans-hof-b6-transactional-visibility/README.md)
+reproduit le défaut avant correction puis vérifie **74 contrôles**, dont le
+rollback et le retrait concurrent de consentement ; aucun score Hub ou écran
+n'est revendiqué par ces tests de visibilité.
 
 Origine/acquittements B1/B2, choix d'attribution, source primaire à jour, mapping
 des filiations et visibilité doivent être composés avec B4/B5 avant livraison.

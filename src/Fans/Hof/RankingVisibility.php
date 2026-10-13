@@ -99,7 +99,8 @@ final class RankingVisibility
     public function visibleFan(int $member): ?string
     {
         if (!RankingSchema::ready($this->db) || !FansSsoService::linkedMember($member)) { return null; }
-        $row = $this->storage->row($this->db->prepare('SELECT approved_alias,fan_public FROM %i WHERE wp_user_id=%d', $this->tables['members'], $member));
+        $row = $this->storage->row($this->db->prepare('SELECT approved_alias,fan_public FROM %i WHERE wp_user_id=%d'
+            . ($this->inTransaction() ? ' FOR UPDATE' : ''), $this->tables['members'], $member));
         return $row !== null && $row['fan_public'] === '1' && $row['approved_alias'] !== '' ? $row['approved_alias'] : null;
     }
 
@@ -107,14 +108,24 @@ final class RankingVisibility
     public function visibleCreator(string $creatorId): ?string
     {
         if (!RankingSchema::ready($this->db)) { return null; }
-        $owner = CreatorProfileService::activeOwner($creatorId);
+        $transaction = $this->inTransaction();
+        $owner = CreatorProfileService::activeOwner($creatorId, $transaction);
         if ($owner === null) { return null; }
-        $row = $this->storage->row($this->db->prepare('SELECT revision,creator_public FROM %i WHERE wp_user_id=%d', $this->tables['members'], $owner));
+        $query = 'SELECT revision,creator_public FROM %i WHERE wp_user_id=%d' . ($transaction ? ' FOR UPDATE' : '');
+        $row = $this->storage->row($this->db->prepare($query, $this->tables['members'], $owner));
         if ($row === null || $row['creator_public'] !== '1') { return null; }
-        // The editorial module owns its approved fields and transaction; never join its private tables here.
-        $editorial = EditorialService::publicById($creatorId);
-        $latest = $this->storage->row($this->db->prepare('SELECT revision,creator_public FROM %i WHERE wp_user_id=%d', $this->tables['members'], $owner));
-        return $latest === $row && $editorial !== null && CreatorProfileService::activeOwner($creatorId) === $owner ? (string) $editorial['public_name'] : null;
+        // Editorial owns its tables. Its additive locking read preserves the existing caller transaction.
+        $presentation = $transaction ? null : EditorialService::publicById($creatorId);
+        $name = $transaction ? EditorialService::publicNameInTransaction($creatorId) : ($presentation['public_name'] ?? null);
+        $latest = $this->storage->row($this->db->prepare($query, $this->tables['members'], $owner));
+        return $latest === $row && $name !== null && CreatorProfileService::activeOwner($creatorId, $transaction) === $owner ? (string) $name : null;
+    }
+
+    private function inTransaction(): bool
+    {
+        $state = $this->db->get_var('SELECT @@in_transaction');
+        if ($this->db->last_error !== '' || !in_array((string) $state,['0','1'],true)) { throw new ModelViolation('hof_storage_unavailable'); }
+        return (string) $state === '1';
     }
 
     /** Private review contract, at most twenty rows and a local member cursor.

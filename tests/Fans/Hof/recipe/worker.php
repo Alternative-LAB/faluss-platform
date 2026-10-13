@@ -36,6 +36,10 @@ if (isset($input['barrier'])) {
 }
 $registry = new RankingRegistry($wpdb);
 $visibility = new RankingVisibility($wpdb);
+if (isset($input['visibility_started'])) {
+    if (realpath(dirname($input['visibility_started'])) !== realpath(dirname(rtrim(ABSPATH,'/')))) { throw new RuntimeException('Private fixture path required'); }
+    file_put_contents($input['visibility_started'],'ready');
+}
 $sessions = new SessionService($wpdb);
 $roles = new SessionRoles($wpdb);
 $territories = new TerritoryService($wpdb);
@@ -55,6 +59,24 @@ try {
         'review' => $visibility->review($input['after'] ?? 0),
         'visible_fan' => $visibility->visibleFan($input['member']),
         'visible_creator' => $visibility->visibleCreator($input['creator']),
+        'visibility_transaction' => (static function () use ($wpdb,$input,$visibility): array {
+            $wpdb->query('CREATE TEMPORARY TABLE hof_visibility_transaction_probe (id INT PRIMARY KEY) ENGINE=InnoDB');
+            $wpdb->query('START TRANSACTION');
+            try {
+                $wpdb->query('INSERT INTO hof_visibility_transaction_probe VALUES (1)');
+                $name = $input['family'] === 'creator' ? $visibility->visibleCreator($input['creator']) : $visibility->visibleFan($input['member']);
+                $active = (string) $wpdb->get_var('SELECT @@in_transaction') === '1';
+                if (isset($input['hold'])) {
+                    if (realpath(dirname($input['hold'])) !== realpath(dirname(rtrim(ABSPATH,'/')))) { throw new RuntimeException('Private fixture path required'); }
+                    file_put_contents($input['hold'] . '.ready','ready'); $until = microtime(true)+15;
+                    while (!is_file($input['hold'] . '.release')) {
+                        if (microtime(true)>$until) { throw new RuntimeException('Visibility interleaving timed out'); }
+                        usleep(10000);
+                    }
+                }
+            } finally { $wpdb->query('ROLLBACK'); }
+            return ['name' => $name,'transaction_preserved' => $active,'probe_rows_after_rollback' => (string) $wpdb->get_var('SELECT COUNT(*) FROM hof_visibility_transaction_probe')];
+        })(),
         'visible_projection' => \Faluss\Platform\Fans\Hof\RankingVisibleProjection::build($input['ranked'],static function (string $id) use ($input,$visibility): ?string {
             $local = $input['mapping'][$id] ?? null;
             if ($local === null) { return null; }
@@ -64,6 +86,7 @@ try {
         'editorial_submit' => EditorialService::submit($input['revision'], 'Local creator fixture', 'Fictitious recipe biography', '', 0),
         'editorial_decide' => EditorialService::decide($input['creator'], $input['revision'], $input['decision'], $input['reason']),
         'editorial_guard_outside' => EditorialService::approvedInTransaction($input['creator']),
+        'editorial_name_outside' => EditorialService::publicNameInTransaction($input['creator']),
         'editorial_guard_hold' => (static function () use ($wpdb,$input): array {
             if (realpath(dirname($input['guard'])) !== realpath(dirname(rtrim(ABSPATH,'/')))) { throw new RuntimeException('Private fixture path required'); }
             $wpdb->query('START TRANSACTION');
