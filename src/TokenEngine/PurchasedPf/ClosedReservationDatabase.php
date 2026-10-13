@@ -10,7 +10,7 @@ use Throwable;
 /** One primary connection and one outer transaction for all H2 owner writes. */
 final class ClosedReservationDatabase
 {
-    public function __construct(public readonly \wpdb $database)
+    public function __construct(public readonly \wpdb $database, private readonly ?\Closure $beforeCommit = null)
     {
         ClosedReservationEnvironment::assertIsolated($database);
     }
@@ -52,6 +52,8 @@ final class ClosedReservationDatabase
             $this->rows($this->database->prepare('SELECT id FROM %i WHERE faluss_id=%s AND economic_class=%s ORDER BY id FOR UPDATE',
                 \Token_Engine_Schema::pf_ledger_table(), $member, 'funded'));
             $result = $callback();
+            // A delegated request may expire while waiting on rows or writing its final journal.
+            if ($this->beforeCommit !== null) { ($this->beforeCommit)(); }
             if ($this->database->query('COMMIT') === false || $this->database->last_error !== '') {
                 throw new ModelViolation('h2_commit_unknown');
             }

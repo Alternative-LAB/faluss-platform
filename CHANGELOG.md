@@ -51,6 +51,22 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 - Ajouter le codec privé approuvé des barrières de classement : register,
   close et lookup signés, action et clé stables, permissions dédiées et réponses
   liées à la requête. Aucun endpoint, schéma ou changement économique ajouté.
+- Persister dans Fans jetable les intentions complètes 0.3, leurs clés stables
+  avant envoi et les reçus privés signés ; tester la reprise après panne et
+  réponse perdue, sans ledger PF, migration automatique ni API active.
+
+- Raccorder le gateway propriétaire 0.3 aux signatures, nonces privés et contrôles
+  transactionnels existants dans la seule enclave jetable. Recette HTTP avec
+  clés distinctes, rejeux et réponse perdue après consommation ; aucune route
+  distribuée ni activation sur les sites.
+
+- Revalider la délégation 0.3 après les verrous propriétaires et avant COMMIT,
+  avec rollback des effets préparés si elle expire. Recette réelle fermée
+  de concurrence et reprise, sans route, schéma ou activation supplémentaire.
+
+- Ajouter le codec signé 0.3 fermé pour réserver, confirmer, libérer et retrouver
+  une attribution à contexte de classement immuable. Réponses liées à la requête
+  et reçus d'origine vérifiés, sans admission HTTP ni consommation supplémentaire.
 
 - Ajouter le lecteur B3 fermé raccordant l'inbox durable Fans au véritable
   client HTTP WordPress : étapes bornées, lookup primaire après résultat
