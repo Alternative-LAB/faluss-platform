@@ -1,11 +1,15 @@
 """Actual barrier HTTP and complete cache on the same private Fans primary; no simulated ACK."""
 import copy
+import hashlib
 import json
+import secrets
+import time
 import uuid
 
 
-def run_checks(root,source,cli_path,check,command,fixture,hub_sql):
-    origin=fixture['origin'];sql=fixture['fan_sql']
+def run_checks(root,source,cli_path,check,command,fixture,hub_sql,hub):
+    # The prefix's direct owner registration has a different durable key/context; it cannot be adopted.
+    origin=str(uuid.uuid4());sql=fixture['fan_sql']
     endpoint=(root/'corpus-endpoint').read_text().replace('/corpus','/barrier')
     def invoke(role,action,**extra):
         path=root/(uuid.uuid4().hex+'.json')
@@ -23,11 +27,7 @@ def run_checks(root,source,cli_path,check,command,fixture,hub_sql):
     check('B6join explicit same-node fixture installs separate barrier metadata',
         invoke('hub','install')==dict(ready=True) and invoke('fans','install')==dict(ready=True))
     marker=root/'b6-joined-enabled';marker.write_text('fixture-only');marker.chmod(0o600)
-    # Read the owner fixture descriptor; the genuine gateway then attests it independently.
-    encoded=hub_sql("SELECT HEX(descriptor_json) FROM wp_token_engine_pf_b3b_barriers WHERE "
-        "JSON_UNQUOTE(JSON_EXTRACT(descriptor_json,'$.content.kind'))='origin' AND "
-        "JSON_UNQUOTE(JSON_EXTRACT(descriptor_json,'$.content.origin_id'))='"+origin+"' AND version=1")
-    descriptor=json.loads(bytes.fromhex(encoded).decode())
+    descriptor=invoke('fans','describe')
     fields=dict(operation='register',action_id=str(uuid.uuid4()),origin_id=origin,policy_version='1.0.0',lookup_operation='',object=descriptor)
     prepared=invoke('fans','prepare',fields=fields)
     if 'error' in prepared:
@@ -38,16 +38,71 @@ def run_checks(root,source,cli_path,check,command,fixture,hub_sql):
     check('B6join an unacknowledged origin cannot compose a complete cache',
         'error' in invoke('fans','compose',action_id=prepared['action_id']))
     reply=invoke('fans','advance',action_id=prepared['action_id'])
+    if reply.get('state')!='acknowledged':
+        raise RuntimeError('B6join signed origin diagnostics: '+json.dumps({
+            **{key:reply.get(key) for key in ('state','reason','completed_steps')},
+            'hub_reason':(root/'b6-barrier-diagnostic').read_text() if (root/'b6-barrier-diagnostic').exists() else 'none'}))
     check('B6join genuine signed HTTP attests the same authoritative origin',reply['state']=='acknowledged')
     ack=invoke('fans','ack',action_id=prepared['action_id'])
     check('B6join attested descriptor and corpus origin are identical',
         ack['fields']['object']==descriptor and ack['result']['state']=='active')
+    read=str(uuid.uuid4());fixture['set_clock']()
+    collected=fixture['inbox']('advance',origin,read_id=read,steps=4)
+    for delay in (1,2):
+        if collected.get('state')!='pending' or collected.get('reason')!='pf_transport_unknown':break
+        prior=fixture['inbox']('prepare',origin,read_id=read);time.sleep(delay)
+        collected=fixture['inbox']('advance',origin,read_id=read,steps=4)
+        assert fixture['inbox']('prepare',origin,read_id=read)['read_key']==prior['read_key']
+    check('B6join the genuine origin owns a complete signed empty corpus',
+        collected.get('state')=='verified' and fixture['inbox']('current',origin)['current']['manifest']['fact_count']=='0')
+    fixture['inbox']('cache-rebuild',origin)
+    # One fictitious official consumption, not one debit per derived projection.
+    purchase=dict(fixture['proof'],purchase_id='synthetic.'+uuid.uuid4().hex,evidence_id=str(uuid.uuid4()),
+        member_faluss_id=str(uuid.uuid4()),purchased_pf='3')
+    lot=hub('h1-evidence',payload=purchase,key=secrets.token_hex(32))['lot_id']
+    hub('h2-admit',lot_id=lot,member=purchase['member_faluss_id'],key=secrets.token_hex(32))
+    fixture['set_clock']();assert fixture['inbox']('refresh',origin,read_id=read,steps=1)['state']=='verified'
+    fixture['inbox']('cache-rebuild',origin);pack_only=fixture['inbox']('cache-read',origin)['document']
+    check('B6join an admitted pack alone creates no Fan or Creator point',
+        pack_only['general']['fans']==[] and pack_only['general']['creators']==[])
+    intent=copy.deepcopy(fixture['intent']);intent.update(attribution_id=str(uuid.uuid4()),
+        member_faluss_id=purchase['member_faluss_id'],purchased_pf='3')
+    intent['ranking_context'].update(origin_id=origin,sessions=[])
+    intent['context_sha256']=hashlib.sha256(json.dumps(intent['ranking_context'],sort_keys=True,separators=(',',':')).encode()).hexdigest()
+    for reference in hub('b3b-refs',payload=intent)['references']:
+        if reference['content']['kind']=='origin':continue
+        hub('b3b-register',payload=dict(descriptor,content=reference['content']),key=secrets.token_hex(32))
+    receipt_count=int(hub_sql('SELECT COUNT(*) FROM wp_token_engine_pf_b3r_receipts'))
+    fixture['consume'](intent)
+    fixture['set_clock']()
+    check('B6join a new confirmed fact closes the earlier entire signed cache',
+        fixture['inbox']('refresh',origin,read_id=read,steps=1)['state']=='unavailable'
+        and 'error' in fixture['inbox']('cache-read',origin))
+    read=str(uuid.uuid4());assert fixture['inbox']('advance',origin,read_id=read,steps=4)['state']=='verified'
+    fixture['inbox']('cache-rebuild',origin);value=fixture['inbox']('cache-read',origin)['document']
+    check('B6join one official consumption feeds both exact Fan and Creator projections',
+        sum(int(x['points']) for x in value['general']['fans'])==3
+        and sum(int(x['points']) for x in value['general']['creators'])==3
+        and int(hub_sql('SELECT COUNT(*) FROM wp_token_engine_pf_b3r_receipts'))==receipt_count+1)
+    correction=dict(purchase,source_revision='2',evidence_id=str(uuid.uuid4()),state='partially_cancelled',cancelled_purchased_pf_cumulative='1')
+    plan=hub('h4-begin',payload=correction,key=secrets.token_hex(32))
+    check('B6join an incomplete owner correction suppresses the complete old cache',
+        fixture['inbox']('refresh',origin,read_id=read,steps=1)['state']=='unavailable')
+    for fragment in range(int(plan['next_fragment'])+1,int(plan['fragment_count'])+1):
+        hub('h4-resume',member=purchase['member_faluss_id'],plan_id=plan['plan_id'],fragment=str(fragment))
+    read=str(uuid.uuid4());assert fixture['inbox']('advance',origin,read_id=read,steps=4)['state']=='verified'
+    fixture['inbox']('cache-rebuild',origin);value=fixture['inbox']('cache-read',origin)['document']
+    check('B6join the latest attested correction rebuilds both families without second consumption',
+        sum(int(x['points']) for x in value['general']['fans'])==2
+        and sum(int(x['points']) for x in value['general']['creators'])==2
+        and int(hub_sql('SELECT COUNT(*) FROM wp_token_engine_pf_b3r_receipts'))==receipt_count+1)
+    ledger=hub_sql('SELECT * FROM wp_token_engine_pf_ledger ORDER BY id')
     sql('CREATE TABLE wp_b6_joined_probe (id INT NOT NULL PRIMARY KEY) ENGINE=InnoDB')
-    before=fixture['inbox']('cache-read')
+    before=fixture['inbox']('cache-read',origin)
     rejected=invoke('fans','compose',action_id=prepared['action_id'],reject=True)
     check('B6join rejected application rolls back the real shared transaction',
         rejected==dict(error='pf_fixture_apply_refused') and sql('SELECT COUNT(*) FROM wp_b6_joined_probe')=='0'
-        and fixture['inbox']('cache-read')==before)
+        and fixture['inbox']('cache-read',origin)==before)
     accepted=invoke('fans','compose',action_id=prepared['action_id'])
     check('B6join authenticated barrier and exact cache commit in one owner transaction',
         accepted==dict(state='reconciled',generation=before['generation'],transaction='1')

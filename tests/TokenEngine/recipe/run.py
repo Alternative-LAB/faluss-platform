@@ -456,7 +456,7 @@ def main():
             run_checks(root,source,options.cli,check,command,corpus_fixture,corpus_reader)
         if options.b6_joined_integration:
             from b6_joined_checks import run_checks
-            run_checks(root,source,options.cli,check,command,corpus_fixture,sql)
+            run_checks(root,source,options.cli,check,command,corpus_fixture,sql,call)
         b3_ranked_http_start = len(checks)
         ranked_fixture = None
         if options.b3_ranked_http:

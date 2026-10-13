@@ -31,7 +31,12 @@ add_action('rest_api_init',static function (): void {
                     ClosedEnvironment::assertIsolated($wpdb,'hub');
                     $wire=(new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedBarrierGateway($wpdb,b3_corpus_recipe_peer(),'recipe-hub-k1'))->handle($request->get_body());
                     $response=new WP_REST_Response(['barrier_wire'=>$wire],200);
-                } catch (Throwable) { $response=new WP_REST_Response(['error'=>'pf_fixture_unavailable'],503); }
+                } catch (Throwable $error) {
+                    $diagnostic=dirname(rtrim(ABSPATH,'/')).'/b6-barrier-diagnostic';
+                    file_put_contents($diagnostic,$error instanceof ModelViolation ? $error->reason : get_class($error));
+                    chmod($diagnostic,0600);
+                    $response=new WP_REST_Response(['error'=>'pf_fixture_unavailable'],503);
+                }
                 $response->header('Cache-Control','private, no-store, max-age=0');
                 return $response;
             },
