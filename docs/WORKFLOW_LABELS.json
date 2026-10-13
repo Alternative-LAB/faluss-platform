@@ -1,0 +1,12 @@
+{
+  "type": {
+    "documentation": "documentation",
+    "maintenance": null
+  },
+  "priority": {
+    "normal": null
+  },
+  "status": {
+    "in_progress": null
+  }
+}

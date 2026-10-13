@@ -24,16 +24,95 @@ concurrency:
 
 jobs:
   prepare:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: main
+
+      - name: Find or create release issue before changing files
+        id: issue
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PR_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$GH_TOKEN" ]]; then
+            echo 'RELEASE_PR_TOKEN is not configured.' >&2
+            exit 1
+          fi
+          export RELEASE_ISSUE_TITLE="Préparer la publication depuis $(git rev-parse HEAD)"
+          gh api --paginate --slurp "repos/${GITHUB_REPOSITORY}/labels?per_page=100" > "$RUNNER_TEMP/release-labels.json"
+          release_labels="$(python3 - <<'PYLABELS'
+          import json
+          import os
+          from pathlib import Path
+
+          mapping = json.loads(Path('docs/WORKFLOW_LABELS.json').read_text())
+          pages = json.loads((Path(os.environ['RUNNER_TEMP']) / 'release-labels.json').read_text())
+          available = {label['name'] for page in pages for label in page}
+          selected = [mapping['type']['maintenance'], mapping['priority']['normal'], mapping['status']['in_progress']]
+          for label in filter(None, selected):
+              if label not in available:
+                  raise SystemExit('Configured release label is unavailable: ' + label)
+          print(','.join(filter(None, selected)))
+          PYLABELS
+          )"
+          gh api --paginate --slurp "repos/${GITHUB_REPOSITORY}/issues?state=all&per_page=100" > "$RUNNER_TEMP/release-issues.json"
+          issue_number="$(python3 - <<'PYISSUE'
+          import json
+          import os
+          from pathlib import Path
+
+          pages = json.loads((Path(os.environ['RUNNER_TEMP']) / 'release-issues.json').read_text())
+          matches = [issue for page in pages for issue in page
+                     if 'pull_request' not in issue and issue['title'] == os.environ['RELEASE_ISSUE_TITLE']]
+          if len(matches) > 1:
+              raise SystemExit('Several release issues match; resolve the duplicate before continuing.')
+          if matches and matches[0]['state'] != 'open':
+              raise SystemExit('This release issue is closed; inspect the previous publication before retrying.')
+          print(matches[0]['number'] if matches else '')
+          PYISSUE
+          )"
+          if [[ -z "$issue_number" ]]; then
+            python3 - <<'PYBODY'
+          import os
+          import re
+          from pathlib import Path
+
+          sections = {
+              'Contexte': 'Les changements fusionnés doivent être préparés pour publication.',
+              'Objectif': 'Préparer une version et ses notes depuis la base courante.',
+              'Travail attendu': '- Générer la version et le changelog.\n- Ouvrir une PR de publication liée à cette issue.',
+              "Critères d'acceptation": '- Version et archive cohérentes.\n- Tous les contrôles CI applicables réussissent avant fusion.',
+              'Informations complémentaires': 'Type : maintenance. Priorité : normale. Statut : en cours. Les axes sans mapping de label restent décrits ici. La publication effective reste conditionnée à la fusion.',
+          }
+          template = Path('docs/ISSUE_TEMPLATE.md').read_text()
+          for heading, content in sections.items():
+              pattern = r'(?m)^## ' + re.escape(heading) + r'\n.*?(?=^## |\Z)'
+              template = re.sub(pattern, lambda match: '## ' + heading + '\n\n' + content + '\n\n', template, flags=re.S)
+          (Path(os.environ['RUNNER_TEMP']) / 'release-issue.md').write_text(template)
+          PYBODY
+            label_args=()
+            if [[ -n "$release_labels" ]]; then
+              label_args=(--label "$release_labels")
+            fi
+            issue_url="$(gh issue create "${label_args[@]}" --repo "$GITHUB_REPOSITORY" --title "$RELEASE_ISSUE_TITLE" --body-file "$RUNNER_TEMP/release-issue.md")"
+            issue_number="${issue_url##*/}"
+          fi
+          [[ "$issue_number" =~ ^[0-9]+$ ]]
+          if [[ -n "$release_labels" ]]; then
+            gh issue edit "$issue_number" --repo "$GITHUB_REPOSITORY" --add-label "$release_labels"
+          fi
+          echo "number=$issue_number" >> "$GITHUB_OUTPUT"
 
       - name: Generate version and changelog
         id: release
         env:
           REQUESTED_BUMP: ${{ inputs.bump }}
+          RELEASE_ISSUE: ${{ steps.issue.outputs.number }}
         shell: bash
         run: |
           set -euo pipefail
@@ -49,7 +128,7 @@ jobs:
             --bump="$REQUESTED_BUMP" \
             --date="$(date -u +%F)")"
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "branch=chore/release-v$version" >> "$GITHUB_OUTPUT"
+          echo "branch=chore/$RELEASE_ISSUE-release-v$version" >> "$GITHUB_OUTPUT"
 
       - name: Create release branch
         env:
@@ -58,9 +137,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if git ls-remote --exit-code --heads origin "$RELEASE_BRANCH" >/dev/null 2>&1; then
-            echo "Release branch $RELEASE_BRANCH already exists." >&2
-            exit 1
+          existing_branch="$(git ls-remote --heads origin "$RELEASE_BRANCH")"
+          if [[ -n "$existing_branch" ]]; then
+            git fetch origin "$RELEASE_BRANCH"
+            if ! git diff --quiet FETCH_HEAD -- faluss-platform.php CHANGELOG.md; then
+              echo 'Existing release branch differs from generated files; inspect it before retrying.' >&2
+              exit 1
+            fi
+            echo "Reusing release branch $RELEASE_BRANCH."
+            exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
@@ -74,6 +159,7 @@ jobs:
           GH_TOKEN: ${{ secrets.RELEASE_PR_TOKEN }}
           RELEASE_BRANCH: ${{ steps.release.outputs.branch }}
           RELEASE_VERSION: ${{ steps.release.outputs.version }}
+          RELEASE_ISSUE: ${{ steps.issue.outputs.number }}
         shell: bash
         run: |
           set -euo pipefail
@@ -86,6 +172,7 @@ jobs:
             '## Objectif' \
             '' \
             "Préparer automatiquement Faluss Platform v$RELEASE_VERSION depuis les commits fusionnés depuis le dernier tag." \
+            "Closes #$RELEASE_ISSUE" \
             '' \
             '## Changements' \
             '' \
@@ -123,6 +210,21 @@ jobs:
             '## Captures d’écran' \
             '' \
             'Sans objet' > "$body"
+          existing_pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$RELEASE_BRANCH" --base main --state all --json number,state,url)"
+          export EXISTING_RELEASE_PRS="$existing_pr"
+          existing_url="$(python3 - <<'PYPR'
+          import json
+          import os
+          prs = json.loads(os.environ['EXISTING_RELEASE_PRS'])
+          if len(prs) > 1 or (prs and prs[0]['state'] != 'OPEN'):
+              raise SystemExit('Inspect previous release PRs before retrying.')
+          print(prs[0]['url'] if prs else '')
+          PYPR
+          )"
+          if [[ -n "$existing_url" ]]; then
+            echo "Reusing $existing_url"
+            exit 0
+          fi
           gh pr create \
             --base main \
             --head "$RELEASE_BRANCH" \

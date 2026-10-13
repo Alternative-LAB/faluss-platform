@@ -62,3 +62,6 @@ auth.json
 # Note: If you wish to whitelist themes,
 # uncomment the next line
 #/wp-content/themes
+
+# Python test artifacts
+__pycache__/

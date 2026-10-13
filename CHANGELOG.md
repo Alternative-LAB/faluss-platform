@@ -6,6 +6,11 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Modifié
+
+- Règles IA centralisées : adaptateurs AGENT/Claude, sélection des modèles, délégation bornée, tests utiles et traçabilité par issue ; procédure GitLab conditionnelle conservant le workflow GitHub actuel.
+- Gouvernance liée à une issue ouverte et préparation de release avec recherche paginée, mapping des labels, reprise contrôlée et tests de non-duplication.
+
 ### Documentation
 
 - Consigner la validation F1b R2 : relevé Europe/Paris, classements persistants
