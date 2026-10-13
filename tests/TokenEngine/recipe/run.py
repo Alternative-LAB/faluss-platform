@@ -42,6 +42,7 @@ def main():
     parser.add_argument('--b3-barrier-completion-recovery', action='store_true', help='Durable explicit Fans completion action and same-key recovery')
     parser.add_argument('--b3-barrier-acknowledgement', action='store_true', help='Current signed acknowledgement and atomic local callback')
     parser.add_argument('--b1-origin-ack', action='store_true', help='Closed B1 actual origin opening from current primary barrier ACK')
+    parser.add_argument('--b3-session-lifecycle', action='store_true', help='Closed B2 governed session states to attested primary barriers')
     parser.add_argument('--b3-ranked', action='store_true', help='Closed B3 ranked consumption with official debit; fictitious owner proofs only')
     parser.add_argument('--b3-snapshots', action='store_true', help='Closed member snapshots 2.0 with original ranked facts and latest H4 net')
     parser.add_argument('--b3-corpus-source', action='store_true', help='Exhaustive closed owner inventory, H4 reconciliation and measured read mutex')
@@ -50,7 +51,7 @@ def main():
     parser.add_argument('--b3-corpus-inbox', action='store_true', help='Durable private Fans staging, primary recovery and atomic complete corpus replacement')
     parser.add_argument('--b3-corpus-reader', action='store_true', help='Bounded durable corpus orchestration with real private WordPress HTTP and recovery')
     options = parser.parse_args()
-    if options.b1_origin_ack:
+    if options.b1_origin_ack or options.b3_session_lifecycle:
         options.b3_barrier_acknowledgement = True
     if options.b3_barrier_acknowledgement:
         options.b3_barrier_completion_recovery = True
@@ -194,7 +195,7 @@ def main():
                                      '--datadir=' + str(root / 'db'), '--socket=' + str(root / 'sql.sock'),
                                      '--pid-file=' + str(root / 'sql.pid'), '--skip-networking',
                                      '--innodb-buffer-pool-size=64M'], stdout=log, stderr=log)
-        for _ in range(100):
+        for _ in range(600):
             result = subprocess.run(['mariadb', '--no-defaults', '--socket=' + str(root / 'sql.sock'),
                                      '-uroot', '-e', 'CREATE DATABASE IF NOT EXISTS hub_pf_recipe'], capture_output=True)
             if result.returncode == 0:
@@ -382,7 +383,14 @@ def main():
             run_checks(root,check,sql,barrier_http)
         if options.b1_origin_ack:
             from b1_origin_ack_checks import run_checks
-            run_checks(root,check,sql,barrier_http)
+            origin_fixture=run_checks(root,check,sql,barrier_http,defer_close=options.b3_session_lifecycle)
+        if options.b3_session_lifecycle:
+            from b3_session_lifecycle_checks import run_checks
+            shared_origin=origin_fixture['origin'] if options.b1_origin_ack else None
+            run_checks(root,source,options.cli,check,command,sql,barrier_http,origin_override=shared_origin)
+            if options.b1_origin_ack:
+                check('B1B2 joined lifecycle preserves the attested active origin',origin_fixture['read']()['state']=='open')
+                origin_fixture['close']()
         b3_ranked_start = len(checks)
         if options.b3_ranked:
             from b3_ranked_checks import run_checks
@@ -438,8 +446,10 @@ def main():
         report['b3_barrier_completion_recovery_total'] = sum(name.startswith('B3ber ') for name in checks)
         report['b3_barrier_acknowledgement_total'] = sum(name.startswith('B3ack ') for name in checks)
         report['b1_origin_ack_total'] = sum(name.startswith('B1oa ') for name in checks)
+        report['b3_session_lifecycle_total'] = sum(name.startswith('B3sl ') for name in checks)
+        report['b1_b2_integration_total'] = sum(name.startswith('B1B2 ') for name in checks)
         report['b3_barrier_http_total'] = sum(name.startswith('B3bh ') for name in checks)
-        report['b3_barriers_total'] = b3_ranked_start - b3_barriers_start - report['b3_barrier_http_total'] - report['b3_barrier_recovery_total'] - report['b3_barrier_completion_http_total'] - report['b3_barrier_completion_recovery_total'] - report['b3_barrier_acknowledgement_total'] - report['b1_origin_ack_total']
+        report['b3_barriers_total'] = b3_ranked_start - b3_barriers_start - report['b3_barrier_http_total'] - report['b3_barrier_recovery_total'] - report['b3_barrier_completion_http_total'] - report['b3_barrier_completion_recovery_total'] - report['b3_barrier_acknowledgement_total'] - report['b1_origin_ack_total'] - report['b3_session_lifecycle_total'] - report['b1_b2_integration_total']
         report['b3_ranked_total'] = b3_snapshots_start - b3_ranked_start
         report['b3_snapshots_total'] = b3_corpus_source_start - b3_snapshots_start
         report['b3_corpus_source_total'] = b3_corpus_start - b3_corpus_source_start
@@ -484,6 +494,11 @@ def main():
         if options.b1_origin_ack:
             report['scope'] += '; B1 origin opening separately records primary ACK and frozen earliest admissible instant, no economic source or public delivery'
             report['not_proven'][0] = 'B2 governance barriers, intent choices, public delivery, real SSO and production admission'
+        if options.b3_session_lifecycle:
+            report['scope'] += '; B2 creator session lifecycle to primary barriers, fictitious local Identity links only'
+            report['not_proven'][0] = 'B1 actual origin opening, participant/creator/country governance barriers, intent choices, real SSO and production admission'
+            if options.b1_origin_ack:
+                report['not_proven'][0] = 'Participant/creator/country governance barriers, intent choices, delivery composition, real SSO and production admission'
         if options.b3_ranked:
             report['scope'] += '; closed B3b2 atomic owner order/context/signed receipt and official H2 debit, partial H4 corrections with fictitious evidence'
             report['ranked_schema'] = '1 (closed_b3_ranked)'

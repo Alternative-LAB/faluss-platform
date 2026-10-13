@@ -4,7 +4,7 @@ import copy
 import uuid
 
 
-def run_checks(root,check,hub_sql,network):
+def run_checks(root,check,hub_sql,network,defer_close=False):
     local=network['recovery'];invoke=local['invoke'];sql=local['sql']
     _,_,objects=network['fixture']();descriptor=next(row for row in objects if row['content']['kind']=='origin');origin=descriptor['content']['origin_id']
     table='wp_fans_hof_origin_records';ledger=hub_sql('SELECT * FROM wp_token_engine_pf_ledger ORDER BY id')
@@ -37,10 +37,14 @@ def run_checks(root,check,hub_sql,network):
     policy=copy.deepcopy(network['policies']['fans']);policy['keys']['recipe-hub-k1']['state']='revoked';network['policy']('fans',policy)
     check('B1oa current revoked Hub trust closes delivery of old opening evidence','error' in run('read') and stored()==before)
     network['policy']('fans',network['policies']['fans'])
-    ref=network['fields'](descriptor);reference={name:fields['result'][name] for name in ('barrier_key','version','content_sha256')}
-    close=dict(ref,operation='close',action_id=str(uuid.uuid4()),object=reference|dict(reason='origin_closed'))
-    local['prepare'](close)
-    check('B1oa local closing immediately prevents an old register ACK from reopening delivery','error' in run('read') and stored()==before)
-    assert local['advance'](close)['state']=='acknowledged'
-    check('B1oa final closed origin retains history without returning active admission','error' in run('read') and stored()==before)
-    check('B1oa admission evidence creates no PF debit credit or parallel Fan ledger',hub_sql('SELECT * FROM wp_token_engine_pf_ledger ORDER BY id')==ledger and sql("SHOW TABLES LIKE 'wp_fans%ledger%'")=='')
+    def close_checks():
+        ref=network['fields'](descriptor);reference={name:fields['result'][name] for name in ('barrier_key','version','content_sha256')}
+        close=dict(ref,operation='close',action_id=str(uuid.uuid4()),object=reference|dict(reason='origin_closed'))
+        local['prepare'](close)
+        check('B1oa local closing immediately prevents an old register ACK from reopening delivery','error' in run('read') and stored()==before)
+        assert local['advance'](close)['state']=='acknowledged'
+        check('B1oa final closed origin retains history without returning active admission','error' in run('read') and stored()==before)
+        check('B1oa admission evidence creates no PF debit credit or parallel Fan ledger',hub_sql('SELECT * FROM wp_token_engine_pf_ledger ORDER BY id')==ledger and sql("SHOW TABLES LIKE 'wp_fans%ledger%'")=='')
+    if defer_close:
+        return dict(origin=origin,close=close_checks,read=lambda:run('read'))
+    close_checks()

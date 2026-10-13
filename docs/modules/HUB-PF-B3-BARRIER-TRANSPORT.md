@@ -226,3 +226,21 @@ production ou capacité de classement sur les sites n'est revendiqué. Aucun
 nouveau contrat Hub n'est introduit. Retour arrière : retirer ces composants
 inertes et détruire la fixture ; aucune migration de site à annuler.
 Conservation #150 et RustFS #161 restent distinctes.
+
+## Consolidation B1/B2/B3 du 13 octobre 2026
+
+La PR #196 reprend les apports de #182, #184, #187–#190, #193–#195,
+#199 et #200. Le code du cycle de vie #200 est importé par diff, sans
+réécriture de sa branche ni son ancien commit de merge non conforme.
+Les PR sources restent conservées jusqu'à preuve d'intégration.
+
+La recette combinée `--b1-origin-ack --b3-session-lifecycle` utilise la même
+origine réellement enregistrée et acquittée par Hub. La fermeture de l'origine
+est différée jusqu'à la fin des tests de sessions, puis tous les contrôles de
+fermeture initialement prévus sont exécutés. Aucun historique n'est effacé et
+aucune deuxième origine n'est introduite dans le registre Fans unique.
+Les invocations individuelles gardent leurs scénarios antérieurs.
+
+Cette jonction de recette n'ajoute ni contrat, route, admission ou fonctionnalité
+publique. La livraison complète des projections et la liaison des barrières de
+participants/créateurs/pays aux intentions restent à composer.
