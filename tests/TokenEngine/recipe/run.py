@@ -115,11 +115,13 @@ def main():
                                     'eval-file', str(source / 'tests/TokenEngine/recipe/worker.php'),
                                     str(input_file), '--use-include'], stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE, text=True, start_new_session=True)
+        # This bounded bulk fixture executes 101 genuine owner transactions before returning.
+        process.recipe_timeout = 180 if data.get('action')=='b3s-seed-ranked' and data.get('count')=='101' else 40
         workers.append(process)
         return process
 
     def finish(process):
-        output, errors = process.communicate(timeout=40)
+        output, errors = process.communicate(timeout=getattr(process,'recipe_timeout',40))
         if process.returncode:
             raise RuntimeError('Hub fixture worker failed: ' + errors[-800:])
         return json.loads(output)
@@ -182,7 +184,7 @@ def main():
                                      '--datadir=' + str(root / 'db'), '--socket=' + str(root / 'sql.sock'),
                                      '--pid-file=' + str(root / 'sql.pid'), '--skip-networking',
                                      '--innodb-buffer-pool-size=64M'], stdout=log, stderr=log)
-        for _ in range(100):
+        for _ in range(600):
             result = subprocess.run(['mariadb', '--no-defaults', '--socket=' + str(root / 'sql.sock'),
                                      '-uroot', '-e', 'CREATE DATABASE IF NOT EXISTS hub_pf_recipe'], capture_output=True)
             if result.returncode == 0:

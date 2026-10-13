@@ -1,6 +1,8 @@
 """Explicit primary freshness of one immutable private generation; fictitious enclave only."""
 import concurrent.futures
 import copy
+import datetime
+import decimal
 import json
 import secrets
 import socket
@@ -37,6 +39,13 @@ def run_checks(root,source,cli_path,check,command,fixture,reader,hub,hub_sql):
 
     read=latest();key=progress(read)['read_key'];old=stored_proof();historical=hub_sql('SELECT * FROM wp_token_engine_ledger ORDER BY id')
     economic=hub_sql('SELECT * FROM wp_token_engine_pf_ledger ORDER BY id');initial=counts();old_at=current()['verified_at']
+    # The prefix deliberately freezes SQL time. This scenario needs a later primary attestation.
+    minimum_clock=decimal.Decimal(int(datetime.datetime.fromisoformat(old_at).replace(tzinfo=datetime.timezone.utc).timestamp())+1)
+    original_clock=fixture['set_clock']
+    def subsequent_primary_clock():
+        original_clock();path=root/'corpus-sql-clock'
+        path.write_text(format(max(decimal.Decimal(path.read_text()),minimum_clock),'.6f'))
+    fixture['set_clock']=subsequent_primary_clock
     check('B6pr invalid refresh budgets do not modify the current primary checkpoint',
           invoke('refresh',read_id=read,steps=0)==dict(error='pf_local_corpus_budget')
           and invoke('refresh',read_id=read,steps=17)==dict(error='pf_local_corpus_budget') and counts()==initial
@@ -62,9 +71,14 @@ def run_checks(root,source,cli_path,check,command,fixture,reader,hub,hub_sql):
     check('B6pr even after a new request an older valid finish remains unusable',
           inbox('accept',proof=renew(old))==dict(error='pf_local_corpus_checkpoint_moved') and current() is None)
     accepted=inbox('accept',proof=fresh)
+    promoted=current()
+    promotion_checks=dict(current_phase=accepted.get('phase')=='current',same_read=accepted.get('read_id')==read,
+        same_key=accepted.get('read_key')==key,same_manifest=promoted is not None and promoted['manifest']==p['manifest'],
+        same_cardinality=counts()==initial,new_primary_instant=promoted is not None and promoted['verified_at']!=old_at)
+    if not all(promotion_checks.values()):
+        raise AssertionError('B6pr expurgated promotion predicates: '+json.dumps(promotion_checks,sort_keys=True))
     check('B6pr the new primary acknowledgement promotes exactly the same complete generation',
-          accepted['phase']=='current' and accepted['read_id']==read and accepted['read_key']==key
-          and current()['manifest']==p['manifest'] and counts()==initial and current()['verified_at']!=old_at)
+          all(promotion_checks.values()))
     check('B6pr a changed attested instant requires rebuilding the derived cache',
           invoke('cache-read')==dict(error='hof_projection_not_reconciled')
           and invoke('cache-rebuild')['state']=='reconciled' and invoke('cache-read')['state']=='reconciled')

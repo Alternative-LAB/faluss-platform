@@ -50,3 +50,5 @@ loopback et données fictives. Elle rejoue H0–H4, corpus, B4 et B5. Les preuve
 seront consignées après exécution ; aucun rendu UI ou véritable SSO n'est
 revendiqué par ce sous-lot. #150 et #161 restent distinctes, version publiée
 inchangée, aucun score public ou admission de production.
+
+Diagnostic du 13 octobre : l'échec initial porte uniquement sur l'horloge SQL figée du harnais ; la correction de recette est en validation. Voir la preuve expurgée liée ci-dessus. Aucun correctif runtime déduit de cet échec.

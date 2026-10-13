@@ -29,3 +29,22 @@ Le [rapport partiel expurgé](partial-checks.json) conserve les seuls intitulés
 totaux, statut d'échec et limites. Aucun contenu privé, clé, identité, wire,
 signature, cookie ou preuve détaillée n'y figure. PR #202 en brouillon : pas de
 Ready for review, fusion ou publication. #150 et #161 distinctes.
+
+## Diagnostic de reprise du 13 octobre
+
+La recette de diagnostic sur l'arbre `d329d0434b123d2acfff30f6efe8251d0ee2b8ce`
+a reproduit l'échec après les sept contrôles B6pr. Les prédicats expurgés
+confirment état courant, identité et clé inchangées, manifeste et cardinalités
+identiques. Seul `new_primary_instant` est faux : l'horloge SQL du préfixe
+reste figée et donne la même date aux deux lectures primaires.
+
+Le correctif en validation avance explicitement cette horloge de recette
+au-delà du premier instant attesté, avant de vérifier l'invalidation du cache.
+Aucune instruction du plugin n'est modifiée par ce diagnostic. Les budgets du
+harnais sont bornés à 60 secondes pour démarrer MariaDB et 180 secondes pour
+le seul worker qui prépare 101 attributions, après des échecs locaux de délai.
+Les timeouts et contrôles des transports du plugin restent inchangés.
+
+Arbre corrigé `0227b6fcdd10565dcc529b364ec461aa28eda173` : suites PHP et analyse
+statique vertes (648/7 102 ; HoF 76/259). Recette complète en cours : aucun
+succès des scénarios suivants annoncé avant sa fin. PR en brouillon.
