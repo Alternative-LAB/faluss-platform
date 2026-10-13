@@ -28,8 +28,13 @@ def run_checks(root,source,cli_path,check,command,fixture,hub_sql):
         "JSON_UNQUOTE(JSON_EXTRACT(descriptor_json,'$.content.kind'))='origin' AND "
         "JSON_UNQUOTE(JSON_EXTRACT(descriptor_json,'$.content.origin_id'))='"+origin+"' AND version=1")
     descriptor=json.loads(bytes.fromhex(encoded).decode())
-    fields=dict(operation='register',action_id=str(uuid.uuid4()),origin_id=origin,policy_version='1.0.0',object=descriptor)
+    fields=dict(operation='register',action_id=str(uuid.uuid4()),origin_id=origin,policy_version='1.0.0',lookup_operation='',object=descriptor)
     prepared=invoke('fans','prepare',fields=fields)
+    if 'error' in prepared:
+        raise RuntimeError('B6join private preparation refused: '+str(prepared['error']))
+    check('B6join the complete immutable action is persisted before any HTTP',
+        prepared['fields']==fields and prepared['action_id']==fields['action_id']
+        and prepared['phase']=='lookup' and prepared['state']=='opening')
     check('B6join an unacknowledged origin cannot compose a complete cache',
         'error' in invoke('fans','compose',action_id=prepared['action_id']))
     reply=invoke('fans','advance',action_id=prepared['action_id'])
