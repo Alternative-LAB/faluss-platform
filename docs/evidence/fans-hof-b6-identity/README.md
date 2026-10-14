@@ -29,6 +29,22 @@ instruction exécutable modifiée. PHPStan traite ainsi correctement les lecture
 successives d'une propriété wpdb modifiée par chaque requête. Les sources PHP
 modifiées sont lintées ; Python compilé, liens relatifs et scan ciblé réussis.
 
+## Harnais SQL historique
+
+La première CI de #208 a échoué dans l'adaptateur SQL éditorial/messagerie :
+les comptes y étaient simulés en mémoire sans tables `users`/`usermeta`, sans
+préfixe des rôles et sans prise en charge du placeholder `%i`. Échec reproduit
+en isolation à l'ouverture d'une demande de message, alors que la recette
+WordPress ci-dessus réussissait. Le harnais persiste désormais ses comptes
+et rôles fictifs en InnoDB et complète ces primitives. Aucune garde du plugin
+n'est contournée ; ce harnais reste explicitement **distinct de WordPress**.
+Le [rapport du harnais corrigé](editorial-adapter-checks.json), tree
+`c900db5c1bb097bc6261d5a4e8fceb55db340d13`, réussit **304 contrôles SQL/HTTP**,
+code zéro, ressources supprimées : éditorial, images privées, publications,
+messagerie, quotas, signalements et recours. PHP lint des deux fichiers
+du harnais réussi ; runtime du plugin et tests PHPUnit identiques au tree
+qualité cité plus haut. La CI du nouveau head reste requise avant intégration.
+
 **Limites** : lignes classées synthétiques pour cette recette de filiation ;
 pas de corpus Hub ou livraison UI dans ce lot. La preuve signée et économique
 est celle de la [consolidation](../fans-hof-main-consolidation/README.md).

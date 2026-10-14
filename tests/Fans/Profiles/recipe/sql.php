@@ -21,6 +21,14 @@ if (($argv[1] ?? '') === 'race') {
 }
 if (($argv[1] ?? '') === 'setup') {
     $wpdb->query('CREATE TABLE fixture_options(name varchar(191) PRIMARY KEY,value text NOT NULL) ENGINE=InnoDB');
+    check('transactional local account fixture', $wpdb->query('CREATE TABLE test_users (ID bigint unsigned PRIMARY KEY) ENGINE=InnoDB') !== false);
+    check('transactional local roles fixture', $wpdb->query('CREATE TABLE test_usermeta (umeta_id bigint unsigned AUTO_INCREMENT PRIMARY KEY,user_id bigint unsigned NOT NULL,meta_key varchar(255) NOT NULL,meta_value longtext NOT NULL,KEY account_meta (user_id,meta_key)) ENGINE=InnoDB') !== false);
+    foreach ([1 => 'administrator', 17 => 'subscriber', 18 => 'subscriber', 19 => 'subscriber',
+        20 => 'subscriber', 21 => 'subscriber', 22 => 'subscriber', 42 => 'administrator'] as $account => $role) {
+        check('stored fixture account ' . $account, $wpdb->query($wpdb->prepare('INSERT INTO test_users (ID) VALUES (%d)', $account)) === 1
+            && $wpdb->query($wpdb->prepare('INSERT INTO test_usermeta (user_id,meta_key,meta_value) VALUES (%d,%s,%s)',
+                $account, 'test_capabilities', serialize([$role => true]))) === 1);
+    }
     check('real SSO schemas', FansSsoSchema::installOrVerify());
     check('real notification schema', \Faluss\Platform\Fans\Notifications\NotificationSchema::installOrVerify());
     check('real profile schema', CreatorProfileSchema::installOrVerify());
