@@ -14,7 +14,7 @@ Séparer Identity, l’administration Fans et cinq recettes PF terminales sur de
 
 Comparer les rapports à l’inventaire des 1 413 assertions uniques de la CI réussie 38531600985. Exiger tous les rapports, des compteurs cohérents et toutes les assertions de référence. Un statut d’intégration stable agrège les suites et cette vérification, sans accepter un échec ou un job ignoré.
 
-Centraliser les outils épinglés dans une action composite locale et annuler les exécutions obsolètes d’une même PR. Les contrôles existants et la protection distante restent en place. La preuve indépendante vient des rapports de l’ancien workflow réussi et de la comparaison avec les nouveaux rapports, et non d’une simple affirmation du nouveau workflow.
+Centraliser les outils épinglés dans une action composite locale, partager le bytecode CLI au sein du job avec revalidation immédiate et configuration de fixture exclue, puis annuler les exécutions obsolètes d’une même PR. Les serveurs HTTP gardent leurs options explicites désactivant OPcache. Les contrôles existants et la protection distante restent en place. La preuve indépendante vient des rapports de l’ancien workflow réussi et de la comparaison avec les nouveaux rapports, et non d’une simple affirmation du nouveau workflow.
 
 ## Conséquences
 

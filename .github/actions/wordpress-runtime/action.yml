@@ -23,3 +23,17 @@ runs:
         echo "ce34ddd838f7351d6759068d09793f26755463b4a4610a5a5c0a97b68220d85c  $RUNNER_TEMP/wp-cli.phar" | sha256sum --check
         tar -xzf "$RUNNER_TEMP/wordpress.tar.gz" -C "$RUNNER_TEMP"
         git archive HEAD -o "$RUNNER_TEMP/plugin.tar"
+    - name: Cache immutable CLI bytecode within this job
+      shell: bash
+      run: |
+        set -euo pipefail
+        php -r 'exit(extension_loaded("Zend OPcache") ? 0 : 1);'
+        ci_php_binary="$(command -v php)"
+        ci_php_cache="$RUNNER_TEMP/php-cli-bytecode"
+        mkdir -m 700 "$ci_php_cache"
+        mkdir -p "$RUNNER_TEMP/php-cli-bin"
+        : > "$ci_php_cache/blacklist"
+        install -m 755 "$GITHUB_ACTION_PATH/php" "$RUNNER_TEMP/php-cli-bin/php"
+        echo "FALUSS_CI_PHP_BINARY=$ci_php_binary" >> "$GITHUB_ENV"
+        echo "FALUSS_CI_PHP_CACHE=$ci_php_cache" >> "$GITHUB_ENV"
+        echo "$RUNNER_TEMP/php-cli-bin" >> "$GITHUB_PATH"

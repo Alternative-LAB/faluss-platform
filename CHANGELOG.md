@@ -8,7 +8,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Modifié
 
-- Accélérer la CI WordPress : Identity et administration Fans séparés, cinq recettes PF terminales parallèles et vérification des 1 413 assertions historiques ; outils épinglés partagés, budgets de temps et annulation des workflows obsolètes de PR. Aucun scénario applicatif ou état de production modifié.
+- Accélérer la CI WordPress : Identity et administration Fans séparés, cinq recettes PF terminales parallèles et vérification des 1 413 assertions historiques ; outils épinglés et bytecode CLI partagés avec revalidation immédiate, budgets de temps et annulation des workflows obsolètes de PR. Aucun scénario applicatif ou état de production modifié.
 
 ### Corrigé
 

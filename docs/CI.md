@@ -30,7 +30,7 @@ Les noms décrivent les scénarios observables ; ils ne constituent pas une mesu
 
 ## Outils et exploitation
 
-L’action locale [wordpress-runtime](../.github/actions/wordpress-runtime/action.yml) centralise PHP 8.3, Composer, MariaDB, WordPress 7.1.2 et WP-CLI 2.12.0, avec les empreintes de téléchargements existantes. Chaque recette conserve ses bases, clés de fixture et processus locaux ; aucun site de production n’est contacté.
+L’action locale [wordpress-runtime](../.github/actions/wordpress-runtime/action.yml) centralise PHP 8.3, Composer, MariaDB, WordPress 7.1.2 et WP-CLI 2.12.0, avec les empreintes de téléchargements existantes. Chaque recette conserve ses bases, clés de fixture et processus locaux ; aucun site de production n’est contacté. Un lanceur PHP local à la CI partage uniquement le bytecode des appels CLI dans le répertoire privé du job. Il vérifie les fichiers à chaque appel (`validate_timestamps=1`, `revalidate_freq=0`), exclut `wp-config.php` et respecte les options explicites désactivant OPcache dans les serveurs HTTP de fixture. Aucun état de requête ou cache n’est partagé entre jobs ni publié comme artefact.
 
 Les cinq variantes PF peuvent tourner simultanément (`max-parallel: 5`). Leur budget est de 30 minutes ; Identity et l’administration Fans ont un budget de 10 minutes. Une expiration reste un échec, pas un résultat accepté. `fail-fast: false` permet aux autres variantes de produire leurs diagnostics.
 
@@ -44,3 +44,7 @@ python3 scripts/validate-wordpress-coverage.py /chemin/rapports
 ```
 
 En cas de régression, revenir à l’organisation précédente par une PR validée. Aucun code de module, contrat, schéma ou donnée persistante de production n’est changé.
+
+## Mesure avant cache CLI
+
+La [première exécution parallèle 38559059477](https://github.com/Alternative-LAB/faluss-platform/actions/runs/38559059477) a réussi en **29 min 56 s**, contre 98 min 42 s pour la référence. Identity termine en 39 secondes et les 1 413 assertions sont conservées indépendamment. Le corpus reste le chemin critique (29 min 35 s). Le cache de bytecode CLI vise ce coût de démarrages répétés ; sa mesure complète est à confirmer avant livraison.
