@@ -15,6 +15,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Corrigé
 
+- Rendre observable un refus HTTP dans la préparation de la recette corpus avec un diagnostic expurgé du statut, de la raison technique et de l’espace temporaire, sans accepter le refus ni exposer de preuve privée.
 - Accepter les emojis Unicode et les codes `:gitmoji:` dans le contrôle de gouvernance des commits, avec tests de non-régression. Livrer cette transition depuis la base de confiance avant la PR #205.
 
 ### Ajouté
