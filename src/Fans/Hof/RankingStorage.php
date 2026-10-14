@@ -33,6 +33,29 @@ final class RankingStorage
         }
     }
 
+    /** Hold domain ordering before another owner starts its transaction. This is not an authorization.
+     * @template T
+     * @param callable():T $operation
+     * @return T */
+    public function withMutex(string $scope, callable $operation): mixed
+    {
+        $db = $this->database;
+        if ($db !== ($GLOBALS['wpdb'] ?? null)) { throw new ModelViolation('hof_primary_connection_required'); }
+        if (!RankingSchema::ready($db)) { throw new ModelViolation('hof_schema_unavailable'); }
+        if ($this->transactionState() !== '0') { throw new ModelViolation('hof_nested_transaction'); }
+        $lock = 'fans_hof_' . substr(hash('sha256', $db->prefix . '|' . $scope), 0, 48);
+        if ((string) $db->get_var($db->prepare('SELECT GET_LOCK(%s,10)', $lock)) !== '1' || $this->failed()) { throw new ModelViolation('hof_busy'); }
+        try {
+            $result = $operation();
+            if ($this->transactionState() !== '0') { throw new ModelViolation('hof_unfinished_transaction'); }
+            return $result;
+        } finally {
+            if ($this->transactionState() !== '0') { $db->query('ROLLBACK'); }
+            $released = (string) $db->get_var($db->prepare('SELECT RELEASE_LOCK(%s)', $lock));
+            if ($released !== '1' || $this->failed()) { throw new ModelViolation('hof_mutex_release_unknown'); }
+        }
+    }
+
     public function query(string $sql): int|bool
     {
         $result = $this->database->query($sql);
@@ -50,4 +73,11 @@ final class RankingStorage
 
     /** @phpstan-impure Reads the most recent database operation's error. */
     private function failed(): bool { global $wpdb; return $wpdb->last_error !== ''; }
+
+    /** @phpstan-impure A callback can change the connection's transaction state. */
+    private function transactionState(): ?string
+    {
+        $value = $this->database->get_var('SELECT @@in_transaction');
+        return !$this->failed() && in_array((string) $value,['0','1'],true) ? (string) $value : null;
+    }
 }
