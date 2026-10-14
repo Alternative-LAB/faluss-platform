@@ -117,11 +117,14 @@ jobs:
             emoji="${subject%% *}"
             message="${subject#* }"
             if [[ "$emoji" == "$subject" || ! "$message" =~ ^[A-Z] ]]; then
-              echo "Invalid gitmoji/English commit subject: $subject"
+              echo "Use a gitmoji followed by an English imperative message: $subject"
               exit 1
             fi
+            if [[ "$emoji" =~ ^:[a-z][a-z0-9_+-]*:$ ]]; then
+              continue
+            fi
             if ! EMOJI="$emoji" python3 -c 'import os, sys; code = ord(os.environ["EMOJI"][0]); sys.exit(not (0x1F300 <= code <= 0x1FAFF or 0x2600 <= code <= 0x27BF or 0x2300 <= code <= 0x23FF))'; then
-              echo "A gitmoji must start the commit subject: $subject"
+              echo "Use a Unicode gitmoji or :gitmoji: shortcode: $subject"
               exit 1
             fi
           done < <(git log --format=%s "$BASE_SHA".."$HEAD_SHA")

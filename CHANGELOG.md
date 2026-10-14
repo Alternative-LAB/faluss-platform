@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Corrigé
+
+- Accepter les emojis Unicode et les codes `:gitmoji:` dans le contrôle de gouvernance des commits, avec tests de non-régression. Livrer cette transition depuis la base de confiance avant la PR #205.
+
 ### Ajouté
 
 - Filiation serveur B6 entre Faluss ID attesté, membre WordPress lié et profil Créateur local : lectures primaires verrouillées, consentement et noms approuvés recontrôlés sans mapping navigateur ni COMMIT implicite. Recette WordPress/MariaDB avec cache périmé et retrait concurrent ; aucun contrat Hub, route, schéma ou score public ajouté.
