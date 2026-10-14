@@ -18,17 +18,19 @@ Apply the permanent safeguards in [AGENTS.md](../../AGENTS.md).
 
 ## Commits
 
-Use a gitmoji **shortcode**, followed by a concise English imperative message:
+Use a gitmoji **Unicode emoji or shortcode**, followed by a concise English
+imperative message. Both forms are interpreted by release tooling:
 
 ```text
 :sparkles: Add module registry
 :bug: Prevent duplicate route registration
 :memo: Document the module lifecycle
+📝 Document the module lifecycle
 ```
 
 Optional commit bodies are also in English. Each commit represents one logical
-change. New commits must use shortcodes; the release parser retains support for
-historical Unicode emojis. Do not rewrite shared history just to change its style.
+change. Unicode emojis and shortcodes are equally valid for new and existing
+commits. Do not rewrite shared history just to change its style.
 
 ## Pull requests
 

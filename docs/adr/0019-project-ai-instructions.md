@@ -18,7 +18,8 @@ Use English for all AI guidance. Compatibility entrypoints reference the root;
 Claude skill directories are symlinks to the canonical packages. Load each body
 only when its task applies. Keep human templates and release operations in `docs/`.
 
-GitHub is the sole platform. Commit shortcodes and English PR titles align the
+GitHub is the sole platform. Unicode gitmojis and shortcodes are equally valid;
+release tooling interprets both automatically. English PR titles align the
 instructions and automation with the requested conventions. Model and tool
 selection uses available capabilities and task risk; delegation requires a
 concrete benefit, with one coordinator responsible for integration.

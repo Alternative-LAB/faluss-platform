@@ -72,17 +72,19 @@ qu'aucun rôle ni application ne figure dans la liste de contournement.
 
 ## Transition des conventions
 
-Les nouveaux commits utilisent les codes `:gitmoji:` ; les titres de PR sont en
-anglais et les descriptions restent en français. Le générateur de releases
-reconnaît les codes et les anciens emojis Unicode sans modifier l’historique.
+Les commits acceptent les emojis Unicode (`📝`) et les codes `:gitmoji:`
+(`:memo:`), suivis d’un message anglais. Le générateur de releases interprète
+automatiquement les deux formats. Les titres de PR sont en anglais et les
+descriptions restent en français.
 Les branches déjà publiées ne sont pas réécrites sans autorisation explicite.
 
 Le contrôle actuellement présent dans `main` exige encore un emoji Unicode.
 Une PR proposant des codes courts peut donc rester bloquée par ce contrôle de
 la base de confiance, même si ses tests locaux passent. La modification proposée
-du workflow ne constitue pas une validation de cette même PR. La transition du
-contrôle doit être livrée séparément selon les règles déjà actives, avant que les
-PR utilisant des codes courts puissent être fusionnées. Ne pas désactiver le
+du workflow accepte les deux formats, mais ne constitue pas une validation de
+cette même PR. La transition du contrôle doit être livrée séparément selon les
+règles déjà actives, avant que les PR utilisant des codes courts puissent être
+fusionnées. Ne pas désactiver le
 contrôle ni publier artificiellement un statut favorable.
 
 ## Retour arrière

@@ -33,15 +33,17 @@ print('CHANGELOG.md' if sys.argv[1] == 'diff' else os.environ['TEST_SUBJECT'])
                        BASE_SHA='base', HEAD_SHA='head', TEST_SUBJECT=subject)
             return subprocess.run(['bash', '-c', script], env=env, capture_output=True, text=True)
 
-    def test_accepts_shortcode_and_english_message(self):
+    def test_accepts_unicode_or_shortcode_and_english_message(self):
         for subject in [':memo: Document project rules', ':bug: Fix release retries',
-                        ':bookmark: Prepare Faluss Platform v1.2.3']:
+                        ':bookmark: Prepare Faluss Platform v1.2.3',
+                        '📝 Document project rules', '🐛 Fix release retries',
+                        '🔖 Prepare Faluss Platform v1.2.3']:
             with self.subTest(subject=subject):
                 result = self.validate_subject(subject)
                 self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
-    def test_rejects_unicode_or_incomplete_subject(self):
-        for subject in ['📝 Document rules', 'Document rules', ':memo:',
+    def test_rejects_missing_gitmoji_or_incomplete_subject(self):
+        for subject in ['Document rules', ':memo:', '📝', '📝 document rules',
                         ':memo: document rules', ':memo: ', ':memo Document rules']:
             with self.subTest(subject=subject):
                 self.assertNotEqual(self.validate_subject(subject).returncode, 0)
