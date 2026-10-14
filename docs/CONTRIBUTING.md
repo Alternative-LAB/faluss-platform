@@ -78,14 +78,10 @@ automatiquement les deux formats. Les titres de PR sont en anglais et les
 descriptions restent en français.
 Les branches déjà publiées ne sont pas réécrites sans autorisation explicite.
 
-Le contrôle actuellement présent dans `main` exige encore un emoji Unicode.
-Une PR proposant des codes courts peut donc rester bloquée par ce contrôle de
-la base de confiance, même si ses tests locaux passent. La modification proposée
-du workflow accepte les deux formats, mais ne constitue pas une validation de
-cette même PR. La transition du contrôle doit être livrée séparément selon les
-règles déjà actives, avant que les PR utilisant des codes courts puissent être
-fusionnées. Ne pas désactiver le
-contrôle ni publier artificiellement un statut favorable.
+La [PR #207](https://github.com/Alternative-LAB/faluss-platform/pull/207) livre
+l’acceptation des deux formats dans le contrôle de confiance. Le contrôle reste
+exécuté depuis la base de la PR ; une modification proposée ne peut pas valider
+sa propre évolution. Aucun contournement ou statut artificiel n’est autorisé.
 
 ## Retour arrière
 

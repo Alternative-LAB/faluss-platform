@@ -33,8 +33,9 @@ skill paths from the root entrypoint. No runtime dependency or production
 migration is introduced. Revert through a checked PR if necessary.
 
 The trusted base still validates governance changes. Existing Unicode history
-remains readable by release tooling; changing the base's commit validator needs
-a separate compliant transition before shortcode PRs can merge.
+remains readable by release tooling. The separate transition in
+[PR #207](https://github.com/Alternative-LAB/faluss-platform/pull/207) enables
+both formats in the trusted base before this PR is validated.
 
 ## Alternatives
 

@@ -11,6 +11,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 - Instructions IA en anglais : point d’entrée court, règles modulaires dans `.agents/rules/`, deux skills chargés à la demande et adaptateurs Codex/Claude sans duplication ; workflow exclusivement GitHub.
 - Gouvernance liée à une issue ouverte et préparation de release avec recherche paginée, mapping des labels, reprise contrôlée et tests de non-duplication ; commits anglais acceptant emojis Unicode et codes `:gitmoji:`, titres de PR en anglais et descriptions en français. Les deux formats sont interprétés automatiquement par le générateur de releases.
 
+### Corrigé
+
+- Accepter les emojis Unicode et les codes `:gitmoji:` dans le contrôle de gouvernance des commits, avec tests de non-régression. Livrer cette transition depuis la base de confiance avant la PR #205.
+
 ### Ajouté
 
 - Recette de jonction fermée : acquittement réel des barrières par HTTP signé et lecture atomique du corpus/cache sur les mêmes instances jetables ; 727 contrôles réussis, dont achat fictif sans score et correction attestée sans seconde consommation. Aucun nouveau contrat ou score public.

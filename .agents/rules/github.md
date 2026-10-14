@@ -50,4 +50,4 @@ commits. Do not rewrite shared history just to change its style.
 Use [faluss-github-workflow](../skills/faluss-github-workflow/SKILL.md) for the
 procedure and [faluss-verify-change](../skills/faluss-verify-change/SKILL.md) for
 verification. [CONTRIBUTING.md](../../docs/CONTRIBUTING.md) documents release
-automation and trusted remote protection, including policy-transition limits.
+automation and trusted remote protection, including trusted validation of governance changes.
