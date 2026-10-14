@@ -40,6 +40,8 @@ Aucun réglage SQL de journalisation ou de synchronisation n’est assoupli. Les
 
 Les rapports sont conservés sept jours dans des artefacts `wordpress-evidence-*`. Lorsqu’une même PR reçoit un nouveau commit, l’ancien workflow PHP est annulé par concurrence ; les exécutions de `main` restent sérialisées et ne sont pas annulées. Les protections distantes ne sont pas modifiées ; ajouter `WordPress integration tests` aux statuts requis lors d’une évolution autorisée de la protection.
 
+Si la préparation de la preuve d’absence retardée échoue, la recette journalise uniquement le statut HTTP, une raison technique `pf_*` autorisée et l’espace temporaire restant. Les requêtes, réponses signées, clés et identifiants privés ne sont jamais inclus. Le prérequis HTTP 200 reste obligatoire ; ce diagnostic ne constitue pas une reprise automatique ni la preuve qu’un refus intermittent est corrigé.
+
 Vérification locale rapide :
 
 ```bash
