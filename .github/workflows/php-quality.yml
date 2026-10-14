@@ -146,6 +146,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/wordpress-runtime
+      - name: Keep disposable fixtures on bounded memory storage
+        if: ${{ matrix.suite == 'corpus-joined' && runner.environment == 'github-hosted' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo mount -t tmpfs -o size=1G,mode=1777,nosuid,nodev tmpfs /var/tmp
+          test "$(findmnt -n -o FSTYPE --target /var/tmp)" = tmpfs
       - name: Execute complete recipe on fresh disposable nodes
         env:
           PF_FLAGS: ${{ matrix.flags }}
@@ -154,7 +161,7 @@ jobs:
         run: |
           set -euo pipefail
           read -ra pf_flags <<< "$PF_FLAGS"
-          python3 tests/TokenEngine/recipe/run.py "${pf_flags[@]}" \
+          time python3 tests/TokenEngine/recipe/run.py "${pf_flags[@]}" \
             --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" \
             --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/$PF_REPORT"
       - uses: actions/upload-artifact@v4
