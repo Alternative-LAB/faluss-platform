@@ -104,6 +104,19 @@ final class ClosedBarrierPrimaryRead
      * @param callable(array<string,mixed>):T $operation
      * @return T */
     public function withCurrentAcknowledgement(string $action, callable $operation): mixed
+    { return $this->current($action,$operation,false); }
+
+    /** Same origin owner must already hold the transaction and mutex; no independent COMMIT.
+     * @template T
+     * @param callable(array<string,mixed>):T $operation
+     * @return T */
+    public function withCurrentAcknowledgementInTransaction(string $action, callable $operation): mixed
+    { return $this->current($action,$operation,true); }
+
+    /** @template T
+     * @param callable(array<string,mixed>):T $operation
+     * @return T */
+    private function current(string $action, callable $operation, bool $callerTransaction): mixed
     {
         return $this->write($action,function (array $ack) use ($action,$operation): mixed {
             $row = $this->required($action); $this->progress($row,$ack);
@@ -111,7 +124,7 @@ final class ClosedBarrierPrimaryRead
             $answer = $this->verified($row,$ack,CanonicalJson::object($row['proof_json'],131072),true);
             return $operation(['fields' => $ack['fields'],'contract' => $ack['contract'],
                 'result' => $answer['result'],'local_state' => $ack['local_state'],'read_revision' => $row['revision']]);
-        });
+        },$callerTransaction);
     }
 
     /** @param array<string,mixed> $ack
@@ -181,14 +194,16 @@ final class ClosedBarrierPrimaryRead
     /** @template T
      * @param callable(array<string,mixed>):T $operation
      * @return T */
-    private function write(string $action, callable $operation): mixed
+    private function write(string $action, callable $operation, bool $callerTransaction = false): mixed
     {
-        return $this->inbox->withAcknowledgement($action,function (array $ack) use ($operation): mixed {
+        $compose = function (array $ack) use ($operation): mixed {
             if ((string) $this->db->get_var('SELECT @@in_transaction') !== '1') { throw new ModelViolation('pf_local_barrier_primary_connection'); }
             $this->healthy();
             if (!ClosedBarrierReadSchema::ready($this->db)) { throw new ModelViolation('pf_local_barrier_primary_schema'); }
             return $operation($ack);
-        });
+        };
+        return $callerTransaction ? $this->inbox->withAcknowledgementInTransaction($action,$compose)
+            : $this->inbox->withAcknowledgement($action,$compose);
     }
 
     /** @return array<string,string>|null */

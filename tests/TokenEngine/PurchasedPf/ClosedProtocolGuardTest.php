@@ -173,6 +173,12 @@ final class ClosedProtocolGuardTest extends TestCase
             catch (ModelViolation $error) { self::assertSame('isolated_h3_recipe_required',$error->reason); }
         }
         self::assertSame(0,$database->queries);
+        $type = new \ReflectionClass(\Faluss\Platform\Fans\PfContract\ClosedBarrierInbox::class);
+        $type->getProperty('db')->setValue($inbox,$database);
+        try { $inbox->withAcknowledgementInTransaction('11111111-1111-4111-8111-111111111111',static fn (): bool => true);
+            self::fail('Caller transactions cannot bypass the physical gate.'); }
+        catch (ModelViolation $error) { self::assertSame('isolated_h3_recipe_required',$error->reason); }
+        self::assertSame(0,$database->queries);
     }
 
     public function testReaderCannotBypassThePhysicalGateOrPersistAnUnboundedJob(): void

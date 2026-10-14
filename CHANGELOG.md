@@ -8,6 +8,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Composition de plusieurs barrières actuelles dans la transaction d'origine déjà détenue : mutex et connexion primaires vérifiés, rollback/commit communs, aucun BEGIN imbriqué ou nouvelle preuve implicite ; périmètre B6 fermé sans contrat Hub ajouté.
+
 - Mutex de gouvernance B6 sans BEGIN pour composer sessions, origine et corpus sous leur transaction propriétaire : ordre conservé, callback incomplet rollbacké et libération vérifiée ; aucun droit, contrat Hub, table ou activation ajouté.
 
 - Relecture primaire fermée des barrières avant livraison B6 : lookup approuvé sur l'action/clé d'origine, challenge durable et reprise sans réenregistrement ; état indisponible pendant l'incertitude, fermeture locale prioritaire et callback transactionnel. Schéma séparé explicitement jetable, aucun contrat Hub nouveau ni activation.

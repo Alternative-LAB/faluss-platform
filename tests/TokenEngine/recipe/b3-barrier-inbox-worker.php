@@ -104,6 +104,27 @@ try {
                 if (($input['nested'] ?? false) === true) { $primary->recover($input['action_id']); }
                 return $ack + ['transaction' => (string) $wpdb->get_var('SELECT @@in_transaction')];
             }),
+            'primary-caller-read' => (static function () use ($wpdb,$input,$primary,$inbox,$peer): array {
+                $callback = static function () use ($wpdb,$input,$primary,$peer): array {
+                    $read = $primary;
+                    if (isset($input['other_origin'])) {
+                        $other = new ClosedBarrierInbox($wpdb,$peer,$input['other_origin'],'1.0.0');
+                        $read = new ClosedBarrierPrimaryRead($wpdb,$other,$peer);
+                    }
+                    return $read->withCurrentAcknowledgementInTransaction($input['action_id'],static function (array $ack) use ($wpdb,$input): array {
+                        if (($input['probe'] ?? false) === true) {
+                            if ($wpdb->query($wpdb->prepare('INSERT INTO wp_barrier_primary_probe (action_id) VALUES (%s)',$input['action_id'])) !== 1) { throw new ModelViolation('pf_fixture_probe_failed'); }
+                        }
+                        if (($input['reject_apply'] ?? false) === true) { throw new ModelViolation('pf_fixture_apply_refused'); }
+                        return $ack + ['transaction' => (string) $wpdb->get_var('SELECT @@in_transaction')];
+                    });
+                };
+                if (($input['manual_transaction'] ?? false) === true) {
+                    $wpdb->query('START TRANSACTION'); try { return $callback(); } finally { $wpdb->query('ROLLBACK'); }
+                }
+                if (($input['no_transaction'] ?? false) === true) { return $callback(); }
+                return $inbox->withAcknowledgement($input['action_id'],$callback);
+            })(),
             'prepare' => $inbox->prepare($input['fields'],$input['contract'] ?? BarrierTransport::CONTRACT),
             'recover' => $inbox->recover($input['action_id']),
             'accept' => $inbox->accept($input['proof']),

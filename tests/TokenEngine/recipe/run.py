@@ -497,7 +497,7 @@ def main():
         report['b3_session_lifecycle_total'] = sum(name.startswith('B3sl ') for name in checks)
         report['b1_b2_integration_total'] = sum(name.startswith('B1B2 ') for name in checks)
         report['b3_barrier_http_total'] = sum(name.startswith('B3bh ') for name in checks)
-        report['b3_barriers_total'] = b3_ranked_start - b3_barriers_start - report['b3_barrier_http_total'] - report['b3_barrier_recovery_total'] - report['b3_barrier_completion_http_total'] - report['b3_barrier_completion_recovery_total'] - report['b3_barrier_acknowledgement_total'] - report['b1_origin_ack_total'] - report['b3_session_lifecycle_total'] - report['b1_b2_integration_total'] - sum(name.startswith('B6br ') for name in checks)
+        report['b3_barriers_total'] = b3_ranked_start - b3_barriers_start - report['b3_barrier_http_total'] - report['b3_barrier_recovery_total'] - report['b3_barrier_completion_http_total'] - report['b3_barrier_completion_recovery_total'] - report['b3_barrier_acknowledgement_total'] - report['b1_origin_ack_total'] - report['b3_session_lifecycle_total'] - report['b1_b2_integration_total'] - sum(name.startswith(('B6br ','B6bt ')) for name in checks)
         report['b3_ranked_total'] = b3_snapshots_start - b3_ranked_start
         report['b3_snapshots_total'] = b3_corpus_source_start - b3_snapshots_start
         report['b3_corpus_source_total'] = b3_corpus_start - b3_corpus_source_start
@@ -508,6 +508,7 @@ def main():
         report['b5_projection_total'] = sum(name.startswith('B5b ') for name in checks)
         report['b6_primary_refresh_total'] = sum(name.startswith('B6pr ') for name in checks)
         report['b6_barrier_refresh_total'] = sum(name.startswith('B6br ') for name in checks)
+        report['b6_barrier_transaction_total'] = sum(name.startswith('B6bt ') for name in checks)
         report['b6_corpus_transaction_total'] = sum(name.startswith('B6tx ') for name in checks)
         report['b6_joined_integration_total'] = sum(name.startswith('B6join ') for name in checks)
         report['b3_corpus_reader_total'] = b3_ranked_http_start - b3_corpus_reader_start - report['b4_projection_total'] - report['b5_projection_total'] - report['b6_corpus_transaction_total'] - report['b6_primary_refresh_total'] - report['b6_joined_integration_total']

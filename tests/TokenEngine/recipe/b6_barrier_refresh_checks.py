@@ -51,6 +51,15 @@ def run_checks(root, check, hub_sql, network):
               and current['result']['effective_at'] == invoke('ack', origin, action_id=action)['result']['effective_at'] and events() == before)
         check('B6br current proof callback shares the existing transaction and reveals no secret',
               current['transaction'] == '1' and set(current) == {'fields','contract','result','local_state','read_revision','transaction'})
+        check('B6bt caller-owned current read preserves the same primary transaction', call('caller-read') == current)
+        check('B6bt missing caller transaction grants no read', call('caller-read',no_transaction=True) == dict(error='pf_local_barrier_owner_transaction_required'))
+        check('B6bt a transaction alone cannot substitute for the origin mutex', call('caller-read',manual_transaction=True) == dict(error='pf_local_barrier_owner_transaction_required'))
+        check('B6bt another origin mutex cannot authorize this read', call('caller-read',other_origin=str(uuid.uuid4())) == dict(error='pf_local_barrier_owner_transaction_required'))
+        check('B6bt caller rejection rolls back its proof-related metadata', call('caller-read',probe=True,reject_apply=True) == dict(error='pf_fixture_apply_refused')
+              and sql('SELECT COUNT(*) FROM wp_barrier_primary_probe') == '0')
+        check('B6bt caller commit publishes the callback exactly once without independent commit',
+              call('caller-read',probe=True)['transaction'] == '1' and sql('SELECT COUNT(*) FROM wp_barrier_primary_probe') == '1')
+        sql('DELETE FROM wp_barrier_primary_probe')
         check('B6br failed local callback rolls back its metadata', call('read', probe=True, reject_apply=True) == dict(error='pf_fixture_apply_refused')
               and sql('SELECT COUNT(*) FROM wp_barrier_primary_probe') == '0')
         check('B6br nested callback refuses a second transaction', call('read', probe=True, nested=True) == dict(error='nested_transaction_refused')
