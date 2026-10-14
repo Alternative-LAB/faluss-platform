@@ -8,6 +8,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Modifié
 
+- Réduire les coûts du stockage de la recette WordPress/MariaDB `corpus-joined` sur runner GitHub hébergé avec un montage temporaire en mémoire plafonné à 1 Gio ; scénarios, chemins privés et réglages transactionnels inchangés, aucun effet sur la production.
 - Accélérer la CI WordPress : Identity et administration Fans séparés, cinq recettes PF terminales parallèles et vérification des 1 413 assertions historiques ; outils épinglés et bytecode CLI partagés avec revalidation immédiate, budgets de temps et annulation des workflows obsolètes de PR. Aucun scénario applicatif ou état de production modifié.
 - Instructions IA en anglais : point d’entrée court, règles modulaires dans `.agents/rules/`, deux skills chargés à la demande et adaptateurs Codex/Claude sans duplication ; workflow exclusivement GitHub.
 - Gouvernance liée à une issue ouverte et préparation de release avec recherche paginée, mapping des labels, reprise contrôlée et tests de non-duplication ; commits anglais acceptant emojis Unicode et codes `:gitmoji:`, titres de PR en anglais et descriptions en français. Les deux formats sont interprétés automatiquement par le générateur de releases.

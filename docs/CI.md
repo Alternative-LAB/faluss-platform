@@ -34,6 +34,10 @@ L’action locale [wordpress-runtime](../.github/actions/wordpress-runtime/actio
 
 Les cinq variantes PF peuvent tourner simultanément (`max-parallel: 5`). Leur budget est de 30 minutes ; Identity et l’administration Fans ont un budget de 10 minutes. Une expiration reste un échec, pas un résultat accepté. `fail-fast: false` permet aux autres variantes de produire leurs diagnostics.
 
+Dans le seul groupe `corpus-joined` sur runner GitHub hébergé, le workflow monte un `tmpfs` plafonné à **1 Gio** sur `/var/tmp`, avant la création des fixtures. Les mêmes WordPress, fichiers privés et bases MariaDB utilisent ainsi un stockage en mémoire ; les chemins d’enclave, répertoires privés `0700` et fichiers `0600` restent identiques. Le montage ne modifie pas les données sous-jacentes et disparaît avec le runner jetable. Il ne s’applique pas aux autres groupes ni aux runners auto-hébergés : les recettes d’administration Fans conservent plusieurs fixtures et nécessitent le stockage disque. Le temps réel et CPU de chaque recette PF apparaît dans ses logs grâce à `time`. Les outils téléchargés, le checkout et les rapports restent hors de ce montage.
+
+Aucun réglage SQL de journalisation ou de synchronisation n’est assoupli. Les tests d’arrêt de workers, de perte de réponse, de rollback et de concurrence restent exécutés contre le serveur MariaDB réel. Ces recettes ne testent pas la survie à une panne du système ou du stockage ; le montage en mémoire n’apporte pas cette preuve. Une erreur de montage ou le dépassement du plafond fait échouer le job. Pour revenir au stockage disque, retirer l’étape `Keep disposable fixtures on bounded memory storage` par une PR validée.
+
 Les rapports sont conservés sept jours dans des artefacts `wordpress-evidence-*`. Lorsqu’une même PR reçoit un nouveau commit, l’ancien workflow PHP est annulé par concurrence ; les exécutions de `main` restent sérialisées et ne sont pas annulées. Les protections distantes ne sont pas modifiées ; ajouter `WordPress integration tests` aux statuts requis lors d’une évolution autorisée de la protection.
 
 Vérification locale rapide :

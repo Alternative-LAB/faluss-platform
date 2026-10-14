@@ -22,6 +22,10 @@ Le chemin critique suit la recette la plus longue, avec un objectif de 15–20 m
 
 Le changement est réversible par une PR et ne touche pas la production. La procédure, les groupes et le contrat de couverture sont documentés dans [CI.md](../CI.md).
 
+## Complément — stockage des fixtures (#215)
+
+Tester un montage `tmpfs` de 1 Gio sur `/var/tmp` dans le seul job `corpus-joined` sur runner GitHub hébergé pour réduire les coûts de synchronisation et de lecture des fixtures. Les scripts, chemins d’enclave, permissions et paramètres transactionnels restent identiques. Les recettes prouvent la reprise après arrêt des workers PHP et les transactions du serveur actif, pas la persistance après une panne du système ou du stockage. Les autres groupes conservent leur stockage disque, notamment l’administration Fans dont les fixtures successives occupent plus de 1 Gio. La conservation du montage dépend d’un gain mesuré en CI avec les 1 413 assertions de référence.
+
 ## Alternatives
 
 - Ne paralléliser que les 21 invocations PF conserve presque toutes les répétitions et augmente le coût des runners.
