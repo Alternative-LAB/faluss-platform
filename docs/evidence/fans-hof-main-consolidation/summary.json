@@ -1,0 +1,31 @@
+{
+  "commit": "28a81499fd79c10af256ac35fd544597407273b0",
+  "tree": "9bcb2e4241d58ec90a42f6d75c3e420f4d671a95",
+  "quality": "passed",
+  "recipes": [
+    {
+      "recipe": "barriers",
+      "state": "passed",
+      "total": 455,
+      "failed": 0,
+      "fixture_removed": true,
+      "report_sha256": "5cf1bba353a4c5b86b75f7fab147fe5120afb995641f0bc7a04c0203e60b5ccf"
+    },
+    {
+      "recipe": "joined",
+      "state": "passed",
+      "total": 727,
+      "failed": 0,
+      "fixture_removed": true,
+      "report_sha256": "3f7b4e458d5df4697f9e1b1e9a0094e6589b21b21c3b5297fc6068875a02cab5"
+    }
+  ],
+  "source_root": "/var/tmp/fans-hof-exact-g4uul4jx",
+  "not_proven": [
+    "real SSO or sites",
+    "production sizing",
+    "B6 full delivery or UI",
+    "RustFS private Fans compatibility",
+    "release or activation"
+  ]
+}

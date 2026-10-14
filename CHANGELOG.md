@@ -8,6 +8,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Filiation serveur B6 entre Faluss ID attesté, membre WordPress lié et profil Créateur local : lectures primaires verrouillées, consentement et noms approuvés recontrôlés sans mapping navigateur ni COMMIT implicite. Recette WordPress/MariaDB avec cache périmé et retrait concurrent ; aucun contrat Hub, route, schéma ou score public ajouté.
+
 - Recette de jonction fermée : acquittement réel des barrières par HTTP signé et lecture atomique du corpus/cache sur les mêmes instances jetables ; 727 contrôles réussis, dont achat fictif sans score et correction attestée sans seconde consommation. Aucun nouveau contrat ou score public.
 
 - Origine HoF fermée : ouverture locale enregistrée seulement sur acquittement primaire Hub actuel, intervalle d'admission figé et reprise de la même action après COMMIT incertain ; aucun achat, score public ou schéma installé sur site.

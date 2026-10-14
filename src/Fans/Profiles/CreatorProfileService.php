@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Faluss\Platform\Fans\Profiles;
 
 use Faluss\Platform\Fans\Sso\FansSsoService;
+use Faluss\Platform\Fans\Sso\FansLinkedAccounts;
 
 final class CreatorProfileService
 {
@@ -178,7 +179,20 @@ final class CreatorProfileService
         global $wpdb;
         $id = $wpdb->get_var($wpdb->prepare('SELECT wp_user_id FROM ' . self::quote(CreatorProfileSchema::table())
             . ' WHERE creator_id=%s AND status=%s LIMIT 1' . ($lock ? ' FOR UPDATE' : ''), $creatorId, 'active'));
-        return is_numeric($id) && (int) $id > 0 && FansSsoService::linkedMember((int) $id) ? (int) $id : null;
+        $linked = is_numeric($id) && (int) $id > 0 && ($lock
+            ? FansLinkedAccounts::identityInTransaction((int) $id) !== null
+            : FansSsoService::linkedMember((int) $id));
+        return $wpdb->last_error === '' && $linked ? (int) $id : null;
+    }
+
+    /** Private owner-to-profile binding; caller owns the primary transaction, no editorial approval implied. */
+    public static function activeIdForOwnerInTransaction(int $owner): ?string
+    {
+        if (FansLinkedAccounts::identityInTransaction($owner) === null || !CreatorProfileSchema::ready()) { return null; }
+        global $wpdb;
+        $id = $wpdb->get_var($wpdb->prepare('SELECT creator_id FROM %i WHERE wp_user_id=%d AND status=%s LIMIT 1 FOR UPDATE',
+            CreatorProfileSchema::table(), $owner, 'active'));
+        return $wpdb->last_error === '' && self::validId($id) ? $id : null;
     }
 
     /** @return array{creator_id:string,category:string,status:string,identity_verified:false,created_at:string,updated_at:string}|null */
