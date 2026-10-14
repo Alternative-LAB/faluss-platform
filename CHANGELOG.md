@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Modifié
+
+- Accélérer la CI WordPress : Identity et administration Fans séparés, cinq recettes PF terminales parallèles et vérification des 1 413 assertions historiques ; outils épinglés partagés, budgets de temps et annulation des workflows obsolètes de PR. Aucun scénario applicatif ou état de production modifié.
+
 ### Corrigé
 
 - Accepter les emojis Unicode et les codes `:gitmoji:` dans le contrôle de gouvernance des commits, avec tests de non-régression. Livrer cette transition depuis la base de confiance avant la PR #205.
