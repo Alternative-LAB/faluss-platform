@@ -57,7 +57,7 @@ Configurer une règle de protection ou un ruleset ciblant exactement `main` :
    commit de la PR par GitHub Actions, ainsi que tous les contrôles applicables sur le commit à fusionner,
    notamment `Lint, static analysis and tests`, `Federation without native Sodium`,
    `Check JavaScript syntax`, `Fans editorial isolated SQL`,
-   `Identity admin-post real WordPress` et `Validate WordPress archive`. Sélectionner GitHub
+   `Identity admin-post real WordPress`, `WordPress integration tests` et `Validate WordPress archive`. Sélectionner GitHub
    Actions comme source attendue de chaque statut, jamais « n'importe quelle
    source ». Exiger une branche à jour avant fusion si la règle GitHub le permet.
 3. Interdire les poussées forcées, la suppression de `main` et tout acteur de
@@ -89,3 +89,10 @@ Revenir aux instructions ou à l’automatisation précédentes par une nouvelle
 validée. Ces changements ne modifient pas les données, les modules ni la
 configuration de production. Après toute mise à jour du mapping de labels,
 vérifier à nouveau les permissions et les labels distants avant une release.
+
+## Organisation de la CI
+
+Les recettes WordPress indépendantes tournent en parallèle ; le contrôle
+`WordPress integration tests` exige toutes les suites et la conservation des
+assertions de référence. Voir [CI.md](CI.md) pour les groupes, limites de temps,
+artefacts, annulation des workflows obsolètes et procédure de retour arrière.

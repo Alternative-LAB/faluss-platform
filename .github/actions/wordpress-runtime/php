@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# HTTP fixtures retain their original PHP configuration.
+for argument in "$@"; do
+  if [[ "$argument" == '-S' ]]; then
+    exec "${FALUSS_CI_PHP_BINARY:?}" "$@"
+  fi
+done
+
+blacklist="${FALUSS_CI_PHP_CACHE:?}/blacklist"
+for argument in "$@"; do
+  if [[ "$argument" == --path=* ]]; then
+    config="${argument#--path=}/wp-config.php"
+    digest="$(printf '%s' "$config" | sha256sum)"
+    blacklist="$FALUSS_CI_PHP_CACHE/config-${digest%% *}"
+    if [[ ! -f "$blacklist" ]]; then
+      printf '%s\n' "$config" > "$blacklist.$$"
+      mv "$blacklist.$$" "$blacklist"
+    fi
+  fi
+done
+
+# Cache code only; never reuse a previous request's state or stale scripts.
+exec "${FALUSS_CI_PHP_BINARY:?}" \
+  -d opcache.enable_cli=1 \
+  -d "opcache.file_cache=$FALUSS_CI_PHP_CACHE" \
+  -d opcache.file_cache_only=1 \
+  -d opcache.validate_timestamps=1 \
+  -d opcache.revalidate_freq=0 \
+  -d "opcache.blacklist_filename=$blacklist" \
+  "$@"
