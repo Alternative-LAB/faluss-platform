@@ -42,12 +42,14 @@ Quand une petite PR dépend d’une autre PR non fusionnée, créer la branche s
 
 ## Commits
 
-Les sujets de commits utilisent un gitmoji suivi d’un message impératif en anglais :
+Les sujets de commits acceptent un gitmoji Unicode ou un code `:gitmoji:`,
+suivi d’un message impératif en anglais :
 
 ```text
 ✨ Add module registry
 🐛 Prevent duplicate route registration
 📝 Document the module lifecycle
+:memo: Document the module lifecycle
 ```
 
 La description facultative du commit est également rédigée en anglais.

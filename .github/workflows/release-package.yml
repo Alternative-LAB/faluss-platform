@@ -22,6 +22,8 @@ jobs:
           tools: composer:v2
       - name: Install production dependencies
         run: composer install --no-dev --prefer-dist --no-interaction --no-progress --classmap-authoritative
+      - name: Workflow regression tests
+        run: python3 -m unittest discover -s tests/Workflow -p 'test_*.py'
       - name: Archive validator tests
         run: python3 -m unittest discover -s tests/Release -p 'test_*.py'
       - name: Build and validate archive
