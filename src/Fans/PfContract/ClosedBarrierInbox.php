@@ -79,6 +79,9 @@ final class ClosedBarrierInbox
     public function recover(string $action): array
     { ModelValues::uuid($action); return $this->write(fn (): array => $this->progress($this->required($action))); }
 
+    /** Composition binds the very same primary connection, never a second concurrent transaction. */
+    public function usesConnection(\wpdb $db): bool { return $this->db === $db; }
+
     /** Apply trusted local governance under the same origin lock and transaction as the current proof.
      * No HTTP or nested transaction is allowed in the callback; no operation key or wire escapes this facade.
      * @template T

@@ -8,6 +8,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Relecture primaire fermée des barrières avant livraison B6 : lookup approuvé sur l'action/clé d'origine, challenge durable et reprise sans réenregistrement ; état indisponible pendant l'incertitude, fermeture locale prioritaire et callback transactionnel. Schéma séparé explicitement jetable, aucun contrat Hub nouveau ni activation.
+
 - Filiation serveur B6 entre Faluss ID attesté, membre WordPress lié et profil Créateur local : lectures primaires verrouillées, consentement et noms approuvés recontrôlés sans mapping navigateur ni COMMIT implicite. Recette WordPress/MariaDB avec cache périmé et retrait concurrent ; aucun contrat Hub, route, schéma ou score public ajouté.
 
 - Recette de jonction fermée : acquittement réel des barrières par HTTP signé et lecture atomique du corpus/cache sur les mêmes instances jetables ; 727 contrôles réussis, dont achat fictif sans score et correction attestée sans seconde consommation. Aucun nouveau contrat ou score public.
