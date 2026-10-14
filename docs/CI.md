@@ -47,4 +47,6 @@ En cas de régression, revenir à l’organisation précédente par une PR valid
 
 ## Mesure avant cache CLI
 
-La [première exécution parallèle 38559059477](https://github.com/Alternative-LAB/faluss-platform/actions/runs/38559059477) a réussi en **29 min 56 s**, contre 98 min 42 s pour la référence. Identity termine en 39 secondes et les 1 413 assertions sont conservées indépendamment. Le corpus reste le chemin critique (29 min 35 s). Le cache de bytecode CLI vise ce coût de démarrages répétés ; sa mesure complète est à confirmer avant livraison.
+La [première exécution parallèle 38559059477](https://github.com/Alternative-LAB/faluss-platform/actions/runs/38559059477) a réussi en **29 min 56 s**, contre 98 min 42 s pour la référence. Identity termine en 39 secondes et les 1 413 assertions sont conservées indépendamment. Le corpus reste le chemin critique (29 min 35 s). Le cache de bytecode CLI vise ce coût de démarrages répétés.
+
+La [seconde exécution 38566759801](https://github.com/Alternative-LAB/faluss-platform/actions/runs/38566759801), avec cache CLI, a réussi en **17 min 56 s**, dont **17 min 34 s** pour le corpus. Les 1 413 assertions sont encore présentes dans les neuf nouveaux rapports ; le nombre d’exécutions est toujours 2 496. Cette mesure respecte l’objectif initial sans modifier les scripts applicatifs ni les scénarios.
