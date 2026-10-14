@@ -147,7 +147,11 @@ final class ClosedProtocolGuardTest extends TestCase
             static fn () => \Faluss\Platform\Fans\PfContract\ClosedRankedProtocolSchema::installForRecipe($database),
             static fn () => new \Faluss\Platform\Fans\PfContract\ClosedRankedProtocolStore($database),
             static fn () => new \Faluss\Platform\Fans\PfContract\ClosedCorpusInbox($database,
-                new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',['pf.ranking.corpus'],[]),'','')] as $operation) {
+                new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',['pf.ranking.corpus'],[]),'',''),
+            static fn () => new \Faluss\Platform\Fans\Hof\ClosedRankingDelivery($database,
+                (new \ReflectionClass(\Faluss\Platform\Fans\Hof\ClosedOriginOpening::class))->newInstanceWithoutConstructor(),
+                (new \ReflectionClass(\Faluss\Platform\Fans\PfContract\ClosedBarrierPrimaryRead::class))->newInstanceWithoutConstructor(),
+                (new \ReflectionClass(\Faluss\Platform\Fans\Hof\ClosedRankingProjectionStore::class))->newInstanceWithoutConstructor())] as $operation) {
             try { $operation(); self::fail('Copied settings cannot stage private global facts.'); }
             catch (ModelViolation $error) { self::assertSame('isolated_h3_recipe_required',$error->reason); }
         }

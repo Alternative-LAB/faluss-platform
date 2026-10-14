@@ -7,7 +7,7 @@ import time
 import uuid
 
 
-def run_checks(root,source,cli_path,check,command,fixture,hub_sql,hub):
+def run_checks(root,source,cli_path,check,command,fixture,hub_sql,hub,delivery_enabled=False):
     # The prefix's direct owner registration has a different durable key/context; it cannot be adopted.
     origin=str(uuid.uuid4());sql=fixture['fan_sql']
     endpoint=(root/'corpus-endpoint').read_text().replace('/corpus','/barrier')
@@ -17,6 +17,13 @@ def run_checks(root,source,cli_path,check,command,fixture,hub_sql,hub):
         node=root/'wordpress' if role=='hub' else fixture['fans']
         return json.loads(command(['php',cli_path,'--allow-root','--path='+str(node),'eval-file',
             str(source/'tests/TokenEngine/recipe/b6-joined-worker.php'),str(path),'--use-include']))
+    def deliver(action,**extra):
+        path=root/(uuid.uuid4().hex+'.json')
+        fixture['set_clock']()
+        clock=(root/'corpus-primary-clock').read_text().strip()
+        path.write_text(json.dumps(dict(action=action,origin=origin,endpoint=endpoint,at=clock,**extra)));path.chmod(0o600)
+        return json.loads(command(['php',cli_path,'--allow-root','--path='+str(fixture['fans']),'eval-file',
+            str(source/'tests/TokenEngine/recipe/b6-delivery-worker.php'),str(path),'--use-include']))
     ledger=hub_sql('SELECT * FROM wp_token_engine_pf_ledger ORDER BY id')
     historical=hub_sql('SELECT * FROM wp_token_engine_ledger ORDER BY id')
     policies={}
@@ -29,7 +36,8 @@ def run_checks(root,source,cli_path,check,command,fixture,hub_sql,hub):
     marker=root/'b6-joined-enabled';marker.write_text('fixture-only');marker.chmod(0o600)
     descriptor=invoke('fans','describe')
     fields=dict(operation='register',action_id=str(uuid.uuid4()),origin_id=origin,policy_version='1.0.0',lookup_operation='',object=descriptor)
-    prepared=invoke('fans','prepare',fields=fields)
+    prepared=deliver('prepare-origin',descriptor=descriptor) if delivery_enabled else invoke('fans','prepare',fields=fields)
+    if delivery_enabled:fields=prepared['fields']
     if 'error' in prepared:
         raise RuntimeError('B6join private preparation refused: '+str(prepared['error']))
     check('B6join the complete immutable action is persisted before any HTTP',
@@ -46,6 +54,12 @@ def run_checks(root,source,cli_path,check,command,fixture,hub_sql,hub):
     ack=invoke('fans','ack',action_id=prepared['action_id'])
     check('B6join attested descriptor and corpus origin are identical',
         ack['fields']['object']==descriptor and ack['result']['state']=='active')
+    if delivery_enabled:
+        applied=deliver('apply-origin',action_id=fields['action_id'])
+        check('B6dl actual local origin opens only from the real signed primary ACK',applied.get('state')=='open')
+        check('B6dl historical origin ACK alone never delivers current rankings','error' in deliver('ranking',family='creator'))
+        deliver('prepare-read',action_id=fields['action_id'])
+        assert deliver('advance-read',action_id=fields['action_id'])['phase']=='current'
     read=str(uuid.uuid4());fixture['set_clock']()
     collected=fixture['inbox']('advance',origin,read_id=read,steps=4)
     for delay in (1,2):
@@ -65,6 +79,8 @@ def run_checks(root,source,cli_path,check,command,fixture,hub_sql,hub):
     fixture['inbox']('cache-rebuild',origin);pack_only=fixture['inbox']('cache-read',origin)['document']
     check('B6join an admitted pack alone creates no Fan or Creator point',
         pack_only['general']['fans']==[] and pack_only['general']['creators']==[])
+    if delivery_enabled:
+        check('B6dl complete pack-only corpus delivers real empty rankings',deliver('ranking',family='creator')['items']==[] and deliver('ranking',family='fan')['items']==[])
     intent=copy.deepcopy(fixture['intent']);intent.update(attribution_id=str(uuid.uuid4()),
         member_faluss_id=purchase['member_faluss_id'],purchased_pf='3')
     intent['ranking_context'].update(origin_id=origin,sessions=[])
@@ -84,10 +100,35 @@ def run_checks(root,source,cli_path,check,command,fixture,hub_sql,hub):
         sum(int(x['points']) for x in value['general']['fans'])==3
         and sum(int(x['points']) for x in value['general']['creators'])==3
         and int(hub_sql('SELECT COUNT(*) FROM wp_token_engine_pf_b3r_receipts'))==receipt_count+1)
+    if delivery_enabled:
+        actors=deliver('seed',member_faluss_id=intent['member_faluss_id'],creator_faluss_id=intent['creator_faluss_id'],category=intent['ranking_context']['creator_category'])
+        check('B6dl creator profile UUID differs from the attested Identity UUID',actors['creator_profile']!=intent['creator_faluss_id'])
+        month=next(iter(value['months']))
+        check('B6dl actual current creator and fan delivery uses approved identities',
+            deliver('ranking',family='creator')['items']==[dict(name='Atelier de recette B6',points='3',position='1')]
+            and deliver('ranking',family='fan')['items']==[dict(name='Fan de recette B6',points='3',position='1')])
+        check('B6dl historical category projection stays tied to the attested context',
+            deliver('ranking',family='creator',category=intent['ranking_context']['creator_category'])['items'][0]['points']=='3')
+        check('B6dl private statement is the current linked member only',
+            deliver('statement',actor=actors['fan_user'],family='fan',month=month)['points']=='3'
+            and deliver('statement',actor=actors['creator_user'],family='fan',month=month)['points']=='0'
+            and deliver('statement',actor=actors['creator_user'],family='creator',month=month)['points']=='3')
+        check('B6dl guest cannot read a private statement',deliver('statement',family='fan',month=month)==dict(error='hof_linked_member_required'))
+        deliver('consent',actor=actors['fan_user'],family='fan',enabled=False)
+        check('B6dl withdrawal suppresses public identity without erasing the private statement',
+            deliver('ranking',family='fan')['items']==[] and deliver('statement',actor=actors['fan_user'],family='fan',month=month)['points']=='3')
+        deliver('suspend',creator_profile=actors['creator_profile'],status='suspended')
+        check('B6dl suspension hides creator but preserves corrected private history',
+            deliver('ranking',family='creator')['items']==[] and deliver('statement',actor=actors['creator_user'],family='creator',month=month)['points']=='3')
+        deliver('suspend',creator_profile=actors['creator_profile'],status='active')
+        check('B6dl readmission rechecks the approved presentation',deliver('ranking',family='creator')['items'][0]['points']=='3')
     correction=dict(purchase,source_revision='2',evidence_id=str(uuid.uuid4()),state='partially_cancelled',cancelled_purchased_pf_cumulative='1')
     plan=hub('h4-begin',payload=correction,key=secrets.token_hex(32))
     check('B6join an incomplete owner correction suppresses the complete old cache',
         fixture['inbox']('refresh',origin,read_id=read,steps=1)['state']=='unavailable')
+    if delivery_enabled:
+        check('B6dl incomplete authoritative correction closes public and private delivery',
+            'error' in deliver('ranking',family='creator') and 'error' in deliver('statement',actor=actors['fan_user'],family='fan',month=month))
     for fragment in range(int(plan['next_fragment'])+1,int(plan['fragment_count'])+1):
         hub('h4-resume',member=purchase['member_faluss_id'],plan_id=plan['plan_id'],fragment=str(fragment))
     read=str(uuid.uuid4());assert fixture['inbox']('advance',origin,read_id=read,steps=4)['state']=='verified'
@@ -96,6 +137,13 @@ def run_checks(root,source,cli_path,check,command,fixture,hub_sql,hub):
         sum(int(x['points']) for x in value['general']['fans'])==2
         and sum(int(x['points']) for x in value['general']['creators'])==2
         and int(hub_sql('SELECT COUNT(*) FROM wp_token_engine_pf_b3r_receipts'))==receipt_count+1)
+    if delivery_enabled:
+        check('B6dl latest correction reaches current delivery without restoring withdrawn identity',
+            deliver('ranking',family='creator')['items'][0]['points']=='2' and deliver('ranking',family='fan')['items']==[]
+            and deliver('statement',actor=actors['fan_user'],family='fan',month=month)['points']=='2')
+        deliver('prepare-read',action_id=fields['action_id'])
+        check('B6dl primary recheck uncertainty closes the entire delivery','error' in deliver('ranking',family='creator'))
+        assert deliver('advance-read',action_id=fields['action_id'])['phase']=='current'
     ledger=hub_sql('SELECT * FROM wp_token_engine_pf_ledger ORDER BY id')
     sql('CREATE TABLE wp_b6_joined_probe (id INT NOT NULL PRIMARY KEY) ENGINE=InnoDB')
     before=fixture['inbox']('cache-read',origin)
@@ -117,10 +165,12 @@ def run_checks(root,source,cli_path,check,command,fixture,hub_sql,hub):
     closing=invoke('fans','prepare',fields=close)
     check('B6join local closing suppresses composed delivery before network acknowledgement',
         'error' in invoke('fans','compose',action_id=prepared['action_id']) and sql('SELECT COUNT(*) FROM wp_b6_joined_probe')=='0')
+    if delivery_enabled:check('B6dl local closing suppresses the real delivery before acknowledgement','error' in deliver('ranking',family='creator'))
     check('B6join the same signed close reaches its primary attested state',
         invoke('fans','advance',action_id=closing['action_id'])['state']=='acknowledged')
     check('B6join closed origin cannot deliver an old cache or old register ACK',
         'error' in invoke('fans','compose',action_id=prepared['action_id']) and sql('SELECT COUNT(*) FROM wp_b6_joined_probe')=='0')
+    if delivery_enabled:check('B6dl closed origin never restores an old signed ranking','error' in deliver('ranking',family='creator'))
     check('B6join actual composition preserves both ledgers without a Fans ledger',
         hub_sql('SELECT * FROM wp_token_engine_pf_ledger ORDER BY id')==ledger
         and hub_sql('SELECT * FROM wp_token_engine_ledger ORDER BY id')==historical

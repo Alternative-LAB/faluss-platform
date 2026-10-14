@@ -12,6 +12,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Première livraison B6 fermée des classements et relevés privés depuis l'origine primaire, le corpus/cache complet corrigé et les identités/consentements courants : transaction commune sans donnée fictive fournie à l'API, uniquement sur instances jetables ; sessions/UI et activation restent distinctes.
+
 - Composition de plusieurs barrières actuelles dans la transaction d'origine déjà détenue : mutex et connexion primaires vérifiés, rollback/commit communs, aucun BEGIN imbriqué ou nouvelle preuve implicite ; périmètre B6 fermé sans contrat Hub ajouté.
 
 - Mutex de gouvernance B6 sans BEGIN pour composer sessions, origine et corpus sous leur transaction propriétaire : ordre conservé, callback incomplet rollbacké et libération vérifiée ; aucun droit, contrat Hub, table ou activation ajouté.
