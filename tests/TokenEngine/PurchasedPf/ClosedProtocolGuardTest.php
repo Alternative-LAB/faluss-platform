@@ -37,6 +37,14 @@ final class ClosedProtocolGuardTest extends TestCase
             static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedRankingCorpusSource($database,[],'recipe-key'),
             static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedRankingCorpusStore($database,[],'recipe-key'),
             static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedCorpusAdmission($database),
+            static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedBarrierAdmission($database),
+            static fn () => \Faluss\Platform\Fans\PfContract\ClosedBarrierInboxSchema::installForRecipe($database),
+            static fn () => new \Faluss\Platform\Fans\PfContract\ClosedBarrierInbox($database,
+                new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',[],[]),'',''),
+            static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedBarrierGateway($database,
+                new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.fans','fixture.hub',[],[]),'recipe-key'),
+            static fn () => \Faluss\Platform\TokenEngine\PurchasedPf\ClosedBarrierTransportSchema::installForRecipe($database),
+            static fn () => \Faluss\Platform\TokenEngine\PurchasedPf\ClosedBarrierTransportSchema::ready($database),
             static fn () => \Faluss\Platform\TokenEngine\PurchasedPf\ClosedCorpusTransportSchema::installForRecipe($database),
             static fn () => \Faluss\Platform\TokenEngine\PurchasedPf\ClosedCorpusTransportSchema::ready($database),
             static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedCorpusGateway($database,
@@ -45,6 +53,10 @@ final class ClosedProtocolGuardTest extends TestCase
                 new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',['pf.ranking.corpus'],[]),'recipe-key','','',''),
             static fn () => \Faluss\Platform\Fans\PfContract\ClosedCorpusInboxSchema::installForRecipe($database),
             static fn () => \Faluss\Platform\Fans\PfContract\ClosedCorpusInboxSchema::ready($database),
+            static fn () => \Faluss\Platform\Fans\Hof\ClosedOriginOpeningSchema::ready($database),
+            static fn () => \Faluss\Platform\Fans\Hof\ClosedOriginOpeningSchema::installForRecipe($database),
+            static fn () => \Faluss\Platform\Fans\Hof\ClosedSessionLifecycleSchema::ready($database),
+            static fn () => \Faluss\Platform\Fans\Hof\ClosedSessionLifecycleSchema::installForRecipe($database),
             static fn () => new \Faluss\Platform\Fans\PfContract\ClosedCorpusInbox($database,
                 new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',['pf.ranking.corpus'],[]),'',''),
             static fn () => \Faluss\Platform\TokenEngine\PurchasedPf\ClosedRankingCorpusSchema::installForRecipe($database),
@@ -82,6 +94,18 @@ final class ClosedProtocolGuardTest extends TestCase
             static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedRankingCorpusSource($database,[],'recipe-key'),
             static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedRankingCorpusStore($database,[],'recipe-key'),
             static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedCorpusAdmission($database),
+            static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedBarrierAdmission($database),
+            static fn () => \Faluss\Platform\Fans\PfContract\ClosedBarrierInboxSchema::installForRecipe($database),
+            static fn () => \Faluss\Platform\Fans\Hof\ClosedOriginOpeningSchema::ready($database),
+            static fn () => \Faluss\Platform\Fans\Hof\ClosedOriginOpeningSchema::installForRecipe($database),
+            static fn () => \Faluss\Platform\Fans\Hof\ClosedSessionLifecycleSchema::ready($database),
+            static fn () => \Faluss\Platform\Fans\Hof\ClosedSessionLifecycleSchema::installForRecipe($database),
+            static fn () => new \Faluss\Platform\Fans\PfContract\ClosedBarrierInbox($database,
+                new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',[],[]),'',''),
+            static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedBarrierGateway($database,
+                new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.fans','fixture.hub',[],[]),'recipe-key'),
+            static fn () => \Faluss\Platform\TokenEngine\PurchasedPf\ClosedBarrierTransportSchema::installForRecipe($database),
+            static fn () => \Faluss\Platform\TokenEngine\PurchasedPf\ClosedBarrierTransportSchema::ready($database),
             static fn () => \Faluss\Platform\TokenEngine\PurchasedPf\ClosedCorpusTransportSchema::installForRecipe($database),
             static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedCorpusGateway($database,
                 new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.fans','fixture.hub',['pf.ranking.corpus'],[]),'recipe-key'),
@@ -108,6 +132,9 @@ final class ClosedProtocolGuardTest extends TestCase
             'FALUSS_PF_H3_LEASE_SHA256' => str_repeat('a',64),'ABSPATH' => __DIR__ . '/','DB_HOST' => 'localhost','WP_CLI' => true] as $key => $value) { define($key,$value); }
         $database = new \wpdb(); $GLOBALS['wpdb'] = $database;
         foreach ([static fn () => \Faluss\Platform\Fans\PfContract\ClosedCorpusInboxSchema::installForRecipe($database),
+            static fn () => \Faluss\Platform\Fans\PfContract\ClosedBarrierInboxSchema::installForRecipe($database),
+            static fn () => new \Faluss\Platform\Fans\PfContract\ClosedBarrierInbox($database,
+                new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',[],[]),'',''),
             static fn () => \Faluss\Platform\Fans\PfContract\ClosedRankedProtocolSchema::installForRecipe($database),
             static fn () => new \Faluss\Platform\Fans\PfContract\ClosedRankedProtocolStore($database),
             static fn () => new \Faluss\Platform\Fans\PfContract\ClosedCorpusInbox($database,
@@ -115,6 +142,18 @@ final class ClosedProtocolGuardTest extends TestCase
             try { $operation(); self::fail('Copied settings cannot stage private global facts.'); }
             catch (ModelViolation $error) { self::assertSame('isolated_h3_recipe_required',$error->reason); }
         }
+        self::assertSame(0,$database->queries);
+    }
+
+    public function testBarrierClientCannotBypassThePhysicalGate(): void
+    {
+        eval('namespace { class wpdb { public int $queries=0; } }');
+        $database = new \wpdb();
+        $inbox = (new \ReflectionClass(\Faluss\Platform\Fans\PfContract\ClosedBarrierInbox::class))->newInstanceWithoutConstructor();
+        try {
+            new \Faluss\Platform\Fans\PfContract\ClosedBarrierClient($database,$inbox,'recipe-key','');
+            self::fail('The closed client must refuse an ordinary WordPress before HTTP.');
+        } catch (ModelViolation $error) { self::assertSame('isolated_h3_recipe_required',$error->reason); }
         self::assertSame(0,$database->queries);
     }
 
@@ -134,4 +173,12 @@ final class ClosedProtocolGuardTest extends TestCase
         catch (ModelViolation $error) { self::assertSame('isolated_h3_recipe_required',$error->reason); }
         self::assertSame(0,$database->queries);
     }
+    public function testCopiedBarrierAdapterCannotRegisterAnOrdinaryWordPressRoute(): void
+    {
+        eval('namespace { class wpdb { public int $queries=0; public function get_row($q,$a=null) { $this->queries++; return null; } } function add_action($name,$callback) { $callback(); } function register_rest_route(...$args) { $GLOBALS["recipe_routes"]++; } }');
+        $database = new \wpdb(); $GLOBALS['wpdb'] = $database; $GLOBALS['recipe_routes'] = 0;
+        require dirname(__DIR__) . '/recipe/b3-barrier-http-adapter.php';
+        self::assertSame(0,$database->queries); self::assertSame(0,$GLOBALS['recipe_routes']);
+    }
+
 }
