@@ -1,10 +1,13 @@
 # B6 — relecture primaire explicite, périmètre fermé
 
-**Point de pause du 10 octobre : implémentation en brouillon, fraîcheur non
-validée.** La [recette partielle](../evidence/fans-hof-b6-primary-refresh/README.md)
-a échoué après 599 contrôles achevés ; le prédicat fautif de la promotion de la
-même génération reste à isoler. Les garanties ci-dessous décrivent le contrat
-visé, pas une livraison B6 fonctionnelle attestée.
+**Relecture validée en isolation sur la branche consolidée de #203.** La
+[jonction du 13 octobre](FANS-HOF-B6-JOINED-INTEGRATION.md) au source
+`1391adab21e3e0e0ec8d68be6e026924580c2806` réussit **727 contrôles**, dont
+**28 B6pr**, **18 B6tx** et **18 B6join**. Les échecs de harnais antérieurs
+restent documentés ci-dessous ; ils ne décrivent plus le résultat courant.
+Cette preuve de branche ne démontre ni le `main` consolidé, ni une livraison
+B6 complète, ni le fonctionnement des sites. Les vérifications finales sur
+`main` et le raccordement des identités, permissions et vues restent nécessaires.
 
 ## Contrat et scénarios
 
@@ -46,27 +49,26 @@ Aucun site n'est migré. Retour arrière : garder les checkpoints privés pour
 reprise ; ne pas supprimer de preuve ou rouvrir un cache devenu indisponible.
 
 La recette `--b6-primary-refresh` utilise deux WordPress/MariaDB jetables, HTTP
-loopback et données fictives. Elle rejoue H0–H4, corpus, B4 et B5. Les preuves
-seront consignées après exécution ; aucun rendu UI ou véritable SSO n'est
-revendiqué par ce sous-lot. #150 et #161 restent distinctes, version publiée
-inchangée, aucun score public ou admission de production.
+loopback et données fictives. La recette commune `--b6-joined-integration`
+rejoue H0–H4, corpus, B4 et B5 puis compose les acquittements de barrières
+avec le corpus/cache sur la même origine. Le
+[rapport expurgé](../evidence/fans-hof-b6-joined-integration/wordpress-checks.json)
+confirme `failed=0` et le nettoyage final. Aucun rendu UI, véritable SSO,
+dimensionnement de production ou fraîcheur future n'est revendiqué.
+#150 et #161 restent distinctes ; aucun score public ou admission de production.
 
-Diagnostic du 13 octobre : l'échec initial porte uniquement sur l'horloge SQL figée du harnais ; la correction de recette est en validation. Voir la preuve expurgée liée ci-dessus. Aucun correctif runtime déduit de cet échec.
+## Historique des défauts du harnais, corrigés
 
-La CI des heads `69bf2cc` (#202) et `f93ff15` (#203) démontre ensuite une
-course entre threads de recette : lecture du fichier d'horloge pendant sa
-troncature (`decimal.InvalidOperation`). La publication utilise désormais
-un remplacement atomique d'un fichier 0600 ; le minimum de la relecture
-primaire est appliqué avant cette publication, sans lecture intermédiaire.
-Des tests Python couvrent lecteurs/concurrence, permissions et échec du
-remplacement. Aucun délai du plugin ou contrat réseau n'est modifié. La
-recette WordPress/MariaDB complète reste un gate avant intégration.
+La [recette partielle du 10 octobre](../evidence/fans-hof-b6-primary-refresh/README.md)
+avait échoué après 599 contrôles achevés. Le diagnostic a isolé l'horloge SQL
+figée du harnais, sans défaut runtime démontré. Les heads `69bf2cc` (#202) et
+`f93ff15` (#203) ont ensuite révélé une lecture concurrente du fichier pendant
+sa troncature (`decimal.InvalidOperation`). La publication utilise désormais
+un remplacement atomique privé en 0600.
 
-La reprise au tree `2f728925` passe 670 contrôles mais retrouve l'instant
-inchangé : le générateur de preuve conserve une ancienne copie du dictionnaire
-de fixture et rétablit l'horloge initiale. Ce comportement a été reproduit sans
-modifier Hub. L'objet d'horloge partagé conserve désormais le minimum explicite
-à travers toutes les closures/copies ; les mises à jour concurrentes sont
-sérialisées avant publication atomique. Deux tests supplémentaires reproduisent
-la copie ancienne et vérifient l'absence de recul. Les scénarios B6 complets
-restent à repasser ; aucun succès de jonction n'est déduit de cette itération.
+La reprise au tree `2f728925` passait 670 contrôles mais conservait une ancienne
+copie du dictionnaire d'horloge. `RecipeClock` partage désormais son minimum
+entre les closures et sérialise les publications. **Six tests Python** couvrent
+la concurrence, les permissions, l'échec du remplacement et la copie ancienne.
+La jonction complète citée en tête a ensuite réussi. Aucun délai du plugin,
+contrat réseau ou contrôle CI n'a été réduit pour obtenir ce résultat.

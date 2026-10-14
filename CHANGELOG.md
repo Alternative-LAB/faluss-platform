@@ -28,6 +28,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Documentation
 
+- Actualiser la preuve B6 de relecture primaire : succès de jonction fermé de 727 contrôles, erreurs de harnais conservées comme historique et limites de livraison explicites.
+
 - Consigner la validation F1b R2 : relevé Europe/Paris, classements persistants
   et sessions Créateur distincts, trois portées, plafonds et corrections après
   clôture. Formaliser les places uniques par date d'atteinte corrigée et ordre
