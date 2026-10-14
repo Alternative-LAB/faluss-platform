@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Corrigé
+
+- Accepter les emojis Unicode et les codes `:gitmoji:` dans le contrôle de gouvernance des commits, avec tests de non-régression. Livrer cette transition depuis la base de confiance avant la PR #205.
+
 ### Ajouté
 
 - Mutex de gouvernance B6 sans BEGIN pour composer sessions, origine et corpus sous leur transaction propriétaire : ordre conservé, callback incomplet rollbacké et libération vérifiée ; aucun droit, contrat Hub, table ou activation ajouté.
