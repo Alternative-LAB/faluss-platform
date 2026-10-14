@@ -55,6 +55,28 @@ final class ClosedCorpusInbox
         });
     }
 
+    /** Explicit primary recheck of the same complete generation. No replacement ID/key on uncertainty.
+     * A new response challenge is persisted before HTTP; an older finish cannot satisfy this recheck.
+     * @return array<string,mixed> */
+    public function prepareRefresh(string $readId): array
+    {
+        ModelValues::uuid($readId);
+        return $this->write(function () use ($readId): array {
+            $row = $this->required($readId); $progress = $this->progress($row);
+            if ($progress['phase'] !== 'current') { return $progress; }
+            $current = $this->readCurrent();
+            $stored = $this->row('current','origin_id=%s AND policy_version=%s',[$this->origin,$this->policy]);
+            if ($current === null || $stored === null || $stored['read_id'] !== $readId
+                || CanonicalJson::encode($current['manifest']) !== CanonicalJson::encode($progress['manifest'])) {
+                throw new ModelViolation('pf_local_corpus_checkpoint_moved');
+            }
+            $progress['phase'] = 'finish'; $progress['fence_request_sha256'] = 'pending';
+            $this->query($this->db->prepare("UPDATE %i SET state='refreshing' WHERE origin_id=%s AND policy_version=%s AND read_id=%s",
+                $this->tables['current'],$this->origin,$this->policy,$readId));
+            return $this->save($row,$progress);
+        });
+    }
+
     /** Persist the exact signed request/digest before any HTTP; response binding survives restart.
      * @param array<string,mixed> $fields
      * @param array<string,mixed> $sealed
@@ -80,11 +102,17 @@ final class ClosedCorpusInbox
             DelegatedContext::fresh($payload['issued_at'],$payload['expires_at'],time());
             $hash = hash('sha256',$sealed['wire']); $nonceHash = hash('sha256',$sealed['nonce']);
             $known = $this->row('requests','read_id=%s AND nonce_sha256=%s',[$fields['read_id'],$nonceHash]);
+            if (isset($progress['fence_request_sha256']) && $known !== null) {
+                throw new ModelViolation('pf_local_corpus_checkpoint_moved');
+            }
             if ($known !== null) {
                 if ($known['request_sha256'] !== $hash || $known['wire_json'] !== $sealed['wire']) { throw new ModelViolation('pf_local_corpus_conflict'); }
             } else {
                 $this->insert('requests',['read_id' => $fields['read_id'],'nonce_sha256' => $nonceHash,'request_sha256' => $hash,
                     'fields_json' => CanonicalJson::encode($fields),'wire_json' => $sealed['wire']]);
+            }
+            if (isset($progress['fence_request_sha256'])) {
+                $progress['fence_request_sha256'] = $hash; return $this->save($row,$progress);
             }
             // A lost start response always resumes at primary lookup, never under a replacement key.
             if ($progress['phase'] === 'start') { $progress['phase'] = 'lookup'; return $this->save($row,$progress); }
@@ -112,6 +140,9 @@ final class ClosedCorpusInbox
     {
         return $this->write(function () use ($proof): array {
             $answer = $this->verified($proof,false); $row = $this->required($proof['fields']['read_id']); $progress = $this->progress($row);
+            if (isset($progress['fence_request_sha256']) && $progress['fence_request_sha256'] !== $proof['request_sha256']) {
+                throw new ModelViolation('pf_local_corpus_checkpoint_moved');
+            }
             if ($answer['outcome'] === 'unknown') { throw new ModelViolation('pf_transport_unknown'); }
             if ($answer['outcome'] === 'refused') {
                 if ($progress['phase'] === 'refused') { return $progress; }
@@ -121,8 +152,10 @@ final class ClosedCorpusInbox
                 return $this->save($row,$progress);
             }
             if ($answer['result'] === ['state' => 'absent']) {
-                if ($proof['fields']['operation'] !== 'lookup' || $progress['manifest'] !== null
-                    || !in_array($progress['phase'],['lookup','start'],true)) { throw new ModelViolation('pf_local_corpus_conflict'); }
+                if ($proof['fields']['operation'] !== 'lookup') { throw new ModelViolation('pf_local_corpus_conflict'); }
+                if ($progress['manifest'] !== null || !in_array($progress['phase'],['lookup','start'],true)) {
+                    throw new ModelViolation('pf_local_corpus_checkpoint_moved');
+                }
                 $progress['phase'] = 'start'; return $this->save($row,$progress);
             }
             if ($proof['fields']['operation'] === 'finish') { return $this->finish($row,$progress,$answer['result'],$proof); }
@@ -147,24 +180,70 @@ final class ClosedCorpusInbox
     /** A historical, completely verified generation at its attested instant, not future freshness.
      * @return array{manifest:array<string,mixed>,facts:list<array<string,mixed>>,verified_at:string}|null */
     public function current(): ?array
+    { return $this->withCurrent(static fn (?array $generation): ?array => $generation); }
+
+    /** Trusted Fans composition under the same origin mutex and transaction as corpus promotion.
+     * No HTTP or nested transaction inside this callback; exceptions roll back every composed write.
+     * @template T
+     * @param callable(array{manifest:array<string,mixed>,facts:list<array<string,mixed>>,verified_at:string}|null):T $operation
+     * @return T */
+    public function withCurrent(callable $operation): mixed
+    { return $this->write(fn (): mixed => $operation($this->readCurrent())); }
+
+    /** Trusted composition after the barrier origin mutex, in its caller-owned transaction.
+     * This checks lock ownership, not an acknowledgement: the caller must authenticate its barriers first.
+     * No BEGIN, COMMIT, ROLLBACK or HTTP here; the outer facade owns rollback after any exception.
+     * @template T
+     * @param callable(array{manifest:array<string,mixed>,facts:list<array<string,mixed>>,verified_at:string}|null):T $operation
+     * @return T */
+    public function withCurrentInTransaction(callable $operation): mixed
     {
-        return $this->write(function (): ?array {
-            $row = $this->row('current','origin_id=%s AND policy_version=%s',[$this->origin,$this->policy]);
-            if ($row === null || $row['state'] !== 'current') { return null; }
-            $manifest = CanonicalJson::object($row['manifest_json']);
-            $facts = CanonicalJson::object('{"facts":' . $row['facts_json'] . '}',33554448)['facts'];
-            $proof = CanonicalJson::object($row['proof_json'],8388608);
-            if (!is_array($facts) || !array_is_list($facts) || $row['full_sha256'] !== hash('sha256',$row['facts_json'])
-                || $row['proof_sha256'] !== hash('sha256',$row['proof_json'])) { throw new ModelViolation('pf_corpus_incomplete'); }
-            RankingCorpusDocument::manifest($manifest,$this->origin,$this->policy); RankingCorpusDocument::complete($manifest,$facts);
-            $verified = $this->verified($proof,true);
-            if ($verified['outcome'] !== 'ok' || $verified['result']['state'] !== 'current'
-                || CanonicalJson::encode($verified['result']['manifest']) !== CanonicalJson::encode($manifest)
-                || $row['read_id'] !== $proof['fields']['read_id'] || $row['epoch'] !== $manifest['epoch']
-                || $row['ordering_epoch'] !== $manifest['ordering_epoch'] || $row['revision'] !== $manifest['revision']
-                || $row['verified_at'] !== $verified['result']['verified_at']) { throw new ModelViolation('pf_local_corpus_conflict'); }
-            return ['manifest' => $manifest,'facts' => $facts,'verified_at' => $row['verified_at']];
-        });
+        ClosedEnvironment::assertIsolated($this->db,'fans');
+        $barrier = 'fans_pf_b3b_' . substr(hash('sha256',$this->db->prefix . ':' . $this->origin . ':' . $this->policy),0,40);
+        $lock = $this->corpusLock(); $held = false; $suppressed = $this->db->suppress_errors(true);
+        try {
+            $scope = $this->db->get_row($this->db->prepare(
+                'SELECT @@in_transaction AS active, IS_USED_LOCK(%s)=CONNECTION_ID() AS barrier_owner, IS_USED_LOCK(%s)=CONNECTION_ID() AS corpus_owner',
+                $barrier,$lock),'ARRAY_A');
+            if (self::failed() || $scope === null || (string) $scope['active'] !== '1'
+                || (string) $scope['barrier_owner'] !== '1' || (string) $scope['corpus_owner'] === '1') {
+                throw new ModelViolation('pf_corpus_barrier_transaction_required');
+            }
+            if ((string) $this->db->get_var($this->db->prepare('SELECT GET_LOCK(%s,10)',$lock)) !== '1' || self::failed()) {
+                throw new ModelViolation('pf_local_corpus_busy');
+            }
+            $held = true;
+            if (!ClosedCorpusInboxSchema::ready($this->db)) { throw new ModelViolation('pf_local_corpus_schema'); }
+            $result = $operation($this->readCurrent());
+            if ((string) $this->db->get_var('SELECT @@in_transaction') !== '1' || self::failed()) {
+                throw new ModelViolation('pf_corpus_barrier_transaction_required');
+            }
+            return $result;
+        } finally {
+            $released = !$held || (string) $this->db->get_var($this->db->prepare('SELECT RELEASE_LOCK(%s)',$lock)) === '1';
+            $this->db->suppress_errors($suppressed);
+            if (!$released) { throw new ModelViolation('pf_local_corpus_commit_unknown'); }
+        }
+    }
+
+    /** @return array{manifest:array<string,mixed>,facts:list<array<string,mixed>>,verified_at:string}|null */
+    private function readCurrent(): ?array
+    {
+        $row = $this->row('current','origin_id=%s AND policy_version=%s',[$this->origin,$this->policy]);
+        if ($row === null || $row['state'] !== 'current') { return null; }
+        $manifest = CanonicalJson::object($row['manifest_json']);
+        $facts = CanonicalJson::object('{"facts":' . $row['facts_json'] . '}',33554448)['facts'];
+        $proof = CanonicalJson::object($row['proof_json'],8388608);
+        if (!is_array($facts) || !array_is_list($facts) || $row['full_sha256'] !== hash('sha256',$row['facts_json'])
+            || $row['proof_sha256'] !== hash('sha256',$row['proof_json'])) { throw new ModelViolation('pf_corpus_incomplete'); }
+        RankingCorpusDocument::manifest($manifest,$this->origin,$this->policy); RankingCorpusDocument::complete($manifest,$facts);
+        $verified = $this->verified($proof,true);
+        if ($verified['outcome'] !== 'ok' || $verified['result']['state'] !== 'current'
+            || CanonicalJson::encode($verified['result']['manifest']) !== CanonicalJson::encode($manifest)
+            || $row['read_id'] !== $proof['fields']['read_id'] || $row['epoch'] !== $manifest['epoch']
+            || $row['ordering_epoch'] !== $manifest['ordering_epoch'] || $row['revision'] !== $manifest['revision']
+            || $row['verified_at'] !== $verified['result']['verified_at']) { throw new ModelViolation('pf_local_corpus_conflict'); }
+        return ['manifest' => $manifest,'facts' => $facts,'verified_at' => $row['verified_at']];
     }
 
     /** @param array<string,string> $row
@@ -240,7 +319,14 @@ final class ClosedCorpusInbox
      * @return array<string,mixed> */
     private function progress(array $row): array
     {
-        $value = CanonicalJson::object($row['progress_json']); ModelValues::exactKeys($value,['read_id','origin_id','policy_version','read_key','phase','manifest','next_index','next_cursor']);
+        $value = CanonicalJson::object($row['progress_json']);
+        $keys = ['read_id','origin_id','policy_version','read_key','phase','manifest','next_index','next_cursor'];
+        if (array_key_exists('fence_request_sha256',$value)) {
+            $keys[] = 'fence_request_sha256';
+            if (!in_array($value['phase'] ?? '',['finish','current','refused'],true)) { throw new ModelViolation('pf_local_corpus_conflict'); }
+            if ($value['fence_request_sha256'] !== 'pending') { RankingValues::digest($value['fence_request_sha256']); }
+        }
+        ModelValues::exactKeys($value,$keys);
         if ($row['progress_sha256'] !== hash('sha256',$row['progress_json']) || $value['origin_id'] !== $this->origin || $value['policy_version'] !== $this->policy
             || $row['read_id'] !== $value['read_id'] || $row['origin_id'] !== $this->origin || $row['policy_version'] !== $this->policy
             || $row['phase'] !== $value['phase'] || $row['read_key'] !== $value['read_key']) { throw new ModelViolation('pf_local_corpus_conflict'); }
@@ -276,7 +362,7 @@ final class ClosedCorpusInbox
     private function write(callable $callback): mixed
     {
         ClosedEnvironment::assertIsolated($this->db,'fans'); $held = $started = false; $suppressed = $this->db->suppress_errors(true);
-        $lock = 'fans_pf_b3_corpus_' . substr(hash('sha256',$this->db->prefix . ':' . $this->origin . ':' . $this->policy),0,32);
+        $lock = $this->corpusLock();
         try {
             if ((string) $this->db->get_var('SELECT @@in_transaction') !== '0' || self::failed()) { throw new ModelViolation('nested_transaction_refused'); }
             if ((string) $this->db->get_var($this->db->prepare('SELECT GET_LOCK(%s,10)',$lock)) !== '1' || self::failed()) { throw new ModelViolation('pf_local_corpus_busy'); }
@@ -291,6 +377,9 @@ final class ClosedCorpusInbox
             $this->db->suppress_errors($suppressed); if (!$released) { throw new ModelViolation('pf_local_corpus_commit_unknown'); }
         }
     }
+
+    private function corpusLock(): string
+    { return 'fans_pf_b3_corpus_' . substr(hash('sha256',$this->db->prefix . ':' . $this->origin . ':' . $this->policy),0,32); }
 
     /** @param literal-string $where
      * @param list<string> $values

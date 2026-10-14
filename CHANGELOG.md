@@ -11,7 +11,29 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 - Règles IA centralisées : adaptateurs AGENT/Claude, sélection des modèles, délégation bornée, tests utiles et traçabilité par issue ; procédure GitLab conditionnelle conservant le workflow GitHub actuel.
 - Gouvernance liée à une issue ouverte et préparation de release avec recherche paginée, mapping des labels, reprise contrôlée et tests de non-duplication.
 
+### Ajouté
+
+- Recette de jonction fermée : acquittement réel des barrières par HTTP signé et lecture atomique du corpus/cache sur les mêmes instances jetables ; 727 contrôles réussis, dont achat fictif sans score et correction attestée sans seconde consommation. Aucun nouveau contrat ou score public.
+
+- Origine HoF fermée : ouverture locale enregistrée seulement sur acquittement primaire Hub actuel, intervalle d'admission figé et reprise de la même action après COMMIT incertain ; aucun achat, score public ou schéma installé sur site.
+- Pont fermé entre gouvernance des sessions Fans et acquittements primaires Hub : actions immuables, décisions et journal atomiques, annulation/suspension distinctes de la fin attestée ; uniquement en recette jetable, sans route ou ouverture économique.
+
+- Façade privée d'acquittement de barrière : preuve signée et confiance actuelle vérifiées sous la transaction de l'application locale, sans exposer la clé de reprise ni ouvrir le cycle de vie sur site.
+
+- Reprise Fans fermée 1.1 : version persistée avant HTTP avec l'action/clé, clôture en attente de l'échéance primaire et lookup après panne, sans réinterprétation des actions 1.0.
+
+- Dispatch signé fermé des barrières 1.1 : fin de session et lookup primaire sur la même action, compatibilité 1.0 et recette HTTP avec réponse perdue ; aucun pair réel ou cycle de vie public.
+
+- Primitive propriétaire fermée 1.1 de fin de session : échéance figée vérifiée après les verrous sur le primaire, audit atomique et lookup de reprise sur la même action/clé ; aucune API ou écriture économique.
+
+- Codec fermé explicitement versionné des barrières 1.1 pour la raison de fin de session approuvée ; contrat 1.0 conservé, sans raccordement propriétaire ou HTTP dans ce sous-lot.
+- Fiabiliser l'horloge de recette du corpus par publication atomique privée,
+  y compris pendant les relectures concurrentes ; aucun comportement des sites
+  ou durée d'attestation du plugin modifié.
+
 ### Documentation
+
+- Actualiser la preuve B6 de relecture primaire : succès de jonction fermé de 727 contrôles, erreurs de harnais conservées comme historique et limites de livraison explicites.
 
 - Consigner la validation F1b R2 : relevé Europe/Paris, classements persistants
   et sessions Créateur distincts, trois portées, plafonds et corrections après
@@ -21,6 +43,64 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
   autorisés selon leurs dépendances ; aucun code économique ou flag activé.
 
 ### Ajouté
+
+- Composer le corpus/cache privés avec une transaction propriétaire de barrière, avec ordre de mutex vérifié et rollback commun, sans nouvelle preuve Hub ou route publique ; recette transactionnelle B6 fermée.
+- Lecture minimale du nom éditorial approuvé dans la transaction existante de classement, sans COMMIT implicite ; contrôles de profil et consentement conservés et rollback vérifié en recette isolée.
+- Relecture primaire explicite du corpus fermé avant livraison : même génération et clé, nouvelle réponse liée à une requête durable, cache indisponible pendant le rapprochement ; aucun contrat Hub, route ou flag ajouté.
+
+- Projection d'affichage HoF/Fans : filtrage par identité approuvée et visibilité courante, places recalculées parmi les seuls profils visibles, sans diffuser identité technique ou rang privé ; préparatif B6 sans route ni score public.
+
+- Persistance fermée des sessions dans la même génération dérivée que les classements/relevés, reconstruction après correction et reprise primaire après panne ; aucun état public ou gagnant ajouté.
+
+- Calcul privé des sessions à partir du corpus Hub complet : une contribution par dimension, trois portées, réadmission sans remise à zéro et ancienneté corrigée ; aucune ouverture ou lecture publique.
+
+- Persister les projections privées B4 depuis le corpus courant authentifié,
+  avec reconstruction atomique et refus des générations anciennes ou
+  incomplètes. Recette Fans jetable uniquement, sans score public ni ledger.
+
+- Composer les relevés privés Europe/Paris et les classements persistants
+  Fan/Créateur par catégorie depuis un corpus B3 complet déjà authentifié.
+  Calcul pur testé, sans publication, stockage supplémentaire ni consommation.
+- Persister les actions et clés des barrières côté Fans avant chaque HTTP,
+  conserver opening/closing après panne et reprendre par lookup primaire,
+  uniquement dans l'enclave Hub/Fans jetable. Aucun parcours de site ouvert.
+
+- Raccorder le transport privé fermé des barrières au gateway Hub : signatures,
+  nonces dédiés et lookup primaire après réponse HTTP perdue. Deux WordPress
+  jetables uniquement ; aucun ledger, route de site ou activation ajouté.
+
+- Ajouter l'admission SQL fermée des nonces de barrières : stockage dédié,
+  permissions, concurrence et expiration après attente et avant COMMIT,
+  sans opération économique, route ou migration automatique.
+
+- Lier les opérations propriétaires de barrières au contexte signé de leur
+  action, vérifier l'origine d'une fermeture sur le descripteur stocké et
+  revalider la fraîcheur avant COMMIT, uniquement dans l'enclave de recette.
+
+- Ajouter le codec privé approuvé des barrières de classement : register,
+  close et lookup signés, action et clé stables, permissions dédiées et réponses
+  liées à la requête. Aucun endpoint, schéma ou changement économique ajouté.
+- Persister dans Fans jetable les intentions complètes 0.3, leurs clés stables
+  avant envoi et les reçus privés signés ; tester la reprise après panne et
+  réponse perdue, sans ledger PF, migration automatique ni API active.
+
+- Raccorder le gateway propriétaire 0.3 aux signatures, nonces privés et contrôles
+  transactionnels existants dans la seule enclave jetable. Recette HTTP avec
+  clés distinctes, rejeux et réponse perdue après consommation ; aucune route
+  distribuée ni activation sur les sites.
+
+- Revalider la délégation 0.3 après les verrous propriétaires et avant COMMIT,
+  avec rollback des effets préparés si elle expire. Recette réelle fermée
+  de concurrence et reprise, sans route, schéma ou activation supplémentaire.
+
+- Ajouter le codec signé 0.3 fermé pour réserver, confirmer, libérer et retrouver
+  une attribution à contexte de classement immuable. Réponses liées à la requête
+  et reçus d'origine vérifiés, sans admission HTTP ni consommation supplémentaire.
+
+- Ajouter le lecteur B3 fermé raccordant l'inbox durable Fans au véritable
+  client HTTP WordPress : étapes bornées, lookup primaire après résultat
+  incertain, concurrence sans nouvelle clé et promotion signée exhaustive.
+  Aucun classement public, cron, installation automatique ou activation.
 
 - Ajouter l'inbox privée B3c2c3a : clé et demande signée persistées avant HTTP,
   staging des pages, reprise primaire après résultat incertain et remplacement

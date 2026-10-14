@@ -16,6 +16,8 @@ import urllib.error
 import urllib.request
 import uuid
 
+from recipe_clock import RecipeClock
+
 
 def run_checks(root, wp, source, cli_path, check, call, sql, command, workers, log, start, finish, await_file):
     fans=root/'fans'
@@ -50,7 +52,12 @@ def run_checks(root, wp, source, cli_path, check, call, sql, command, workers, l
         return result.stdout.strip()
     def worker(role,value):
         path=root/(uuid.uuid4().hex+'.json'); path.write_text(json.dumps(value)); path.chmod(0o600)
-        return json.loads(cli(wp if role=='hub' else fans,'eval-file',str(source/'tests/TokenEngine/recipe/b3-corpus-network-worker.php'),str(path),'--use-include'))
+        result=json.loads(cli(wp if role=='hub' else fans,'eval-file',str(source/'tests/TokenEngine/recipe/b3-corpus-network-worker.php'),str(path),'--use-include'))
+        if value['action']=='exchange' and 'error' in result:
+            metrics=path.with_name(path.name+'.http-metrics')
+            (root/'corpus-client-diagnostic').write_text(json.dumps(dict(error=result['error'],
+                transport=json.loads(metrics.read_text()) if metrics.exists() else [])))
+        return result
     cli(fans,'core','install','--url=http://127.0.0.1:9','--title=Disposable corpus Fans','--admin_user=fixture',
         '--admin_password='+secrets.token_urlsafe(32),'--admin_email=fixture@example.invalid','--skip-email')
     cli(fans,'plugin','activate','faluss-platform')
@@ -87,8 +94,7 @@ def run_checks(root, wp, source, cli_path, check, call, sql, command, workers, l
         last=sql('SELECT last_confirmed_at FROM wp_token_engine_pf_b3r_counter')
         latest=datetime.datetime.fromisoformat(last).replace(tzinfo=datetime.timezone.utc) if last else datetime.datetime.now(datetime.timezone.utc)
         return str(max(int(sql('SELECT UNIX_TIMESTAMP()')),int(latest.timestamp()))+7)+'.000000'
-    def set_clock():
-        path=root/'corpus-sql-clock';path.write_text(clock());path.chmod(0o600)
+    set_clock=RecipeClock(root/'corpus-sql-clock',clock)
     def http(body=None,method='POST',headers=None):
         extra={'Content-Type':'application/json','Accept':'application/json'};extra.update(headers or {})
         request=urllib.request.Request(endpoint,data=body.encode() if body is not None else None,headers=extra,method=method)
@@ -98,7 +104,10 @@ def run_checks(root, wp, source, cli_path, check, call, sql, command, workers, l
     def fields(origin,op='start',page=None):return dict(operation=op,read_id=str(uuid.uuid4()),origin_id=origin,policy_version='1.0.0',
         corpus_id=page['manifest']['corpus_id'] if page else '',cursor=page['next_cursor'] if op=='page' and page else '')
     def sign(f,key,**extra):return worker('fans',dict(action='sign',fields=f,key=key,**extra))
-    def exchange(f,key,**extra):set_clock();return worker('fans',dict(action='exchange',fields=f,key=key,**extra))
+    def exchange(f,key,**extra):
+        set_clock()
+        for name in ('corpus-client-diagnostic','corpus-http-diagnostic'):(root/name).unlink(missing_ok=True)
+        return worker('fans',dict(action='exchange',fields=f,key=key,**extra))
     def accept(f,request,wire,**extra):
         value=dict(action='accept',fields=f,wire=wire,nonce=request['nonce'],digest=hashlib.sha256(request['wire'].encode()).hexdigest())
         value.update(extra);return worker('fans',value)
@@ -213,7 +222,16 @@ def run_checks(root, wp, source, cli_path, check, call, sql, command, workers, l
         assert call('b3r-confirm',payload=value,key=secrets.token_hex(32),clock_value=now_value)['state']=='confirmed'
     for _ in range(101):consume(dict(intent,attribution_id=str(uuid.uuid4())))
     ledger=sql('SELECT * FROM wp_token_engine_pf_ledger ORDER BY id');old_claims=sql('SELECT * FROM wp_token_engine_ledger ORDER BY id')
-    f=fields(origin);key_value=secrets.token_hex(32);first=exchange(f,key_value)['result']['page'];second=exchange(fields(origin,'page',first),key_value)['result']['page']
+    def positive_page(f,key):
+        value=exchange(f,key)
+        if value.get('outcome')!='ok':
+            raise RuntimeError('Expurgated positive corpus diagnostics: '+json.dumps(dict(
+                operation=f['operation'],error=value.get('error','none'),outcome=value.get('outcome','none'),
+                hub_reason=(root/'corpus-http-diagnostic').read_text() if (root/'corpus-http-diagnostic').exists() else 'none',
+                client=json.loads((root/'corpus-client-diagnostic').read_text()) if (root/'corpus-client-diagnostic').exists() else {},
+                phase=json.loads((root/'corpus-http-phase').read_text()) if (root/'corpus-http-phase').exists() else {})))
+        return value['result']['page']
+    f=fields(origin);key_value=secrets.token_hex(32);first=positive_page(f,key_value);second=positive_page(fields(origin,'page',first),key_value)
     check('B3ch signed immutable pagination delivers 101 genuine facts without duplication',len(first['facts'])==100 and len(second['facts'])==1
           and first['manifest']==second['manifest'] and second['next_cursor'] is None and len({x['attribution_id'] for x in first['facts']+second['facts']})==101)
     check('B3ch final signed primary fence attests the complete current manifest',exchange(fields(origin,'finish',first),key_value)['result']['state']=='current')
@@ -222,8 +240,20 @@ def run_checks(root, wp, source, cli_path, check, call, sql, command, workers, l
     foreign=dict(fields(str(uuid.uuid4()),'page',first));refusal=exchange(foreign,key_value)
     check('B3ch another origin cannot read this private corpus',refusal==dict(outcome='refused',result=dict(reason='pf_corpus_unavailable')))
     consume(dict(intent,attribution_id=str(uuid.uuid4())))
-    check('B3ch new confirmed consumption makes the older final fence unavailable',exchange(fields(origin,'finish',first),key_value)==dict(outcome='refused',result=dict(reason='pf_corpus_superseded')))
-    fresh=exchange(fields(origin),secrets.token_hex(32))['result']['page'];assert fresh['manifest']['fact_count']=='102'
+    obsolete=exchange(fields(origin,'finish',first),key_value)
+    if obsolete!=dict(outcome='refused',result=dict(reason='pf_corpus_superseded')):
+        client=root/'corpus-client-diagnostic';diagnostic=root/'corpus-http-diagnostic'
+        raise RuntimeError('Expurgated obsolete fence diagnostics: '+json.dumps(dict(
+            client=json.loads(client.read_text()) if client.exists() else {},hub_reason=diagnostic.read_text() if diagnostic.exists() else 'none')))
+    check('B3ch new confirmed consumption makes the older final fence unavailable',True)
+    next_generation=exchange(fields(origin),secrets.token_hex(32))
+    if next_generation.get('outcome')!='ok':
+        diagnostic=root/'corpus-http-diagnostic'
+        raise RuntimeError('Expurgated corpus refresh diagnostics: '+json.dumps(dict(
+            error=next_generation.get('error','none'),outcome=next_generation.get('outcome','none'),
+            hub_reason=diagnostic.read_text() if diagnostic.exists() else 'none',
+            client=json.loads((root/'corpus-client-diagnostic').read_text()) if (root/'corpus-client-diagnostic').exists() else {})))
+    fresh=next_generation['result']['page'];assert fresh['manifest']['fact_count']=='102'
     updated=dict(proof,source_revision='2',evidence_id=str(uuid.uuid4()),state='partially_cancelled',cancelled_purchased_pf_cumulative='100')
     plan=call('h4-begin',payload=updated,key=secrets.token_hex(32))
     check('B3ch unfinished H4 reconciliation refuses all fresh exact corpus reads',exchange(fields(origin),secrets.token_hex(32))==dict(outcome='refused',result=dict(reason='h4_reconciliation_incomplete')))

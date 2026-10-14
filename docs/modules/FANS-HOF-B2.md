@@ -82,6 +82,10 @@ de rétention ; #150 reste distincte.
 
 ## Dépendances conservées
 
+Le [pont privé de cycle de vie](FANS-HOF-B3-SESSION-LIFECYCLE.md) raccorde les
+états B2 aux acquittements Hub dans une fixture physique uniquement. Il ne
+constitue pas encore une admission réseau, un choix d'attribution ou un écran B6.
+
 - B2b : territoire principal déclaré/examiné, critères publics versionnés. Aucun
   lieu inféré de l'IP, du SSO ou de la langue ; trois portées conservées.
 - B3 : barrières/contextes/acquittements attestés, y compris versions d'admission.
