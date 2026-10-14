@@ -22,12 +22,34 @@ add_action('rest_api_init',static function (): void {
     try { ClosedEnvironment::assertIsolated($wpdb,'hub'); }
     catch (ModelViolation) { return; }
     require_once WP_PLUGIN_DIR . '/faluss-platform/src/Federation/Legacy/includes/class-faluss-federation-crypto.php';
+    if (is_file(dirname(rtrim(ABSPATH,'/')) . '/b6-joined-enabled')) {
+        register_rest_route('faluss-b3-recipe/v1','/barrier',[
+            'methods' => 'POST','permission_callback' => '__return_true',
+            'callback' => static function (WP_REST_Request $request): WP_REST_Response {
+                global $wpdb;
+                try {
+                    ClosedEnvironment::assertIsolated($wpdb,'hub');
+                    $wire=(new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedBarrierGateway($wpdb,b3_corpus_recipe_peer(),'recipe-hub-k1'))->handle($request->get_body());
+                    $response=new WP_REST_Response(['barrier_wire'=>$wire],200);
+                } catch (Throwable $error) {
+                    $diagnostic=dirname(rtrim(ABSPATH,'/')).'/b6-barrier-diagnostic';
+                    file_put_contents($diagnostic,$error instanceof ModelViolation ? $error->reason : get_class($error));
+                    chmod($diagnostic,0600);
+                    $response=new WP_REST_Response(['error'=>'pf_fixture_unavailable'],503);
+                }
+                $response->header('Cache-Control','private, no-store, max-age=0');
+                return $response;
+            },
+        ]);
+    }
     register_rest_route('faluss-b3-recipe/v1','/corpus',[
         'methods' => 'POST','permission_callback' => '__return_true',
         'callback' => static function (WP_REST_Request $request): WP_REST_Response {
             global $wpdb;
             try {
                 ClosedEnvironment::assertIsolated($wpdb,'hub');
+                $phase = dirname(rtrim(ABSPATH,'/')) . '/corpus-http-phase'; $began = microtime(true);
+                file_put_contents($phase,json_encode(['phase' => 'entered','elapsed_ms' => 0],JSON_THROW_ON_ERROR));
                 if (strtolower($request->get_header('content-type')) !== 'application/json'
                     || strlen($request->get_body()) > CorpusTransport::MAX_REQUEST_WIRE) { throw new ModelViolation('pf_request_rejected'); }
                 // Accelerate this fixture's primary SQL clock only. Never accept a clock from HTTP.
@@ -37,7 +59,9 @@ add_action('rest_api_init',static function (): void {
                 if (preg_match('/^[1-9][0-9]{9}\.[0-9]{6}$/D',$clock) !== 1 || $wpdb->query('SET timestamp=' . $clock) === false) {
                     throw new ModelViolation('pf_fixture_clock_required');
                 }
+                file_put_contents($phase,json_encode(['phase' => 'handling','elapsed_ms' => round((microtime(true)-$began)*1000,3)],JSON_THROW_ON_ERROR));
                 $wire = (new ClosedCorpusGateway($wpdb,b3_corpus_recipe_peer(),'recipe-hub-k1'))->handle($request->get_body());
+                file_put_contents($phase,json_encode(['phase' => 'handled','elapsed_ms' => round((microtime(true)-$began)*1000,3)],JSON_THROW_ON_ERROR));
                 $fault = dirname(rtrim(ABSPATH,'/')) . '/corpus-http-fault';
                 if (is_file($fault) && file_get_contents($fault) === 'drop-after-materialize') {
                     unlink($fault);
@@ -79,6 +103,8 @@ add_action('rest_api_init',static function (): void {
     ]);
     add_filter('rest_pre_serve_request',static function (bool $served, WP_HTTP_Response $response, WP_REST_Request $request): bool {
         $data = $response->get_data();
+        if ($request->get_route() === '/faluss-b3-recipe/v1/barrier' && $response->get_status() === 200
+            && is_array($data) && is_string($data['barrier_wire'] ?? null)) { echo $data['barrier_wire']; return true; }
         if ($request->get_route() === '/faluss-b3-recipe/v1/corpus' && $response->get_status() === 200
             && is_array($data) && is_string($data['corpus_wire'] ?? null)) { echo $data['corpus_wire']; return true; }
         return $served;

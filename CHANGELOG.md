@@ -8,6 +8,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Recette de jonction fermée : acquittement réel des barrières par HTTP signé et lecture atomique du corpus/cache sur les mêmes instances jetables ; 727 contrôles réussis, dont achat fictif sans score et correction attestée sans seconde consommation. Aucun nouveau contrat ou score public.
+
 - Origine HoF fermée : ouverture locale enregistrée seulement sur acquittement primaire Hub actuel, intervalle d'admission figé et reprise de la même action après COMMIT incertain ; aucun achat, score public ou schéma installé sur site.
 - Pont fermé entre gouvernance des sessions Fans et acquittements primaires Hub : actions immuables, décisions et journal atomiques, annulation/suspension distinctes de la fin attestée ; uniquement en recette jetable, sans route ou ouverture économique.
 
@@ -20,8 +22,13 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 - Primitive propriétaire fermée 1.1 de fin de session : échéance figée vérifiée après les verrous sur le primaire, audit atomique et lookup de reprise sur la même action/clé ; aucune API ou écriture économique.
 
 - Codec fermé explicitement versionné des barrières 1.1 pour la raison de fin de session approuvée ; contrat 1.0 conservé, sans raccordement propriétaire ou HTTP dans ce sous-lot.
+- Fiabiliser l'horloge de recette du corpus par publication atomique privée,
+  y compris pendant les relectures concurrentes ; aucun comportement des sites
+  ou durée d'attestation du plugin modifié.
 
 ### Documentation
+
+- Actualiser la preuve B6 de relecture primaire : succès de jonction fermé de 727 contrôles, erreurs de harnais conservées comme historique et limites de livraison explicites.
 
 - Consigner la validation F1b R2 : relevé Europe/Paris, classements persistants
   et sessions Créateur distincts, trois portées, plafonds et corrections après
@@ -32,6 +39,23 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Composer le corpus/cache privés avec une transaction propriétaire de barrière, avec ordre de mutex vérifié et rollback commun, sans nouvelle preuve Hub ou route publique ; recette transactionnelle B6 fermée.
+- Lecture minimale du nom éditorial approuvé dans la transaction existante de classement, sans COMMIT implicite ; contrôles de profil et consentement conservés et rollback vérifié en recette isolée.
+- Relecture primaire explicite du corpus fermé avant livraison : même génération et clé, nouvelle réponse liée à une requête durable, cache indisponible pendant le rapprochement ; aucun contrat Hub, route ou flag ajouté.
+
+- Projection d'affichage HoF/Fans : filtrage par identité approuvée et visibilité courante, places recalculées parmi les seuls profils visibles, sans diffuser identité technique ou rang privé ; préparatif B6 sans route ni score public.
+
+- Persistance fermée des sessions dans la même génération dérivée que les classements/relevés, reconstruction après correction et reprise primaire après panne ; aucun état public ou gagnant ajouté.
+
+- Calcul privé des sessions à partir du corpus Hub complet : une contribution par dimension, trois portées, réadmission sans remise à zéro et ancienneté corrigée ; aucune ouverture ou lecture publique.
+
+- Persister les projections privées B4 depuis le corpus courant authentifié,
+  avec reconstruction atomique et refus des générations anciennes ou
+  incomplètes. Recette Fans jetable uniquement, sans score public ni ledger.
+
+- Composer les relevés privés Europe/Paris et les classements persistants
+  Fan/Créateur par catégorie depuis un corpus B3 complet déjà authentifié.
+  Calcul pur testé, sans publication, stockage supplémentaire ni consommation.
 - Persister les actions et clés des barrières côté Fans avant chaque HTTP,
   conserver opening/closing après panne et reprendre par lookup primaire,
   uniquement dans l'enclave Hub/Fans jetable. Aucun parcours de site ouvert.

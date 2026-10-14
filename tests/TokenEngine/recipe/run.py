@@ -52,7 +52,18 @@ def main():
     parser.add_argument('--b3-corpus-http', action='store_true', help='Closed signed owner corpus HTTP with dedicated SQL nonces and distinct fixture keys')
     parser.add_argument('--b3-corpus-inbox', action='store_true', help='Durable private Fans staging, primary recovery and atomic complete corpus replacement')
     parser.add_argument('--b3-corpus-reader', action='store_true', help='Bounded durable corpus orchestration with real private WordPress HTTP and recovery')
+    parser.add_argument('--b5-sessions', action='store_true', help='Private session projections and recovery from the complete current corpus')
+    parser.add_argument('--b6-corpus-transaction', action='store_true', help='Caller-owned barrier/corpus transaction and rollback, without public delivery')
+    parser.add_argument('--b6-primary-refresh', action='store_true', help='Explicit same-generation primary freshness and uncertain response recovery')
+    parser.add_argument('--b6-joined-integration', action='store_true', help='Actual signed barrier HTTP and corpus/cache on the same Fans primary')
     options = parser.parse_args()
+    if options.b6_joined_integration:
+        options.b6_corpus_transaction = True
+        options.b6_primary_refresh = True
+    if options.b6_corpus_transaction or options.b6_primary_refresh:
+        options.b5_sessions = True
+    if options.b5_sessions:
+        options.b3_corpus_reader = True
     if options.b1_origin_ack or options.b3_session_lifecycle:
         options.b3_barrier_acknowledgement = True
     if options.b3_barrier_acknowledgement:
@@ -137,11 +148,13 @@ def main():
                                     'eval-file', str(source / 'tests/TokenEngine/recipe/worker.php'),
                                     str(input_file), '--use-include'], stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE, text=True, start_new_session=True)
+        # These bounded bulk fixtures execute many genuine owner transactions before returning.
+        process.recipe_timeout = 180 if data.get('action')=='b3s-seed-ranked' else 40
         workers.append(process)
         return process
 
     def finish(process):
-        output, errors = process.communicate(timeout=40)
+        output, errors = process.communicate(timeout=getattr(process,'recipe_timeout',40))
         if process.returncode:
             raise RuntimeError('Hub fixture worker failed: ' + errors[-800:])
         return json.loads(output)
@@ -431,7 +444,19 @@ def main():
         b3_corpus_reader_start = len(checks)
         if options.b3_corpus_reader:
             from b3_corpus_reader_checks import run_checks
-            run_checks(root,source,options.cli,check,call,sql,command,corpus_fixture)
+            corpus_reader = run_checks(root,source,options.cli,check,call,sql,command,corpus_fixture)
+        if options.b5_sessions:
+            from b5_projection_checks import run_checks
+            run_checks(root,source,options.cli,check,command,corpus_fixture,corpus_reader,call,sql)
+        if options.b6_primary_refresh:
+            from b6_primary_refresh_checks import run_checks
+            run_checks(root,source,options.cli,check,command,corpus_fixture,corpus_reader,call,sql)
+        if options.b6_corpus_transaction:
+            from b6_corpus_transaction_checks import run_checks
+            run_checks(root,source,options.cli,check,command,corpus_fixture,corpus_reader)
+        if options.b6_joined_integration:
+            from b6_joined_checks import run_checks
+            run_checks(root,source,options.cli,check,command,corpus_fixture,sql,call)
         b3_ranked_http_start = len(checks)
         ranked_fixture = None
         if options.b3_ranked_http:
@@ -475,7 +500,12 @@ def main():
         report['b3_corpus_total'] = b3_corpus_http_start - b3_corpus_start
         report['b3_corpus_http_total'] = b3_corpus_inbox_start - b3_corpus_http_start
         report['b3_corpus_inbox_total'] = b3_corpus_reader_start - b3_corpus_inbox_start
-        report['b3_corpus_reader_total'] = b3_ranked_http_start - b3_corpus_reader_start
+        report['b4_projection_total'] = sum(name.startswith('B4b ') for name in checks)
+        report['b5_projection_total'] = sum(name.startswith('B5b ') for name in checks)
+        report['b6_primary_refresh_total'] = sum(name.startswith('B6pr ') for name in checks)
+        report['b6_corpus_transaction_total'] = sum(name.startswith('B6tx ') for name in checks)
+        report['b6_joined_integration_total'] = sum(name.startswith('B6join ') for name in checks)
+        report['b3_corpus_reader_total'] = b3_ranked_http_start - b3_corpus_reader_start - report['b4_projection_total'] - report['b5_projection_total'] - report['b6_corpus_transaction_total'] - report['b6_primary_refresh_total'] - report['b6_joined_integration_total']
         report['b3_ranked_http_total'] = b3_ranked_inbox_start - b3_ranked_http_start
         report['b3_ranked_inbox_total'] = len(checks) - b3_ranked_inbox_start
         report['corpus_source_measurements'] = corpus_measurements
@@ -578,8 +608,14 @@ def main():
             report['fans_corpus_schema'] = '1 (closed_b3_corpus_fans)'
             report['not_proven'][0] = 'Automated network reader, ranking projections B4/B5, continuous production freshness'
         if options.b3_corpus_reader:
-            report['scope'] += '; bounded durable Fans reader with primary lookup and exact signed HTTP checkpoints'
-            report['not_proven'][0] = 'Ranked member and barrier HTTP, ranking projections B4/B5, continuous production freshness'
+            report['scope'] += '; bounded durable Fans reader with primary lookup and exact signed HTTP checkpoints; private rebuildable B4 general/category/month cache under the current corpus transaction'
+            report['not_proven'][0] = 'Ranked member and barrier HTTP, B5 session projections, public visibility and attested opening, continuous production freshness'
+        if options.b5_sessions:
+            report['scope'] += '; private session projections in the same atomic derived generation, without winner or public admission'
+            report['not_proven'][0] = 'Ranked member and barrier HTTP, B2 session lifecycle, public visibility and attested opening, continuous production freshness'
+        if options.b6_corpus_transaction:
+            report['scope'] += '; private cache composition in caller-owned transaction after the barrier origin mutex; real rollback and competing collector'
+            report['not_proven'][0] = 'Authenticated joined barrier acknowledgement, Identity mapping and public B6 delivery, continuous production freshness'
         if options.b3_ranked_http:
             report['scope'] += '; signed 0.3 owner gateway over loopback between distinct WordPress signers and keys, controller-transferred requests and lost HTTP body after commit'
             report['not_proven'] = ['Durable ranked Fans client, linked-user delegation, barrier HTTP and closure recovery',
@@ -588,6 +624,11 @@ def main():
         if options.b3_ranked_inbox:
             report['scope'] += '; durable Fans full intentions and stable keys before controller-transferred HTTP, signed receipt inbox after confirmed primary recovery'
             report['not_proven'][0] = 'Integrated ranked Fans HTTP client, linked-user delegation, barrier HTTP and closure recovery'
+        if options.b6_primary_refresh:
+            report['scope'] += '; explicit existing finish primary recheck of the same generation, no new wire contract or continuous freshness claim'
+        if options.b6_joined_integration:
+            report['scope'] += '; actual signed barrier gateway and exact corpus cache composed on the same Fans primary, with rollback, revoked trust and closing suppression'
+            report['not_proven'][0] = 'B1/B2 full delivery composition, participant/creator/country governance barriers, intent choices, Identity mapping and public B6 delivery, continuous production freshness'
     finally:
         for process in workers:
             if process.poll() is None:

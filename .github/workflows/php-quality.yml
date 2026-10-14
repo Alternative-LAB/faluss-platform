@@ -30,6 +30,8 @@ jobs:
         run: composer analyse
       - name: Unit tests
         run: composer test
+      - name: Isolated recipe clock concurrency
+        run: python3 -m unittest discover -s tests/TokenEngine/recipe -p 'test_recipe_clock.py'
       - name: Faluss Link transactional behavior contract
         run: php tests/Link/link-hotfix-behavior-test.php
       - name: Faluss Subscriptions historical behavior contracts
@@ -107,7 +109,7 @@ jobs:
       - name: Fans messaging operator preparation real WordPress
         run: python3 tests/Fans/Profiles/recipe/admission-wordpress.py --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --test --messaging
       - name: Fans B1 private ranking governance real WordPress
-        run: python3 tests/Fans/Profiles/recipe/admission-wordpress.py --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --test --hof-b1 --output "$RUNNER_TEMP/fans-hof-b1-checks.json"
+        run: python3 tests/Fans/Profiles/recipe/admission-wordpress.py --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --test --hof-b1 --hof-b6-visibility --output "$RUNNER_TEMP/fans-hof-b1-checks.json"
       - name: Fans B2 private session governance real WordPress
         run: python3 tests/Fans/Profiles/recipe/admission-wordpress.py --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --test --hof-b2 --output "$RUNNER_TEMP/fans-hof-b2-checks.json"
       - name: Fans B2 private territory examination real WordPress
@@ -155,7 +157,7 @@ jobs:
       - name: Fans B3 durable complete corpus inbox real WordPress
         run: python3 tests/TokenEngine/recipe/run.py --b3-corpus-inbox --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/fans-pf-b3-corpus-inbox-checks.json"
       - name: Fans B3 bounded durable corpus reader real WordPress
-        run: python3 tests/TokenEngine/recipe/run.py --b3-corpus-reader --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/fans-pf-b3-corpus-reader-checks.json"
+        run: python3 tests/TokenEngine/recipe/run.py --b3-corpus-reader --b5-sessions --b6-corpus-transaction --b6-primary-refresh --b6-joined-integration --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/fans-pf-b3-corpus-reader-checks.json"
       - uses: actions/upload-artifact@v4
         with:
           name: hub-pf-runtime-checks
