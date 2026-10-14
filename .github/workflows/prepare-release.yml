@@ -151,7 +151,7 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git switch -c "$RELEASE_BRANCH"
           git add faluss-platform.php CHANGELOG.md
-          git commit -m "🔖 Prepare Faluss Platform v$RELEASE_VERSION"
+          git commit -m ":bookmark: Prepare Faluss Platform v$RELEASE_VERSION"
           git push origin "$RELEASE_BRANCH"
 
       - name: Open release pull request
@@ -181,9 +181,25 @@ jobs:
             '' \
             '## Changelog' \
             '' \
+            '### Ajouté' \
+            '' \
+            '- Sans objet' \
+            '' \
             '### Modifié' \
             '' \
             '- Version et notes de publication générées automatiquement.' \
+            '' \
+            '### Corrigé' \
+            '' \
+            '- Sans objet' \
+            '' \
+            '### Supprimé' \
+            '' \
+            '- Sans objet' \
+            '' \
+            '### Migration et compatibilité' \
+            '' \
+            '- Sans objet : aucun changement de contrat ou migration de données.' \
             '' \
             '## Vérifications effectuées' \
             '' \
@@ -228,5 +244,5 @@ jobs:
           gh pr create \
             --base main \
             --head "$RELEASE_BRANCH" \
-            --title "Publier Faluss Platform v$RELEASE_VERSION" \
+            --title "Release Faluss Platform v$RELEASE_VERSION" \
             --body-file "$body"

@@ -8,8 +8,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Modifié
 
-- Règles IA centralisées : adaptateurs AGENT/Claude, sélection des modèles, délégation bornée, tests utiles et traçabilité par issue ; procédure GitLab conditionnelle conservant le workflow GitHub actuel.
-- Gouvernance liée à une issue ouverte et préparation de release avec recherche paginée, mapping des labels, reprise contrôlée et tests de non-duplication.
+- Instructions IA en anglais : point d’entrée court, règles modulaires dans `.agents/rules/`, deux skills chargés à la demande et adaptateurs Codex/Claude sans duplication ; workflow exclusivement GitHub.
+- Gouvernance liée à une issue ouverte et préparation de release avec recherche paginée, mapping des labels, reprise contrôlée et tests de non-duplication ; commits `:gitmoji:` en anglais, titres de PR en anglais et descriptions en français. Compatibilité des releases avec les anciens emojis Unicode conservée.
 
 ### Ajouté
 
