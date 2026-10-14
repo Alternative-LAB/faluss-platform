@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Corrigé
+
+- Accepter les emojis Unicode et les codes `:gitmoji:` dans le contrôle de gouvernance des commits, avec tests de non-régression. Livrer cette transition depuis la base de confiance avant la PR #205.
+
 ### Ajouté
 
 - Relecture primaire fermée des barrières avant livraison B6 : lookup approuvé sur l'action/clé d'origine, challenge durable et reprise sans réenregistrement ; état indisponible pendant l'incertitude, fermeture locale prioritaire et callback transactionnel. Schéma séparé explicitement jetable, aucun contrat Hub nouveau ni activation.
