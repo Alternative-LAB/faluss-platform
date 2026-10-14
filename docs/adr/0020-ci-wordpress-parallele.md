@@ -24,7 +24,7 @@ Le changement est réversible par une PR et ne touche pas la production. La proc
 
 ## Complément — stockage des fixtures (#215)
 
-Tester un montage `tmpfs` de 1 Gio sur `/var/tmp` dans les seuls runners GitHub hébergés pour réduire les coûts de synchronisation et de lecture des fixtures. Les scripts, chemins d’enclave, permissions et paramètres transactionnels restent identiques. Les recettes prouvent la reprise après arrêt des workers PHP et les transactions du serveur actif, pas la persistance après une panne du système ou du stockage. La conservation du montage dépend d’un gain mesuré en CI avec les 1 413 assertions de référence.
+Tester un montage `tmpfs` de 1 Gio sur `/var/tmp` dans le seul job `corpus-joined` sur runner GitHub hébergé pour réduire les coûts de synchronisation et de lecture des fixtures. Les scripts, chemins d’enclave, permissions et paramètres transactionnels restent identiques. Les recettes prouvent la reprise après arrêt des workers PHP et les transactions du serveur actif, pas la persistance après une panne du système ou du stockage. Les autres groupes conservent leur stockage disque, notamment l’administration Fans dont les fixtures successives occupent plus de 1 Gio. La conservation du montage dépend d’un gain mesuré en CI avec les 1 413 assertions de référence.
 
 ## Alternatives
 

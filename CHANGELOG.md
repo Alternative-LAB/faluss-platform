@@ -8,7 +8,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Modifié
 
-- Réduire les coûts du stockage des recettes WordPress/MariaDB sur les runners GitHub hébergés avec un montage temporaire en mémoire plafonné à 1 Gio ; scénarios, chemins privés et réglages transactionnels inchangés, aucun effet sur la production.
+- Réduire les coûts du stockage de la recette WordPress/MariaDB `corpus-joined` sur runner GitHub hébergé avec un montage temporaire en mémoire plafonné à 1 Gio ; scénarios, chemins privés et réglages transactionnels inchangés, aucun effet sur la production.
 - Accélérer la CI WordPress : Identity et administration Fans séparés, cinq recettes PF terminales parallèles et vérification des 1 413 assertions historiques ; outils épinglés et bytecode CLI partagés avec revalidation immédiate, budgets de temps et annulation des workflows obsolètes de PR. Aucun scénario applicatif ou état de production modifié.
 
 ### Corrigé
