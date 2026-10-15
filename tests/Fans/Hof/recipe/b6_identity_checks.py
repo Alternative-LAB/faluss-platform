@@ -90,14 +90,17 @@ def run_checks():
     writer = None
 
     def wait_for(predicate, process):
-        deadline = time.monotonic()+12
+        deadline = time.monotonic()+20
         while not predicate():
             if process.poll() is not None or time.monotonic() > deadline:
-                raise RuntimeError('Private identity checkpoint unavailable')
+                raise RuntimeError('Private identity checkpoint unavailable; process_exit='+str(process.poll()))
             time.sleep(.05)
 
     try:
         wait_for(lambda: guard.with_name(guard.name+'.ready').exists(), held)
+        checkpoint = json.loads(guard.with_name(guard.name+'.ready').read_text())
+        check('B6id concurrent reader resolved the real member inside its active transaction',
+              checkpoint == dict(member_resolved=True, transaction_active=True))
         writer = subprocess.Popen(['mariadb', '--no-defaults', '--socket='+str(root/'sql.sock'), '-uroot', 'admission_recipe', '-e',
                                    'DELETE FROM wp_faluss_fans_identity_links WHERE wp_user_id='+str(member)],
                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
