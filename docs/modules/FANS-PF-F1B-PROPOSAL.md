@@ -174,7 +174,8 @@ caché ne révèle des comptes masqués. UUID, e-mail, achat et montant invisibl
 
 Créateur : profil actif, présentation approuvée et accord explicite de classement
 distinct du partenariat commercial. Invités exclus avant leur contrat
-identité/attribution/reprise. Service d'alias et consentement Fan à construire.
+identité/attribution/reprise. Le service privé d'alias et de consentement Fan est
+implémenté dans B1 ; son parcours d'édition/modération UI demeure à raccorder.
 La conservation réelle demeure #150, sans défaut de 24 mois ni purge ajoutée.
 
 ## P5/P6 — annulation, suspension et corrections approuvées
@@ -209,8 +210,14 @@ leur livraison ne doit pas être présentée comme un classement opérationnel.
 La séquence conserve toutes les capacités cible. Chaque lot passe par PR bornée,
 revue, contrôles et protections ; publication seulement par les workflows établis.
 
-Dépendances ouvertes : capacités B3 attestées à implémenter/tester ; producteur d'achat/preuve réelle ;
-admission réseau et vrai SSO ; corpus admissible exhaustif/fraîcheur et remise
-durable des corrections ; référentiel territorial et pays autorisés ;
+État au 15 octobre : B1–B5, filiation et primitives transactionnelles B6 sont
+intégrés sur main `df1c53b`. Les transports, barrières, corpus exhaustif,
+corrections/reprise et projections ont des recettes jetables ; ils ne sont plus
+des capacités absentes. La [livraison B6](FANS-HOF-B6-CURRENT-DELIVERY.md) reste
+en brouillon, avec ses preuves de branche distinctes du code intégré.
+
+Dépendances ouvertes : producteur d'achat/preuve réelle ; admission réseau et
+vrai SSO ; fraîcheur continue et remise durable en conditions de production ;
+référentiel territorial et pays autorisés ;
 conservation #150, décisions PC/commerciales et recette opérateur avant activation.
 RustFS #161 est distinct. La validation produit ne ratifie aucun de ces contrats.

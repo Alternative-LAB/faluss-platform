@@ -17,8 +17,10 @@ consommé ; une exception de visibilité interrompt toute la réponse.
 
 Ce contrat local n'est pas une nouvelle preuve ou API Hub. Une fonction fournie
 à ce calcul n'autorise pas un navigateur à choisir un membre ou un nom. Le futur
-adaptateur utilisera la filiation SSO et `RankingVisibility`, sans repli sur le
-login WordPress ou les données Identity.
+adaptateur utilise désormais la filiation SSO et `RankingVisibility` via
+`RankingIdentity`, intégrée dans #208, sans repli sur le login WordPress ou les
+données Identity. Le [fournisseur des trois objets](FANS-HOF-B6-CURRENT-DELIVERY.md)
+et ses vues restent en cours de recette dans #212.
 
 ## Scénarios et preuve
 

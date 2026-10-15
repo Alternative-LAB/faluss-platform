@@ -83,6 +83,12 @@ try {
         'statement' => $delivery->statement($input['family'],$input['month']),
         'sessions' => $delivery->sessions($input['after'] ?? ''),
         'session' => $delivery->session($input['session']),
+        'fixture-cookie' => (static function () use ($input): array {
+            if (!isset($input['actor']) || get_user_by('id',$input['actor']) === false) { throw new ModelViolation('pf_fixture_actor_required'); }
+            $expires = time() + (($input['expired'] ?? false) === true ? -1 : \Faluss\Platform\Fans\Sso\FansSsoService::SESSION_TTL);
+            $token = WP_Session_Tokens::get_instance($input['actor'])->create($expires);
+            return ['name' => (string) constant('LOGGED_IN_COOKIE'),'value' => wp_generate_auth_cookie($input['actor'],$expires,'logged_in',$token)];
+        })(),
         'render' => (static function () use ($delivery,$input): array {
             // Actual server DTO and templates, not an injected score or simulated REST response.
             $linked = \Faluss\Platform\Fans\Sso\FansSsoService::currentLinkedSubject() !== null;
