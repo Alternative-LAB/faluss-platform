@@ -72,7 +72,8 @@ function rankingIdentityRecipe(array $input): array
         $active = (string) $wpdb->get_var('SELECT @@in_transaction') === '1';
         if (isset($input['hold'])) {
             if (realpath(dirname($input['hold'])) !== realpath(dirname(rtrim(ABSPATH, '/')))) { throw new RuntimeException('Private fixture path required'); }
-            file_put_contents($input['hold'] . '.ready', 'ready'); $until = microtime(true) + 15;
+            file_put_contents($input['hold'] . '.ready', wp_json_encode(['member_resolved' => $resolved === (int) $input['member'],
+                'transaction_active' => $active])); $until = microtime(true) + 60;
             while (!is_file($input['hold'] . '.release')) {
                 if (microtime(true) > $until) { throw new RuntimeException('Identity interleaving timed out'); }
                 usleep(10000);

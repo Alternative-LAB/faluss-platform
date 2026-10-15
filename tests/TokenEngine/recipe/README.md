@@ -32,8 +32,8 @@ python3 tests/TokenEngine/recipe/run.py \
 ```
 
 Sans option, ces commandes exécutent les 27 contrôles H0 inchangés. Ajouter
-`--h1` pour exécuter ensuite les 47 contrôles H1. La CI garde l'étape H0 et ajoute
-une étape H1 distincte ; ses deux rapports sont joints à `hub-pf-runtime-checks`.
+`--h1` pour exécuter ensuite les 47 contrôles H1. La CI conserve H0 et H1 dans ses cinq recettes terminales parallèles,
+avec vérification de toutes les assertions de référence ; ses deux rapports sont joints à `hub-pf-runtime-checks`.
 
 La recette crée un répertoire privé neuf `hub-pf-wp-*` sous `/var/tmp`, copie le
 plugin et le cœur sans wp-config existant, installe MariaDB sans écoute réseau
