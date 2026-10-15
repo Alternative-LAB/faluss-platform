@@ -86,5 +86,8 @@ check('B6v revoked creator consent remains hidden inside the preserved transacti
 data('other','withdraw',revision=int(own('other')['revision']))
 check('B6v all names withdrawn leaves a real empty list without invented participants',projection()==[])
 check('B6v display filtering creates no ledger or score table',sql("SHOW TABLES LIKE 'wp_fans%ledger%'")=='' and sql("SHOW TABLES LIKE 'wp_fans_hof_scores'")=='')
-(root/'checks.json').write_text(json.dumps(dict(scope='B6 display filtering only: actual private WordPress state, synthetic ranked rows; no primary Hub proof or delivery route',
-    checks=checks,count=len(checks),b6_visibility_total=len(checks)-baseline),indent=2))
+visibility_total = len(checks)-baseline
+from b6_identity_checks import run_checks
+identity_total = run_checks()
+(root/'checks.json').write_text(json.dumps(dict(scope='B6 account bindings and display filtering: actual primary WordPress state, synthetic ranked rows; no primary Hub corpus proof or delivery route',
+    checks=checks,count=len(checks),b6_visibility_total=visibility_total,b6_identity_total=identity_total),indent=2))

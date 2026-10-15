@@ -18,6 +18,8 @@ use Faluss\Platform\Fans\Profiles\CreatorStatusSchema;
 use Faluss\Platform\Fans\Profiles\EditorialService;
 use Faluss\Platform\TokenEngine\PurchasedPf\ModelViolation;
 
+require_once __DIR__ . '/identity-worker.php';
+
 if (!defined('WP_CLI') || !WP_CLI || DB_NAME !== 'admission_recipe'
     || preg_match('#^/var/tmp/fans-admission-wp-[A-Za-z0-9_-]+/wordpress/$#D', ABSPATH) !== 1) {
     throw new RuntimeException('Disposable fixture only');
@@ -47,6 +49,7 @@ $moderation = new SessionModeration($wpdb);
 $appeals = new SessionAppeals($wpdb);
 try {
     $result = match ($input['action']) {
+        'identity_outside', 'identity_transaction', 'identity_wrong_connection' => rankingIdentityRecipe($input),
         'install' => (static function () use ($wpdb): array { RankingSchema::installOrVerify($wpdb); return ['ready' => RankingSchema::ready($wpdb)]; })(),
         'origin' => $registry->prepareOrigin($input['origin']),
         'read_origin' => $registry->origin(),
