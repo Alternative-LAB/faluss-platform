@@ -5,6 +5,9 @@ declare(strict_types=1);
 use Faluss\Platform\Fans\PfContract\ClosedBarrierClient;
 use Faluss\Platform\Fans\PfContract\ClosedBarrierInbox;
 use Faluss\Platform\Fans\PfContract\ClosedBarrierInboxSchema;
+use Faluss\Platform\Fans\PfContract\ClosedBarrierReadSchema;
+use Faluss\Platform\Fans\PfContract\ClosedBarrierPrimaryRead;
+use Faluss\Platform\Fans\PfContract\ClosedBarrierPrimaryClient;
 use Faluss\Platform\TokenEngine\PurchasedPf\ModelViolation;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\ClosedEnvironment;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy;
@@ -62,6 +65,8 @@ try {
     elseif ($input['action']==='origin-install') { RankingRegistry::administrator();ClosedOriginOpeningSchema::installForRecipe($wpdb);$result=['ready'=>true]; }
     elseif ($input['action'] === 'ready') { $result = ['ready' => ClosedBarrierInboxSchema::ready($wpdb)]; }
     elseif ($input['action'] === 'install') { ClosedBarrierInboxSchema::installForRecipe($wpdb); $result = ['ready' => true]; }
+    elseif ($input['action'] === 'primary-install') { ClosedBarrierReadSchema::installForRecipe($wpdb); $result = ['ready' => true]; }
+    elseif ($input['action'] === 'primary-ready') { $result = ['ready' => ClosedBarrierReadSchema::ready($wpdb)]; }
     else {
         if (isset($input['fault'])) {
             $db = new FansBarrierRecipeDatabase(DB_USER,DB_PASSWORD,DB_NAME,DB_HOST); $db->set_prefix($wpdb->prefix);
@@ -71,6 +76,7 @@ try {
         $policy = json_decode(file_get_contents($root . '/fans-barrier-trust.json'),true,20,JSON_THROW_ON_ERROR);
         $peer = new PeerPolicy($policy['node'],$policy['audience'],$policy['permissions'],$policy['keys']);
         $inbox = new ClosedBarrierInbox($wpdb,$peer,$input['origin'],'1.0.0');
+        $primary = str_starts_with($input['action'],'primary-') ? new ClosedBarrierPrimaryRead($wpdb,$inbox,$peer) : null;
         $opening=str_starts_with($input['action'],'origin-')?new ClosedOriginOpening($wpdb,$inbox,$input['origin']):null;
         $trace = [];
         if (($input['monitor'] ?? false) === true) {
@@ -79,12 +85,46 @@ try {
                 $trace[] = ['transaction' => (string) $wpdb->get_var('SELECT @@in_transaction'),
                     'mutex_free' => (string) $wpdb->get_var($wpdb->prepare('SELECT IS_FREE_LOCK(%s)',$lock)),
                     'registered' => (string) $wpdb->get_var($wpdb->prepare('SELECT COUNT(*) FROM %i WHERE request_sha256=%s',
-                        $wpdb->prefix . 'fans_pf_b3b_requests',hash('sha256',$args['body'])))];
+                        $wpdb->prefix . (str_starts_with($input['action'],'primary-') ? 'fans_pf_b6br_requests' : 'fans_pf_b3b_requests'),hash('sha256',$args['body'])))];
                 return $pre;
             },10,2);
         }
         if ($input['action'] === 'request') { $inbox->request($input['fields'],$input['sealed']); $result = ['accepted' => true]; }
         else { $result = match ($input['action']) {
+            'primary-prepare' => $primary->prepare($input['action_id']),
+            'primary-recover' => $primary->recover($input['action_id']),
+            'primary-request' => (static function () use ($primary,$input): array { $primary->request($input['action_id'],$input['sealed']); return ['accepted' => true]; })(),
+            'primary-accept' => $primary->accept($input['action_id'],$input['proof']),
+            'primary-advance' => (new ClosedBarrierPrimaryClient($wpdb,$inbox,$primary,'recipe-fans-k1',$input['endpoint']))->advance($input['action_id']),
+            'primary-read' => $primary->withCurrentAcknowledgement($input['action_id'],static function (array $ack) use ($wpdb,$input,$primary): array {
+                if (($input['probe'] ?? false) === true) {
+                    if ($wpdb->query($wpdb->prepare('INSERT INTO wp_barrier_primary_probe (action_id) VALUES (%s)',$input['action_id'])) !== 1) { throw new ModelViolation('pf_fixture_probe_failed'); }
+                }
+                if (($input['reject_apply'] ?? false) === true) { throw new ModelViolation('pf_fixture_apply_refused'); }
+                if (($input['nested'] ?? false) === true) { $primary->recover($input['action_id']); }
+                return $ack + ['transaction' => (string) $wpdb->get_var('SELECT @@in_transaction')];
+            }),
+            'primary-caller-read' => (static function () use ($wpdb,$input,$primary,$inbox,$peer): array {
+                $callback = static function () use ($wpdb,$input,$primary,$peer): array {
+                    $read = $primary;
+                    if (isset($input['other_origin'])) {
+                        $other = new ClosedBarrierInbox($wpdb,$peer,$input['other_origin'],'1.0.0');
+                        $read = new ClosedBarrierPrimaryRead($wpdb,$other,$peer);
+                    }
+                    return $read->withCurrentAcknowledgementInTransaction($input['action_id'],static function (array $ack) use ($wpdb,$input): array {
+                        if (($input['probe'] ?? false) === true) {
+                            if ($wpdb->query($wpdb->prepare('INSERT INTO wp_barrier_primary_probe (action_id) VALUES (%s)',$input['action_id'])) !== 1) { throw new ModelViolation('pf_fixture_probe_failed'); }
+                        }
+                        if (($input['reject_apply'] ?? false) === true) { throw new ModelViolation('pf_fixture_apply_refused'); }
+                        return $ack + ['transaction' => (string) $wpdb->get_var('SELECT @@in_transaction')];
+                    });
+                };
+                if (($input['manual_transaction'] ?? false) === true) {
+                    $wpdb->query('START TRANSACTION'); try { return $callback(); } finally { $wpdb->query('ROLLBACK'); }
+                }
+                if (($input['no_transaction'] ?? false) === true) { return $callback(); }
+                return $inbox->withAcknowledgement($input['action_id'],$callback);
+            })(),
             'prepare' => $inbox->prepare($input['fields'],$input['contract'] ?? BarrierTransport::CONTRACT),
             'recover' => $inbox->recover($input['action_id']),
             'accept' => $inbox->accept($input['proof']),

@@ -56,6 +56,7 @@ final class ClosedProtocolGuardTest extends TestCase
             static fn () => new \Faluss\Platform\Fans\PfContract\ClosedCorpusClient($database,
                 new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',['pf.ranking.corpus'],[]),'recipe-key','','',''),
             static fn () => \Faluss\Platform\Fans\PfContract\ClosedCorpusInboxSchema::installForRecipe($database),
+            static fn () => \Faluss\Platform\Fans\PfContract\ClosedBarrierReadSchema::installForRecipe($database),
             static fn () => \Faluss\Platform\Fans\PfContract\ClosedCorpusInboxSchema::ready($database),
             static fn () => \Faluss\Platform\Fans\Hof\ClosedOriginOpeningSchema::ready($database),
             static fn () => \Faluss\Platform\Fans\Hof\ClosedOriginOpeningSchema::installForRecipe($database),
@@ -162,6 +163,21 @@ final class ClosedProtocolGuardTest extends TestCase
             new \Faluss\Platform\Fans\PfContract\ClosedBarrierClient($database,$inbox,'recipe-key','');
             self::fail('The closed client must refuse an ordinary WordPress before HTTP.');
         } catch (ModelViolation $error) { self::assertSame('isolated_h3_recipe_required',$error->reason); }
+        self::assertSame(0,$database->queries);
+        $primaryType = new \ReflectionClass(\Faluss\Platform\Fans\PfContract\ClosedBarrierPrimaryRead::class);
+        $primary = $primaryType->newInstanceWithoutConstructor();
+        foreach ([static fn () => new \Faluss\Platform\Fans\PfContract\ClosedBarrierPrimaryRead($database,$inbox,
+            new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',[],[])),
+            static fn () => new \Faluss\Platform\Fans\PfContract\ClosedBarrierPrimaryClient($database,$inbox,$primary,'recipe-key','')] as $operation) {
+            try { $operation(); self::fail('Ordinary WordPress cannot refresh a private barrier.'); }
+            catch (ModelViolation $error) { self::assertSame('isolated_h3_recipe_required',$error->reason); }
+        }
+        self::assertSame(0,$database->queries);
+        $type = new \ReflectionClass(\Faluss\Platform\Fans\PfContract\ClosedBarrierInbox::class);
+        $type->getProperty('db')->setValue($inbox,$database);
+        try { $inbox->withAcknowledgementInTransaction('11111111-1111-4111-8111-111111111111',static fn (): bool => true);
+            self::fail('Caller transactions cannot bypass the physical gate.'); }
+        catch (ModelViolation $error) { self::assertSame('isolated_h3_recipe_required',$error->reason); }
         self::assertSame(0,$database->queries);
     }
 

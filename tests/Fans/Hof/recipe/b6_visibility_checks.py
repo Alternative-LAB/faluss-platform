@@ -89,5 +89,7 @@ check('B6v display filtering creates no ledger or score table',sql("SHOW TABLES 
 visibility_total = len(checks)-baseline
 from b6_identity_checks import run_checks
 identity_total = run_checks()
+from b6_mutex_checks import run_checks
+mutex_total = run_checks()
 (root/'checks.json').write_text(json.dumps(dict(scope='B6 account bindings and display filtering: actual primary WordPress state, synthetic ranked rows; no primary Hub corpus proof or delivery route',
-    checks=checks,count=len(checks),b6_visibility_total=visibility_total,b6_identity_total=identity_total),indent=2))
+    checks=checks,count=len(checks),b6_visibility_total=visibility_total,b6_identity_total=identity_total,b6_mutex_total=mutex_total),indent=2))

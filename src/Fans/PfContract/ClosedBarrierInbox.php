@@ -79,6 +79,9 @@ final class ClosedBarrierInbox
     public function recover(string $action): array
     { ModelValues::uuid($action); return $this->write(fn (): array => $this->progress($this->required($action))); }
 
+    /** Composition binds the very same primary connection, never a second concurrent transaction. */
+    public function usesConnection(\wpdb $db): bool { return $this->db === $db; }
+
     /** Apply trusted local governance under the same origin lock and transaction as the current proof.
      * No HTTP or nested transaction is allowed in the callback; no operation key or wire escapes this facade.
      * @template T
@@ -87,13 +90,39 @@ final class ClosedBarrierInbox
     public function withAcknowledgement(string $action, callable $operation): mixed
     {
         ModelValues::uuid($action);
-        return $this->write(function () use ($action,$operation): mixed {
-            $row = $this->required($action); $progress = $this->progress($row);
-            if ($progress['phase'] !== 'acknowledged') { throw new ModelViolation('pf_local_barrier_acknowledgement_required'); }
-            $proof = CanonicalJson::object($row['proof_json'],131072); $answer = $this->verified($proof,true);
-            return $operation(['fields' => $progress['fields'],'contract' => $progress['contract'] ?? BarrierTransport::CONTRACT,
-                'result' => $answer['result'],'local_state' => $progress['state']]);
-        });
+        return $this->write(fn (): mixed => $this->acknowledgement($action,$operation));
+    }
+
+    /** Additive composition inside the same primary transaction and origin mutex, never begins or commits.
+     * @template T
+     * @param callable(array{fields:array<string,mixed>,contract:string,result:array<string,mixed>,local_state:string}):T $operation
+     * @return T */
+    public function withAcknowledgementInTransaction(string $action, callable $operation): mixed
+    {
+        ClosedEnvironment::assertIsolated($this->db,'fans'); ModelValues::uuid($action);
+        if ((string) $this->scalar('SELECT @@in_transaction') !== '1'
+            || (string) $this->scalar($this->db->prepare('SELECT IS_USED_LOCK(%s)=CONNECTION_ID()',$this->lockName())) !== '1') {
+            throw new ModelViolation('pf_local_barrier_owner_transaction_required');
+        }
+        if (!ClosedBarrierInboxSchema::ready($this->db)) { throw new ModelViolation('pf_local_barrier_schema'); }
+        $result = $this->acknowledgement($action,$operation);
+        if ((string) $this->scalar('SELECT @@in_transaction') !== '1'
+            || (string) $this->scalar($this->db->prepare('SELECT IS_USED_LOCK(%s)=CONNECTION_ID()',$this->lockName())) !== '1') {
+            throw new ModelViolation('pf_local_barrier_owner_transaction_required');
+        }
+        return $result;
+    }
+
+    /** @template T
+     * @param callable(array{fields:array<string,mixed>,contract:string,result:array<string,mixed>,local_state:string}):T $operation
+     * @return T */
+    private function acknowledgement(string $action, callable $operation): mixed
+    {
+        $row = $this->required($action); $progress = $this->progress($row);
+        if ($progress['phase'] !== 'acknowledged') { throw new ModelViolation('pf_local_barrier_acknowledgement_required'); }
+        $proof = CanonicalJson::object($row['proof_json'],131072); $answer = $this->verified($proof,true);
+        return $operation(['fields' => $progress['fields'],'contract' => $progress['contract'] ?? BarrierTransport::CONTRACT,
+            'result' => $answer['result'],'local_state' => $progress['state']]);
     }
 
     /** Registration uncertainty must be resolved before a queued close can be sent.
@@ -291,7 +320,7 @@ final class ClosedBarrierInbox
     {
         ClosedEnvironment::assertIsolated($this->db,'fans');
         $held = $started = false; $suppressed = $this->db->suppress_errors(true);
-        $lock = 'fans_pf_b3b_' . substr(hash('sha256',$this->db->prefix . ':' . $this->origin . ':' . $this->policy),0,40);
+        $lock = $this->lockName();
         try {
             if ((string) $this->scalar('SELECT @@in_transaction') !== '0') { throw new ModelViolation('nested_transaction_refused'); }
             if ((string) $this->scalar($this->db->prepare('SELECT GET_LOCK(%s,10)',$lock)) !== '1') { throw new ModelViolation('pf_local_barrier_busy'); }
@@ -315,6 +344,7 @@ final class ClosedBarrierInbox
     /** @return list<array<string,string>> */
     private function rows(string $sql): array
     { $rows = $this->db->get_results($sql,'ARRAY_A'); if (!is_array($rows) || $this->db->last_error !== '') { throw new ModelViolation('pf_local_barrier_storage'); } return $rows; }
+    /** @phpstan-impure SQL and callbacks can change the connection state. */
     private function scalar(string $sql): mixed
     { $value = $this->db->get_var($sql); if ($this->db->last_error !== '') { throw new ModelViolation('pf_local_barrier_storage'); } return $value; }
     private function query(string $sql): void
@@ -326,4 +356,7 @@ final class ClosedBarrierInbox
      * @param array<string,string> $where */
     private function update(string $kind, array $values, array $where): void
     { if ($this->db->update($this->tables[$kind],$values,$where) === false || $this->db->last_error !== '') { throw new ModelViolation('pf_local_barrier_storage'); } }
+
+    private function lockName(): string
+    { return 'fans_pf_b3b_' . substr(hash('sha256',$this->db->prefix . ':' . $this->origin . ':' . $this->policy),0,40); }
 }

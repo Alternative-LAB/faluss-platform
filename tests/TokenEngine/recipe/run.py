@@ -41,6 +41,7 @@ def main():
     parser.add_argument('--b3-barrier-completion-http', action='store_true', help='Explicit signed 1.1 session completion over private loopback')
     parser.add_argument('--b3-barrier-completion-recovery', action='store_true', help='Durable explicit Fans completion action and same-key recovery')
     parser.add_argument('--b3-barrier-acknowledgement', action='store_true', help='Current signed acknowledgement and atomic local callback')
+    parser.add_argument('--b6-barrier-refresh', action='store_true', help='Explicit fresh lookup and durable closed delivery checkpoint; existing Hub contract only')
     parser.add_argument('--b1-origin-ack', action='store_true', help='Closed B1 actual origin opening from current primary barrier ACK')
     parser.add_argument('--b3-session-lifecycle', action='store_true', help='Closed B2 governed session states to attested primary barriers')
     parser.add_argument('--b3-ranked', action='store_true', help='Closed B3 ranked consumption with official debit; fictitious owner proofs only')
@@ -64,7 +65,7 @@ def main():
         options.b5_sessions = True
     if options.b5_sessions:
         options.b3_corpus_reader = True
-    if options.b1_origin_ack or options.b3_session_lifecycle:
+    if options.b1_origin_ack or options.b3_session_lifecycle or options.b6_barrier_refresh:
         options.b3_barrier_acknowledgement = True
     if options.b3_barrier_acknowledgement:
         options.b3_barrier_completion_recovery = True
@@ -403,6 +404,11 @@ def main():
         if options.b3_barrier_acknowledgement:
             from b3_barrier_acknowledgement_checks import run_checks
             run_checks(root,check,sql,barrier_http)
+        # The existing complete lifecycle recipe includes current-read regression checks.
+        # Keep its CI invocation and environment preparation unchanged.
+        if options.b6_barrier_refresh or options.b3_session_lifecycle:
+            from b6_barrier_refresh_checks import run_checks
+            run_checks(root,check,sql,barrier_http)
         if options.b1_origin_ack:
             from b1_origin_ack_checks import run_checks
             origin_fixture=run_checks(root,check,sql,barrier_http,defer_close=options.b3_session_lifecycle)
@@ -493,7 +499,7 @@ def main():
         report['b3_session_lifecycle_total'] = sum(name.startswith('B3sl ') for name in checks)
         report['b1_b2_integration_total'] = sum(name.startswith('B1B2 ') for name in checks)
         report['b3_barrier_http_total'] = sum(name.startswith('B3bh ') for name in checks)
-        report['b3_barriers_total'] = b3_ranked_start - b3_barriers_start - report['b3_barrier_http_total'] - report['b3_barrier_recovery_total'] - report['b3_barrier_completion_http_total'] - report['b3_barrier_completion_recovery_total'] - report['b3_barrier_acknowledgement_total'] - report['b1_origin_ack_total'] - report['b3_session_lifecycle_total'] - report['b1_b2_integration_total']
+        report['b3_barriers_total'] = b3_ranked_start - b3_barriers_start - report['b3_barrier_http_total'] - report['b3_barrier_recovery_total'] - report['b3_barrier_completion_http_total'] - report['b3_barrier_completion_recovery_total'] - report['b3_barrier_acknowledgement_total'] - report['b1_origin_ack_total'] - report['b3_session_lifecycle_total'] - report['b1_b2_integration_total'] - sum(name.startswith(('B6br ','B6bt ')) for name in checks)
         report['b3_ranked_total'] = b3_snapshots_start - b3_ranked_start
         report['b3_snapshots_total'] = b3_corpus_source_start - b3_snapshots_start
         report['b3_corpus_source_total'] = b3_corpus_start - b3_corpus_source_start
@@ -503,6 +509,8 @@ def main():
         report['b4_projection_total'] = sum(name.startswith('B4b ') for name in checks)
         report['b5_projection_total'] = sum(name.startswith('B5b ') for name in checks)
         report['b6_primary_refresh_total'] = sum(name.startswith('B6pr ') for name in checks)
+        report['b6_barrier_refresh_total'] = sum(name.startswith('B6br ') for name in checks)
+        report['b6_barrier_transaction_total'] = sum(name.startswith('B6bt ') for name in checks)
         report['b6_corpus_transaction_total'] = sum(name.startswith('B6tx ') for name in checks)
         report['b6_joined_integration_total'] = sum(name.startswith('B6join ') for name in checks)
         report['b3_corpus_reader_total'] = b3_ranked_http_start - b3_corpus_reader_start - report['b4_projection_total'] - report['b5_projection_total'] - report['b6_corpus_transaction_total'] - report['b6_primary_refresh_total'] - report['b6_joined_integration_total']
@@ -542,6 +550,9 @@ def main():
             report['scope'] += '; durable explicit Fans 1.1 action/key/version and primary recovery; no B1/B2 lifecycle bridge or real SSO'
         if options.b3_barrier_acknowledgement:
             report['scope'] += '; current signed acknowledgement and atomic local callback; no B1/B2 lifecycle bridge'
+        if options.b6_barrier_refresh:
+            report['scope'] += '; explicit current primary barrier lookup, durable read revision, latest challenge and same-key recovery; no new Hub message or admission'
+            report['barrier_primary_read_schema'] = '1 (closed_b6_barrier_primary_read)'
         if options.b1_origin_ack:
             report['scope'] += '; B1 origin opening separately records primary ACK and frozen earliest admissible instant, no economic source or public delivery'
             report['not_proven'][0] = 'B2 governance barriers, intent choices, public delivery, real SSO and production admission'
