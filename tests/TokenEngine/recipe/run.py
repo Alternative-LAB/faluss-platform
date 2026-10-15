@@ -404,7 +404,9 @@ def main():
         if options.b3_barrier_acknowledgement:
             from b3_barrier_acknowledgement_checks import run_checks
             run_checks(root,check,sql,barrier_http)
-        if options.b6_barrier_refresh:
+        # The existing complete lifecycle recipe includes current-read regression checks.
+        # Keep its CI invocation and environment preparation unchanged.
+        if options.b6_barrier_refresh or options.b3_session_lifecycle:
             from b6_barrier_refresh_checks import run_checks
             run_checks(root,check,sql,barrier_http)
         if options.b1_origin_ack:
