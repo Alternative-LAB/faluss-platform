@@ -28,6 +28,13 @@ use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy;
 global $wpdb;
 ClosedEnvironment::assertIsolated($wpdb,'fans');
 if (!defined('WP_CLI') || !WP_CLI) { throw new RuntimeException('Fixture CLI only'); }
+// Only this physically isolated CLI scenario supplies fictitious Identity configuration.
+// It never performs central authentication or changes the fixture's HTTP/WordPress setup.
+foreach (['FALUSS_FANS_SSO_CLIENT_ID' => 'fixture.fans.identity',
+    'FALUSS_FANS_SSO_CLIENT_SECRET' => rtrim(strtr(base64_encode(random_bytes(32)),'+/','-_'),'=')] as $name => $value) {
+    if (!defined($name)) { define($name,$value); }
+}
+add_filter('home_url',static fn (string $url): string => (string) preg_replace('~^http://127\.0\.0\.1:[0-9]+~','https://fans.example.test',$url));
 foreach (['SSO','CREATOR_PROFILES','EDITORIAL'] as $flag) {
     $name = 'FALUSS_PLATFORM_FANS_' . $flag;
     if (defined($name) && constant($name) !== true) { throw new RuntimeException('Conflicting fixture feature'); }
@@ -71,7 +78,7 @@ try {
             wp_set_current_user($admin->ID);
             if (!FansSsoSchema::installOrVerify() || !CreatorProfileSchema::installOrVerify() || !EditorialSchema::installOrVerify()
                 || !\Faluss\Platform\Fans\Notifications\NotificationSchema::installOrVerify() || !CreatorStatusSchema::installOrVerify()) {
-                throw new RuntimeException('Fixture account schemas unavailable');
+                throw new ModelViolation('pf_fixture_account_schemas_unavailable');
             }
             $actors = [];
             foreach (['fan' => $input['member_faluss_id'],'creator' => $input['creator_faluss_id']] as $family => $subject) {
@@ -85,13 +92,14 @@ try {
                 $actors[$family . '_user'] = $id;
             }
             wp_set_current_user($actors['creator_user']); $profile = CreatorProfileService::create($input['category']);
-            if (is_wp_error($profile)) { throw new RuntimeException('Fixture profile unavailable'); }
+            if (is_wp_error($profile)) { throw new ModelViolation($profile->get_error_code()); }
             $actors['creator_profile'] = $profile['creator_id'];
-            wp_set_current_user($admin->ID); CreatorProfileService::setStatus($profile['creator_id'],'active');
+            wp_set_current_user($admin->ID); $active = CreatorProfileService::setStatus($profile['creator_id'],'active');
+            if (is_wp_error($active)) { throw new ModelViolation($active->get_error_code()); }
             wp_set_current_user($actors['creator_user']); $proposal = EditorialService::submit(0,'Atelier de recette B6','Présentation fictive de recette','',0);
-            if (is_wp_error($proposal)) { throw new RuntimeException('Fixture editorial unavailable'); }
+            if (is_wp_error($proposal)) { throw new ModelViolation($proposal->get_error_code()); }
             wp_set_current_user($admin->ID); $approved = EditorialService::decide($profile['creator_id'],1,'approve','allowed_editorial');
-            if (is_wp_error($approved)) { throw new RuntimeException('Fixture approval unavailable'); }
+            if (is_wp_error($approved)) { throw new ModelViolation($approved->get_error_code()); }
             wp_set_current_user($actors['creator_user']); $visibility->consent('creator',true,(int) $visibility->own()['revision']);
             wp_set_current_user($actors['fan_user']); $alias = $visibility->submit('Fan de recette B6',0);
             wp_set_current_user($admin->ID); $visibility->decide($actors['fan_user'],(int) $alias['revision'],'approve','allowed_alias');
