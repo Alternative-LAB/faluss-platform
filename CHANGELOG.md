@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Ajouté
+
+- Lecture privée paginée des sessions associées au Créateur courant pour préparer leur gestion B6, sans destinataire choisi par le navigateur ni pouvoir implicite pour une invitation ; tests WordPress/MariaDB des exclusions, suspensions et pages au-delà de vingt. Raccordement d'interface en cours, aucune activation.
+
 ## [0.13.0] - 2026-10-15
 
 ### Ajouté

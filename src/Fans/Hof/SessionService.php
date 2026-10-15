@@ -105,6 +105,22 @@ final class SessionService
         });
     }
 
+    /** Private stable cursor: includes invitations/history, never another member's session.
+     * @return list<array<string,string>> */
+    public function own(string $after = ''): array
+    {
+        $creator = SessionStore::ownerCreator()['creator_id'];
+        if ($after !== '') { \Faluss\Platform\TokenEngine\PurchasedPf\ModelValues::uuid($after); }
+        return $this->store->transaction(function () use ($creator, $after): array {
+            $db = $this->store->db; $tables = $this->store->tables;
+            $rows = $db->get_results($db->prepare('SELECT s.* FROM %i s WHERE s.session_id>%s AND EXISTS '
+                . '(SELECT 1 FROM %i r WHERE r.session_id=s.session_id AND r.creator_id=%s) ORDER BY s.session_id LIMIT 20',
+                $tables['records'], $after, $tables['roles'], $creator), 'ARRAY_A');
+            if (!is_array($rows) || $db->last_error !== '') { throw new ModelViolation('hof_storage_unavailable'); }
+            return $rows;
+        });
+    }
+
     /** @return array{session:array<string,string>,roles:list<array<string,string>>} */
     public function inspect(string $id): array
     {
