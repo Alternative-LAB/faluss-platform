@@ -146,6 +146,8 @@ def run_checks(root,source,cli_path,check,command,fixture,hub_sql,hub,delivery_e
         screen('visitor-hof','fan','hof')
         screen('creator-hof','creator','hof',actors['creator_user'])
         screen('fan-rankings','fan','classement-fans',actors['fan_user'])
+        all_categories=screen('creator-all-categories','creator','classements',actors['creator_user'],category='')
+        check('B6dl selecting all categories retains the exact authorized ranking','Atelier de recette B6' in all_categories and 'Classement indisponible' not in all_categories)
         session_html=screen('fan-session','fan','hof/session',actors['fan_user'],session=session['session_id'])
         check('B6dl actual session template exposes approved rules and genuine participant',
               'Rencontres de recette B6' in session_html and 'Atelier de recette B6' in session_html)

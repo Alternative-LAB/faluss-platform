@@ -43,7 +43,9 @@ final class FansUiHof
             $provider = apply_filters('faluss_fans_hof_closed_delivery', null);
             if (!$provider instanceof ClosedRankingDelivery) { return $state; }
             if (isset($_GET['category'])) {
-                $state->category = RankingPolicy::category(is_string($_GET['category']) ? wp_unslash($_GET['category']) : null);
+                if (!is_string($_GET['category'])) { throw new ModelViolation('hof_invalid_category'); }
+                $category = wp_unslash($_GET['category']);
+                $state->category = $category === '' ? '' : RankingPolicy::category($category);
             }
             if (isset($_GET['rank_page'])) {
                 if (!is_string($_GET['rank_page']) || preg_match('/^[1-9][0-9]{0,4}$/D', $_GET['rank_page']) !== 1) {
