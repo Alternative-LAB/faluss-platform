@@ -144,6 +144,15 @@ final class RankingVisibility
         return $rows;
     }
 
+    /** Private account detail for moderation; does not create a preference or grant consent.
+     * @return array<string,string> */
+    public function inspectForReview(int $member): array
+    {
+        RankingRegistry::administrator();
+        if ($member < 1 || !FansSsoService::linkedMember($member)) { throw new ModelViolation('hof_linked_member_required'); }
+        return $this->storage->transaction('member:' . $member, fn (): array => $this->member($member));
+    }
+
     /** @return array<string,string> */
     private function member(int $owner): array
     {

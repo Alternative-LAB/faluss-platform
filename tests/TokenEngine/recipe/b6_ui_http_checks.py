@@ -13,7 +13,7 @@ import urllib.parse
 import urllib.request
 
 
-def run_checks(root,source,cli_path,fixture,origin,actors,session,month,deliver,check):
+def run_checks(root,source,cli_path,fixture,origin,actors,session,month,deliver,check,origin_action=None):
     fans=fixture['fans']
     with socket.socket() as listener:
         listener.bind(('127.0.0.1',0));port=listener.getsockname()[1]
@@ -33,9 +33,10 @@ def run_checks(root,source,cli_path,fixture,origin,actors,session,month,deliver,
             result=subprocess.run(['php',cli_path,'--allow-root','--path='+str(fans),*arguments],capture_output=True,timeout=90)
             if result.returncode:raise RuntimeError('B6 UI fixture route registration failed; no private output printed')
         cookies={family:deliver('fixture-cookie',actor=actors[family+'_user']) for family in ('fan','creator','admin')}
-        def read(path,cookie=None):
+        def read(path,cookie=None,fields=None):
             headers={} if cookie is None else {'Cookie':cookie['name']+'='+cookie['value']}
-            request=urllib.request.Request(base+path,headers=headers)
+            body=None if fields is None else urllib.parse.urlencode(fields).encode()
+            request=urllib.request.Request(base+path,headers=headers,data=body)
             try:response=urllib.request.urlopen(request,timeout=20)
             except urllib.error.HTTPError as error:response=error
             with response:return response.status,response.read().decode('utf8'),response.headers
@@ -63,6 +64,8 @@ def run_checks(root,source,cli_path,fixture,origin,actors,session,month,deliver,
         expired=deliver('fixture-cookie',actor=actors['fan_user'],expired=True)
         check('B6dl forged or expired local cookie cannot retain private route access',
               read('/app/fan/espace',broken)[0]==403 and read('/app/fan/espace',expired)[0]==403)
+        from b6_privacy_http_checks import run_checks as privacy_checks
+        privacy_checks(read,cookies,actors,month,deliver,check,origin_action)
         if os.environ.get('FALUSS_B6_UI_EXPORT'):
             out=pathlib.Path(os.environ['FALUSS_B6_UI_EXPORT']).resolve()
             if out.parent!=pathlib.Path('/var/tmp') or not out.name.startswith('fans-hof-ui-') or out.is_symlink():raise RuntimeError('Unsafe private UI capture destination')

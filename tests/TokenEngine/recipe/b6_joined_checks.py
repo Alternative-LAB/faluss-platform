@@ -172,7 +172,7 @@ def run_checks(root,source,cli_path,check,command,fixture,hub_sql,hub,delivery_e
         screen('fan-statement','fan','espace',actors['fan_user'],month=month)
         screen('creator-statement','creator','progression',actors['creator_user'],month=month)
         from b6_ui_http_checks import run_checks as ui_checks
-        ui_checks(root,source,cli_path,fixture,origin,actors,session,month,deliver,check)
+        ui_checks(root,source,cli_path,fixture,origin,actors,session,month,deliver,check,origin_action=fields['action_id'])
         check('B6dl guest cannot read a private statement',deliver('statement',family='fan',month=month)==dict(error='hof_linked_member_required'))
         deliver('consent',actor=actors['fan_user'],family='fan',enabled=False)
         check('B6dl withdrawal suppresses public identity without erasing the private statement',

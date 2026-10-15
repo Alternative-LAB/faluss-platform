@@ -20,6 +20,7 @@ final class BackOfficeView
             'operations' => BackOfficeOperations::render(),
             'staff' => BackOfficeStaff::render(),
             'catalog' => BackOfficeCatalog::render(),
+            'ranking' => RankingAliasPanel::render(),
             default => self::overview(),
         };
     }
@@ -70,6 +71,7 @@ final class BackOfficeView
         echo '<article class="fb-card faluss-moderation"><h2>' . ($detail ? 'Fiche du compte local' : 'Compte lié') . '</h2>';
         AccountContext::member($id, $profile);
         BackOfficeMetrics::render($id, $profile);
+        if ($detail && RankingAliasPanel::available()) { echo '<p><a href="' . esc_url(BackOffice::url(['view' => 'ranking', 'member' => (string) $id])) . '">Examiner le pseudonyme de classement Fan →</a></p>'; }
         if (!$detail) { echo '<a href="' . esc_url(BackOffice::url(['view' => 'accounts', 'user' => (string) $id])) . '">Examiner le compte →</a>'; }
         if ($detail && $profile !== null) {
             foreach (['profiles' => 'Admission et journal', 'editorial' => 'Présentation éditoriale'] as $view => $label) {
@@ -87,7 +89,7 @@ final class BackOfficeView
             echo '<tr><th>' . esc_html($label) . '</th><td>' . (isset($sections[$key]) ? 'Disponible pour votre compte' : 'Module fermé, prérequis absent ou habilitation insuffisante') . '</td></tr>';
         }
         echo '<tr><th>Notifications privées</th><td>'.(\Faluss\Platform\Fans\Notifications\NotificationSchema::ready()?'Stockage vérifié ; lecture réservée au destinataire':'Stockage indisponible : décisions émettrices refusées').'</td></tr>';
-        echo '<tr><th>HoF et classement calculé</th><td>Indisponibles : contrat Hub non ratifié</td></tr><tr><th>Paiement et réservations</th><td>Indisponibles</td></tr></tbody></table>';
+        echo '<tr><th>HoF et classement calculé</th><td>Contrats fermés ratifiés et testés sur instances jetables ; admission et activation réelles distinctes.</td></tr><tr><th>Paiement et réservations</th><td>Indisponibles</td></tr></tbody></table>';
         if (MessageOperations::allowed()) { echo '<p><a href="' . esc_url(BackOffice::url(['view' => 'operations'])) . '">Vérifier les schémas et la rétention messagerie →</a></p>'; }
     }
 

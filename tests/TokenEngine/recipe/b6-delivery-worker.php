@@ -145,6 +145,12 @@ try {
             $prepared = $bridge->prepare($input['session'],(int) $session['revision']); $result = $bridge->advance($input['session'],(int) $session['revision']);
             return $result + ['action_id' => $prepared['action_id']];
         })(),
+        'preferences' => $visibility->own(),
+        'presentation-timezone' => (static function () use ($input): array {
+            if (!current_user_can('manage_options') || !in_array($input['zone'], ['', 'UTC', 'Europe/Paris'], true)) { throw new ModelViolation('pf_fixture_timezone_refused'); }
+            $previous = get_option('timezone_string', ''); update_option('timezone_string', $input['zone']);
+            return ['previous' => $previous];
+        })(),
         'consent' => $visibility->consent($input['family'],$input['enabled'],(int) $visibility->own()['revision']),
         'suspend' => (static function () use ($admin,$input): mixed { wp_set_current_user($admin->ID); return CreatorProfileService::setStatus($input['creator_profile'],$input['status']); })(),
         'seed' => (static function () use ($wpdb,$input,$admin,$visibility): array {

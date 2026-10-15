@@ -63,7 +63,7 @@ final class FansUiView
         'public-profile' => ['Découvrir', 'Profil créateur', 'explorer', 'Découvrez son univers et ses publications.'],
     ];
 
-    public static function render(string $role, string $view, ?string $creatorId, int $status = 200, string $signIn = '', ?FansUiAuthor $author = null, ?FansUiAdmission $admission = null, ?FansUiEditorial $editorial = null, ?FansUiImages $images = null, ?FansUiMessages $messages = null, ?FansUiAuthor $composer = null, ?FansUiNotifications $notifications = null, ?FansUiHof $hof = null): void
+    public static function render(string $role, string $view, ?string $creatorId, int $status = 200, string $signIn = '', ?FansUiAuthor $author = null, ?FansUiAdmission $admission = null, ?FansUiEditorial $editorial = null, ?FansUiImages $images = null, ?FansUiMessages $messages = null, ?FansUiAuthor $composer = null, ?FansUiNotifications $notifications = null, ?FansUiHof $hof = null, ?FansUiRankingPrivacy $privacy = null): void
     {
         $errorView = in_array($view, ['profile-unavailable', 'creator-unavailable'], true);
         $page = self::PAGES[$view === 'public-profile' || $errorView ? $view : $role . ':' . $view] ?? null;
@@ -167,6 +167,7 @@ final class FansUiView
                 </div>
             </section>
         <?php endif; ?>
+        <?php if ($privacy !== null) { FansUiRankingPrivacyView::render($privacy); } ?>
         <?php if ($admission !== null) { FansUiReading::admission($admission); } ?>
         <?php if ($view !== 'notifications'): ?><footer class="fu-footer">Faluss Fans · Certaines fonctionnalités arrivent progressivement.</footer><?php endif; ?>
     </main>

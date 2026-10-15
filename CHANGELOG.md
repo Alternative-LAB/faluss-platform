@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Ajouté
+
+- Formulaires B6 fermés de pseudonyme Fan et consentements de visibilité séparés, modération dans le panel Fans avec nonce/révision et journal existants ; refus des POST ambigus avec l'admission Créateur, retrait possible pendant une incertitude Hub. Recette applicative sur instances jetables uniquement, sans activation ou contrat économique ajouté.
+
 ## [0.13.0] - 2026-10-15
 
 ### Ajouté
