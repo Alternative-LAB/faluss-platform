@@ -2,10 +2,27 @@
 import concurrent.futures
 import copy
 import json
+import re
 import secrets
+import shutil
 import socket
 import time
 import uuid
+
+
+def lookup_proof(root, fixture, progress):
+    fields, sealed, _ = fixture['request'](progress)
+    status, proof = fixture['proof_for'](fields, sealed)
+    if status != 200:
+        try:
+            reason = (root / 'corpus-http-diagnostic').read_text()
+            if re.fullmatch(r'pf_[a-z0-9_]{1,60}', reason) is None:
+                reason = 'unavailable'
+        except (OSError, UnicodeError):
+            reason = 'none'
+        raise RuntimeError('Expurgated lookup HTTP diagnostics: ' + json.dumps(dict(
+            status=status, hub_reason=reason, temporary_free_bytes=shutil.disk_usage(root).free)))
+    return proof
 
 
 def run_checks(root, source, cli_path, check, call, sql, command, fixture):
@@ -109,7 +126,7 @@ def run_checks(root, source, cli_path, check, call, sql, command, fixture):
           and rows(read,'pages')==2 and current()['manifest']['net_pf']=='1')
 
     # Deterministically delay an authenticated absence response until another worker stages page zero.
-    read=str(uuid.uuid4());p=progress(read);fields,sealed,_=fixture['request'](p);status,late=fixture['proof_for'](fields,sealed);assert status==200
+    read=str(uuid.uuid4());p=progress(read);late=lookup_proof(root,fixture,p)
     staged=reader(read,2)
     check('B3cr late primary absence never rewinds a newer materialized checkpoint',staged['state']=='pending'
           and inbox('accept',proof=late)==dict(error='pf_local_corpus_checkpoint_moved') and progress(read)['phase']=='page')

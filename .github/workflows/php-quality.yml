@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: php-quality-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   php:
     name: Lint, static analysis and tests
@@ -81,29 +85,20 @@ jobs:
   identity-admin-wordpress:
     name: Identity admin-post real WordPress
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.3'
-          coverage: none
-          extensions: mysqli, pdo_mysql, mbstring
-          tools: composer:v2
-      - uses: ramsey/composer-install@v3
-      - name: Install isolated database binaries
-        run: sudo apt-get update -qq && sudo apt-get install -y mariadb-server mariadb-client
-      - name: Fetch pinned WordPress and CLI test tools
-        shell: bash
-        run: |
-          set -euo pipefail
-          curl --fail --silent --show-error --location https://wordpress.org/wordpress-7.1.2.tar.gz -o "$RUNNER_TEMP/wordpress.tar.gz"
-          curl --fail --silent --show-error --location https://github.com/wp-cli/wp-cli/releases/download/v2.12.0/wp-cli-2.12.0.phar -o "$RUNNER_TEMP/wp-cli.phar"
-          echo "c0c666689d66b870d8825500bb8e402ed04de52602c61a6f516c6236b8c9ac67  $RUNNER_TEMP/wordpress.tar.gz" | sha256sum --check
-          echo "ce34ddd838f7351d6759068d09793f26755463b4a4610a5a5c0a97b68220d85c  $RUNNER_TEMP/wp-cli.phar" | sha256sum --check
-          tar -xzf "$RUNNER_TEMP/wordpress.tar.gz" -C "$RUNNER_TEMP"
-          git archive HEAD -o "$RUNNER_TEMP/plugin.tar"
+      - uses: ./.github/actions/wordpress-runtime
       - name: Real creation rotation failure and secret authentication
         run: python3 tests/Identity/recipe/sso-admin-wordpress.py --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --archive "$RUNNER_TEMP/plugin.tar" --vendor "$GITHUB_WORKSPACE/vendor"
+
+  fans-admin-wordpress:
+    name: Fans administration real WordPress
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/wordpress-runtime
       - name: Fans creator admission real WordPress
         run: python3 tests/Fans/Profiles/recipe/admission-wordpress.py --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --test
       - name: Fans messaging operator preparation real WordPress
@@ -116,75 +111,95 @@ jobs:
         run: python3 tests/Fans/Profiles/recipe/admission-wordpress.py --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --test --hof-territory --output "$RUNNER_TEMP/fans-hof-territory-checks.json"
       - name: Fans B2 private session moderation and recourse real WordPress
         run: python3 tests/Fans/Profiles/recipe/admission-wordpress.py --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --test --hof-review --output "$RUNNER_TEMP/fans-hof-review-checks.json"
-      - name: Hub historical PF concurrency and commit recovery real WordPress
-        run: python3 tests/TokenEngine/recipe/run.py --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-checks.json"
-      - name: Hub H1 closed model persistence real WordPress
-        run: python3 tests/TokenEngine/recipe/run.py --h1 --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-h1-checks.json"
-      - name: Hub H2 closed reservations real WordPress
-        run: python3 tests/TokenEngine/recipe/run.py --h2-reservations --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-h2-reservations-checks.json"
-      - name: Hub H2 closed consumption and commit recovery real WordPress
-        run: python3 tests/TokenEngine/recipe/run.py --h2 --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-h2-consumption-checks.json"
-      - name: Hub H3 closed signed persistence real WordPress
-        run: python3 tests/TokenEngine/recipe/run.py --h3-proofs --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-h3-proofs-checks.json"
-      - name: Hub Fans H3 closed private HTTP real WordPress
-        run: python3 tests/TokenEngine/recipe/run.py --h3-http --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-h3-http-checks.json"
-      - name: Hub H4 closed corrections real WordPress
-        run: python3 tests/TokenEngine/recipe/run.py --h4 --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-h4-corrections-checks.json"
-      - name: Hub H4 complete owner snapshots real WordPress
-        run: python3 tests/TokenEngine/recipe/run.py --h4-snapshots --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-h4-snapshots-checks.json"
-      - name: Hub Fans H4 private complete snapshots real WordPress
-        run: python3 tests/TokenEngine/recipe/run.py --h4-http --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-h4-http-checks.json"
-      - name: Fans F1a closed private projections real WordPress
-        run: python3 tests/TokenEngine/recipe/run.py --f1a --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/fans-pf-f1a-checks.json"
-      - name: Hub B3 closed owner barriers real WordPress
-        run: python3 tests/TokenEngine/recipe/run.py --b3-barriers --b3-barrier-completion --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-b3-barriers-checks.json"
-      - name: Hub B3 signed barriers isolated HTTP
-        run: python3 tests/TokenEngine/recipe/run.py --b3-barrier-http --b3-barrier-completion-recovery --b3-barrier-acknowledgement --b1-origin-ack --b3-session-lifecycle --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-b3-barrier-http-checks.json"
-      - name: Hub B3 closed ranked consumption real WordPress
-        run: python3 tests/TokenEngine/recipe/run.py --b3-ranked --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-b3-ranked-checks.json"
-      - name: Hub B3 closed ranked gateway private HTTP real WordPress
-        run: python3 tests/TokenEngine/recipe/run.py --b3-ranked-http --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-b3-ranked-http-checks.json"
-      - name: Fans B3 durable ranked intention and proof inbox real WordPress
-        run: python3 tests/TokenEngine/recipe/run.py --b3-ranked-inbox --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/fans-pf-b3-ranked-inbox-checks.json"
-      - name: Hub B3 closed ranked member snapshots real WordPress
-        run: python3 tests/TokenEngine/recipe/run.py --b3-snapshots --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-b3-snapshots-checks.json"
-      - name: Hub B3 exhaustive owner corpus source real WordPress
-        run: python3 tests/TokenEngine/recipe/run.py --b3-corpus-source --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-b3-corpus-source-checks.json"
-      - name: Hub B3 complete immutable corpus and primary fence real WordPress
-        run: python3 tests/TokenEngine/recipe/run.py --b3-corpus --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-b3-corpus-checks.json"
-      - name: Hub Fans B3 signed corpus private HTTP real WordPress
-        run: python3 tests/TokenEngine/recipe/run.py --b3-corpus-http --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/hub-pf-b3-corpus-http-checks.json"
-      - name: Fans B3 durable complete corpus inbox real WordPress
-        run: python3 tests/TokenEngine/recipe/run.py --b3-corpus-inbox --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/fans-pf-b3-corpus-inbox-checks.json"
-      - name: Fans B3 bounded durable corpus reader real WordPress
-        run: python3 tests/TokenEngine/recipe/run.py --b3-corpus-reader --b5-sessions --b6-corpus-transaction --b6-primary-refresh --b6-joined-integration --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/fans-pf-b3-corpus-reader-checks.json"
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: hub-pf-runtime-checks
-          path: |
-            ${{ runner.temp }}/hub-pf-checks.json
-            ${{ runner.temp }}/hub-pf-h1-checks.json
-            ${{ runner.temp }}/hub-pf-h2-reservations-checks.json
-            ${{ runner.temp }}/hub-pf-h2-consumption-checks.json
-            ${{ runner.temp }}/hub-pf-h3-proofs-checks.json
-            ${{ runner.temp }}/hub-pf-h3-http-checks.json
-            ${{ runner.temp }}/hub-pf-h4-corrections-checks.json
-            ${{ runner.temp }}/hub-pf-h4-snapshots-checks.json
-            ${{ runner.temp }}/hub-pf-h4-http-checks.json
-            ${{ runner.temp }}/fans-pf-f1a-checks.json
-            ${{ runner.temp }}/hub-pf-b3-barriers-checks.json
-            ${{ runner.temp }}/hub-pf-b3-barrier-http-checks.json
-            ${{ runner.temp }}/hub-pf-b3-ranked-checks.json
-            ${{ runner.temp }}/hub-pf-b3-ranked-http-checks.json
-            ${{ runner.temp }}/fans-pf-b3-ranked-inbox-checks.json
-            ${{ runner.temp }}/hub-pf-b3-snapshots-checks.json
-            ${{ runner.temp }}/hub-pf-b3-corpus-source-checks.json
-            ${{ runner.temp }}/hub-pf-b3-corpus-checks.json
-            ${{ runner.temp }}/hub-pf-b3-corpus-http-checks.json
-            ${{ runner.temp }}/fans-pf-b3-corpus-inbox-checks.json
-            ${{ runner.temp }}/fans-pf-b3-corpus-reader-checks.json
-            ${{ runner.temp }}/fans-hof-b1-checks.json
-            ${{ runner.temp }}/fans-hof-b2-checks.json
-            ${{ runner.temp }}/fans-hof-territory-checks.json
-            ${{ runner.temp }}/fans-hof-review-checks.json
+          name: wordpress-evidence-fans-admin
+          path: ${{ runner.temp }}/fans-hof-*-checks.json
           if-no-files-found: error
+          retention-days: 7
+
+  pf-wordpress:
+    name: PF WordPress (${{ matrix.suite }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        include:
+          - suite: projections
+            flags: --f1a
+            report: fans-pf-f1a-checks.json
+          - suite: session-completion
+            flags: --b3-barriers --b3-barrier-completion
+            report: hub-pf-b3-barriers-checks.json
+          - suite: barrier-http
+            flags: --b3-barrier-http --b3-barrier-completion-recovery --b3-barrier-acknowledgement --b1-origin-ack --b3-session-lifecycle
+            report: hub-pf-b3-barrier-http-checks.json
+          - suite: ranked-inbox
+            flags: --b3-ranked-inbox
+            report: fans-pf-b3-ranked-inbox-checks.json
+          - suite: corpus-joined
+            flags: --b3-corpus-reader --b5-sessions --b6-corpus-transaction --b6-primary-refresh --b6-joined-integration
+            report: fans-pf-b3-corpus-reader-checks.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/wordpress-runtime
+      - name: Keep disposable fixtures on bounded memory storage
+        if: ${{ matrix.suite == 'corpus-joined' && runner.environment == 'github-hosted' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo mount -t tmpfs -o size=1G,mode=1777,nosuid,nodev tmpfs /var/tmp
+          test "$(findmnt -n -o FSTYPE --target /var/tmp)" = tmpfs
+      - name: Execute complete recipe on fresh disposable nodes
+        env:
+          PF_FLAGS: ${{ matrix.flags }}
+          PF_REPORT: ${{ matrix.report }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          read -ra pf_flags <<< "$PF_FLAGS"
+          time python3 tests/TokenEngine/recipe/run.py "${pf_flags[@]}" \
+            --source "$GITHUB_WORKSPACE" --core "$RUNNER_TEMP/wordpress" \
+            --cli "$RUNNER_TEMP/wp-cli.phar" --output "$RUNNER_TEMP/$PF_REPORT"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wordpress-evidence-${{ matrix.suite }}
+          path: ${{ runner.temp }}/${{ matrix.report }}
+          if-no-files-found: error
+          retention-days: 7
+
+  wordpress-coverage:
+    name: WordPress recipe coverage
+    needs: [fans-admin-wordpress, pf-wordpress]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require all recipe jobs to succeed
+        env:
+          RECIPE_RESULTS: ${{ toJSON(needs) }}
+        run: python3 -c 'import json, os, sys; results = json.loads(os.environ["RECIPE_RESULTS"]); sys.exit(not results or any(job["result"] != "success" for job in results.values()))'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wordpress-evidence-*
+          merge-multiple: true
+          path: ${{ runner.temp }}/wordpress-evidence
+      - name: Preserve the trusted baseline assertions
+        run: python3 scripts/validate-wordpress-coverage.py "$RUNNER_TEMP/wordpress-evidence"
+
+  wordpress-integration:
+    name: WordPress integration tests
+    needs: [identity-admin-wordpress, fans-admin-wordpress, pf-wordpress, wordpress-coverage]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require every integration and coverage result
+        env:
+          INTEGRATION_RESULTS: ${{ toJSON(needs) }}
+        run: python3 -c 'import json, os, sys; results = json.loads(os.environ["INTEGRATION_RESULTS"]); sys.exit(not results or any(job["result"] != "success" for job in results.values()))'
