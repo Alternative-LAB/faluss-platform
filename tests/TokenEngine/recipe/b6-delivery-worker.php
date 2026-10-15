@@ -82,6 +82,7 @@ try {
         'ranking' => $delivery->ranking($input['family'],$input['category'] ?? null),
         'statement' => $delivery->statement($input['family'],$input['month']),
         'sessions' => $delivery->sessions($input['after'] ?? ''),
+        'overview' => $delivery->overview($input['category'] ?? null,$input['after'] ?? ''),
         'session' => $delivery->session($input['session']),
         'fixture-cookie' => (static function () use ($input): array {
             if (!isset($input['actor']) || get_user_by('id',$input['actor']) === false) { throw new ModelViolation('pf_fixture_actor_required'); }

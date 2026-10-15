@@ -143,6 +143,10 @@ def run_checks(root,source,cli_path,check,command,fixture,hub_sql,hub,delivery_e
             deliver('ranking',family='creator',category=intent['ranking_context']['creator_category'])['items'][0]['points']=='3')
         check('B6dl session delivery shares the same one-consumption corrected source',
               deliver('session',session=session['session_id'])['items']==[dict(name='Atelier de recette B6',points='3',position='1')])
+        overview=deliver('overview')
+        check('B6dl overview composes ranking and approved sessions from one current source transaction',
+              overview['ranking']['source_at']==overview['sessions']['source_at']==overview['sessions']['items'][0]['source_at']
+              and overview['ranking']['items'][0]['points']==overview['sessions']['items'][0]['items'][0]['points']=='3')
         screen('visitor-hof','fan','hof')
         screen('creator-hof','creator','hof',actors['creator_user'])
         screen('fan-rankings','fan','classement-fans',actors['fan_user'])

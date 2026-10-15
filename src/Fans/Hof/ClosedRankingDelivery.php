@@ -23,13 +23,7 @@ final class ClosedRankingDelivery
     public function ranking(string $family, ?string $category = null): array
     {
         self::family($family); if ($category !== null) { RankingPolicy::category($category); }
-        return $this->withSource(function (array $document, array $origin) use ($family,$category): array {
-            $selected = $category === null ? $document['general'] : $document['categories'][$category];
-            $identity = new RankingIdentity($this->db);
-            return ['items' => RankingVisibleProjection::build($selected[$family === 'fan' ? 'fans' : 'creators'],
-                static fn (string $id): ?string => $identity->visibleNameInTransaction($family,$id)),
-                'source_at' => $document['source']['verified_at']];
-        });
+        return $this->withSource(fn (array $document, array $origin): array => $this->rankingInTransaction($document,$family,$category));
     }
 
     /** Private current linked member only. Public consent and active creator visibility are separate.
@@ -66,20 +60,48 @@ final class ClosedRankingDelivery
     public function sessions(string $after = ''): array
     {
         if ($after !== '') { \Faluss\Platform\TokenEngine\PurchasedPf\ModelValues::uuid($after); }
-        return $this->withSource(function (array $document, array $origin) use ($after): array {
-            $rows = $this->db->get_results($this->db->prepare('SELECT session_id FROM %i WHERE session_id>%s AND state IN (%s,%s,%s) ORDER BY session_id LIMIT 21',
-                SessionSchema::tables($this->db)['records'],$after,'open','closed','cancelled'),'ARRAY_A');
-            if (!is_array($rows) || $this->db->last_error !== '') { throw new ModelViolation('hof_storage_unavailable'); }
-            $items = [];
-            foreach (array_slice($rows,0,20) as $row) {
-                try { $items[] = $this->sessionInTransaction($document,$origin,$row['session_id'],'creator'); }
-                catch (ModelViolation $error) {
-                    // Suspension or editorial withdrawal suppresses this session. Proof/schema/conflict errors suppress the page.
-                    if (!in_array($error->reason,['hof_session_unavailable','hof_session_approval_required'],true)) { throw $error; }
-                }
+        return $this->withSource(fn (array $document, array $origin): array => $this->sessionsInTransaction($document,$origin,$after));
+    }
+
+    /** One page cannot mix rankings and sessions from different corpus generations/visibility snapshots.
+     * @return array{ranking:array{items:list<array{name:string,points:string,position:string}>,source_at:string},sessions:array{items:list<array<string,mixed>>,next_cursor:?string,source_at:string}} */
+    public function overview(?string $category = null, string $after = ''): array
+    {
+        if ($category !== null) { RankingPolicy::category($category); }
+        if ($after !== '') { \Faluss\Platform\TokenEngine\PurchasedPf\ModelValues::uuid($after); }
+        return $this->withSource(fn (array $document, array $origin): array => [
+            'ranking' => $this->rankingInTransaction($document,'creator',$category),
+            'sessions' => $this->sessionsInTransaction($document,$origin,$after)]);
+    }
+
+    /** @param array<string,mixed> $document
+     * @return array{items:list<array{name:string,points:string,position:string}>,source_at:string} */
+    private function rankingInTransaction(array $document, string $family, ?string $category): array
+    {
+        $selected = $category === null ? $document['general'] : $document['categories'][$category];
+        $identity = new RankingIdentity($this->db);
+        return ['items' => RankingVisibleProjection::build($selected[$family === 'fan' ? 'fans' : 'creators'],
+            static fn (string $id): ?string => $identity->visibleNameInTransaction($family,$id)),
+            'source_at' => $document['source']['verified_at']];
+    }
+
+    /** @param array<string,mixed> $document
+     * @param array<string,string> $origin
+     * @return array{items:list<array<string,mixed>>,next_cursor:?string,source_at:string} */
+    private function sessionsInTransaction(array $document, array $origin, string $after): array
+    {
+        $rows = $this->db->get_results($this->db->prepare('SELECT session_id FROM %i WHERE session_id>%s AND state IN (%s,%s,%s) ORDER BY session_id LIMIT 21',
+            SessionSchema::tables($this->db)['records'],$after,'open','closed','cancelled'),'ARRAY_A');
+        if (!is_array($rows) || $this->db->last_error !== '') { throw new ModelViolation('hof_storage_unavailable'); }
+        $items = [];
+        foreach (array_slice($rows,0,20) as $row) {
+            try { $items[] = $this->sessionInTransaction($document,$origin,$row['session_id'],'creator'); }
+            catch (ModelViolation $error) {
+                // Suspension or editorial withdrawal suppresses this session. Proof/schema/conflict errors suppress the page.
+                if (!in_array($error->reason,['hof_session_unavailable','hof_session_approval_required'],true)) { throw $error; }
             }
-            return ['items' => $items,'next_cursor' => count($rows) > 20 ? $rows[19]['session_id'] : null,'source_at' => $document['source']['verified_at']];
-        });
+        }
+        return ['items' => $items,'next_cursor' => count($rows) > 20 ? $rows[19]['session_id'] : null,'source_at' => $document['source']['verified_at']];
     }
 
     /** @param array<string,mixed> $document

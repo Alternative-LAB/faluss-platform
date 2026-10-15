@@ -170,6 +170,12 @@ final class ClosedProtocolGuardTest extends TestCase
         self::assertSame(0,$database->queries);
         $primaryType = new \ReflectionClass(\Faluss\Platform\Fans\PfContract\ClosedBarrierPrimaryRead::class);
         $primary = $primaryType->newInstanceWithoutConstructor();
+        try {
+            (new \Faluss\Platform\Fans\Hof\ClosedSessionRead($database,$primary,'11111111-1111-4111-8111-111111111111'))
+                ->readInTransaction('22222222-2222-4222-8222-222222222222');
+            self::fail('Session metadata must not read ordinary WordPress storage or trust.');
+        } catch (ModelViolation $error) { self::assertSame('isolated_h3_recipe_required',$error->reason); }
+        self::assertSame(0,$database->queries);
         foreach ([static fn () => new \Faluss\Platform\Fans\PfContract\ClosedBarrierPrimaryRead($database,$inbox,
             new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',[],[])),
             static fn () => new \Faluss\Platform\Fans\PfContract\ClosedBarrierPrimaryClient($database,$inbox,$primary,'recipe-key','')] as $operation) {

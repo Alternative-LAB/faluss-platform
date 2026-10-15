@@ -64,11 +64,12 @@ final class FansUiHof
                 if (!isset($_GET['session']) || !is_string($_GET['session'])) { throw new ModelViolation('hof_session_not_found'); }
                 $state->session = $provider->session(wp_unslash($_GET['session']));
             } else {
-                $state->ranking = $provider->ranking($state->family, $state->category === '' ? null : $state->category);
                 if ($view === 'hof') {
                     if (isset($_GET['session_cursor']) && !is_string($_GET['session_cursor'])) { throw new ModelViolation('hof_invalid_cursor'); }
-                    $state->sessions = $provider->sessions(isset($_GET['session_cursor']) ? wp_unslash($_GET['session_cursor']) : '');
-                }
+                    $overview = $provider->overview($state->category === '' ? null : $state->category,
+                        isset($_GET['session_cursor']) ? wp_unslash($_GET['session_cursor']) : '');
+                    $state->ranking = $overview['ranking']; $state->sessions = $overview['sessions'];
+                } else { $state->ranking = $provider->ranking($state->family, $state->category === '' ? null : $state->category); }
             }
             $state->available = $state->ranking !== null || $state->statement !== null || $state->session !== null || $state->sessions !== null;
         } catch (ModelViolation) {
