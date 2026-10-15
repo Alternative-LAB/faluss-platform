@@ -10,6 +10,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 - Lecture privée paginée des sessions associées au Créateur courant pour préparer leur gestion B6, sans destinataire choisi par le navigateur ni pouvoir implicite pour une invitation ; tests WordPress/MariaDB des exclusions, suspensions et pages au-delà de vingt. Raccordement d'interface en cours, aucune activation.
 - Adaptateur des dates de formulaire de session vers le calendrier existant : heures ambiguës explicitement départagées, heures inexistantes refusées et fractions UTC conservées lors d'une saisie inchangée. Aucun changement de fuseau global ou de règle de session.
+- Préparation fermée de l'interface propriétaire et du panel d'examen des sessions B6 : brouillons, soumission, recours et décisions sur révision exacte. [Travail sauvegardé non livrable](docs/modules/FANS-HOF-B6-SESSION-UI.md) : recettes HTTP, captures et raccordement complet du cycle Hub restent nécessaires ; aucune activation.
 - Formulaires B6 fermés de pseudonyme Fan et consentements de visibilité séparés, modération dans le panel Fans avec nonce/révision et journal existants ; refus des POST ambigus avec l'admission Créateur, retrait possible pendant une incertitude Hub. Recette applicative sur instances jetables uniquement, sans activation ou contrat économique ajouté.
 
 ## [0.13.0] - 2026-10-15

@@ -105,7 +105,7 @@ final class SessionService
         });
     }
 
-    /** Private stable cursor: includes invitations/history, never another member's session.
+    /** Private stable cursor: includes invitations/history, never an unrelated session.
      * @return list<array<string,string>> */
     public function own(string $after = ''): array
     {

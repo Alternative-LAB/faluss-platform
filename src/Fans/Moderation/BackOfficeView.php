@@ -21,6 +21,7 @@ final class BackOfficeView
             'staff' => BackOfficeStaff::render(),
             'catalog' => BackOfficeCatalog::render(),
             'ranking' => RankingAliasPanel::render(),
+            'sessions' => SessionReviewPanel::render(),
             default => self::overview(),
         };
     }

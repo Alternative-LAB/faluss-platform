@@ -7,6 +7,7 @@ namespace Faluss\Platform\Tests\Fans\Ui;
 use Faluss\Platform\Fans\Ui\FansUiHof;
 use Faluss\Platform\Fans\Ui\FansUiHofView;
 use Faluss\Platform\Fans\Ui\FansUiRankingPrivacy;
+use Faluss\Platform\Fans\Ui\FansUiSessions;
 use PHPUnit\Framework\TestCase;
 
 final class FansHofPresentationTest extends TestCase
@@ -24,7 +25,19 @@ final class FansHofPresentationTest extends TestCase
         foreach (['explorer', 'public-profile', 'notifications', 'messages', 'mon-profil', 'boutique', 'creer', 'images'] as $view) {
             self::assertNull(FansUiHof::load('creator', $view));
             self::assertNull(FansUiRankingPrivacy::load('creator', $view));
+            self::assertNull(FansUiSessions::load('creator', $view));
         }
+    }
+
+    public function testPrivateSessionSelectionNeverLoadsOnOtherRolesOrScreens(): void
+    {
+        $previous = $_GET; $_GET = ['manage' => 'sessions'];
+        try {
+            foreach (['visitor', 'fan', 'admin'] as $role) { self::assertNull(FansUiSessions::load($role, 'hof')); }
+            foreach (['espace', 'progression', 'explorer', 'mon-profil', 'hof/session', 'messages'] as $view) {
+                self::assertNull(FansUiSessions::load('creator', $view));
+            }
+        } finally { $_GET = $previous; }
     }
 
     public function testAnUnavailableWordPressConnectionNeverBecomesAScoreOrAFatalError(): void
