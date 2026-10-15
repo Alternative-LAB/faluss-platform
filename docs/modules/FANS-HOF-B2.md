@@ -67,6 +67,13 @@ Pagination au-delà de vingt, exclusion d'un autre compte, curseur invalide,
 lecture après suspension et absence d'écriture sont vérifiées sur la recette
 WordPress/MariaDB existante. Cette méthode ne constitue pas encore son écran B6.
 
+L'adaptateur `FansUiSessionDates` prépare les champs `datetime-local` sans
+nouvelle autorité calendaire : conversion par `RankingCalendar.local`, choix
+explicite du décalage lors d'une ambiguïté et refus d'une heure inexistante.
+Un champ inchangé préserve les fractions de seconde du précédent enregistrement
+fourni par le service propriétaire, jamais par un champ caché du navigateur.
+L'édition après ouverture reste refusée par B2, indépendamment de ce formatage.
+
 La limitation technique de création est vingt brouillons par Créateur et par
 heure ; elle ne change pas le plafond produit de trois ouvertures simultanées.
 Les trois portées sont conservées, mais B2a refuse une ouverture locale/nationale
