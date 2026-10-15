@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Ajouté
+
+- Connexions SignInForge 0.1.1 personnalisées avec Elementor sur les trois sites Faluss : profils visuels reproductibles, catalogue public français, recette d’authentification et procédure de retour arrière.
+
 ### Modifié
 
 - Réduire les coûts du stockage de la recette WordPress/MariaDB `corpus-joined` sur runner GitHub hébergé avec un montage temporaire en mémoire plafonné à 1 Gio ; scénarios, chemins privés et réglages transactionnels inchangés, aucun effet sur la production.

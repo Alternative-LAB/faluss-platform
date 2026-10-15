@@ -1,0 +1,50 @@
+[
+  {
+    "site": "https://faluss.com",
+    "checks": {
+      "branded_french_uncached_form": true,
+      "generic_invalid_login": true,
+      "login_cookie_and_explicit_local_redirect": true,
+      "logout_cookie_revoked_and_branded_return": true,
+      "password_recovery_mail_generated_locally": true,
+      "password_reset": true,
+      "new_password_authenticates": true,
+      "external_redirect_rejected": true,
+      "administrator_default_destination": true,
+      "native_safe_mode_available": true
+    },
+    "success": true
+  },
+  {
+    "site": "https://faluss.me",
+    "checks": {
+      "branded_french_uncached_form": true,
+      "generic_invalid_login": true,
+      "login_cookie_and_explicit_local_redirect": true,
+      "logout_cookie_revoked_and_branded_return": true,
+      "password_recovery_mail_generated_locally": true,
+      "password_reset": true,
+      "new_password_authenticates": true,
+      "external_redirect_rejected": true,
+      "administrator_default_destination": true,
+      "native_safe_mode_available": true
+    },
+    "success": true
+  },
+  {
+    "site": "https://fans.faluss.me",
+    "checks": {
+      "branded_french_uncached_form": true,
+      "generic_invalid_login": true,
+      "login_cookie_and_explicit_local_redirect": true,
+      "logout_cookie_revoked_and_branded_return": true,
+      "password_recovery_mail_generated_locally": true,
+      "password_reset": true,
+      "new_password_authenticates": true,
+      "external_redirect_rejected": true,
+      "administrator_default_destination": true,
+      "native_safe_mode_available": true
+    },
+    "success": true
+  }
+]
