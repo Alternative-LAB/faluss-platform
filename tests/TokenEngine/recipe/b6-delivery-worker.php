@@ -10,6 +10,15 @@ use Faluss\Platform\Fans\Hof\RankingRegistry;
 use Faluss\Platform\Fans\Hof\RankingSchema;
 use Faluss\Platform\Fans\Hof\RankingVisibility;
 use Faluss\Platform\Fans\Hof\SessionSchema;
+use Faluss\Platform\Fans\Hof\ClosedSessionLifecycle;
+use Faluss\Platform\Fans\Hof\ClosedSessionLifecycleSchema;
+use Faluss\Platform\Fans\Hof\SessionBarrierDescriptor;
+use Faluss\Platform\Fans\Hof\SessionService;
+use Faluss\Platform\Fans\Hof\SessionModeration;
+use Faluss\Platform\Fans\Hof\SessionReviewSchema;
+use Faluss\Platform\Fans\Hof\SessionRoles;
+use Faluss\Platform\Fans\Hof\SessionStore;
+use Faluss\Platform\Fans\PfContract\ClosedBarrierClient;
 use Faluss\Platform\Fans\PfContract\ClosedBarrierInbox;
 use Faluss\Platform\Fans\PfContract\ClosedBarrierPrimaryClient;
 use Faluss\Platform\Fans\PfContract\ClosedBarrierPrimaryRead;
@@ -72,6 +81,62 @@ try {
         'advance-read' => (new ClosedBarrierPrimaryClient($wpdb,$inbox,$reader,'recipe-fans-k1',$input['endpoint']))->advance($input['action_id']),
         'ranking' => $delivery->ranking($input['family'],$input['category'] ?? null),
         'statement' => $delivery->statement($input['family'],$input['month']),
+        'sessions' => $delivery->sessions($input['after'] ?? ''),
+        'session' => $delivery->session($input['session']),
+        'render' => (static function () use ($delivery,$input): array {
+            // Actual server DTO and templates, not an injected score or simulated REST response.
+            $linked = \Faluss\Platform\Fans\Sso\FansSsoService::currentLinkedSubject() !== null;
+            $creator = $linked ? CreatorProfileService::own() : null;
+            $requested = $input['role']; $view = $input['view'];
+            $status = \Faluss\Platform\Fans\Ui\FansUiRoutes::accessStatus($requested,$view,$linked,$creator !== null);
+            if ($status !== 200) { return ['status' => $status,'html' => '']; }
+            $role = $linked ? $requested : 'visitor'; $_GET = $input['selection'] ?? [];
+            add_filter('faluss_fans_hof_closed_delivery',static fn (): ClosedRankingDelivery => $delivery);
+            $state = \Faluss\Platform\Fans\Ui\FansUiHof::load($role,$view);
+            ob_start();
+            \Faluss\Platform\Fans\Ui\FansUiView::render($role,$view,null,$status,
+                \Faluss\Platform\Fans\Sso\FansSsoService::button(['return_to' => '/app/' . $requested . '/' . $view]),hof: $state);
+            return ['status' => $status,'html' => ob_get_clean()];
+        })(),
+        'create-session' => (static function () use ($wpdb,$admin,$input,$inbox): array {
+            wp_set_current_user($admin->ID); SessionReviewSchema::installOrVerify($wpdb); ClosedSessionLifecycleSchema::installForRecipe($wpdb);
+            wp_set_current_user($input['actor']);
+            $now = new DateTimeImmutable((new SessionStore($wpdb))->now(),new DateTimeZone('UTC'));
+            $sessions = new SessionService($wpdb); $moderation = new SessionModeration($wpdb);
+            $session = $sessions->create(['title' => 'Rencontres de recette B6','rules_text' => 'Participation volontaire. Données fictives de recette.',
+                'category' => $input['category'],'scope' => 'international','country' => '','territory_ref' => '',
+                'timezone' => 'Europe/Paris','starts_at' => $now->modify('-1 minute')->format('Y-m-d H:i:s.u'),
+                'ends_at' => $now->modify('+40 minutes')->format('Y-m-d H:i:s.u')]);
+            $review = $moderation->submit($session['session_id'],(int) $session['revision'],0);
+            wp_set_current_user($admin->ID); $moderation->decide($session['session_id'],(int) $review['revision'],'approve','allowed_session');
+            wp_set_current_user($input['actor']); $session = $sessions->requestOpen($session['session_id'],(int) $session['revision']);
+            $bridge = new ClosedSessionLifecycle($wpdb,$inbox,new ClosedBarrierClient($wpdb,$inbox,'recipe-fans-k1',$input['endpoint']),$input['origin']);
+            $prepared = $bridge->prepare($session['session_id'],(int) $session['revision']);
+            $result = $bridge->advance($session['session_id'],(int) $session['revision']);
+            if (($result['session_state'] ?? '') !== 'open') { throw new ModelViolation('pf_fixture_session_open_required'); }
+            $session = $sessions->inspect($session['session_id'])['session'];
+            // The organizer also explicitly accepts and joins as an individual participant.
+            $roles = new SessionRoles($wpdb); $session = $roles->apply($session['session_id'],(int) $session['revision'],$session['frozen_sha256']);
+            $own = CreatorProfileService::own();
+            if ($own === null) { throw new ModelViolation('pf_fixture_creator_required'); }
+            $roles->admit($session['session_id'],(int) $session['revision'],$own['creator_id'],true);
+            $store = new SessionStore($wpdb);
+            $admission = $store->transaction(fn (): ?array => $store->role($session['session_id'],$own['creator_id'],'participant'));
+            if ($admission === null || $admission['state'] !== 'admitted') { throw new ModelViolation('pf_fixture_admission_required'); }
+            $content = SessionBarrierDescriptor::compose($session,$input['origin'],null)['content'];
+            $context = array_intersect_key($content,array_flip(['rules_revision','rules_sha256','starts_at','ends_at','scope','territory_policy_revision','country','territory_ref']));
+            return ['session_id' => $session['session_id'],'action_id' => $prepared['action_id'],'context' => ['session_id' => $session['session_id'],
+                'barrier_version' => $session['barrier_version'],'admission_revision' => $admission['revision'],
+                'admitted_at' => $admission['admitted_at'],'territory_admission_revision' => '0'] + $context];
+        })(),
+        'close-session' => (static function () use ($wpdb,$input,$inbox): array {
+            $sessions = new SessionService($wpdb); $session = $sessions->inspect($input['session'])['session'];
+            if ($session['state'] !== 'closing') { $session = $sessions->close($input['session'],(int) $session['revision'],'cancelled'); }
+            if (($input['acknowledge'] ?? false) !== true) { return $session; }
+            $bridge = new ClosedSessionLifecycle($wpdb,$inbox,new ClosedBarrierClient($wpdb,$inbox,'recipe-fans-k1',$input['endpoint']),$input['origin']);
+            $prepared = $bridge->prepare($input['session'],(int) $session['revision']); $result = $bridge->advance($input['session'],(int) $session['revision']);
+            return $result + ['action_id' => $prepared['action_id']];
+        })(),
         'consent' => $visibility->consent($input['family'],$input['enabled'],(int) $visibility->own()['revision']),
         'suspend' => (static function () use ($admin,$input): mixed { wp_set_current_user($admin->ID); return CreatorProfileService::setStatus($input['creator_profile'],$input['status']); })(),
         'seed' => (static function () use ($wpdb,$input,$admin,$visibility): array {
@@ -104,7 +169,7 @@ try {
             wp_set_current_user($actors['fan_user']); $alias = $visibility->submit('Fan de recette B6',0);
             wp_set_current_user($admin->ID); $visibility->decide($actors['fan_user'],(int) $alias['revision'],'approve','allowed_alias');
             wp_set_current_user($actors['fan_user']); $visibility->consent('fan',true,(int) $visibility->own()['revision']);
-            return $actors;
+            return $actors + ['admin_user' => $admin->ID];
         })(),
         default => throw new RuntimeException('Unknown closed delivery fixture operation'),
     };

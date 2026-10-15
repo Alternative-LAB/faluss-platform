@@ -53,6 +53,56 @@ final class ClosedRankingDelivery
         });
     }
 
+    /** Current complete source and approved frozen session, with no mutation or private subject in the DTO.
+     * @return array<string,mixed> */
+    public function session(string $id, string $family = 'creator'): array
+    {
+        self::family($family);
+        return $this->withSource(fn (array $document, array $origin): array => $this->sessionInTransaction($document,$origin,$id,$family));
+    }
+
+    /** Keyset pages cover all published candidates; an unverified page fails closed rather than claiming completeness.
+     * @return array{items:list<array<string,mixed>>,next_cursor:?string,source_at:string} */
+    public function sessions(string $after = ''): array
+    {
+        if ($after !== '') { \Faluss\Platform\TokenEngine\PurchasedPf\ModelValues::uuid($after); }
+        return $this->withSource(function (array $document, array $origin) use ($after): array {
+            $rows = $this->db->get_results($this->db->prepare('SELECT session_id FROM %i WHERE session_id>%s AND state IN (%s,%s,%s) ORDER BY session_id LIMIT 21',
+                SessionSchema::tables($this->db)['records'],$after,'open','closed','cancelled'),'ARRAY_A');
+            if (!is_array($rows) || $this->db->last_error !== '') { throw new ModelViolation('hof_storage_unavailable'); }
+            $items = [];
+            foreach (array_slice($rows,0,20) as $row) {
+                try { $items[] = $this->sessionInTransaction($document,$origin,$row['session_id'],'creator'); }
+                catch (ModelViolation $error) {
+                    // Suspension or editorial withdrawal suppresses this session. Proof/schema/conflict errors suppress the page.
+                    if (!in_array($error->reason,['hof_session_unavailable','hof_session_approval_required'],true)) { throw $error; }
+                }
+            }
+            return ['items' => $items,'next_cursor' => count($rows) > 20 ? $rows[19]['session_id'] : null,'source_at' => $document['source']['verified_at']];
+        });
+    }
+
+    /** @param array<string,mixed> $document
+     * @param array<string,string> $origin
+     * @return array<string,mixed> */
+    private function sessionInTransaction(array $document, array $origin, string $id, string $family): array
+    {
+        $verified = (new ClosedSessionRead($this->db,$this->barriers,$origin['origin_id']))->readInTransaction($id);
+        $row = $verified['row']; $ranked = [];
+        foreach ($document['sessions'] as $dimension) {
+            if ($dimension['session_id'] !== $id) { continue; }
+            foreach (['rules_revision','rules_sha256','starts_at','ends_at','scope','territory_policy_revision','country','territory_ref'] as $field) {
+                if ($dimension[$field] !== $verified['content'][$field]) { throw new ModelViolation('hof_conflicting_frozen_session'); }
+            }
+            $ranked = $dimension[$family === 'fan' ? 'fans' : 'creators'];
+        }
+        $identity = new RankingIdentity($this->db);
+        return array_intersect_key($row,array_flip(['title','rules_text','category','scope','starts_at','ends_at','state']))
+            + ['id' => $id,'organizers' => $verified['organizers'],'items' => RankingVisibleProjection::build($ranked,
+                static fn (string $subject): ?string => $identity->visibleNameInTransaction($family,$subject)),
+                'source_at' => $document['source']['verified_at']];
+    }
+
     /** The sessions mutex precedes the origin transaction and the authenticated corpus mutex.
      * @template T
      * @param callable(array<string,mixed>,array<string,string>):T $operation

@@ -22,6 +22,10 @@ final class FansUiHof
     public ?array $ranking = null;
     /** @var array{month:string,start:string,end:string,points:string,source_at:string}|null */
     public ?array $statement = null;
+    /** @var array{items:list<array<string,mixed>>,next_cursor:?string,source_at:string}|null */
+    public ?array $sessions = null;
+    /** @var array<string,mixed>|null */
+    public ?array $session = null;
 
     private function __construct(public readonly string $role, public readonly string $view) {}
 
@@ -54,13 +58,21 @@ final class FansUiHof
                     $state->month = wp_unslash($_GET['month']);
                 }
                 $state->statement = $provider->statement($state->family, $state->month);
-            } elseif ($view !== 'hof/session') {
+            } elseif ($view === 'hof/session') {
+                if (!isset($_GET['session']) || !is_string($_GET['session'])) { throw new ModelViolation('hof_session_not_found'); }
+                $state->session = $provider->session(wp_unslash($_GET['session']));
+            } else {
                 $state->ranking = $provider->ranking($state->family, $state->category === '' ? null : $state->category);
+                if ($view === 'hof') {
+                    if (isset($_GET['session_cursor']) && !is_string($_GET['session_cursor'])) { throw new ModelViolation('hof_invalid_cursor'); }
+                    $state->sessions = $provider->sessions(isset($_GET['session_cursor']) ? wp_unslash($_GET['session_cursor']) : '');
+                }
             }
-            $state->available = $state->ranking !== null || $state->statement !== null;
+            $state->available = $state->ranking !== null || $state->statement !== null || $state->session !== null || $state->sessions !== null;
         } catch (ModelViolation) {
             // No diagnostic, partial score or last known rank is sent to the member.
             $state->ranking = $state->statement = null;
+            $state->session = $state->sessions = null;
         }
         return $state;
     }

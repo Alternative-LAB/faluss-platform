@@ -19,10 +19,35 @@ pas les consentements. Un fournisseur absent, une preuve périmée ou une source
 incomplète donne un état indisponible, jamais un zéro ou un rang estimé.
 
 Le sélecteur de catégorie et les pages de vingt lignes sont rendus côté serveur.
-Le relevé privé utilise seulement le membre SSO courant. Les sessions, les
-barrières d'admission complètes, les formulaires de gouvernance et la recette
-visuelle sur la véritable paire jetable restent à raccorder. Ce travail reste
-en brouillon et ne constitue pas encore une livraison B6 complète.
+Le relevé privé utilise seulement le membre SSO courant. La lecture des sessions
+compose aussi les règles figées approuvées, le profil/publication de
+l'organisateur et l'acquittement primaire correspondant exactement à la liaison
+locale de cycle de vie. Elle ne démarre aucune requête réseau ni transaction
+indépendante. L'ancien acquittement d'ouverture ne passe pas pendant une
+fermeture locale ; une session arrivée à échéance attend sa clôture attestée,
+sans être déclarée terminée par le navigateur. Une annulation attestée conserve
+le classement corrigible sans vainqueur. La liste est paginée par clé de session,
+vingt candidates par page ; les erreurs de preuve ferment la page, les retraits
+éditoriaux et suspensions masquent la session. Les identifiants servent aux liens,
+jamais aux libellés. Aucun retrait économique ne réécrit les points historiques.
+
+Scénarios positifs/négatifs de ce raccordement : session approuvée ouverte via
+HTTP Hub réel de recette, vide puis alimentée par la même consommation que les
+classements permanents ; correction partielle commune ; lecture sans preuve
+primaire refusée, suspension masquée, fermeture en cours refusée, annulation
+attestée conservant les deux points nets. Le rendu des vrais DTO/templates est
+exercé pour invité/Fan/Créateur, avec refus des relevés privés invité et admin
+non lié, et du relevé Créateur pour un Fan sans profil. Ces scénarios ajoutés
+attendent leur exécution avant d'être présentés comme des preuves acquises.
+
+L'export facultatif `FALUSS_B6_UI_EXPORT=/var/tmp/fans-hof-ui-…` conserve uniquement
+des replays HTML/assets des données fictives, destinés à la recette de mise en
+page navigateur. Il ne prouve ni une authentification centrale Me ni l'hébergement
+réel des routes. La recette utilise les mécanismes WordPress/MariaDB existants,
+sans modification de préparation, cache, délais, matrice ou runners.
+
+Les formulaires de gouvernance et les intentions serveur complètes restent à
+raccorder. Ce travail reste en brouillon, sans annonce d'activation sur les sites.
 
 La recette applicative complète existante `--b6-joined-integration` vérifie
 désormais aussi le fournisseur, sans modifier ses arguments de CI, la préparation
