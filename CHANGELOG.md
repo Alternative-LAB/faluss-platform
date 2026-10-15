@@ -6,260 +6,415 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+## [0.13.0] - 2026-10-15
+
 ### Ajouté
 
-- Importer ses liens dans Studio V3 depuis un fichier CSV / JSON ou du texte, HTML et Markdown : aperçu modifiable, choix des lignes et de l’ordre, validation et détection des doublons. L’import ajoute les liens sans remplacer les données existantes et respecte la capacité de la carte.
-- Analyse locale des sources et confirmation dans la transaction Link existante, avec contrôle de version, rapport des imports partiels et annulation complète des erreurs de stockage. Aucun scraping, migration de schéma ou accès tiers.
-- Guide [d’import des liens](docs/modules/LINK-IMPORT.md) et tests des formats, droits, limites, conservation, conflits, rollback et interface mobile.
-
-### Modifié
-
-- Harmoniser l’import de liens avec le Studio : choix fichier / copier-coller, parcours en deux étapes, liste compacte avec éditeurs dépliables et une seule action principale corail. Conserver séparément les brouillons de chaque source lors des changements d’onglet.
-
-- Réduire les coûts du stockage de la recette WordPress/MariaDB `corpus-joined` sur runner GitHub hébergé avec un montage temporaire en mémoire plafonné à 1 Gio ; scénarios, chemins privés et réglages transactionnels inchangés, aucun effet sur la production.
-- Accélérer la CI WordPress : Identity et administration Fans séparés, cinq recettes PF terminales parallèles et vérification des 1 413 assertions historiques ; outils épinglés et bytecode CLI partagés avec revalidation immédiate, budgets de temps et annulation des workflows obsolètes de PR. Aucun scénario applicatif ou état de production modifié.
+- Add universal link imports to Faluss Studio (`43dffec`)
+- Compose current barrier proofs in the existing owner transaction (`afa80ef`)
+- Hold session governance before the composed owner transaction (`7aa22cc`)
+- Recheck primary barrier state with durable lookup recovery (`86711d2`)
+- Bind attested ranking identities to current local accounts (`2438910`)
+- Add corrected ranking domain and Paris calendars (`28a8149`)
+- Persist private ranking governance and revocable visibility (`28a8149`)
+- Add private creator sessions and atomic participation governance (`28a8149`)
+- Add reviewed principal territories and private recourse (`28a8149`)
+- Add private session moderation and participation appeals (`28a8149`)
+- Add versioned private ranking contexts and receipts (`28a8149`)
+- Add closed Hub ranking barriers and primary recovery (`28a8149`)
+- Bind ranked context and authoritative order to one owner consumption (`28a8149`)
+- Add complete ranked member snapshots in the closed Hub recipe (`28a8149`)
+- Add the approved exhaustive ranking corpus validator (`28a8149`)
+- Read exhaustive ranked facts through the Hub owner (`28a8149`)
+- Materialize exhaustive closed corpus with primary recovery (`28a8149`)
+- Bind exhaustive corpus reads to dedicated signed contexts (`28a8149`)
+- Add closed signed corpus transport and primary recovery (`28a8149`)
+- Persist the closed signed corpus inbox and atomic recovery (`28a8149`)
+- Resume bounded signed corpus reads through durable checkpoints (`28a8149`)
+- Bind ranked attribution messages to their signed immutable context (`28a8149`)
+- Add the approved private ranking barrier wire codec (`28a8149`)
+- Project private rankings and Paris statements from complete corpora (`28a8149`)
+- Bind closed barrier actions to owner context and transaction freshness (`28a8149`)
+- Exercise the closed ranked gateway over private WordPress HTTP (`28a8149`)
+- Persist closed ranked intentions and signed Fans receipts (`28a8149`)
+- Add isolated barrier nonce admission with expiry fencing (`28a8149`)
+- Deliver signed owner barrier operations in isolated HTTP (`28a8149`)
+- Persist and recover private Fans barrier actions (`28a8149`)
+- Add explicit signed session completion barrier messages (`28a8149`)
+- Persist corrected private ranking generations from complete Hub corpus (`28a8149`)
+- Project private HoF sessions from complete corrected Hub facts (`28a8149`)
+- Close ended sessions atomically on the authoritative Hub primary (`28a8149`)
+- Dispatch signed session completion through the isolated Hub gateway (`28a8149`)
+- Persist explicit completion versions and recover the same Fans barrier action (`28a8149`)
+- Fence local governance with current barrier acknowledgements (`28a8149`)
+- Persist corrected session projections in the private generation (`28a8149`)
+- Filter ranking display by current approved visibility (`28a8149`)
+- Record actual origin admission from the current primary acknowledgement (`28a8149`)
+- Recheck the same closed corpus against the primary fence (`28a8149`)
+- Compose the private corpus in its caller-owned transaction (`28a8149`)
+- Consolidate attested origin and session barrier lifecycles (`28a8149`)
+- Add corrected ranking domain and Paris calendars (`32318d4`)
+- Persist private ranking governance and revocable visibility (`32318d4`)
+- Add private creator sessions and atomic participation governance (`32318d4`)
+- Add reviewed principal territories and private recourse (`32318d4`)
+- Add private session moderation and participation appeals (`32318d4`)
+- Add versioned private ranking contexts and receipts (`32318d4`)
+- Add closed Hub ranking barriers and primary recovery (`32318d4`)
+- Bind ranked context and authoritative order to one owner consumption (`32318d4`)
+- Add complete ranked member snapshots in the closed Hub recipe (`32318d4`)
+- Add the approved exhaustive ranking corpus validator (`32318d4`)
+- Read exhaustive ranked facts through the Hub owner (`32318d4`)
+- Materialize exhaustive closed corpus with primary recovery (`32318d4`)
+- Bind exhaustive corpus reads to dedicated signed contexts (`32318d4`)
+- Add closed signed corpus transport and primary recovery (`32318d4`)
+- Persist the closed signed corpus inbox and atomic recovery (`32318d4`)
+- Resume bounded signed corpus reads through durable checkpoints (`32318d4`)
+- Bind ranked attribution messages to their signed immutable context (`32318d4`)
+- Add the approved private ranking barrier wire codec (`32318d4`)
+- Bind closed barrier actions to owner context and transaction freshness (`32318d4`)
+- Exercise the closed ranked gateway over private WordPress HTTP (`32318d4`)
+- Persist closed ranked intentions and signed Fans receipts (`32318d4`)
+- Add isolated barrier nonce admission with expiry fencing (`32318d4`)
+- Deliver signed owner barrier operations in isolated HTTP (`32318d4`)
+- Persist and recover private Fans barrier actions (`32318d4`)
+- Add explicit signed session completion barrier messages (`32318d4`)
+- Close ended sessions atomically on the authoritative Hub primary (`32318d4`)
+- Dispatch signed session completion through the isolated Hub gateway (`32318d4`)
+- Persist explicit completion versions and recover the same Fans barrier action (`32318d4`)
+- Fence local governance with current barrier acknowledgements (`32318d4`)
+- Record actual origin admission from the current primary acknowledgement (`32318d4`)
+- Consolidate attested origin and session barrier lifecycles (`32318d4`)
+- Add corrected ranking domain and Paris calendars (`5d0f91d`)
+- Persist private ranking governance and revocable visibility (`5d0f91d`)
+- Add private creator sessions and atomic participation governance (`5d0f91d`)
+- Add reviewed principal territories and private recourse (`5d0f91d`)
+- Add private session moderation and participation appeals (`5d0f91d`)
+- Add versioned private ranking contexts and receipts (`5d0f91d`)
+- Add closed Hub ranking barriers and primary recovery (`5d0f91d`)
+- Bind ranked context and authoritative order to one owner consumption (`5d0f91d`)
+- Add complete ranked member snapshots in the closed Hub recipe (`5d0f91d`)
+- Add the approved exhaustive ranking corpus validator (`5d0f91d`)
+- Read exhaustive ranked facts through the Hub owner (`5d0f91d`)
+- Materialize exhaustive closed corpus with primary recovery (`5d0f91d`)
+- Bind exhaustive corpus reads to dedicated signed contexts (`5d0f91d`)
+- Add closed signed corpus transport and primary recovery (`5d0f91d`)
+- Persist the closed signed corpus inbox and atomic recovery (`5d0f91d`)
+- Resume bounded signed corpus reads through durable checkpoints (`5d0f91d`)
+- Bind ranked attribution messages to their signed immutable context (`5d0f91d`)
+- Exercise the closed ranked gateway over private WordPress HTTP (`5d0f91d`)
+- Persist closed ranked intentions and signed Fans receipts (`5d0f91d`)
+- Add corrected ranking domain and Paris calendars (`90baa73`)
+- Persist private ranking governance and revocable visibility (`90baa73`)
+- Add private creator sessions and atomic participation governance (`90baa73`)
+- Add reviewed principal territories and private recourse (`90baa73`)
+- Add private session moderation and participation appeals (`90baa73`)
+- Add versioned private ranking contexts and receipts (`90baa73`)
+- Add closed Hub ranking barriers and primary recovery (`90baa73`)
+- Bind ranked context and authoritative order to one owner consumption (`90baa73`)
+- Add complete ranked member snapshots in the closed Hub recipe (`90baa73`)
+- Add the approved exhaustive ranking corpus validator (`90baa73`)
+- Read exhaustive ranked facts through the Hub owner (`90baa73`)
+- Materialize exhaustive closed corpus with primary recovery (`90baa73`)
+- Bind exhaustive corpus reads to dedicated signed contexts (`90baa73`)
+- Add closed signed corpus transport and primary recovery (`90baa73`)
+- Persist the closed signed corpus inbox and atomic recovery (`90baa73`)
+- Resume bounded signed corpus reads through durable checkpoints (`90baa73`)
+- Add corrected ranking domain and Paris calendars (`9198b39`)
+- Persist private ranking governance and revocable visibility (`9198b39`)
+- Add private creator sessions and atomic participation governance (`9198b39`)
+- Add reviewed principal territories and private recourse (`9198b39`)
+- Add private session moderation and participation appeals (`9198b39`)
+- Add versioned private ranking contexts and receipts (`9198b39`)
+- Add closed Hub ranking barriers and primary recovery (`9198b39`)
+- Bind ranked context and authoritative order to one owner consumption (`9198b39`)
+- Add complete ranked member snapshots in the closed Hub recipe (`9198b39`)
+- Add the approved exhaustive ranking corpus validator (`9198b39`)
+- Read exhaustive ranked facts through the Hub owner (`9198b39`)
+- Materialize exhaustive closed corpus with primary recovery (`9198b39`)
+- Bind exhaustive corpus reads to dedicated signed contexts (`9198b39`)
+- Add closed signed corpus transport and primary recovery (`9198b39`)
+- Persist the closed signed corpus inbox and atomic recovery (`9198b39`)
+- Add corrected ranking domain and Paris calendars (`c5275c7`)
+- Persist private ranking governance and revocable visibility (`c5275c7`)
+- Add private creator sessions and atomic participation governance (`c5275c7`)
+- Add reviewed principal territories and private recourse (`c5275c7`)
+- Add private session moderation and participation appeals (`c5275c7`)
+- Add versioned private ranking contexts and receipts (`c5275c7`)
+- Add closed Hub ranking barriers and primary recovery (`c5275c7`)
+- Bind ranked context and authoritative order to one owner consumption (`c5275c7`)
+- Add complete ranked member snapshots in the closed Hub recipe (`c5275c7`)
+- Add the approved exhaustive ranking corpus validator (`c5275c7`)
+- Read exhaustive ranked facts through the Hub owner (`c5275c7`)
+- Materialize exhaustive closed corpus with primary recovery (`c5275c7`)
+- Bind exhaustive corpus reads to dedicated signed contexts (`c5275c7`)
+- Add closed signed corpus transport and primary recovery (`c5275c7`)
+- Add corrected ranking domain and Paris calendars (`f03bb02`)
+- Persist private ranking governance and revocable visibility (`f03bb02`)
+- Add private creator sessions and atomic participation governance (`f03bb02`)
+- Add reviewed principal territories and private recourse (`f03bb02`)
+- Add private session moderation and participation appeals (`f03bb02`)
+- Add versioned private ranking contexts and receipts (`f03bb02`)
+- Add closed Hub ranking barriers and primary recovery (`f03bb02`)
+- Bind ranked context and authoritative order to one owner consumption (`f03bb02`)
+- Add complete ranked member snapshots in the closed Hub recipe (`f03bb02`)
+- Add the approved exhaustive ranking corpus validator (`f03bb02`)
+- Read exhaustive ranked facts through the Hub owner (`f03bb02`)
+- Materialize exhaustive closed corpus with primary recovery (`f03bb02`)
+- Bind exhaustive corpus reads to dedicated signed contexts (`f03bb02`)
+- Add corrected ranking domain and Paris calendars (`89b838f`)
+- Persist private ranking governance and revocable visibility (`89b838f`)
+- Add private creator sessions and atomic participation governance (`89b838f`)
+- Add reviewed principal territories and private recourse (`89b838f`)
+- Add private session moderation and participation appeals (`89b838f`)
+- Add versioned private ranking contexts and receipts (`89b838f`)
+- Add closed Hub ranking barriers and primary recovery (`89b838f`)
+- Bind ranked context and authoritative order to one owner consumption (`89b838f`)
+- Add complete ranked member snapshots in the closed Hub recipe (`89b838f`)
+- Add the approved exhaustive ranking corpus validator (`89b838f`)
+- Read exhaustive ranked facts through the Hub owner (`89b838f`)
+- Materialize exhaustive closed corpus with primary recovery (`89b838f`)
+- Add corrected ranking domain and Paris calendars (`1f9a605`)
+- Persist private ranking governance and revocable visibility (`1f9a605`)
+- Add private creator sessions and atomic participation governance (`1f9a605`)
+- Add reviewed principal territories and private recourse (`1f9a605`)
+- Add private session moderation and participation appeals (`1f9a605`)
+- Add versioned private ranking contexts and receipts (`1f9a605`)
+- Add closed Hub ranking barriers and primary recovery (`1f9a605`)
+- Bind ranked context and authoritative order to one owner consumption (`1f9a605`)
+- Add complete ranked member snapshots in the closed Hub recipe (`1f9a605`)
+- Add the approved exhaustive ranking corpus validator (`1f9a605`)
+- Read exhaustive ranked facts through the Hub owner (`1f9a605`)
+- Add corrected ranking domain and Paris calendars (`2f432f7`)
+- Persist private ranking governance and revocable visibility (`2f432f7`)
+- Add private creator sessions and atomic participation governance (`2f432f7`)
+- Add reviewed principal territories and private recourse (`2f432f7`)
+- Add private session moderation and participation appeals (`2f432f7`)
+- Add versioned private ranking contexts and receipts (`2f432f7`)
+- Add closed Hub ranking barriers and primary recovery (`2f432f7`)
+- Bind ranked context and authoritative order to one owner consumption (`2f432f7`)
+- Add complete ranked member snapshots in the closed Hub recipe (`2f432f7`)
+- Add the approved exhaustive ranking corpus validator (`2f432f7`)
+- Add corrected ranking domain and Paris calendars (`e883a68`)
+- Persist private ranking governance and revocable visibility (`e883a68`)
+- Add private creator sessions and atomic participation governance (`e883a68`)
+- Add reviewed principal territories and private recourse (`e883a68`)
+- Add private session moderation and participation appeals (`e883a68`)
+- Add versioned private ranking contexts and receipts (`e883a68`)
+- Add closed Hub ranking barriers and primary recovery (`e883a68`)
+- Bind ranked context and authoritative order to one owner consumption (`e883a68`)
+- Add complete ranked member snapshots in the closed Hub recipe (`e883a68`)
+- Add corrected ranking domain and Paris calendars (`7eff569`)
+- Persist private ranking governance and revocable visibility (`7eff569`)
+- Add private creator sessions and atomic participation governance (`7eff569`)
+- Add reviewed principal territories and private recourse (`7eff569`)
+- Add private session moderation and participation appeals (`7eff569`)
+- Add versioned private ranking contexts and receipts (`7eff569`)
+- Add closed Hub ranking barriers and primary recovery (`7eff569`)
+- Bind ranked context and authoritative order to one owner consumption (`7eff569`)
+- Add corrected ranking domain and Paris calendars (`44bc620`)
+- Persist private ranking governance and revocable visibility (`44bc620`)
+- Add private creator sessions and atomic participation governance (`44bc620`)
+- Add reviewed principal territories and private recourse (`44bc620`)
+- Add private session moderation and participation appeals (`44bc620`)
+- Add versioned private ranking contexts and receipts (`44bc620`)
+- Add closed Hub ranking barriers and primary recovery (`44bc620`)
+- Add corrected ranking domain and Paris calendars (`07f23af`)
+- Persist private ranking governance and revocable visibility (`07f23af`)
+- Add private creator sessions and atomic participation governance (`07f23af`)
+- Add reviewed principal territories and private recourse (`07f23af`)
+- Add private session moderation and participation appeals (`07f23af`)
+- Add versioned private ranking contexts and receipts (`07f23af`)
+- Add corrected ranking domain and Paris calendars (`e8d04dd`)
+- Persist private ranking governance and revocable visibility (`e8d04dd`)
+- Add private creator sessions and atomic participation governance (`e8d04dd`)
+- Add reviewed principal territories and private recourse (`e8d04dd`)
+- Add private session moderation and participation appeals (`e8d04dd`)
+- Add corrected ranking domain and Paris calendars (`1708516`)
+- Persist private ranking governance and revocable visibility (`1708516`)
+- Add private creator sessions and atomic participation governance (`1708516`)
+- Add reviewed principal territories and private recourse (`1708516`)
+- Add corrected ranking domain and Paris calendars (`f0ac2a4`)
+- Persist private ranking governance and revocable visibility (`f0ac2a4`)
+- Add private creator sessions and atomic participation governance (`f0ac2a4`)
+- Add corrected ranking domain and Paris calendars (`7b4f9a9`)
+- Persist private ranking governance and revocable visibility (`7b4f9a9`)
+- Add corrected ranking domain and Paris calendars (`7875212`)
+- Add closed rebuildable Fan and Creator PF projections (#162) (`a3e82eb`)
+- Add closed signed PF snapshot reconciliation (#159) (`d00f41f`)
+- Add closed complete PF owner snapshots (#158) (`460f3d3`)
+- Add closed cumulative PF corrections and durable fragments (#157) (`e64a726`)
+- Exercise closed signed PF transport between Hub and Fans (#156) (`9ebad5e`)
+- Persist closed Hub receipts with official consumption (#155) (`9552dd9`)
+- Add closed PF signed receipt and delegation contracts (`fb529ce`)
+- Add closed Hub PF consumption and atomic recovery journal (#153) (`7e1a77d`)
+- Add closed Hub PF reservations and official ledger provenance (#152) (`93a778e`)
+- Add closed Hub purchase evidence model (`eb10be0`)
 
 ### Corrigé
 
-- Rendre observable un refus HTTP dans la préparation de la recette corpus avec un diagnostic expurgé du statut, de la raison technique et de l’espace temporaire, sans accepter le refus ni exposer de preuve privée.
-- Accepter les emojis Unicode et les codes `:gitmoji:` dans le contrôle de gouvernance des commits, avec tests de non-régression. Livrer cette transition depuis la base de confiance avant la PR #205.
+- Keep HoF content within narrow mobile grid tracks (`fc899b4`)
+- Compose HoF overview under one current source transaction (`4abb931`)
+- Keep all-category filters and closed recipe proof limits exact (`b35fc90`)
+- Report safe diagnostics for corpus lookup refusals (`03c0eb3`)
+- Accept both gitmoji formats in trusted PR governance (`ad602f7`)
+- Read the current SQL error from the bound WordPress database (`28a8149`)
+- Preserve accented session rules without changing the Hub codec (`28a8149`)
+- Read the guarded WordPress connection error for PHP 8.3 analysis (`28a8149`)
+- Distinguish acknowledgement checks from barrier admission (`28a8149`)
+- Preserve caller transactions during approved ranking visibility reads (`28a8149`)
+- Restore valid YAML indentation for corpus transaction checks (`28a8149`)
+- Advance the isolated primary clock before freshness assertions (`28a8149`)
+- Bound all bulk fixture seeding workers consistently (`28a8149`)
+- Read the current SQL error from the bound WordPress database (`32318d4`)
+- Preserve accented session rules without changing the Hub codec (`32318d4`)
+- Read the guarded WordPress connection error for PHP 8.3 analysis (`32318d4`)
+- Distinguish acknowledgement checks from barrier admission (`32318d4`)
+- Read the current SQL error from the bound WordPress database (`5d0f91d`)
+- Preserve accented session rules without changing the Hub codec (`5d0f91d`)
+- Read the guarded WordPress connection error for PHP 8.3 analysis (`5d0f91d`)
+- Read the current SQL error from the bound WordPress database (`90baa73`)
+- Preserve accented session rules without changing the Hub codec (`90baa73`)
+- Read the guarded WordPress connection error for PHP 8.3 analysis (`90baa73`)
+- Read the current SQL error from the bound WordPress database (`9198b39`)
+- Preserve accented session rules without changing the Hub codec (`9198b39`)
+- Read the guarded WordPress connection error for PHP 8.3 analysis (`9198b39`)
+- Read the current SQL error from the bound WordPress database (`c5275c7`)
+- Preserve accented session rules without changing the Hub codec (`c5275c7`)
+- Read the guarded WordPress connection error for PHP 8.3 analysis (`c5275c7`)
+- Read the current SQL error from the bound WordPress database (`f03bb02`)
+- Preserve accented session rules without changing the Hub codec (`f03bb02`)
+- Read the guarded WordPress connection error for PHP 8.3 analysis (`f03bb02`)
+- Read the current SQL error from the bound WordPress database (`89b838f`)
+- Preserve accented session rules without changing the Hub codec (`89b838f`)
+- Read the guarded WordPress connection error for PHP 8.3 analysis (`89b838f`)
+- Read the current SQL error from the bound WordPress database (`1f9a605`)
+- Preserve accented session rules without changing the Hub codec (`1f9a605`)
+- Read the guarded WordPress connection error for PHP 8.3 analysis (`1f9a605`)
+- Read the current SQL error from the bound WordPress database (`2f432f7`)
+- Preserve accented session rules without changing the Hub codec (`2f432f7`)
+- Read the guarded WordPress connection error for PHP 8.3 analysis (`2f432f7`)
+- Read the current SQL error from the bound WordPress database (`e883a68`)
+- Preserve accented session rules without changing the Hub codec (`e883a68`)
+- Read the guarded WordPress connection error for PHP 8.3 analysis (`e883a68`)
+- Read the current SQL error from the bound WordPress database (`7eff569`)
+- Preserve accented session rules without changing the Hub codec (`7eff569`)
+- Read the guarded WordPress connection error for PHP 8.3 analysis (`7eff569`)
+- Read the current SQL error from the bound WordPress database (`44bc620`)
+- Preserve accented session rules without changing the Hub codec (`44bc620`)
+- Read the guarded WordPress connection error for PHP 8.3 analysis (`44bc620`)
+- Read the current SQL error from the bound WordPress database (`07f23af`)
+- Preserve accented session rules without changing the Hub codec (`07f23af`)
+- Read the current SQL error from the bound WordPress database (`e8d04dd`)
+- Preserve accented session rules without changing the Hub codec (`e8d04dd`)
+- Read the current SQL error from the bound WordPress database (`1708516`)
+- Preserve accented session rules without changing the Hub codec (`1708516`)
+- Read the current SQL error from the bound WordPress database (`f0ac2a4`)
+- Preserve accented session rules without changing the Hub codec (`f0ac2a4`)
+- Read the current SQL error from the bound WordPress database (`7b4f9a9`)
+- Preserve SQL error snapshots across schema checks (`eb10be0`)
 
-### Ajouté
+### Sécurité
 
-- Livraison B6 fermée des classements, relevés privés et sessions depuis l'origine primaire, le corpus/cache complet corrigé et les identités/consentements courants : transaction commune sans quantité ou destinataire fourni par le navigateur, uniquement sur instances jetables ; formulaires de gouvernance, intentions complètes et activation restent distincts.
-- Vues B6 des classements permanents, relevés mensuels privés et sessions approuvées : filtres et pagination serveur, scores entiers sans arrondi, dates affichées dans le fuseau WordPress et mois Europe/Paris ; cycle de vie de session relu depuis sa liaison et son acquittement primaire existants, fermeture en cours masquée et annulation sans vainqueur. Fournisseur physiquement fermé hors recette, états indisponibles sans rang estimé, aucun changement de navigation globale.
-
-- Composition de plusieurs barrières actuelles dans la transaction d'origine déjà détenue : mutex et connexion primaires vérifiés, rollback/commit communs, aucun BEGIN imbriqué ou nouvelle preuve implicite ; périmètre B6 fermé sans contrat Hub ajouté.
-
-- Mutex de gouvernance B6 sans BEGIN pour composer sessions, origine et corpus sous leur transaction propriétaire : ordre conservé, callback incomplet rollbacké et libération vérifiée ; aucun droit, contrat Hub, table ou activation ajouté.
-
-- Relecture primaire fermée des barrières avant livraison B6 : lookup approuvé sur l'action/clé d'origine, challenge durable et reprise sans réenregistrement ; état indisponible pendant l'incertitude, fermeture locale prioritaire et callback transactionnel. Schéma séparé explicitement jetable, aucun contrat Hub nouveau ni activation.
-
-- Filiation serveur B6 entre Faluss ID attesté, membre WordPress lié et profil Créateur local : lectures primaires verrouillées, consentement et noms approuvés recontrôlés sans mapping navigateur ni COMMIT implicite. Recette WordPress/MariaDB avec cache périmé et retrait concurrent ; aucun contrat Hub, route, schéma ou score public ajouté.
-
-- Recette de jonction fermée : acquittement réel des barrières par HTTP signé et lecture atomique du corpus/cache sur les mêmes instances jetables ; 727 contrôles réussis, dont achat fictif sans score et correction attestée sans seconde consommation. Aucun nouveau contrat ou score public.
-
-- Origine HoF fermée : ouverture locale enregistrée seulement sur acquittement primaire Hub actuel, intervalle d'admission figé et reprise de la même action après COMMIT incertain ; aucun achat, score public ou schéma installé sur site.
-- Pont fermé entre gouvernance des sessions Fans et acquittements primaires Hub : actions immuables, décisions et journal atomiques, annulation/suspension distinctes de la fin attestée ; uniquement en recette jetable, sans route ou ouverture économique.
-
-- Façade privée d'acquittement de barrière : preuve signée et confiance actuelle vérifiées sous la transaction de l'application locale, sans exposer la clé de reprise ni ouvrir le cycle de vie sur site.
-
-- Reprise Fans fermée 1.1 : version persistée avant HTTP avec l'action/clé, clôture en attente de l'échéance primaire et lookup après panne, sans réinterprétation des actions 1.0.
-
-- Dispatch signé fermé des barrières 1.1 : fin de session et lookup primaire sur la même action, compatibilité 1.0 et recette HTTP avec réponse perdue ; aucun pair réel ou cycle de vie public.
-
-- Primitive propriétaire fermée 1.1 de fin de session : échéance figée vérifiée après les verrous sur le primaire, audit atomique et lookup de reprise sur la même action/clé ; aucune API ou écriture économique.
-
-- Codec fermé explicitement versionné des barrières 1.1 pour la raison de fin de session approuvée ; contrat 1.0 conservé, sans raccordement propriétaire ou HTTP dans ce sous-lot.
-- Fiabiliser l'horloge de recette du corpus par publication atomique privée,
-  y compris pendant les relectures concurrentes ; aucun comportement des sites
-  ou durée d'attestation du plugin modifié.
-
-### Documentation
-
-- Actualiser la preuve B6 de relecture primaire : succès de jonction fermé de 727 contrôles, erreurs de harnais conservées comme historique et limites de livraison explicites.
-
-- Consigner la validation F1b R2 : relevé Europe/Paris, classements persistants
-  et sessions Créateur distincts, trois portées, plafonds et corrections après
-  clôture. Formaliser les places uniques par date d'atteinte corrigée et ordre
-  propriétaire Hub ; proposer l'extension additive B3, approuvée séparément
-  pour la recette fermée au commit `2553e376`. B1–B6
-  autorisés selon leurs dépendances ; aucun code économique ou flag activé.
-
-### Ajouté
-
-- Composer le corpus/cache privés avec une transaction propriétaire de barrière, avec ordre de mutex vérifié et rollback commun, sans nouvelle preuve Hub ou route publique ; recette transactionnelle B6 fermée.
-- Lecture minimale du nom éditorial approuvé dans la transaction existante de classement, sans COMMIT implicite ; contrôles de profil et consentement conservés et rollback vérifié en recette isolée.
-- Relecture primaire explicite du corpus fermé avant livraison : même génération et clé, nouvelle réponse liée à une requête durable, cache indisponible pendant le rapprochement ; aucun contrat Hub, route ou flag ajouté.
-
-- Projection d'affichage HoF/Fans : filtrage par identité approuvée et visibilité courante, places recalculées parmi les seuls profils visibles, sans diffuser identité technique ou rang privé ; préparatif B6 sans route ni score public.
-
-- Persistance fermée des sessions dans la même génération dérivée que les classements/relevés, reconstruction après correction et reprise primaire après panne ; aucun état public ou gagnant ajouté.
-
-- Calcul privé des sessions à partir du corpus Hub complet : une contribution par dimension, trois portées, réadmission sans remise à zéro et ancienneté corrigée ; aucune ouverture ou lecture publique.
-
-- Persister les projections privées B4 depuis le corpus courant authentifié,
-  avec reconstruction atomique et refus des générations anciennes ou
-  incomplètes. Recette Fans jetable uniquement, sans score public ni ledger.
-
-- Composer les relevés privés Europe/Paris et les classements persistants
-  Fan/Créateur par catégorie depuis un corpus B3 complet déjà authentifié.
-  Calcul pur testé, sans publication, stockage supplémentaire ni consommation.
-- Persister les actions et clés des barrières côté Fans avant chaque HTTP,
-  conserver opening/closing après panne et reprendre par lookup primaire,
-  uniquement dans l'enclave Hub/Fans jetable. Aucun parcours de site ouvert.
-
-- Raccorder le transport privé fermé des barrières au gateway Hub : signatures,
-  nonces dédiés et lookup primaire après réponse HTTP perdue. Deux WordPress
-  jetables uniquement ; aucun ledger, route de site ou activation ajouté.
-
-- Ajouter l'admission SQL fermée des nonces de barrières : stockage dédié,
-  permissions, concurrence et expiration après attente et avant COMMIT,
-  sans opération économique, route ou migration automatique.
-
-- Lier les opérations propriétaires de barrières au contexte signé de leur
-  action, vérifier l'origine d'une fermeture sur le descripteur stocké et
-  revalider la fraîcheur avant COMMIT, uniquement dans l'enclave de recette.
-
-- Ajouter le codec privé approuvé des barrières de classement : register,
-  close et lookup signés, action et clé stables, permissions dédiées et réponses
-  liées à la requête. Aucun endpoint, schéma ou changement économique ajouté.
-- Persister dans Fans jetable les intentions complètes 0.3, leurs clés stables
-  avant envoi et les reçus privés signés ; tester la reprise après panne et
-  réponse perdue, sans ledger PF, migration automatique ni API active.
-
-- Raccorder le gateway propriétaire 0.3 aux signatures, nonces privés et contrôles
-  transactionnels existants dans la seule enclave jetable. Recette HTTP avec
-  clés distinctes, rejeux et réponse perdue après consommation ; aucune route
-  distribuée ni activation sur les sites.
-
-- Revalider la délégation 0.3 après les verrous propriétaires et avant COMMIT,
-  avec rollback des effets préparés si elle expire. Recette réelle fermée
-  de concurrence et reprise, sans route, schéma ou activation supplémentaire.
-
-- Ajouter le codec signé 0.3 fermé pour réserver, confirmer, libérer et retrouver
-  une attribution à contexte de classement immuable. Réponses liées à la requête
-  et reçus d'origine vérifiés, sans admission HTTP ni consommation supplémentaire.
-
-- Ajouter le lecteur B3 fermé raccordant l'inbox durable Fans au véritable
-  client HTTP WordPress : étapes bornées, lookup primaire après résultat
-  incertain, concurrence sans nouvelle clé et promotion signée exhaustive.
-  Aucun classement public, cron, installation automatique ou activation.
-
-- Ajouter l'inbox privée B3c2c3a : clé et demande signée persistées avant HTTP,
-  staging des pages, reprise primaire après résultat incertain et remplacement
-  atomique après fence du corpus exhaustif. Installation explicite sur Fans
-  jetable uniquement, sans ledger, route, migration ou score public.
-
-- Ajouter B3c2c2 fermé : lectures HTTP signées du corpus propriétaire, admission
-  par nonce SQL distinct et reprise par lookup primaire après réponse perdue.
-  Recette physiquement limitée à deux WordPress jetables à clés distinctes ;
-  aucun endpoint de production, écriture économique ou inbox Fans ajouté.
-
-- Lier les lectures fermées du corpus exhaustif à l'origine, la politique,
-  l'opération, la clé durable et au contexte signé exact, sans paramètre Fan.
-  Vérifier les pages/fences privées et les refus sous les domaines dédiés,
-  sans route HTTP ni admission ajoutée par ce sous-lot de validateurs.
-
-- Ajouter B3c2b2 fermé : générations exhaustives immuables du corpus 1.0,
-  pages de 100 faits et lookup primaire par clé stable ; vérification finale
-  des sources H4 actuelles et refus du corpus obsolète, sans écriture
-  économique, transport ouvert ou score public.
-
-- Ajouter B3c2b1 fermé : lecture propriétaire exhaustive de l'origine depuis
-  les consommations Hub 0.3 et le net H4 complet, sous verrou global et bail
-  distinct de lecture. Aucun paramètre de liste de membres, nouvelle écriture
-  économique, matérialisation, transport, score ou activation.
-
-- Formaliser B3c2a fermé : corpus privé exhaustif 1.0 approuvé, validateur de
-  faits/totaux/filiation H4 et pagination, permission dédiée et domaines de
-  signature séparés. Aucun stockage, transport, score ou activation ajouté.
-
-- Ajouter B3c1 fermé : snapshots privés complets 2.0 par membre, ordre/contexte
-  d'origine attestés et net H4 rapproché, pages immuables et fence primaire.
-  Anciennes allocations explicitement non classables ; aucune API de site,
-  migration automatique, nouvelle consommation ou activation.
-
-- Ajouter B3b2 fermé : contexte 0.3 immuable, ordre Hub global attesté et reçu
-  signé dans la transaction du débit officiel et des journaux, reprise par clé
-  identique sur le primaire. Compatibilité H2/H3/H4 préservée ; aucune route,
-  source d'achat, installation automatique ou activation sur les sites.
-
-- Ajouter B3b1 fermé : barrières propriétaires versionnées d'origine, pays,
-  catégorie, session et admission, permissions dédiées, journal atomique et
-  lookup primaire après réponse perdue. Sélection exacte sous verrous ; aucune
-  consommation nouvelle, installation automatique, API de site ou activation.
-
-- Ajouter B3a fermé : intention/contexte/reçu 0.3 versionnés, précision UTC et
-  ordre Hub obligatoires, sessions explicitement choisies, domaines de signature
-  et permissions dédiées. Validateurs seulement ; anciens formats intacts,
-  aucune consommation, persistance, route, migration ou activation.
-
-- Ajouter B2c : modération distincte des règles de session, historique privé
-  versionné, recours des candidats et réadmission après suspension effective.
-  Décisions exactes et journaux atomiques, approbation éditoriale verrouillée
-  dans la transaction ; fermeture/réadmission en attente de la preuve Hub B3.
-  Aucun nouvel endpoint, schéma installé automatiquement ou score public.
-
-- Ajouter B2b : critères territoriaux publics versionnés sans défaut, déclaration
-  privée du territoire d'activité principal, examen/recours motivés et contrôle
-  des ouvertures/admissions locale et nationale. Aucun pays de soutien Fan
-  autorisé implicitement, contexte Hub ou ouverture économique.
-
-- Ajouter B2a : sessions privées créées par les Créateurs, coorganisation
-  explicitement acceptée, participation volontaire, programmation figée et
-  plafonds vérifiés en concurrence. L'ouverture reste en attente de preuve Hub ;
-  aucune route active, attribution ou score public.
-
-- Ajouter B1b : registre privé versionné des dimensions et origine préparée,
-  pseudonymes éditoriaux modérés, consentements Fan/Créateur révocables et journal
-  atomique. Installation explicite vérifiée InnoDB, recette WordPress/MariaDB ;
-  aucune ouverture réelle, endpoint public, migration automatique ou score.
-
-- Ajouter B1a : calendrier Europe/Paris avec bornes UTC/été-hiver, programmation
-  locale désambiguïsée et calcul pur des places uniques depuis les nets corrigés.
-  Ordre propriétaire requis, anciens reçus/source incomplète refusés ; aucun
-  changement Hub, endpoint, migration ou classement public. Registre B1b à suivre.
-
-- Ajouter F1a fermé : projections persistantes de points Fan et Créateur,
-  reconstruction atomique depuis les seuls faits H4 complets rapprochés,
-  refus des générations périmées et reprises testées en recette jetable ; aucun
-  ledger parallèle, score public, classement, session ou activation.
-- Proposer F1b séparément, sans validation ni implémentation : périodes, sessions,
-  égalités, visibilité, suspensions et corrections après clôture ; actualiser
-  l'état fermé H1–H4 dans les contrats sans ratifier la production ou la rétention.
-
-- Ajouter H4c fermé : transfert des snapshots complets signé, délégué et limité
-  aux deux instances jetables ; staging privé et reprise durable Fans, sans
-  ledger parallèle, projection de classement ou route ordinaire.
-- Ajouter H4b fermé : snapshots privés complets matérialisés en pages stables,
-  filiation des attributions multi-lots, fence primaire et reprise après COMMIT
-  incertain ; aucun score, transfert réseau, durée de conservation ou purge réelle.
-- Ajouter H4a fermé : corrections PF cumulatives par primitive propriétaire,
-  litiges/résolutions et fragments durables de 100 allocations dans le ledger
-  officiel ; recettes fictives uniquement, sans purge ni score public.
-- Ajouter H3c fermé : transport Hub/Fans signé et délégué sur loopback de recette,
-  intentions/clés stables et inbox privée vérifiée, sans API normale ni ledger Fans.
-- Ajouter H3b fermé : reçus privés atomiques avec consommation/débit/journal H2,
-  nonces durables et reprise primaire ; garde de recette isolée sans admission site.
-- Ajouter H3a fermé : formats canoniques restreints des reçus privés signés,
-  contextes délégués et permissions PF dédiées, sans route ni activation.
-- Ajouter H2b fermé : confirmation avec débit PF officiel, consommation immuable
-  et journal de remise atomiques ; lookup primaire et reprise à clé stable après
-  réponse perdue. Preuves fictives en recette uniquement, aucune admission réseau.
-- Ajouter H2a fermé : filiation des crédits fictifs au ledger PF officiel,
-  réservations FIFO atomiques de 120 s sans renouvellement, libération et lookup
-  primaire avec clé stable. Recette Hub isolée uniquement, aucun débit/site/API Fans.
-- Ajouter le modèle fermé H1 des preuves d'achat synthétiques, lots de provenance,
-  intentions et plans FIFO : validateurs stricts, schéma additif propriétaire et
-  persistance atomique testable uniquement dans la recette Hub isolée. Aucun
-  producteur réel, crédit/débit PF, réserve, reçu opérationnel ou API Fans.
-
-### Tests
-
-- Tester H3c entre deux WordPress/MariaDB jetables : permissions, signatures,
-  audiences/clés/expiration/rejeux, confirmation concurrente et perte HTTP après
-  consommation suivie d'un lookup sans second débit ; aucun SSO Me véritable annoncé.
-- Tester H3b sur WordPress/MariaDB jetable : signature, concurrence, rollback du
-  reçu, crash et COMMIT inconnu, lookup stable et conservation des ledgers existants.
-- Tester H2b sur Hub WordPress/MariaDB jetable : confirmations concurrentes,
-  confirmation/libération/expiration/révision source, 32 lots, COMMIT incertain et
-  crash après commit sans double débit ; conservation complète des anciens claims.
-- Vérifier H2a sur WordPress/MariaDB jetable : réserves/admissions concurrentes,
-  expiration, quotas, reprises COMMIT, rollback et conservation des claims/lignes historiques.
-- Ajouter la recette WordPress/MariaDB Hub jetable des claims PF historiques,
-  de leur concurrence réelle, des pertes de réponse autour de COMMIT et des
-  compensations intégrales, sans modifier les opérations économiques.
-- Vérifier H1 sur WordPress/MariaDB jetable : conflits de contenu, unicités
-  concurrentes, filiation, schémas divergents, rollback et COMMIT ambigu du modèle ;
-  ledgers PF/ALB et claims historiques conservés.
+- Recheck delegated expiry before committing ranked owner operations (`28a8149`)
+- Recheck delegated expiry before committing ranked owner operations (`32318d4`)
+- Recheck delegated expiry before committing ranked owner operations (`5d0f91d`)
 
 ### Documentation
 
-- Consigner ALB-Origine comme propriétaire habilité Hub et l'accord limité D1/D2/D4
-  pour H1 dans #147. D3/D5/D6 restent proposés ; l'ordre de réduction après
-  remboursement (#149) et la conservation des preuves (#150) nécessitent chacun
-  une décision humaine distincte avant H4 ou ouverture économique.
+- Record joined B6 route and browser verification (`6bf94f7`)
+- Record verified parallel WordPress CI timings (`050317f`)
+- Preserve persistent rankings and Creator-led HoF sessions (`28a8149`)
+- Record approved F1b rules and authoritative tie-break contract (`28a8149`)
+- Record the exact session head regression evidence (`28a8149`)
+- Describe the isolated signed completion boundary (`28a8149`)
+- Record isolated signed completion and recovery evidence (`28a8149`)
+- Record current acknowledgement transaction evidence (`28a8149`)
+- Record the incomplete primary refresh verification before pause (`28a8149`)
+- Preserve the completed transaction recipe before pause (`28a8149`)
+- Record the failed consolidation recipe and stable pause (`28a8149`)
+- Record the successful joined barrier and corpus verification (`28a8149`)
+- Preserve persistent rankings and Creator-led HoF sessions (`32318d4`)
+- Record approved F1b rules and authoritative tie-break contract (`32318d4`)
+- Record the exact session head regression evidence (`32318d4`)
+- Describe the isolated signed completion boundary (`32318d4`)
+- Record isolated signed completion and recovery evidence (`32318d4`)
+- Record current acknowledgement transaction evidence (`32318d4`)
+- Preserve persistent rankings and Creator-led HoF sessions (`5d0f91d`)
+- Record approved F1b rules and authoritative tie-break contract (`5d0f91d`)
+- Record the exact session head regression evidence (`5d0f91d`)
+- Preserve persistent rankings and Creator-led HoF sessions (`90baa73`)
+- Record approved F1b rules and authoritative tie-break contract (`90baa73`)
+- Record the exact session head regression evidence (`90baa73`)
+- Preserve persistent rankings and Creator-led HoF sessions (`9198b39`)
+- Record approved F1b rules and authoritative tie-break contract (`9198b39`)
+- Record the exact session head regression evidence (`9198b39`)
+- Preserve persistent rankings and Creator-led HoF sessions (`c5275c7`)
+- Record approved F1b rules and authoritative tie-break contract (`c5275c7`)
+- Record the exact session head regression evidence (`c5275c7`)
+- Preserve persistent rankings and Creator-led HoF sessions (`f03bb02`)
+- Record approved F1b rules and authoritative tie-break contract (`f03bb02`)
+- Record the exact session head regression evidence (`f03bb02`)
+- Preserve persistent rankings and Creator-led HoF sessions (`89b838f`)
+- Record approved F1b rules and authoritative tie-break contract (`89b838f`)
+- Record the exact session head regression evidence (`89b838f`)
+- Preserve persistent rankings and Creator-led HoF sessions (`1f9a605`)
+- Record approved F1b rules and authoritative tie-break contract (`1f9a605`)
+- Record the exact session head regression evidence (`1f9a605`)
+- Preserve persistent rankings and Creator-led HoF sessions (`2f432f7`)
+- Record approved F1b rules and authoritative tie-break contract (`2f432f7`)
+- Record the exact session head regression evidence (`2f432f7`)
+- Preserve persistent rankings and Creator-led HoF sessions (`e883a68`)
+- Record approved F1b rules and authoritative tie-break contract (`e883a68`)
+- Record the exact session head regression evidence (`e883a68`)
+- Preserve persistent rankings and Creator-led HoF sessions (`7eff569`)
+- Record approved F1b rules and authoritative tie-break contract (`7eff569`)
+- Record the exact session head regression evidence (`7eff569`)
+- Preserve persistent rankings and Creator-led HoF sessions (`44bc620`)
+- Record approved F1b rules and authoritative tie-break contract (`44bc620`)
+- Record the exact session head regression evidence (`44bc620`)
+- Preserve persistent rankings and Creator-led HoF sessions (`07f23af`)
+- Record approved F1b rules and authoritative tie-break contract (`07f23af`)
+- Record the exact session head regression evidence (`07f23af`)
+- Preserve persistent rankings and Creator-led HoF sessions (`e8d04dd`)
+- Record approved F1b rules and authoritative tie-break contract (`e8d04dd`)
+- Record the exact session head regression evidence (`e8d04dd`)
+- Preserve persistent rankings and Creator-led HoF sessions (`1708516`)
+- Record approved F1b rules and authoritative tie-break contract (`1708516`)
+- Record the exact session head regression evidence (`1708516`)
+- Preserve persistent rankings and Creator-led HoF sessions (`f0ac2a4`)
+- Record approved F1b rules and authoritative tie-break contract (`f0ac2a4`)
+- Record the exact session head regression evidence (`f0ac2a4`)
+- Preserve persistent rankings and Creator-led HoF sessions (`7b4f9a9`)
+- Record approved F1b rules and authoritative tie-break contract (`7b4f9a9`)
+- Preserve persistent rankings and Creator-led HoF sessions (`7875212`)
+- Record approved F1b rules and authoritative tie-break contract (`7875212`)
+- Preserve persistent rankings and Creator-led HoF sessions (`80fca5a`)
+- Record approved F1b rules and authoritative tie-break contract (`80fca5a`)
+
+### Modifié
+
+- Style scoped HoF controls and readable mobile filters (`80ddecc`)
+- Bind fixture admission barriers to the real participation interval (`698e64d`)
+- Exercise actual closed Fans routes with separate local cookie sessions (`0807f7a`)
+- Read attested session lifecycle in the closed ranking views (`32de1cd`)
+- Supply fictitious Identity configuration to the closed delivery recipe (`c5e9356`)
+- Prepare scoped ranking and private monthly statement views (`23ccca3`)
+- Include actual B6 delivery in the existing joined recipe (`64da02c`)
+- Limit in-memory fixtures to the corpus recipe (`1ab8134`)
+- Use bounded memory storage for disposable WordPress fixtures (`3bcd704`)
+- Reuse validated PHP CLI bytecode in isolated CI jobs (`18a7499`)
+- Parallelize WordPress CI without losing recipe coverage (`e0f255c`)
+- Save incomplete closed ranking delivery for the pause (`28856fe`)
+- Save incomplete identity checkpoint diagnostics for the pause (`fe125ea`)
+- Persist local accounts in the isolated editorial SQL adapter (`ea4ca17`)
+- Compose signed barrier acknowledgements with private corpus transactions (`28a8149`)
+- Publish private recipe clocks atomically under concurrency (`28a8149`)
+- Share the primary clock minimum across captured fixtures (`28a8149`)
+- Gate the actual barrier and corpus composition in CI (`28a8149`)
+- Bind all required fields in the joined barrier fixture (`28a8149`)
+- Open the joined origin through its genuine durable network action (`28a8149`)
+- Refresh protected validation after retargeting to main (`1708516`)
+- Characterize Hub PF concurrency and commit recovery (#148) (`7be5911`)
 
 ## [0.12.6] - 2026-10-04
 
