@@ -6,6 +6,7 @@ namespace Faluss\Platform\Tests\Fans\Ui;
 
 use Faluss\Platform\Fans\Ui\FansUiHof;
 use Faluss\Platform\Fans\Ui\FansUiHofView;
+use Faluss\Platform\Fans\Ui\FansUiRankingPrivacy;
 use PHPUnit\Framework\TestCase;
 
 final class FansHofPresentationTest extends TestCase
@@ -22,6 +23,7 @@ final class FansHofPresentationTest extends TestCase
     {
         foreach (['explorer', 'public-profile', 'notifications', 'messages', 'mon-profil', 'boutique', 'creer', 'images'] as $view) {
             self::assertNull(FansUiHof::load('creator', $view));
+            self::assertNull(FansUiRankingPrivacy::load('creator', $view));
         }
     }
 
@@ -36,6 +38,13 @@ final class FansHofPresentationTest extends TestCase
             self::assertFalse($screen->available);
             self::assertNull($screen->ranking);
             self::assertNull($screen->statement);
+            $privacy = FansUiRankingPrivacy::load('fan', 'espace');
+            self::assertNotNull($privacy);
+            self::assertFalse($privacy->available);
+            self::assertNull($privacy->row);
+            self::assertNull($privacy->result);
+            self::assertNull(FansUiRankingPrivacy::load('visitor', 'espace'));
+            self::assertNull(FansUiRankingPrivacy::load('fan', 'progression'));
         } finally {
             if ($existed) { $GLOBALS['wpdb'] = $previous; }
             else { unset($GLOBALS['wpdb']); }

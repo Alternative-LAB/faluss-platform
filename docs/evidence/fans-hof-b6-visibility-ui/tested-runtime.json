@@ -1,0 +1,78 @@
+{
+  "source_tree": "13e9ff3c4fb1c2c1bfd718806c5ed718d383e792",
+  "equivalent_fans_head": "1b97a9a8c9be043911d894328c0439058dd5f219",
+  "files": [
+    {
+      "path": "assets/fans-backoffice.css",
+      "lf_sha256": "dcc775afe8abbab2829bb81553191d2bc70fdc1ec457cb4901e582a7ef9a1065"
+    },
+    {
+      "path": "assets/fans-hof.css",
+      "lf_sha256": "5f901002cbcb43378b9695c241d667be6bb52b9de9e05b67820fce9569c173ab"
+    },
+    {
+      "path": "src/Fans/Hof/ClosedRankingPreferences.php",
+      "lf_sha256": "67e059740bf1393d02edae7bff11bbc776ede37c4a2d112ae2057785df78ee72"
+    },
+    {
+      "path": "src/Fans/Hof/RankingVisibility.php",
+      "lf_sha256": "098b8f5a004325badbb48204ade5492786f62644653ff47249af4a09da0adc4e"
+    },
+    {
+      "path": "src/Fans/Moderation/BackOffice.php",
+      "lf_sha256": "fdc4a9bd0a6e1c288059f3c5f4aaee5f9b5b3cef69a0e382077533a28774b95c"
+    },
+    {
+      "path": "src/Fans/Moderation/BackOfficeView.php",
+      "lf_sha256": "a7ec2a93fee978a77d6564e387823970b230a39018093cf05d8e5e88189dff7d"
+    },
+    {
+      "path": "src/Fans/Moderation/RankingAliasPanel.php",
+      "lf_sha256": "d077704acaa2668992385d3ace745fb17ffd1ddc6b2a56531c1fa3b7937b6b2a"
+    },
+    {
+      "path": "src/Fans/Ui/FansUiAdmission.php",
+      "lf_sha256": "280319a20730fa87110d9992e487c14fb53e2d571729bc704b2ea916f30e5822"
+    },
+    {
+      "path": "src/Fans/Ui/FansUiRankingPrivacy.php",
+      "lf_sha256": "a173efdff5473ee6d552da7f3dd7056ee18f73771ceb91623dcac457fa4d8625"
+    },
+    {
+      "path": "src/Fans/Ui/FansUiRankingPrivacyView.php",
+      "lf_sha256": "6913d652944d80afd3141327e1411d4b7fbcc22e7d06f4c4e87a28d93e52d5cd"
+    },
+    {
+      "path": "src/Fans/Ui/FansUiRoutes.php",
+      "lf_sha256": "8808c5d7221c4303622280c3a531eb6a952be65aaf149a419a2b4f31e31757f4"
+    },
+    {
+      "path": "src/Fans/Ui/FansUiView.php",
+      "lf_sha256": "17ee1b9d2858cee0c35279ac4e7a5efb1941b283668de24ff817f8456942aba2"
+    },
+    {
+      "path": "tests/Fans/Ui/FansHofPresentationTest.php",
+      "lf_sha256": "b1f1c281ce8f52e4928ab60b8157bff84c0ff9d926b0e7f68ea5103b03dbaf69"
+    },
+    {
+      "path": "tests/TokenEngine/PurchasedPf/ClosedProtocolGuardTest.php",
+      "lf_sha256": "89a8bd670a5164112e19880bd5c0696ba4de577db62478abd46bf168fb4968cf"
+    },
+    {
+      "path": "tests/TokenEngine/recipe/b6-delivery-worker.php",
+      "lf_sha256": "dbe7a5367403e617ba0712819e3c72d61d2214d0cb310e0f04dfa2143b6d1e8f"
+    },
+    {
+      "path": "tests/TokenEngine/recipe/b6_joined_checks.py",
+      "lf_sha256": "0968e9047a2c06041ac3fad7eefe9f6fc852692c9751761af3ea56af86dbfda4"
+    },
+    {
+      "path": "tests/TokenEngine/recipe/b6_privacy_http_checks.py",
+      "lf_sha256": "032f26b06ededde4f80ad9c4311022a06d7b92974c6edc7a93ae9c36b8b49ab7"
+    },
+    {
+      "path": "tests/TokenEngine/recipe/b6_ui_http_checks.py",
+      "lf_sha256": "2ff771c2a740375a9f4639bbfe1ac6b267bb5618eb831dfd4e11972e15342330"
+    }
+  ]
+}

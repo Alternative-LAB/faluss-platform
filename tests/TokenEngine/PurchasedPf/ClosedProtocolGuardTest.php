@@ -65,6 +65,7 @@ final class ClosedProtocolGuardTest extends TestCase
             static fn () => new \Faluss\Platform\Fans\PfContract\ClosedCorpusInbox($database,
                 new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',['pf.ranking.corpus'],[]),'',''),
             static fn () => \Faluss\Platform\TokenEngine\PurchasedPf\ClosedRankingCorpusSchema::installForRecipe($database),
+            static fn () => \Faluss\Platform\Fans\Hof\ClosedRankingPreferences::visibility($database),
             static fn () => \Faluss\Platform\TokenEngine\PurchasedPf\ClosedCorpusTransaction::assertActive($database),
             static fn () => ClosedEnvironment::assertIsolated($database, 'fans')] as $operation) {
             try {
@@ -118,6 +119,7 @@ final class ClosedProtocolGuardTest extends TestCase
             static fn () => \Faluss\Platform\TokenEngine\PurchasedPf\ClosedCorpusTransportSchema::installForRecipe($database),
             static fn () => new \Faluss\Platform\TokenEngine\PurchasedPf\ClosedCorpusGateway($database,
                 new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.fans','fixture.hub',['pf.ranking.corpus'],[]),'recipe-key'),
+            static fn () => \Faluss\Platform\Fans\Hof\ClosedRankingPreferences::visibility($database),
             static fn () => \Faluss\Platform\TokenEngine\PurchasedPf\ClosedRankingCorpusSchema::installForRecipe($database)] as $operation) {
             try { $operation(); self::fail('Copied constants cannot expose the corpus.'); }
             catch (ModelViolation $error) { self::assertSame('isolated_h3_recipe_required',$error->reason); }
