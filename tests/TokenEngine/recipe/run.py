@@ -465,7 +465,9 @@ def main():
             run_checks(root,source,options.cli,check,command,corpus_fixture,corpus_reader)
         if options.b6_joined_integration:
             from b6_joined_checks import run_checks
-            run_checks(root,source,options.cli,check,command,corpus_fixture,sql,call,delivery_enabled=options.b6_current_delivery)
+            # The complete joined scenario exercises the actual B6 provider too.
+            # No workflow argument, runner or environment preparation change is needed.
+            run_checks(root,source,options.cli,check,command,corpus_fixture,sql,call,delivery_enabled=True)
         b3_ranked_http_start = len(checks)
         ranked_fixture = None
         if options.b3_ranked_http:
