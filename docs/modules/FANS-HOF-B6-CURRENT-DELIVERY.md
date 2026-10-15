@@ -1,112 +1,110 @@
-# B6 — première livraison fermée depuis les faits rapprochés
+# B6 — lectures et vues fermées depuis les faits rapprochés
 
-## Reprise du 15 octobre 2026 — raccordement en cours
+## Périmètre du raccordement
 
-Les vues de classement permanent et de relevé mensuel sont préparées dans
-`FansUiHof` et `FansUiHofView`, avec une feuille de styles limitée à `.fu-hof`.
-Elles ne changent ni la navigation globale ni les accès existants. La demande
-d'admission Créateur de l'espace Fan est conservée. Les dates de source restent
-UTC et leur présentation utilise le fuseau WordPress ; les mois civils restent
-explicitement Europe/Paris. Aucun graphe, portrait ou résultat de session n'est
-inventé lorsque le contrat ne le fournit pas.
+`ClosedRankingDelivery` compose les trois objets approuvés : classements
+persistants général/catégories avec familles Créateurs et Fans séparées,
+relevés mensuels privés et sessions HoF. Il lit les faits Hub complets corrigés
+via B4/B5 ; il ne crée ni attribution, crédit, débit, ledger Fans ou contrat Hub.
 
-Le filtre PHP privé `faluss_fans_hof_closed_delivery` accepte seulement un
-`ClosedRankingDelivery`, **après** validation de l'enclave physique. Il ne peut
-pas activer un fournisseur sur un site ordinaire, même avec des constantes
-copiées. Il n'accepte aucune identité ou quantité venant du navigateur. Les
-lectures GET ne préparent pas de barrière, ne consomment pas de PF et ne modifient
-pas les consentements. Un fournisseur absent, une preuve périmée ou une source
-incomplète donne un état indisponible, jamais un zéro ou un rang estimé.
+Les vues `FansUiHof` / `FansUiHofView` réutilisent les routes, conteneurs,
+typographie et composants Fans. Leurs styles sont limités à `.fu-hof`. La
+sidebar, les autres écrans et la matrice d'accès restent inchangés : HoF d'accueil
+public, espaces et pages de détail personnels derrière les contrôles existants.
+La demande d'admission Créateur dans l'espace Fan reste accessible.
 
-Le sélecteur de catégorie et les pages de vingt lignes sont rendus côté serveur.
-Le relevé privé utilise seulement le membre SSO courant. La lecture des sessions
-compose aussi les règles figées approuvées, le profil/publication de
-l'organisateur et l'acquittement primaire correspondant exactement à la liaison
-locale de cycle de vie. Elle ne démarre aucune requête réseau ni transaction
-indépendante. L'ancien acquittement d'ouverture ne passe pas pendant une
-fermeture locale ; une session arrivée à échéance attend sa clôture attestée,
-sans être déclarée terminée par le navigateur. Une annulation attestée conserve
-le classement corrigible sans vainqueur. La liste est paginée par clé de session,
-vingt candidates par page ; les erreurs de preuve ferment la page, les retraits
-éditoriaux et suspensions masquent la session. Les identifiants servent aux liens,
-jamais aux libellés. Aucun retrait économique ne réécrit les points historiques.
+**Cette livraison est exclusivement une recette fermée.** Le filtre PHP privé
+`faluss_fans_hof_closed_delivery` accepte seulement un `ClosedRankingDelivery`,
+après validation de l'enclave physique. Copier des constantes ou activer un
+flag ne permet pas de l'ouvrir sur un site ordinaire. Aucun score n'est annoncé
+testable sur les sites par la fusion ou la publication de ce code.
 
-Scénarios positifs/négatifs de ce raccordement : session approuvée ouverte via
-HTTP Hub réel de recette, vide puis alimentée par la même consommation que les
-classements permanents ; correction partielle commune ; lecture sans preuve
-primaire refusée, suspension masquée, fermeture en cours refusée, annulation
-attestée conservant les deux points nets. Le rendu des vrais DTO/templates est
-exercé pour invité/Fan/Créateur, avec refus des relevés privés invité et admin
-non lié, et du relevé Créateur pour un Fan sans profil. Ces scénarios ajoutés
-attendent leur exécution avant d'être présentés comme des preuves acquises.
+## Garanties de lecture
 
-L'export facultatif `FALUSS_B6_UI_EXPORT=/var/tmp/fans-hof-ui-…` conserve uniquement
-des replays HTML/assets des données fictives, destinés à la recette de mise en
-page navigateur. Il ne prouve ni une authentification centrale Me ni l'hébergement
-réel des routes. La recette utilise les mécanismes WordPress/MariaDB existants,
-sans modification de préparation, cache, délais, matrice ou runners.
+Ordre de composition : mutex des sessions, transaction propriétaire de l'origine
+et des barrières, corpus/cache authentifié, puis visibilité. L'accueil compose
+classement et sessions dans cette même transaction ; il ne mélange pas deux
+générations de source. Aucun HTTP, BEGIN imbriqué ou COMMIT indépendant dans la
+livraison. Un rollback de l'appelant conserve les garanties propriétaires.
 
-Les formulaires de gouvernance et les intentions serveur complètes restent à
-raccorder. Ce travail reste en brouillon, sans annonce d'activation sur les sites.
+`ClosedOriginOpening::withCurrentRead` est distinct des actions administrateur
+d'ouverture. Il exige une origine appliquée, le même inbox/connexion, ses champs
+immuables et une relecture primaire confirmée. Le cache doit correspondre au
+corpus complet courant de cette origine et de cette politique. Source incomplète,
+preuve périmée, clé révoquée ou fermeture en cours : indisponible, jamais ancien
+score présenté comme exact, zéro supposé ou rang estimé.
 
-La recette applicative complète existante `--b6-joined-integration` vérifie
-désormais aussi le fournisseur, sans modifier ses arguments de CI, la préparation
-d'environnement, les caches, les délais ou les runners. La première tentative
-locale a échoué avant B6 sur l'assertion de perte de réponse du transport de corpus ;
-sa cause n'est pas établie. Aucun succès réseau du fournisseur n'est revendiqué
-sur la seule base de ses tests unitaires.
+- Classements : filiation SSO locale, statut/publication approuvés et consentement
+  relus par les contrats propriétaires. Sortie nom/points/place, sans UUID,
+  reçu, date d'atteinte privée ni information financière. Les places visibles
+  restent successives sans révéler les identités masquées.
+- Relevé : seul le membre WordPress courant lié à Identity, aucun paramètre de
+  destinataire. Mois civil Europe/Paris avec été/hiver et corrections dans le
+  mois d'origine. Mois antérieur à l'origine ou futur refusé. Dans un corpus
+  complet, absence de contribution = zéro ; achat seul, PC et anciens PF non
+  admissibles exclus. Retrait de visibilité publique et suspension ne détruisent
+  pas les faits ni le relevé privé autorisé.
+- Sessions : règles figées approuvées, organisateur actif avec présentation
+  approuvée, liaison locale de cycle de vie et acquittement primaire exact.
+  Ancienne preuve d'ouverture refusée pendant fermeture ; échéance passée sans
+  acquittement de clôture non présentée comme terminée. Annulation attestée :
+  historique corrigible conservé, aucun vainqueur. Retraits et suspensions
+  masquent la session, sans réécriture des contributions historiques.
 
-## État au point d'arrêt du 14 octobre 2026
+Les pages de classement comportent vingt lignes ; les sessions utilisent une
+pagination par clé de vingt candidates, y compris lorsque des candidates sont
+masquées. Catégories, mois et pages fonctionnent par GET sans JavaScript. Les
+lectures ne préparent aucune barrière, ne consomment rien et ne modifient aucun
+consentement. Les instants techniques restent UTC, la présentation indique le
+fuseau WordPress ; le mois métier reste explicitement Europe/Paris. Les entiers
+ne passent jamais par une conversion flottante.
 
-Travail incomplet sauvegardé en brouillon. La suite locale passe : 722 tests,
-7 544 assertions, PHPStan sans erreur ; deux dépréciations historiques restent.
-La recette WordPress/MariaDB Hub/Fans de ce sous-lot est préparée mais n'a pas
-encore été exécutée. Les scénarios ci-dessous sont à vérifier, pas des preuves
-de fonctionnement obtenues. Aucune UI ni capture n'est encore livrée.
-La recette concurrente d'identité de la PR parente #208 reste en échec sur
-son point de synchronisation ; sa cause doit être établie avant intégration.
+## Recette et limites des preuves
 
-Périmètre serveur, depuis #208–#211. Aucun nouveau contrat Hub, API, flag,
-migration de site ou opération économique. Garde physique obligatoire avant
-SQL : aucun site ordinaire ne peut activer ce fournisseur par une constante.
+La recette applicative complète existante `--b6-joined-integration` inclut ce
+fournisseur et les vraies routes WordPress. `--b6-current-delivery` permet la
+même recette locale explicite. Aucun workflow, mécanisme de préparation,
+cache, délai, matrice, runner ou contrôle requis n'est modifié.
 
-La lecture de l'origine est distincte des actions d'ouverture administrateur.
-`ClosedOriginOpening::withCurrentRead` exige un acquittement local déjà appliqué,
-une relecture primaire explicitement confirmée, le même inbox/connexion, les
-champs immuables, l'intervalle d'admission et l'état primaire/local actif.
-Ouverture et installation restent protégées par leurs contrôles existants.
+Scénarios : origine ouverte par transport signé ; corpus vide et pack seul ; une
+consommation alimentant Créateur/Fan/session une seule fois ; correction partielle
+commune ; source incomplète indisponible ; retrait de consentement, suspension et
+réadmission ; annulation ; fermeture ; rollback. De vrais cookies WordPress
+distincts exercent les routes invité/Fan/Créateur/admin non lié, les refus et les
+cookies expirés ou altérés. Comptes liés, achats, clés et données sont fictifs :
+ces preuves ne sont pas celles du véritable SSO central Me.
 
-`ClosedRankingDelivery` compose sessions → origine/barrières → corpus/cache
-dans l'unique transaction propriétaire. Le cache doit correspondre exactement
-au corpus complet authentifié et corrigé de la même origine/politique. Une
-source incomplète, clé révoquée, fermeture locale ou relecture en attente
-refuse la livraison ; aucun cache ancien servi comme exact.
+La capture navigateur facultative s'exécute pendant que cette même paire jetable
+est vivante, sur les routes réelles. L'adaptateur de recette HTTPS/HTTP loopback
+reste dans `tests/`, après garde physique ; il ne change pas les permissions.
+Les exports HTML/assets de `FALUSS_B6_UI_EXPORT` sont des replays distincts et
+ne constituent pas une preuve d'authentification ou d'hébergement cible. Le
+serveur, les capacités temporaires et la paire sont nettoyés en `finally`.
 
-- Général/catégories persistants : noms approuvés et consentements relus par
-  les contrats SSO/Profils propriétaires, IDs locaux distincts des Faluss ID.
-  Sortie minimale nom/points/place visible, sans UUID, reçu ou départage privé.
-- Relevé mensuel privé : membre courant déterminé par WordPress et son lien
-  SSO primaire, sans paramètre de destinataire ; mois civil Europe/Paris,
-  corrections au mois d'origine. Retrait du consentement public et suspension
-  du profil ne suppriment pas les faits/relevés privés. Une absence de faits
-  dans un corpus complet vaut zéro, pas un montant ou solde utilisable.
-- Mois antérieur à l'ouverture ou futur par rapport au corpus attesté refusé.
-  PC, packs non attribués et anciens PF non admissibles restent exclus.
+Les résultats exacts, SHA et captures de la recette finale sont consignés dans
+les [preuves de branche](../evidence/fans-hof-b6-current-delivery/README.md) :
+769/769 contrôles conjoints et48/48 cas navigateur réussis. Un résultat de branche n'est jamais présenté comme une
+vérification du futur `main`. Les premiers échecs ont permis de corriger les
+scénarios d'horloge/admission et le débordement à 320 px ; ils ne sont pas des
+succès. L'échec antérieur B3beh, disparu sur un rejeu inchangé, reste sans cause
+établie et a été signalé à Jérémie, sans modification d'infrastructure.
 
-La préparation/collecte/relecture HTTP et reconstruction sont explicites,
-hors de la transaction et des mutex de livraison. `source_at` est l'instant
-de fence du corpus, pas une promesse de fraîcheur future continue ou une
-transaction distribuée entre les primaires.
+## Écarts V2 et raccordements suivants
 
-Recette `--b6-current-delivery` : deux WordPress/MariaDB jetables, données,
-achats, clés et identités fictifs. Ouverture réelle par le transport signé,
-corpus complet vide/pack seul, une consommation officielle, filiation locale,
-consentement/suspension, relevés privés, correction partielle/incomplète et
-fermeture. Les comptes liés sont des fixtures, pas le véritable SSO Me.
-L'horloge injectée du Hub est appliquée seulement à la connexion Fans de recette.
+Les trois objets ont leurs lectures et vues, sans photographie, graphe, rang,
+statistique ou session inventés. Le contrat de session ne fournit pas de média
+public approuvé : traitement graphique sobre et pictogramme. Les lignes de
+classement affichent seulement les noms approuvés disponibles, sans portrait
+supposé. Pas de variation de score inventée ni de badge/récompense irréversible.
 
-Limites : pas encore de livraison des sessions et de toutes leurs barrières
-d'admission/Créateur/pays, d'intentions serveur complètes ni d'UI/captures.
-Ce sous-lot ne rend pas les classements testables sur les sites. Retour arrière :
-retirer ses futurs appelants et revert, sans modifier faits ou checkpoints.
-#150 et RustFS #161 restent distincts ; aucune release/activation.
+Les formulaires de gouvernance, d'alias/consentement et les intentions serveur
+complètes restent à raccorder aux services existants. Collecte/relecture primaire
+et reconstruction restent explicites hors des transactions de livraison ;
+`source_at` est la fence du corpus, pas une promesse de fraîcheur continue.
+Producteur d'achat, admission réelle, vrai SSO, automatisation de production,
+référentiel territorial et pays autorisés restent des portes distinctes.
+Conservation #150 et RustFS #161 ne sont pas débloqués par cette recette.
+
+Retour arrière : retirer les appelants et revert du lot, sans modifier faits,
+reçus, schémas ou checkpoints. Aucun site, flag de production, migration de
+production, achat ou opération économique réelle dans ce lot.

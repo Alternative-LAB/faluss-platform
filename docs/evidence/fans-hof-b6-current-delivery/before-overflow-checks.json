@@ -1,0 +1,1090 @@
+{
+  "scope": "Actual disposable WordPress routes, local cookie sessions and fictitious Hub facts; emulated viewports/touch, loopback HTTP scheme shim; no central Me SSO, physical device or real-site proof",
+  "browser": "151.0.7922.34",
+  "screens": [
+    {
+      "name": "visitor-hof",
+      "width": 1440,
+      "layout": {
+        "viewport": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "title": "Le Hall of Fame",
+        "main": {
+          "x": 82,
+          "y": 0,
+          "width": 1343,
+          "height": 1444.109375,
+          "top": 0,
+          "right": 1425,
+          "bottom": 1444.109375,
+          "left": 82
+        },
+        "overflow": []
+      },
+      "screenshot": "visitor-hof-1440.png"
+    },
+    {
+      "name": "fan-hof",
+      "width": 1440,
+      "layout": {
+        "viewport": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "title": "Le Hall of Fame",
+        "main": {
+          "x": 82,
+          "y": 0,
+          "width": 1343,
+          "height": 1415.53125,
+          "top": 0,
+          "right": 1425,
+          "bottom": 1415.53125,
+          "left": 82
+        },
+        "overflow": []
+      },
+      "screenshot": "fan-hof-1440.png"
+    },
+    {
+      "name": "creator-hof",
+      "width": 1440,
+      "layout": {
+        "viewport": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "title": "Le Hall of Fame",
+        "main": {
+          "x": 82,
+          "y": 0,
+          "width": 1343,
+          "height": 1415.53125,
+          "top": 0,
+          "right": 1425,
+          "bottom": 1415.53125,
+          "left": 82
+        },
+        "overflow": []
+      },
+      "screenshot": "creator-hof-1440.png"
+    },
+    {
+      "name": "fan-ranking",
+      "width": 1440,
+      "layout": {
+        "viewport": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "title": "Classement Fans",
+        "main": {
+          "x": 82,
+          "y": 0,
+          "width": 1343,
+          "height": 773.90625,
+          "top": 0,
+          "right": 1425,
+          "bottom": 773.90625,
+          "left": 82
+        },
+        "overflow": []
+      },
+      "screenshot": "fan-ranking-1440.png"
+    },
+    {
+      "name": "creator-ranking",
+      "width": 1440,
+      "layout": {
+        "viewport": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "title": "Classements",
+        "main": {
+          "x": 82,
+          "y": 0,
+          "width": 1343,
+          "height": 736.40625,
+          "top": 0,
+          "right": 1425,
+          "bottom": 736.40625,
+          "left": 82
+        },
+        "overflow": []
+      },
+      "screenshot": "creator-ranking-1440.png"
+    },
+    {
+      "name": "fan-statement",
+      "width": 1440,
+      "layout": {
+        "viewport": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "title": "Espace personnel",
+        "main": {
+          "x": 82,
+          "y": 0,
+          "width": 1343,
+          "height": 1204.15625,
+          "top": 0,
+          "right": 1425,
+          "bottom": 1204.15625,
+          "left": 82
+        },
+        "overflow": []
+      },
+      "screenshot": "fan-statement-1440.png"
+    },
+    {
+      "name": "creator-statement",
+      "width": 1440,
+      "layout": {
+        "viewport": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "title": "Progression",
+        "main": {
+          "x": 82,
+          "y": 0,
+          "width": 1343,
+          "height": 809.328125,
+          "top": 0,
+          "right": 1425,
+          "bottom": 809.328125,
+          "left": 82
+        },
+        "overflow": []
+      },
+      "screenshot": "creator-statement-1440.png"
+    },
+    {
+      "name": "fan-session",
+      "width": 1440,
+      "layout": {
+        "viewport": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "title": "Session HoF",
+        "main": {
+          "x": 82,
+          "y": 0,
+          "width": 1343,
+          "height": 947.8125,
+          "top": 0,
+          "right": 1425,
+          "bottom": 947.8125,
+          "left": 82
+        },
+        "overflow": []
+      },
+      "screenshot": "fan-session-1440.png"
+    },
+    {
+      "name": "visitor-hof",
+      "width": 768,
+      "layout": {
+        "viewport": 768,
+        "document": 753,
+        "fontLoaded": true,
+        "title": "Le Hall of Fame",
+        "main": {
+          "x": 82,
+          "y": 0,
+          "width": 671,
+          "height": 1500.328125,
+          "top": 0,
+          "right": 753,
+          "bottom": 1500.328125,
+          "left": 82
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "fan-hof",
+      "width": 768,
+      "layout": {
+        "viewport": 768,
+        "document": 753,
+        "fontLoaded": true,
+        "title": "Le Hall of Fame",
+        "main": {
+          "x": 82,
+          "y": 0,
+          "width": 671,
+          "height": 1417.75,
+          "top": 0,
+          "right": 753,
+          "bottom": 1417.75,
+          "left": 82
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-hof",
+      "width": 768,
+      "layout": {
+        "viewport": 768,
+        "document": 753,
+        "fontLoaded": true,
+        "title": "Le Hall of Fame",
+        "main": {
+          "x": 82,
+          "y": 0,
+          "width": 671,
+          "height": 1407.75,
+          "top": 0,
+          "right": 753,
+          "bottom": 1407.75,
+          "left": 82
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "fan-ranking",
+      "width": 768,
+      "layout": {
+        "viewport": 768,
+        "document": 753,
+        "fontLoaded": true,
+        "title": "Classement Fans",
+        "main": {
+          "x": 82,
+          "y": 0,
+          "width": 671,
+          "height": 790.8125,
+          "top": 0,
+          "right": 753,
+          "bottom": 790.8125,
+          "left": 82
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-ranking",
+      "width": 768,
+      "layout": {
+        "viewport": 768,
+        "document": 753,
+        "fontLoaded": true,
+        "title": "Classements",
+        "main": {
+          "x": 82,
+          "y": 0,
+          "width": 671,
+          "height": 721.8125,
+          "top": 0,
+          "right": 753,
+          "bottom": 721.8125,
+          "left": 82
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "fan-statement",
+      "width": 768,
+      "layout": {
+        "viewport": 768,
+        "document": 753,
+        "fontLoaded": true,
+        "title": "Espace personnel",
+        "main": {
+          "x": 82,
+          "y": 0,
+          "width": 671,
+          "height": 1163.40625,
+          "top": 0,
+          "right": 753,
+          "bottom": 1163.40625,
+          "left": 82
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-statement",
+      "width": 768,
+      "layout": {
+        "viewport": 768,
+        "document": 753,
+        "fontLoaded": true,
+        "title": "Progression",
+        "main": {
+          "x": 82,
+          "y": 0,
+          "width": 671,
+          "height": 776.65625,
+          "top": 0,
+          "right": 753,
+          "bottom": 776.65625,
+          "left": 82
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "fan-session",
+      "width": 768,
+      "layout": {
+        "viewport": 768,
+        "document": 753,
+        "fontLoaded": true,
+        "title": "Session HoF",
+        "main": {
+          "x": 82,
+          "y": 0,
+          "width": 671,
+          "height": 939.40625,
+          "top": 0,
+          "right": 753,
+          "bottom": 939.40625,
+          "left": 82
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "visitor-hof",
+      "width": 430,
+      "layout": {
+        "viewport": 430,
+        "document": 430,
+        "fontLoaded": true,
+        "title": "Le Hall of Fame",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 430,
+          "height": 1440.046875,
+          "top": 0,
+          "right": 430,
+          "bottom": 1440.046875,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "fan-hof",
+      "width": 430,
+      "layout": {
+        "viewport": 430,
+        "document": 430,
+        "fontLoaded": true,
+        "title": "Le Hall of Fame",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 430,
+          "height": 1354.28125,
+          "top": 0,
+          "right": 430,
+          "bottom": 1354.28125,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-hof",
+      "width": 430,
+      "layout": {
+        "viewport": 430,
+        "document": 430,
+        "fontLoaded": true,
+        "title": "Le Hall of Fame",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 430,
+          "height": 1354.28125,
+          "top": 0,
+          "right": 430,
+          "bottom": 1354.28125,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "fan-ranking",
+      "width": 430,
+      "layout": {
+        "viewport": 430,
+        "document": 430,
+        "fontLoaded": true,
+        "title": "Classement Fans",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 430,
+          "height": 791.1875,
+          "top": 0,
+          "right": 430,
+          "bottom": 791.1875,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-ranking",
+      "width": 430,
+      "layout": {
+        "viewport": 430,
+        "document": 430,
+        "fontLoaded": true,
+        "title": "Classements",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 430,
+          "height": 732.1875,
+          "top": 0,
+          "right": 430,
+          "bottom": 732.1875,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "fan-statement",
+      "width": 430,
+      "layout": {
+        "viewport": 430,
+        "document": 430,
+        "fontLoaded": true,
+        "title": "Espace personnel",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 430,
+          "height": 1260.546875,
+          "top": 0,
+          "right": 430,
+          "bottom": 1260.546875,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-statement",
+      "width": 430,
+      "layout": {
+        "viewport": 430,
+        "document": 430,
+        "fontLoaded": true,
+        "title": "Progression",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 430,
+          "height": 864.296875,
+          "top": 0,
+          "right": 430,
+          "bottom": 864.296875,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "fan-session",
+      "width": 430,
+      "layout": {
+        "viewport": 430,
+        "document": 430,
+        "fontLoaded": true,
+        "title": "Session HoF",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 430,
+          "height": 879.890625,
+          "top": 0,
+          "right": 430,
+          "bottom": 879.890625,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "visitor-hof",
+      "width": 390,
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "title": "Le Hall of Fame",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 1439.53125,
+          "top": 0,
+          "right": 390,
+          "bottom": 1439.53125,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": "visitor-hof-390.png"
+    },
+    {
+      "name": "fan-hof",
+      "width": 390,
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "title": "Le Hall of Fame",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 1353.765625,
+          "top": 0,
+          "right": 390,
+          "bottom": 1353.765625,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": "fan-hof-390.png"
+    },
+    {
+      "name": "creator-hof",
+      "width": 390,
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "title": "Le Hall of Fame",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 1353.765625,
+          "top": 0,
+          "right": 390,
+          "bottom": 1353.765625,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": "creator-hof-390.png"
+    },
+    {
+      "name": "fan-ranking",
+      "width": 390,
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "title": "Classement Fans",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 791.015625,
+          "top": 0,
+          "right": 390,
+          "bottom": 791.015625,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": "fan-ranking-390.png"
+    },
+    {
+      "name": "creator-ranking",
+      "width": 390,
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "title": "Classements",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 732.015625,
+          "top": 0,
+          "right": 390,
+          "bottom": 732.015625,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": "creator-ranking-390.png"
+    },
+    {
+      "name": "fan-statement",
+      "width": 390,
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "title": "Espace personnel",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 1284.375,
+          "top": 0,
+          "right": 390,
+          "bottom": 1284.375,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": "fan-statement-390.png"
+    },
+    {
+      "name": "creator-statement",
+      "width": 390,
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "title": "Progression",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 864.125,
+          "top": 0,
+          "right": 390,
+          "bottom": 864.125,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": "creator-statement-390.png"
+    },
+    {
+      "name": "fan-session",
+      "width": 390,
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "title": "Session HoF",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 900.9375,
+          "top": 0,
+          "right": 390,
+          "bottom": 900.9375,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": "fan-session-390.png"
+    },
+    {
+      "name": "visitor-hof",
+      "width": 375,
+      "layout": {
+        "viewport": 375,
+        "document": 375,
+        "fontLoaded": true,
+        "title": "Le Hall of Fame",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 375,
+          "height": 1439.296875,
+          "top": 0,
+          "right": 375,
+          "bottom": 1439.296875,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "fan-hof",
+      "width": 375,
+      "layout": {
+        "viewport": 375,
+        "document": 375,
+        "fontLoaded": true,
+        "title": "Le Hall of Fame",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 375,
+          "height": 1353.53125,
+          "top": 0,
+          "right": 375,
+          "bottom": 1353.53125,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-hof",
+      "width": 375,
+      "layout": {
+        "viewport": 375,
+        "document": 375,
+        "fontLoaded": true,
+        "title": "Le Hall of Fame",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 375,
+          "height": 1353.53125,
+          "top": 0,
+          "right": 375,
+          "bottom": 1353.53125,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "fan-ranking",
+      "width": 375,
+      "layout": {
+        "viewport": 375,
+        "document": 375,
+        "fontLoaded": true,
+        "title": "Classement Fans",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 375,
+          "height": 790.9375,
+          "top": 0,
+          "right": 375,
+          "bottom": 790.9375,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-ranking",
+      "width": 375,
+      "layout": {
+        "viewport": 375,
+        "document": 375,
+        "fontLoaded": true,
+        "title": "Classements",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 375,
+          "height": 731.9375,
+          "top": 0,
+          "right": 375,
+          "bottom": 731.9375,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "fan-statement",
+      "width": 375,
+      "layout": {
+        "viewport": 375,
+        "document": 375,
+        "fontLoaded": true,
+        "title": "Espace personnel",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 375,
+          "height": 1284.296875,
+          "top": 0,
+          "right": 375,
+          "bottom": 1284.296875,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-statement",
+      "width": 375,
+      "layout": {
+        "viewport": 375,
+        "document": 375,
+        "fontLoaded": true,
+        "title": "Progression",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 375,
+          "height": 864.046875,
+          "top": 0,
+          "right": 375,
+          "bottom": 864.046875,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "fan-session",
+      "width": 375,
+      "layout": {
+        "viewport": 375,
+        "document": 375,
+        "fontLoaded": true,
+        "title": "Session HoF",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 375,
+          "height": 932.5,
+          "top": 0,
+          "right": 375,
+          "bottom": 932.5,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "visitor-hof",
+      "width": 320,
+      "layout": {
+        "viewport": 354,
+        "document": 354,
+        "fontLoaded": true,
+        "title": "Le Hall of Fame",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 320,
+          "height": 1540.890625,
+          "top": 0,
+          "right": 320,
+          "bottom": 1540.890625,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "fan-hof",
+      "width": 320,
+      "layout": {
+        "viewport": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "title": "Le Hall of Fame",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 320,
+          "height": 1508.9375,
+          "top": 0,
+          "right": 320,
+          "bottom": 1508.9375,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-hof",
+      "width": 320,
+      "layout": {
+        "viewport": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "title": "Le Hall of Fame",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 320,
+          "height": 1508.9375,
+          "top": 0,
+          "right": 320,
+          "bottom": 1508.9375,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "fan-ranking",
+      "width": 320,
+      "layout": {
+        "viewport": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "title": "Classement Fans",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 320,
+          "height": 883,
+          "top": 0,
+          "right": 320,
+          "bottom": 883,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-ranking",
+      "width": 320,
+      "layout": {
+        "viewport": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "title": "Classements",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 320,
+          "height": 856.3125,
+          "top": 0,
+          "right": 320,
+          "bottom": 856.3125,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "fan-statement",
+      "width": 320,
+      "layout": {
+        "viewport": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "title": "Espace personnel",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 320,
+          "height": 1447.03125,
+          "top": 0,
+          "right": 320,
+          "bottom": 1447.03125,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-statement",
+      "width": 320,
+      "layout": {
+        "viewport": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "title": "Progression",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 320,
+          "height": 1007.28125,
+          "top": 0,
+          "right": 320,
+          "bottom": 1007.28125,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "fan-session",
+      "width": 320,
+      "layout": {
+        "viewport": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "title": "Session HoF",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 320,
+          "height": 972,
+          "top": 0,
+          "right": 320,
+          "bottom": 972,
+          "left": 0
+        },
+        "overflow": []
+      },
+      "screenshot": null
+    }
+  ],
+  "navigation": [
+    "Touch session opening and browser back",
+    "Keyboard activation and native category/all-category GET forms"
+  ],
+  "failures": [
+    {
+      "name": "visitor-hof",
+      "width": 320,
+      "kind": "overflow",
+      "layout": {
+        "viewport": 354,
+        "document": 354,
+        "fontLoaded": true,
+        "title": "Le Hall of Fame",
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 320,
+          "height": 1540.890625,
+          "top": 0,
+          "right": 320,
+          "bottom": 1540.890625,
+          "left": 0
+        },
+        "overflow": []
+      }
+    }
+  ]
+}

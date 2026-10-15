@@ -20,7 +20,8 @@ Ce contrat local n'est pas une nouvelle preuve ou API Hub. Une fonction fournie
 adaptateur utilise désormais la filiation SSO et `RankingVisibility` via
 `RankingIdentity`, intégrée dans #208, sans repli sur le login WordPress ou les
 données Identity. Le [fournisseur des trois objets](FANS-HOF-B6-CURRENT-DELIVERY.md)
-et ses vues restent en cours de recette dans #212.
+et ses vues sont raccordés dans #212 ; les preuves de branche et celles du code
+intégré restent distinguées, sans annoncer une activation sur les sites.
 
 ## Scénarios et preuve
 
@@ -60,8 +61,9 @@ Origine/acquittements B1/B2, choix d'attribution, source primaire à jour, mappi
 des filiations et visibilité doivent être composés avec B4/B5 avant livraison.
 Les relevés mensuels resteront privés, liés au membre courant ; les tableaux
 Créateurs et Fans sont distincts et les sessions ne deviennent pas un relevé.
-La présentation réutilisera les routes, composants et DA V2 validés ; aucun
-écran, REST, flag, activation ou score public n'est ajouté par cette primitive.
+La présentation B6 réutilise les routes, composants et DA V2 validés. Cette
+primitive de visibilité seule n'ajoute aucun écran, REST, flag, activation ou
+score public ; le raccordement fermé et ses limites sont décrits séparément.
 
 Un classement incomplet ne doit jamais être présenté comme exact. Publication,
 vrai SSO, source d'achat et admission réelle restent distincts ; #150 et #161

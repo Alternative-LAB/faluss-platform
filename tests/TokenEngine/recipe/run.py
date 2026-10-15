@@ -57,7 +57,7 @@ def main():
     parser.add_argument('--b6-corpus-transaction', action='store_true', help='Caller-owned barrier/corpus transaction and rollback, without public delivery')
     parser.add_argument('--b6-primary-refresh', action='store_true', help='Explicit same-generation primary freshness and uncertain response recovery')
     parser.add_argument('--b6-joined-integration', action='store_true', help='Actual signed barrier HTTP and corpus/cache on the same Fans primary')
-    parser.add_argument('--b6-current-delivery', action='store_true', help='Actual origin, corpus/cache and local identities in closed current rankings/statements; no UI or site')
+    parser.add_argument('--b6-current-delivery', action='store_true', help='Actual origin, corpus/cache and local identities in closed rankings, statements, sessions and disposable WordPress routes; no real site')
     options = parser.parse_args()
     if options.b6_current_delivery:
         options.b6_joined_integration = True
@@ -646,7 +646,7 @@ def main():
         if options.b6_joined_integration:
             report['scope'] += '; actual signed barrier gateway and exact corpus cache composed on the same Fans primary, with rollback, revoked trust and closing suppression'
             report['scope'] += '; actual closed B6 provider for persistent rankings, current-member monthly statements and approved session reads, corrected facts, Identity links and real-template rendering'
-            report['not_proven'][0] = 'Production admission, complete server intent choices and governance forms, continuously scheduled primary freshness, live route/browser authentication and real Me SSO'
+            report['not_proven'][0] = 'Production admission, complete server intent choices and governance forms, continuously scheduled primary freshness, real Me SSO, real-site or physical-device browser validation'
     finally:
         for process in workers:
             if process.poll() is None:
