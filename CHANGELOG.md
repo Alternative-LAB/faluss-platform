@@ -6,6 +6,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+## [0.13.0] - 2026-10-15
+
 ### Ajouté
 
 - Importer ses liens dans Studio V3 depuis un fichier CSV / JSON ou du texte, HTML et Markdown : aperçu modifiable, choix des lignes et de l’ordre, validation et détection des doublons. L’import ajoute les liens sans remplacer les données existantes et respecte la capacité de la carte.
