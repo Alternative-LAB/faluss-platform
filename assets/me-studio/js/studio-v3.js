@@ -10,6 +10,7 @@
     var dialog = root.querySelector('dialog');
     var pending = false, uploading = false, leaving = false, previewRequest = null;
     var management = root.querySelector('[data-v3-management]');
+    var importer = null;
     function notice(message, failed) {
         if (error) { error.textContent = failed ? message : ''; error.hidden = !failed; }
         if (status) { status.textContent = failed ? '' : message; }
@@ -133,6 +134,7 @@
 
     function saveItem(editor, removal) {
         if (pending || uploading || navigating) { return; }
+        if (importer && importer.isDirty() && !window.confirm('Enregistrer cet élément et abandonner l’aperçu d’import non enregistré ?')) { return; }
         if (Array.from(root.querySelectorAll('[data-v3-editor]')).filter(editorDirty).some(function (other) { return other !== editor; })) {
             if (!window.confirm('Enregistrer cet élément et abandonner les modifications non enregistrées des autres éléments ?')) { return; }
         }
@@ -225,7 +227,7 @@
     resetBaselines();
     function editorDirty(editor) { return editorSnapshot(editor) !== baselines.get(editor); }
     function isDirty() {
-        return management ? Array.from(baselines.keys()).some(editorDirty) : JSON.stringify(fields()) !== baseline;
+        return (importer && importer.isDirty()) || (management ? Array.from(baselines.keys()).some(editorDirty) : JSON.stringify(fields()) !== baseline);
     }
     function refreshPreview() {
         if (!dialog.open) { return; }
@@ -258,6 +260,16 @@
             }).catch(function (failure) { notice(failure.message, true); pending = false; button.disabled = false; });
     }
     var navigationRequest = null, navigationRevision = 0, navigating = false, needsCanonical = false;
+    function setupImporter() {
+        importer = window.falussLinkImport ? window.falussLinkImport(root.querySelector('[data-link-import]'), {
+            post: post, config: function () { return config; }, version: function () { return root.dataset.version || ''; },
+            isBusy: function () { return pending || uploading || navigating || needsCanonical; },
+            blocked: function () { return needsCanonical; }, busy: function (value) { pending = value; },
+            confirmOtherDrafts: function () { return !Array.from(baselines.keys()).some(editorDirty) || window.confirm('Importer ces liens et abandonner les modifications non enregistrées des autres éléments ?'); },
+            serverError: serverError, saved: reloadCanonical, notice: notice
+        }) : null;
+    }
+    setupImporter();
     var currentUrl = window.location.href;
     var historyKey = 'falussStudioV3';
     var historyIndex = history.state && history.state[historyKey] ? history.state[historyKey].index : 0;
@@ -365,6 +377,7 @@
         config = nextConfig;
         needsCanonical = false;
         resetBaselines();
+        setupImporter();
         root.scrollTo({ top: 0, behavior: 'instant' });
         var focus = focusArea ? root.querySelector('.faluss-studio-v3__' + focusArea + ' [aria-current]') : panel.querySelector('h1');
         if (focus) { if (!focusArea) { focus.tabIndex = -1; } focus.focus({preventScroll: true}); }
