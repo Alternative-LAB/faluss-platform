@@ -697,6 +697,7 @@ final class Faluss_Link {
             'save_link_style'      => array( 'button_color', 'link_style' ),
             'save_atomic_design'   => array( 'cover_attachment_id', 'avatar_visible', 'name_font', 'page_background', 'button_color', 'link_style', 'structure', 'button_texture', 'avatar_shape', 'avatar_effect', 'wallpaper_size', 'wallpaper_effect', 'social_style', 'social_color', 'links_mode', 'link_width', 'secondary_color', 'image_border', 'image_border_color' ),
             'save_profile'         => array( 'display_name', 'bio', 'avatar_attachment_id', 'publication_status' ),
+            'import_links'         => array( 'rows' ),
             'create_link'          => array( 'block_id', 'label', 'url', 'collection_id', 'attachment_id', 'visibility' ),
             'update_link'          => array( 'block_id', 'label', 'url', 'attachment_id', 'visibility' ),
             'delete_link'          => array( 'block_id' ),
@@ -727,7 +728,7 @@ final class Faluss_Link {
     /** One member aggregate, one MariaDB transaction, one commit owner. */
     private static function run_studio_mutation( $faluss_id, $request ) {
         global $wpdb;
-        $block_mutations = array( 'create_content', 'update_content', 'delete_content', 'create_link', 'update_link', 'delete_link', 'create_collection', 'update_collection', 'dissolve_collection', 'reorder_blocks' );
+        $block_mutations = array( 'import_links', 'create_content', 'update_content', 'delete_content', 'create_link', 'update_link', 'delete_link', 'create_collection', 'update_collection', 'dissolve_collection', 'reorder_blocks' );
         if ( ! \Faluss\Platform\Link\LinkIdentityAdapter::studioAvailable() || false === $wpdb->query( 'START TRANSACTION' ) ) {
             return array( 'ok' => false, 'status' => 503, 'code' => 'transaction_unavailable', 'message' => __( 'La sauvegarde transactionnelle est indisponible.', 'faluss-link' ) );
         }
@@ -748,9 +749,29 @@ final class Faluss_Link {
             }
 
             $mutation = $request['mutation'];
+            $import_report = null;
             if ( $legacy_blocks_only && in_array( $mutation, $block_mutations, true ) ) {
                 $wpdb->query( 'ROLLBACK' );
                 return array( 'ok' => false, 'status' => 409, 'code' => 'legacy_blocks_not_initialized', 'message' => __( 'Les liens historiques sont affichés en lecture seule. Leur import explicite doit être traité séparément.', 'faluss-link' ), 'state' => self::canonical_studio_state( $faluss_id, $request['active_collection'] ) );
+            }
+            if ( 'import_links' === $mutation ) {
+                try {
+                    $rows = \Faluss\Platform\Link\Import\LinkImportBatch::rows( $request['payload']['rows'] ?? array() );
+                    $urls = array_values( array_map( static function( $block ) { return $block['url']; }, array_filter( $blocks, static function( $block ) { return 'link' === $block['type']; } ) ) );
+                    $import_report = ( new \Faluss\Platform\Link\Import\LinkImportValidator() )->review( $rows, $urls );
+                    $ready = array_values( array_filter( $import_report, static function( $row ) { return 'ready' === $row['status']; } ) );
+                    if ( ! $ready || count( $blocks ) + count( $ready ) > 32 ) {
+                        $wpdb->query( 'ROLLBACK' );
+                        return array( 'ok' => false, 'status' => 422, 'code' => $ready ? 'import_capacity' : 'import_empty', 'report' => $import_report );
+                    }
+                    usort( $ready, static function( $a, $b ) { return $a['order'] <=> $b['order']; } );
+                    foreach ( $ready as $row ) {
+                        if ( ! self::mutate_blocks_in_transaction( $faluss_id, 'create_link', array( 'block_id' => wp_generate_uuid4(), 'label' => wp_slash( $row['label'] ), 'url' => $row['url'], 'visibility' => 'all' ) ) ) { throw new RuntimeException( 'import_insert' ); }
+                    }
+                } catch ( InvalidArgumentException $error ) {
+                    $wpdb->query( 'ROLLBACK' );
+                    return array( 'ok' => false, 'status' => 422, 'code' => 'invalid_import' );
+                }
             }
             if ( 'save_profile' === $mutation ) {
                 if ( ! \Faluss\Platform\Link\LinkIdentityAdapter::persistStudioProfileInTransaction( $faluss_id, $request['payload'] ) ) { throw new RuntimeException( 'profile' ); }
@@ -763,7 +784,7 @@ final class Faluss_Link {
                 }
                 if ( ! $saved ) { throw new RuntimeException( 'preferences' ); }
             } elseif ( in_array( $mutation, $block_mutations, true ) ) {
-                if ( ! self::mutate_blocks_in_transaction( $faluss_id, $mutation, $request['payload'] ) ) { throw new RuntimeException( 'blocks' ); }
+                if ( 'import_links' !== $mutation && ! self::mutate_blocks_in_transaction( $faluss_id, $mutation, $request['payload'] ) ) { throw new RuntimeException( 'blocks' ); }
                 if ( ! self::mutation_checkpoint( 'before_projection' ) ) { throw new RuntimeException( 'projection_checkpoint' ); }
                 $canonical_blocks = self::stored_blocks( $faluss_id )['blocks'];
                 if ( ! \Faluss\Platform\Link\LinkIdentityAdapter::persistExternalLinksInTransaction( $faluss_id, self::identity_links( $canonical_blocks ) ) ) { throw new RuntimeException( 'projection' ); }
@@ -772,7 +793,9 @@ final class Faluss_Link {
                 throw new RuntimeException( 'mutation' );
             }
             if ( ! self::mutation_checkpoint( 'before_commit' ) || false === $wpdb->query( 'COMMIT' ) ) { throw new RuntimeException( 'commit' ); }
-            return array( 'ok' => true, 'status' => 200, 'code' => 'saved', 'message' => __( 'Studio enregistré.', 'faluss-link' ), 'state' => self::canonical_studio_state( $faluss_id, $request['active_collection'] ) );
+            $result = array( 'ok' => true, 'status' => 200, 'code' => 'saved', 'message' => __( 'Studio enregistré.', 'faluss-link' ), 'state' => self::canonical_studio_state( $faluss_id, $request['active_collection'] ) );
+            if ( null !== $import_report ) { $result['code'] = 'imported'; $result['report'] = $import_report; $result['imported'] = count( $ready ); }
+            return $result;
         } catch ( Throwable $exception ) {
             $wpdb->query( 'ROLLBACK' );
             return array( 'ok' => false, 'status' => 422, 'code' => 'mutation_failed', 'message' => __( 'La mutation a été annulée intégralement.', 'faluss-link' ), 'state' => self::canonical_studio_state( $faluss_id, $request['active_collection'] ) );

@@ -6,7 +6,21 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Ajouté
+
+- Formulaires B6 fermés de pseudonyme Fan et consentements de visibilité séparés, modération dans le panel Fans avec nonce/révision et journal existants ; refus des POST ambigus avec l'admission Créateur, retrait possible pendant une incertitude Hub. Recette applicative sur instances jetables uniquement, sans activation ou contrat économique ajouté.
+
+## [0.13.0] - 2026-10-15
+
+### Ajouté
+
+- Importer ses liens dans Studio V3 depuis un fichier CSV / JSON ou du texte, HTML et Markdown : aperçu modifiable, choix des lignes et de l’ordre, validation et détection des doublons. L’import ajoute les liens sans remplacer les données existantes et respecte la capacité de la carte.
+- Analyse locale des sources et confirmation dans la transaction Link existante, avec contrôle de version, rapport des imports partiels et annulation complète des erreurs de stockage. Aucun scraping, migration de schéma ou accès tiers.
+- Guide [d’import des liens](docs/modules/LINK-IMPORT.md) et tests des formats, droits, limites, conservation, conflits, rollback et interface mobile.
+
 ### Modifié
+
+- Harmoniser l’import de liens avec le Studio : choix fichier / copier-coller, parcours en deux étapes, liste compacte avec éditeurs dépliables et une seule action principale corail. Conserver séparément les brouillons de chaque source lors des changements d’onglet.
 
 - Réduire les coûts du stockage de la recette WordPress/MariaDB `corpus-joined` sur runner GitHub hébergé avec un montage temporaire en mémoire plafonné à 1 Gio ; scénarios, chemins privés et réglages transactionnels inchangés, aucun effet sur la production.
 - Accélérer la CI WordPress : Identity et administration Fans séparés, cinq recettes PF terminales parallèles et vérification des 1 413 assertions historiques ; outils épinglés et bytecode CLI partagés avec revalidation immédiate, budgets de temps et annulation des workflows obsolètes de PR. Aucun scénario applicatif ou état de production modifié.
@@ -18,7 +32,6 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
-- Formulaires B6 fermés de pseudonyme Fan et consentements de visibilité séparés, modération dans le panel Fans avec nonce/révision et journal existants ; refus des POST ambigus avec l'admission Créateur, retrait possible pendant une incertitude Hub. Recette applicative sur instances jetables uniquement, sans activation ou contrat économique ajouté.
 - Livraison B6 fermée des classements, relevés privés et sessions depuis l'origine primaire, le corpus/cache complet corrigé et les identités/consentements courants : transaction commune sans quantité ou destinataire fourni par le navigateur, uniquement sur instances jetables ; formulaires de gouvernance, intentions complètes et activation restent distincts.
 - Vues B6 des classements permanents, relevés mensuels privés et sessions approuvées : filtres et pagination serveur, scores entiers sans arrondi, dates affichées dans le fuseau WordPress et mois Europe/Paris ; cycle de vie de session relu depuis sa liaison et son acquittement primaire existants, fermeture en cours masquée et annulation sans vainqueur. Fournisseur physiquement fermé hors recette, états indisponibles sans rang estimé, aucun changement de navigation globale.
 

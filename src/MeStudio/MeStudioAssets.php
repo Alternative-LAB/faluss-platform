@@ -83,7 +83,8 @@ final class MeStudioAssets
         self::register();
         $file = dirname(__DIR__, 2) . '/faluss-platform.php';
         wp_enqueue_style('faluss-studio-v3', plugins_url('assets/me-studio/css/studio-v3.css', $file), [self::CARD_STYLE], MeStudioModule::VERSION);
-        wp_enqueue_script('faluss-studio-v3', plugins_url('assets/me-studio/js/studio-v3.js', $file), [], MeStudioModule::VERSION, true);
+        wp_enqueue_script('faluss-link-import', plugins_url('assets/me-studio/js/link-import.js', $file), [], MeStudioModule::VERSION, true);
+        wp_enqueue_script('faluss-studio-v3', plugins_url('assets/me-studio/js/studio-v3.js', $file), ['faluss-link-import'], MeStudioModule::VERSION, true);
         wp_localize_script('faluss-studio-v3', 'falussStudioV3', self::studioV3Config());
     }
 
@@ -93,6 +94,7 @@ final class MeStudioAssets
         return [
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'managementNonce' => wp_create_nonce('faluss_studio_v3_manage'),
+            'importNonce' => wp_create_nonce('faluss_studio_link_import_preview'),
             'contentNonce' => wp_create_nonce('faluss_studio_v3_upload_content'),
             'studioNonce' => wp_create_nonce('faluss_studio_v3_save'),
             'previewNonce' => wp_create_nonce('faluss_onboarding_v3_preview'),

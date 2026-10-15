@@ -22,6 +22,7 @@ final class StudioV3Management
         $blocks = (array) ($state['blocks'] ?? []);
         $collections = (array) ($state['collections'] ?? []);
         if ($section === 'v3_links') {
+            LinkImportPanel::render();
             self::start('save_atomic_design', 'Disposition des liens');
             self::select('links_mode', 'Disposition', ['neutral' => 'Liste', 'image-grid' => 'Images · vedette puis deux colonnes'], $state['preferences']['links_mode'] ?? 'neutral');
             self::imageBorderControls((array) $state['preferences']);
