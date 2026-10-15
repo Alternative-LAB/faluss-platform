@@ -147,7 +147,11 @@ final class ClosedProtocolGuardTest extends TestCase
             static fn () => \Faluss\Platform\Fans\PfContract\ClosedRankedProtocolSchema::installForRecipe($database),
             static fn () => new \Faluss\Platform\Fans\PfContract\ClosedRankedProtocolStore($database),
             static fn () => new \Faluss\Platform\Fans\PfContract\ClosedCorpusInbox($database,
-                new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',['pf.ranking.corpus'],[]),'','')] as $operation) {
+                new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',['pf.ranking.corpus'],[]),'',''),
+            static fn () => new \Faluss\Platform\Fans\Hof\ClosedRankingDelivery($database,
+                (new \ReflectionClass(\Faluss\Platform\Fans\Hof\ClosedOriginOpening::class))->newInstanceWithoutConstructor(),
+                (new \ReflectionClass(\Faluss\Platform\Fans\PfContract\ClosedBarrierPrimaryRead::class))->newInstanceWithoutConstructor(),
+                (new \ReflectionClass(\Faluss\Platform\Fans\Hof\ClosedRankingProjectionStore::class))->newInstanceWithoutConstructor())] as $operation) {
             try { $operation(); self::fail('Copied settings cannot stage private global facts.'); }
             catch (ModelViolation $error) { self::assertSame('isolated_h3_recipe_required',$error->reason); }
         }
@@ -166,6 +170,12 @@ final class ClosedProtocolGuardTest extends TestCase
         self::assertSame(0,$database->queries);
         $primaryType = new \ReflectionClass(\Faluss\Platform\Fans\PfContract\ClosedBarrierPrimaryRead::class);
         $primary = $primaryType->newInstanceWithoutConstructor();
+        try {
+            (new \Faluss\Platform\Fans\Hof\ClosedSessionRead($database,$primary,'11111111-1111-4111-8111-111111111111'))
+                ->readInTransaction('22222222-2222-4222-8222-222222222222');
+            self::fail('Session metadata must not read ordinary WordPress storage or trust.');
+        } catch (ModelViolation $error) { self::assertSame('isolated_h3_recipe_required',$error->reason); }
+        self::assertSame(0,$database->queries);
         foreach ([static fn () => new \Faluss\Platform\Fans\PfContract\ClosedBarrierPrimaryRead($database,$inbox,
             new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',[],[])),
             static fn () => new \Faluss\Platform\Fans\PfContract\ClosedBarrierPrimaryClient($database,$inbox,$primary,'recipe-key','')] as $operation) {
@@ -179,6 +189,15 @@ final class ClosedProtocolGuardTest extends TestCase
             self::fail('Caller transactions cannot bypass the physical gate.'); }
         catch (ModelViolation $error) { self::assertSame('isolated_h3_recipe_required',$error->reason); }
         self::assertSame(0,$database->queries);
+        $GLOBALS['wpdb'] = $database;
+        foreach (['hof', 'classements', 'classement-fans', 'espace', 'progression'] as $view) {
+            $screen = \Faluss\Platform\Fans\Ui\FansUiHof::load('fan', $view);
+            self::assertNotNull($screen);
+            self::assertFalse($screen->available);
+            self::assertNull($screen->ranking);
+            self::assertNull($screen->statement);
+        }
+        self::assertSame(0,$database->queries, 'An ordinary site cannot resolve a ranking provider with copied settings.');
     }
 
     public function testReaderCannotBypassThePhysicalGateOrPersistAnUnboundedJob(): void

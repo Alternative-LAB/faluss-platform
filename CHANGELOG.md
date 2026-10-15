@@ -18,6 +18,9 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Livraison B6 fermée des classements, relevés privés et sessions depuis l'origine primaire, le corpus/cache complet corrigé et les identités/consentements courants : transaction commune sans quantité ou destinataire fourni par le navigateur, uniquement sur instances jetables ; formulaires de gouvernance, intentions complètes et activation restent distincts.
+- Vues B6 des classements permanents, relevés mensuels privés et sessions approuvées : filtres et pagination serveur, scores entiers sans arrondi, dates affichées dans le fuseau WordPress et mois Europe/Paris ; cycle de vie de session relu depuis sa liaison et son acquittement primaire existants, fermeture en cours masquée et annulation sans vainqueur. Fournisseur physiquement fermé hors recette, états indisponibles sans rang estimé, aucun changement de navigation globale.
+
 - Composition de plusieurs barrières actuelles dans la transaction d'origine déjà détenue : mutex et connexion primaires vérifiés, rollback/commit communs, aucun BEGIN imbriqué ou nouvelle preuve implicite ; périmètre B6 fermé sans contrat Hub ajouté.
 
 - Mutex de gouvernance B6 sans BEGIN pour composer sessions, origine et corpus sous leur transaction propriétaire : ordre conservé, callback incomplet rollbacké et libération vérifiée ; aucun droit, contrat Hub, table ou activation ajouté.

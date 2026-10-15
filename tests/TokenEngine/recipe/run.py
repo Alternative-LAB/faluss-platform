@@ -57,7 +57,10 @@ def main():
     parser.add_argument('--b6-corpus-transaction', action='store_true', help='Caller-owned barrier/corpus transaction and rollback, without public delivery')
     parser.add_argument('--b6-primary-refresh', action='store_true', help='Explicit same-generation primary freshness and uncertain response recovery')
     parser.add_argument('--b6-joined-integration', action='store_true', help='Actual signed barrier HTTP and corpus/cache on the same Fans primary')
+    parser.add_argument('--b6-current-delivery', action='store_true', help='Actual origin, corpus/cache and local identities in closed rankings, statements, sessions and disposable WordPress routes; no real site')
     options = parser.parse_args()
+    if options.b6_current_delivery:
+        options.b6_joined_integration = True
     if options.b6_joined_integration:
         options.b6_corpus_transaction = True
         options.b6_primary_refresh = True
@@ -462,7 +465,9 @@ def main():
             run_checks(root,source,options.cli,check,command,corpus_fixture,corpus_reader)
         if options.b6_joined_integration:
             from b6_joined_checks import run_checks
-            run_checks(root,source,options.cli,check,command,corpus_fixture,sql,call)
+            # The complete joined scenario exercises the actual B6 provider too.
+            # No workflow argument, runner or environment preparation change is needed.
+            run_checks(root,source,options.cli,check,command,corpus_fixture,sql,call,delivery_enabled=True)
         b3_ranked_http_start = len(checks)
         ranked_fixture = None
         if options.b3_ranked_http:
@@ -513,7 +518,8 @@ def main():
         report['b6_barrier_transaction_total'] = sum(name.startswith('B6bt ') for name in checks)
         report['b6_corpus_transaction_total'] = sum(name.startswith('B6tx ') for name in checks)
         report['b6_joined_integration_total'] = sum(name.startswith('B6join ') for name in checks)
-        report['b3_corpus_reader_total'] = b3_ranked_http_start - b3_corpus_reader_start - report['b4_projection_total'] - report['b5_projection_total'] - report['b6_corpus_transaction_total'] - report['b6_primary_refresh_total'] - report['b6_joined_integration_total']
+        report['b6_current_delivery_total'] = sum(name.startswith('B6dl ') for name in checks)
+        report['b3_corpus_reader_total'] = b3_ranked_http_start - b3_corpus_reader_start - report['b4_projection_total'] - report['b5_projection_total'] - report['b6_corpus_transaction_total'] - report['b6_primary_refresh_total'] - report['b6_joined_integration_total'] - report['b6_current_delivery_total']
         report['b3_ranked_http_total'] = b3_ranked_inbox_start - b3_ranked_http_start
         report['b3_ranked_inbox_total'] = len(checks) - b3_ranked_inbox_start
         report['corpus_source_measurements'] = corpus_measurements
@@ -639,7 +645,8 @@ def main():
             report['scope'] += '; explicit existing finish primary recheck of the same generation, no new wire contract or continuous freshness claim'
         if options.b6_joined_integration:
             report['scope'] += '; actual signed barrier gateway and exact corpus cache composed on the same Fans primary, with rollback, revoked trust and closing suppression'
-            report['not_proven'][0] = 'B1/B2 full delivery composition, participant/creator/country governance barriers, intent choices, Identity mapping and public B6 delivery, continuous production freshness'
+            report['scope'] += '; actual closed B6 provider for persistent rankings, current-member monthly statements and approved session reads, corrected facts, Identity links and real-template rendering'
+            report['not_proven'][0] = 'Production admission, complete server intent choices and governance forms, continuously scheduled primary freshness, real Me SSO, real-site or physical-device browser validation'
     finally:
         for process in workers:
             if process.poll() is None:
