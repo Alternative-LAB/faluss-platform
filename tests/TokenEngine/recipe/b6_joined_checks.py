@@ -120,7 +120,12 @@ def run_checks(root,source,cli_path,check,command,fixture,hub_sql,hub,delivery_e
     intent['context_sha256']=hashlib.sha256(json.dumps(intent['ranking_context'],sort_keys=True,separators=(',',':')).encode()).hexdigest()
     for reference in hub('b3b-refs',payload=intent)['references']:
         if reference['content']['kind']=='origin' or delivery_enabled and reference['content']['kind']=='session':continue
-        hub('b3b-register',payload=dict(descriptor,content=reference['content']),key=secrets.token_hex(32))
+        content=reference['content'];barrier=dict(descriptor,content=content)
+        if content['kind']=='admission':
+            barrier.update(valid_from=max(content['starts_at'],content['admitted_at']),valid_until=content['ends_at'])
+        registered=hub('b3b-register',payload=barrier,key=secrets.token_hex(32))
+        if registered.get('state')!='active':
+            raise RuntimeError('B6dl '+content['kind']+' fixture barrier refused: '+str(registered.get('error','unknown')))
     receipt_count=int(hub_sql('SELECT COUNT(*) FROM wp_token_engine_pf_b3r_receipts'))
     fixture['consume'](intent)
     fixture['set_clock']()
