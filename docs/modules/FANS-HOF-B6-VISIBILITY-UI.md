@@ -2,12 +2,12 @@
 
 ## Statut et périmètre
 
-Raccordement depuis main `ab874a3`, après intégration des lectures et vues des
-trois objets. Les tests unitaires et l'analyse statique passent. Les nouveaux
-scénarios HTTP ont passé sur la paire jetable ; une première recette navigateur
-a révélé un débordement d'un pseudonyme approuvé de 80 caractères, corrigé dans
-les styles locaux. La recette complète corrigée reste en cours : ce constat
-partiel ne constitue pas encore sa validation globale.
+Raccordement depuis main `ab874a3`, puis actualisation sur `a7a820d` (0.13.0),
+après intégration des lectures et vues des trois objets. La recette corrigée
+réussit : **791 contrôles WordPress/MariaDB, dont 64 B6**, et **66 vérifications
+navigateur**. Les [rapports et captures](../evidence/fans-hof-b6-visibility-ui/README.md)
+distinguent source exécutée, head actualisé, échec antérieur et limites de preuve.
+Ce lot n'est pas inclus dans la version 0.13.0 publiée parallèlement.
 
 L'espace Fan propose un pseudonyme de classement et un consentement distinct,
 révocable. La progression Créateur propose son propre consentement. Les deux

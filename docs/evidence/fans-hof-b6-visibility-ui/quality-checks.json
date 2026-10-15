@@ -1,0 +1,16 @@
+{
+  "head": "1b97a9a8c9be043911d894328c0439058dd5f219",
+  "php": "8.5.4",
+  "phpstan_target": 80335,
+  "phpstan_errors": 0,
+  "unit_tests": 795,
+  "assertions": 7879,
+  "hof_tests": 84,
+  "hof_assertions": 291,
+  "existing_deprecations": 2,
+  "php_lint": 13,
+  "python_compile": 3,
+  "secret_scan": "pass",
+  "diff_check": "pass",
+  "scope": "Local quality after integration of main a7a820d; not a hosted CI or site result"
+}
