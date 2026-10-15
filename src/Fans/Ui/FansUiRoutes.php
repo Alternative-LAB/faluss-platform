@@ -181,16 +181,20 @@ final class FansUiRoutes
         }
         $author = $role === 'creator' && $view === 'creer' ? FansUiAuthor::load() : null;
         $images = $role === 'creator' && $view === 'images' ? FansUiImages::load() : null;
-        $admission = $role === 'fan' && $view === 'espace' ? FansUiAdmission::load($profilesEnabled) : null;
+        if ($role === 'fan' && $view === 'espace' && FansUiRankingPrivacy::isPost() && array_key_exists('admission_action', $_POST)) {
+            wp_die('Formulaire ambigu. Rechargez la page.', '', ['response' => 400]);
+        }
+        $admission = $role === 'fan' && $view === 'espace' ? FansUiAdmission::load($profilesEnabled, !FansUiRankingPrivacy::isPost()) : null;
         $editorial = $role === 'creator' && $view === 'mon-profil' ? FansUiEditorial::load() : null;
         $messages = $view === 'messages' ? FansUiMessages::load((string)$role) : null;
         $composer = $role === 'creator' ? FansUiAuthor::load(true) : null;
         $notifications=$view==='notifications'?FansUiNotifications::load((string)$role):null;
         $hof = FansUiHof::load((string) $role, $view);
+        $privacy = FansUiRankingPrivacy::load((string) $role, $view);
         if($notifications?->destination!==null){wp_safe_redirect($notifications->destination,303);exit;}
         $status = max($author?->httpStatus() ?? 200, $images?->httpStatus() ?? 200, $admission?->httpStatus() ?? 200, $editorial?->httpStatus() ?? 200, $messages?->httpStatus() ?? 200);
-        $status=max($status,$notifications->status??200);
-        FansUiView::render((string) $role, $view, $publicProfile ? $creatorId : null, $status, $signIn, $author, $admission, $editorial, $images, $messages, $composer, $notifications, $hof);
+        $status=max($status,$notifications->status??200,$privacy?->httpStatus() ?? 200);
+        FansUiView::render((string) $role, $view, $publicProfile ? $creatorId : null, $status, $signIn, $author, $admission, $editorial, $images, $messages, $composer, $notifications, $hof, $privacy);
         exit;
     }
 

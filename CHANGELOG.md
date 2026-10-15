@@ -18,6 +18,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Formulaires B6 fermés de pseudonyme Fan et consentements de visibilité séparés, modération dans le panel Fans avec nonce/révision et journal existants ; refus des POST ambigus avec l'admission Créateur, retrait possible pendant une incertitude Hub. Recette applicative sur instances jetables uniquement, sans activation ou contrat économique ajouté.
 - Livraison B6 fermée des classements, relevés privés et sessions depuis l'origine primaire, le corpus/cache complet corrigé et les identités/consentements courants : transaction commune sans quantité ou destinataire fourni par le navigateur, uniquement sur instances jetables ; formulaires de gouvernance, intentions complètes et activation restent distincts.
 - Vues B6 des classements permanents, relevés mensuels privés et sessions approuvées : filtres et pagination serveur, scores entiers sans arrondi, dates affichées dans le fuseau WordPress et mois Europe/Paris ; cycle de vie de session relu depuis sa liaison et son acquittement primaire existants, fermeture en cours masquée et annulation sans vainqueur. Fournisseur physiquement fermé hors recette, états indisponibles sans rang estimé, aucun changement de navigation globale.
 
