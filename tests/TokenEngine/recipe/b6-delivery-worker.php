@@ -100,6 +100,7 @@ try {
             $role = $linked ? $requested : 'visitor'; $_GET = $input['selection'] ?? [];
             add_filter('faluss_fans_hof_closed_delivery',static fn (): ClosedRankingDelivery => $delivery);
             $state = \Faluss\Platform\Fans\Ui\FansUiHof::load($role,$view);
+            \Faluss\Platform\Fans\Sso\FansSsoService::enqueueButtonStyle();
             ob_start();
             \Faluss\Platform\Fans\Ui\FansUiView::render($role,$view,null,$status,
                 \Faluss\Platform\Fans\Sso\FansSsoService::button(['return_to' => '/app/' . $requested . '/' . $view]),hof: $state);
