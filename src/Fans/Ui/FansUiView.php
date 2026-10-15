@@ -63,7 +63,7 @@ final class FansUiView
         'public-profile' => ['Découvrir', 'Profil créateur', 'explorer', 'Découvrez son univers et ses publications.'],
     ];
 
-    public static function render(string $role, string $view, ?string $creatorId, int $status = 200, string $signIn = '', ?FansUiAuthor $author = null, ?FansUiAdmission $admission = null, ?FansUiEditorial $editorial = null, ?FansUiImages $images = null, ?FansUiMessages $messages = null, ?FansUiAuthor $composer = null, ?FansUiNotifications $notifications = null): void
+    public static function render(string $role, string $view, ?string $creatorId, int $status = 200, string $signIn = '', ?FansUiAuthor $author = null, ?FansUiAdmission $admission = null, ?FansUiEditorial $editorial = null, ?FansUiImages $images = null, ?FansUiMessages $messages = null, ?FansUiAuthor $composer = null, ?FansUiNotifications $notifications = null, ?FansUiHof $hof = null): void
     {
         $errorView = in_array($view, ['profile-unavailable', 'creator-unavailable'], true);
         $page = self::PAGES[$view === 'public-profile' || $errorView ? $view : $role . ':' . $view] ?? null;
@@ -75,6 +75,7 @@ final class FansUiView
         // Use native Unicode glyphs on the standalone app; do not fetch emoji images from a CDN.
         if (function_exists('remove_action')) { remove_action('wp_head', 'print_emoji_detection_script', 7); }
         if ($messages?->available) { $page[3]='Vos demandes et conversations privées. Chaque échange respecte le choix de son destinataire.'; }
+        if ($hof !== null) { $page[3] = in_array($view, ['espace', 'progression'], true) ? 'Votre relevé mensuel privé, distinct des classements permanents.' : 'Sessions, classements permanents et création.'; }
         $api = rest_url('faluss-fans/v1/creators');
         $publicBase = home_url('/app/creators/');
         wp_enqueue_style('faluss-fans-ui-v2', plugins_url('assets/fans-ui-v2.css', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'));
@@ -82,6 +83,7 @@ final class FansUiView
         if ($messages !== null) { wp_enqueue_script('faluss-fans-messages', plugins_url('assets/fans-messages.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true); wp_enqueue_style('faluss-fans-messages', plugins_url('assets/fans-messages.css', dirname(__DIR__, 3) . '/faluss-platform.php'), ['faluss-fans-ui-v2'], (string)constant('FALUSS_PLATFORM_VERSION')); }
         if (in_array($role,['fan','creator'],true)) { wp_enqueue_script('faluss-fans-notifications', plugins_url('assets/fans-notifications.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string)constant('FALUSS_PLATFORM_VERSION'), true); }
         if ($notifications !== null) { wp_enqueue_style('faluss-fans-notifications', plugins_url('assets/fans-notifications.css', dirname(__DIR__, 3) . '/faluss-platform.php'), ['faluss-fans-ui-v2'], (string)constant('FALUSS_PLATFORM_VERSION')); }
+        if ($hof !== null) { wp_enqueue_style('faluss-fans-hof', plugins_url('assets/fans-hof.css', dirname(__DIR__, 3) . '/faluss-platform.php'), ['faluss-fans-ui-v2'], (string) constant('FALUSS_PLATFORM_VERSION')); }
         wp_enqueue_script('faluss-fans-ui-v2', plugins_url('assets/fans-ui-v2.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true);
         wp_enqueue_script('faluss-fans-reading', plugins_url('assets/fans-ui-reading.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true);
         $sessionExpiry = \Faluss\Platform\Fans\Sso\FansLocalSession::expires();
@@ -119,7 +121,7 @@ final class FansUiView
             <?php if (isset($_GET['faluss_fans_session']) && $_GET['faluss_fans_session'] === 'closed'): ?>
                 <section class="fu-panel fu-session-notice"><h2>Vous êtes déconnecté de Fans</h2><p>Cette déconnexion concerne uniquement Fans. Elle ne ferme pas vos sessions sur Faluss Identity ou les autres sites.</p><details><summary>Utiliser un autre compte</summary><p>Fans ne dispose pas encore d’un sélecteur de compte Identity. Ouvrez Faluss Identity, déconnectez-vous explicitement de ce compte puis connectez-vous au compte souhaité avant de revenir sur Fans.</p><a class="fu-link" href="https://faluss.me/login" target="_blank" rel="noopener">Gérer ma connexion Faluss Identity ↗</a></details></section>
             <?php endif; ?>
-            <?php if (!$discovery): ?>
+            <?php if (!$discovery && $hof === null): ?>
             <section class="fu-signin fu-panel" aria-label="Connexion Faluss">
                 <div><h2><?php echo $view === 'connexion' ? 'Connexion requise' : 'Retrouvez votre espace'; ?></h2>
                 <p>Connectez-vous ou créez votre compte sur Faluss Identity. Vous reviendrez sur cette page après connexion.</p>
@@ -146,6 +148,8 @@ final class FansUiView
             <?php FansUiImagesView::render($images); ?>
         <?php elseif ($view === 'messages' && $messages !== null) : ?>
             <?php FansUiMessageView::render($messages); ?>
+        <?php elseif ($hof !== null): ?>
+            <?php FansUiHofView::render($hof, $role === 'visitor' ? $signIn : ''); ?>
         <?php elseif ($view === 'classement-fans') : ?>
             <?php self::fanRanking(); ?>
         <?php elseif ($view === 'connexion') : ?>

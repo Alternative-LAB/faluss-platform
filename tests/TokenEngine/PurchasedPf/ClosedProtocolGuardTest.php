@@ -183,6 +183,15 @@ final class ClosedProtocolGuardTest extends TestCase
             self::fail('Caller transactions cannot bypass the physical gate.'); }
         catch (ModelViolation $error) { self::assertSame('isolated_h3_recipe_required',$error->reason); }
         self::assertSame(0,$database->queries);
+        $GLOBALS['wpdb'] = $database;
+        foreach (['hof', 'classements', 'classement-fans', 'espace', 'progression'] as $view) {
+            $screen = \Faluss\Platform\Fans\Ui\FansUiHof::load('fan', $view);
+            self::assertNotNull($screen);
+            self::assertFalse($screen->available);
+            self::assertNull($screen->ranking);
+            self::assertNull($screen->statement);
+        }
+        self::assertSame(0,$database->queries, 'An ordinary site cannot resolve a ranking provider with copied settings.');
     }
 
     public function testReaderCannotBypassThePhysicalGateOrPersistAnUnboundedJob(): void

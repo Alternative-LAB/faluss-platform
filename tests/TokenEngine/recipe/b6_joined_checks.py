@@ -20,7 +20,7 @@ def run_checks(root,source,cli_path,check,command,fixture,hub_sql,hub,delivery_e
     def deliver(action,**extra):
         path=root/(uuid.uuid4().hex+'.json')
         fixture['set_clock']()
-        clock=(root/'corpus-primary-clock').read_text().strip()
+        clock=fixture['set_clock'].path.read_text().strip()
         path.write_text(json.dumps(dict(action=action,origin=origin,endpoint=endpoint,at=clock,**extra)));path.chmod(0o600)
         return json.loads(command(['php',cli_path,'--allow-root','--path='+str(fixture['fans']),'eval-file',
             str(source/'tests/TokenEngine/recipe/b6-delivery-worker.php'),str(path),'--use-include']))

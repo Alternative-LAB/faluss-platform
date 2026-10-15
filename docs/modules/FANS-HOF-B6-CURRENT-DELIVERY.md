@@ -1,5 +1,36 @@
 # B6 — première livraison fermée depuis les faits rapprochés
 
+## Reprise du 15 octobre 2026 — raccordement en cours
+
+Les vues de classement permanent et de relevé mensuel sont préparées dans
+`FansUiHof` et `FansUiHofView`, avec une feuille de styles limitée à `.fu-hof`.
+Elles ne changent ni la navigation globale ni les accès existants. La demande
+d'admission Créateur de l'espace Fan est conservée. Les dates de source restent
+UTC et leur présentation utilise le fuseau WordPress ; les mois civils restent
+explicitement Europe/Paris. Aucun graphe, portrait ou résultat de session n'est
+inventé lorsque le contrat ne le fournit pas.
+
+Le filtre PHP privé `faluss_fans_hof_closed_delivery` accepte seulement un
+`ClosedRankingDelivery`, **après** validation de l'enclave physique. Il ne peut
+pas activer un fournisseur sur un site ordinaire, même avec des constantes
+copiées. Il n'accepte aucune identité ou quantité venant du navigateur. Les
+lectures GET ne préparent pas de barrière, ne consomment pas de PF et ne modifient
+pas les consentements. Un fournisseur absent, une preuve périmée ou une source
+incomplète donne un état indisponible, jamais un zéro ou un rang estimé.
+
+Le sélecteur de catégorie et les pages de vingt lignes sont rendus côté serveur.
+Le relevé privé utilise seulement le membre SSO courant. Les sessions, les
+barrières d'admission complètes, les formulaires de gouvernance et la recette
+visuelle sur la véritable paire jetable restent à raccorder. Ce travail reste
+en brouillon et ne constitue pas encore une livraison B6 complète.
+
+La recette applicative complète existante `--b6-joined-integration` vérifie
+désormais aussi le fournisseur, sans modifier ses arguments de CI, la préparation
+d'environnement, les caches, les délais ou les runners. La première tentative
+locale a échoué avant B6 sur l'assertion de perte de réponse du transport de corpus ;
+sa cause n'est pas établie. Aucun succès réseau du fournisseur n'est revendiqué
+sur la seule base de ses tests unitaires.
+
 ## État au point d'arrêt du 14 octobre 2026
 
 Travail incomplet sauvegardé en brouillon. La suite locale passe : 722 tests,

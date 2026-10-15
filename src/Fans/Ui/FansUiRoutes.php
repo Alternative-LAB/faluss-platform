@@ -123,7 +123,9 @@ final class FansUiRoutes
         if (self::isCanonicalPath($legacy, (string) ($_SERVER['REQUEST_URI'] ?? ''))) {
             self::noStore();
             $selection = [];
-            foreach (['publication', 'cursor', 'section', 'thread', 'creator', 'archive', 'image', 'image_state', 'images_cursor'] as $key) {
+            $selectionKeys = ['publication', 'cursor', 'section', 'thread', 'creator', 'archive', 'image', 'image_state', 'images_cursor'];
+            if (in_array($view, FansUiHof::VIEWS, true)) { $selectionKeys = array_merge($selectionKeys, ['category', 'month', 'rank_page', 'session']); }
+            foreach ($selectionKeys as $key) {
                 if (isset($_GET[$key]) && is_string($_GET[$key]) && strlen($_GET[$key]) <= 160) { $selection[$key] = wp_unslash($_GET[$key]); }
             }
             wp_safe_redirect($selection === [] ? $canonical : add_query_arg($selection, $canonical), ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' ? 307 : 302);
@@ -184,10 +186,11 @@ final class FansUiRoutes
         $messages = $view === 'messages' ? FansUiMessages::load((string)$role) : null;
         $composer = $role === 'creator' ? FansUiAuthor::load(true) : null;
         $notifications=$view==='notifications'?FansUiNotifications::load((string)$role):null;
+        $hof = FansUiHof::load((string) $role, $view);
         if($notifications?->destination!==null){wp_safe_redirect($notifications->destination,303);exit;}
         $status = max($author?->httpStatus() ?? 200, $images?->httpStatus() ?? 200, $admission?->httpStatus() ?? 200, $editorial?->httpStatus() ?? 200, $messages?->httpStatus() ?? 200);
         $status=max($status,$notifications->status??200);
-        FansUiView::render((string) $role, $view, $publicProfile ? $creatorId : null, $status, $signIn, $author, $admission, $editorial, $images, $messages, $composer, $notifications);
+        FansUiView::render((string) $role, $view, $publicProfile ? $creatorId : null, $status, $signIn, $author, $admission, $editorial, $images, $messages, $composer, $notifications, $hof);
         exit;
     }
 
