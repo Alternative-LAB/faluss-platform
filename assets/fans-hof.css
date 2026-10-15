@@ -1,4 +1,4 @@
-.fu-hof{display:grid;gap:1.5rem;min-width:0;margin-block:1.25rem;color:#eef5f2}
+.fu-hof{display:grid;grid-template-columns:minmax(0,1fr);gap:1.5rem;min-width:0;margin-block:1.25rem;color:#eef5f2}
 .fu-hof__tabs{display:flex;gap:.5rem;overflow-x:auto;max-width:100%;padding:.25rem 0 .75rem;scrollbar-width:thin}
 .fu-hof__tabs a{flex:0 0 auto;padding:.7rem 1rem;border:1px solid #2d3934;border-radius:999px;color:#bfcec7;text-decoration:none;white-space:nowrap}
 .fu-hof__tabs a[aria-current=page]{background:#173e31;border-color:#41c295;color:#effff8}
@@ -17,7 +17,7 @@
 .fu-hof__empty{display:grid;gap:.6rem;padding:1.5rem;border:1px solid #29372f;border-radius:1rem;background:#101713}
 .fu-hof__empty p{margin:0;color:#afbeb5;line-height:1.6}
 .fu-hof__podium{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:.8rem}
-.fu-hof__podium article{padding:1.2rem;border:1px solid #304439;border-radius:1rem;background:linear-gradient(150deg,#1b2920,#101713);min-width:0}
+.fu-hof__podium article{box-sizing:border-box;width:100%;max-width:440px;padding:1.2rem;border:1px solid #304439;border-radius:1rem;background:linear-gradient(150deg,#1b2920,#101713);min-width:0}
 .fu-hof__place{display:grid;place-items:center;inline-size:2.8rem;block-size:2.8rem;border-radius:50%;background:#244c3b;color:#a5f3ce;font-size:1.25rem;font-weight:600}
 .fu-hof__podium h3{margin:.8rem 0;overflow-wrap:anywhere;font-size:1.1rem}
 .fu-hof__points{margin:0;font-size:1.6rem;font-weight:600;font-variant-numeric:tabular-nums}
@@ -35,10 +35,10 @@
 .fu-hof__statement h3{font-size:1rem;margin:.5rem 0;color:#dce9df}
 .fu-hof__statement p{line-height:1.6}
 .fu-hof__metric{margin:0;font-size:clamp(2.5rem,7vw,4rem);font-weight:600;letter-spacing:-.04em;font-variant-numeric:tabular-nums;color:#70d9aa}
-.fu-hof__signin{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;padding:1rem 0;border-top:1px solid #29372f}
+.fu-hof__signin{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;min-width:0;padding:1rem 0;border-top:1px solid #29372f}
 .fu-hof__signin h2{font-size:1rem;margin:0}.fu-hof__signin p{color:#afbeb5;font-size:.85rem;margin:.35rem 0}
 .fu-hof__sessions{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:1rem}
-.fu-hof__session-card{padding:0;overflow:hidden;border:1px solid #304439;border-radius:1rem;background:#101713}
+.fu-hof__session-card{box-sizing:border-box;width:100%;max-width:440px;padding:0;overflow:hidden;border:1px solid #304439;border-radius:1rem;background:#101713}
 .fu-hof__session-card>div:last-child{padding:1.2rem;display:grid;gap:.65rem}.fu-hof__session-card h3,.fu-hof__session-card p{margin:0;overflow-wrap:anywhere}.fu-hof__session-card .fu-button{justify-self:start}
 .fu-hof__session-art{min-height:130px;display:grid;place-items:center;background:radial-gradient(ellipse at 75% 20%,#31533c 0,transparent 60%),linear-gradient(145deg,#172a20,#101916)}
 .fu-hof__session-art svg{width:44px;height:44px;fill:none;stroke:#99cfb3;stroke-width:1.3}
