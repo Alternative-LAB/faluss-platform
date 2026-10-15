@@ -103,3 +103,10 @@ Une PR doit répondre à un seul objectif. Le scaffold, le registre des modules,
 ## Documentation
 
 La documentation évolue dans la même PR que le code concerné. Les diagrammes utilisent Mermaid afin de rester versionnés, lisibles et modifiables avec le code.
+
+## Organisation de la CI
+
+Les recettes WordPress indépendantes tournent en parallèle ; le contrôle
+`WordPress integration tests` exige toutes les suites et la conservation des
+assertions de référence. Voir [CI.md](CI.md) pour les groupes, limites de temps,
+artefacts, annulation des workflows obsolètes et procédure de retour arrière.

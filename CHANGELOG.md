@@ -6,8 +6,14 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Modifié
+
+- Réduire les coûts du stockage de la recette WordPress/MariaDB `corpus-joined` sur runner GitHub hébergé avec un montage temporaire en mémoire plafonné à 1 Gio ; scénarios, chemins privés et réglages transactionnels inchangés, aucun effet sur la production.
+- Accélérer la CI WordPress : Identity et administration Fans séparés, cinq recettes PF terminales parallèles et vérification des 1 413 assertions historiques ; outils épinglés et bytecode CLI partagés avec revalidation immédiate, budgets de temps et annulation des workflows obsolètes de PR. Aucun scénario applicatif ou état de production modifié.
+
 ### Corrigé
 
+- Rendre observable un refus HTTP dans la préparation de la recette corpus avec un diagnostic expurgé du statut, de la raison technique et de l’espace temporaire, sans accepter le refus ni exposer de preuve privée.
 - Accepter les emojis Unicode et les codes `:gitmoji:` dans le contrôle de gouvernance des commits, avec tests de non-régression. Livrer cette transition depuis la base de confiance avant la PR #205.
 
 ### Ajouté
