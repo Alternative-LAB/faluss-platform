@@ -21,7 +21,7 @@ du navigateur ou d'une politique par défaut.
 La transition B2 est commise avant l'appel réseau. Le pont conserve sa liaison,
 son action et sa clé ; la reprise effectue son lookup primaire existant. L'UI
 ne montre un état terminal que lorsque l'application de la preuve l'a écrit.
-Un résultat réseau encore incertain répond202 avec opening/closing, et une
+Un résultat réseau encore incertain répond 202 avec opening/closing, et une
 action explicite de reprise. Une exception impose une relecture protégée ;
 aucun remplacement de clé ou succès supposé n'est ajouté.
 
@@ -35,7 +35,7 @@ sans rouvrir la session ni créer une clé économique. Aucun GET ne l'exécute.
 Cette coordination ponctuelle n'annonce pas une fraîcheur continue sur site.
 
 Annulation confirmée, fin à échéance et suspension restent distinctes. La fin
-anticipée est refusée localement avant la transition ; Hub1.1 vérifie encore
+anticipée est refusée localement avant la transition ; Hub 1.1 vérifie encore
 l'échéance figée après les verrous. Les règles et contributions précédentes ne
 sont ni effacées ni redistribuées. Une demande d'ouverture durablement refusée
 conserve la limite de rapprochement documentée par B3 ; aucun acquittement
@@ -49,9 +49,18 @@ sans être transformée silencieusement en suspension.
 
 Scénarios à prouver : refus de nonce/propriété/révision, examen et consentement
 des coorganisateurs nécessaires, fin anticipée, ouverture et annulation
-attestées, réponse perdue aprèsCOMMIT puis reprise, révocation et fermeture,
+attestées, réponse perdue après COMMIT puis reprise, révocation et fermeture,
 GET sans mutation, et fermeture physique hors recette. Aucun résultat de
 branche précédente ne vaut preuve de ce raccordement.
+
+La recette applicative ajoute aussi une réadmission après recours et nouvel
+examen des mêmes règles : version de barrière suivante, anciennes clés
+conservées, ancien formulaire de fermeture inopérant. La fin normale utilise
+l'horloge primaire de la fixture et le contrat approuvé 1.1, sans date fournie
+par le navigateur. Les contrôles de consentement et de territoire des services
+existants restent requis ; aucun organisateur n'est inscrit automatiquement
+comme participant. Ces parcours attendent encore leur résultat avant d'être
+déclarés fonctionnels.
 
 Application : instances Hub/Fans jetables à données fictives uniquement ;
 aucun flag, site, admission de pair ou migration de production. #150 et #161

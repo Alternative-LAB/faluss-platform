@@ -13,7 +13,7 @@ def run_checks(root,read,cookies,actors,deliver,check):
         status,html,_=read(path,admin if moderator else owner)
         if status!=200:raise RuntimeError('Native lifecycle GET refused; private response omitted')
         return Forms(html).action('session_review_action' if moderator else 'hof_session_action',action)
-    def prepare(title,duration_seconds=1500):
+    def prepare(title,duration_seconds=1500,verify_unapproved=False):
         stamp=datetime.fromtimestamp(float((root/'corpus-sql-clock').read_text()),timezone.utc)
         fields=form(new,'create');fields.update(title=title,rules_text='Règles fictives de cycle natif. Participation volontaire.',
             category='arts',scope='international',country='',territory_ref='',timezone='UTC',
@@ -22,10 +22,14 @@ def run_checks(root,read,cookies,actors,deliver,check):
         if response[0]!=303:raise RuntimeError('Native lifecycle draft creation failed; response omitted')
         path=response[2]['Location'];id=parse_qs(urlsplit(path).query)['session'][0];panel='/app/admin?view=sessions&session='+id
         assert read(path,owner,form(path,'submit'))[0]==200
+        if verify_unapproved:
+            pending=snapshot(id);forged=form(path,'edit');forged['hof_session_action']='open'
+            check('B6dl lifecycle a crafted opening cannot bypass the exact pending rules review',
+                  read(path,owner,forged)[0]==409 and snapshot(id)==pending and bindings(id)==[])
         assert read(panel,admin,form(panel,'approve',True))[0]==200
         return id,path,panel
 
-    id,path,panel=prepare('Cycle natif fictif — reprise')
+    id,path,panel=prepare('Cycle natif fictif — reprise',verify_unapproved=True)
     baseline=snapshot(id);opening=form(path,'open')
     check('B6dl lifecycle invalid opening nonce changes neither rules nor lifecycle binding',
           read(path,owner,dict(opening,hof_session_nonce='invalid'))[0]==403 and snapshot(id)==baseline and bindings(id)==[])
@@ -86,6 +90,24 @@ def run_checks(root,read,cookies,actors,deliver,check):
           and [row['operation_key_sha256'] for row in saved]==[row['operation_key_sha256'] for row in recovered])
     check('B6dl lifecycle closed or suspended session cannot be reopened by a stale transport form',
           read(panel,admin,resume)[0]==409 and snapshot(id)==suspended and bindings(id)==recovered)
+
+    premature=form(path,'refresh');premature['hof_session_action']='readmit'
+    check('B6dl lifecycle readmission cannot bypass revoked rules approval',
+          read(path,owner,premature)[0]==409 and snapshot(id)==suspended and bindings(id)==recovered)
+    appeal=form(path,'appeal');appeal['explanation']='Recours fictif pour la réadmission aux mêmes règles.'
+    assert read(path,owner,appeal)[0]==200
+    assert read(panel,admin,form(panel,'approve',True))[0]==200
+    assert read(path,owner,form(path,'readmit'))[0]==200
+    readmitted=snapshot(id);new_bindings=bindings(id)
+    previous={row['action_id']:row['operation_key_sha256'] for row in recovered}
+    check('B6dl lifecycle approved readmission attests a new version while preserving every previous key',
+          readmitted['session']['state']=='open' and int(readmitted['session']['barrier_version'])==int(suspended['session']['barrier_version'])+1
+          and readmitted['session']['frozen_sha256']==suspended['session']['frozen_sha256'] and len(new_bindings)==len(recovered)+1
+          and all(previous[row['action_id']]==row['operation_key_sha256'] for row in new_bindings if row['action_id'] in previous)
+          and deliver('session',session=id).get('id')==id)
+    check('B6dl lifecycle an old closure form cannot suspend a readmitted version',
+          read(panel,admin,resume)[0]==409 and snapshot(id)==readmitted and bindings(id)==new_bindings)
+    cancel=form(path,'cancel');cancel['hof_session_confirmation']='yes';assert read(path,owner,cancel)[0]==200
 
     id,path,panel=prepare('Cycle natif fictif — fraîcheur')
     fault.write_text('3');fault.chmod(0o600)
