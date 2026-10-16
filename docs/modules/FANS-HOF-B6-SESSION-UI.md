@@ -1,9 +1,13 @@
-# B6 — gestion des sessions : travail en cours, non livrable
+# B6 — brouillons et examen des règles de session, interface fermée
 
-Ce raccordement est sauvegardé pour une pause demandée le 15 octobre 2026.
-**Il n'est ni validé sur les nouvelles routes HTTP, ni prêt à fusionner ou à
-publier.** Les services [B2](FANS-HOF-B2.md) et le
+Ce sous-lot raccorde la gestion privée des brouillons, la soumission, les recours
+et les décisions de modération aux routes et au panel existants. Sa
+[recette native](../evidence/fans-hof-b6-session-ui/README.md) utilise de vrais
+WordPress/MariaDB jetables et des identités fictives. Les services
+[B2](FANS-HOF-B2.md) et le
 [cycle de vie attesté](FANS-HOF-B3-SESSION-LIFECYCLE.md) restent les autorités.
+**Le cycle Hub, les coorganisateurs, participations, territoires et intentions
+ne sont pas déclarés entièrement raccordés par cette interface.**
 
 ## Périmètre déjà écrit
 
@@ -39,13 +43,17 @@ La liste propriétaire a passé la recette WordPress/MariaDB B2 existante :
 sessions. Les scénarios calendaires couvrent été/hiver, ambiguïtés, lacunes et
 précision UTC. Les tests de retour SSO et de fermeture hors enclave sont ajoutés.
 
-Le dernier arbre de code indexé `f8b2ccb85ae7b1be9807bcbde60465d2d778fb9d`
-passe 802 tests / 8 004 assertions, dont 84 tests HoF / 291 assertions ;
-PHPStan ne signale aucune erreur. Deux dépréciations historiques subsistent.
-Cette qualité locale utilise PHP 8.5.4, avec la cible statique PHP 8.3.35.
-**Elle ne démontre pas le fonctionnement des nouveaux formulaires en HTTP,
-leurs décisions concurrentes ni leur rendu navigateur.** Aucune capture de ce
-nouveau parcours n'est encore une preuve acquise.
+L'arbre de recette `ac888673c87d09d2edb5ffe696c5d7cd752a69f9` passe
+802 tests / 8 004 assertions, dont 84 tests HoF / 291 assertions, et PHPStan
+sans erreur. Deux dépréciations historiques subsistent. PHP local 8.5.4, cible
+statique 8.3.35. La recette physique conjointe passe **822 contrôles**, dont 95 B6
+et 31 nouveaux cas natifs de sessions ; nettoyage confirmé. Le navigateur passe
+32 contrôles sur 6 largeurs et deux parcours de formulaires natifs, sans échec.
+Les 16 captures ont été examinées. Voir les limites précises dans la preuve :
+émulation tactile, pas de véritable SSO Me ou recette sur les sites.
+
+Un contrôle supplémentaire de présentation du fuseau WordPress est ajouté
+après cette source locale ; il doit être vérifié par la CI du head final.
 
 La CI intégrée de `main` au SHA `57a0639c3e2dbab19530f76486f1319a6ea9a748`
 valide le code antérieur à cette branche : 791 contrôles physiques conjoints,
@@ -53,18 +61,13 @@ dont 64 B6, zéro échec et nettoyage confirmé. Elle ne valide pas ce travail.
 Sa première tentative avait reçu `403 pf_corpus_busy` ; une seule relance
 inchangée a réussi, sans établir la cause de la première erreur.
 
-## Travail restant avant revue
+## Raccordements suivants
 
-1. Recette HTTP native sur les instances Hub/Fans jetables : propriétaire,
-   invité, Fan, autre Créateur, administrateur ; nonces, cible falsifiée,
-   conflits de révision, rejet, recours, révocation et absence de diffusion.
-2. Captures et examen ordinateur/mobile des formulaires, états et erreurs,
-   navigation clavier, défilement et comparaison aux composants V2 existants.
-3. Raccorder invitations, participations, territoires et leurs recours aux
+1. Raccorder invitations, participations, territoires et leurs recours aux
    services déjà approuvés, puis ouverture/fermeture et reprise au cycle B3.
    **La révocation locale B2 ne constitue pas encore un transport de fermeture
    Hub depuis ce panel.** Aucun succès réseau ne doit être supposé.
-4. Terminer les intentions et les raccordements B6 restants ; revue et CI du
+2. Terminer les intentions et les raccordements B6 restants ; revue et CI du
    head exact, puis vérification conjointe sur main avant publication officielle.
 
 La création de brouillon n'est pas annoncée idempotente : après un résultat

@@ -84,6 +84,28 @@ try {
         'sessions' => $delivery->sessions($input['after'] ?? ''),
         'overview' => $delivery->overview($input['category'] ?? null,$input['after'] ?? ''),
         'session' => $delivery->session($input['session']),
+        'private-session' => (static function () use ($wpdb,$input): array {
+            $reviews = new SessionModeration($wpdb);
+            return (new SessionService($wpdb))->inspect($input['session']) + ['review' => $reviews->own($input['session']), 'history' => $reviews->history($input['session'])];
+        })(),
+        'private-sessions' => (new SessionService($wpdb))->own($input['after'] ?? ''),
+        'fixture-extra-creator' => (static function () use ($wpdb,$admin): array {
+            $label = 'b6_session_' . bin2hex(random_bytes(8));
+            $id = wp_insert_user(['user_login' => $label,'user_pass' => wp_generate_password(40),
+                'user_email' => $label . '@example.invalid','role' => 'subscriber']);
+            if (is_wp_error($id)) { throw new ModelViolation('pf_fixture_actor_required'); }
+            if ($wpdb->insert(FansSsoSchema::tables()['links'],['wp_user_id' => $id,'faluss_id' => wp_generate_uuid4(),
+                'created_at' => gmdate('Y-m-d H:i:s'),'last_proved_at' => gmdate('Y-m-d H:i:s')]) !== 1) { throw new ModelViolation('pf_fixture_actor_required'); }
+            wp_set_current_user($id); $profile = CreatorProfileService::create('arts');
+            if (is_wp_error($profile)) { throw new ModelViolation($profile->get_error_code()); }
+            wp_set_current_user($admin->ID); $active = CreatorProfileService::setStatus($profile['creator_id'],'active');
+            if (is_wp_error($active)) { throw new ModelViolation($active->get_error_code()); }
+            wp_set_current_user($id); $proposal = EditorialService::submit(0,'Autre atelier de recette','Profil fictif pour vérifier les refus de propriété.','',0);
+            if (is_wp_error($proposal)) { throw new ModelViolation($proposal->get_error_code()); }
+            wp_set_current_user($admin->ID); $approved = EditorialService::decide($profile['creator_id'],1,'approve','allowed_editorial');
+            if (is_wp_error($approved)) { throw new ModelViolation($approved->get_error_code()); }
+            return ['creator_user' => $id,'creator_profile' => $profile['creator_id']];
+        })(),
         'fixture-cookie' => (static function () use ($input): array {
             if (!isset($input['actor']) || get_user_by('id',$input['actor']) === false) { throw new ModelViolation('pf_fixture_actor_required'); }
             $expires = time() + (($input['expired'] ?? false) === true ? -1 : \Faluss\Platform\Fans\Sso\FansSsoService::SESSION_TTL);
