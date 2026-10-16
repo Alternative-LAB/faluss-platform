@@ -33,11 +33,14 @@ def run_checks(root,source,cli_path,fixture,origin,actors,session,month,deliver,
             result=subprocess.run(['php',cli_path,'--allow-root','--path='+str(fans),*arguments],capture_output=True,timeout=90)
             if result.returncode:raise RuntimeError('B6 UI fixture route registration failed; no private output printed')
         cookies={family:deliver('fixture-cookie',actor=actors[family+'_user']) for family in ('fan','creator','admin')}
-        def read(path,cookie=None,fields=None):
+        class NoRedirect(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self,req,fp,code,msg,headers,newurl):return None
+        def read(path,cookie=None,fields=None,follow=True):
             headers={} if cookie is None else {'Cookie':cookie['name']+'='+cookie['value']}
             body=None if fields is None else urllib.parse.urlencode(fields).encode()
             request=urllib.request.Request(base+path,headers=headers,data=body)
-            try:response=urllib.request.urlopen(request,timeout=20)
+            open_request=urllib.request.urlopen if follow else urllib.request.build_opener(NoRedirect).open
+            try:response=open_request(request,timeout=20)
             except urllib.error.HTTPError as error:response=error
             with response:return response.status,response.read().decode('utf8'),response.headers
         server=subprocess.Popen(['php','-S','127.0.0.1:'+str(port),'-t',str(fans),str(source/'tests/TokenEngine/recipe/b6-ui-router.php')],
@@ -66,13 +69,15 @@ def run_checks(root,source,cli_path,fixture,origin,actors,session,month,deliver,
               read('/app/fan/espace',broken)[0]==403 and read('/app/fan/espace',expired)[0]==403)
         from b6_privacy_http_checks import run_checks as privacy_checks
         privacy_checks(read,cookies,actors,month,deliver,check,origin_action)
+        from b6_session_ui_http_checks import run_checks as session_checks
+        management=session_checks(read,cookies,actors,session,deliver,check)
         if os.environ.get('FALUSS_B6_UI_EXPORT'):
             out=pathlib.Path(os.environ['FALUSS_B6_UI_EXPORT']).resolve()
             if out.parent!=pathlib.Path('/var/tmp') or not out.name.startswith('fans-hof-ui-') or out.is_symlink():raise RuntimeError('Unsafe private UI capture destination')
             out.mkdir(mode=0o700,exist_ok=True)
             # Private capability file for the local renderer, removed before the server is stopped.
             live=out/'live-session.json'
-            live.write_text(json.dumps(dict(base=base,cookies=cookies,month=month,session=session['session_id'])));live.chmod(0o600)
+            live.write_text(json.dumps(dict(base=base,cookies=cookies,month=month,session=session['session_id'],session_management=management)));live.chmod(0o600)
             try:
                 if os.environ.get('FALUSS_B6_UI_CAPTURE_COMMAND'):
                     command=json.loads(os.environ['FALUSS_B6_UI_CAPTURE_COMMAND'])

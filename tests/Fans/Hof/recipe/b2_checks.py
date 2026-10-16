@@ -57,6 +57,9 @@ for actor in ['member','other','waiting']:
     data('admin','editorial_decide',creator=profiles[actor],revision=1,decision='approve',reason='allowed_editorial')
 session=data('member','session_create',rules=dict(reversed(list(rules.items()))));sid=session['session_id']
 check('Creator owns a stable draft with canonical input ordering',session['state']=='draft' and session['title']==rules['title'] and session['category']=='arts')
+check('Private session list contains only the current creator associations',
+      [row['session_id'] for row in data('member','session_list')]==[sid] and data('other','session_list')==[])
+check('Unlinked administrator is not implicitly a session list owner','error' in call('admin','session_list'))
 check('Organizer is not automatically a participant',all(role['role']!='participant' for role in data('member','session_inspect',session=sid)['roles']))
 check('Unrelated creator cannot read or edit private session',call('other','session_inspect',session=sid)['error']=='hof_session_forbidden' and call('other','session_edit',session=sid,revision=1,rules=rules)['error']=='hof_session_forbidden')
 check('Stale edit is rejected',call('member','session_edit',session=sid,revision=2,rules=rules)['error']=='hof_session_revision_conflict')
@@ -64,6 +67,8 @@ edited=data('member','session_edit',session=sid,revision=1,rules=dict(rules,titl
 check('Pre-opening edits version structural rules',edited['rules_version']=='2' and edited['revision']=='2')
 data('member','session_invite',session=sid,revision=2,creator=profiles['other'])
 check('Invitation does not implicitly grant coorganization',data('other','session_inspect',session=sid)['roles'][0]['state']=='invited')
+check('Invitation becomes discoverable only in the invited creator private list',
+      [row['session_id'] for row in data('other','session_list')]==[sid] and data('waiting','session_list')==[])
 check('Unaccepted coorganization blocks opening',call('member','session_open',session=sid,revision=3)['error']=='hof_coorganizer_acceptance_required')
 check('Invitation can only be accepted by its recipient','error' in call('waiting','session_answer',session=sid,revision=3,accept=True))
 data('other','session_answer',session=sid,revision=3,accept=True)
@@ -113,6 +118,8 @@ data('waiting','session_admit',session=participation['session_id'],revision=5,cr
 data('admin','admit',creator=profiles['other'],status='suspended')
 data('other','session_withdraw',session=participation['session_id'],revision=6)
 check('Suspended creator can still withdraw their own existing participation',any(role['role']=='participant' and role['state']=='closing' for role in data('other','session_inspect',session=participation['session_id'])['roles']))
+check('Suspended creator keeps their own session list without regaining mutation rights',
+      bool(data('other','session_list')) and 'error' in call('other','session_create',rules=rules))
 data('admin','admit',creator=profiles['other'],status='active')
 local=data('waiting','session_create',rules=dict(rules,scope='local',country='FR',territory_ref='fixture-town'))
 national=data('waiting','session_create',rules=dict(rules,scope='national',country='FR'))
@@ -131,5 +138,16 @@ sql('ALTER TABLE wp_fans_hof_session_roles ENGINE=MyISAM')
 check('Nontransactional session metadata is refused without implicit repair','error' in call('member','session_inspect',session=sid))
 sql('ALTER TABLE wp_fans_hof_session_roles ENGINE=InnoDB')
 check('Restored compatible session schema retains frozen history',data('member','session_inspect',session=sid)['session']['frozen_sha256']==opening['frozen_sha256'])
+# Age only this fictitious creator's metadata to represent older drafts, without weakening the hourly limit.
+for i in range(22):
+    if i in (0,15):sql("UPDATE wp_fans_hof_session_records SET created_at=UTC_TIMESTAMP(6)-INTERVAL 2 HOUR WHERE owner_creator_id='"+profiles['waiting']+"'")
+    data('waiting','session_create',rules=dict(rules,title='Private pagination fixture '+str(i)))
+expected=sql("SELECT DISTINCT s.session_id FROM wp_fans_hof_session_records s JOIN wp_fans_hof_session_roles r ON r.session_id=s.session_id WHERE r.creator_id='"+profiles['waiting']+"' ORDER BY s.session_id").splitlines()
+first=data('waiting','session_list');second=data('waiting','session_list',after=first[-1]['session_id'])
+actual=[row['session_id'] for row in first+second]
+check('Private session cursor traverses more than twenty associations without duplicates or losses',
+      len(first)==20 and len(expected)>20 and actual==expected and len(actual)==len(set(actual)))
+check('Invalid private session cursor is refused instead of becoming the first page','error' in call('waiting','session_list',after='invalid'))
+check('Session list GET creates no extra decision or revision',sql('SELECT COUNT(*) FROM wp_fans_hof_session_records s WHERE s.revision<>(SELECT COUNT(*) FROM wp_fans_hof_session_decisions d WHERE d.session_id=s.session_id)')=='0')
 check('Closed B2 exposes no normal route or score/ledger table',sql("SHOW TABLES LIKE '%pf_ledger'")=='' and sql("SHOW TABLES LIKE 'wp_fans_hof_scores'")=='')
 (root/'checks.json').write_text(json.dumps({'scope':'B2 private session metadata on disposable WordPress/MariaDB; no Hub acknowledgement, economic opening or central SSO proof','count':len(checks),'checks':checks},indent=2))

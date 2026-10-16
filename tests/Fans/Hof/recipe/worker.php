@@ -111,6 +111,7 @@ try {
         'session_edit' => $sessions->edit($input['session'], $input['revision'], $input['rules']),
         'session_open' => $sessions->requestOpen($input['session'], $input['revision'], $input['policy'] ?? null),
         'session_close' => $sessions->close($input['session'], $input['revision'], $input['state']),
+        'session_list' => $sessions->own($input['after'] ?? ''),
         'session_inspect' => $sessions->inspect($input['session']),
         'session_invite' => $roles->invite($input['session'], $input['revision'], $input['creator']),
         'session_answer' => $roles->answer($input['session'], $input['revision'], $input['accept']),

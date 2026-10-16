@@ -22,6 +22,7 @@ final class FansUiHofView
                 <?php if ($state->role === 'fan'): ?><a href="<?php echo esc_url(FansUiRoutes::url('fan', 'classement-fans')); ?>" <?php if ($state->view === 'classement-fans'): ?>aria-current="page"<?php endif; ?>>Classement Fans</a><?php endif; ?>
                 <?php if (in_array($state->role, ['fan', 'creator'], true)): ?><a href="<?php echo esc_url(FansUiRoutes::url($role, $role === 'creator' ? 'progression' : 'espace')); ?>" <?php if (in_array($state->view, ['espace', 'progression'], true)): ?>aria-current="page"<?php endif; ?>>Relevé mensuel</a><?php endif; ?>
             </nav>
+            <?php if ($state->role === 'creator' && FansUiSessions::canManage()): ?><p><a class="fu-button fu-button--outline" href="<?php echo esc_url(FansUiSessions::url()); ?>">Gérer mes sessions →</a></p><?php endif; ?>
             <?php if (in_array($state->view, ['espace', 'progression'], true)): ?>
                 <?php self::statement($state); ?>
             <?php elseif ($state->view === 'hof/session'): ?>

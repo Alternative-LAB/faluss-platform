@@ -66,6 +66,27 @@ final class FansSsoReturnTest extends TestCase
         self::assertNull(FansSsoReturn::seal('https://evil.example', $state));
         self::assertNull(FansSsoReturn::seal($path, 'invalid'));
     }
+
+    public function testSessionManagementReturnKeepsOnlyAnExactOpaqueSelection(): void
+    {
+        $id = '123e4567-e89b-42d3-a456-426614174000'; $state = str_repeat('s', 43);
+        foreach (['/app/', '/faluss-fans/'] as $prefix) {
+            foreach (['manage=sessions', 'manage=new', 'manage=session&session=' . $id, 'manage=sessions&sessions_cursor=' . $id] as $query) {
+                $path = $prefix . 'creator/hof?' . $query;
+                self::assertSame($path, FansSsoReturn::path($path));
+                self::assertSame($path, FansSsoReturn::open(FansSsoReturn::seal($path, $state), $state));
+                self::assertNull(FansSsoReturn::open(FansSsoReturn::seal($path, $state), str_repeat('t', 43)));
+            }
+        }
+        foreach (['manage=new&nonce=private', 'manage=new&manage=sessions', 'manage=session&sessions_cursor=' . $id,
+            'manage=sessions&session=' . $id, 'manage=session&session[]=' . $id, 'manage=session&session=' . strtoupper($id),
+            'manage=session&session=' . $id . '&redirect=https://other.example', 'manage=sessions#private'] as $query) {
+            self::assertNull(FansSsoReturn::path('/app/creator/hof?' . $query));
+        }
+        self::assertNull(FansSsoReturn::path('/app/fan/hof?manage=new'));
+        $GLOBALS['fans_sso_home'] = 'https://fans.example.test/community';
+        self::assertSame('/community/app/creator/hof?manage=new', FansSsoReturn::path('/community/app/creator/hof?manage=new'));
+    }
     public function testMessageReturnKeepsOnlyOneOpaqueSelection(): void
     {
         $id='123e4567-e89b-42d3-a456-426614174000';$state=str_repeat('s',43);

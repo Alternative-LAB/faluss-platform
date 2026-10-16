@@ -29,6 +29,13 @@ final class FansSsoReturn
         if (preg_match('~^creator/creer/?\?publication=([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$~D', $relative, $selection) === 1) {
             return $prefix . 'creator/creer?publication=' . $selection[1];
         }
+        if (preg_match('~^creator/hof/?\?manage=(sessions|new)$~D', $relative, $selection) === 1) {
+            return $prefix . 'creator/hof?manage=' . $selection[1];
+        }
+        if (preg_match('~^creator/hof/?\?manage=(session|sessions)&(session|sessions_cursor)=([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$~D', $relative, $selection) === 1
+            && (($selection[1] === 'session' && $selection[2] === 'session') || ($selection[1] === 'sessions' && $selection[2] === 'sessions_cursor'))) {
+            return $prefix . 'creator/hof?manage=' . $selection[1] . '&' . $selection[2] . '=' . $selection[3];
+        }
         $fan = 'fan/(?:accueil|explorer|hof(?:/session)?|classements|classement-fans|messages|espace)';
         $creator = 'creator/(?:accueil|explorer|hof(?:/session)?|classements|messages|progression|creer|images|boutique|mon-profil)';
         $public = 'creators/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
