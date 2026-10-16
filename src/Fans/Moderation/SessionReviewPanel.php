@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Faluss\Platform\Fans\Moderation;
 
 use Faluss\Platform\Fans\Hof\ClosedSessionManagement;
+use Faluss\Platform\Fans\Hof\ClosedSessionActions;
 use Faluss\Platform\Fans\Hof\RankingCalendar;
 use Faluss\Platform\Fans\Hof\SessionModeration;
 use Faluss\Platform\Fans\Hof\SessionRules;
@@ -36,17 +37,18 @@ final class SessionReviewPanel
                 if ($historyCursor !== '' && (preg_match('/^(0|[1-9][0-9]{0,9})$/D', $historyCursor) !== 1 || (int) $historyCursor >= 2147483646)) { throw new ModelViolation('hof_invalid_review_cursor'); }
                 $sessions->inspect($id); $status = 200;
                 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
-                    try { self::submit($reviews, $id); }
+                    try { $status = self::submit($sessions, $reviews, $id); }
                     catch (ModelViolation $error) { $status = self::status($error->reason); }
                     status_header($status);
                     echo '<p class="fb-empty" role="status">' . esc_html(match ($status) {
                         200 => 'Décision enregistrée. L’état courant est affiché.', 400 => 'Vérifiez la décision, le motif et la confirmation.',
+                        202 => 'La décision est enregistrée. La fermeture attend encore sa confirmation.',
                         403 => 'Autorisation ou confirmation invalide. Rechargez avant de décider.',
                         409 => 'La session ou son examen a changé. Relisez les règles courantes avant de décider.',
-                        default => 'Décision non confirmée. Rechargez pour vérifier son enregistrement.',
+                        default => 'La dernière étape n’est pas confirmée. Relisez l’état enregistré avant de continuer.',
                     }) . '</p>';
                 }
-                self::detail($sessions, $reviews, $id, $status === 200, (int) $historyCursor); return;
+                self::detail($sessions, $reviews, $id, $status < 400, (int) $historyCursor); return;
             }
             if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') { throw new ModelViolation('hof_invalid_review_decision'); }
             $rows = $reviews->review(self::field('review_cursor', $_GET));
@@ -64,13 +66,30 @@ final class SessionReviewPanel
         } catch (ModelViolation $error) { BackOfficeView::error('Lecture de session indisponible.', self::status($error->reason)); }
     }
 
-    private static function submit(SessionModeration $reviews, string $id): void
+    private static function submit(SessionService $sessions, SessionModeration $reviews, string $id): int
     {
         if (self::field('session_id', $_POST) !== $id || wp_verify_nonce(self::field('session_review_nonce', $_POST), 'fans_hof_session_review_' . $id) === false) { throw new ModelViolation('hof_session_forbidden'); }
         $revision = self::field('review_revision', $_POST); $action = self::field('session_review_action', $_POST);
         if (preg_match('/^[1-9][0-9]{0,9}$/D', $revision) !== 1 || (int) $revision >= 2147483646
-            || !in_array($action, ['approve', 'reject', 'revoke'], true) || ($action === 'revoke' && self::field('confirm_revoke', $_POST) !== 'yes')) { throw new ModelViolation('hof_invalid_review_decision'); }
+            || !in_array($action, ['approve', 'reject', 'revoke', 'resume'], true) || ($action === 'revoke' && self::field('confirm_revoke', $_POST) !== 'yes')) { throw new ModelViolation('hof_invalid_review_decision'); }
+        global $wpdb;
+        if ($action === 'resume') {
+            $row = $reviews->own($id);
+            if (($row['revision'] ?? '') !== $revision) { throw new ModelViolation('hof_review_revision_conflict'); }
+            $sessionRevision = self::field('session_revision', $_POST);
+            if (preg_match('/^[1-9][0-9]{0,9}$/D', $sessionRevision) !== 1 || (int) $sessionRevision >= 2147483646) { throw new ModelViolation('hof_invalid_review_decision'); }
+            $session = $sessions->inspect($id)['session'];
+            if ($session['state'] !== 'closing') { throw new ModelViolation('hof_invalid_session_transition'); }
+            $progress = (new ClosedSessionActions($wpdb))->perform($id, (int) $sessionRevision, 'resume');
+            return in_array($progress['session_state'] ?? '', ['suspended', 'cancelled', 'closed'], true) ? 200 : 202;
+        }
         $reviews->decide($id, (int) $revision, $action, self::field('reason', $_POST));
+        $session = $sessions->inspect($id)['session'];
+        if ($session['state'] !== 'closing') { return 200; }
+        // The decision is known committed. A transport failure cannot turn it into a claimed rollback.
+        try { $progress = (new ClosedSessionActions($wpdb))->perform($id, (int) $session['revision'], 'resume'); }
+        catch (ModelViolation) { return 202; }
+        return in_array($progress['session_state'] ?? '', ['suspended', 'cancelled', 'closed'], true) ? 200 : 202;
     }
 
     private static function detail(SessionService $sessions, SessionModeration $reviews, string $id, bool $allow, int $historyCursor): void
@@ -89,7 +108,10 @@ final class SessionReviewPanel
         $current = $row['rules_sha256'] === SessionRules::digest($session);
         echo '<p>' . esc_html($current ? self::state($row['state']) : 'Règles modifiées depuis l’examen : une nouvelle soumission est nécessaire.') . ' · ' . esc_html(self::date($row['updated_at'])) . '</p><p>' . esc_html(self::reason($row['reason'])) . '</p>';
         if ($row['appeal_text'] !== '') { echo '<h3>Recours du propriétaire</h3><p class="fm-text">' . esc_html($row['appeal_text']) . '</p>'; }
-        if ($session['state'] === 'closing') { echo '<p>Fermeture en cours ; la confirmation Hub reste attendue.</p>'; }
+        if ($session['state'] === 'closing') {
+            echo '<p>Fermeture en cours ; la confirmation Hub reste attendue.</p>';
+            if ($allow) { self::resumeForm($id, $row['revision'], $session['revision']); }
+        }
         if ($allow && $current) {
             foreach (in_array($row['state'], ['pending', 'appealed'], true) ? ['approve', 'reject'] : ($row['state'] === 'approved' ? ['revoke'] : []) as $action) { self::form($id, $row['revision'], $action); }
         }
@@ -115,11 +137,19 @@ final class SessionReviewPanel
     }
 
     private static function url(string $id = ''): string { return BackOffice::url(['view' => 'sessions', 'session' => $id]); }
+    private static function resumeForm(string $id, string $reviewRevision, string $sessionRevision): void
+    {
+        echo '<form class="fb-hof-session-review__form" method="post" action="' . esc_url(self::url($id)) . '"><input type="hidden" name="session_review_nonce" value="' . esc_attr(wp_create_nonce('fans_hof_session_review_' . $id)) . '">';
+        foreach (['session_id' => $id, 'review_revision' => $reviewRevision, 'session_revision' => $sessionRevision, 'session_review_action' => 'resume'] as $name => $value) {
+            echo '<input type="hidden" name="' . esc_attr($name) . '" value="' . esc_attr($value) . '">';
+        }
+        echo '<button class="fb-button" type="submit">Reprendre la confirmation de fermeture</button></form>';
+    }
     private static function date(string $utc): string { return wp_date('d/m/Y à H:i:s', RankingCalendar::utc($utc)->getTimestamp()) . ' · ' . wp_timezone()->getName(); }
     private static function state(string $state): string { return match ($state) { 'pending' => 'En attente', 'approved' => 'Règles approuvées', 'rejected' => 'Proposition refusée', 'appealed' => 'Recours en attente', default => 'Examen indisponible' }; }
     private static function decision(string $action): string { return match ($action) { 'submit' => 'Proposition soumise', 'approve' => 'Approbation', 'reject' => 'Refus', 'revoke' => 'Révocation', 'appeal' => 'Recours reçu', default => 'Décision enregistrée' }; }
     private static function reason(string $reason): string { return match ($reason) { 'needs_revision' => 'À revoir', 'prohibited_content' => 'Contenu interdit', 'criteria_not_met' => 'Critères non remplis', 'allowed_session' => 'Règles admises', 'awaiting_review' => 'Examen demandé', 'member_appeal' => 'Recours du propriétaire', default => '' }; }
     /** @param array<string,mixed> $data */
     private static function field(string $key, array $data): string { return ModerationPanel::field($key, $data); }
-    private static function status(string $reason): int { return match ($reason) { 'hof_session_forbidden', 'hof_forbidden' => 403, 'hof_session_not_found', 'hof_review_not_found' => 404, 'hof_review_revision_conflict', 'hof_review_rules_changed', 'hof_approved_creator_required' => 409, default => str_starts_with($reason, 'hof_invalid_') || $reason === 'invalid_identity_or_reference' ? 400 : 503 }; }
+    private static function status(string $reason): int { return match ($reason) { 'hof_session_forbidden', 'hof_forbidden' => 403, 'hof_session_not_found', 'hof_review_not_found' => 404, 'hof_review_revision_conflict', 'hof_session_revision_conflict', 'hof_review_rules_changed', 'hof_approved_creator_required', 'hof_invalid_session_transition' => 409, default => str_starts_with($reason, 'hof_invalid_') || $reason === 'invalid_identity_or_reference' ? 400 : 503 }; }
 }
