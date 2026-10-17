@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Corrigé
+
+- Éviter l'interblocage entre admissions de nonces de barrières Hub distincts dans un même intervalle InnoDB, en conservant le mutex par nonce, la clé unique, les contrôles de fraîcheur et le refus des rejeux ; aucun contrat réseau ou réglage d'environnement modifié. Recette fermée sur données fictives uniquement.
+
 ### Ajouté
 
 - Formulaires fermés de cycle de session B6 : ouverture, annulation confirmée, fin à l'échéance, réadmission et reprise des mêmes actions Hub ; décision administrative commise distinguée de sa fermeture encore incertaine. Lecture primaire séparée après acquittement, sans assimilation d'un ancien reçu à une preuve actuelle. Contrats Hub inchangés, aucune activation ; [recette native et captures](docs/evidence/fans-hof-b6-session-lifecycle/README.md) acquises sur instances jetables.
