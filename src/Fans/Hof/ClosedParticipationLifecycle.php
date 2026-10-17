@@ -10,6 +10,7 @@ use Faluss\Platform\Fans\Sso\FansLinkedAccounts;
 use Faluss\Platform\TokenEngine\PurchasedPf\ModelValues;
 use Faluss\Platform\TokenEngine\PurchasedPf\ModelViolation;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\BarrierTransport;
+use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\BarrierTerritoryRevocation;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\CanonicalJson;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\ClosedEnvironment;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\RankingBarrier;
@@ -103,6 +104,46 @@ final class ClosedParticipationLifecycle
         return $result + ['participation_state' => $this->apply($sessionId,$creator,$prepared['action_id'])['state']];
     }
 
+    /** Retire the exact old territorial admission without rewriting voluntary participation.
+     * Historical withdrawals keep their original contract/action/key. No HTTP under the TX.
+     * @return array<string,string> */
+    public function retireTerritory(string $change, string $sessionId, string $barrierVersion, int $steps = 4): array
+    {
+        $this->available();
+        if ($steps < 1 || $steps > 16) { throw new ModelViolation('pf_local_barrier_budget'); }
+        $plan = $this->sessions->transaction(function () use ($change,$sessionId,$barrierVersion): array {
+            $target = ClosedTerritoryChanges::target($this->db,$change,'admission',$sessionId,$barrierVersion);
+            $creator = $target['change']['creator_id']; $version = $this->version($sessionId,$creator,$barrierVersion);
+            $descriptor = $this->descriptor($version); BarrierTerritoryRevocation::requireTerritorialAdmission($descriptor);
+            $content = $descriptor['content'];
+            if ($version['descriptor_sha256'] !== $target['item']['descriptor_sha256']
+                || $content['origin_id'] !== $this->origin || $content['territory_policy_revision'] !== $target['change']['policy_id']
+                || $content['territory_admission_revision'] !== $target['change']['approval_revision']) {
+                throw new ModelViolation('hof_territory_checkpoint_conflict');
+            }
+            $opening = $this->bind($version,'register'); $closing = $this->bind($version,'close',BarrierTerritoryRevocation::REASON);
+            ClosedTerritoryChanges::attach($this->db,$change,'admission',$sessionId,$barrierVersion,$closing['action_id']);
+            return ['creator' => $creator,'opening' => $opening,'closing' => $closing];
+        });
+        foreach (['opening','closing'] as $operation) {
+            $binding = $plan[$operation]; $this->inbox->prepare(CanonicalJson::object($binding['fields_json']),$binding['contract']);
+        }
+        $result = $this->client->advance($plan['closing']['action_id'],$steps);
+        if ($result['state'] !== 'acknowledged') { return $result; }
+        $this->apply($sessionId,$plan['creator'],$plan['closing']['action_id']);
+        return $this->sessions->withGovernanceMutex(fn (): array => $this->inbox->withAcknowledgement($plan['closing']['action_id'],
+            function (array $ack) use ($change,$sessionId,$barrierVersion,$plan,$result): array {
+                $target = ClosedTerritoryChanges::target($this->db,$change,'admission',$sessionId,$barrierVersion);
+                $binding = $this->binding($this->version($sessionId,$plan['creator'],$barrierVersion),'close');
+                $bytes = CanonicalJson::encode($ack['fields']); $instant = RankingValues::utc($ack['result']['effective_at']);
+                if ($binding === null || $target['item']['action_id'] !== $binding['action_id'] || $binding['action_id'] !== $plan['closing']['action_id']
+                    || $binding['fields_json'] !== $bytes || $binding['contract'] !== $ack['contract'] || $binding['applied_at'] !== $instant
+                    || $ack['local_state'] !== 'closed' || $ack['result']['state'] !== 'closed') { throw new ModelViolation('hof_territory_checkpoint_conflict'); }
+                ClosedTerritoryChanges::settle($this->db,$change,'admission',$sessionId,$barrierVersion,$binding['action_id'],$instant);
+                return $result + ['territory_state' => 'applied'];
+            }));
+    }
+
     /** Reuse unchanged voluntary rules after an attested session suspension/readmission.
      * Retire the old admission first, then bind only future contributions to the current parent.
      * Every network stage is outside the owner transaction and resumes its existing action/key.
@@ -115,9 +156,16 @@ final class ClosedParticipationLifecycle
             $role = $this->requiredRole($session['session_id'],$creator); $version = $this->latest($session['session_id'],$creator);
             if ($version === null || $role['state'] !== 'admitted' || $role['revision'] !== $version['role_revision']
                 || $role['rules_sha256'] !== $session['frozen_sha256']) { throw new ModelViolation('hof_participation_binding_conflict'); }
-            if ($version['session_barrier_version'] === $session['barrier_version']) { return ['current' => true]; }
-            $this->retiredParent($session,$version);
+            $retirement = 'parent';
+            if ($version['session_barrier_version'] === $session['barrier_version']) {
+                $facts = $this->eligible($session,$creator);
+                $expected = ParticipationBarrierDescriptor::compose($session,$role,$this->origin,$facts['subject'],
+                    $version['barrier_version'],$facts['policy'],$facts['territory_revision']);
+                if (CanonicalJson::encode($expected) === $version['descriptor_json']) { return ['current' => true]; }
+                $this->retiredTerritory($version); $retirement = 'territory';
+            } else { $this->retiredParent($session,$version); }
             return ['current' => false,'parent' => $session['barrier_version'],'version' => $version,
+                'retirement' => $retirement,
                 'opening' => $this->bind($version,'register'),'closing' => $this->bind($version,'close','session_suspended')];
         });
         if ($plan['current']) { return $this->advance($sessionId,$revision,$creator,$steps); }
@@ -135,7 +183,8 @@ final class ClosedParticipationLifecycle
                 || $role['revision'] !== $previous['role_revision'] || $role['rules_sha256'] !== $session['frozen_sha256']) {
                 throw new ModelViolation('hof_participation_binding_conflict');
             }
-            $this->retiredParent($session,$previous);
+            if ($plan['retirement'] === 'territory') { $this->retiredTerritory($previous); }
+            else { $this->retiredParent($session,$previous); }
             if ($this->sessions->storage->query($this->db->prepare('UPDATE %i SET revision=revision+1,admitted_at=%s,updated_at=UTC_TIMESTAMP(6)'
                 . ' WHERE session_id=%s AND creator_id=%s AND role=%s AND state=%s AND revision=%s',
                 $this->sessions->tables['roles'],$this->sessions->now(),$session['session_id'],$creator,'participant','admitted',$role['revision'])) !== 1) {
@@ -171,7 +220,7 @@ final class ClosedParticipationLifecycle
                 $instant = RankingValues::utc($ack['result']['effective_at']);
                 if ($binding['applied_at'] !== '') {
                     if ($binding['applied_at'] !== $instant) { throw new ModelViolation('hof_participation_binding_conflict'); }
-                    if ($binding['operation'] === 'close' && $ack['result']['reason'] === 'session_suspended'
+                    if ($binding['operation'] === 'close' && in_array($ack['result']['reason'],['session_suspended',BarrierTerritoryRevocation::REASON],true)
                         && $role['state'] === 'closing' && (int) $role['revision'] === (int) $version['role_revision']+1) {
                         $this->settleClose($session,$version,$role,$ack);
                         return $this->requiredRole($sessionId,$creator);
@@ -214,6 +263,35 @@ final class ClosedParticipationLifecycle
         return ParticipationSessionRetirement::reference($session,$version,$this->origin,$closed);
     }
 
+    /** An applied old territorial checkpoint, never a local label or newer approval alone.
+     * The signed close is reverified by apply() before a future version can commit.
+     * @param array<string,string> $version */
+    private function retiredTerritory(array $version): void
+    {
+        $descriptor = $this->descriptor($version); BarrierTerritoryRevocation::requireTerritorialAdmission($descriptor);
+        if (!ClosedTerritoryChangeSchema::ready($this->db)) { throw new ModelViolation('hof_territory_checkpoint_schema_unavailable'); }
+        $content = $descriptor['content']; $tables = ClosedTerritoryChangeSchema::tables($this->db);
+        $change = $this->sessions->storage->row($this->db->prepare('SELECT * FROM %i WHERE creator_id=%s AND approval_revision=%s FOR UPDATE',
+            $tables['changes'],$version['creator_id'],$content['territory_admission_revision']));
+        $item = $change === null ? null : $this->sessions->storage->row($this->db->prepare('SELECT * FROM %i WHERE change_id=%s AND kind=%s AND session_id=%s AND barrier_version=%s FOR UPDATE',
+            $tables['items'],$change['change_id'],'admission',$version['session_id'],$version['barrier_version']));
+        $closed = $this->binding($version,'close');
+        if ($change === null || $change['policy_id'] !== $content['territory_policy_revision'] || $item === null
+            || $item['descriptor_sha256'] !== $version['descriptor_sha256'] || $item['state'] !== 'applied'
+            || $item['applied_at'] === '' || $closed === null || $closed['action_id'] !== $item['action_id']
+            || $closed['applied_at'] !== $item['applied_at'] || $closed['contract'] !== BarrierTransport::TERRITORY_CONTRACT
+            || $closed['fields_sha256'] !== hash('sha256',$closed['fields_json'])) {
+            throw new ModelViolation('hof_territory_retirement_acknowledgement_required');
+        }
+        $fields = CanonicalJson::object($closed['fields_json']); BarrierTransport::fields($fields,$closed['contract']);
+        $reference = array_intersect_key(RankingBarrier::reference($content),array_flip(['barrier_key','version','content_sha256']))
+            + ['reason' => BarrierTerritoryRevocation::REASON];
+        if ($content['origin_id'] !== $this->origin || $fields['operation'] !== 'close' || $fields['action_id'] !== $closed['action_id']
+            || $fields['origin_id'] !== $this->origin || CanonicalJson::encode($fields['object']) !== CanonicalJson::encode($reference)) {
+            throw new ModelViolation('hof_territory_retirement_acknowledgement_required');
+        }
+    }
+
     /** @param array<string,string> $session
      * @param array<string,string> $version
      * @param array<string,string> $role
@@ -222,13 +300,20 @@ final class ClosedParticipationLifecycle
     {
         $reason = $ack['result']['reason'];
         if ($ack['local_state'] !== 'closed' || $ack['result']['state'] !== 'closed'
-            || !in_array($reason,['participant_withdrawn','session_suspended'],true)
+            || !in_array($reason,['participant_withdrawn','session_suspended',BarrierTerritoryRevocation::REASON],true)
             || $ack['fields']['object']['reason'] !== $reason) { throw new ModelViolation('hof_participation_binding_conflict'); }
         if ($reason === 'session_suspended') {
             $expected = $this->retiredParent($session,$version);
             if (CanonicalJson::encode($expected) !== CanonicalJson::encode($ack['fields']['object'])) { throw new ModelViolation('hof_participation_binding_conflict'); }
             if ($role['state'] === 'admitted' && $role['revision'] === $version['role_revision']) {
                 $this->sessions->change($session,[],'retire_participation_parent',$role['creator_id'],$reason); return;
+            }
+        }
+        if ($reason === BarrierTerritoryRevocation::REASON) {
+            BarrierTerritoryRevocation::requireTerritorialAdmission($this->descriptor($version));
+            if ($ack['contract'] !== BarrierTransport::TERRITORY_CONTRACT) { throw new ModelViolation('hof_participation_binding_conflict'); }
+            if ($role['state'] === 'admitted' && $role['revision'] === $version['role_revision']) {
+                $this->sessions->change($session,[],'retire_territory_participation',$role['creator_id'],$reason); return;
             }
         }
         if ($role['state'] !== 'closing' || (int) $role['revision'] !== (int) $version['role_revision']+1) { throw new ModelViolation('hof_participation_binding_conflict'); }
@@ -356,24 +441,27 @@ final class ClosedParticipationLifecycle
     private function bind(array $version, string $operation, string $reason = 'participant_withdrawn'): array
     {
         $old = $this->binding($version,$operation); $descriptor = $this->descriptor($version); $object = $descriptor;
+        $contract = $old['contract'] ?? ($operation === 'close' && $reason === BarrierTerritoryRevocation::REASON
+            ? BarrierTransport::TERRITORY_CONTRACT : BarrierTransport::CONTRACT);
         if ($operation === 'close') {
             if ($old !== null) { $reason = CanonicalJson::object($old['fields_json'])['object']['reason']; }
-            if (!in_array($reason,['participant_withdrawn','session_suspended'],true)) { throw new ModelViolation('hof_participation_binding_conflict'); }
+            if (!in_array($reason,['participant_withdrawn','session_suspended',BarrierTerritoryRevocation::REASON],true)) { throw new ModelViolation('hof_participation_binding_conflict'); }
+            if ($reason === BarrierTerritoryRevocation::REASON) { BarrierTerritoryRevocation::requireTerritorialAdmission($descriptor); }
             $object = array_intersect_key(RankingBarrier::reference($descriptor['content']),array_flip(['barrier_key','version','content_sha256']))
                 + ['reason' => $reason];
         }
         $fields = ['operation' => $operation,'lookup_operation' => '','action_id' => $old['action_id'] ?? wp_generate_uuid4(),
             'origin_id' => $this->origin,'policy_version' => RankingPolicy::VERSION,'object' => $object];
-        BarrierTransport::fields($fields); $bytes = CanonicalJson::encode($fields);
+        BarrierTransport::fields($fields,$contract); $bytes = CanonicalJson::encode($fields);
         if ($old !== null) {
-            if ($old['contract'] !== BarrierTransport::CONTRACT || $old['fields_json'] !== $bytes || $old['fields_sha256'] !== hash('sha256',$bytes)) {
+            if ($old['contract'] !== $contract || $old['fields_json'] !== $bytes || $old['fields_sha256'] !== hash('sha256',$bytes)) {
                 throw new ModelViolation('hof_participation_binding_conflict');
             }
             return $old;
         }
         if ($this->db->insert($this->tables['bindings'],['session_id' => $version['session_id'],'creator_id' => $version['creator_id'],
             'barrier_version' => $version['barrier_version'],'operation' => $operation,'action_id' => $fields['action_id'],
-            'contract' => BarrierTransport::CONTRACT,'fields_json' => $bytes,'fields_sha256' => hash('sha256',$bytes),'applied_at' => '']) !== 1) {
+            'contract' => $contract,'fields_json' => $bytes,'fields_sha256' => hash('sha256',$bytes),'applied_at' => '']) !== 1) {
             throw new ModelViolation('hof_storage_unavailable');
         }
         return $this->binding($version,$operation) ?? throw new ModelViolation('hof_storage_unavailable');
