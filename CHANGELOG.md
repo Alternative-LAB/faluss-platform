@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Corrigé
+
+- Éviter l'interblocage entre admissions de nonces de barrières Hub distincts dans un même intervalle InnoDB, en conservant le mutex par nonce, la clé unique, les contrôles de fraîcheur et le refus des rejeux ; aucun contrat réseau ou réglage d'environnement modifié. Recette fermée sur données fictives uniquement.
+
 ### Ajouté
 
 - Lecture privée paginée des sessions associées au Créateur courant pour préparer leur gestion B6, sans destinataire choisi par le navigateur ni pouvoir implicite pour une invitation ; tests WordPress/MariaDB des exclusions, suspensions et pages au-delà de vingt. Raccordement d'interface en cours, aucune activation.
