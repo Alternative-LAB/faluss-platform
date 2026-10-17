@@ -1,0 +1,27 @@
+{
+  "source_commit": "40fda2bfaa0bfb76bcef7d004c8e1f732360c7c5",
+  "source_tree": "3724a310596c0596b078603c9d73859f5d9ec9fd",
+  "export": "/var/tmp/fans-hof-exact-lhb8r4is",
+  "normalization": "CRLF to LF only",
+  "quality": {
+    "tests": 806,
+    "assertions": 8119,
+    "hof_tests": 87,
+    "hof_assertions": 309,
+    "phpstan_errors": 0,
+    "historic_deprecations": 2
+  },
+  "files": {
+    "CHANGELOG.md": "0311dac1702eb448522eca5cbc71b708c7359daf956e464c27f7ba9d015ee2f6",
+    "docs/modules/FANS-HOF-B6-PARTICIPATION-BRIDGE.md": "7c5fb6950f981f5448b0fa9d8ee66a2cf4360ebf0149edb24742d096c57cd452",
+    "src/Fans/Hof/ClosedParticipationLifecycle.php": "dc55803f457dfd9743c952f3a8af844835b5fbcf47037cea0166817a9a9002cf",
+    "src/Fans/Hof/ClosedParticipationSchema.php": "9d8573dcf3a6ca02279743b712c6ea4666931509904e2ee097a26ec848ff0d90",
+    "src/Fans/Hof/ParticipationBarrierDescriptor.php": "83edf562a9a5e7bd4d362593ff5f512b0f3cdd07c34182ace343afb643c2aaa4",
+    "src/Fans/Hof/SessionAppeals.php": "54aaa8a68e9365b7b5406c535c86080861a6dca075b489eac60ef144c4ae0e04",
+    "tests/Fans/Hof/ParticipationBarrierDescriptorTest.php": "321190422b5a4ec4574c3d4173d0e416e5970c4e850c7d76cace3c90781cc4fc",
+    "tests/TokenEngine/recipe/b3-session-lifecycle-worker.php": "f753a249e29594b0d07cd5ae5a05776ec5b492ce72591c3bace81bfacacd10b6",
+    "tests/TokenEngine/recipe/b3_session_lifecycle_checks.py": "a3b105977a1fddc0857b66057ec8c7636063efdf40ffc29fc3471aee01442b55",
+    "tests/TokenEngine/recipe/b6-participation-worker.php": "b05f48b6abb0fcf0ce5c91bd147a0ddddc5e99a22c8241e313d9be654ae0cf06",
+    "tests/TokenEngine/recipe/b6_participation_checks.py": "90c7b744dd4a8cd01f4e33896351502f7be103773a21d672a85eb9c517754ae5"
+  }
+}

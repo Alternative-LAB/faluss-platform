@@ -77,8 +77,10 @@ Scénarios ciblés : schéma absent/partiel, acteur non habilité, absence d'ACK
 session, admission concurrente, rollback des checkpoints, Faluss ID vérifié,
 réponse perdue après COMMIT Hub, reprise sans double événement, retrait,
 réadmission, ancien ACK, suspension, mort du processus avant/après COMMIT local.
-Les résultats acquis seront ajoutés après exécution ; aucune recette réelle
-du SSO Me, d'un site ou de la production n'est revendiquée.
+[Recette consolidée acquise](../evidence/fans-hof-b6-participation/README.md) :
+527 contrôles sans échec, dont37 participations, et40 contrôles historiques de
+modération/recours. Aucune recette réelle du SSO Me, d'un site ou de la production
+n'est revendiquée. Les preuves de branche restent distinctes de celles de main.
 
 Suite : formulaires de demande/décision/retrait et recours, puis territoires et
 choix d'intention sous attestations. Le raccordement B6 complet, sa recette
