@@ -1,6 +1,6 @@
 # B6 — participation après suspension et réadmission de session
 
-Lot fermé en recette. Il utilise exclusivement `ranking-barriers/1.0.0` et le
+Lot fermé, recette isolée acquise. Il utilise exclusivement `ranking-barriers/1.0.0` et le
 motif `session_suspended` déjà approuvé ; aucun nouveau contrat, permission,
 schéma, ledger ou opération économique Hub n'est introduit.
 
@@ -47,7 +47,8 @@ Les recettes couvrent acteurs exclus, autre motif/version, rejeux, rollback de
 version, réponse perdue après COMMIT Hub/local, retrait concurrent, deux reprises
 concurrentes et immutabilité des descripteurs antérieurs.
 
-Les résultats sont à consigner après exécution. Les tests unitaires ne prouvent
-pas encore le fonctionnement physique conjoint. Aucun achat, score réel, pair de
+[Preuves physiques acquises](../evidence/fans-hof-b6-participation-requalification/README.md) :
+542 contrôles sans échec, dont15exécutions du cycle croisé ; fixture supprimée.
+Les contrôles du head final et du futur main consolidé restent distincts. Aucun achat, score réel, pair de
 production, site, flag ou publication n'est autorisé par ce document. Conservation
 #150 et RustFS #161 restent distinctes.
