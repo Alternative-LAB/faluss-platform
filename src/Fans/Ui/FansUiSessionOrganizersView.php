@@ -9,7 +9,7 @@ final class FansUiSessionOrganizersView
     public static function render(FansUiSessions $state): void
     {
         $view = $state->organizers;
-        if ($view === null || $state->detail === null) { return; }
+        if ($view === null || $state->detail === null || $view->items === []) { return; }
         echo '<section class="fu-panel fu-hof-session__summary"><h3>Coorganisation</h3><ul>';
         foreach ($view->items as $item) {
             $label = match ($item['state']) { 'accepted' => 'Acceptée', 'invited' => 'Invitation en attente', 'refused' => 'Invitation refusée', default => 'Indisponible' };

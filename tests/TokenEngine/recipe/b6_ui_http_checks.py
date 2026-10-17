@@ -77,13 +77,15 @@ def run_checks(root,source,cli_path,fixture,origin,actors,session,month,deliver,
         lifecycle_checks(root,read,cookies,actors,deliver,check,fixture['set_clock'])
         from b6_coorganizers_ui_http_checks import run_checks as coorganizer_checks
         coorganization=coorganizer_checks(read,cookies,actors,management,deliver,check)
+        from b6_participation_ui_http_checks import run_checks as participation_checks
+        participation=participation_checks(root,read,cookies,actors,deliver,check)
         if os.environ.get('FALUSS_B6_UI_EXPORT'):
             out=pathlib.Path(os.environ['FALUSS_B6_UI_EXPORT']).resolve()
             if out.parent!=pathlib.Path('/var/tmp') or not out.name.startswith('fans-hof-ui-') or out.is_symlink():raise RuntimeError('Unsafe private UI capture destination')
             out.mkdir(mode=0o700,exist_ok=True)
             # Private capability file for the local renderer, removed before the server is stopped.
             live=out/'live-session.json'
-            live.write_text(json.dumps(dict(base=base,cookies=cookies,month=month,session=session['session_id'],session_management=management,session_coorganizers=coorganization)));live.chmod(0o600)
+            live.write_text(json.dumps(dict(base=base,cookies=cookies,month=month,session=session['session_id'],session_management=management,session_coorganizers=coorganization,session_participation=participation)));live.chmod(0o600)
             try:
                 if os.environ.get('FALUSS_B6_UI_CAPTURE_COMMAND'):
                     command=json.loads(os.environ['FALUSS_B6_UI_CAPTURE_COMMAND'])

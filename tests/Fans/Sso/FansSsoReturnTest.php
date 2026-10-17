@@ -118,4 +118,24 @@ final class FansSsoReturnTest extends TestCase
         }}
         self::assertNull(FansSsoReturn::path('/faluss-fans/fan/messages?email=private'));
     }
+
+    public function testVoluntaryEntryAndParticipantPaginationKeepOnlyTheirCanonicalSelection(): void
+    {
+        $id = '123e4567-e89b-42d3-a456-426614174000'; $state = str_repeat('s',43);
+        foreach (['/app/','/faluss-fans/'] as $prefix) {
+            foreach (['manage=join&session=' . $id,'manage=session&session=' . $id . '&participant_cursor=' . $id] as $query) {
+                $path = $prefix . 'creator/hof?' . $query;
+                self::assertSame($path,FansSsoReturn::path($path));
+                self::assertSame($path,FansSsoReturn::open(FansSsoReturn::seal($path,$state),$state));
+                foreach ([$path . '&nonce=private',$path . '&session=' . $id,$path . '#private',str_replace($id,strtoupper($id),$path)] as $invalid) {
+                    self::assertNull(FansSsoReturn::path($invalid));
+                }
+            }
+        }
+        self::assertNull(FansSsoReturn::path('/app/creator/hof?manage=join&sessions_cursor=' . $id));
+        self::assertNull(FansSsoReturn::path('/app/fan/hof?manage=join&session=' . $id));
+        $GLOBALS['fans_sso_home'] = 'https://fans.example.test/community';
+        self::assertSame('/community/app/creator/hof?manage=join&session=' . $id,
+            FansSsoReturn::path('/community/app/creator/hof?manage=join&session=' . $id));
+    }
 }
