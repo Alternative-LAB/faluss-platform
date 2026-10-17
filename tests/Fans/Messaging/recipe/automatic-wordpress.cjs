@@ -70,6 +70,18 @@ const { execFileSync } = require('node:child_process');
       await welcome.getByLabel('Votre texte').focus();
       assert.notEqual(await welcome.getByLabel('Votre texte').evaluate(el=>getComputedStyle(el).outlineStyle),'none');
       await shot(config,'automatic-settings-'+width);
+      const thanksBody='Remerciement préparé, recette '+width+'.';
+      await thanks.getByLabel('Votre texte').fill(thanksBody);await local(config);
+      await Promise.all([config.waitForNavigation(),thanks.getByRole('button',{name:'Aperçu',exact:true}).click()]);
+      assert.equal(await thanks.getByLabel('Votre texte').inputValue(),thanksBody);
+      await local(config);
+      await Promise.all([config.waitForNavigation(),thanks.getByRole('button',{name:'Enregistrer remerciement',exact:true}).click()]);
+      assert.equal(await thanks.getByLabel('Votre texte').inputValue(),thanksBody);
+      assert.equal(await thanks.getByLabel('Envoi automatique').inputValue(),'no');
+      assert.equal(await welcome.getByLabel('Votre texte').inputValue(),body);
+      assert.equal(await welcome.getByLabel('Envoi automatique').inputValue(),'yes');
+      await thanks.getByRole('heading',{name:'Remerciement',exact:true}).scrollIntoViewIfNeeded();
+      await shot(config,'automatic-thanks-unavailable-'+width);
 
       const fan=await contextFor(width,'auto-a');const profile=await fan.newPage();
       profile.on('pageerror',e=>errors.push(e.message));
@@ -115,7 +127,7 @@ const { execFileSync } = require('node:child_process');
     assert.deepEqual(errors,[]);
     fs.writeFileSync(path.join(out,'browser.json'),JSON.stringify({browser:browser.version(),checks,errors,
       limits:'Disposable WordPress/MariaDB, synthetic Identity links/texts, actual WP cookies/nonces. Canonical fixture HTML and 303 locations mapped to loopback only; an extra GET after the verified native 303 normalizes API URLs for visual capture. No central SSO, target theme, TLS or physical-device proof.'},null,2));
-    console.log('PASS automatic settings, native free follow, read-only automatic thread, 3 widths and 9 screenshots');
+    console.log('PASS independent automatic settings, native free follow, read-only automatic thread, 3 widths and 12 screenshots');
   } finally {
     for(const context of browser.contexts()){await context.unrouteAll({behavior:'wait'});await context.close();}
     await browser.close();

@@ -153,3 +153,5 @@ def run_checks(root,cli_path,fans,recipe,origin,endpoint,members,create,state,in
 
     from b6_participation_requalification_checks import run_checks as requalification_checks
     requalification_checks(root,members,opened,state,invoke,call,request,participant,close_session,scalar,sql,network,check)
+    from b6_territory_checkpoint_checks import run_checks as territory_checks
+    territory_checks(root,members,invoke,sql,network,check)

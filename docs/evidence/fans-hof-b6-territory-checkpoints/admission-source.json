@@ -1,0 +1,20 @@
+{
+  "scope": "Acquired admission checkpoint recipe before final session-coorganizer additions",
+  "source_tree": "987628c980b17e7a9abdc808e06d4c0445c69ccc",
+  "source_head": "a2c6f1daab47382ccfd73485d9b40af1acb39050",
+  "git_archive": true,
+  "lf_export": true,
+  "wordPress": "7.1.2",
+  "php": "8.5.4",
+  "database": "11.8.6-MariaDB-5ubuntu0.1 from Ubuntu",
+  "total": 601,
+  "failed": 0,
+  "territory_cases": 35,
+  "fixture_removed": true,
+  "not_proven": [
+    "Final coorganizer session retirement and additional fault cases",
+    "Integrated main and CI",
+    "Native territorial UI, true Me SSO or real site admission",
+    "Production flags, purchase source, real scores or retention policy"
+  ]
+}

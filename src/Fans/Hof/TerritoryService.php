@@ -175,6 +175,7 @@ final class TerritoryService
 
     private function write(string $id, int $revision, string $state, string $policy, string $country, string $ref, int $approved, string $reason, string $appeal, string $action): void
     {
+        ClosedTerritoryChanges::record($this->db,$this->creatorRow($id),$revision,$action);
         $this->store->storage->query($this->db->prepare('REPLACE INTO %i (creator_id,revision,state,policy_id,country,territory_ref,approved_revision,reason,appeal_text,updated_at) VALUES (%s,%d,%s,%s,%s,%s,%d,%s,%s,UTC_TIMESTAMP(6))',
             $this->tables['creators'], $id, $revision, $state, $policy, $country, $ref, $approved, $reason, $appeal));
         $this->store->storage->query($this->db->prepare('INSERT INTO %i (creator_id,revision,actor_id,action,reason,policy_id,country,territory_ref,occurred_at) VALUES (%s,%d,%d,%s,%s,%s,%s,%s,UTC_TIMESTAMP(6))',
