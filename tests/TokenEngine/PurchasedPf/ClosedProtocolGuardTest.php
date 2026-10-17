@@ -70,6 +70,9 @@ final class ClosedProtocolGuardTest extends TestCase
             static fn () => new \Faluss\Platform\Fans\Hof\ClosedTerritorySessionRetirement($database,
                 (new \ReflectionClass(\Faluss\Platform\Fans\PfContract\ClosedBarrierInbox::class))->newInstanceWithoutConstructor(),
                 (new \ReflectionClass(\Faluss\Platform\Fans\PfContract\ClosedBarrierClient::class))->newInstanceWithoutConstructor(),''),
+            static fn () => \Faluss\Platform\Fans\Hof\ClosedParticipationSchema::ready($database),
+            static fn () => \Faluss\Platform\Fans\Hof\ClosedParticipationSchema::installForRecipe($database),
+            static fn () => \Faluss\Platform\Fans\Hof\ClosedParticipationEntry::preview($database,'123e4567-e89b-42d3-a456-426614174000'),
             static fn () => new \Faluss\Platform\Fans\PfContract\ClosedCorpusInbox($database,
                 new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy('fixture.hub','fixture.fans',['pf.ranking.corpus'],[]),'',''),
             static fn () => \Faluss\Platform\TokenEngine\PurchasedPf\ClosedRankingCorpusSchema::installForRecipe($database),
@@ -77,6 +80,8 @@ final class ClosedProtocolGuardTest extends TestCase
             static fn () => \Faluss\Platform\Fans\Hof\ClosedSessionManagement::services($database),
             static fn () => \Faluss\Platform\Fans\Hof\ClosedSessionManagement::lifecycle($database),
             static fn () => \Faluss\Platform\Fans\Hof\ClosedSessionManagement::freshness($database),
+            static fn () => \Faluss\Platform\Fans\Hof\ClosedSessionManagement::participation($database),
+            static fn () => new \Faluss\Platform\Fans\Hof\ClosedParticipationActions($database),
             static fn () => new \Faluss\Platform\Fans\Hof\ClosedSessionActions($database),
             static fn () => \Faluss\Platform\TokenEngine\PurchasedPf\ClosedCorpusTransaction::assertActive($database),
             static fn () => ClosedEnvironment::assertIsolated($database, 'fans')] as $operation) {

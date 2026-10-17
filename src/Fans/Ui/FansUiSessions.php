@@ -11,6 +11,9 @@ use Faluss\Platform\Fans\Hof\SessionRules;
 use Faluss\Platform\Fans\Hof\SessionService;
 use Faluss\Platform\Fans\Hof\SessionRoles;
 use Faluss\Platform\Fans\Hof\SessionStore;
+use Faluss\Platform\Fans\Hof\SessionAppeals;
+use Faluss\Platform\Fans\Hof\ClosedParticipationActions;
+use Faluss\Platform\Fans\Hof\ClosedParticipationEntry;
 use Faluss\Platform\Fans\Moderation\ModerationPanel;
 use Faluss\Platform\TokenEngine\PurchasedPf\ModelViolation;
 
@@ -43,6 +46,9 @@ final class FansUiSessions
     /** @var array<string,string>|null */
     public ?array $draft = null;
     public ?FansUiSessionOrganizers $organizers = null;
+    public ?FansUiSessionParticipants $participants = null;
+    public string $participationAppeal = '';
+    public bool $participationPending = false;
 
     public static function supports(string $role, string $view): bool
     { return $role === 'creator' && $view === 'hof' && array_key_exists('manage', $_GET); }
@@ -71,7 +77,7 @@ final class FansUiSessions
             try { SessionStore::creator(); $state->active = true; }
             catch (ModelViolation $error) { if ($error->reason !== 'hof_approved_creator_required') { throw $error; } }
             $state->mode = self::field('manage', $_GET);
-            if (!in_array($state->mode, ['sessions', 'new', 'session'], true)) { throw new ModelViolation('hof_invalid_session_input'); }
+            if (!in_array($state->mode, ['sessions', 'new', 'session', 'join'], true)) { throw new ModelViolation('hof_invalid_session_input'); }
             $state->id = self::field('session', $_GET); $state->cursor = self::field('sessions_cursor', $_GET);
             $state->read($services['sessions'], $services['reviews']);
             if ($state->detail !== null) {
@@ -85,10 +91,12 @@ final class FansUiSessions
                 $state->submittedReviewRevision = self::field('review_revision', $_POST);
                 if (in_array($action, ['create', 'edit'], true)) { $state->draft = self::draftFields(); }
                 if ($action === 'appeal') { $state->appealText = mb_substr(self::field('explanation', $_POST), 0, 1200, 'UTF-8'); }
+                if ($action === 'appeal_participation') { $state->participationAppeal = mb_substr(self::field('explanation', $_POST),0,1200,'UTF-8'); }
                 try {
                     $state->submit($services['sessions'], $services['reviews']);
-                    $state->result = new \WP_REST_Response(['code' => $state->publicationPending ? 'hof_session_publication_pending' : ''], $state->lifecyclePending || $state->publicationPending ? 202 : 200);
+                    $state->result = new \WP_REST_Response(['code' => $state->publicationPending ? 'hof_session_publication_pending' : ''], $state->lifecyclePending || $state->publicationPending || $state->participationPending ? 202 : 200);
                     $state->draft = null; $state->appealText = '';
+                    $state->participationAppeal = '';
                 }
                 catch (ModelViolation $error) { $state->result = self::failure($error->reason); }
                 if ($state->destination === null) { $state->read($services['sessions'], $services['reviews']); }
@@ -103,12 +111,18 @@ final class FansUiSessions
     private function read(SessionService $sessions, SessionModeration $reviews): void
     {
         if ($this->mode === 'sessions') { $this->items = $sessions->own($this->cursor); return; }
+        if ($this->mode === 'join') {
+            global $wpdb;
+            $this->detail = ClosedParticipationEntry::preview($wpdb,$this->id);
+            $this->participants = FansUiSessionParticipants::load($this); return;
+        }
         if ($this->mode === 'session') {
             $this->detail = $sessions->inspect($this->id);
             try { SessionRules::validate(array_intersect_key($this->detail['session'], array_flip(['title', 'rules_text', 'category', 'scope', 'country', 'territory_ref', 'timezone', 'starts_at', 'ends_at']))); }
             catch (ModelViolation) { throw new ModelViolation('hof_session_unavailable'); }
             $this->review = $this->isOwner() ? $reviews->own($this->id) : null;
             $this->organizers = FansUiSessionOrganizers::load($this);
+            $this->participants = FansUiSessionParticipants::load($this);
         }
     }
 
@@ -120,12 +134,31 @@ final class FansUiSessions
             $created = $sessions->create($this->rules());
             $this->destination = wp_make_link_relative(self::url('session', $created['session_id'])); return;
         }
+        if ($action === 'request_participation' && $this->mode === 'join') {
+            global $wpdb;
+            if (self::field('accept_participation_rules',$_POST) !== 'yes') { throw new ModelViolation('hof_session_rules_acceptance_required'); }
+            (new SessionRoles($wpdb))->apply($this->id,self::revision('session_revision',1),self::field('rules_sha256',$_POST));
+            $this->destination = wp_make_link_relative(self::url('session',$this->id)); return;
+        }
         if ($this->mode !== 'session') { throw new ModelViolation('hof_invalid_session_input'); }
         if ($action === 'edit') { $sessions->edit($this->id, self::revision('session_revision', 1), $this->rules()); return; }
         if ($action === 'submit') {
             $reviews->submit($this->id, self::revision('session_revision', 1), self::revision('review_revision', 0)); return;
         }
         if ($action === 'appeal') { $reviews->appeal($this->id, self::revision('review_revision', 0), self::field('explanation', $_POST)); return; }
+        if ($action === 'appeal_participation') {
+            global $wpdb;
+            (new SessionAppeals($wpdb))->submit($this->id,self::revision('role_revision',1),$this->participationAppeal);
+            $this->participationDestination(); return;
+        }
+        if (in_array($action,['admit_participant','refuse_participant','withdraw_participation','resume_participation'],true)) {
+            global $wpdb;
+            $progress = (new ClosedParticipationActions($wpdb))->perform($this->id,self::revision('session_revision',1),$action,
+                $action === 'withdraw_participation' ? '' : self::field('participant_target',$_POST));
+            $this->participationPending = ($progress['state'] ?? '') === 'pending'
+                || !in_array($progress['participation_state'] ?? '',['admitted','withdrawn','refused'],true);
+            $this->participationDestination(); return;
+        }
         if (in_array($action, ['invite_organizer', 'accept_organizer', 'refuse_organizer'], true)) {
             global $wpdb;
             $roles = new SessionRoles($wpdb); $revision = self::revision('session_revision', 1);
@@ -142,6 +175,15 @@ final class FansUiSessions
             return;
         }
         throw new ModelViolation('hof_invalid_session_input');
+    }
+
+    private function participationDestination(): void
+    {
+        $url = self::url('session',$this->id);
+        if (($this->participants->manager ?? false) && $this->participants->cursor !== '') {
+            $url = add_query_arg('participant_cursor',$this->participants->cursor,$url);
+        }
+        $this->destination = wp_make_link_relative($url);
     }
 
     /** @return array<string,string> */
@@ -187,11 +229,12 @@ final class FansUiSessions
     private static function failure(string $reason): \WP_REST_Response
     {
         $status = match ($reason) {
-            'hof_session_forbidden', 'hof_linked_creator_required' => 403,
+            'hof_session_forbidden', 'hof_linked_creator_required', 'hof_appeal_forbidden', 'hof_forbidden' => 403,
             'hof_session_not_found', 'hof_review_not_found' => 404,
             'hof_session_revision_conflict', 'hof_review_revision_conflict', 'hof_review_rules_changed', 'hof_session_rules_frozen', 'hof_invalid_review_transition', 'hof_approved_creator_required',
             'hof_session_deadline_not_reached', 'hof_session_approval_required', 'hof_coorganizer_acceptance_required', 'hof_reviewed_territory_required', 'hof_invalid_session_transition', 'hof_invalid_coorganizer_invitation' => 409,
-            'invalid_identity_or_reference' => 400,
+            'hof_participation_conflict', 'hof_participation_binding_conflict', 'hof_appeal_revision_conflict', 'hof_appeal_application_changed', 'hof_appeal_refusal_required', 'hof_appeal_already_submitted' => 409,
+            'invalid_identity_or_reference', 'hof_session_rules_acceptance_required' => 400,
             'hof_session_rate_limit' => 429,
             default => str_starts_with($reason, 'hof_invalid_') || in_array($reason, ['hof_ambiguous_local_time', 'hof_nonexistent_local_time'], true) ? 400 : 503,
         };

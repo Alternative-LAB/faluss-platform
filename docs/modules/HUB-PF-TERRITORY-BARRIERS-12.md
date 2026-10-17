@@ -43,12 +43,15 @@ y compris si des constantes de recette sont copiées sur un WordPress ordinaire.
 
 ## Dépendance suivante, non livrée par ce seul transport
 
-Le checkpoint métier doit encore être lié atomiquement à chaque modification,
-retrait ou révocation de déclaration territoriale ; sa collecte exhaustive et
-sa reprise par curseur borné doivent être raccordées à `TerritoryService` et aux
-bindings de participation. Une nouvelle approbation devra retirer le contexte
-précédent avant toute admission future sous le même consentement. Ce transport
-seul ne rend donc pas le parcours territorial fonctionnel ni activable.
+Le [raccordement privé des checkpoints](FANS-HOF-B6-TERRITORY-CHECKPOINTS.md)
+lie désormais la modification, le retrait ou la révocation à leur journal
+atomique dans `TerritoryService`. La collecte exhaustive par curseur, les
+admissions et les suspensions de sessions de coorganisateurs reprennent leurs
+actions exactes. Une nouvelle approbation exige la fermeture attestée du contexte
+précédent avant une admission future sous le même consentement. Les preuves de
+ce raccordement restent séparées de celles du seul transport. L'interface
+territoriale, le masquage public par dimension et les choix d'intention restent
+des raccordements suivants ; aucun de ces lots fermés n'autorise une activation.
 
 La perte du territoire indispensable d'un organisateur doit suspendre réellement
 sa session avec le motif existant `session_suspended`. Elle n'est ni un retrait
@@ -61,8 +64,11 @@ Tests ciblés de syntaxe, signatures/version/audience, types stockés, anciennes
 versions, nonce, origine/digest/version, concurrence, COMMIT incertain local et
 Hub, lookup de la même clé et préservation du ledger. La recette utilise le
 module applicatif existant des barrières HTTP ; aucun workflow, préparateur,
-cache, délai ou runner n'est modifié. Les résultats physiques seront consignés
-après exécution, séparément de la qualité locale et de la CI du head final.
+cache, délai ou runner n'est modifié. Les
+[preuves isolées acquises](../evidence/hub-territory-barriers-12/README.md)
+distinguent le transport final (383/0), les vraies courses du ledger fictif
+(356/0) et le socle session/participation (564/0). Leurs baselines se recouvrent ;
+la CI du head final puis du main intégré reste distincte.
 
 Les tests ajoutent les courses avec une véritable confirmation dans le ledger
 officiel fictif : fermeture avant débit, confirmation verrouillée avant fermeture,

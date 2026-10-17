@@ -44,15 +44,24 @@ touchant ses deux rôles termine les deux dimensions indépendantes. Après
 réexamen et réadmission, l'ancienne réponse ne peut suspendre le nouveau parent.
 La fermeture d'organisateur déjà appliquée se reprend sans autre opération.
 
-## Qualité et état du code final
+## Qualité avant et après intégration de main
 
-Code sauvegardé au commit `51fe9712e672807fd6c87c7dd8101ad01d3ef660` ; mêmes
+Code de la recette611 sauvegardé au commit `51fe9712e672807fd6c87c7dd8101ad01d3ef660` ; mêmes
 octets PHP/Python que l'arbre exporté `e34eb6351cff5f9dd6f04120df028297a9b86a32`
 pour la recette finale, hors textes de changelog/documentation. Qualité locale :
 **813 tests PHP / 8 217 assertions**, dont90/323 HoF, PHPStan sans erreur avec
 cible PHP80300. Deux dépréciations historiques conservées. Huit fichiers PHP
 lintés, deux Python compilés, dix sources comparées à l'export LF, neuf liens
 relatifs vérifiés, scan de secrets ciblé et `git diff --check` réussis.
+
+La jonction avec main `cd42356` conserve les formulaires et tests de #231 ainsi
+que le transport #233. Elle corrige aussi leur checkpoint de présentation : une
+approbation territoriale invalidée ou un ancien contexte fermé ne peut pas être
+présenté comme une admission courante confirmée. Deux contrôles physiques ont
+été ajoutés ; leur résultat sur le nouveau head reste attendu en CI.
+La [qualité conjointe](integrated-quality.json) sur l'arbre3cda352 donne
+**814 tests /8 294 assertions**, HoF90/323 et PHPStan0. Cette preuve de qualité
+ne remplace pas la recette physique du nouveau head ou celle du futur main.
 
 Une première exécution s'est arrêtée avant la politique territoriale parce que
 le schéma métier B2 n'avait pas été installé explicitement dans cette fixture.

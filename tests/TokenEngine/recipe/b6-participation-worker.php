@@ -33,6 +33,7 @@ return match ($input['action']) {
     'participation-territory-invite' => $roles->invite($input['session'],$input['revision'],$input['creator']),
     'participation-territory-accept' => $roles->answer($input['session'],$input['revision'],true),
     'participation-ready' => ['ready' => ClosedParticipationSchema::ready($wpdb)],
+    'participation-checkpoint' => $participations->checkpoint($input['session'],$input['creator']),
     'participation-install' => (static function () use ($wpdb): array { ClosedParticipationSchema::installForRecipe($wpdb); return ['ready' => true]; })(),
     'participation-request' => $roles->apply($input['session'],$input['revision'],$input['rules_sha256']),
     'participation-admit' => $participations->admit($input['session'],$input['revision'],$input['creator']),

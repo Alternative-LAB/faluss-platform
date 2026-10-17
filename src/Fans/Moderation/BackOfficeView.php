@@ -22,6 +22,7 @@ final class BackOfficeView
             'catalog' => BackOfficeCatalog::render(),
             'ranking' => RankingAliasPanel::render(),
             'sessions' => SessionReviewPanel::render(),
+            'participation' => ParticipationAppealPanel::render(),
             default => self::overview(),
         };
     }

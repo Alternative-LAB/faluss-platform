@@ -1,8 +1,9 @@
 {
-  "README.md": "0147abd349af294c853329d145bd527d9c0b33be551378446d4a792b73a64f3c",
+  "README.md": "f5cbdfe04ca18820fc9444c0a7b5d2b104b057cc02d1b94b1d0e2d13b6fb52ff",
   "admission-checks.json": "148f5929b4baae7b39aeb7ede29f64de4f4e411b493f7694cc21267aae78da7f",
   "admission-source.json": "cb79b4c2abca1f73ac10ef908a84279e9f4395143d6c8ef183c2469c51b41153",
   "final-checks.json": "8b373beac99729d671237c961658c8b7a49c7ee7c733219b1113ccbfe1920727",
   "final-source.json": "ee62f911e30a2728aad523f8cd608dafca8f83e7c18588641037aa8593c4ef95",
+  "integrated-quality.json": "e9d268fdc3f0f88fd449fd29ec2e6951cee620c2465a1dab9c5f7d16494e33b9",
   "quality-proof.json": "aff10b19d7d952068226673a1e84b09da3c49417295d889b3fc7f2b1e848f05d"
 }

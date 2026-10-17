@@ -62,6 +62,9 @@ def run_checks(root,members,invoke,sql,network,check):
           and bool(change) and len(events().splitlines())==1 and items(change)=='' and snapshot()==before)
     check('B6tc new local participation choices fail immediately after territorial revocation without a fabricated Hub close',
           participation('prepare')==dict(error='hof_reviewed_territory_required') and network['events']()==primary_events)
+    check('B6tc native participation checkpoint cannot display the revoked territory as a confirmed current admission',
+          participation('checkpoint')==dict(bound=False,opening_applied=False,closing_applied=False)
+          and snapshot()==before and network['events']()==primary_events)
     prior=events()
     check('B6tc a stale invalidation cannot replace the original checkpoint action',
           territory('decide',admin,creator=creator,revision=int(original['revision']),decision='revoke',reason='needs_revision')==dict(error='hof_territory_revision_conflict') and events()==prior)
@@ -152,6 +155,8 @@ def run_checks(root,members,invoke,sql,network,check):
           and new_role['admitted_at']>voluntary['admitted_at'] and new_role['rules_sha256']==voluntary['rules_sha256']
           and sql("SELECT JSON_UNQUOTE(JSON_EXTRACT(descriptor_json,'$.content.territory_admission_revision')) FROM wp_fans_hof_b6p_versions WHERE session_id='"+id+"' AND barrier_version=24")==approved['approved_revision']
           and sql("SELECT * FROM wp_fans_hof_b6p_versions WHERE session_id='"+id+"' AND barrier_version<=23 ORDER BY barrier_version")==historical)
+    check('B6tc native checkpoint confirms only the newly approved and actually opened future admission',
+          participation('checkpoint')==dict(bound=True,opening_applied=True,closing_applied=False))
     revision=snapshot()['session']['revision']
     check('B6tc an old territorial retirement cannot remove the new admission or repeat its close',
           territory('retire',**args)['territory_state']=='applied' and participant()==new_role
