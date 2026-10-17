@@ -64,7 +64,10 @@ module applicatif existant des barrières HTTP ; aucun workflow, préparateur,
 cache, délai ou runner n'est modifié. Les résultats physiques seront consignés
 après exécution, séparément de la qualité locale et de la CI du head final.
 
-Les courses confirmation/fermeture et expiration derrière les verrous, la purge
-des checkpoints et les fragments métier territoriaux restent à vérifier dans le
-lot de raccordement. Aucun site réel, SSO Me, pair de production, migration,
+Les tests ajoutent les courses avec une véritable confirmation dans le ledger
+officiel fictif : fermeture avant débit, confirmation verrouillée avant fermeture,
+lookup sans second débit et expiration après attente du mutex propriétaire.
+Leur résultat physique reste distinct du simple test de syntaxe ou du transport.
+La reprise des fragments et checkpoints métier territoriaux reste à vérifier dans
+le lot de raccordement. Aucune durée ou purge applicable n'est ajoutée. Aucun site réel, SSO Me, pair de production, migration,
 achat, activation ou publication n'est prouvé. #150 et RustFS #161 restent distincts.
