@@ -76,7 +76,7 @@ def run_checks(root,check,hub_sql,network):
           done['state']=='acknowledged' and done['local_state']=='closed' and events()==before+1
           and done['http_trace']==[dict(transaction='0',mutex_free='1',registered='1')] and stored(closing)==raw)
     # The same old action can never close a future version after reapproval.
-    future=deepcopy(descriptor);future['content'].update(version='2',territory_admission_revision='8',
+    future=deepcopy(descriptor);future['content'].update(version=str(int(descriptor['content']['version'])+1),territory_admission_revision='8',
         admitted_at=hub_sql('SELECT UTC_TIMESTAMP(6)'))
     future['valid_from']=max(future['content']['starts_at'],future['content']['admitted_at'])
     new_open=network['fields'](future);assert local['prepare'](new_open)['state']=='opening'
