@@ -1,0 +1,32 @@
+{
+  "commit": "747f5d27481c019e2b4d333dad63729fdb2f7282",
+  "tree": "59006ff8698f82614ea43afa6f16f5d608b7dd9c",
+  "runtime": "/var/tmp/fans-hof-exact-nvyl7xg8",
+  "source_lf_sha256": {
+    "assets/fans-backoffice.css": "bbfe503db6e554fb0d3ff903d4b9a8a60f402885f2cda46ecd1e151da42c593c",
+    "assets/fans-hof.css": "c1446cb217c87dc931b70f4fc2a1716884c1f39638405df16c27292cd104d563",
+    "src/Fans/Hof/ClosedParticipationActions.php": "ad295606bd74745066365380e25dcf3f0ba6d40ee4bb2c1d6a72001f7087a493",
+    "src/Fans/Hof/ClosedParticipationEntry.php": "372cecf51a04a7708de6c45511ce18b8b86792371f4ab2c6890c72faf000a888",
+    "src/Fans/Hof/ClosedParticipationLifecycle.php": "9f3f10486e4f505f72b2b08176f3ba0bae410a02bde43d26ffe467a94125fd48",
+    "src/Fans/Hof/ClosedSessionManagement.php": "855956d18a6a2626efe889a81f033b5949e33a956a68783e67a445cf2ca7abf4",
+    "src/Fans/Hof/SessionAppeals.php": "8fca6e853bbeb0609c29a729160bd699807bc68568dc647011dc23be541c5015",
+    "src/Fans/Moderation/BackOffice.php": "b90c17a355887c55f42ebd8a1b47aaebd10f1ffba3e08dbb193ca20fa20a9a63",
+    "src/Fans/Moderation/BackOfficeView.php": "3bc98da0e4ba3a55d9bd3dc5173767073ff4110719cec308ed24c7cefad7855e",
+    "src/Fans/Moderation/ParticipationAppealPanel.php": "3420c92a6bd442cdb0448427aa7e99052e1281afeea298a7fbb58a9204f7a60c",
+    "src/Fans/Sso/FansSsoReturn.php": "c3ca61a1aeed8cc070aadf4170f2c56f7aa7c2806c2b593a0da0fadb4732889e",
+    "src/Fans/Ui/FansUiHofView.php": "e1a71321486f2dd807e1d8eca5827fc587f57a61a885637862da7c2e9a71e966",
+    "src/Fans/Ui/FansUiRoutes.php": "f99eaddbc527c733cd1d368336499e99f352562844d22530c04e0d2d33df9a33",
+    "src/Fans/Ui/FansUiSessionLifecycleView.php": "dba9dfba1fee06a6d7cf0a9eaaa0fd38947edc8be4d9b4b9a229e2451efbbf41",
+    "src/Fans/Ui/FansUiSessionOrganizersView.php": "1b242585f383197712580b0b4c7edf74e2883b7facc805747a3cb3b8528cdb48",
+    "src/Fans/Ui/FansUiSessionParticipants.php": "5cd7b677c8fd4a82e3b79272f4aa9c93911957fa5869cf4a67116f0ee6349a3e",
+    "src/Fans/Ui/FansUiSessionParticipantsView.php": "ebaab886a667f8096f0705407f49b85757789a745d8281e3ca82b5ae1dc16860",
+    "src/Fans/Ui/FansUiSessions.php": "79521ef7d906bc479b02a7bdb7d4b5c12d2327da6f6ddec5a47b6639331acd79",
+    "src/Fans/Ui/FansUiSessionsView.php": "be251ed8e3e9084dc718dbda77cc2d5e7257c4c1f4488d0f51b4c4200c7a91f1",
+    "tests/Fans/Sso/FansSsoReturnTest.php": "d28bb0ec510462ca643be4395fda5a9dc19f81f27fca9a8030c98cb9dd025ad6",
+    "tests/TokenEngine/PurchasedPf/ClosedProtocolGuardTest.php": "e069cb32a1eb5be7df940f8a61550bca72514b762d457d6fe62087160cf60b6b",
+    "tests/TokenEngine/recipe/b6-delivery-worker.php": "ef80b497fa589f8890b1994109a287ce671b8327652c74e8b5a4eae6b0cd2816",
+    "tests/TokenEngine/recipe/b6-ui-bootstrap.php": "fc0b4970899896efb701c07d98efa3f643b9359f5d4305854eb6e22eac63d196",
+    "tests/TokenEngine/recipe/b6_participation_ui_http_checks.py": "5ff239b728e7d9c66802d5f8fe2ccb631799757eade37c8a7130e36b95ae68d6",
+    "tests/TokenEngine/recipe/b6_ui_http_checks.py": "8dada0778a7c456f0c7c4359eb2ac361d3bc811c790b5d7c52ff52c833e519d9"
+  }
+}

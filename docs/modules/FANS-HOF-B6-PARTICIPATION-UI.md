@@ -1,6 +1,6 @@
 # B6 — formulaires de participation et recours privés
 
-Raccordement en cours de recette, non publié. Les règles produit F1b R2 et les
+Raccordement vérifié en recette isolée, non publié. Les règles produit F1b R2 et les
 contrats Hub existants sont conservés. Aucun contrat réseau, source d'achat,
 pair réel ou mécanisme de consommation n'est ajouté.
 
@@ -63,8 +63,11 @@ acteurs exclus, demandes dupliquées, décisions/refus/recours, réponse perdue 
 COMMIT et lookup primaire, retrait, ancien dossier, pagination et absence de
 mutation sur GET. La recette navigateur doit exercer les contrôles natifs au
 clavier et au toucher et vérifier six largeurs, les noms accessibles, les
-débordements et le retour navigateur. Les preuves et captures seront ajoutées
-après exécution ; une compilation ou un écran seul ne vaut pas parcours fonctionnel.
+débordements et le retour navigateur. Les
+[preuves et captures acquises](../evidence/fans-hof-b6-participation-ui/README.md)
+comprennent 882 contrôles physiques sans échec, deux parcours navigateur, 91 mesures
+aux six largeurs et 16 PNG examinés. Les autorisations et le cycle croisé sont
+vérifiés par les vrais formulaires WordPress ; aucune preuve de site cible n'en découle.
 
 Après suspension puis réadmission de session attestées, « Vérifier la confirmation »
 utilise la [requalification privée](FANS-HOF-B6-PARTICIPATION-REQUALIFICATION.md)

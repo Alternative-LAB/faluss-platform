@@ -1,0 +1,1320 @@
+{
+  "scope": "Actual disposable WordPress Hub/Fans routes, fictitious local Identity links; emulated keyboard/touch, no real Me SSO or physical device; exact-loopback HTTPS Location normalized only for the existing HTTP fixture",
+  "browser": "151.0.7922.34",
+  "screens": [
+    {
+      "name": "participation-join",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": "participation-join-1440.png",
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-join-layout",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 305,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-join-layout",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 360,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-join-layout",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-join-layout",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 415,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-join-layout",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 753,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-requested",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": "participation-requested-1440.png",
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-requested-layout",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 305,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-requested-layout",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 360,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-requested-layout",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-requested-layout",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 415,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-requested-layout",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 753,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "creator-participation-queue",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": "creator-participation-queue-1440.png",
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "creator-participation-controls",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": "creator-participation-controls-1440.png",
+      "viewportCenteredOn": "requested member"
+    },
+    {
+      "name": "creator-participation-queue-layout",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 305,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "creator-participation-queue-layout",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 360,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "creator-participation-queue-layout",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "creator-participation-queue-layout",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 415,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "creator-participation-queue-layout",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 753,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "moderator-participation-decided",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1440,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 0,
+        "overflow": []
+      },
+      "screenshot": "moderator-participation-decided-1440.png",
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "moderator-participation-decided-layout",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 305,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 0,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "moderator-participation-decided-layout",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 360,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 0,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "moderator-participation-decided-layout",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 0,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "moderator-participation-decided-layout",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 415,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 0,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "moderator-participation-decided-layout",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 768,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 0,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-admitted",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": "participation-admitted-1440.png",
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-admitted-layout",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 305,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-admitted-layout",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 360,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-admitted-layout",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-admitted-layout",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 415,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-admitted-layout",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 753,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-withdrawn",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": "participation-withdrawn-1440.png",
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-withdrawn-layout",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 305,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-withdrawn-layout",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 360,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-withdrawn-layout",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-withdrawn-layout",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 415,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-withdrawn-layout",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 753,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-join",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": "participation-join-390.png",
+      "viewportCenteredOn": "request_participation"
+    },
+    {
+      "name": "participation-join-layout",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-join-layout",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-join-layout",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 430,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-join-layout",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 768,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-join-layout",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1440,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-requested",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": "participation-requested-390.png",
+      "viewportCenteredOn": "withdraw_participation"
+    },
+    {
+      "name": "participation-requested-layout",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-requested-layout",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-requested-layout",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 430,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-requested-layout",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 768,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-requested-layout",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1440,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "creator-participation-queue",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": "creator-participation-queue-390.png",
+      "viewportCenteredOn": "admit_participant"
+    },
+    {
+      "name": "creator-participation-queue-layout",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "creator-participation-queue-layout",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "creator-participation-queue-layout",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 430,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "creator-participation-queue-layout",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 768,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "creator-participation-queue-layout",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1440,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-refused",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": "participation-refused-390.png",
+      "viewportCenteredOn": "appeal_participation"
+    },
+    {
+      "name": "participation-refused-layout",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-refused-layout",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-refused-layout",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 430,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-refused-layout",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 768,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-refused-layout",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1440,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-appeal-pending",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": "participation-appeal-pending-390.png",
+      "viewportCenteredOn": "withdraw_participation"
+    },
+    {
+      "name": "participation-appeal-pending-layout",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-appeal-pending-layout",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-appeal-pending-layout",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 430,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-appeal-pending-layout",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 768,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-appeal-pending-layout",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1440,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "moderator-participation-pending",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 0,
+        "overflow": []
+      },
+      "screenshot": "moderator-participation-pending-390.png",
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "moderator-participation-pending-layout",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 0,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "moderator-participation-pending-layout",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 0,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "moderator-participation-pending-layout",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 430,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 0,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "moderator-participation-pending-layout",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 768,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 0,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "moderator-participation-pending-layout",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1440,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 0,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-admitted",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": "participation-admitted-390.png",
+      "viewportCenteredOn": "withdraw_participation"
+    },
+    {
+      "name": "participation-admitted-layout",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-admitted-layout",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-admitted-layout",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 430,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-admitted-layout",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 768,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-admitted-layout",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1440,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-closing",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": "participation-closing-390.png",
+      "viewportCenteredOn": "resume_participation"
+    },
+    {
+      "name": "participation-closing-layout",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-closing-layout",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-closing-layout",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 430,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-closing-layout",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 768,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-closing-layout",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1440,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-withdrawn",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": "participation-withdrawn-390.png",
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-withdrawn-layout",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-withdrawn-layout",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-withdrawn-layout",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 430,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-withdrawn-layout",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 768,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    },
+    {
+      "name": "participation-withdrawn-layout",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1440,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "creatorTabs": 8,
+        "overflow": []
+      },
+      "screenshot": null,
+      "viewportCenteredOn": null
+    }
+  ],
+  "journeys": [
+    {
+      "width": 1440,
+      "keyboard": true,
+      "touch": false,
+      "nativeRequest": true,
+      "organizerAdmission": true,
+      "nativeRefusal": false,
+      "nativeAppeal": false,
+      "nativeModeratorDecision": false,
+      "nativeWithdrawal": true,
+      "uncertainClosureAndRecovery": false,
+      "back": true
+    },
+    {
+      "width": 390,
+      "keyboard": false,
+      "touch": true,
+      "nativeRequest": true,
+      "organizerAdmission": false,
+      "nativeRefusal": true,
+      "nativeAppeal": true,
+      "nativeModeratorDecision": true,
+      "nativeWithdrawal": true,
+      "uncertainClosureAndRecovery": true,
+      "back": true
+    }
+  ],
+  "redirectTransport": [
+    {
+      "width": 390,
+      "role": "admin",
+      "status": 303,
+      "fromScheme": "https",
+      "toScheme": "http",
+      "pathname": "/app/admin"
+    }
+  ],
+  "failures": [],
+  "currentStage": "mobile moderator favourable participation appeal"
+}
