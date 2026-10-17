@@ -118,10 +118,10 @@ final class ClosedRankingDelivery
             }
             $ranked = $dimension[$family === 'fan' ? 'fans' : 'creators'];
         }
-        $identity = new RankingIdentity($this->db);
+        $visibility = new SessionDimensionVisibility($this->db);
         return array_intersect_key($row,array_flip(['title','rules_text','category','scope','starts_at','ends_at','state']))
             + ['id' => $id,'organizers' => $verified['organizers'],'items' => RankingVisibleProjection::build($ranked,
-                static fn (string $subject): ?string => $identity->visibleNameInTransaction($family,$subject)),
+                static fn (string $subject): ?string => $visibility->visibleNameInTransaction($family,$subject,$row,$verified['territory_policy'])),
                 'source_at' => $document['source']['verified_at']];
     }
 
