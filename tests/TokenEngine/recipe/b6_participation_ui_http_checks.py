@@ -94,6 +94,32 @@ def run_checks(root,read,cookies,actors,deliver,check):
               and 'participation_case_action' not in read(case_path,admin)[1])
         assert read(path,member,form(path,'withdraw_participation',member))[0]==200
         check('B6dl participation withdrawing a pending request needs no fabricated Hub admission',role()['state']=='withdrawn')
+        again=form(join,'request_participation',member);again['accept_participation_rules']='yes'
+        assert read(join,member,again,follow=False)[0]==303
+        admission=form(path,'admit_participant');admission['participant_target']=target
+        assert read(path,owner,admission)[0]==200
+        admitted=role();old_parent=snapshot()['session']['barrier_version']
+        revoke=form(panel,'revoke',admin,'session_review_action');revoke.update(reason='needs_revision',confirm_revoke='yes')
+        assert read(panel,admin,revoke)[0]==200
+        appeal=form(path,'appeal');appeal['explanation']='Recours fictif sur les règles inchangées de session.'
+        assert read(path,owner,appeal)[0]==200
+        assert read(panel,admin,form(panel,'approve',admin,'session_review_action'))[0]==200
+        assert read(path,owner,form(path,'readmit'))[0]==200
+        before=snapshot();status,html,_=read(path,member)
+        check('B6dl participation a native session readmission never presents the old admission as confirmed or changes it on GET',
+              status==200 and 'Admission confirmée.' not in html and 'Vérifier la confirmation' in html
+              and snapshot()==before and int(before['session']['barrier_version'])==int(old_parent)+1 and role()==admitted)
+        fault.write_text('2');fault.chmod(0o600)
+        resume=form(path,'resume_participation',member);resume['participant_target']=target
+        response=read(path,member,resume,follow=False)
+        check('B6dl participation native readmission recovery preserves an uncertain retirement without fabricating its confirmation',
+              response[0]==303 and 'Admission confirmée.' not in read(path,member)[1] and role()==admitted)
+        assert read(path,member,dict(form(path,'resume_participation',member),participant_target=target))[0]==200
+        check('B6dl participation native same-action recovery confirms only the future admission under unchanged consent',
+              'Admission confirmée.' in read(path,member)[1] and role()['rules_sha256']==admitted['rules_sha256']
+              and role()['admitted_at']>=admitted['admitted_at'] and int(role()['revision'])==int(admitted['revision'])+1)
+        assert read(path,member,form(path,'withdraw_participation',member))[0]==200
+        check('B6dl participation the requalified native participant can still withdraw without a new application',role()['state']=='withdrawn')
         candidates=[]
         for _ in range(21):
             candidate=deliver('fixture-extra-creator',actor=actors['admin_user']);cookie=deliver('fixture-cookie',actor=candidate['creator_user'])

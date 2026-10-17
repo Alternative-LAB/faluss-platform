@@ -66,8 +66,14 @@ clavier et au toucher et vérifier six largeurs, les noms accessibles, les
 débordements et le retour navigateur. Les preuves et captures seront ajoutées
 après exécution ; une compilation ou un écran seul ne vaut pas parcours fonctionnel.
 
-Les transitions croisées de suspension/réadmission de session et participation,
-les territoires et les choix d'intention doivent encore être vérifiés ensemble.
+Après suspension puis réadmission de session attestées, « Vérifier la confirmation »
+utilise la [requalification privée](FANS-HOF-B6-PARTICIPATION-REQUALIFICATION.md)
+pour un rôle admis dont le parent a changé. Elle conserve le consentement,
+retire d'abord l'ancien contexte avec sa même action et n'admet que les
+contributions futures après preuve primaire. Le GET ne transforme jamais l'ancien
+binding en confirmation. Le parcours natif croisé est inclus dans la recette HTTP.
+
+Les territoires et les choix d'intention doivent encore être vérifiés ensemble.
 Un ancien binding de version de session ne constitue jamais une confirmation
 pour la nouvelle version. Aucun test du véritable SSO Me, site cible, appareil
 physique, achat, score public, flag, migration ou publication n'est revendiqué.

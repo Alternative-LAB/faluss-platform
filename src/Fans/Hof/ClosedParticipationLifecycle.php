@@ -124,6 +124,51 @@ final class ClosedParticipationLifecycle
         return $result + ['participation_state' => $this->apply($sessionId,$creator,$prepared['action_id'])['state']];
     }
 
+    /** Reuse unchanged voluntary rules after an attested session suspension/readmission.
+     * Retire the old admission first, then bind only future contributions to the current parent.
+     * Every network stage is outside the owner transaction and resumes its existing action/key.
+     * @return array<string,string> */
+    public function requalify(string $sessionId, int $revision, string $creator, int $steps = 4): array
+    {
+        if ($steps < 1 || $steps > 16) { throw new ModelViolation('pf_local_barrier_budget'); }
+        $plan = $this->withSessionProof($sessionId,function (array $session,array $proof) use ($revision,$creator): array {
+            SessionStore::revision($session,$revision); $this->authorize($session,$creator); $this->openSession($session,$proof);
+            $role = $this->requiredRole($session['session_id'],$creator); $version = $this->latest($session['session_id'],$creator);
+            if ($version === null || $role['state'] !== 'admitted' || $role['revision'] !== $version['role_revision']
+                || $role['rules_sha256'] !== $session['frozen_sha256']) { throw new ModelViolation('hof_participation_binding_conflict'); }
+            if ($version['session_barrier_version'] === $session['barrier_version']) { return ['current' => true]; }
+            $this->retiredParent($session,$version);
+            return ['current' => false,'parent' => $session['barrier_version'],'version' => $version,
+                'opening' => $this->bind($version,'register'),'closing' => $this->bind($version,'close','session_suspended')];
+        });
+        if ($plan['current']) { return $this->advance($sessionId,$revision,$creator,$steps); }
+        foreach (['opening','closing'] as $operation) {
+            $binding = $plan[$operation]; $this->inbox->prepare(CanonicalJson::object($binding['fields_json']),$binding['contract']);
+        }
+        $result = $this->client->advance($plan['closing']['action_id'],$steps);
+        if ($result['state'] !== 'acknowledged') { return $result; }
+        $this->apply($sessionId,$creator,$plan['closing']['action_id']);
+        $current = $this->withSessionProof($sessionId,function (array $session,array $proof) use ($creator,$plan): array {
+            $this->authorize($session,$creator); $this->openSession($session,$proof);
+            $role = $this->requiredRole($session['session_id'],$creator); $previous = $this->latest($session['session_id'],$creator);
+            if ($session['barrier_version'] !== $plan['parent'] || $previous === null
+                || $previous['barrier_version'] !== $plan['version']['barrier_version'] || $role['state'] !== 'admitted'
+                || $role['revision'] !== $previous['role_revision'] || $role['rules_sha256'] !== $session['frozen_sha256']) {
+                throw new ModelViolation('hof_participation_binding_conflict');
+            }
+            $this->retiredParent($session,$previous);
+            if ($this->sessions->storage->query($this->db->prepare('UPDATE %i SET revision=revision+1,admitted_at=%s,updated_at=UTC_TIMESTAMP(6)'
+                . ' WHERE session_id=%s AND creator_id=%s AND role=%s AND state=%s AND revision=%s',
+                $this->sessions->tables['roles'],$this->sessions->now(),$session['session_id'],$creator,'participant','admitted',$role['revision'])) !== 1) {
+                throw new ModelViolation('hof_participation_binding_conflict');
+            }
+            $session = $this->sessions->change($session,[],'requalify_participation',$creator,'session_readmitted');
+            $this->createVersion($session,$this->requiredRole($session['session_id'],$creator),$previous);
+            return $session;
+        });
+        return $this->advance($sessionId,(int) $current['revision'],$creator,$steps);
+    }
+
     /** Session mutex precedes inbox origin mutex/TX, as for signed corpus/session delivery.
      * An old opening acknowledgement never overrides withdrawal or a later admission.
      * @return array<string,string> */
@@ -147,19 +192,15 @@ final class ClosedParticipationLifecycle
                 $instant = RankingValues::utc($ack['result']['effective_at']);
                 if ($binding['applied_at'] !== '') {
                     if ($binding['applied_at'] !== $instant) { throw new ModelViolation('hof_participation_binding_conflict'); }
+                    if ($binding['operation'] === 'close' && $ack['result']['reason'] === 'session_suspended'
+                        && $role['state'] === 'closing' && (int) $role['revision'] === (int) $version['role_revision']+1) {
+                        $this->settleClose($session,$version,$role,$ack);
+                        return $this->requiredRole($sessionId,$creator);
+                    }
                     return $role;
                 }
                 if ($binding['operation'] === 'close') {
-                    if ($ack['local_state'] !== 'closed' || $ack['result']['state'] !== 'closed' || $ack['result']['reason'] !== 'participant_withdrawn'
-                        || $role['state'] !== 'closing' || (int) $role['revision'] !== (int) $version['role_revision']+1) {
-                        throw new ModelViolation('hof_participation_binding_conflict');
-                    }
-                    if ($this->sessions->storage->query($this->db->prepare('UPDATE %i SET state=%s,revision=revision+1,updated_at=UTC_TIMESTAMP(6)'
-                        . ' WHERE session_id=%s AND creator_id=%s AND role=%s AND state=%s AND revision=%s',
-                        $this->sessions->tables['roles'],'withdrawn',$sessionId,$creator,'participant','closing',$role['revision'])) !== 1) {
-                        throw new ModelViolation('hof_participation_binding_conflict');
-                    }
-                    $this->sessions->change($session,[],'hub_participation_close_ack',$creator,'participant_withdrawn');
+                    $this->settleClose($session,$version,$role,$ack);
                 } elseif ($role['state'] === 'admitted' && $role['revision'] === $version['role_revision']) {
                     if ($session['state'] !== 'open' || $session['barrier_version'] !== $version['session_barrier_version']
                         || $ack['local_state'] !== 'active' || $ack['result']['state'] !== 'active') { throw new ModelViolation('hof_participation_binding_conflict'); }
@@ -182,6 +223,42 @@ final class ClosedParticipationLifecycle
     {
         ClosedEnvironment::assertIsolated($this->db,'fans');
         if (!ClosedParticipationSchema::ready($this->db) || !ClosedSessionLifecycleSchema::ready($this->db)) { throw new ModelViolation('hof_participation_schema_unavailable'); }
+    }
+
+    /** @param array<string,string> $session
+     * @param array<string,string> $version
+     * @return array<string,string> */
+    private function retiredParent(array $session, array $version): array
+    {
+        $closed = $this->sessions->storage->row($this->db->prepare('SELECT * FROM %i WHERE session_id=%s AND barrier_version=%s AND operation=%s FOR UPDATE',
+            ClosedSessionLifecycleSchema::tables($this->db)['bindings'],$session['session_id'],$version['session_barrier_version'],'close'));
+        return ParticipationSessionRetirement::reference($session,$version,$this->origin,$closed);
+    }
+
+    /** @param array<string,string> $session
+     * @param array<string,string> $version
+     * @param array<string,string> $role
+     * @param array<string,mixed> $ack */
+    private function settleClose(array $session, array $version, array $role, array $ack): void
+    {
+        $reason = $ack['result']['reason'];
+        if ($ack['local_state'] !== 'closed' || $ack['result']['state'] !== 'closed'
+            || !in_array($reason,['participant_withdrawn','session_suspended'],true)
+            || $ack['fields']['object']['reason'] !== $reason) { throw new ModelViolation('hof_participation_binding_conflict'); }
+        if ($reason === 'session_suspended') {
+            $expected = $this->retiredParent($session,$version);
+            if (CanonicalJson::encode($expected) !== CanonicalJson::encode($ack['fields']['object'])) { throw new ModelViolation('hof_participation_binding_conflict'); }
+            if ($role['state'] === 'admitted' && $role['revision'] === $version['role_revision']) {
+                $this->sessions->change($session,[],'retire_participation_parent',$role['creator_id'],$reason); return;
+            }
+        }
+        if ($role['state'] !== 'closing' || (int) $role['revision'] !== (int) $version['role_revision']+1) { throw new ModelViolation('hof_participation_binding_conflict'); }
+        if ($this->sessions->storage->query($this->db->prepare('UPDATE %i SET state=%s,revision=revision+1,updated_at=UTC_TIMESTAMP(6)'
+            . ' WHERE session_id=%s AND creator_id=%s AND role=%s AND state=%s AND revision=%s',
+            $this->sessions->tables['roles'],'withdrawn',$session['session_id'],$role['creator_id'],'participant','closing',$role['revision'])) !== 1) {
+            throw new ModelViolation('hof_participation_binding_conflict');
+        }
+        $this->sessions->change($session,[],'hub_participation_close_ack',$role['creator_id'],$reason);
     }
 
     /** @param array<string,string> $session */
@@ -297,12 +374,14 @@ final class ClosedParticipationLifecycle
 
     /** @param array<string,string> $version
      * @return array<string,string> */
-    private function bind(array $version, string $operation): array
+    private function bind(array $version, string $operation, string $reason = 'participant_withdrawn'): array
     {
         $old = $this->binding($version,$operation); $descriptor = $this->descriptor($version); $object = $descriptor;
         if ($operation === 'close') {
+            if ($old !== null) { $reason = CanonicalJson::object($old['fields_json'])['object']['reason']; }
+            if (!in_array($reason,['participant_withdrawn','session_suspended'],true)) { throw new ModelViolation('hof_participation_binding_conflict'); }
             $object = array_intersect_key(RankingBarrier::reference($descriptor['content']),array_flip(['barrier_key','version','content_sha256']))
-                + ['reason' => 'participant_withdrawn'];
+                + ['reason' => $reason];
         }
         $fields = ['operation' => $operation,'lookup_operation' => '','action_id' => $old['action_id'] ?? wp_generate_uuid4(),
             'origin_id' => $this->origin,'policy_version' => RankingPolicy::VERSION,'object' => $object];

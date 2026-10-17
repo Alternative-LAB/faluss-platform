@@ -42,6 +42,11 @@ final class ClosedParticipationActions
             try { return $bridge->advance($id,(int) $current['revision'],$target); }
             catch (ModelViolation) { return ['participation_state' => 'admitted','state' => 'pending']; }
         }
+        $role = array_values(array_filter($sessions->inspect($id)['roles'],
+            static fn (array $value): bool => $value['role'] === 'participant' && $value['creator_id'] === $target))[0] ?? null;
+        if (($role['state'] ?? '') === 'admitted' && !$bridge->checkpoint($id,$target)['bound']) {
+            return $bridge->requalify($id,$revision,$target);
+        }
         return $bridge->advance($id,$revision,$target);
     }
 }

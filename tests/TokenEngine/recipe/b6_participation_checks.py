@@ -150,3 +150,6 @@ def run_checks(root,cli_path,fans,recipe,origin,endpoint,members,create,state,in
         check('B6pa '+point+' recovery uses the durable original admission action',
               result.get('participation_state')=='admitted' and call('prepare',row)['action_id']==stable)
         call('withdraw',row,other);assert call('advance',row,other)['participation_state']=='withdrawn';close_session(row)
+
+    from b6_participation_requalification_checks import run_checks as requalification_checks
+    requalification_checks(root,members,opened,state,invoke,call,request,participant,close_session,scalar,sql,network,check)

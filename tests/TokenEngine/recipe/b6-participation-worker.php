@@ -25,6 +25,7 @@ return match ($input['action']) {
     'participation-withdraw' => $roles->withdraw($input['session'],$input['revision']),
     'participation-prepare' => $participations->prepare($input['session'],$input['revision'],$input['creator']),
     'participation-advance' => $participations->advance($input['session'],$input['revision'],$input['creator'],$input['steps'] ?? 4),
+    'participation-requalify' => $participations->requalify($input['session'],$input['revision'],$input['creator'],$input['steps'] ?? 4),
     'participation-apply' => $participations->apply($input['session'],$input['creator'],$input['action_id']),
     default => throw new RuntimeException('Unknown private participation fixture operation.'),
 };
