@@ -92,8 +92,11 @@ coorganisateur accepté sans lui donner un pouvoir général de propriétaire.
 Elle utilise le motif existant `session_suspended`, jamais une suspension
 globale du Créateur. Une fermeture déjà engagée conserve son motif et sa clé.
 Un ancien acquittement ne peut fermer une nouvelle version de session.
-Le parcours d'interface territorial et son adaptation native restent à raccorder.
+Le parcours d'interface territorial, son masquage public par dimension et son
+adaptation native restent à raccorder ; la remise privée ne les rend pas disponibles.
 
-Les résultats physiques exacts restent à consigner après la recette. Aucun site,
+Les [résultats physiques exacts](../evidence/fans-hof-b6-territory-checkpoints/README.md)
+sont acquis :611 contrôles sans échec, dont45 territoriaux, sur le code fermé.
+La CI du futur head et du main intégré reste distincte. Aucun site,
 SSO Me, délai de conservation, score réel, flag ou publication n'est validé par
 ce document. #150 et RustFS #161 restent distinctes.

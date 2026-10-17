@@ -1,0 +1,18 @@
+{
+  "code_commit": "51fe9712e672807fd6c87c7dd8101ad01d3ef660",
+  "runtime_tree": "e34eb6351cff5f9dd6f04120df028297a9b86a32",
+  "php_runtime": "8.5.4",
+  "phpstan_target": "80300",
+  "phpstan_errors": 0,
+  "phpunit_tests": 813,
+  "phpunit_assertions": 8217,
+  "hof_tests": 90,
+  "hof_assertions": 323,
+  "historical_deprecations": 2,
+  "modified_php_lint": 8,
+  "python_compile": 2,
+  "runtime_lf_equal": 10,
+  "relative_links": 9,
+  "secret_scan": "pass",
+  "diff_check": "pass"
+}
