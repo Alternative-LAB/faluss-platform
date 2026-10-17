@@ -25,7 +25,7 @@ final class FansUiSessionOrganizersView
             self::answer($state, 'refuse_organizer', 'Refuser l’invitation');
         }
         if ($state->detail['session']['state'] === 'draft' && $view->manager) {
-            echo '<p>Chaque Créateur invité doit accepter avant l’ouverture.</p>';
+            echo '<p>Les invitations en attente doivent être acceptées ou refusées avant l’ouverture.</p>';
             if ($view->candidates !== []) {
                 echo '<form class="fu-hof-session__summary fu-hof-session__invitation" method="post" action="' . esc_url(FansUiSessions::url('session', $state->id)) . '">';
                 FansUiSessionForm::fields('invite_organizer', $state->detail['session']['revision'], $state->review['revision'] ?? '0');

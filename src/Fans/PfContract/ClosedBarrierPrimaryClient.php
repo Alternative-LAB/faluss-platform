@@ -20,6 +20,8 @@ final class ClosedBarrierPrimaryClient
             || (int) $port[1] > 65535) { throw new ModelViolation('pf_fixture_peer_required'); }
     }
 
+    public function usesReader(ClosedBarrierPrimaryRead $reader): bool { return $this->reader === $reader; }
+
     /** Preparation is explicit and durable. This method resumes only that revision.
      * @return array<string,mixed> */
     public function advance(string $action): array
