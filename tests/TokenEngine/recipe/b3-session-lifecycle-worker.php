@@ -40,6 +40,10 @@ final class FansSessionLifecycleRecipeDatabase extends wpdb
         foreach (['participation-binding-insert' => 'wp_fans_hof_b6p_bindings','participation-version-insert' => 'wp_fans_hof_b6p_versions'] as $fault => $table) {
             if ($this->fault === $fault && str_starts_with($query,'INSERT INTO `' . $table . '`')) { $this->fault = ''; return false; }
         }
+        foreach (['territory-change-insert' => 'wp_fans_hof_b6t_changes','territory-item-insert' => 'wp_fans_hof_b6t_items'] as $fault => $table) {
+            if ($this->fault === $fault && str_starts_with($query,'INSERT INTO `' . $table . '`')) { $this->fault = ''; return false; }
+        }
+        if ($this->fault === 'territory-item-apply' && str_starts_with($query,'UPDATE `wp_fans_hof_b6t_items` SET state=\'applied\'')) { $this->fault = ''; return false; }
         if ($this->fault === 'requalification-commit-unknown' && str_starts_with($query,'UPDATE `wp_fans_hof_session_roles` SET revision=revision+1,admitted_at=')) { $this->fault = 'commit-unknown'; }
         if (strtoupper(trim($query)) !== 'COMMIT' || !in_array($this->fault,['before-commit','after-commit','commit-unknown'],true)) { return parent::query($query); }
         $fault = $this->fault; $this->fault = '';
@@ -105,7 +109,7 @@ try {
             'create' => $sessions->create($input['rules']),
             'review-submit' => $moderation->submit($input['session'],$input['revision'],$input['review_revision'] ?? 0),
             'review-decide' => $moderation->decide($input['session'],$input['review_revision'],$input['decision'],$input['reason']),
-            'open' => $sessions->requestOpen($input['session'],$input['revision']),
+            'open' => $sessions->requestOpen($input['session'],$input['revision'],$input['territory_policy'] ?? null),
             'close' => $sessions->close($input['session'],$input['revision'],$input['state']),
             'readmit' => $sessions->requestReadmission($input['session'],$input['revision']),
             'inspect' => $sessions->inspect($input['session']),

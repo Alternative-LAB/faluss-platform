@@ -43,12 +43,15 @@ y compris si des constantes de recette sont copiées sur un WordPress ordinaire.
 
 ## Dépendance suivante, non livrée par ce seul transport
 
-Le checkpoint métier doit encore être lié atomiquement à chaque modification,
-retrait ou révocation de déclaration territoriale ; sa collecte exhaustive et
-sa reprise par curseur borné doivent être raccordées à `TerritoryService` et aux
-bindings de participation. Une nouvelle approbation devra retirer le contexte
-précédent avant toute admission future sous le même consentement. Ce transport
-seul ne rend donc pas le parcours territorial fonctionnel ni activable.
+Le [raccordement privé des checkpoints](FANS-HOF-B6-TERRITORY-CHECKPOINTS.md)
+lie désormais la modification, le retrait ou la révocation à leur journal
+atomique dans `TerritoryService`. La collecte exhaustive par curseur, les
+admissions et les suspensions de sessions de coorganisateurs reprennent leurs
+actions exactes. Une nouvelle approbation exige la fermeture attestée du contexte
+précédent avant une admission future sous le même consentement. Les preuves de
+ce raccordement restent séparées de celles du seul transport. L'interface
+territoriale, le masquage public par dimension et les choix d'intention restent
+des raccordements suivants ; aucun de ces lots fermés n'autorise une activation.
 
 La perte du territoire indispensable d'un organisateur doit suspendre réellement
 sa session avec le motif existant `session_suspended`. Elle n'est ni un retrait
