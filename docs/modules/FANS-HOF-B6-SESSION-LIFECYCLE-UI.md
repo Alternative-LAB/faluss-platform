@@ -1,9 +1,9 @@
-# B6 — formulaires de cycle de session, raccordement fermé en cours
+# B6 — formulaires de cycle de session, raccordement fermé vérifié
 
 Ce lot suit les [brouillons et examens des règles](FANS-HOF-B6-SESSION-UI.md).
 Il réutilise le [pont B2/B3 approuvé](FANS-HOF-B3-SESSION-LIFECYCLE.md), sans
 modifier un message Hub, une permission, un ledger ou un contrat économique.
-**Travail en cours : les nouvelles actions n'ont pas encore leur preuve HTTP.**
+**Recette WordPress/MariaDB et navigateur acquise en isolation** : [preuves, captures et limites](../evidence/fans-hof-b6-session-lifecycle/README.md). Aucun site activé.
 
 `ClosedSessionActions` orchestre les appels aux services propriétaires existants.
 Le membre lié ne choisit ni l'origine, ni le pair, ni le point d'accès ou la clé.
@@ -47,7 +47,7 @@ la fermeture ; une reprise protégée par cible et révisions reste disponible.
 Une annulation concurrente déjà engagée conserve son motif et son état final,
 sans être transformée silencieusement en suspension.
 
-Scénarios à prouver : refus de nonce/propriété/révision, examen et consentement
+Scénarios vérifiés dans la recette native : refus de nonce/propriété/révision, examen et consentement
 des coorganisateurs nécessaires, fin anticipée, ouverture et annulation
 attestées, réponse perdue après COMMIT puis reprise, révocation et fermeture,
 GET sans mutation, et fermeture physique hors recette. Aucun résultat de
@@ -59,8 +59,8 @@ conservées, ancien formulaire de fermeture inopérant. La fin normale utilise
 l'horloge primaire de la fixture et le contrat approuvé 1.1, sans date fournie
 par le navigateur. Les contrôles de consentement et de territoire des services
 existants restent requis ; aucun organisateur n'est inscrit automatiquement
-comme participant. Ces parcours attendent encore leur résultat avant d'être
-déclarés fonctionnels.
+comme participant. Ces parcours sont vérifiés dans l'enclave jetable ; ils ne sont pas
+annoncés disponibles sur les sites.
 
 Le nouveau scénario de fin à échéance coordonne explicitement les deux horloges
 de recette : le pilote existant du corpus/Fans et la convention privée

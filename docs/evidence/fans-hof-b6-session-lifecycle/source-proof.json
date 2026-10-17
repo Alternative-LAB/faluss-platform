@@ -1,0 +1,67 @@
+{
+  "commit": "c254d50398b38026a29b321f1ed614ea23b79c98",
+  "tree": "7781312ddfbcbbd87ff001bfb62e0b556ebf0f9a",
+  "runtime": "Exact LF export; physical dependencies matching composer.lock",
+  "files": [
+    {
+      "file": "src/Fans/Hof/ClosedSessionActions.php",
+      "lf_sha256": "326ce2346f62346ab369879161ab3b56a12a5f22e6e1bbb5210ec46763e4fc1e"
+    },
+    {
+      "file": "src/Fans/Hof/ClosedSessionFreshness.php",
+      "lf_sha256": "ced667392b7de3867219544bdd0f5755a797623146d438cc5bd9ede3d8761f44"
+    },
+    {
+      "file": "src/Fans/Hof/ClosedSessionLifecycle.php",
+      "lf_sha256": "ccfe4521a96d7ecf68fff19dd5df230ebdec2f3e6704eb37de686c3201cc03d1"
+    },
+    {
+      "file": "src/Fans/Hof/ClosedSessionManagement.php",
+      "lf_sha256": "e645da71cf7b79b17a81a4fe0c282ac6dd8d7b520dc99551e53de0948c206527"
+    },
+    {
+      "file": "src/Fans/Moderation/SessionReviewPanel.php",
+      "lf_sha256": "635b086fdb3c2eafc7f0634dbdd782465c9ac809be624a88547f7ac97ea1a507"
+    },
+    {
+      "file": "src/Fans/PfContract/ClosedBarrierPrimaryClient.php",
+      "lf_sha256": "54091f59986fa94f48656b78a7156bf80121e963e0e23db74862f2f7f93fe0b7"
+    },
+    {
+      "file": "src/Fans/Ui/FansUiSessionLifecycleView.php",
+      "lf_sha256": "fca39f3054d9a0e1137535ec3c7ce88de839b412a750dbb4f21e77feca2ed002"
+    },
+    {
+      "file": "src/Fans/Ui/FansUiSessions.php",
+      "lf_sha256": "599bdf4ac34290b168dc5ff8b31cb12da99802a1a4a0f2db80e3d98f8b5b744d"
+    },
+    {
+      "file": "src/Fans/Ui/FansUiSessionsView.php",
+      "lf_sha256": "f08ba0bf8b6bf38044b34810e4e82eb6cf806ef64fe2677d27d9ce012e9fc635"
+    },
+    {
+      "file": "tests/TokenEngine/PurchasedPf/ClosedProtocolGuardTest.php",
+      "lf_sha256": "b941c72e035ffd1b68d270092a6d8ec2a930b2cec7c6fe94000ab7d102d772f1"
+    },
+    {
+      "file": "tests/TokenEngine/recipe/b6-delivery-worker.php",
+      "lf_sha256": "22cbee8ac6fa1b3e6dfd7ea9b3d2c3b3040a95da4af72e99fa2224759da29ad2"
+    },
+    {
+      "file": "tests/TokenEngine/recipe/b6-ui-bootstrap.php",
+      "lf_sha256": "a4470b6ae6721b35dc75f0f2f487a06773b9487df0e7ee681d7c638f8f059c32"
+    },
+    {
+      "file": "tests/TokenEngine/recipe/b6-ui-hub-clock.php",
+      "lf_sha256": "c58994b9cb3c3c44f71e37a4472970b61e2f43a3806317912454b7be0ebc899f"
+    },
+    {
+      "file": "tests/TokenEngine/recipe/b6_session_lifecycle_ui_http_checks.py",
+      "lf_sha256": "08cd789144c852ef1eaaa5e0bccb15ab24ca93466f3f853c2a2d7124be60915c"
+    },
+    {
+      "file": "tests/TokenEngine/recipe/b6_ui_http_checks.py",
+      "lf_sha256": "e95e1948c72a688902c47db3c21162eb780c9ab2ed27a9f498db9e05a99fc850"
+    }
+  ]
+}
