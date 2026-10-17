@@ -47,6 +47,7 @@ final class BackOffice
         if (MessageOperations::allowed()) { $sections['operations'] = 'Messagerie'; }
         if (RankingAliasPanel::available()) { $sections['ranking'] = 'Pseudonymes Fans'; }
         if (SessionReviewPanel::available()) { $sections['sessions'] = 'Sessions HoF'; }
+        if (ParticipationAppealPanel::available()) { $sections['participation'] = 'Recours de participation'; }
         if (StoreCatalogModule::available()) { $sections['catalog'] = 'Catalogue'; }
         if (current_user_can('list_users')) { $sections['staff'] = 'Équipe'; }
         $sections['modules'] = 'Modules';

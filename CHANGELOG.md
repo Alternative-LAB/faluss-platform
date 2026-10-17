@@ -12,6 +12,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Formulaires privés B6 de participation volontaire, décisions d'organisateur, retrait et reprise, avec recours dans le panel Fans existant et retour SSO canonique vers la demande ; interfaces limitées à la recette fermée, aucune activation ou nouvelle opération Hub. [Contrôles et périmètre](docs/modules/FANS-HOF-B6-PARTICIPATION-UI.md).
 - Requalification fermée des participations après suspension et réadmission attestées d'une session : fermeture préalable du binding antérieur, même clé de reprise, nouvelle admission future et retrait concurrent sans double fermeture. Contrat Hub inchangé ; [portée et reprise](docs/modules/FANS-HOF-B6-PARTICIPATION-REQUALIFICATION.md).
 
 - Pont fermé B6 de participation : admission locale et identité vérifiée liées atomiquement à une version Hub indépendante, reprise des mêmes actions, retrait acquitté et réadmission sans réécriture historique ; contrat de barrière existant, aucune API ou activation de site. [Périmètre et reprise](docs/modules/FANS-HOF-B6-PARTICIPATION-BRIDGE.md).
