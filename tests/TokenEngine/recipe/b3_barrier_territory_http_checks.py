@@ -1,6 +1,7 @@
 """Approved 1.2 private wire and durable inbox on the existing disposable pair."""
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
+from datetime import datetime,timezone
 import hashlib
 import json
 import secrets
@@ -91,5 +92,21 @@ def run_checks(root,check,hub_sql,network):
     check('B3bt concurrent territorial closings commit one exact primary instant and event',
           len(answers)==6 and all(answer==answers[0] for answer in answers) and answers[0]['result']['state']=='closed'
           and answers[0]['result']['reason']==reason and events()==before+1)
+    opening,closing,descriptor=fresh('session',False)
+    completed=dict(closing,object=dict(closing['object'],reason='session_completed'));saved=prepare(completed)
+    clock=root/'barrier-primary-clock';prior=clock.read_bytes() if clock.exists() else None
+    due=datetime.fromisoformat(descriptor['valid_until']).replace(tzinfo=timezone.utc).timestamp()
+    try:
+        clock.write_text(format(due-1,'.6f'));clock.chmod(0o600);before=events()
+        check('B3bt 1.2 completion still refuses an early primary deadline and keeps the same pending key',
+              advance(completed,1)['state']=='pending' and recover(completed)['phase']=='lookup'
+              and recover(completed)['operation_key']==saved['operation_key'] and events()==before)
+        clock.write_text(format(due,'.6f'));clock.chmod(0o600)
+        check('B3bt 1.2 completion reaches only its frozen primary deadline without rewriting the action',
+              advance(completed)['state']=='acknowledged' and recover(completed)['state']=='closed'
+              and recover(completed)['operation_key']==saved['operation_key'] and events()==before+1)
+    finally:
+        if prior is None:clock.unlink(missing_ok=True)
+        else:clock.write_bytes(prior);clock.chmod(0o600)
     check('B3bt territorial transport preserves historical official ledger and has no parallel ledger',
           hub_sql('SELECT * FROM wp_token_engine_pf_ledger ORDER BY id')==ledger and sql("SHOW TABLES LIKE 'wp_fans%ledger%'")=='')
