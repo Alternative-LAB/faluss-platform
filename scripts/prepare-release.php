@@ -54,7 +54,7 @@ final class ReleasePreparer
 
             preg_match_all('/^\* (.+)$/m', $body, $matches);
             $squashedSubjects = array_values(array_filter(
-                array_map('trim', $matches[1] ?? []),
+                array_map('trim', $matches[1]),
                 static fn(string $candidate): bool => preg_match('/^[^\p{L}\p{N}\s]/u', $candidate) === 1
             ));
             if ($squashedSubjects === []) {
@@ -79,7 +79,7 @@ final class ReleasePreparer
         $groups = ['Ajouté' => [], 'Corrigé' => [], 'Sécurité' => [], 'Documentation' => [], 'Modifié' => []];
 
         foreach ($commits as $commit) {
-            $subject = $commit['subject'];
+            $subject = self::normalizeSubject($commit['subject']);
             $group = match (true) {
                 str_starts_with($subject, '✨'), str_starts_with($subject, '🎉'), str_starts_with($subject, '🚀') => 'Ajouté',
                 str_starts_with($subject, '🐛'), str_starts_with($subject, '🚑') => 'Corrigé',
@@ -161,20 +161,37 @@ final class ReleasePreparer
     private static function detectBump(array $commits): string
     {
         foreach ($commits as $commit) {
-            if (str_starts_with($commit['subject'], '💥') || str_contains($commit['subject'], '!:')) {
+            $subject = self::normalizeSubject($commit['subject']);
+            if (str_starts_with($subject, '💥') || str_contains($subject, '!:')) {
                 return 'major';
             }
         }
         foreach ($commits as $commit) {
-            if (str_starts_with($commit['subject'], '✨')
-                || str_starts_with($commit['subject'], '🚀')
-                || preg_match('/^feat(?:\(.+\))?:/i', $commit['subject']) === 1
+            $subject = self::normalizeSubject($commit['subject']);
+            if (str_starts_with($subject, '✨')
+                || str_starts_with($subject, '🚀')
+                || preg_match('/^feat(?:\(.+\))?:/i', $subject) === 1
             ) {
                 return 'minor';
             }
         }
 
         return 'patch';
+    }
+
+    private static function normalizeSubject(string $subject): string
+    {
+        // Normalize only the leading code; keep historical emojis and message text.
+        $emojis = [
+            'boom' => '💥', 'sparkles' => '✨', 'tada' => '🎉', 'rocket' => '🚀',
+            'bug' => '🐛', 'ambulance' => '🚑', 'lock' => '🔒', 'memo' => '📝',
+        ];
+
+        return (string) preg_replace_callback(
+            '/^:([a-z][a-z0-9_+-]*): /',
+            static fn(array $matches): string => ($emojis[$matches[1]] ?? '') . ' ',
+            $subject
+        );
     }
 
     private static function read(string $path): string
