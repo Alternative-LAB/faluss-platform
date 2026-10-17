@@ -1,5 +1,5 @@
 {
-  "README.md": "12528f4694992af15b1316dcc6b12ed337fce6214573989e87fbce45b2dae2ab",
+  "README.md": "58873d19769176be0d8ce02badf732a64d96960a78095e2ef617a4cc91e4b0c3",
   "automatic-follow-1440.png": "939ecf78f36d070332b561e8c1f87425460da45ef68c36d6b4d72320ce4bb835",
   "automatic-follow-320.png": "c8d50840c87bdedb519ce4c45edeae24e0066cea46dff3d1d0b5e0c134d46e9a",
   "automatic-follow-390.png": "4382c3a4afb153151afb8503b7cf1d6c9e9fa9680576521fa8fa65fd01fc810a",
@@ -13,6 +13,7 @@
   "automatic-thanks-unavailable-320.png": "b117484e9350ab716001cc1c29b0ee53dbdaea0624a1f1bcb4b6ca5e444b8493",
   "automatic-thanks-unavailable-390.png": "1b59a6e34d7f109613d9617da1b06dab2600e5f23fb16654e6251a133c1eb7fa",
   "browser.json": "d9e27e517732e831e22d981cc430892f0a2d1363b4cacae0fbbcd54c8e281a21",
+  "cleanup.json": "752c0f1f8bd504a785c5a76eb8e52a63d05bc385a987a8eaa4491b8e292175cb",
   "source-proof.json": "03d0d03f6a6433a252ea6ffa14790c9fbaec30e687f88c00175b4d48b9581b99",
   "wordpress-checks.json": "009cbe9a0519690113a07763e3ecd84c95f6051bba4ba9b6b96a312e2206bcae"
 }

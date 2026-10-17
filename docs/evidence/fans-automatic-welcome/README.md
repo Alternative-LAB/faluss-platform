@@ -69,3 +69,7 @@ corrigée. Une ancienne fixture WordPress a dépassé l'attente de20 secondes lo
 de l'arrêt MariaDB ; le processus a ensuite terminé. Aucun délai, environnement,
 workflow, test ou runner CI n'a été modifié. Les résultats de contenu et le
 nettoyage des ressources sont consignés séparément.
+
+[Nettoyage vérifié](cleanup.json) : six racines de recette propres à ce lot,
+aucun processus associé restant, admission de recette refermée avant arrêt.
+Les deux exports protégés et les autres environnements ne sont pas concernés.
