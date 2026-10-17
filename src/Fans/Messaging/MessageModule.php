@@ -22,7 +22,7 @@ final class MessageModule implements Module
     public static function activate(): void
     {
         if(self::enabled()&&self::policyAttested()&&FansSsoService::configured()&&FansSsoSchema::ready()&&CreatorProfileSchema::ready()) {
-            if(MessageSchema::installOrVerify()) {ReportSchema::installOrVerify();}
+            if(MessageSchema::installOrVerify() && ReportSchema::installOrVerify()) {MessageContact::installOrVerify();}
         }
     }
     private static function policyAttested(): bool

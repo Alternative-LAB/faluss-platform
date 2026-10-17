@@ -26,6 +26,8 @@ final class MessageService
             $blocked=self::blocks($fan,$creatorId);
             if ($blocked instanceof \WP_Error) { return $blocked; }
             if ($blocked['fan_block'] || $blocked['creator_block']) { return MessagePolicy::error('conversation_blocked',403); }
+            $contact=MessageContact::inTransaction($creatorId);
+            if ($contact instanceof \WP_Error) { return $contact; }
             $hash=hash('sha256','request' . "\0" . $creatorId . "\0" . $body);
             $replay=self::replay($fan,$key,$hash);
             if ($replay!==null) { return $replay; }
@@ -48,12 +50,13 @@ final class MessageService
             }
             $quota=self::sendQuota($fan); if ($quota!==null) { return $quota; }
             $id=wp_generate_uuid4();
-            // Direct opening stays closed until an authoritative subscription contract exists.
+            // The creator's explicit admission mode grants no subscription or economic right.
+            $state=$contact['mode']==='open'?'open':'pending';
             if ($wpdb->query($wpdb->prepare('INSERT INTO `'.$threads.'` (thread_id,fan_user,creator_id,creator_user,state,revision,last_seq,created_at,last_sent_at) VALUES(%s,%d,%s,%d,%s,1,1,UTC_TIMESTAMP(),UTC_TIMESTAMP())',
-                $id,$fan,$creatorId,$owner,'pending'))!==1) { return MessagePolicy::error('messages_write_failed'); }
+                $id,$fan,$creatorId,$owner,$state))!==1) { return MessagePolicy::error('messages_write_failed'); }
             $message=self::insert($id,1,$fan,$body,$key,$hash);
-            if(!($message instanceof \WP_Error)&&!\Faluss\Platform\Fans\Notifications\NotificationEvents::record($owner,'message_request',$id,1)){return MessagePolicy::error('message_notification_failed');}
-            return $message instanceof \WP_Error ? $message : ['thread_id'=>$id,'message_id'=>$message,'state'=>'pending','direct_opening_available'=>false];
+            if(!($message instanceof \WP_Error)&&!\Faluss\Platform\Fans\Notifications\NotificationEvents::record($owner,$state==='open'?'message_received':'message_request',$id,1)){return MessagePolicy::error('message_notification_failed');}
+            return $message instanceof \WP_Error ? $message : ['thread_id'=>$id,'message_id'=>$message,'state'=>$state,'direct_opening_available'=>$state==='open'];
         });
     }
     public static function send(mixed $threadId, mixed $body, mixed $key): mixed

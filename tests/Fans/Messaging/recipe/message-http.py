@@ -18,6 +18,14 @@ def call(user,path,data=None,nonce=True):
 def payload(body='Demande HTTP'): return dict(creator_id=CREATOR,body=body,key=str(uuid.uuid4()))
 # The image recipe ends with a suspended creator: restore only this disposable fixture.
 sql("UPDATE test_faluss_fans_creator_profiles SET status='active' WHERE creator_id='"+CREATOR+"'")
+for user in [0,19,1,18]: check('HTTP contact settings denied '+str(user),call(user,'messages/contact')[0]==403)
+check('HTTP contact CSRF denied',call(17,'messages/contact',dict(mode='open',revision=3),False)[0]==403)
+contact=call(17,'messages/contact')[1]
+check('contact settings private no-store','no-store' in call(17,'messages/contact')[2]['Cache-Control'])
+for extra in [{'creator_id':CREATOR},{'image_id':str(uuid.uuid4())}]: check('contact forged target refused',call(17,'messages/contact',dict(mode='request',revision=contact['revision'],**extra))[0]==400)
+with concurrent.futures.ThreadPoolExecutor(2) as pool:
+    edits=list(pool.map(lambda _:call(17,'messages/contact',dict(mode='request',revision=contact['revision'])),range(2)))
+check('concurrent contact edits one CAS winner',sorted(r[0] for r in edits)==[200,409])
 for user in [0,19,1]: check('HTTP request denied '+str(user),call(user,'messages/requests',payload())[0]==403)
 check('HTTP CSRF denied',call(18,'messages/requests',payload(),False)[0]==403)
 for extra in [{'max':True},{'state':'open'},{'image_id':str(uuid.uuid4())}]: check('forged fields refused '+str(extra),call(18,'messages/requests',dict(payload(),**extra))[0]==400)
