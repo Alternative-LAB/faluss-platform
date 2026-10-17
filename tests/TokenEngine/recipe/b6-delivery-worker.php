@@ -173,7 +173,11 @@ try {
             $rows = $wpdb->get_results($wpdb->prepare('SELECT operation,action_id,fields_sha256,applied_at FROM %i WHERE session_id=%s ORDER BY operation',
                 $table,$input['session']),'ARRAY_A');
             if (!is_array($rows) || $wpdb->last_error !== '') { throw new ModelViolation('hof_storage_unavailable'); }
-            foreach ($rows as &$row) { $row['operation_key_sha256'] = hash('sha256',$inbox->recover($row['action_id'])['operation_key']); }
+            foreach ($rows as &$row) {
+                $progress = $inbox->recover($row['action_id']);
+                $row['operation_key_sha256'] = hash('sha256',$progress['operation_key']);
+                $row['transport_phase'] = $progress['phase']; $row['transport_state'] = $progress['state'];
+            }
             unset($row);
             return $rows;
         })(),

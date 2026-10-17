@@ -62,6 +62,18 @@ existants restent requis ; aucun organisateur n'est inscrit automatiquement
 comme participant. Ces parcours attendent encore leur résultat avant d'être
 déclarés fonctionnels.
 
+Le nouveau scénario de fin à échéance coordonne explicitement les deux horloges
+de recette : le pilote existant du corpus/Fans et la convention privée
+`barrier-primary-clock` déjà utilisée par les tests Hub 1.1. Un adaptateur MU
+applicatif temporaire applique cette dernière au seul endpoint de barrières,
+après garde physique, avant les vérifications propriétaires. Aucun instant
+n'est reçu du navigateur ou d'un paramètre HTTP ; aucune réponse n'est fabriquée.
+Le fichier et l'adaptateur sont retirés en `finally`. Cela ne modifie ni la CI,
+sa préparation, ses caches/délais, ni une horloge ou configuration de production.
+Les premiers essais ont révélé une mauvaise attente de l'horloge réelle puis
+une absence de synchronisation de l'endpoint Hub dans ce nouveau test. Les
+assertions de refus anticipé et de clôture native attestée sont conservées.
+
 Application : instances Hub/Fans jetables à données fictives uniquement ;
 aucun flag, site, admission de pair ou migration de production. #150 et #161
 restent distinctes. Retour arrière : retirer les adaptateurs/formulaires, en

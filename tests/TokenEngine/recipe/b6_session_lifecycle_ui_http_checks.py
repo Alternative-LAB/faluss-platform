@@ -1,5 +1,6 @@
 """Native lifecycle POSTs through the approved real signed bridge, on disposable nodes only."""
 from datetime import datetime,timedelta,timezone
+import json
 from urllib.parse import parse_qs,urlsplit
 from b6_privacy_http_checks import Forms
 
@@ -127,9 +128,18 @@ def run_checks(root,read,cookies,actors,deliver,check,set_clock):
     # No browser timestamp, direct SQL override, environment preparation or timeout is changed here.
     set_clock(format(ends,'.6f'))
     assert float((root/'corpus-sql-clock').read_text())>=ends,'Existing isolated clock did not reach the frozen deadline.'
-    complete=form(path,'complete');complete['hof_session_confirmation']='yes'
-    assert read(path,owner,complete)[0]==200
-    finished=snapshot(id);proof=deliver('session',session=id)
-    check('B6dl lifecycle native deadline completion reaches attested closed without declaring a winner',
-          finished['session']['state']=='closed' and finished['session']['closure_action']=='closed'
-          and proof.get('state')=='closed' and proof['items']==[])
+    # The joined corpus fixture has its own clock; the barrier endpoint normally uses real primary time.
+    # Reuse the existing private barrier-clock convention only for this new application case.
+    primary_clock=root/'barrier-primary-clock';primary_clock.write_text(format(ends,'.6f'));primary_clock.chmod(0o600)
+    try:
+        complete=form(path,'complete');complete['hof_session_confirmation']='yes'
+        response=read(path,owner,complete)
+        if response[0]!=200:
+            current=snapshot(id)['session']
+            raise RuntimeError('Native completion diagnostics: '+json.dumps(dict(status=response[0],state=current['state'],closure_action=current['closure_action'],
+                bindings=[{key:row.get(key) for key in ('operation','transport_phase','transport_state')} for row in bindings(id)])))
+        finished=snapshot(id);proof=deliver('session',session=id)
+        check('B6dl lifecycle native deadline completion reaches attested closed without declaring a winner',
+              finished['session']['state']=='closed' and finished['session']['closure_action']=='closed'
+              and proof.get('state')=='closed' and proof['items']==[])
+    finally:primary_clock.unlink(missing_ok=True)
