@@ -10,6 +10,10 @@ function code(mixed $r): int { return $r instanceof WP_Error?(int)$r->data['stat
 const CREATOR='11111111-1111-4111-8111-111111111111';
 check('message schema explicit and idempotent',Schema::installOrVerify()&&Schema::installOrVerify());
 check('report safeguards installed before any admission',\Faluss\Platform\Fans\Messaging\ReportSchema::installOrVerify());
+$fixtureUser=18;
+check('missing contact schema fails closed without creating it',code(Service::request(CREATOR,'Closed without schema',wp_generate_uuid4()))===503);
+check('explicit additive contact schema',\Faluss\Platform\Fans\Messaging\MessageContact::installOrVerify()&&\Faluss\Platform\Fans\Messaging\MessageContact::installOrVerify());
+require __DIR__.'/contact.php';
 $fixtureUser=18; $key=wp_generate_uuid4();
 $r=Service::request(CREATOR,'Demande de test SQL',$key);
 check('linked fan real pending request',is_array($r)&&$r['state']==='pending'&&!$r['direct_opening_available']);

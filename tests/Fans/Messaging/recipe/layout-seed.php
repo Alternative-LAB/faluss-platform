@@ -6,10 +6,16 @@ use Faluss\Platform\Fans\Messaging\{MessageSchema,ReportSchema};
 use Faluss\Platform\Fans\Images\ImageSchema;
 if(!defined('WP_CLI')||!WP_CLI||DB_NAME!=='admission_recipe'){throw new RuntimeException('Disposable fixture only');}
 $s=json_decode(file_get_contents($args[0]),true);
-foreach([CreatorStatusSchema::installOrVerify(),MessageSchema::installOrVerify(),ReportSchema::installOrVerify(),ImageSchema::installOrVerify()] as $ok){if(!$ok){throw new RuntimeException('Fixture schema failure');}}
+foreach([CreatorStatusSchema::installOrVerify(),MessageSchema::installOrVerify(),ReportSchema::installOrVerify(),ImageSchema::installOrVerify(),\Faluss\Platform\Fans\Messaging\MessageContact::installOrVerify()] as $ok){if(!$ok){throw new RuntimeException('Fixture schema failure');}}
 $check=static function($value){if(is_wp_error($value)){throw new RuntimeException($value->get_error_code());}return $value;};
 wp_set_current_user($s['sessions']['admin']['id']);
 $check(CreatorProfileService::setStatus($s['profiles']['other'],'active'));
+foreach(['member','other'] as $who) {
+    wp_set_current_user($s['sessions'][$who]['id']);
+    $contact=$check(\Faluss\Platform\Fans\Messaging\MessageContact::own());
+    $check(\Faluss\Platform\Fans\Messaging\MessageContact::save('request',$contact['revision']));
+}
+wp_set_current_user($s['sessions']['admin']['id']);
 get_user_by('id',$s['sessions']['admin-two']['id'])->add_cap('moderate_faluss_fans_messages');
 wp_set_current_user($s['sessions']['other']['id']);
 $edit=$check(EditorialService::submit(0,'Atelier des formes','Compte synthétique pour la recette de messagerie.','',0));

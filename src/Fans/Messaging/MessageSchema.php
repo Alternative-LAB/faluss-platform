@@ -9,7 +9,7 @@ final class MessageSchema
     public static function table(string $kind): string
     {
         global $wpdb;
-        if (!in_array($kind, ['threads','messages','blocks','reports','report_events','legal_holds'], true) || !is_string($wpdb->prefix ?? null)
+        if (!in_array($kind, ['threads','messages','blocks','reports','report_events','legal_holds','contact'], true) || !is_string($wpdb->prefix ?? null)
             || preg_match('/^[A-Za-z0-9_]+$/D', $wpdb->prefix) !== 1) { throw new \RuntimeException('Invalid message table'); }
         return $wpdb->prefix . 'faluss_fans_dm_' . $kind;
     }
@@ -17,6 +17,7 @@ final class MessageSchema
     public static function columns(string $kind): array
     {
         return match ($kind) {
+            'contact' => ['creator_id'=>'char(36)','mode'=>'varchar(16)','revision'=>'bigint(20) unsigned','updated_at'=>'datetime'],
             'threads' => ['thread_id'=>'char(36)','fan_user'=>'bigint(20) unsigned','creator_id'=>'char(36)','creator_user'=>'bigint(20) unsigned',
                 'state'=>'varchar(16)','revision'=>'bigint(20) unsigned','last_seq'=>'bigint(20) unsigned','created_at'=>'datetime','last_sent_at'=>'datetime'],
             'messages' => ['message_id'=>'char(36)','thread_id'=>'char(36)','sequence'=>'bigint(20) unsigned','sender_id'=>'bigint(20) unsigned',
@@ -34,6 +35,7 @@ final class MessageSchema
     public static function indexes(string $kind): array
     {
         return match ($kind) {
+            'contact'=>['PRIMARY'=>[true,['creator_id']]],
             'threads'=>['PRIMARY'=>[true,['thread_id']],'pair'=>[true,['fan_user','creator_id']], 'expiry'=>[false,['last_sent_at']]],
             'messages'=>['PRIMARY'=>[true,['message_id']],'position'=>[true,['thread_id','sequence']], 'replay'=>[true,['sender_id','key_hash']], 'rate'=>[false,['sender_id','created_at']]],
             'blocks'=>['PRIMARY'=>[true,['block_id']],'pair'=>[true,['fan_user','creator_id']]],

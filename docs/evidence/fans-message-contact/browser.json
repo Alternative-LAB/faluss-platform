@@ -1,0 +1,43 @@
+{
+  "browser": "155.0.8059.80",
+  "checks": [
+    {
+      "width": 1440,
+      "nativeEntry": true,
+      "nonceProtectedPost": true,
+      "openAndRequestSaved": true,
+      "visibleKeyboardFocus": true,
+      "noHorizontalOverflow": true,
+      "javaScriptDisabled": true
+    },
+    {
+      "width": 768,
+      "nativeEntry": true,
+      "nonceProtectedPost": true,
+      "openAndRequestSaved": true,
+      "visibleKeyboardFocus": true,
+      "noHorizontalOverflow": true,
+      "javaScriptDisabled": true
+    },
+    {
+      "width": 390,
+      "nativeEntry": true,
+      "nonceProtectedPost": true,
+      "openAndRequestSaved": true,
+      "visibleKeyboardFocus": true,
+      "noHorizontalOverflow": true,
+      "javaScriptDisabled": true
+    },
+    {
+      "width": 320,
+      "nativeEntry": true,
+      "nonceProtectedPost": true,
+      "openAndRequestSaved": true,
+      "visibleKeyboardFocus": true,
+      "noHorizontalOverflow": true,
+      "javaScriptDisabled": true
+    }
+  ],
+  "errors": [],
+  "limits": "Disposable WordPress/MariaDB and genuine local WP cookies; synthetic Identity links, no central SSO or physical device proof."
+}

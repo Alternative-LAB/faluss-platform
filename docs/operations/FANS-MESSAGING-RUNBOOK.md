@@ -88,7 +88,7 @@ l’attestation absente ou fausse tant que la validation humaine manque.
 
 `prepare` crée seulement les tables manquantes et vérifie celles présentes,
 sans réparer/remplacer une table non conforme ni effacer des données. DDL additive,
-non atomique entre les six créations : en cas d’échec partiel, conserver les
+non atomique entre les créations : en cas d’échec partiel, conserver les
 tables et diagnostiquer avant une reprise. Sauvegarde contrôlée avant DDL ; aucun
 export privé dans Git ou un ticket public.
 
@@ -96,9 +96,13 @@ export privé dans Git ou un ticket public.
 | --- | --- | --- |
 | Ordinaire | `faluss_fans_dm_threads`, `faluss_fans_dm_messages`, `faluss_fans_dm_blocks` | `faluss_fans_messages_schema_version = "1"` |
 | Preuves | `faluss_fans_dm_reports`, `faluss_fans_dm_report_events`, `faluss_fans_dm_legal_holds` | `faluss_fans_message_reports_schema_version = "1"` |
+| Contact Créateur | `faluss_fans_dm_contact` | `faluss_fans_message_contact_schema_version = "1"` |
 
 `schemas_ready:true` vérifie **InnoDB, colonnes exactes, nullabilité et index** des
-six tables, pas seulement les options. Attendre `sso_ready:true`,
+six tables de messages/preuves, pas seulement les options. Le schéma additif de
+contact est vérifié séparément par `contact_schema_ready:true`, requis avant les
+nouvelles conversations de cette version ; les anciennes lectures et recours
+restent indépendants. Aucune DDL n'est lancée par un GET. Attendre `sso_ready:true`,
 `profiles_ready:true`, `hourly_event:true`. `retention_healthy` reste faux avant la
 première purge. `prepare` ne crée aucune conversation et ne valide aucune politique.
 Si une erreur `*_schema_failed`, `*_prerequisites` ou `*_schedule_conflict` apparaît,
