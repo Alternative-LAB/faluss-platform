@@ -1,0 +1,11 @@
+{
+  "tree": "bf9ae77137062c2f930614ee3e9b88f99927dc20",
+  "php": "8.5.4",
+  "phpstan_target": "80300",
+  "phpstan_errors": 0,
+  "phpunit_tests": 814,
+  "phpunit_assertions": 8264,
+  "hof_tests": 90,
+  "hof_assertions": 323,
+  "historical_deprecations": 2
+}

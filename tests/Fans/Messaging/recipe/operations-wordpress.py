@@ -1,5 +1,6 @@
 """Operator CLI and real WordPress REST/cron; synthetic SSO links, loopback only."""
 import argparse, json, pathlib, re, subprocess, urllib.request, urllib.error, uuid
+from contact_checks import run_checks as contact_checks
 
 p = argparse.ArgumentParser()
 p.add_argument('--root', required=True); p.add_argument('--base', required=True); p.add_argument('--cli', required=True)
@@ -53,7 +54,7 @@ state = json.loads(prepared.stdout)
 check('all schemas and hourly recurrence verified', state['schemas_ready'] and state['hourly_event'])
 check('no attestation or opening from prepare', not state['policy_attested'] and not state['admission_open'] and not state['private_access'])
 check('prepare repeat is idempotent', operation('prepare').returncode == 0)
-check('six InnoDB tables are present', evaluate("global $wpdb; echo count($wpdb->get_results(\"SHOW TABLES LIKE '%faluss_fans_dm_%'\"));") == '6')
+check('six message tables and additive contact schema are present', state['contact_schema_ready'] and evaluate("global $wpdb; echo count($wpdb->get_results(\"SHOW TABLES LIKE '%faluss_fans_dm_%'\"));") == '7')
 check('fresh purge succeeds with admission closed', operation('purge').returncode == 0)
 check('healthy operational status does not attest policy', operation('status', healthy=True).returncode == 0)
 evaluate("wp_clear_scheduled_hook('faluss_fans_messages_retention'); wp_schedule_event(time()+60,'daily','faluss_fans_messages_retention');")
@@ -102,6 +103,7 @@ for who in [None, 'unlinked', 'admin']:
 check('inbox requires real WP nonce', api('messages','member',nonce=False)[0] in (401,403))
 code, body, headers = api('messages','member'); check('linked fan private no-store', code==200 and 'no-store' in headers.get('Cache-Control',''))
 request = {'creator_id':creator,'body':'Demande textuelle de recette isolée.','key':str(uuid.uuid4())}
+contact_checks(api,evaluate,check,creator)
 code, result, _ = api('messages/requests','member',request); check('actual request created', code==200 and result['state']=='pending')
 thread = result['thread_id']; route = 'messages/'+thread
 check('replayed request keeps same thread', api('messages/requests','member',request)[1]['thread_id']==thread)

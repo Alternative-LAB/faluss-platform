@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Ajouté
+
+- Modes de contact Créateur « Ouvert » par défaut et « Sur demande » volontaire, avec réglage propriétaire révisé, formulaire natif et maintien des refus, blocages et conversations existantes ; préparation du lot des messages automatiques sans déclencheur économique réel.
+
 ### Corrigé
 
 - Éviter l'interblocage entre admissions de nonces de barrières Hub distincts dans un même intervalle InnoDB, en conservant le mutex par nonce, la clé unique, les contrôles de fraîcheur et le refus des rejeux ; aucun contrat réseau ou réglage d'environnement modifié. Recette fermée sur données fictives uniquement.
