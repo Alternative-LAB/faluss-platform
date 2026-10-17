@@ -182,3 +182,7 @@ def run_checks(root,source,cli_path,check,command,hub_sql,network,origin_overrid
     opened=state(row);closing=invoke('close',owner,session=row['session_id'],revision=int(opened['revision']),state='cancelled')
     assert invoke('advance',owner,session=row['session_id'],revision=int(closing['revision']))['session_state']=='cancelled'
     check('B3sl lifecycle changes no official ledger and creates no parallel Fan ledger',hub_sql('SELECT * FROM wp_token_engine_pf_ledger ORDER BY id')==historical and sql("SHOW TABLES LIKE 'wp_fans%ledger%'")=='')
+    from b6_participation_checks import run_checks as participation_checks
+    participation_checks(root,cli_path,fans,recipe,origin,endpoint,members,create,state,invoke,sql,network,check)
+    check('B6pa participation recovery preserves the official ledger and creates no parallel ledger',
+          hub_sql('SELECT * FROM wp_token_engine_pf_ledger ORDER BY id')==historical and sql("SHOW TABLES LIKE 'wp_fans%ledger%'")=='')
