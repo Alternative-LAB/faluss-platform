@@ -76,6 +76,7 @@ final class FansUiSessionsView
             echo '</section>';
             FansUiSessionLifecycleView::render($state);
         }
+        FansUiSessionOrganizersView::render($state);
     }
 
     /** @param array<string,string> $row */
