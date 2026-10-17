@@ -161,12 +161,12 @@ final class FollowersTest extends TestCase
         self::assertSame([], $GLOBALS['wpdb']->follows);
     }
 
-    public function testApiUsesMemberPermissionForBothWrites(): void
+    public function testApiUsesMemberPermissionForThePrivateReadAndBothWrites(): void
     {
         FollowersRest::routes();
         self::assertCount(2, $GLOBALS['follower_routes']);
         $write = $GLOBALS['follower_routes']['faluss-fans/v1/creators/(?P<creator_id>[0-9a-f-]{36})/follow'];
-        self::assertSame(['Faluss\\Platform\\Fans\\Profiles\\CreatorProfileRest', 'memberPermission'], $write[0]['permission_callback']);
-        self::assertSame($write[0]['permission_callback'], $write[1]['permission_callback']);
+        self::assertSame(['GET','POST','DELETE'],array_column($write,'methods'));
+        foreach($write as $route){self::assertSame(['Faluss\\Platform\\Fans\\Profiles\\CreatorProfileRest','memberPermission'],$route['permission_callback']);}
     }
 }

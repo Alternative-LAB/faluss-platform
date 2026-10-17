@@ -35,7 +35,8 @@ final class MessageOperations
             'purge' => $purge, 'retention_healthy' => $schemas && $scheduled && $fresh,
             'policy_attested' => defined('FALUSS_FANS_MESSAGING_POLICY_ATTESTED') && constant('FALUSS_FANS_MESSAGING_POLICY_ATTESTED') === true,
             'admission_open' => MessageModule::available(), 'private_access' => MessageModule::privateAccessAvailable(),
-            'contact_schema_ready' => MessageContact::ready()];
+            'contact_schema_ready' => MessageContact::ready(), 'automation_schema_ready'=>MessageAutomationSchema::ready(),
+            'automation_event'=>MessageAutomaticScheduler::prepared()];
     }
 
     /** @return array<string,mixed>|\WP_Error */
@@ -45,7 +46,8 @@ final class MessageOperations
         if (!FansSsoSchema::ready() || !FansSsoService::configured() || !CreatorProfileSchema::ready()) {
             return MessagePolicy::error('message_operations_prerequisites');
         }
-        if (!MessageSchema::installOrVerify() || !ReportSchema::installOrVerify() || !MessageContact::installOrVerify()) {
+        if (!MessageSchema::installOrVerify() || !ReportSchema::installOrVerify() || !MessageContact::installOrVerify()
+            || !MessageAutomationSchema::installOrVerify()) {
             return MessagePolicy::error('message_operations_schema_failed');
         }
         $event = wp_get_scheduled_event(MessageRetention::HOOK);
@@ -56,6 +58,8 @@ final class MessageOperations
         if ($status instanceof \WP_Error || !$status['hourly_event']) {
             return MessagePolicy::error('message_operations_schedule_conflict');
         }
+        if(!MessageAutomaticScheduler::prepare()){return MessagePolicy::error('message_automation_schedule_failed');}
+        $status=self::status();
         return $status;
     }
 

@@ -17,6 +17,10 @@ final class MessageRest
             ['/messages/contact','GET','contact'],['/messages/contact','POST','saveContact']] as [$route,$method,$callback]) {
             register_rest_route(CreatorProfileRest::NAMESPACE,$route,['methods'=>$method,'callback'=>[self::class,$callback],'permission_callback'=>[self::class,'member']]);
         }
+        foreach([['/messages/automatic','GET','automatic'],['/messages/automatic/(?P<kind>welcome|thanks)','POST','saveAutomatic'],
+            ['/messages/automatic/(?P<kind>welcome|thanks)/preview','POST','previewAutomatic']] as [$route,$method,$callback]) {
+            register_rest_route(CreatorProfileRest::NAMESPACE,$route,['methods'=>$method,'callback'=>[self::class,$callback],'permission_callback'=>[self::class,'member']]);
+        }
     }
     public static function member(\WP_REST_Request $r): bool { return MessageModule::privateAccessAvailable() && CreatorProfileRest::memberPermission($r); }
     public static function inbox(\WP_REST_Request $r): \WP_REST_Response { return EditorialRest::response(MessageReading::inbox($r->get_param('cursor')??'')); }
@@ -38,6 +42,12 @@ final class MessageRest
     { return EditorialRest::response($r->get_query_params()!==[]?MessagePolicy::error('invalid_message_contact',400):MessageContact::own()); }
     public static function saveContact(\WP_REST_Request $r): \WP_REST_Response
     { $d=self::input($r,['mode','revision']); return EditorialRest::response($d===null?MessagePolicy::error('invalid_message_contact',400):MessageContact::save($d['mode'],$d['revision'])); }
+    public static function automatic(\WP_REST_Request $r): \WP_REST_Response
+    { return EditorialRest::response($r->get_query_params()!==[]?MessagePolicy::error('invalid_message_automation',400):MessageAutomaticSettings::own()); }
+    public static function saveAutomatic(\WP_REST_Request $r): \WP_REST_Response
+    { $d=self::input($r,['body','enabled','revision']); return EditorialRest::response($d===null?MessagePolicy::error('invalid_message_automation',400):MessageAutomaticSettings::save($r->get_param('kind'),$d['body'],$d['enabled'],$d['revision'])); }
+    public static function previewAutomatic(\WP_REST_Request $r): \WP_REST_Response
+    { $d=self::input($r,['body']); return EditorialRest::response($d===null?MessagePolicy::error('invalid_message_automation',400):MessageAutomaticSettings::preview($r->get_param('kind'),$d['body'])); }
     /**
      * @param list<string> $keys
      * @return array<string,mixed>|null

@@ -40,6 +40,8 @@ final class MessageReading
             $mine=(int)$thread['creator_user']===get_current_user_id()?'creator_block':'fan_block';
             return self::projection($thread)+['messages'=>$messages,'blocked'=>$blocks['fan_block']||$blocks['creator_block'],
                 'blocked_by_me'=>$blocks[$mine],'can_send'=>MessageModule::available() && $thread['state']==='open' && !$blocks['fan_block'] && !$blocks['creator_block'] && MessageService::writable($thread),
+                'can_start'=>MessageModule::available()&&MessageAutomationSchema::ready()&&$thread['state']==='automatic'&&(int)$thread['fan_user']===get_current_user_id()
+                    &&!$blocks['fan_block']&&!$blocks['creator_block']&&MessageService::writable($thread),
                 'last_sequence'=>(int)$thread['last_seq'],'next_after'=>$more?(int)$rows[49]['sequence']:null];
         });
     }

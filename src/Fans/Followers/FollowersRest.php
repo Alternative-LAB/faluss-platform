@@ -22,6 +22,11 @@ final class FollowersRest
         ]);
         register_rest_route('faluss-fans/v1', '/creators/(?P<creator_id>[0-9a-f-]{36})/follow', [
             [
+                'methods' => 'GET',
+                'callback' => [self::class, 'ownFollowing'],
+                'permission_callback' => [CreatorProfileRest::class, 'memberPermission'],
+            ],
+            [
                 'methods' => 'POST',
                 'callback' => [self::class, 'follow'],
                 'permission_callback' => [CreatorProfileRest::class, 'memberPermission'],
@@ -39,6 +44,14 @@ final class FollowersRest
         $result = FollowersService::follow($request->get_param('creator_id'));
 
         return $result instanceof \WP_Error ? $result : new \WP_REST_Response($result, 200);
+    }
+
+    public static function ownFollowing(\WP_REST_Request $request): \WP_REST_Response
+    {
+        return \Faluss\Platform\Fans\Profiles\EditorialRest::response($request->get_query_params()!==[]||$request->get_body()!==''
+            ||$request->get_body_params()!==[]||$request->get_file_params()!==[]
+            ?new \WP_Error('invalid_follow_read','Action indisponible.',['status'=>400])
+            :FollowersService::ownFollowing($request->get_param('creator_id')));
     }
 
     public static function unfollow(\WP_REST_Request $request): \WP_REST_Response|\WP_Error

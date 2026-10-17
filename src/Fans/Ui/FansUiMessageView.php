@@ -21,6 +21,7 @@ final class FansUiMessageView
                 <footer class="fu-message-list-footer">
                     <a class="fu-link" href="<?php echo esc_url(FansUiRoutes::url($v->role,'explorer')); ?>">Trouver un créateur ↗</a>
                     <?php if($v->role==='creator'): ?><a class="fu-link" href="<?php echo esc_url($v->url(['section'=>'contact'])); ?>" <?php echo $v->section==='contact'?'aria-current="page"':''; ?>>Réglages de contact</a><?php endif; ?>
+                    <?php if($v->role==='creator'): ?><a class="fu-link" href="<?php echo esc_url($v->url(['section'=>'automatic'])); ?>" <?php echo $v->section==='automatic'?'aria-current="page"':''; ?>>Messages automatiques</a><?php endif; ?>
                     <details class="fu-message-tools"><summary>Confidentialité et aide</summary>
                         <nav class="fu-message-tabs" aria-label="Mes échanges">
                         <?php foreach(['inbox'=>'Conversations','blocks'=>'Mes blocages','reports'=>'Signalements et recours'] as $key=>$label): ?>
@@ -38,7 +39,8 @@ final class FansUiMessageView
             </aside>
             <div class="fu-message-chat" id="fu-conversation">
                 <a class="fu-message-return" href="<?php echo esc_url($v->url()); ?>">← Conversations</a>
-                <?php if($v->section==='contact'): self::contact($v);
+                <?php if($v->section==='automatic'): FansUiAutomaticMessages::render($v);
+                elseif($v->section==='contact'): self::contact($v);
                 elseif($v->section!=='inbox'): ?>
                     <header class="fu-message-heading"><h2><?php echo $v->section==='blocks'?'Mes blocages':'Signalements et recours'; ?></h2></header>
                     <div class="fu-message-scroll" tabindex="0" aria-label="Mes dossiers privés"><?php self::privateList($v); ?></div>
@@ -97,7 +99,7 @@ final class FansUiMessageView
         if(!$v->recipientAvailable()) {echo '<div class="fu-message-empty"><h2>Destinataire indisponible</h2><p>Ce profil ne peut pas recevoir votre demande.</p></div>';return;}
         $person=$v->correspondent(false,$v->creatorId);
         ?>
-        <header class="fu-message-heading"><?php self::avatar($person); ?><div><h2><?php echo esc_html($person['name']); ?></h2><p>Nouvelle demande</p></div></header>
+        <header class="fu-message-heading"><?php self::avatar($person); ?><div><h2><?php echo esc_html($person['name']); ?></h2><p>Premier message</p></div></header>
         <div class="fu-message-scroll fu-message-empty"><h3>Faites le premier pas</h3><p>Présentez-vous en quelques mots. Selon les réglages du créateur, votre échange s’ouvre directement ou attend son acceptation.</p></div>
         <form class="fu-message-form fu-message-composer" method="post" action="<?php echo esc_url($v->url(['creator'=>$v->creatorId])); ?>">
             <?php self::fields('request',['creator_id'=>$v->creatorId,'key'=>$v->key]); ?>
@@ -143,6 +145,7 @@ final class FansUiMessageView
                 <?php self::fields('send',['thread_id'=>$row['thread_id'],'key'=>$v->key]); ?>
                 <label for="fu-message-body">Votre message</label><div class="fu-message-input"><textarea name="body" id="fu-message-body" rows="2" maxlength="2000" required aria-describedby="fu-message-send-limit" placeholder="Écrire un message…"><?php echo esc_textarea($v->draft); ?></textarea><button type="submit" aria-label="Envoyer le message"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m3 11 18-8-8 18-2-8-8-2Zm8 2L21 3"/></svg></button></div><p id="fu-message-send-limit">2 000 caractères · texte uniquement · 30 envois par heure maximum.</p>
             </form>
+        <?php elseif($row['can_start']??false): ?><div class="fu-message-readonly"><a class="fu-link" href="<?php echo esc_url($v->url(['creator'=>$row['creator_id']])); ?>">Écrire au créateur →</a><p>Votre premier message suit le mode de contact choisi par le créateur.</p></div>
         <?php else: ?><p class="fu-message-readonly"><?php echo $row['blocked']?'Échange bloqué. Aucun nouvel envoi n’est possible.':($row['state']==='pending'?'En attente de l’acceptation du créateur.':'L’envoi est fermé pour cet échange.'); ?></p><?php endif;
     }
     /** @param array<string,mixed> $row */

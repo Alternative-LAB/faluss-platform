@@ -8,6 +8,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Configuration privée des messages automatiques, aperçu serveur et bienvenue textuelle unique depuis le suivi réel, avec remise asynchrone dans les conversations existantes, reprise durable, quotas et annulation avant envoi. Boutons natifs « Suivre / Ne plus suivre » sans consentement supplémentaire. Les remerciements attendent encore leur raccordement aux preuves PF fermées ; les pièces jointes restent indisponibles.
+
+### Ajouté
+
 - Modes de contact Créateur « Ouvert » par défaut et « Sur demande » volontaire, avec réglage propriétaire révisé, formulaire natif et maintien des refus, blocages et conversations existantes ; préparation du lot des messages automatiques sans déclencheur économique réel.
 
 ### Corrigé

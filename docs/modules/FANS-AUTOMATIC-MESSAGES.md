@@ -23,22 +23,85 @@
   opposables avant la livraison. Le mode de contact du Créateur régit les
   réponses et nouveaux échanges. Pas d'ouverture générale implicite.
 
-## Ordre de réalisation et statut exact
+## Périmètre du premier lot automatique
 
-1. **Modes de contact**, code de ce lot : Ouvert par défaut, Sur demande volontaire,
-   réglage propriétaire et admission dans les services existants. Aucun changement
-   aux états des anciens fils. Voir [le contrat messagerie](FANS-MESSAGING.md).
-2. Configuration indépendante des textes, édition/aperçu et bouton gratuit
-   « Suivre / Ne plus suivre », sans option Fan supplémentaire. Ce parcours
-   n'est pas encore livré par le présent lot de contact.
-3. Journal durable des événements et file asynchrone reprenable, unicité métier,
-   version du texte fixée à l'événement, nouvelle vérification avant livraison,
-   annulation des éléments en attente après désactivation. Livraison via les
-   conversations et notifications existantes, sans seconde consommation Hub ni
-   appel réseau dans une transaction économique. Tests de panne et concurrence.
-4. Raccordement des faits PF autoritatifs **en recette fermée seulement**, puis
-   preuves conjointes et captures des parcours complets. Aucun nouveau contrat Hub
-   sans accord distinct. Une interface configurée seule ne prouve aucun envoi.
+Les modes de contact sont intégrés par #235. Ce lot ajoute les configurations
+indépendantes, l'aperçu serveur, la bienvenue textuelle réellement raccordée au
+suivi et les formulaires gratuits « Suivre / Ne plus suivre ». Aucun opt-in Fan
+n'est lu, enregistré ou demandé ; l'événement de suivi fournit l'autorisation
+limitée au message correspondant. Aucune acceptation générale n'en découle.
+
+Le remerciement peut être rédigé et prévisualisé, mais son **activation échoue
+fermée côté serveur** tant que le raccordement aux faits PF confirmés et rapprochés
+n'est pas livré. Son option Activé est désactivée dans l'UI. Une ligne de file
+fabriquée, un champ REST, un flag ou un rôle ne constituent jamais une preuve PF.
+Le futur raccordement reste limité aux instances Hub/Fans physiquement jetables ;
+ni producteur d'achat réel, ni API économique de site ne sont ajoutés ici.
+
+### Persistance et livraison de la bienvenue
+
+- Trois tables InnoDB additives, préparées explicitement par l'opération existante
+  `wp faluss fans-messaging prepare` : `automatic_settings`, `automatic_events`,
+  `automatic_contacts`. Aucune DDL au démarrage ou sur GET.
+- Réglages propriétaires avec révision attendue ; édition périmée en409. Le GET
+  ne crée rien ; aperçu sans écriture ; corps textuel conforme aux limites Fans.
+- L'insertion effective du suivi et son événement sont dans la même transaction
+  sous le mutex de messagerie. Un GET, un clic ou un rejeu de suivi ne déclenche
+  rien. Retirer un suivi existant antérieur au lot enregistre une trace sans envoi,
+  pour qu'un réabonnement ne transforme pas cet ancien suivi en bienvenue.
+- Clé métier dérivée du couple Créateur/identité opaque, indépendante du numéro
+  WordPress local. Un événement désactivé reste consommé pour la bienvenue : pas
+  de rattrapage après activation. Aucun historique de suivi effacé avant ce lot
+  n'est reconstitué ou présenté comme attesté.
+- Révision et texte figés au déclenchement. Modifier le texte ne réécrit pas la
+  file ; désactiver annule les éléments encore en attente, sans les ressusciter
+  lors de la réactivation. Désabonnement avant remise annule aussi la bienvenue.
+- Traitement borné à20 décisions par exécution, quota ordinaire Créateur partagé,
+  reprise progressive60 à3600 secondes pour429. Message, notification et résultat
+  durable s'écrivent dans une transaction unique. Après réponse COMMIT perdue,
+  relire le même événement sur le primaire ; aucune nouvelle clé, aucun doublon.
+- Vérifications à la remise : liaison actuelle, Créateur actif, refus, blocages
+  dans les deux sens, suspension/modération, admission, quotas et configuration.
+  Aucun texte n'est délivré à partir d'une session navigateur expirée fabriquée.
+
+### Conversation automatique et droits ordinaires
+
+La remise utilise les tables, notifications, signalements et purges ordinaires.
+Sans fil préalable, l'état `automatic` rend seulement ce texte lisible. Ni Fan ni
+Créateur ne peut y envoyer librement. Le Fan peut commencer explicitement un
+premier échange sur le **même fil** : Ouvert l'ouvre, Sur demande crée une demande
+qui nécessite toujours acceptation. Le message automatique ne consomme pas le
+quota de nouvelles demandes du Fan ; sa première demande effective est datée
+séparément sans falsifier la date de création du fil. Les refus et blocages
+existants ne sont jamais acceptés ou levés par une automatisation.
+
+Le texte livré suit la rétention ordinaire, douze mois après le dernier message.
+Les instantanés en attente non remis expirent au plus tard douze mois après leur
+événement. À l'issue, texte, identité destinataire et clé de remise sont effacés
+de la file ; les références de fil/message sont effacées par la purge ordinaire.
+Une empreinte métier minimale et le résultat restent nécessaires à l'unicité à
+vie. Cette trace est une donnée pseudonyme, pas une preuve d'effacement physique
+des sauvegardes ni une politique de conservation des faits PF de #150.
+
+### Exploitation explicite, sans activation
+
+La préparation ajoute l'événement WP-Cron `faluss_fans_message_automations`
+(récurrence60 secondes) ; elle n'atteste pas la politique et n'ouvre aucun flag.
+`wp faluss fans-messaging status` expose séparément le schéma et la programmation.
+L'exploitant doit faire tourner les événements dus avec un déclenchement fiable,
+vérifier la dernière exécution et les erreurs dans l'option privée
+`faluss_fans_message_automation_status` (date UTC, nombre traité, code générique ;
+aucun texte/identité). La purge horaire existante et ses verrous sont inchangés.
+Ne pas compter sur une visite du site pour garantir la livraison.
+
+Fermer l'admission interdit les nouvelles remises ; les messages déjà conservés,
+signalements, recours et purges restent accessibles. Désactiver Bienvenue avant
+un retrait de code, laisser terminer le job puis conserver les données : ne pas
+supprimer les empreintes pour simuler une première bienvenue après rollback.
+
+Le prochain lot raccordera les remerciements aux faits Hub autoritatifs, sans
+nouveau contrat Hub sans accord distinct, ni réseau dans une transaction
+économique, ni annulation d'un soutien si la messagerie est indisponible.
 
 La pièce jointe de bienvenue demeure **indisponible** tant que #161 ne prouve pas
 la compatibilité du stockage privé, l'intégrité, la lecture autorisée et la

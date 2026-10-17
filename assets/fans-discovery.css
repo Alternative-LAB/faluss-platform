@@ -52,6 +52,8 @@
 .fu-public-creator .fu-profile__bio{max-width:72ch;margin:0;line-height:1.7;color:#c3cec8;white-space:pre-wrap}
 .fu-public-creator__followers{font-size:13px;color:#92a99c;margin:14px 0 0}.fu-public-creator__followers:empty{display:none}
 .fu-public-creator__action{display:inline-flex;align-items:center;min-height:44px;margin:14px 0}
+.fu-public-creator .fu-follow{display:inline-flex;margin:14px 12px 14px 0}.fu-public-creator .fu-follow button{min-height:44px;padding:10px 20px;border:1px solid #41c295;border-radius:999px;background:#41c295;color:#08291e;font:inherit;cursor:pointer}
+.fu-public-creator .fu-follow button:hover{background:#59d0a7}.fu-public-creator .fu-follow button:focus-visible{outline:3px solid #a7f7d7;outline-offset:3px}
 .fu-public-creator [data-fans-publications]{border:0;background:none;padding:0;margin-top:32px}
 .fu-public-creator [data-fans-publications] .fu-section-heading{padding-bottom:14px;border-bottom:1px solid #31493b}
 .fu-public-creator [data-fans-publications] .fu-panel__kicker{display:none}
