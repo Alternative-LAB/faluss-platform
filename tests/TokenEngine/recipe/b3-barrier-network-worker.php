@@ -14,6 +14,10 @@ ClosedEnvironment::assertIsolated($wpdb,FALUSS_PLATFORM_ROLE);
 if (!defined('WP_CLI') || !WP_CLI) { throw new RuntimeException('Fixture CLI only.'); }
 require_once WP_PLUGIN_DIR . '/faluss-platform/src/Federation/Legacy/includes/class-faluss-federation-crypto.php';
 $input = json_decode(file_get_contents($args[0]),true,40,JSON_THROW_ON_ERROR);
+if ($input['action'] === 'admit-interval') {
+    require __DIR__ . '/b3-barrier-nonce-worker.php';
+    return;
+}
 try {
     if ($input['action']==='public') {
         $pair = sodium_crypto_sign_seed_keypair(SignedEnvelope::decode(FALUSS_FEDERATION_PRIVATE_SEED,32));
