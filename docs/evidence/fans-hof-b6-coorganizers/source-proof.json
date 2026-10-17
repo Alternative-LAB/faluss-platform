@@ -1,0 +1,48 @@
+{
+  "tested_tree": "ce012d707c2f72b13e5fad9b68305d1fc1c616a7",
+  "tested_merge_commit": "be2b7439806a0b82cd7621cf837e10a90a1338be",
+  "current_commit": "c3486634be94d9933be1cfb59e44ff5f8d2f90e4",
+  "base_note": "Current base additionally contains reviewed Hub nonce correction, with its separate 490/0 proof; component bytes below identical to tested export. Exact final CI/main proof still required.",
+  "files": [
+    {
+      "file": "assets/fans-hof.css",
+      "lf_sha256": "8e46c6285be7c332183716d25452b1a61ef1fc8572755b9aae7f24120c2fb8da"
+    },
+    {
+      "file": "src/Fans/Sso/FansSsoReturn.php",
+      "lf_sha256": "6209677945ab9517de275d49cb04527426ffd668f79e1bac49f77e290077623e"
+    },
+    {
+      "file": "src/Fans/Ui/FansUiRoutes.php",
+      "lf_sha256": "58117593f6894038e317300aafe6b0b38871b4b56843d42e5b167e6b65f962a7"
+    },
+    {
+      "file": "src/Fans/Ui/FansUiSessionOrganizers.php",
+      "lf_sha256": "ffda8e1c04cd1ba0cbb70f91552bfb59244667525deef6976dea98545e32866a"
+    },
+    {
+      "file": "src/Fans/Ui/FansUiSessionOrganizersView.php",
+      "lf_sha256": "16ca5aa149a8cc690ce74dc5ad2bb5c18f157ca4a4d42805fd36de255a845431"
+    },
+    {
+      "file": "src/Fans/Ui/FansUiSessions.php",
+      "lf_sha256": "40097b0e0caf447837b6bf8d40d47260512c0277d0706ff6ff22c2262c7fca09"
+    },
+    {
+      "file": "src/Fans/Ui/FansUiSessionsView.php",
+      "lf_sha256": "1d8b1630865d5fe89054810c08fb7e096b95cef74ea3c61dc9e3d8a2135332a1"
+    },
+    {
+      "file": "tests/Fans/Sso/FansSsoReturnTest.php",
+      "lf_sha256": "d274ca4284e2dd2e4dd8143dd39f6f305a4f817d790995554556b790f1a4bde9"
+    },
+    {
+      "file": "tests/TokenEngine/recipe/b6_coorganizers_ui_http_checks.py",
+      "lf_sha256": "f6763a86437a8a0c951416dd3e8185969bf819da32b567174c029c3341ee27fd"
+    },
+    {
+      "file": "tests/TokenEngine/recipe/b6_ui_http_checks.py",
+      "lf_sha256": "37a5183b5b3426680964f9f33f92c9652683555eb777a261d07c120a3c092120"
+    }
+  ]
+}

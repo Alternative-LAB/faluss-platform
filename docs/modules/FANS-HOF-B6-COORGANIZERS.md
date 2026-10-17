@@ -1,9 +1,8 @@
-# B6 — invitations de coorganisation, raccordement privé en cours
+# B6 — invitations de coorganisation, raccordement privé vérifié en isolation
 
 Sous-lot d'interface indépendant du transport de participations. Il réutilise
 `SessionRoles` et les [règles B2 approuvées](FANS-HOF-B2.md), sans nouveau contrat
-Hub. **Le code attend encore sa recette HTTP et ses captures ; aucune
-fonctionnalité nouvelle n'est déclarée testée à ce stade.**
+Hub. **Recette HTTP et navigateur acquise sur instances jetables** : [preuves, captures et limites](../evidence/fans-hof-b6-coorganizers/README.md).
 
 La session privée affiche les seuls rôles rendus par `SessionService::inspect`.
 Une invitation apparaît dans la liste propriétaire du destinataire, sans lui
@@ -34,7 +33,7 @@ Scénarios écrits avant le code : nonces et identités distinctes, absence de
 pouvoir implicite, invitations/réponses concurrentes, historique après refus,
 suspension, exclusion des profils non éligibles, plus de vingt candidats,
 pagination sans écriture, anciennes routes et retour SSO. La concurrence des
-requêtes HTTP ne sera pas présentée comme un serveur PHP multithread ; les
+requêtes HTTP ne doit pas être présentée comme un serveur PHP multithread ; les
 recettes SQL B2 gardent leur périmètre transactionnel propre.
 
 Les participations et leurs barrières d'admission, les territoires et les
