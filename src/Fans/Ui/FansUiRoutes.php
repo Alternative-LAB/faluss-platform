@@ -124,7 +124,7 @@ final class FansUiRoutes
             self::noStore();
             $selection = [];
             $selectionKeys = ['publication', 'cursor', 'section', 'thread', 'creator', 'archive', 'image', 'image_state', 'images_cursor'];
-            if (in_array($view, FansUiHof::VIEWS, true)) { $selectionKeys = array_merge($selectionKeys, ['category', 'month', 'rank_page', 'session', 'session_cursor', 'manage', 'sessions_cursor', 'coorganizer_cursor']); }
+            if (in_array($view, FansUiHof::VIEWS, true)) { $selectionKeys = array_merge($selectionKeys, ['category', 'month', 'rank_page', 'session', 'session_cursor', 'manage', 'sessions_cursor', 'coorganizer_cursor', 'participant_cursor']); }
             foreach ($selectionKeys as $key) {
                 if (isset($_GET[$key]) && is_string($_GET[$key]) && strlen($_GET[$key]) <= 160) { $selection[$key] = wp_unslash($_GET[$key]); }
             }

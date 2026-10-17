@@ -42,4 +42,15 @@ final class ClosedSessionManagement
         }
         return $reader;
     }
+
+    public static function participation(\wpdb $db): ClosedParticipationLifecycle
+    {
+        self::services($db);
+        if (!ClosedParticipationSchema::ready($db)) { throw new ModelViolation('hof_participation_schema_unavailable'); }
+        $bridge = apply_filters('faluss_fans_hof_closed_participation',null);
+        if (!$bridge instanceof ClosedParticipationLifecycle || !$bridge->usesConnection($db)) {
+            throw new ModelViolation('hof_participation_transport_unavailable');
+        }
+        return $bridge;
+    }
 }

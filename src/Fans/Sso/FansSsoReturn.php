@@ -41,8 +41,11 @@ final class FansSsoReturn
             }
             return null;
         }
-        if (preg_match('~^creator/hof/?\?manage=(session|sessions)&(session|sessions_cursor)=([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$~D', $relative, $selection) === 1
-            && (($selection[1] === 'session' && $selection[2] === 'session') || ($selection[1] === 'sessions' && $selection[2] === 'sessions_cursor'))) {
+        if (preg_match('~^creator/hof/?\?manage=session&session=([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})&participant_cursor=([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$~D', $relative, $selection) === 1) {
+            return $prefix . 'creator/hof?manage=session&session=' . $selection[1] . '&participant_cursor=' . $selection[2];
+        }
+        if (preg_match('~^creator/hof/?\?manage=(session|sessions|join)&(session|sessions_cursor)=([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$~D', $relative, $selection) === 1
+            && ((in_array($selection[1],['session','join'],true) && $selection[2] === 'session') || ($selection[1] === 'sessions' && $selection[2] === 'sessions_cursor'))) {
             return $prefix . 'creator/hof?manage=' . $selection[1] . '&' . $selection[2] . '=' . $selection[3];
         }
         $fan = 'fan/(?:accueil|explorer|hof(?:/session)?|classements|classement-fans|messages|espace)';
