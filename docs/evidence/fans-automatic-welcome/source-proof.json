@@ -82,6 +82,17 @@
     "synthetic_identity": true,
     "actual_wp_cookies": true
   },
+  "consolidated": {
+    "base": "98de07eb870fde95a3589bd0d724f59bf83c4e8f",
+    "source_tree": "ef90a1963b631d224622bff18c9791d8c8f58747",
+    "runtime": "/var/tmp/fans-hof-exact-q08012pm",
+    "tests": 814,
+    "assertions": 8368,
+    "phpstan_errors": 0,
+    "wordpress_checks": 137,
+    "failed": 0,
+    "screenshots": 12
+  },
   "verification": {
     "text_files": 35,
     "php_lint": 26,
