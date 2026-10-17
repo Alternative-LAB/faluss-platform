@@ -9,8 +9,28 @@ use Faluss\Platform\Fans\Sso\FansSsoService;
 
 final class FollowersService
 {
+    /** Private current-member reading; no recipient parameter or public follower list.
+     * @return array{creator_id:string,following:bool}|\WP_Error */
+    public static function ownFollowing(mixed $creatorId): array|\WP_Error
+    {
+        $member=self::member();
+        if($member===null){return self::error('sso_required',403);}
+        if(!self::validId($creatorId)||CreatorProfileService::publicById($creatorId)===null){return self::error('creator_not_found',404);}
+        $table=FollowersSchema::table();if($table===null||!FollowersSchema::ready()){return self::error('followers_unavailable',503);}
+        $following=self::exists($table,$member,$creatorId);global $wpdb;
+        return $wpdb->last_error!==''?self::error('followers_unavailable',503):['creator_id'=>$creatorId,'following'=>$following];
+    }
     /** @return array{creator_id:string,following:bool}|\WP_Error */
     public static function follow(mixed $creatorId): array|\WP_Error
+    {
+        if(\Faluss\Platform\Fans\Messaging\MessageAutomaticEvents::installed()) {
+            return \Faluss\Platform\Fans\Messaging\MessageStore::transaction(static fn():array|\WP_Error=>self::followCurrent($creatorId,true));
+        }
+        return self::followCurrent($creatorId,false);
+    }
+
+    /** @return array{creator_id:string,following:bool}|\WP_Error */
+    private static function followCurrent(mixed $creatorId,bool $locked): array|\WP_Error
     {
         $member = self::member();
         if ($member === null) {
@@ -23,7 +43,7 @@ final class FollowersService
         if ($own !== null && $own['creator_id'] === $creatorId) {
             return self::error('self_follow', 403);
         }
-        if (CreatorProfileService::publicById($creatorId) === null) {
+        if (CreatorProfileService::publicById($creatorId,$locked) === null) {
             return self::error('creator_not_found', 404);
         }
         $table = FollowersSchema::table();
@@ -43,12 +63,24 @@ final class FollowersService
         if ($inserted !== 1 && !self::exists($table, $member, $creatorId)) {
             return self::error('followers_unavailable', 503);
         }
+        if($locked&&$inserted===1&&!\Faluss\Platform\Fans\Messaging\MessageAutomaticEvents::followedInTransaction($member,$creatorId)) {
+            return self::error('followers_unavailable',503);
+        }
 
         return ['creator_id' => $creatorId, 'following' => true];
     }
 
     /** @return array{creator_id:string,following:bool}|\WP_Error */
     public static function unfollow(mixed $creatorId): array|\WP_Error
+    {
+        if(\Faluss\Platform\Fans\Messaging\MessageAutomaticEvents::installed()) {
+            return \Faluss\Platform\Fans\Messaging\MessageStore::transaction(static fn():array|\WP_Error=>self::unfollowCurrent($creatorId,true));
+        }
+        return self::unfollowCurrent($creatorId,false);
+    }
+
+    /** @return array{creator_id:string,following:bool}|\WP_Error */
+    private static function unfollowCurrent(mixed $creatorId,bool $locked): array|\WP_Error
     {
         $member = self::member();
         if ($member === null) {
@@ -60,6 +92,11 @@ final class FollowersService
         $table = FollowersSchema::table();
         if ($table === null || !FollowersSchema::ready()) {
             return self::error('followers_unavailable', 503);
+        }
+        // Remember an existing follower before deletion without sending any historical welcome.
+        if($locked&&self::exists($table,$member,$creatorId)
+            &&!\Faluss\Platform\Fans\Messaging\MessageAutomaticEvents::followedInTransaction($member,$creatorId,true)) {
+            return self::error('followers_unavailable',503);
         }
         global $wpdb;
         $deleted = $wpdb->query($wpdb->prepare(

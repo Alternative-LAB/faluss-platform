@@ -9,7 +9,7 @@ final class MessageSchema
     public static function table(string $kind): string
     {
         global $wpdb;
-        if (!in_array($kind, ['threads','messages','blocks','reports','report_events','legal_holds','contact'], true) || !is_string($wpdb->prefix ?? null)
+        if (!in_array($kind, ['threads','messages','blocks','reports','report_events','legal_holds','contact','automatic_settings','automatic_events','automatic_contacts'], true) || !is_string($wpdb->prefix ?? null)
             || preg_match('/^[A-Za-z0-9_]+$/D', $wpdb->prefix) !== 1) { throw new \RuntimeException('Invalid message table'); }
         return $wpdb->prefix . 'faluss_fans_dm_' . $kind;
     }
@@ -17,6 +17,11 @@ final class MessageSchema
     public static function columns(string $kind): array
     {
         return match ($kind) {
+            'automatic_contacts'=>['thread_id'=>'char(36)','created_at'=>'datetime'],
+            'automatic_settings'=>['creator_id'=>'char(36)','kind'=>'varchar(12)','enabled'=>'tinyint(3) unsigned','revision'=>'bigint(20) unsigned','epoch'=>'bigint(20) unsigned','body'=>'text','updated_at'=>'datetime'],
+            'automatic_events'=>['event_key'=>'char(64)','kind'=>'varchar(12)','creator_id'=>'char(36)','fan_identity'=>'char(36)',
+                'config_revision'=>'bigint(20) unsigned','config_epoch'=>'bigint(20) unsigned','state'=>'varchar(16)','body'=>'text','delivery_key'=>'char(36)',
+                'thread_id'=>'char(36)','message_id'=>'char(36)','attempts'=>'int(10) unsigned','next_attempt_at'=>'datetime','error'=>'varchar(32)','created_at'=>'datetime','updated_at'=>'datetime'],
             'contact' => ['creator_id'=>'char(36)','mode'=>'varchar(16)','revision'=>'bigint(20) unsigned','updated_at'=>'datetime'],
             'threads' => ['thread_id'=>'char(36)','fan_user'=>'bigint(20) unsigned','creator_id'=>'char(36)','creator_user'=>'bigint(20) unsigned',
                 'state'=>'varchar(16)','revision'=>'bigint(20) unsigned','last_seq'=>'bigint(20) unsigned','created_at'=>'datetime','last_sent_at'=>'datetime'],
@@ -35,6 +40,9 @@ final class MessageSchema
     public static function indexes(string $kind): array
     {
         return match ($kind) {
+            'automatic_contacts'=>['PRIMARY'=>[true,['thread_id']]],
+            'automatic_settings'=>['PRIMARY'=>[true,['creator_id','kind']]],
+            'automatic_events'=>['PRIMARY'=>[true,['event_key']],'delivery'=>[false,['state','next_attempt_at','event_key']],'configuration'=>[false,['creator_id','kind','state']],'thread'=>[false,['thread_id']]],
             'contact'=>['PRIMARY'=>[true,['creator_id']]],
             'threads'=>['PRIMARY'=>[true,['thread_id']],'pair'=>[true,['fan_user','creator_id']], 'expiry'=>[false,['last_sent_at']]],
             'messages'=>['PRIMARY'=>[true,['message_id']],'position'=>[true,['thread_id','sequence']], 'replay'=>[true,['sender_id','key_hash']], 'rate'=>[false,['sender_id','created_at']]],

@@ -1,0 +1,43 @@
+{
+  "browser": "155.0.8059.80",
+  "checks": [
+    {
+      "width": 1440,
+      "independentSettings": true,
+      "nativePreviewAndSave": true,
+      "draftPreserved": true,
+      "noExtraFanConsent": true,
+      "freeFollowAndUnfollow": true,
+      "nonceRejection": true,
+      "automaticNotGeneralContact": true,
+      "visibleFocus": true,
+      "noHorizontalOverflow": true
+    },
+    {
+      "width": 390,
+      "independentSettings": true,
+      "nativePreviewAndSave": true,
+      "draftPreserved": true,
+      "noExtraFanConsent": true,
+      "freeFollowAndUnfollow": true,
+      "nonceRejection": true,
+      "automaticNotGeneralContact": true,
+      "visibleFocus": true,
+      "noHorizontalOverflow": true
+    },
+    {
+      "width": 320,
+      "independentSettings": true,
+      "nativePreviewAndSave": true,
+      "draftPreserved": true,
+      "noExtraFanConsent": true,
+      "freeFollowAndUnfollow": true,
+      "nonceRejection": true,
+      "automaticNotGeneralContact": true,
+      "visibleFocus": true,
+      "noHorizontalOverflow": true
+    }
+  ],
+  "errors": [],
+  "limits": "Disposable WordPress/MariaDB, synthetic Identity links/texts, actual WP cookies/nonces. Canonical fixture HTML and 303 locations mapped to loopback only; an extra GET after the verified native 303 normalizes API URLs for visual capture. No central SSO, target theme, TLS or physical-device proof."
+}

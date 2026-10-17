@@ -167,6 +167,8 @@ final class FansUiRoutes
             }
         }
 
+        if($publicProfile){FansUiFollow::handle($creatorId);}
+
         if ($management && $role !== 'creator') {
             FansUiView::render($role, $role === 'visitor' ? 'connexion' : 'creator-unavailable', null, 403, $signIn);
             exit;

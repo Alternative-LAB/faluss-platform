@@ -5,6 +5,15 @@ namespace Faluss\Platform\Fans\Messaging;
 /** Internal serialized boundary, shared by conversation, reports and retention operations. */
 final class MessageStore
 {
+    /** Internal event participants may never start/commit a caller's transaction. */
+    public static function ownsTransaction(): bool
+    {
+        global $wpdb;
+        $lock='fans_dm_'.substr(hash('sha256',MessageSchema::table('threads')),0,40);
+        $row=$wpdb->get_row($wpdb->prepare('SELECT @@in_transaction AS active,@@read_only AS replica,IS_USED_LOCK(%s)=CONNECTION_ID() AS owns_lock',$lock),'ARRAY_A');
+        return !self::failed()&&is_array($row)&&(string)($row['active']??'')==='1'
+            &&(string)($row['replica']??'')==='0'&&(string)($row['owns_lock']??'')==='1';
+    }
     public static function transaction(callable $operation): mixed
     {
         if (!MessageSchema::ready()) { return MessagePolicy::error('messages_unavailable'); }
@@ -34,6 +43,7 @@ final class MessageStore
     {
         global $wpdb;
         return \Faluss\Platform\Fans\Notifications\NotificationEvents::forgetConversation($id)
+            && MessageAutomaticEvents::forgetContactInTransaction($id)
             && $wpdb->query($wpdb->prepare('DELETE FROM `'.MessageSchema::table('messages').'` WHERE thread_id=%s',$id))!==false
             && $wpdb->query($wpdb->prepare('DELETE FROM `'.MessageSchema::table('threads').'` WHERE thread_id=%s',$id))!==false;
     }

@@ -42,8 +42,10 @@ constitue jamais une permission. Retour arrière : arrêter les nouveaux envois,
 conserver les données et recours, retirer le code sans supprimer les fils.
 
 Les [automatisations validées](FANS-AUTOMATIC-MESSAGES.md) sont autorisées par
-leur événement serveur, sans consentement Fan supplémentaire. Ce premier lot de contact ne livre pas leurs déclencheurs ou leur
-file et n'autorise aucun achat ni envoi automatique sur un site.
+leur événement serveur, sans consentement Fan supplémentaire. Le lot suivant
+raccorde la bienvenue textuelle au suivi, avec file durable et état `automatic`
+sans acceptation générale ; le remerciement reste fermé tant que sa source
+attestée n'est pas raccordée. Aucun achat ni activation de site n'en découle.
 
 ### Politique initiale et traitements conservés
 

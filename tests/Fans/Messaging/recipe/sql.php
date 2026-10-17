@@ -73,3 +73,4 @@ check('purge retry succeeds',Store::purge()['purged']===3);
 // Remove only these disposable accounts; the image recipe owns its own account 20.
 $wpdb->query('DELETE FROM test_faluss_fans_creator_profiles WHERE wp_user_id BETWEEN 20 AND 22');
 $wpdb->query('DELETE FROM test_faluss_fans_identity_links WHERE wp_user_id BETWEEN 20 AND 22');
+require __DIR__.'/automatic.php';
