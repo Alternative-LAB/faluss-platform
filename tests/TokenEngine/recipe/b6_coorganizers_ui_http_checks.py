@@ -78,3 +78,11 @@ def run_checks(read,cookies,actors,management,deliver,check):
     check('B6dl coorganizer native candidate pagination reaches every eligible creator beyond twenty without mutation',
           pages>=2 and next_path is None and set(candidates)<=found and actors['creator_profile'] not in found
           and extra['creator_profile'] not in found and snapshot()==before)
+    pending=[]
+    for _ in range(2):
+        actor=deliver('fixture-extra-creator',actor=actors['admin_user'])
+        invite=form('invite_organizer');invite['organizer_target']=actor['creator_profile']
+        assert read(path,owner,invite)[0]==200
+        pending.append(dict(path=path,cookie=deliver('fixture-cookie',actor=actor['creator_user'])))
+    # Private renderer capability only. The enclosing fixture removes it in finally, never a report.
+    return dict(pending=pending,accepted=dict(path=path,cookie=other))
