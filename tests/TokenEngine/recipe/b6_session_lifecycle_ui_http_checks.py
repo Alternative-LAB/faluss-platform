@@ -1,11 +1,10 @@
 """Native lifecycle POSTs through the approved real signed bridge, on disposable nodes only."""
 from datetime import datetime,timedelta,timezone
-import time
 from urllib.parse import parse_qs,urlsplit
 from b6_privacy_http_checks import Forms
 
 
-def run_checks(root,read,cookies,actors,deliver,check):
+def run_checks(root,read,cookies,actors,deliver,check,set_clock):
     owner=cookies['creator'];admin=cookies['admin'];new='/app/creator/hof?manage=new'
     snapshot=lambda id:deliver('private-session',actor=actors['creator_user'],session=id)
     bindings=lambda id:deliver('private-session-bindings',actor=actors['creator_user'],session=id)
@@ -124,10 +123,9 @@ def run_checks(root,read,cookies,actors,deliver,check):
     id,path,panel=prepare('Cycle natif fictif — échéance',duration_seconds=15)
     assert read(path,owner,form(path,'open'))[0]==200
     ends=datetime.strptime(snapshot(id)['session']['ends_at'],'%Y-%m-%d %H:%M:%S.%f').replace(tzinfo=timezone.utc).timestamp()
-    budget=time.monotonic()+30
-    while float((root/'corpus-sql-clock').read_text())<ends and time.monotonic()<budget:
-        # Use the existing authoritative fixture clock driver, never a browser timestamp or a SQL override here.
-        snapshot(id);time.sleep(.1)
+    # The existing fixture can be ahead of wall time. Advance its shared primary clock explicitly.
+    # No browser timestamp, direct SQL override, environment preparation or timeout is changed here.
+    set_clock(format(ends,'.6f'))
     assert float((root/'corpus-sql-clock').read_text())>=ends,'Existing isolated clock did not reach the frozen deadline.'
     complete=form(path,'complete');complete['hof_session_confirmation']='yes'
     assert read(path,owner,complete)[0]==200

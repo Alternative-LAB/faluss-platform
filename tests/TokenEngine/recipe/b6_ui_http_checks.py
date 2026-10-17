@@ -72,7 +72,7 @@ def run_checks(root,source,cli_path,fixture,origin,actors,session,month,deliver,
         from b6_session_ui_http_checks import run_checks as session_checks
         management=session_checks(read,cookies,actors,session,deliver,check)
         from b6_session_lifecycle_ui_http_checks import run_checks as lifecycle_checks
-        lifecycle_checks(root,read,cookies,actors,deliver,check)
+        lifecycle_checks(root,read,cookies,actors,deliver,check,fixture['set_clock'])
         if os.environ.get('FALUSS_B6_UI_EXPORT'):
             out=pathlib.Path(os.environ['FALUSS_B6_UI_EXPORT']).resolve()
             if out.parent!=pathlib.Path('/var/tmp') or not out.name.startswith('fans-hof-ui-') or out.is_symlink():raise RuntimeError('Unsafe private UI capture destination')
