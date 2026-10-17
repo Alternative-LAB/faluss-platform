@@ -1,0 +1,43 @@
+{
+  "scope": "Disposable fictitious Hub/Fans only; no real SSO or production admission",
+  "reports": [
+    {
+      "file": "physical-wire.json",
+      "commit": "a2c6f1daab47382ccfd73485d9b40af1acb39050",
+      "tree": "3b2f0d9bcc01376a5704dbdc12c314a050275a34",
+      "runtime": "/var/tmp/fans-hof-exact-aq13hxli",
+      "total": 383,
+      "failed": 0,
+      "fixture_removed": true,
+      "original_sha256": "4ab3869f2320100076c50286d502888828d432307e47c45ec2d7a5553b4f41bf"
+    },
+    {
+      "file": "physical-confirmation.json",
+      "commit": "b08cc66ce83cc08d3cc0fad0c2e1b2bf0f7b3911",
+      "tree": "54b057f7f4fc36c046350d989c0bbe6f4d080f6f",
+      "runtime": "/var/tmp/fans-hof-exact-1kv5nrpy",
+      "total": 356,
+      "failed": 0,
+      "fixture_removed": true,
+      "original_sha256": "a5af80de28c30ffe8adcfe184fa982225ced532ddd4e7c96070aff111bf211b2"
+    },
+    {
+      "file": "physical-consolidated-baseline.json",
+      "commit": "ea1b990231968e6f7f9cef36bcc574a620ae0172",
+      "tree": "2790828dbb384119e593d624444f2c8f919d0b0b",
+      "runtime": "/var/tmp/fans-hof-exact-a9snnfuc",
+      "total": 564,
+      "failed": 0,
+      "fixture_removed": true,
+      "original_sha256": "1a0b21129daba5651aa030ea372833739748438fcd9117093944a4a05f08f68d"
+    }
+  ],
+  "production_lf_sha256": {
+    "src/Fans/PfContract/ClosedBarrierInbox.php": "b75ab336183186f2b75957835b377bb862540d2a161ae98f156a1e36d9c7e744",
+    "src/TokenEngine/PurchasedPf/ClosedBarrierContext.php": "953c83f254435e3b1ac098af0036db33f6562a685b1102fb96b4250dfbde081f",
+    "src/TokenEngine/PurchasedPf/ClosedBarrierGateway.php": "23f1e6583fafdae1dca96e91b388a68f93fb048de16f5d9cf2ac9c041713cc83",
+    "src/TokenEngine/PurchasedPf/ClosedBarrierStore.php": "735c85df34a77ac065b424547843303c8b8ce31cc513c3aaad704286137bfcf7",
+    "src/TokenEngine/PurchasedPf/Protocol/BarrierTerritoryRevocation.php": "18423b08e89238e3fdaa806243f5bd80e69c5be2452711ad0e8befaac745c96e",
+    "src/TokenEngine/PurchasedPf/Protocol/BarrierTransport.php": "6afd1b3c5521bb720c04d4101b0a49009eb73d6719902245a24f3758a2c76072"
+  }
+}

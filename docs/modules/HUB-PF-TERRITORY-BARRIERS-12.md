@@ -61,8 +61,11 @@ Tests ciblés de syntaxe, signatures/version/audience, types stockés, anciennes
 versions, nonce, origine/digest/version, concurrence, COMMIT incertain local et
 Hub, lookup de la même clé et préservation du ledger. La recette utilise le
 module applicatif existant des barrières HTTP ; aucun workflow, préparateur,
-cache, délai ou runner n'est modifié. Les résultats physiques seront consignés
-après exécution, séparément de la qualité locale et de la CI du head final.
+cache, délai ou runner n'est modifié. Les
+[preuves isolées acquises](../evidence/hub-territory-barriers-12/README.md)
+distinguent le transport final (383/0), les vraies courses du ledger fictif
+(356/0) et le socle session/participation (564/0). Leurs baselines se recouvrent ;
+la CI du head final puis du main intégré reste distincte.
 
 Les tests ajoutent les courses avec une véritable confirmation dans le ledger
 officiel fictif : fermeture avant débit, confirmation verrouillée avant fermeture,
