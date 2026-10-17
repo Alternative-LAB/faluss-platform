@@ -12,13 +12,14 @@ final class BarrierTransport
 {
     public const CONTRACT = 'hub.purchased-pf.ranking-barriers/1.0.0';
     public const COMPLETION_CONTRACT = 'hub.purchased-pf.ranking-barriers/1.1.0';
+    public const TERRITORY_CONTRACT = 'hub.purchased-pf.ranking-barriers/1.2.0';
     public const MAX_WIRE = 66048;
     private const FIELDS = ['operation','action_id','origin_id','policy_version','lookup_operation','object'];
 
     /** @param array<string,mixed> $fields */
     public static function fields(array $fields, string $contract = self::CONTRACT): void
     {
-        if (!in_array($contract,[self::CONTRACT,self::COMPLETION_CONTRACT],true)) { throw new ModelViolation('pf_barrier_contract_mismatch'); }
+        if (!in_array($contract,[self::CONTRACT,self::COMPLETION_CONTRACT,self::TERRITORY_CONTRACT],true)) { throw new ModelViolation('pf_barrier_contract_mismatch'); }
         ModelValues::exactKeys($fields,self::FIELDS);
         ModelValues::uuid($fields['action_id']); ModelValues::uuid($fields['origin_id']); ModelValues::version($fields['policy_version']);
         if (!in_array($fields['operation'],['register','close','lookup'],true) || !is_array($fields['object'])
@@ -125,5 +126,11 @@ final class BarrierTransport
     /** @param array<array-key,mixed> $input
      * @return array<string,string> */
     private static function closeReference(array $input, string $contract): array
-    { return $contract === self::COMPLETION_CONTRACT ? BarrierCompletion::reference($input) : RankingBarrier::closeReference($input); }
+    {
+        return match ($contract) {
+            self::TERRITORY_CONTRACT => BarrierTerritoryRevocation::reference($input),
+            self::COMPLETION_CONTRACT => BarrierCompletion::reference($input),
+            default => RankingBarrier::closeReference($input),
+        };
+    }
 }

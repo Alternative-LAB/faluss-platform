@@ -86,3 +86,5 @@ def run_checks(root,check,call,sql,fixture):
         nonce_intervals(root,check,sql,fixture)
         check('B3beh 1.1 completion HTTP preserves all official ledger bytes',sql('SELECT * FROM wp_token_engine_pf_ledger ORDER BY id')==historic)
     finally:clock.unlink(missing_ok=True)
+    from b3_barrier_territory_http_checks import run_checks as territory_checks
+    territory_checks(root,check,sql,fixture)

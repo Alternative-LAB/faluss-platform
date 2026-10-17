@@ -60,6 +60,8 @@ try {
                 'b3b-lookup' => $store->lookup($peer,$input['operation'],$input['payload'],$input['key'],$context),
                 'b3b-complete' => $context === null ? throw new ModelViolation('pf_barrier_context_mismatch') : $store->completeSession($peer,$input['payload'],$input['key'],$context),
                 'b3b-lookup-completion' => $context === null ? throw new ModelViolation('pf_barrier_context_mismatch') : $store->lookupCompletion($peer,$input['payload'],$input['key'],$context),
+                'b3b-revoke-territory' => $context === null ? throw new ModelViolation('pf_barrier_context_mismatch') : $store->revokeTerritoryAdmission($peer,$input['payload'],$input['key'],$context),
+                'b3b-lookup-territory' => $context === null ? throw new ModelViolation('pf_barrier_context_mismatch') : $store->lookupTerritoryRevocation($peer,$input['payload'],$input['key'],$context),
                 default => throw new RuntimeException('Unknown B3b fixture action.'),
             };
         }

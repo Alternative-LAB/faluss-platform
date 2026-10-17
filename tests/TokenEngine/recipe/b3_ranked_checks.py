@@ -285,4 +285,6 @@ def run_checks(root, wp, check, call, sql, start, finish, parallel, await_file):
 
     from b3_ranked_freshness_checks import run_checks as freshness_checks
     freshness_checks(root, check, call, sql, start, finish, await_file, proof, fixture, fresh)
+    from b3_territory_confirmation_checks import run_checks as territory_checks
+    territory_checks(root,check,call,sql,start,finish,await_file,proof,fixture)
     return proof, fixture, fresh

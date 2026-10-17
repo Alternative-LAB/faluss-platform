@@ -1,0 +1,17 @@
+{
+  "source_commit": "a2c6f1daab47382ccfd73485d9b40af1acb39050",
+  "tree": "3b2f0d9bcc01376a5704dbdc12c314a050275a34",
+  "runtime": "/var/tmp/fans-hof-exact-aq13hxli",
+  "tests": 813,
+  "assertions": 8178,
+  "hof_tests": 90,
+  "hof_assertions": 323,
+  "phpstan_errors": 0,
+  "phpstan_target": 80300,
+  "historical_deprecations": 2,
+  "php_lint": 9,
+  "python_compile": 4,
+  "source_comparisons": 13,
+  "secret_scan": "pass",
+  "diff_check": "pass"
+}

@@ -249,9 +249,36 @@ final class BarrierTransportTest extends TestCase
         }
     }
 
+    public function testExplicitTerritoryVersionBindsBothSignaturesAndTheExactReply(): void
+    {
+        $fields = $this->completionFields(); $fields['object']['reason'] = 'territory_admission_revoked';
+        foreach (['close','lookup'] as $operation) {
+            $fields['operation'] = $operation; $fields['lookup_operation'] = $operation === 'lookup' ? 'close' : '';
+            $sealed = BarrierTransport::sealRequest($fields,str_repeat('a',64),'recipe-key',time()+60,BarrierTransport::TERRITORY_CONTRACT);
+            $payload = SignedEnvelope::open(SignedEnvelope::BARRIER_REQUEST,CanonicalJson::object($sealed['wire'],BarrierTransport::MAX_WIRE),$this->fans,time());
+            self::assertSame(CanonicalJson::encode($fields['object']),CanonicalJson::encode(BarrierTransport::request($payload,$this->fans,time(),BarrierTransport::TERRITORY_CONTRACT)['object']));
+            foreach (['contract','audience'] as $field) {
+                $bad = $payload; $bad[$field] = $field === 'contract' ? BarrierTransport::COMPLETION_CONTRACT : 'fixture.other';
+                try { BarrierTransport::request($bad,$this->fans,time(),BarrierTransport::TERRITORY_CONTRACT); self::fail('Changed signed context accepted.'); }
+                catch (ModelViolation $error) { self::assertSame('pf_barrier_request_mismatch',$error->reason); }
+            }
+            $result = ['operation' => 'close','state' => 'closed','effective_at' => '2026-10-17 19:00:00.000000'] + $fields['object'];
+            $reply = ['contract' => BarrierTransport::TERRITORY_CONTRACT,'kind' => SignedEnvelope::BARRIER_RESPONSE,
+                'issuer' => 'fixture.hub','audience' => 'fixture.fans','nonce' => str_repeat('b',64),'request_sha256' => str_repeat('c',64),
+                'issued_at' => gmdate('Y-m-d\TH:i:s\Z'),'expires_at' => gmdate('Y-m-d\TH:i:s\Z',time()+60),'outcome' => 'ok','result' => $result]
+                + BarrierTransport::responseFields($fields,BarrierTransport::TERRITORY_CONTRACT);
+            self::assertSame(['outcome' => 'ok','result' => $result],BarrierTransport::response($reply,$this->hub,$fields,
+                str_repeat('b',64),str_repeat('c',64),time(),BarrierTransport::TERRITORY_CONTRACT));
+            $reply['result']['reason'] = 'participant_withdrawn';
+            try { BarrierTransport::response($reply,$this->hub,$fields,str_repeat('b',64),str_repeat('c',64),time(),BarrierTransport::TERRITORY_CONTRACT); self::fail('Different revocation accepted.'); }
+            catch (ModelViolation $error) { self::assertSame('pf_barrier_response_mismatch',$error->reason); }
+        }
+        BarrierTransport::fields($this->completionFields(),BarrierTransport::TERRITORY_CONTRACT);
+    }
+
     public function testUnknownVersionAndUnapprovedCompletionReasonRemainClosed(): void
     {
-        foreach ([BarrierTransport::CONTRACT,'hub.purchased-pf.ranking-barriers/1.2.0'] as $contract) {
+        foreach ([BarrierTransport::CONTRACT,'hub.purchased-pf.ranking-barriers/1.3.0'] as $contract) {
             try { BarrierTransport::fields($this->completionFields(),$contract); self::fail('Unsupported contract must fail.'); }
             catch (ModelViolation $error) { self::assertNotSame('',$error->reason); }
         }
