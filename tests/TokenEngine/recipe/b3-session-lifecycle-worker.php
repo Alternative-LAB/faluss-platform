@@ -37,6 +37,9 @@ final class FansSessionLifecycleRecipeDatabase extends wpdb
         foreach (['binding-insert' => 'wp_fans_hof_b3_bindings','decision-insert' => 'wp_fans_hof_session_decisions'] as $fault => $table) {
             if ($this->fault === $fault && str_starts_with($query,'INSERT INTO `' . $table . '`')) { $this->fault = ''; return false; }
         }
+        foreach (['participation-binding-insert' => 'wp_fans_hof_b6p_bindings','participation-version-insert' => 'wp_fans_hof_b6p_versions'] as $fault => $table) {
+            if ($this->fault === $fault && str_starts_with($query,'INSERT INTO `' . $table . '`')) { $this->fault = ''; return false; }
+        }
         if (strtoupper(trim($query)) !== 'COMMIT' || !in_array($this->fault,['before-commit','after-commit','commit-unknown'],true)) { return parent::query($query); }
         $fault = $this->fault; $this->fault = '';
         if ($fault === 'before-commit') { $this->pause(); }
@@ -97,7 +100,7 @@ try {
         $peer = new PeerPolicy($policy['node'],$policy['audience'],$policy['permissions'],$policy['keys']);
         $inbox = new ClosedBarrierInbox($wpdb,$peer,$input['origin'],'1.0.0');
         $bridge = new ClosedSessionLifecycle($wpdb,$inbox,new ClosedBarrierClient($wpdb,$inbox,'recipe-fans-k1',$input['endpoint']),$input['origin']);
-        $result = match ($input['action']) {
+        $result = str_starts_with($input['action'],'participation-') ? require __DIR__ . '/b6-participation-worker.php' : match ($input['action']) {
             'create' => $sessions->create($input['rules']),
             'review-submit' => $moderation->submit($input['session'],$input['revision'],$input['review_revision'] ?? 0),
             'review-decide' => $moderation->decide($input['session'],$input['review_revision'],$input['decision'],$input['reason']),

@@ -12,6 +12,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Pont fermé B6 de participation : admission locale et identité vérifiée liées atomiquement à une version Hub indépendante, reprise des mêmes actions, retrait acquitté et réadmission sans réécriture historique ; contrat de barrière existant, aucune API ou activation de site. [Périmètre et reprise](docs/modules/FANS-HOF-B6-PARTICIPATION-BRIDGE.md).
 - Formulaires fermés de cycle de session B6 : ouverture, annulation confirmée, fin à l'échéance, réadmission et reprise des mêmes actions Hub ; décision administrative commise distinguée de sa fermeture encore incertaine. Lecture primaire séparée après acquittement, sans assimilation d'un ancien reçu à une preuve actuelle. Contrats Hub inchangés, aucune activation ; [recette native et captures](docs/evidence/fans-hof-b6-session-lifecycle/README.md) acquises sur instances jetables.
 - Lecture privée paginée des sessions associées au Créateur courant pour préparer leur gestion B6, sans destinataire choisi par le navigateur ni pouvoir implicite pour une invitation ; tests WordPress/MariaDB des exclusions, suspensions et pages au-delà de vingt. Raccordement d'interface en cours, aucune activation.
 - Adaptateur des dates de formulaire de session vers le calendrier existant : heures ambiguës explicitement départagées, heures inexistantes refusées et fractions UTC conservées lors d'une saisie inchangée. Aucun changement de fuseau global ou de règle de session.
