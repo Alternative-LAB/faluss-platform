@@ -8,6 +8,7 @@ use Faluss\Platform\TokenEngine\PurchasedPf\ModelValues;
 use Faluss\Platform\TokenEngine\PurchasedPf\ModelViolation;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\BarrierTransport;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\BarrierCompletion;
+use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\BarrierTerritoryRevocation;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\CanonicalJson;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\ClosedEnvironment;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\DelegatedContext;
@@ -62,6 +63,9 @@ final class ClosedBarrierInbox
                 $descriptor = $this->descriptor($version); $expected = RankingBarrier::reference($descriptor['content']);
                 if (($ref['reason'] ?? '') === 'session_completed' && $descriptor['content']['kind'] !== 'session') {
                     throw new ModelViolation('pf_barrier_completion_requires_session');
+                }
+                if (($ref['reason'] ?? '') === BarrierTerritoryRevocation::REASON) {
+                    BarrierTerritoryRevocation::requireTerritorialAdmission($descriptor);
                 }
                 foreach (['barrier_key','version','content_sha256'] as $name) {
                     if ($ref[$name] !== $expected[$name]) { throw new ModelViolation('pf_local_barrier_conflict'); }
@@ -180,7 +184,7 @@ final class ClosedBarrierInbox
             if ($answer['outcome'] === 'unknown') { throw new ModelViolation('pf_transport_unknown'); }
             if ($answer['outcome'] === 'refused') {
                 [, $contract] = $this->storedAction($action);
-                if ($contract === BarrierTransport::COMPLETION_CONTRACT
+                if (in_array($contract,[BarrierTransport::COMPLETION_CONTRACT,BarrierTransport::TERRITORY_CONTRACT],true)
                     && $answer['result']['reason'] === 'pf_barrier_completion_not_due') {
                     // A local clock cannot attest the deadline. Retry later, with the same durable action/key.
                     return $this->progress($action);
@@ -281,7 +285,7 @@ final class ClosedBarrierInbox
         $value = CanonicalJson::object($action['fields_json']); $contract = BarrierTransport::CONTRACT;
         if (array_key_exists('contract',$value)) {
             ModelValues::exactKeys($value,['contract','fields']);
-            if ($value['contract'] !== BarrierTransport::COMPLETION_CONTRACT || !is_array($value['fields'])) {
+            if (!in_array($value['contract'],[BarrierTransport::COMPLETION_CONTRACT,BarrierTransport::TERRITORY_CONTRACT],true) || !is_array($value['fields'])) {
                 throw new ModelViolation('pf_local_barrier_conflict');
             }
             $contract = $value['contract']; $value = $value['fields'];
@@ -294,7 +298,11 @@ final class ClosedBarrierInbox
     private function reference(array $fields, string $contract): array
     {
         return $fields['operation'] === 'register' ? RankingBarrier::reference($fields['object']['content'])
-            : ($contract === BarrierTransport::COMPLETION_CONTRACT ? BarrierCompletion::reference($fields['object']) : RankingBarrier::closeReference($fields['object']));
+            : match ($contract) {
+                BarrierTransport::TERRITORY_CONTRACT => BarrierTerritoryRevocation::reference($fields['object']),
+                BarrierTransport::COMPLETION_CONTRACT => BarrierCompletion::reference($fields['object']),
+                default => RankingBarrier::closeReference($fields['object']),
+            };
     }
 
     /** @param array<string,string> $row

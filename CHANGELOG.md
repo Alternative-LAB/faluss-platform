@@ -12,6 +12,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Transport privé fermé de révocation des seules admissions territoriales par le contrat Hub1.2 explicitement approuvé, avec compatibilité1.0/1.1 et reprise durable existante ; aucun endpoint, opération économique ou activation. [Périmètre et raccordement restant](docs/modules/HUB-PF-TERRITORY-BARRIERS-12.md).
+
 - Pont fermé B6 de participation : admission locale et identité vérifiée liées atomiquement à une version Hub indépendante, reprise des mêmes actions, retrait acquitté et réadmission sans réécriture historique ; contrat de barrière existant, aucune API ou activation de site. [Périmètre et reprise](docs/modules/FANS-HOF-B6-PARTICIPATION-BRIDGE.md).
 - Invitations privées de coorganisation B6 raccordées aux services existants : candidats publics paginés, acceptation/refus explicites et permissions distinctes du propriétaire ; aucun participant ou pouvoir Hub implicite. Retour de navigation SSO canonique pour la page de candidats, sans changement du protocole ; [recette native et captures](docs/evidence/fans-hof-b6-coorganizers/README.md) acquises sur instances jetables, aucune activation.
 - Formulaires fermés de cycle de session B6 : ouverture, annulation confirmée, fin à l'échéance, réadmission et reprise des mêmes actions Hub ; décision administrative commise distinguée de sa fermeture encore incertaine. Lecture primaire séparée après acquittement, sans assimilation d'un ancien reçu à une preuve actuelle. Contrats Hub inchangés, aucune activation ; [recette native et captures](docs/evidence/fans-hof-b6-session-lifecycle/README.md) acquises sur instances jetables.

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Faluss\Platform\TokenEngine\PurchasedPf;
 
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\BarrierTransport;
+use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\BarrierTerritoryRevocation;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\CanonicalJson;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\ClosedEnvironment;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy;
@@ -24,7 +25,7 @@ final class ClosedBarrierGateway
         ClosedEnvironment::assertIsolated($this->db,'hub');
         $payload = SignedEnvelope::open(SignedEnvelope::BARRIER_REQUEST,CanonicalJson::object($wire,BarrierTransport::MAX_WIRE),$this->peer,time());
         $contract = $payload['contract'] ?? null;
-        if (!is_string($contract) || !in_array($contract,[BarrierTransport::CONTRACT,BarrierTransport::COMPLETION_CONTRACT],true)) {
+        if (!is_string($contract) || !in_array($contract,[BarrierTransport::CONTRACT,BarrierTransport::COMPLETION_CONTRACT,BarrierTransport::TERRITORY_CONTRACT],true)) {
             throw new ModelViolation('pf_barrier_contract_mismatch');
         }
         $request = BarrierTransport::request($payload,$this->peer,time(),$contract); $digest = hash('sha256',$wire);
@@ -34,13 +35,17 @@ final class ClosedBarrierGateway
         try {
             $context = new ClosedBarrierContext($fields,$request['issued_at'],$request['expires_at'],$contract);
             $owner = new ClosedBarrierStore($this->db);
-            $completion = $contract === BarrierTransport::COMPLETION_CONTRACT && ($request['object']['reason'] ?? '') === 'session_completed';
+            $completion = in_array($contract,[BarrierTransport::COMPLETION_CONTRACT,BarrierTransport::TERRITORY_CONTRACT],true)
+                && ($request['object']['reason'] ?? '') === 'session_completed';
+            $territory = $contract === BarrierTransport::TERRITORY_CONTRACT && ($request['object']['reason'] ?? '') === BarrierTerritoryRevocation::REASON;
             $result = match ($request['operation']) {
                 'register' => $owner->register($this->peer,$request['object'],$request['operation_key'],$context),
-                'close' => $completion ? $owner->completeSession($this->peer,$request['object'],$request['operation_key'],$context)
-                    : $owner->close($this->peer,$request['object'],$request['operation_key'],$context),
-                'lookup' => $completion ? $owner->lookupCompletion($this->peer,$request['object'],$request['operation_key'],$context)
-                    : $owner->lookup($this->peer,$request['lookup_operation'],$request['object'],$request['operation_key'],$context),
+                'close' => $territory ? $owner->revokeTerritoryAdmission($this->peer,$request['object'],$request['operation_key'],$context)
+                    : ($completion ? $owner->completeSession($this->peer,$request['object'],$request['operation_key'],$context)
+                    : $owner->close($this->peer,$request['object'],$request['operation_key'],$context)),
+                'lookup' => $territory ? $owner->lookupTerritoryRevocation($this->peer,$request['object'],$request['operation_key'],$context)
+                    : ($completion ? $owner->lookupCompletion($this->peer,$request['object'],$request['operation_key'],$context)
+                    : $owner->lookup($this->peer,$request['lookup_operation'],$request['object'],$request['operation_key'],$context)),
                 default => throw new ModelViolation('pf_barrier_request_mismatch'),
             };
         } catch (ModelViolation $error) {
