@@ -1,0 +1,17 @@
+{
+  "tree": "50a0b31959d39040f382cb8adecad392aa239201",
+  "runtime": "/var/tmp/fans-hof-exact-yi0s4n4g",
+  "unit_tests": 809,
+  "assertions": 8142,
+  "hof_tests": 90,
+  "hof_assertions": 323,
+  "phpstan_errors": 0,
+  "phpstan_target": "80300",
+  "php_lint": 5,
+  "python_compile": 2,
+  "source_equal": 7,
+  "relative_links": 6,
+  "secret_scan": "pass",
+  "historical_deprecations": 2,
+  "physical": "542/0; fixture_removed=true"
+}

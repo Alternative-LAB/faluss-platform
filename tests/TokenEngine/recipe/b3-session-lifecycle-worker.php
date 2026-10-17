@@ -40,6 +40,7 @@ final class FansSessionLifecycleRecipeDatabase extends wpdb
         foreach (['participation-binding-insert' => 'wp_fans_hof_b6p_bindings','participation-version-insert' => 'wp_fans_hof_b6p_versions'] as $fault => $table) {
             if ($this->fault === $fault && str_starts_with($query,'INSERT INTO `' . $table . '`')) { $this->fault = ''; return false; }
         }
+        if ($this->fault === 'requalification-commit-unknown' && str_starts_with($query,'UPDATE `wp_fans_hof_session_roles` SET revision=revision+1,admitted_at=')) { $this->fault = 'commit-unknown'; }
         if (strtoupper(trim($query)) !== 'COMMIT' || !in_array($this->fault,['before-commit','after-commit','commit-unknown'],true)) { return parent::query($query); }
         $fault = $this->fault; $this->fault = '';
         if ($fault === 'before-commit') { $this->pause(); }

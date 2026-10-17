@@ -1,0 +1,35 @@
+{
+  "commit": "8fc73c2bb8f4bae5be8109dbf0b014f097cd7271",
+  "tree": "50a0b31959d39040f382cb8adecad392aa239201",
+  "runtime": "/var/tmp/fans-hof-exact-yi0s4n4g",
+  "files": [
+    {
+      "path": "src/Fans/Hof/ClosedParticipationLifecycle.php",
+      "lf_sha256": "db5fdd051b9e8d8c9444fd59cfb5dad91859393851f5c0a9d94d4250ee546d2a"
+    },
+    {
+      "path": "src/Fans/Hof/ParticipationSessionRetirement.php",
+      "lf_sha256": "f50a18cd741178fd74f4ac0fbbc31c35b235da2dad7444d163e69b247ae12c28"
+    },
+    {
+      "path": "tests/Fans/Hof/ParticipationSessionRetirementTest.php",
+      "lf_sha256": "921c8fec586d3e3b3477946a9063c591e99c66e6d1f052c89a0b69ed3de62fec"
+    },
+    {
+      "path": "tests/TokenEngine/recipe/b3-session-lifecycle-worker.php",
+      "lf_sha256": "5bf8dd516381075e831a76e592eae2ee9e2710c1cb7975a0f9a3209dcf2acfc5"
+    },
+    {
+      "path": "tests/TokenEngine/recipe/b6-participation-worker.php",
+      "lf_sha256": "0afa667b7f3aed75561f48247626daee5cb4af97158d34be355bf9651373ebbf"
+    },
+    {
+      "path": "tests/TokenEngine/recipe/b6_participation_checks.py",
+      "lf_sha256": "38d4aee93c0d06960914a21543fb29298616329f47dc57107954a1502d7332ff"
+    },
+    {
+      "path": "tests/TokenEngine/recipe/b6_participation_requalification_checks.py",
+      "lf_sha256": "d01b292f520b93019349cf1d944156b0c23b9a94a7e5ea906891991f29a799c6"
+    }
+  ]
+}
