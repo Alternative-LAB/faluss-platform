@@ -1,0 +1,995 @@
+{
+  "scope": "Actual isolated WordPress session routes with fictitious Identity links; emulated viewport and touch, no central Me SSO or physical device",
+  "browser": "151.0.7922.34",
+  "screens": [
+    {
+      "name": "creator-session-list",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": "creator-session-list-1440.png"
+    },
+    {
+      "name": "creator-session-new",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": "creator-session-new-1440.png"
+    },
+    {
+      "name": "creator-session-review",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": "creator-session-review-1440.png"
+    },
+    {
+      "name": "admin-session-review",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": false,
+        "fontFamily": "Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": "admin-session-review-1440.png"
+    },
+    {
+      "name": "creator-session-list",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 753,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-new",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 753,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-review",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 753,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "admin-session-review",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 753,
+        "fontLoaded": false,
+        "fontFamily": "Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-list",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 430,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-new",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 430,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-review",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 430,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "admin-session-review",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 430,
+        "fontLoaded": false,
+        "fontFamily": "Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-list",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": "creator-session-list-390.png"
+    },
+    {
+      "name": "creator-session-new",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": "creator-session-new-390.png"
+    },
+    {
+      "name": "creator-session-review",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": "creator-session-review-390.png"
+    },
+    {
+      "name": "admin-session-review",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": false,
+        "fontFamily": "Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": "admin-session-review-390.png"
+    },
+    {
+      "name": "creator-session-list",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-new",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-review",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "admin-session-review",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 375,
+        "fontLoaded": false,
+        "fontFamily": "Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-list",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-new",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-review",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "admin-session-review",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": false,
+        "fontFamily": "Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-edited",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": "creator-session-edited-1440.png"
+    },
+    {
+      "name": "creator-session-pending",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": "creator-session-pending-1440.png"
+    },
+    {
+      "name": "admin-session-pending",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": false,
+        "fontFamily": "Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": "admin-session-pending-1440.png"
+    },
+    {
+      "name": "creator-session-approved",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": "creator-session-approved-1440.png"
+    },
+    {
+      "name": "creator-session-open",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": "creator-session-open-1440.png"
+    },
+    {
+      "name": "creator-session-open-layout",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 305,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-open-layout",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 360,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-open-layout",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-open-layout",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 415,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-open-layout",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 753,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-suspended",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": "creator-session-suspended-1440.png"
+    },
+    {
+      "name": "creator-session-suspended-layout",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 305,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-suspended-layout",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 360,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-suspended-layout",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-suspended-layout",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 415,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-suspended-layout",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 753,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-readmitted",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": "creator-session-readmitted-1440.png"
+    },
+    {
+      "name": "creator-session-readmitted-layout",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 305,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-readmitted-layout",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 360,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-readmitted-layout",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-readmitted-layout",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 415,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-readmitted-layout",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 753,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-cancelled",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": "creator-session-cancelled-1440.png"
+    },
+    {
+      "name": "creator-session-cancelled-layout",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 305,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-cancelled-layout",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 360,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-cancelled-layout",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-cancelled-layout",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 415,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-cancelled-layout",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 753,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-edited",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": "creator-session-edited-390.png"
+    },
+    {
+      "name": "creator-session-pending",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": "creator-session-pending-390.png"
+    },
+    {
+      "name": "admin-session-pending",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": false,
+        "fontFamily": "Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": "admin-session-pending-390.png"
+    },
+    {
+      "name": "creator-session-approved",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": "creator-session-approved-390.png"
+    },
+    {
+      "name": "creator-session-open",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": "creator-session-open-390.png"
+    },
+    {
+      "name": "creator-session-open-layout",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-open-layout",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-open-layout",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 430,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-open-layout",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 768,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-open-layout",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1440,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-suspended",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": "creator-session-suspended-390.png"
+    },
+    {
+      "name": "creator-session-suspended-layout",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-suspended-layout",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-suspended-layout",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 430,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-suspended-layout",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 768,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-suspended-layout",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1440,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-readmitted",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": "creator-session-readmitted-390.png"
+    },
+    {
+      "name": "creator-session-readmitted-layout",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-readmitted-layout",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-readmitted-layout",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 430,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-readmitted-layout",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 768,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-readmitted-layout",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1440,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-cancelled",
+      "width": 390,
+      "layout": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": "creator-session-cancelled-390.png"
+    },
+    {
+      "name": "creator-session-cancelled-layout",
+      "width": 320,
+      "layout": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-cancelled-layout",
+      "width": 375,
+      "layout": {
+        "width": 375,
+        "document": 375,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-cancelled-layout",
+      "width": 430,
+      "layout": {
+        "width": 430,
+        "document": 430,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-cancelled-layout",
+      "width": 768,
+      "layout": {
+        "width": 768,
+        "document": 768,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "creator-session-cancelled-layout",
+      "width": 1440,
+      "layout": {
+        "width": 1440,
+        "document": 1440,
+        "fontLoaded": true,
+        "fontFamily": "FansOutfit, Outfit, system-ui, sans-serif",
+        "overflow": []
+      },
+      "screenshot": null
+    }
+  ],
+  "navigation": [
+    {
+      "width": 1440,
+      "nativeCreate": true,
+      "nativeEdit": true,
+      "nativeSubmit": true,
+      "nativeApproval": true,
+      "nativeOpen": true,
+      "nativeSuspension": true,
+      "nativeReadmission": true,
+      "nativeCancel": true,
+      "back": true,
+      "touch": false
+    },
+    {
+      "width": 390,
+      "nativeCreate": true,
+      "nativeEdit": true,
+      "nativeSubmit": true,
+      "nativeApproval": true,
+      "nativeOpen": true,
+      "nativeSuspension": true,
+      "nativeReadmission": true,
+      "nativeCancel": true,
+      "back": true,
+      "touch": true
+    }
+  ],
+  "failures": []
+}

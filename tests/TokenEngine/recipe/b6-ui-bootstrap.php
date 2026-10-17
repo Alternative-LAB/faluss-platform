@@ -32,3 +32,36 @@ add_filter('faluss_fans_hof_closed_delivery',static function () use ($wpdb,$sett
         new \Faluss\Platform\Fans\PfContract\ClosedBarrierPrimaryRead($wpdb,$inbox,$peer),
         new \Faluss\Platform\Fans\Hof\ClosedRankingProjectionStore($wpdb,$peer,$settings['origin'],'1.0.0'));
 });
+// Application transport wiring for the same admitted fictitious peer; no environment setup or admission.
+add_filter('faluss_fans_hof_closed_sessions',static function () use ($wpdb,$settings,$root): \Faluss\Platform\Fans\Hof\ClosedSessionLifecycle {
+    \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\ClosedEnvironment::assertIsolated($wpdb,'fans');
+    $policy = json_decode(file_get_contents($root . '/fans-corpus-trust.json'),true,20,JSON_THROW_ON_ERROR);
+    $peer = new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy($policy['node'],$policy['audience'],$policy['permissions'],$policy['keys']);
+    $inbox = new \Faluss\Platform\Fans\PfContract\ClosedBarrierInbox($wpdb,$peer,$settings['origin'],'1.0.0');
+    $endpoint = str_replace('/corpus','/barrier',trim(file_get_contents($root . '/corpus-endpoint')));
+    return new \Faluss\Platform\Fans\Hof\ClosedSessionLifecycle($wpdb,$inbox,
+        new \Faluss\Platform\Fans\PfContract\ClosedBarrierClient($wpdb,$inbox,'recipe-fans-k1',$endpoint),$settings['origin']);
+});
+// The separate current-primary read uses the same already admitted fictitious peer.
+add_filter('faluss_fans_hof_closed_session_freshness',static function () use ($wpdb,$settings,$root): \Faluss\Platform\Fans\Hof\ClosedSessionFreshness {
+    \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\ClosedEnvironment::assertIsolated($wpdb,'fans');
+    $policy = json_decode(file_get_contents($root . '/fans-corpus-trust.json'),true,20,JSON_THROW_ON_ERROR);
+    $peer = new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy($policy['node'],$policy['audience'],$policy['permissions'],$policy['keys']);
+    $inbox = new \Faluss\Platform\Fans\PfContract\ClosedBarrierInbox($wpdb,$peer,$settings['origin'],'1.0.0');
+    $reader = new \Faluss\Platform\Fans\PfContract\ClosedBarrierPrimaryRead($wpdb,$inbox,$peer);
+    $endpoint = str_replace('/corpus','/barrier',trim(file_get_contents($root . '/corpus-endpoint')));
+    return new \Faluss\Platform\Fans\Hof\ClosedSessionFreshness($wpdb,$inbox,$reader,
+        new \Faluss\Platform\Fans\PfContract\ClosedBarrierPrimaryClient($wpdb,$inbox,$reader,'recipe-fans-k1',$endpoint));
+});
+// Fixture fault selection only; it does not change a signature, permission or Hub result.
+add_filter('http_response',static function ($response, array $arguments, string $url) use ($wpdb,$root) {
+    $fault = $root . '/b6-ui-drop-response';
+    if (!is_file($fault) || is_link($fault) || (fileperms($fault) & 0777) !== 0600
+        || !str_ends_with($url,'rest_route=/faluss-b3-recipe/v1/barrier') || wp_remote_retrieve_response_code($response) !== 200) { return $response; }
+    \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\ClosedEnvironment::assertIsolated($wpdb,'fans');
+    $remaining = trim(file_get_contents($fault));
+    if (!in_array($remaining, ['1', '2', '3'], true)) { throw new RuntimeException('Invalid isolated delivery fault'); }
+    if ($remaining !== '1') { file_put_contents($fault,(string) ((int) $remaining - 1)); return $response; }
+    unlink($fault);
+    return new WP_Error('http_request_failed','Fictitious successful response intentionally lost.');
+},10,3);

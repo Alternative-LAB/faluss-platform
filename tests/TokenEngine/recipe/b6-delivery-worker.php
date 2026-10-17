@@ -167,6 +167,20 @@ try {
             $prepared = $bridge->prepare($input['session'],(int) $session['revision']); $result = $bridge->advance($input['session'],(int) $session['revision']);
             return $result + ['action_id' => $prepared['action_id']];
         })(),
+        'private-session-bindings' => (static function () use ($wpdb,$input,$inbox): array {
+            (new SessionService($wpdb))->inspect($input['session']);
+            $table = ClosedSessionLifecycleSchema::tables($wpdb)['bindings'];
+            $rows = $wpdb->get_results($wpdb->prepare('SELECT operation,action_id,fields_sha256,applied_at FROM %i WHERE session_id=%s ORDER BY operation',
+                $table,$input['session']),'ARRAY_A');
+            if (!is_array($rows) || $wpdb->last_error !== '') { throw new ModelViolation('hof_storage_unavailable'); }
+            foreach ($rows as &$row) {
+                $progress = $inbox->recover($row['action_id']);
+                $row['operation_key_sha256'] = hash('sha256',$progress['operation_key']);
+                $row['transport_phase'] = $progress['phase']; $row['transport_state'] = $progress['state'];
+            }
+            unset($row);
+            return $rows;
+        })(),
         'preferences' => $visibility->own(),
         'presentation-timezone' => (static function () use ($input): array {
             if (!current_user_can('manage_options') || !in_array($input['zone'], ['', 'UTC', 'Europe/Paris'], true)) { throw new ModelViolation('pf_fixture_timezone_refused'); }

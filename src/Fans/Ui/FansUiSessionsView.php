@@ -74,6 +74,7 @@ final class FansUiSessionsView
             }
             if ($row['state'] === 'draft') { echo '<p class="fu-hof__note">L’approbation des règles laisse la session en brouillon jusqu’à son ouverture.</p>'; }
             echo '</section>';
+            FansUiSessionLifecycleView::render($state);
         }
     }
 
@@ -95,8 +96,15 @@ final class FansUiSessionsView
         if ($code === 'hof_ambiguous_local_time') { return 'Cette heure apparaît deux fois au changement d’heure. Choisissez son décalage UTC.'; }
         if ($code === 'hof_nonexistent_local_time') { return 'Cette heure n’existe pas au changement d’heure. Choisissez une autre heure.'; }
         if ($code === 'hof_approved_creator_required') { return 'Un profil actif avec une présentation approuvée est nécessaire pour cette action.'; }
+        if ($code === 'hof_invalid_session_confirmation') { return 'Confirmez explicitement cette action avant de continuer.'; }
+        if ($code === 'hof_session_deadline_not_reached') { return 'L’échéance de la session n’est pas encore atteinte.'; }
+        if ($code === 'hof_coorganizer_acceptance_required') { return 'Chaque coorganisateur invité doit avoir répondu avant l’ouverture.'; }
+        if ($code === 'hof_reviewed_territory_required') { return 'Un territoire d’activité examiné est nécessaire pour cette portée.'; }
+        if ($code === 'hof_session_publication_pending') { return 'La transition est confirmée. L’affichage attend encore sa vérification ; vous pouvez la reprendre.'; }
         return match ($state->httpStatus()) {
-            200 => 'Votre action a été enregistrée. L’état courant est affiché.', 400 => 'Vérifiez les champs, les dates et le fuseau horaire.',
+            200 => 'Votre action a été enregistrée. L’état courant est affiché.',
+            202 => 'Votre demande est enregistrée. Sa confirmation est en cours ; vous pouvez reprendre la vérification.',
+            400 => 'Vérifiez les champs, les dates et le fuseau horaire.',
             403 => 'Accès ou confirmation insuffisante. Rechargez pour vérifier votre accès.', 409 => 'La session a changé ou cette action n’est plus disponible. Relisez la version courante.',
             429 => 'Trop de demandes récentes. Réessayez plus tard.', default => 'Action non confirmée. Consultez vos sessions avant de réessayer.',
         };

@@ -26,6 +26,8 @@ def run_checks(root,source,cli_path,fixture,origin,actors,session,month,deliver,
     settings.write_text(json.dumps(dict(origin=origin,fictitious_client_secret=secrets.token_urlsafe(32))));settings.chmod(0o600)
     mu=fans/'wp-content/mu-plugins';mu.mkdir(exist_ok=True)
     adapter=mu/'b6-ui-recipe.php';shutil.copy2(source/'tests/TokenEngine/recipe/b6-ui-bootstrap.php',adapter)
+    hub_clock_adapter=root/'wordpress/wp-content/mu-plugins/b6-ui-clock.php'
+    shutil.copy2(source/'tests/TokenEngine/recipe/b6-ui-hub-clock.php',hub_clock_adapter)
     log=(root/'b6-ui-runtime.log').open('wb');server=None
     try:
         # Existing WordPress rewrite/route machinery, not a replacement page or fake reader.
@@ -71,6 +73,8 @@ def run_checks(root,source,cli_path,fixture,origin,actors,session,month,deliver,
         privacy_checks(read,cookies,actors,month,deliver,check,origin_action)
         from b6_session_ui_http_checks import run_checks as session_checks
         management=session_checks(read,cookies,actors,session,deliver,check)
+        from b6_session_lifecycle_ui_http_checks import run_checks as lifecycle_checks
+        lifecycle_checks(root,read,cookies,actors,deliver,check,fixture['set_clock'])
         if os.environ.get('FALUSS_B6_UI_EXPORT'):
             out=pathlib.Path(os.environ['FALUSS_B6_UI_EXPORT']).resolve()
             if out.parent!=pathlib.Path('/var/tmp') or not out.name.startswith('fans-hof-ui-') or out.is_symlink():raise RuntimeError('Unsafe private UI capture destination')
@@ -86,5 +90,5 @@ def run_checks(root,source,cli_path,fixture,origin,actors,session,month,deliver,
     finally:
         if server is not None and server.poll() is None:
             os.killpg(server.pid,signal.SIGTERM);server.wait(timeout=15)
-        log.close();adapter.unlink(missing_ok=True);settings.unlink(missing_ok=True)
+        log.close();adapter.unlink(missing_ok=True);hub_clock_adapter.unlink(missing_ok=True);settings.unlink(missing_ok=True)
         config.write_text(before);config.chmod(0o600)

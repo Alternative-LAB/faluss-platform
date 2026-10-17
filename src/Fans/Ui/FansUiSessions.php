@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Faluss\Platform\Fans\Ui;
 
 use Faluss\Platform\Fans\Hof\ClosedSessionManagement;
+use Faluss\Platform\Fans\Hof\ClosedSessionActions;
 use Faluss\Platform\Fans\Hof\SessionModeration;
 use Faluss\Platform\Fans\Hof\SessionRules;
 use Faluss\Platform\Fans\Hof\SessionService;
@@ -28,6 +29,10 @@ final class FansUiSessions
     public string $postAction = '';
     public string $submittedRevision = '';
     public string $submittedReviewRevision = '';
+    public bool $transportAvailable = false;
+    public bool $lifecyclePending = false;
+    public bool $publicationPending = false;
+    public string $serverNow = '';
     /** @var list<array<string,string>> */
     public array $items = [];
     /** @var array{session:array<string,string>,roles:list<array<string,string>>}|null */
@@ -67,6 +72,10 @@ final class FansUiSessions
             if (!in_array($state->mode, ['sessions', 'new', 'session'], true)) { throw new ModelViolation('hof_invalid_session_input'); }
             $state->id = self::field('session', $_GET); $state->cursor = self::field('sessions_cursor', $_GET);
             $state->read($services['sessions'], $services['reviews']);
+            if ($state->detail !== null) {
+                $state->transportAvailable = (new ClosedSessionActions($wpdb))->available();
+                $state->serverNow = (new SessionStore($wpdb))->now();
+            }
             $state->available = true;
             if (self::isPost()) {
                 $action = self::field('hof_session_action', $_POST);
@@ -74,7 +83,11 @@ final class FansUiSessions
                 $state->submittedReviewRevision = self::field('review_revision', $_POST);
                 if (in_array($action, ['create', 'edit'], true)) { $state->draft = self::draftFields(); }
                 if ($action === 'appeal') { $state->appealText = mb_substr(self::field('explanation', $_POST), 0, 1200, 'UTF-8'); }
-                try { $state->submit($services['sessions'], $services['reviews']); $state->result = new \WP_REST_Response([], 200); $state->draft = null; $state->appealText = ''; }
+                try {
+                    $state->submit($services['sessions'], $services['reviews']);
+                    $state->result = new \WP_REST_Response(['code' => $state->publicationPending ? 'hof_session_publication_pending' : ''], $state->lifecyclePending || $state->publicationPending ? 202 : 200);
+                    $state->draft = null; $state->appealText = '';
+                }
                 catch (ModelViolation $error) { $state->result = self::failure($error->reason); }
                 if ($state->destination === null) { $state->read($services['sessions'], $services['reviews']); }
             }
@@ -110,6 +123,14 @@ final class FansUiSessions
             $reviews->submit($this->id, self::revision('session_revision', 1), self::revision('review_revision', 0)); return;
         }
         if ($action === 'appeal') { $reviews->appeal($this->id, self::revision('review_revision', 0), self::field('explanation', $_POST)); return; }
+        if (in_array($action, ['open', 'readmit', 'cancel', 'complete', 'resume', 'refresh'], true)) {
+            global $wpdb;
+            $progress = (new ClosedSessionActions($wpdb))->perform($this->id, self::revision('session_revision', 1), $action,
+                self::field('hof_session_confirmation', $_POST) === 'yes');
+            $this->lifecyclePending = !in_array($progress['session_state'] ?? '', ['open', 'closed', 'cancelled', 'suspended'], true);
+            $this->publicationPending = !$this->lifecyclePending && ($progress['publication_phase'] ?? '') !== 'current';
+            return;
+        }
         throw new ModelViolation('hof_invalid_session_input');
     }
 
@@ -158,7 +179,8 @@ final class FansUiSessions
         $status = match ($reason) {
             'hof_session_forbidden', 'hof_linked_creator_required' => 403,
             'hof_session_not_found', 'hof_review_not_found' => 404,
-            'hof_session_revision_conflict', 'hof_review_revision_conflict', 'hof_review_rules_changed', 'hof_session_rules_frozen', 'hof_invalid_review_transition', 'hof_approved_creator_required' => 409,
+            'hof_session_revision_conflict', 'hof_review_revision_conflict', 'hof_review_rules_changed', 'hof_session_rules_frozen', 'hof_invalid_review_transition', 'hof_approved_creator_required',
+            'hof_session_deadline_not_reached', 'hof_session_approval_required', 'hof_coorganizer_acceptance_required', 'hof_reviewed_territory_required', 'hof_invalid_session_transition' => 409,
             'invalid_identity_or_reference' => 400,
             'hof_session_rate_limit' => 429,
             default => str_starts_with($reason, 'hof_invalid_') || in_array($reason, ['hof_ambiguous_local_time', 'hof_nonexistent_local_time'], true) ? 400 : 503,
