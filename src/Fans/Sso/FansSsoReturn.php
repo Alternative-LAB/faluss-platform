@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Faluss\Platform\Fans\Sso;
 
+use Faluss\Platform\Fans\Profiles\DiscoveryCursor;
+
 /** A navigation hint, never an identity or an authorization grant. */
 final class FansSsoReturn
 {
@@ -31,6 +33,13 @@ final class FansSsoReturn
         }
         if (preg_match('~^creator/hof/?\?manage=(sessions|new)$~D', $relative, $selection) === 1) {
             return $prefix . 'creator/hof?manage=' . $selection[1];
+        }
+        if (preg_match('~^creator/hof/?\?manage=session&session=([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})&coorganizer_cursor=([A-Za-z0-9.%-]{1,200})$~D', $relative, $selection) === 1) {
+            $cursor = rawurldecode($selection[2]);
+            if (rawurlencode($cursor) === $selection[2] && DiscoveryCursor::decode($cursor, 'd1.all.') !== false) {
+                return $prefix . 'creator/hof?manage=session&session=' . $selection[1] . '&coorganizer_cursor=' . $selection[2];
+            }
+            return null;
         }
         if (preg_match('~^creator/hof/?\?manage=(session|sessions)&(session|sessions_cursor)=([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$~D', $relative, $selection) === 1
             && (($selection[1] === 'session' && $selection[2] === 'session') || ($selection[1] === 'sessions' && $selection[2] === 'sessions_cursor'))) {

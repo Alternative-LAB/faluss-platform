@@ -75,6 +75,7 @@ final class FansUiSessionsView
             if ($row['state'] === 'draft') { echo '<p class="fu-hof__note">L’approbation des règles laisse la session en brouillon jusqu’à son ouverture.</p>'; }
             echo '</section>';
         }
+        FansUiSessionOrganizersView::render($state);
     }
 
     /** @param array<string,string> $row */

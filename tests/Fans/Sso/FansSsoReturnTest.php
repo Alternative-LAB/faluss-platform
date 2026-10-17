@@ -87,6 +87,26 @@ final class FansSsoReturnTest extends TestCase
         $GLOBALS['fans_sso_home'] = 'https://fans.example.test/community';
         self::assertSame('/community/app/creator/hof?manage=new', FansSsoReturn::path('/community/app/creator/hof?manage=new'));
     }
+    public function testPrivateCoorganizerPageReturnsToTheSameSessionWithOnlyACanonicalPublicCursor(): void
+    {
+        $id = '123e4567-e89b-42d3-a456-426614174000'; $state = str_repeat('s', 43);
+        $cursor = rawurlencode('d1.all.2026-10-17T12:30:00.' . $id);
+        foreach (['/app/', '/faluss-fans/'] as $prefix) {
+            $path = $prefix . 'creator/hof?manage=session&session=' . $id . '&coorganizer_cursor=' . $cursor;
+            self::assertSame($path, FansSsoReturn::path($path));
+            self::assertSame($path, FansSsoReturn::open(FansSsoReturn::seal($path, $state), $state));
+            self::assertNull(FansSsoReturn::open(FansSsoReturn::seal($path, $state), str_repeat('t', 43)));
+            foreach ([$path . '&nonce=private', $path . '&coorganizer_cursor=' . $cursor,
+                str_replace('d1.all.', 'd1.music.', $path), str_replace('2026-10-17', '2026-02-30', $path),
+                str_replace('%3A', '%253A', $path), str_replace('manage=session&', 'manage=new&', $path)] as $invalid) {
+                self::assertNull(FansSsoReturn::path($invalid));
+            }
+        }
+        $GLOBALS['fans_sso_home'] = 'https://fans.example.test/community';
+        $path = '/community/app/creator/hof?manage=session&session=' . $id . '&coorganizer_cursor=' . $cursor;
+        self::assertSame($path, FansSsoReturn::path($path));
+    }
+
     public function testMessageReturnKeepsOnlyOneOpaqueSelection(): void
     {
         $id='123e4567-e89b-42d3-a456-426614174000';$state=str_repeat('s',43);

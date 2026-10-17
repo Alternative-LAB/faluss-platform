@@ -8,6 +8,7 @@ use Faluss\Platform\Fans\Hof\ClosedSessionManagement;
 use Faluss\Platform\Fans\Hof\SessionModeration;
 use Faluss\Platform\Fans\Hof\SessionRules;
 use Faluss\Platform\Fans\Hof\SessionService;
+use Faluss\Platform\Fans\Hof\SessionRoles;
 use Faluss\Platform\Fans\Hof\SessionStore;
 use Faluss\Platform\Fans\Moderation\ModerationPanel;
 use Faluss\Platform\TokenEngine\PurchasedPf\ModelViolation;
@@ -36,6 +37,7 @@ final class FansUiSessions
     public ?array $review = null;
     /** @var array<string,string>|null */
     public ?array $draft = null;
+    public ?FansUiSessionOrganizers $organizers = null;
 
     public static function supports(string $role, string $view): bool
     { return $role === 'creator' && $view === 'hof' && array_key_exists('manage', $_GET); }
@@ -93,6 +95,7 @@ final class FansUiSessions
             try { SessionRules::validate(array_intersect_key($this->detail['session'], array_flip(['title', 'rules_text', 'category', 'scope', 'country', 'territory_ref', 'timezone', 'starts_at', 'ends_at']))); }
             catch (ModelViolation) { throw new ModelViolation('hof_session_unavailable'); }
             $this->review = $this->isOwner() ? $reviews->own($this->id) : null;
+            $this->organizers = FansUiSessionOrganizers::load($this);
         }
     }
 
@@ -110,6 +113,13 @@ final class FansUiSessions
             $reviews->submit($this->id, self::revision('session_revision', 1), self::revision('review_revision', 0)); return;
         }
         if ($action === 'appeal') { $reviews->appeal($this->id, self::revision('review_revision', 0), self::field('explanation', $_POST)); return; }
+        if (in_array($action, ['invite_organizer', 'accept_organizer', 'refuse_organizer'], true)) {
+            global $wpdb;
+            $roles = new SessionRoles($wpdb); $revision = self::revision('session_revision', 1);
+            if ($action === 'invite_organizer') { $roles->invite($this->id, $revision, self::field('organizer_target', $_POST)); }
+            else { $roles->answer($this->id, $revision, $action === 'accept_organizer'); }
+            return;
+        }
         throw new ModelViolation('hof_invalid_session_input');
     }
 
@@ -158,7 +168,7 @@ final class FansUiSessions
         $status = match ($reason) {
             'hof_session_forbidden', 'hof_linked_creator_required' => 403,
             'hof_session_not_found', 'hof_review_not_found' => 404,
-            'hof_session_revision_conflict', 'hof_review_revision_conflict', 'hof_review_rules_changed', 'hof_session_rules_frozen', 'hof_invalid_review_transition', 'hof_approved_creator_required' => 409,
+            'hof_session_revision_conflict', 'hof_review_revision_conflict', 'hof_review_rules_changed', 'hof_session_rules_frozen', 'hof_invalid_review_transition', 'hof_approved_creator_required', 'hof_invalid_coorganizer_invitation' => 409,
             'invalid_identity_or_reference' => 400,
             'hof_session_rate_limit' => 429,
             default => str_starts_with($reason, 'hof_invalid_') || in_array($reason, ['hof_ambiguous_local_time', 'hof_nonexistent_local_time'], true) ? 400 : 503,
