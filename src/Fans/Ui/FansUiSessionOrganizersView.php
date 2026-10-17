@@ -27,7 +27,7 @@ final class FansUiSessionOrganizersView
         if ($state->detail['session']['state'] === 'draft' && $view->manager) {
             echo '<p>Chaque Créateur invité doit accepter avant l’ouverture.</p>';
             if ($view->candidates !== []) {
-                echo '<form class="fu-hof-session__editor" method="post" action="' . esc_url(FansUiSessions::url('session', $state->id)) . '">';
+                echo '<form class="fu-hof-session__summary fu-hof-session__invitation" method="post" action="' . esc_url(FansUiSessions::url('session', $state->id)) . '">';
                 FansUiSessionForm::fields('invite_organizer', $state->detail['session']['revision'], $state->review['revision'] ?? '0');
                 echo '<label for="fu-session-organizer">Inviter un Créateur</label><select id="fu-session-organizer" name="organizer_target" required><option value="">Choisir un Créateur</option>';
                 foreach ($view->candidates as $candidate) { echo '<option value="' . esc_attr($candidate['id']) . '">' . esc_html($candidate['name']) . '</option>'; }
