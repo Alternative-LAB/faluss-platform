@@ -250,3 +250,11 @@ Les invocations individuelles gardent leurs scénarios antérieurs.
 Cette jonction de recette n'ajoute ni contrat, route, admission ou fonctionnalité
 publique. La livraison complète des projections et la liaison des barrières de
 participants/créateurs/pays aux intentions restent à composer.
+
+
+### Correction de concurrence — 17 octobre 2026
+
+[Recette avant/après et limites](../evidence/hub-barrier-nonce/README.md) :
+490 contrôles, zéro échec ; deux nonces frais dans le même intervalle sont
+admis simultanément, rejeux refusés et ledger inchangé. Aucun changement de
+contrat réseau, de schéma, de CI ou d’environnement. Validation fermée seulement.

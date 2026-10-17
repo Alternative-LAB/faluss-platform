@@ -1,0 +1,41 @@
+{
+  "before": {
+    "source_tree": "dfd03b349b25dc6ae645d17afb4f9c68e78f5c73",
+    "both_ready": true,
+    "same_preexisting_index_interval": true,
+    "accepted": 1,
+    "nonce_count_delta": 1,
+    "workers": [
+      {
+        "accepted": true,
+        "deadlock": false
+      },
+      {
+        "accepted": false,
+        "deadlock": true,
+        "error": "h2_storage_unavailable"
+      }
+    ],
+    "new_deadlock": true,
+    "isolation": "REPEATABLE-READ",
+    "locks": "Two absent-row PRIMARY gap locks and conflicting insert intentions; one transaction rolled back"
+  },
+  "after": {
+    "commit": "43a5e59b8e243d4cfebdf18bc48aa6ab35b6d998",
+    "tree": "adba6735e4e75ab144ab87c3b3e30abb4b4dc965",
+    "total": 490,
+    "failed": 0,
+    "completion_http": 23,
+    "new_cases": [
+      "B3beh distinct authenticated nonces in the same index interval both commit",
+      "B3beh interval admissions change no owner event and both replays are refused"
+    ],
+    "fixture_removed": true,
+    "report_sha256": "add7f18f5f68bcb69c200600dbd7a0bb8fa790ffa888e1510abb464c4abee49c"
+  },
+  "limits": [
+    "Controlled authenticated admission on disposable Hub; no ledger or barrier owner operation in the synchronized probe",
+    "No database trace from the old failing CI jobs: their exact cause is not asserted",
+    "No production sizing, real-site, central SSO or economic admission proof"
+  ]
+}
