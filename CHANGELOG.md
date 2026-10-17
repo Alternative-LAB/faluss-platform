@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Corrigé
+
+- Éviter l'interblocage entre admissions de nonces de barrières Hub distincts dans un même intervalle InnoDB, en conservant le mutex par nonce, la clé unique, les contrôles de fraîcheur et le refus des rejeux ; aucun contrat réseau ou réglage d'environnement modifié. Recette fermée sur données fictives uniquement.
+
 ### Ajouté
 
 - Invitations privées de coorganisation B6 raccordées aux services existants : candidats publics paginés, acceptation/refus explicites et permissions distinctes du propriétaire ; aucun participant ou pouvoir Hub implicite. Retour de navigation SSO canonique pour la page de candidats, sans changement du protocole ; recette applicative en cours, aucune activation.

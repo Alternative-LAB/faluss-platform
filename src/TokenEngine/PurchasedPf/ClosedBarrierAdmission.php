@@ -46,7 +46,10 @@ final class ClosedBarrierAdmission
             DelegatedContext::fresh($request['issued_at'],$request['expires_at'],time());
             $this->connection->query('START TRANSACTION'); $started = true;
             $table = ClosedBarrierTransportSchema::tables($this->db)['nonces'];
-            if ($this->connection->row($table,'peer=%s AND nonce_sha256=%s',[$peer->node,$hash]) !== null) {
+            // The nonce mutex is held before this transaction starts. A locking read of
+            // an absent row would gap-lock unrelated nonces and deadlock their inserts.
+            if ((string) $this->connection->scalar($this->db->prepare(
+                'SELECT COUNT(*) FROM %i WHERE peer=%s AND nonce_sha256=%s',$table,$peer->node,$hash)) !== '0') {
                 throw new ModelViolation('pf_nonce_replayed');
             }
             $this->connection->insert($table,['peer' => $peer->node,'nonce_sha256' => $hash,'request_sha256' => $digest,

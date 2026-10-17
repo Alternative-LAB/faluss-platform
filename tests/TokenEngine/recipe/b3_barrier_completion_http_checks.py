@@ -82,5 +82,7 @@ def run_checks(root,check,call,sql,fixture):
         check('B3beh lost response recovers by primary lookup without a new key or second event',
             recovered['result']['state']=='closed' and recovered['result']['reason']=='session_completed'
             and exchange(fields,key)[0]==recovered and events()==before+1)
+        from b3_barrier_nonce_interval_checks import run_checks as nonce_intervals
+        nonce_intervals(root,check,sql,fixture)
         check('B3beh 1.1 completion HTTP preserves all official ledger bytes',sql('SELECT * FROM wp_token_engine_pf_ledger ORDER BY id')==historic)
     finally:clock.unlink(missing_ok=True)
