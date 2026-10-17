@@ -30,6 +30,27 @@ final class ClosedParticipationLifecycle
         $this->sessions = new SessionStore($db); $this->tables = ClosedParticipationSchema::tables($db);
     }
 
+    public function usesConnection(\wpdb $db): bool
+    { ClosedEnvironment::assertIsolated($db,'fans'); return $this->db === $db; }
+
+    /** Private local checkpoint only, never a fresh-primary proof or a mutation during GET.
+     * @return array{bound:bool,opening_applied:bool,closing_applied:bool} */
+    public function checkpoint(string $sessionId, string $creator): array
+    {
+        $this->available(); ModelValues::uuid($creator);
+        return $this->sessions->transaction(function () use ($sessionId,$creator): array {
+            $session = $this->sessions->row($sessionId); $this->authorize($session,$creator);
+            $role = $this->requiredRole($sessionId,$creator); $version = $this->latest($sessionId,$creator);
+            $offset = match ($role['state']) { 'admitted' => 0,'closing' => 1,'withdrawn' => 2,default => -1 };
+            $current = $version !== null && $offset >= 0 && (int) $role['revision'] === (int) $version['role_revision']+$offset;
+            if ($role['state'] === 'admitted' && ($version['session_barrier_version'] ?? '') !== $session['barrier_version']) { $current = false; }
+            $opening = $current ? $this->binding($version,'register') : null;
+            $closing = $current ? $this->binding($version,'close') : null;
+            return ['bound' => $current,'opening_applied' => ($opening['applied_at'] ?? '') !== '',
+                'closing_applied' => ($closing['applied_at'] ?? '') !== ''];
+        });
+    }
+
     /** Admission and its immutable Identity/version checkpoint commit together, before any HTTP.
      * Refusals keep the existing B2 decision/appeal path and create no Hub admission.
      * @return array<string,string> */

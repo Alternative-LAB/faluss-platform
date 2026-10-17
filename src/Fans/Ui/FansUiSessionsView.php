@@ -24,6 +24,7 @@ final class FansUiSessionsView
                 <?php if ($state->result !== null): ?><p role="status" class="fu-panel fu-hof-session__notice"><?php echo esc_html(self::notice($state)); ?></p><?php endif; ?>
                 <?php if ($state->mode === 'new'): ?><h2>Créer une session</h2><?php FansUiSessionForm::render($state); ?>
                 <?php elseif ($state->mode === 'sessions'): self::listing($state); ?>
+                <?php elseif ($state->mode === 'join'): FansUiSessionParticipantsView::join($state); ?>
                 <?php else: self::detail($state); endif; ?>
             <?php endif; ?>
         </div>
@@ -77,6 +78,7 @@ final class FansUiSessionsView
             FansUiSessionLifecycleView::render($state);
         }
         FansUiSessionOrganizersView::render($state);
+        FansUiSessionParticipantsView::render($state);
     }
 
     /** @param array<string,string> $row */

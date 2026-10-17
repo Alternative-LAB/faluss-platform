@@ -89,6 +89,11 @@ try {
             return (new SessionService($wpdb))->inspect($input['session']) + ['review' => $reviews->own($input['session']), 'history' => $reviews->history($input['session'])];
         })(),
         'private-sessions' => (new SessionService($wpdb))->own($input['after'] ?? ''),
+        'fixture-participation-services' => (static function () use ($wpdb): array {
+            RankingRegistry::administrator(); \Faluss\Platform\Fans\Hof\ClosedParticipationSchema::installForRecipe($wpdb); return ['ready' => true];
+        })(),
+        'participation-cases' => (new \Faluss\Platform\Fans\Hof\SessionAppeals($wpdb))->list($input['after'] ?? ''),
+        'participation-case' => (new \Faluss\Platform\Fans\Hof\SessionAppeals($wpdb))->own($input['case']),
         'fixture-extra-creator' => (static function () use ($wpdb,$admin): array {
             $label = 'b6_session_' . bin2hex(random_bytes(8));
             $id = wp_insert_user(['user_login' => $label,'user_pass' => wp_generate_password(40),

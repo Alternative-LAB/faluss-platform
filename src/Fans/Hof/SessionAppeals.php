@@ -84,6 +84,19 @@ final class SessionAppeals
         });
     }
 
+    /** The current member's current participation only; no recipient parameter or mutation.
+     * @return array<string,string>|null */
+    public function currentForParticipation(string $session): ?array
+    {
+        $creator = SessionStore::ownerCreator()['creator_id']; $this->available();
+        return $this->store->transaction(function () use ($session,$creator): ?array {
+            $this->store->row($session); $role = $this->store->role($session,$creator,'participant');
+            if ($role === null) { throw new ModelViolation('hof_participation_conflict'); }
+            return $this->store->storage->row($this->db->prepare('SELECT * FROM %i WHERE session_id=%s AND creator_id=%s AND role_revision=%s FOR UPDATE',
+                $this->tables['appeals'],$session,$creator,$role['revision']));
+        });
+    }
+
     /** Owner and moderator queues are distinct; no recipient override parameter.
      * @return list<array<string,string>> */
     public function list(string $after = ''): array

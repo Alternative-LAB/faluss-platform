@@ -12,6 +12,7 @@ final class FansUiSessionLifecycleView
         if (!$state->isOwner() || $state->detail === null) { return; }
         $row = $state->detail['session'];
         if (!in_array($row['state'], ['draft', 'opening', 'open', 'closing', 'suspended', 'closed', 'cancelled'], true)) { return; }
+        if ($row['state'] === 'draft' && (!$state->currentReview() || ($state->review['state'] ?? '') !== 'approved')) { return; }
         echo '<section class="fu-panel fu-hof-session__summary"><h3>Ouverture et clôture</h3>';
         if (!$state->transportAvailable) {
             echo '<p>La confirmation d’ouverture ou de clôture est indisponible pour le moment.</p></section>'; return;
