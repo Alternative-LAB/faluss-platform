@@ -16,7 +16,7 @@ def run_checks(root,read,cookies,actors,deliver,check):
     check('B6tu a native territorial GET cannot install a missing schema',
           'error' in before and read(path,owner)[0]==503 and 'error' in own())
     check('B6tu guest Fan and an unlinked administrator cannot use Creator territory forms',
-          read(path)[0]==403 and read(path,cookies['fan'])[0]==404 and read(path,admin)[0]==404)
+          all(read(path,cookie)[0]==403 for cookie in (None,cookies['fan'],admin)))
     assert deliver('territory-ui-install',actor=actors['admin_user'])==dict(ready=True)
     policy_ids=sorted(str(uuid.uuid4()) for _ in range(21))
     criteria=dict(criteria_url='https://criteria.example.invalid/native-territory',criteria_text='Critères fictifs de recette : activité principale examinée, sans preuve de domicile.',
@@ -40,7 +40,7 @@ def run_checks(root,read,cookies,actors,deliver,check):
     check('B6tu invalid owner nonce cannot create a territorial decision',
           read(path,owner,dict(fields,hof_session_nonce='invalid'))[0]==403 and own()==initial)
     check('B6tu a foreign session cannot reuse an owner form or expose the private moderation panel',
-          read(path,cookies['fan'],fields)[0]==404 and read(panel,owner)[0]==403 and own()==initial)
+          read(path,cookies['fan'],fields)[0]==403 and read(panel,owner)[0]==403 and own()==initial)
     with ThreadPoolExecutor(max_workers=2) as pool:responses=list(pool.map(lambda _:read(path,owner,fields)[0],range(2)))
     check('B6tu concurrent native declarations commit one revision and one audit decision',
           sorted(responses)==[200,409] and own()['revision']=='1' and len(detail()['history'])==1)
