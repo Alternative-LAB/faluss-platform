@@ -14,6 +14,7 @@ on:
 permissions:
   contents: read
   pull-requests: read
+  issues: read
   statuses: write
 
 jobs:
@@ -44,11 +45,41 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [[ ! "$PR_BRANCH" =~ ^(feat|fix|refactor|docs|chore|test|ci|build|perf|hotfix)/[a-z0-9][a-z0-9._-]*$ ]]; then
+          if [[ ! "$PR_BRANCH" =~ ^(feat|fix|chore)/[1-9][0-9]*-[a-z0-9][a-z0-9._-]*$ ]]; then
             echo "Invalid branch name: $PR_BRANCH"
-            echo "Use an allowed prefix followed by a lowercase explicit name."
+            echo "Use feat/, fix/ or chore/, the issue number, and a lowercase English name."
             exit 1
           fi
+
+      - name: Validate linked issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          issue_number="${PR_BRANCH#*/}"
+          issue_number="${issue_number%%-*}"
+          if ! ISSUE_NUMBER="$issue_number" python3 - <<'PYISSUE'
+          import os
+          import re
+          import sys
+          body = re.sub(r'<!--.*?-->', '', os.environ['PR_BODY'], flags=re.S)
+          number = re.escape(os.environ['ISSUE_NUMBER'])
+          sys.exit(not re.search(r'(?<![\w/])#' + number + r'(?!\d)', body))
+          PYISSUE
+          then
+            echo 'The PR body must reference the issue number from its branch.' >&2
+            exit 1
+          fi
+          gh api "repos/${GITHUB_REPOSITORY}/issues/${issue_number}" > "$RUNNER_TEMP/linked-issue.json"
+          python3 - <<'PYEXISTS'
+          import json
+          import os
+          from pathlib import Path
+          issue = json.loads((Path(os.environ['RUNNER_TEMP']) / 'linked-issue.json').read_text())
+          if 'pull_request' in issue or issue['state'] != 'open':
+              raise SystemExit('The branch must reference an open issue, not a PR.')
+          PYEXISTS
 
       - name: Validate required PR sections
         shell: bash
