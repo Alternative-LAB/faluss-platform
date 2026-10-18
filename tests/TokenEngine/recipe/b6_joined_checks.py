@@ -236,6 +236,10 @@ def run_checks(root,source,cli_path,check,command,fixture,hub_sql,hub,delivery_e
               cancelled['state']=='cancelled' and cancelled['items'][0]['points']=='2')
         from b6_dimension_visibility_checks import run_checks as dimension_checks
         dimension_checks(dict(fixture,dimension_member=intent['member_faluss_id']),origin,actors,deliver,hub,hub_sql,sql,check)
+        from b6_purchased_thanks_checks import run_checks as thanks_checks
+        thanks_checks(fixture,origin,actors,intent['member_faluss_id'],deliver,hub,hub_sql,sql,check)
+        from b6_purchased_thanks_ui_checks import run_checks as thanks_ui_checks
+        thanks_ui_checks(root,source,cli_path,fixture,origin,actors,deliver,check)
         ledger=hub_sql('SELECT * FROM wp_token_engine_pf_ledger ORDER BY id')
     close=dict(fields,operation='close',action_id=str(uuid.uuid4()),object={
         name:ack['result'][name] for name in ('barrier_key','version','content_sha256')}|dict(reason='origin_closed'))

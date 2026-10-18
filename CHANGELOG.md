@@ -13,6 +13,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Raccordement fermé en cours des remerciements aux reçus PF0.3 authentifiés et au corpus courant rapproché, avec capture durable unique par attribution et file de messagerie existante ; aucune source réelle, nouveau contrat Hub ou activation.
 - Parcours natif fermé des territoires HoF : critères paginés, déclaration/recours/retrait propriétaire, examen dans le panel Fans et reprise bornée des fermetures avec les mêmes actions Hub. Permissions, nonces, révisions et journal existants conservés ; dates affichées dans le fuseau WordPress, sans activation ni nouveau contrat Hub.
 
 ### Ajouté

@@ -74,6 +74,7 @@ final class MessageAutomaticSettings
         });
     }
 
-    /** Until the closed authoritative PF bridge is connected, no flag or client field enables it. */
-    public static function thanksDeliveryAvailable(): bool {return false;}
+    /** A typed closed source, not a flag, preview or client field, makes delivery configurable. */
+    public static function thanksDeliveryAvailable(): bool
+    {return \Faluss\Platform\Fans\PfContract\ClosedPurchasedThanksDelivery::configured()!==null;}
 }
