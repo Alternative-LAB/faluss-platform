@@ -12,6 +12,20 @@ final class FansSsoReturnTest extends TestCase
 {
     protected function setUp(): void { fans_sso_reset(); }
 
+    public function testSupportReturnKeepsOnlyTheExactTargetWithoutGrantingAnAttribution(): void
+    {
+        $id='123e4567-e89b-42d3-a456-426614174000';$state=str_repeat('s',43);
+        foreach (['fan','creator'] as $role) {
+            $path='/app/'.$role.'/hof?support='.$id;
+            self::assertSame($path,FansSsoReturn::path($path));
+            self::assertSame($path,FansSsoReturn::open(FansSsoReturn::seal($path,$state),$state));
+            foreach ([$path.'&quantity=10',$path.'&sessions[]='.$id,$path.'&nonce=x',$path.'&support='.$id,$path.'#fragment',
+                str_replace('?support=','?support[]=',$path)] as $bad) { self::assertNull(FansSsoReturn::path($bad)); }
+        }
+        $GLOBALS['fans_sso_home']='https://fans.example.test/community';
+        self::assertSame('/community/faluss-fans/fan/hof?support='.$id,FansSsoReturn::path('/community/faluss-fans/fan/hof?support='.$id));
+    }
+
     public function testOnlyExplicitFansPathsSurviveIncludingSubdirectories(): void
     {
         foreach (['/app', '/app/fan/explorer', '/app/creator/mon-profil', '/app/creator/images'] as $path) {

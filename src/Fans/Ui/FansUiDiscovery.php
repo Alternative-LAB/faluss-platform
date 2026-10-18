@@ -36,6 +36,7 @@ final class FansUiDiscovery
                 <p class="fu-live" data-fans-status role="status" aria-live="polite">Chargement du profil…</p>
                 <div data-fans-results></div>
                 <?php FansUiFollow::render($creatorId); ?>
+                <?php FansUiSupport::link($role,$creatorId); ?>
                 <?php if (\Faluss\Platform\Fans\Messaging\MessageModule::available() && \Faluss\Platform\Fans\Profiles\CreatorProfileService::activeOwner($creatorId) !== get_current_user_id()): ?>
                     <a class="fu-link fu-public-creator__action" href="<?php echo esc_url(add_query_arg('creator', $creatorId, FansUiRoutes::url($role === 'visitor' ? 'fan' : $role, 'messages'))); ?>">Écrire au créateur ↗</a>
                 <?php endif; ?>
