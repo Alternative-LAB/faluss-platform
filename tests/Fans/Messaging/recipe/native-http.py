@@ -26,10 +26,14 @@ msg=call(17,'messages/'+thread)[1]['messages'][-1]['message_id']
 check('native report reaches actual service',native(17,'/app/creator/messages?thread='+thread,form('report',thread_id=thread,message_id=msg,reason='spam'))[0]==200)
 case=call(17,'message-reports/mine')[1]['items'][0]['case_id'];panel='/admin.php?page=faluss-fans-moderation&view=messages&item='+case
 for user in [0,1,17,18]: check('native evidence denied '+str(user),native(user,panel)[0]==403)
+runtime_log=pathlib.Path(os.environ['FANS_EDITORIAL_FIXTURE'])/'mariadb.log';log_start=runtime_log.stat().st_size
 status,proof,_=native(42,panel)
 check('native moderator proof page is HTTP 200',status==200)
 check('native moderator proof has no PHP error',not any(error in proof for error in ('Fatal error','Uncaught Error','Warning:','Parse error')))
 check('native moderator sees selected proof','Message via formulaire natif' in proof)
+with runtime_log.open('rb') as runtime:
+    runtime.seek(log_start);php_output=runtime.read().decode('utf8',errors='replace')
+check('native moderator proof has no hidden PHP runtime error',not any(error in php_output for error in ('Fatal error','Uncaught Error','Warning:','Parse error')))
 mod=dict(_wpnonce='fixture-fans_moderation',kind='message-report',item_id=case,revision='1',action='no_action',reason='Examen natif réel',days='0')
 check('native moderation nonce required',native(42,panel,dict(mod,_wpnonce='wrong'))[0]==403)
 check('native moderator provisional decision',native(42,panel,mod)[0]==200)
