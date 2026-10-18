@@ -14,6 +14,23 @@ final class MessageStore
         return !self::failed()&&is_array($row)&&(string)($row['active']??'')==='1'
             &&(string)($row['replica']??'')==='0'&&(string)($row['owns_lock']??'')==='1';
     }
+    /** Participate in a caller's primary transaction without START/COMMIT. Lock order belongs to that caller. */
+    public static function composeInTransaction(callable $operation): mixed
+    {
+        global $wpdb;
+        if (!MessageSchema::ready()) { return MessagePolicy::error('messages_unavailable'); }
+        $scope=$wpdb->get_row('SELECT @@in_transaction AS active,@@read_only AS replica','ARRAY_A');
+        if(self::failed()||!is_array($scope)||(string)$scope['active']!=='1'||(string)$scope['replica']!=='0'){return MessagePolicy::error('message_primary_required');}
+        $lock='fans_dm_'.substr(hash('sha256',MessageSchema::table('threads')),0,40);
+        if ((int)$wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s,5)',$lock))!==1) { return MessagePolicy::error('messages_busy'); }
+        try {
+            $result=$operation();
+            if((string)$wpdb->get_var('SELECT @@in_transaction')!=='1'||self::failed()){return MessagePolicy::error('message_primary_required');}
+            return $result;
+        } finally {
+            if((string)$wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)',$lock))!=='1'){throw new \RuntimeException('Message transaction lock release unavailable');}
+        }
+    }
     public static function transaction(callable $operation): mixed
     {
         if (!MessageSchema::ready()) { return MessagePolicy::error('messages_unavailable'); }

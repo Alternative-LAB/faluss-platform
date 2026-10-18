@@ -247,6 +247,23 @@ final class ClosedProtocolGuardTest extends TestCase
         catch (ModelViolation $error) { self::assertSame('isolated_h3_recipe_required',$error->reason); }
         self::assertSame(0,$database->queries);
     }
+    public function testOrdinarySitesAndCopiedFlagsCannotCaptureOrEnablePurchasedThanks(): void
+    {
+        eval('namespace { class wpdb { public int $queries=0; } }');
+        $database = new \wpdb(); $GLOBALS['wpdb'] = $database;
+        foreach ([false,true] as $copied) {
+            if ($copied) { define('FALUSS_PLATFORM_ROLE','fans'); define('FALUSS_PF_H3_RECIPE_ONLY',true); }
+            foreach ([static fn () => \Faluss\Platform\Fans\PfContract\ClosedPurchasedThanksSchema::installForRecipe($database),
+                static fn () => \Faluss\Platform\Fans\PfContract\ClosedPurchasedThanksCapture::inTransaction($database,[])] as $operation) {
+                try { $operation(); self::fail('An ordinary site must not admit purchased thanks.'); }
+                catch (ModelViolation $error) { self::assertSame('isolated_h3_recipe_required',$error->reason); }
+            }
+            self::assertNull(\Faluss\Platform\Fans\PfContract\ClosedPurchasedThanksDelivery::configured());
+            self::assertFalse(\Faluss\Platform\Fans\Messaging\MessageAutomaticSettings::thanksDeliveryAvailable());
+            self::assertSame(0,$database->queries);
+        }
+    }
+
     public function testCopiedBarrierAdapterCannotRegisterAnOrdinaryWordPressRoute(): void
     {
         eval('namespace { class wpdb { public int $queries=0; public function get_row($q,$a=null) { $this->queries++; return null; } } function add_action($name,$callback) { $callback(); } function register_rest_route(...$args) { $GLOBALS["recipe_routes"]++; } }');

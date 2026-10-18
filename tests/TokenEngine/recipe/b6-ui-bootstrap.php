@@ -12,6 +12,22 @@ $settings = json_decode(file_get_contents($root . '/b6-ui-settings.json'),true,1
 foreach (['SSO','UI','CREATOR_PROFILES','EDITORIAL'] as $feature) {
     if (!defined('FALUSS_PLATFORM_FANS_' . $feature)) { define('FALUSS_PLATFORM_FANS_' . $feature,true); }
 }
+// Optional application scenario, still behind the same physical fixture gate above.
+if (($settings['automatic_messages'] ?? false) === true) {
+    foreach (['FALUSS_PLATFORM_FANS_MESSAGING','FALUSS_FANS_MESSAGING_POLICY_ATTESTED'] as $feature) {
+        if (!defined($feature)) { define($feature,true); }
+    }
+    add_filter('faluss_fans_closed_pf_thanks_delivery',static function () use ($wpdb,$settings,$root): \Faluss\Platform\Fans\PfContract\ClosedPurchasedThanksDelivery {
+        \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\ClosedEnvironment::assertIsolated($wpdb,'fans');
+        $policy = json_decode(file_get_contents($root . '/fans-corpus-trust.json'),true,20,JSON_THROW_ON_ERROR);
+        $peer = new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy($policy['node'],$policy['audience'],$policy['permissions'],$policy['keys']);
+        $inbox = new \Faluss\Platform\Fans\PfContract\ClosedBarrierInbox($wpdb,$peer,$settings['origin'],'1.0.0');
+        return new \Faluss\Platform\Fans\PfContract\ClosedPurchasedThanksDelivery($wpdb,
+            new \Faluss\Platform\Fans\Hof\ClosedOriginOpening($wpdb,$inbox,$settings['origin']),
+            new \Faluss\Platform\Fans\PfContract\ClosedBarrierPrimaryRead($wpdb,$inbox,$peer),
+            new \Faluss\Platform\Fans\PfContract\ClosedCorpusInbox($wpdb,$peer,$settings['origin'],'1.0.0'),$peer);
+    });
+}
 define('FALUSS_FANS_SSO_CLIENT_ID','fixture.fans.identity');
 define('FALUSS_FANS_SSO_CLIENT_SECRET',$settings['fictitious_client_secret']);
 // Production requires HTTPS while the approved physical test gate requires exact loopback HTTP.

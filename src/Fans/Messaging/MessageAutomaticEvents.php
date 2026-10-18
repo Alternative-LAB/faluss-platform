@@ -34,6 +34,29 @@ final class MessageAutomaticEvents
         return self::recordInTransaction('welcome',$creator,$identity,hash('sha256','welcome'."\0".$creator."\0".$identity),$rememberOnly);
     }
 
+    /** Only the guarded PF inbox calls this, after validation and inside its actual receipt transaction. */
+    public static function purchasedInTransaction(string $creator,string $identity,string $event): bool
+    {
+        global $wpdb;
+        \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\ClosedEnvironment::assertIsolated($wpdb,'fans');
+        return self::installed() && MessageStore::ownsTransaction() && MessageAutomationSchema::ready()
+            && MessagePolicy::uuid($creator) && MessagePolicy::uuid($identity) && preg_match('/^[0-9a-f]{64}$/D',$event)===1
+            && self::recordInTransaction('thanks',$creator,$identity,$event,false);
+    }
+
+    /** Private bounded worker contract, not a member REST read or recipient selector. */
+    public static function nextPurchased(): mixed
+    {
+        global $wpdb;
+        \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\ClosedEnvironment::assertIsolated($wpdb,'fans');
+        return MessageStore::transaction(static function (): mixed {
+            if (!MessageAutomationSchema::ready()) { return MessagePolicy::error('message_automations_unavailable'); }
+            global $wpdb;
+            $key=$wpdb->get_var('SELECT event_key FROM `'.MessageSchema::table('automatic_events').'` WHERE kind=\'thanks\' AND state IN (\'pending\',\'retry\') AND next_attempt_at<=UTC_TIMESTAMP() ORDER BY next_attempt_at,event_key LIMIT 1');
+            return MessageStore::failed()?MessagePolicy::error('messages_read_failed'):$key;
+        });
+    }
+
     /**
      * Only module-owned authoritative callers; never expose arbitrary events through REST.
      * Body and revision are selected once, under the same mutex as configuration and delivery.

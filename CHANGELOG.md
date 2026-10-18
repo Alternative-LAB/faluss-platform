@@ -8,6 +8,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Raccordement fermé en cours des remerciements aux reçus PF0.3 authentifiés et au corpus courant rapproché, avec capture durable unique par attribution et file de messagerie existante ; aucune source réelle, nouveau contrat Hub ou activation.
+
+### Ajouté
+
 - Configuration privée des messages automatiques, aperçu serveur et bienvenue textuelle unique depuis le suivi réel, avec remise asynchrone dans les conversations existantes, reprise durable, quotas et annulation avant envoi. Boutons natifs « Suivre / Ne plus suivre » sans consentement supplémentaire. Les remerciements attendent encore leur raccordement aux preuves PF fermées ; les pièces jointes restent indisponibles.
 
 ### Ajouté
