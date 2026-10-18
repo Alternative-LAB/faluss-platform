@@ -34,8 +34,11 @@ final class FansSsoReturn
         if (preg_match('~^creator/creer/?\?publication=([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$~D', $relative, $selection) === 1) {
             return $prefix . 'creator/creer?publication=' . $selection[1];
         }
-        if (preg_match('~^creator/hof/?\?manage=(sessions|new)$~D', $relative, $selection) === 1) {
+        if (preg_match('~^creator/hof/?\?manage=(sessions|new|territory)$~D', $relative, $selection) === 1) {
             return $prefix . 'creator/hof?manage=' . $selection[1];
+        }
+        if (preg_match('~^creator/hof/?\?manage=territory&(policy_cursor|change_cursor|change)=([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$~D',$relative,$selection) === 1) {
+            return $prefix . 'creator/hof?manage=territory&' . $selection[1] . '=' . $selection[2];
         }
         if (preg_match('~^creator/hof/?\?manage=session&session=([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})&coorganizer_cursor=([A-Za-z0-9.%-]{1,200})$~D', $relative, $selection) === 1) {
             $cursor = rawurldecode($selection[2]);

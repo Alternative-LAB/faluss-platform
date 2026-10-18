@@ -28,6 +28,9 @@ final class ClosedTerritorySessionRetirement
         $this->store = new SessionStore($db); $this->bindings = ClosedSessionLifecycleSchema::tables($db)['bindings'];
     }
 
+    public function usesConnection(\wpdb $db): bool
+    { ClosedEnvironment::assertIsolated($this->db,'fans'); return $this->db === $db; }
+
     /** Only explicit recovery, never GET/cron. The invalidated creator comes from its private journal.
      * @return array<string,string> */
     public function advance(string $change, string $id, string $version, int $steps = 4): array

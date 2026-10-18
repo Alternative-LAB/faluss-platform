@@ -101,6 +101,26 @@ final class FansSsoReturnTest extends TestCase
         $GLOBALS['fans_sso_home'] = 'https://fans.example.test/community';
         self::assertSame('/community/app/creator/hof?manage=new', FansSsoReturn::path('/community/app/creator/hof?manage=new'));
     }
+    public function testTerritorialNavigationKeepsOnlyExactOwnerPageAndPublicCursors(): void
+    {
+        $id = '123e4567-e89b-42d3-a456-426614174000'; $state = str_repeat('s',43);
+        foreach (['/app/','/faluss-fans/'] as $prefix) {
+            foreach (['','&policy_cursor=' . $id,'&change_cursor=' . $id,'&change=' . $id] as $query) {
+                $path = $prefix . 'creator/hof?manage=territory' . $query;
+                self::assertSame($path,FansSsoReturn::path($path));
+                self::assertSame($path,FansSsoReturn::open(FansSsoReturn::seal($path,$state),$state));
+            }
+        }
+        foreach (['&change=' . strtoupper($id),'&change=' . $id . '&change=' . $id,
+            '&change[]=' . $id,'&creator=' . $id,'&change=' . $id . '&nonce=private','&redirect=https://other.example'] as $query) {
+            self::assertNull(FansSsoReturn::path('/app/creator/hof?manage=territory' . $query));
+        }
+        self::assertNull(FansSsoReturn::path('/app/fan/hof?manage=territory'));
+        $GLOBALS['fans_sso_home'] = 'https://fans.example.test/community';
+        self::assertSame('/community/app/creator/hof?manage=territory&change=' . $id,
+            FansSsoReturn::path('/community/app/creator/hof?manage=territory&change=' . $id));
+    }
+
     public function testPrivateCoorganizerPageReturnsToTheSameSessionWithOnlyACanonicalPublicCursor(): void
     {
         $id = '123e4567-e89b-42d3-a456-426614174000'; $state = str_repeat('s', 43);

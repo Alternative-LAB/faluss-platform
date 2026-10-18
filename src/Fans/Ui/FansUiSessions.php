@@ -49,6 +49,7 @@ final class FansUiSessions
     public ?FansUiSessionParticipants $participants = null;
     public string $participationAppeal = '';
     public bool $participationPending = false;
+    public ?FansUiTerritory $territory = null;
 
     public static function supports(string $role, string $view): bool
     { return $role === 'creator' && $view === 'hof' && array_key_exists('manage', $_GET); }
@@ -77,7 +78,7 @@ final class FansUiSessions
             try { SessionStore::creator(); $state->active = true; }
             catch (ModelViolation $error) { if ($error->reason !== 'hof_approved_creator_required') { throw $error; } }
             $state->mode = self::field('manage', $_GET);
-            if (!in_array($state->mode, ['sessions', 'new', 'session', 'join'], true)) { throw new ModelViolation('hof_invalid_session_input'); }
+            if (!in_array($state->mode, ['sessions', 'new', 'session', 'join', 'territory'], true)) { throw new ModelViolation('hof_invalid_session_input'); }
             $state->id = self::field('session', $_GET); $state->cursor = self::field('sessions_cursor', $_GET);
             $state->read($services['sessions'], $services['reviews']);
             if ($state->detail !== null) {
@@ -90,7 +91,7 @@ final class FansUiSessions
                 $state->postAction = $action; $state->submittedRevision = self::field('session_revision', $_POST);
                 $state->submittedReviewRevision = self::field('review_revision', $_POST);
                 if (in_array($action, ['create', 'edit'], true)) { $state->draft = self::draftFields(); }
-                if ($action === 'appeal') { $state->appealText = mb_substr(self::field('explanation', $_POST), 0, 1200, 'UTF-8'); }
+                if (in_array($action,['appeal','territory_appeal'],true)) { $state->appealText = mb_substr(self::field('explanation', $_POST), 0, 1200, 'UTF-8'); }
                 if ($action === 'appeal_participation') { $state->participationAppeal = mb_substr(self::field('explanation', $_POST),0,1200,'UTF-8'); }
                 try {
                     $state->submit($services['sessions'], $services['reviews']);
@@ -110,6 +111,7 @@ final class FansUiSessions
 
     private function read(SessionService $sessions, SessionModeration $reviews): void
     {
+        if ($this->mode === 'territory') { $this->territory = FansUiTerritory::load($this); return; }
         if ($this->mode === 'sessions') { $this->items = $sessions->own($this->cursor); return; }
         if ($this->mode === 'join') {
             global $wpdb;
@@ -130,6 +132,7 @@ final class FansUiSessions
     {
         if (wp_verify_nonce(self::field('hof_session_nonce', $_POST), 'fans_hof_sessions') === false) { throw new ModelViolation('hof_session_forbidden'); }
         $action = self::field('hof_session_action', $_POST);
+        if ($this->mode === 'territory' && $this->territory !== null) { $this->territory->submit($this); return; }
         if ($action === 'create' && $this->mode === 'new') {
             $created = $sessions->create($this->rules());
             $this->destination = wp_make_link_relative(self::url('session', $created['session_id'])); return;
@@ -230,12 +233,13 @@ final class FansUiSessions
     {
         $status = match ($reason) {
             'hof_session_forbidden', 'hof_linked_creator_required', 'hof_appeal_forbidden', 'hof_forbidden' => 403,
-            'hof_session_not_found', 'hof_review_not_found' => 404,
+            'hof_session_not_found', 'hof_review_not_found', 'hof_territory_not_found', 'hof_territory_checkpoint_not_found' => 404,
             'hof_session_revision_conflict', 'hof_review_revision_conflict', 'hof_review_rules_changed', 'hof_session_rules_frozen', 'hof_invalid_review_transition', 'hof_approved_creator_required',
             'hof_session_deadline_not_reached', 'hof_session_approval_required', 'hof_coorganizer_acceptance_required', 'hof_reviewed_territory_required', 'hof_invalid_session_transition', 'hof_invalid_coorganizer_invitation' => 409,
             'hof_participation_conflict', 'hof_participation_binding_conflict', 'hof_appeal_revision_conflict', 'hof_appeal_application_changed', 'hof_appeal_refusal_required', 'hof_appeal_already_submitted' => 409,
-            'invalid_identity_or_reference', 'hof_session_rules_acceptance_required' => 400,
-            'hof_session_rate_limit' => 429,
+            'hof_territory_revision_conflict', 'hof_invalid_territory_appeal' => 409,
+            'invalid_identity_or_reference', 'hof_session_rules_acceptance_required', 'hof_unknown_principal_territory' => 400,
+            'hof_session_rate_limit', 'hof_territory_rate_limit' => 429,
             default => str_starts_with($reason, 'hof_invalid_') || in_array($reason, ['hof_ambiguous_local_time', 'hof_nonexistent_local_time'], true) ? 400 : 503,
         };
         return new \WP_REST_Response(['code' => $reason], $status);
