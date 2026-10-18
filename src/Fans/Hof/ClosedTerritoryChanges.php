@@ -16,6 +16,42 @@ final class ClosedTerritoryChanges
     public function __construct(private readonly \wpdb $db)
     { ClosedEnvironment::assertIsolated($db,'fans'); }
 
+    /** Current owner, or an administrator reviewing that exact declaration. No mutation during GET.
+     * @return list<array<string,string>> */
+    public function listing(string $creator, string $after = ''): array
+    {
+        ClosedEnvironment::assertIsolated($this->db,'fans'); ModelValues::uuid($creator);
+        if ($after !== '') { ModelValues::uuid($after); }
+        if (current_user_can('manage_options')) { RankingRegistry::administrator(); }
+        elseif (SessionStore::ownerCreator()['creator_id'] !== $creator) { throw new ModelViolation('hof_session_forbidden'); }
+        if (!ClosedTerritoryChangeSchema::ready($this->db)) { throw new ModelViolation('hof_territory_checkpoint_schema_unavailable'); }
+        return (new SessionStore($this->db))->transaction(function () use ($creator,$after): array {
+            $rows = $this->db->get_results($this->db->prepare('SELECT * FROM %i WHERE creator_id=%s AND change_id>%s ORDER BY change_id LIMIT 20',
+                ClosedTerritoryChangeSchema::tables($this->db)['changes'],$creator,$after),'ARRAY_A');
+            if (!is_array($rows) || $this->db->last_error !== '') { throw new ModelViolation('hof_storage_unavailable'); }
+            return $rows;
+        });
+    }
+
+    /** One next target and aggregate progress keep recovery bounded even beyond twenty admissions.
+     * @return array{change:array<string,string>,next:?array<string,string>,total:int,applied:int} */
+    public function progress(string $id): array
+    {
+        ClosedEnvironment::assertIsolated($this->db,'fans'); ModelValues::uuid($id);
+        if (!ClosedTerritoryChangeSchema::ready($this->db)) { throw new ModelViolation('hof_territory_checkpoint_schema_unavailable'); }
+        $store = new SessionStore($this->db); $tables = ClosedTerritoryChangeSchema::tables($this->db);
+        return $store->transaction(function () use ($id,$store,$tables): array {
+            $change = $store->storage->row($this->db->prepare('SELECT * FROM %i WHERE change_id=%s FOR UPDATE',$tables['changes'],$id))
+                ?? throw new ModelViolation('hof_territory_checkpoint_not_found');
+            self::authorize($change);
+            $count = $store->storage->row($this->db->prepare('SELECT COUNT(*) AS total,COALESCE(SUM(state=%s),0) AS applied FROM %i WHERE change_id=%s','applied',$tables['items'],$id));
+            $next = $store->storage->row($this->db->prepare('SELECT * FROM %i WHERE change_id=%s AND state<>%s ORDER BY kind,session_id,barrier_version LIMIT 1 FOR UPDATE',
+                $tables['items'],$id,'applied'));
+            if ($count === null || !is_numeric($count['total']) || !is_numeric($count['applied'])) { throw new ModelViolation('hof_storage_unavailable'); }
+            return ['change' => $change,'next' => $next,'total' => (int) $count['total'],'applied' => (int) $count['applied']];
+        });
+    }
+
     /** Called only by the territory owner inside its current governance transaction.
      * Historical B2 instances without closed Hub bindings keep their existing behavior.
      * @param array<string,string>|null $previous */

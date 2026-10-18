@@ -8,6 +8,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
+- Parcours natif fermé des territoires HoF : critères paginés, déclaration/recours/retrait propriétaire, examen dans le panel Fans et reprise bornée des fermetures avec les mêmes actions Hub. Permissions, nonces, révisions et journal existants conservés ; dates affichées dans le fuseau WordPress, sans activation ni nouveau contrat Hub.
+
+### Ajouté
+
 - Configuration privée des messages automatiques, aperçu serveur et bienvenue textuelle unique depuis le suivi réel, avec remise asynchrone dans les conversations existantes, reprise durable, quotas et annulation avant envoi. Boutons natifs « Suivre / Ne plus suivre » sans consentement supplémentaire. Les remerciements attendent encore leur raccordement aux preuves PF fermées ; les pièces jointes restent indisponibles.
 
 ### Ajouté

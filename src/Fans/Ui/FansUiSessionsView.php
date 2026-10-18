@@ -22,7 +22,8 @@ final class FansUiSessionsView
                 <section class="fu-panel fu-hof__empty"><h2>Gestion des sessions indisponible</h2><p>Ces sessions ne peuvent pas être affichées pour le moment.</p></section>
             <?php else: ?>
                 <?php if ($state->result !== null): ?><p role="status" class="fu-panel fu-hof-session__notice"><?php echo esc_html(self::notice($state)); ?></p><?php endif; ?>
-                <?php if ($state->mode === 'new'): ?><h2>Créer une session</h2><?php FansUiSessionForm::render($state); ?>
+                <?php if ($state->mode === 'territory'): FansUiTerritoryView::render($state); ?>
+                <?php elseif ($state->mode === 'new'): ?><h2>Créer une session</h2><?php FansUiSessionForm::render($state); ?>
                 <?php elseif ($state->mode === 'sessions'): self::listing($state); ?>
                 <?php elseif ($state->mode === 'join'): FansUiSessionParticipantsView::join($state); ?>
                 <?php else: self::detail($state); endif; ?>
@@ -34,6 +35,7 @@ final class FansUiSessionsView
     private static function listing(FansUiSessions $state): void
     {
         echo '<h2>Mes sessions</h2>';
+        echo '<p><a class="fu-link" href="' . esc_url(FansUiSessions::url('territory')) . '">Mon territoire d’activité →</a></p>';
         if ($state->items === []) { echo '<div class="fu-panel fu-hof__empty"><h3>Aucune session sur cette page</h3><p>Vos brouillons, invitations et participations apparaîtront ici.</p></div>'; }
         echo '<div class="fu-hof__sessions">';
         foreach ($state->items as $row) {
