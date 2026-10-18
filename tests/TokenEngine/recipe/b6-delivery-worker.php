@@ -51,6 +51,7 @@ foreach (['SSO','CREATOR_PROFILES','EDITORIAL'] as $flag) {
 }
 require_once WP_PLUGIN_DIR . '/faluss-platform/src/Federation/Legacy/includes/class-faluss-federation-crypto.php';
 $input = json_decode(file_get_contents($args[0]),true,40,JSON_THROW_ON_ERROR);
+if (str_starts_with($input['action'],'thanks-')) { require __DIR__ . '/b6-thanks-config.php'; }
 try {
     $root = dirname(rtrim(ABSPATH,'/'));
     $policy = json_decode(file_get_contents($root . '/fans-corpus-trust.json'),true,20,JSON_THROW_ON_ERROR);
@@ -227,6 +228,7 @@ try {
             return $actors + ['admin_user' => $admin->ID];
         })(),
         default => match (true) {
+            str_starts_with($input['action'],'thanks-') => require __DIR__ . '/b6-thanks-worker.php',
             str_starts_with($input['action'],'territory-ui-') => require __DIR__ . '/b6-territory-ui-worker.php',
             str_starts_with($input['action'],'dimension-') => require __DIR__ . '/b6-dimension-worker.php',
             default => throw new RuntimeException('Unknown closed delivery fixture operation'),

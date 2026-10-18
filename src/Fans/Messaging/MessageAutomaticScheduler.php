@@ -35,8 +35,17 @@ final class MessageAutomaticScheduler
     }
     public static function run(): mixed
     {
-        $result=MessageAutomaticDelivery::run();
-        $status=['checked_at'=>time(),'processed'=>is_array($result)?(int)($result['processed']??0):0,
+        $retired=MessageAutomaticDelivery::retirePending();
+        if($retired instanceof \WP_Error){$result=$retired;}
+        else{
+            $count=(int)$retired['processed'];
+            $source=$count<20?\Faluss\Platform\Fans\PfContract\ClosedPurchasedThanksDelivery::configured():null;
+            $thanks=$source?->run(min(10,20-$count));
+            $count+=is_array($thanks)?(int)$thanks['processed']:0;
+            $welcome=$count<20?MessageAutomaticDelivery::run(20-$count):['processed'=>0];
+            $result=$thanks instanceof \WP_Error?$thanks:($welcome instanceof \WP_Error?$welcome:['processed'=>$count+(int)$welcome['processed']]);
+        }
+        $status=['checked_at'=>time(),'processed'=>is_array($result)?(int)$result['processed']:0,
             'error'=>$result instanceof \WP_Error?'automatic_delivery_failed':''];
         $json=(string)wp_json_encode($status);update_option(self::STATUS,$json,false);
         return get_option(self::STATUS)===$json?$result:MessagePolicy::error('message_automation_status_failed');
