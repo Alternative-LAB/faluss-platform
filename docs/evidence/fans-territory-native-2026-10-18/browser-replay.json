@@ -1,0 +1,115 @@
+{
+  "scope": "Read-only exact PHP view replay on Windows with fictitious models. Not WordPress, REST, SSO, source activation or target-site evidence.",
+  "source_head": "3494121aab1b9fec65a4135d0c4cb6e4c8d4e0f4",
+  "screens": [
+    {
+      "file": "territory-1440.png",
+      "width": 1440,
+      "diagnostic": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "tabs": 8,
+        "visibleUUID": false
+      },
+      "focus": true
+    },
+    {
+      "file": "territory-rejected-1440.png",
+      "width": 1440,
+      "diagnostic": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "tabs": 8,
+        "visibleUUID": false
+      },
+      "focus": true
+    },
+    {
+      "file": "territory-recovery-1440.png",
+      "width": 1440,
+      "diagnostic": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "tabs": 8,
+        "visibleUUID": false
+      },
+      "focus": true
+    },
+    {
+      "file": "territory-390.png",
+      "width": 390,
+      "diagnostic": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "tabs": 8,
+        "visibleUUID": false
+      },
+      "focus": true
+    },
+    {
+      "file": "territory-rejected-390.png",
+      "width": 390,
+      "diagnostic": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "tabs": 8,
+        "visibleUUID": false
+      },
+      "focus": true
+    },
+    {
+      "file": "territory-recovery-390.png",
+      "width": 390,
+      "diagnostic": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "tabs": 8,
+        "visibleUUID": false
+      },
+      "focus": true
+    },
+    {
+      "file": "territory-320.png",
+      "width": 320,
+      "diagnostic": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "tabs": 8,
+        "visibleUUID": false
+      },
+      "focus": true
+    },
+    {
+      "file": "territory-rejected-320.png",
+      "width": 320,
+      "diagnostic": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "tabs": 8,
+        "visibleUUID": false
+      },
+      "focus": true
+    },
+    {
+      "file": "territory-recovery-320.png",
+      "width": 320,
+      "diagnostic": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "tabs": 8,
+        "visibleUUID": false
+      },
+      "focus": true
+    }
+  ],
+  "failures": []
+}

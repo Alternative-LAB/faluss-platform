@@ -52,19 +52,26 @@ filtre ; un flag, marqueur ou objet copié sur un site réel ne suffit pas. Les 
 admissions territoriales utilisent le transport1.2 déjà approuvé. Aucun nouveau
 contrat Hub, schéma, installation automatique ou activation n'est ajouté.
 
-## Vérifications prévues
+## Vérifications réalisées et limites
 
 - WordPress/MariaDB et HTTP réels jetables : absence de migration par GET, invités
   et comptes sans droit refusés,21 politiques paginées, nonces et propriétaire.
 - Déclarations/examens concurrents, refus, recours, approbation et audit exact.
 - Création/modération/ouverture native locale depuis la déclaration approuvée,
   révocation puis reprise après réponse perdue après COMMIT et lookup de la même clé.
-- Captures ordinateur/mobile du propriétaire, du panel et de la progression,
-  clavier, absence de débordement ; aucun nouveau dessin de l'accueil/catégorie
-  HoF ni de l'intérieur d'une session, sidebar et composants existants conservés.
+- Rendus des composants propriétaire, recours et progression à 1 440, 390 et
+  320 px sur Windows sain : police, focus et absence de débordement/UUID visible.
+  Modèles fictifs explicites, **distincts des formulaires WordPress testés par
+  HTTP en CI**. Aucun nouveau dessin de l'accueil/catégorie HoF ou de l'intérieur
+  d'une session, sidebar et composants existants conservés.
 
-Les résultats seront consignés après exécution, pas déduits des tests de services
-antérieurs. Le registre unique reste [#147](https://github.com/Alternative-LAB/faluss-platform/issues/147).
+La recette du head `d6a111e` réussit 913 contrôles, zéro échec, dont seize cas
+territoriaux natifs. Les [preuves et neuf captures](../evidence/fans-territory-native-2026-10-18/README.md)
+séparent la recette WordPress/MariaDB des rendus de composants : ni capture du
+panel actif ni soumission dans un navigateur WordPress ne sont revendiquées.
+L'examen des captures a corrigé uniquement l'espacement du bloc de reprise avec
+le composant existant. Le nouveau head doit conserver tous ses contrôles verts.
+Le registre unique reste [#147](https://github.com/Alternative-LAB/faluss-platform/issues/147).
 Retour arrière par PR de code, sans suppression d'un checkpoint incomplet ; aucune
 migration à inverser. Pas de preuve du vrai SSO Me, d'Elementor cible ou de matériel
 mobile physique. #150, #161 et l'admission réelle restent distinctes.
