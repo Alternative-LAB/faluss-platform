@@ -2,6 +2,21 @@
 
 ## Fonctionnement WordPress/MariaDB
 
+### Intégration finale des parcours fermés
+
+Main `cfcd7c9bb45b6ade3fc6e3d88f3745371ca99504` (#239 et #240 intégrées) :
+[PHP39141732308](https://github.com/Alternative-LAB/faluss-platform/actions/runs/39141732308),
+tous les contrôles réussis, artefact12141849049 téléchargé et examiné :
+**973 vérifications, zéro échec**,36 casB6sc, fixture supprimée.
+Rapport exact : [wordpress-integrated-ci.json](wordpress-integrated-ci.json).
+Cette preuve inclut pagination après un ancien checkpoint terminal, refus de
+remplacer une ancienne intention et parcours natif multi-sessions avec réponse
+perdue, lookup primaire et remise d'un seul remerciement figé après rapprochement.
+Elle reste une recette Hub/Fans jetable avec données et identités fictives,
+distincte du véritable SSO et de la CI du futur main de publication.
+
+### Première preuve et provenance des captures
+
 Head testé : `480d8d487bc04b15ad777f60da1be72906b967ac`.
 [PHP quality 39087392229](https://github.com/Alternative-LAB/faluss-platform/actions/runs/39087392229), tous les contrôles réussis.
 Artefact `12121318401` téléchargé et examiné : **926 vérifications, zéro échec**,
@@ -22,8 +37,9 @@ sans attester un SSO central, une source d'achat ou un accès de production.
 
 La correction suivante `eb73cbf7d673b435fefc2f44e64db24b0e67230b` conserve les cases cochées lors
 de la pagination d'un nouveau formulaire après un ancien checkpoint terminal,
-et refuse un ancien formulaire déjà remplacé. Les deux régressions natives
-ajoutées et le head final doivent encore passer la CI avant intégration.
+et refuse un ancien formulaire déjà remplacé. Ces régressions passent dans la
+preuve intégrée973/0 ci-dessus ; la preuve926/0 est conservée comme historique
+de construction et ne lui est pas substituée.
 
 ## Rendu navigateur sous Windows
 

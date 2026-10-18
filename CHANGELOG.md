@@ -8,6 +8,13 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## [0.14.0] - 2026-10-18
 
+Cette livraison regroupe les modes de contact Créateur, la bienvenue textuelle
+depuis le suivi gratuit, les horaires du back-office selon le fuseau WordPress
+et le raccordement HoF/B6 testé sur Hub/Fans jetables. Le choix prospectif des
+sessions et le remerciement PF sont strictement fermés aux preuves fictives de
+recette ; cette publication n'ouvre aucun achat, score public, pair réel ou flag.
+La pièce jointe de bienvenue attend la vérification du stockage privé (#161).
+
 ### Ajouté
 
 - Resolve explicit session choices from current native primary proofs (`cfcd7c9`)

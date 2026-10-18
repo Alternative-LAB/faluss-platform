@@ -1,4 +1,4 @@
-# Choix explicite des sessions avant attribution — raccordement fermé en cours
+# Choix explicite des sessions avant attribution — raccordement fermé testé
 
 ## Frontière
 
@@ -83,7 +83,7 @@ Les lectures restent liées au vrai cookie/token du membre et ne réactivent auc
 barrière. Les historiques du protocole sont conservés ; aucune politique de purge
 PF réelle n'est décidée par ce lot (#150).
 
-## Scénarios et reste avant livraison
+## Scénarios vérifiés et limites de livraison
 
 Scénarios positifs : liste sans admission, deux admissions natives, pagination,
 choix vide et explicite, un seul débit alimentant deux sessions, réponse perdue
@@ -94,9 +94,8 @@ ACK sans relecture primaire, doublons et plus de dix choix, session inconnue,
 contexte fabriqué et fermeture avant un nouveau choix. Les contrats historiques
 et leurs tests doivent rester intacts.
 
-**En cours, pas encore fonctionnel déclaré :** nouvelle recette SQL/HTTP et
-contrôles du nouveau head restent à réussir. Le checkpoint durable et le
-formulaire Fan sont raccordés uniquement après la barrière physique de recette.
+**Fonctionnel et testé uniquement en recette fermée :** le checkpoint durable et
+le formulaire Fan sont raccordés après la barrière physique de recette.
 Le profil éligible propose l'entrée vers `hof?support=<profil>` ; ce paramètre est
 un repère de navigation, jamais une identité ou une permission. Le retour SSO ne
 conserve que cette cible exacte, sans quantité ni choix économique.
@@ -109,18 +108,23 @@ champs d'identité, contexte et actions étrangères sont refusés. Chaque lectu
 du service reste privée, sans cache partagé ; un GET ne crée aucune intention.
 Le transport typé de recette n'est jamais consulté avant le garde physique.
 
-Le head `65bcc18` a passé la recette complète : **944 contrôles, zéro échec**,
-formulaires natifs et parcours territoriaux intégrés compris. Les
+Le main `cfcd7c9bb45b6ade3fc6e3d88f3745371ca99504`, intégrant #239 et #240,
+a passé sa propre recette complète : **973 contrôles, zéro échec**, avec
+WordPress7.1.2, PHP8.3.35 et MariaDB10.11.14 ; fixture supprimée.
+[PHP39141732308](https://github.com/Alternative-LAB/faluss-platform/actions/runs/39141732308),
+artefact12141849049 téléchargé et examiné. Le head final de #241 `6646859`
+a également passé ses contrôles973/0 et les nouvelles assertions des horaires ;
+ce résultat de branche reste distinct de la vérification du main final publié.
+Les
 [captures et limites de preuve](../evidence/fans-session-selection-2026-10-18/README.md)
 séparent ce fonctionnement HTTP des rendus de composants Windows.
 
-Le nouveau head composé avec #239 doit encore passer sa recette conjointe :
+La recette conjointe intégrée vérifie :
 un vrai formulaire natif choisit deux sessions, une réponse de confirmation est
-perdue puis le lookup du même reçu capture un seul remerciement. Le worker doit
-remettre uniquement le texte figé, après rapprochement complet, sans second débit
+perdue puis le lookup du même reçu capture un seul remerciement. Le worker
+remet uniquement le texte figé, après rapprochement complet, sans second débit
 ou message lors du rejeu. La préparation et la réponse incertaine sans reçu
-authentifié ne créent aucun message. Ces nouveaux cas ne sont pas annoncés
-réussis avant leurs résultats. Aucun appel n'est admis sur un site ou un
+authentifié ne créent aucun message. Aucun appel n'est admis sur un site ou un
 producteur réel.
 
 L'autorité réelle de politique des pays, l'achat et la conservation #150 restent
