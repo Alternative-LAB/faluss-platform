@@ -79,10 +79,13 @@ imposée à ces vues. Les vues de gouvernance HoF nomment déjà le fuseau WordP
 Une date absente ou invalide n'est pas remplacée par une échéance inventée.
 Les modèles d'API, curseurs, journaux stockés, calculs de rétention et dates
 techniques restent en UTC. Aucun cron, verrou de sauvegarde, flag ou règle de
-conservation n'est modifié. Les tests vérifient les passages été/hiver et une
-recette native de lecture contrôle la configuration WordPress, les dates de l'API
-et le maintien du prochain événement de purge. Ils ne constituent pas une
-vérification du site cible.
+conservation n'est modifié. Les tests vérifient les passages été/hiver.
+La recette native `admission-http.py`, exécutée par le contrôle WordPress existant,
+vérifie le rendu HTTP 200, les fuseaux configuré et fixes positif/négatif/nul,
+les dates de l'API et le maintien du prochain événement de purge. La recette
+complémentaire `backoffice-http.py` couvre les autres vues lorsqu'elle est lancée
+explicitement ; elle n'est pas implicitement comptée comme exécutée par la CI.
+Ces vérifications ne constituent pas une recette du site cible.
 
 Pages privées et aperçus : `Cache-Control: private, no-store`,
 `CDN-Cache-Control: no-store`, `Surrogate-Control: no-store`, aucune persistance
