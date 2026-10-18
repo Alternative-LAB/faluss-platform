@@ -12,6 +12,8 @@ use Faluss\Platform\Fans\PfContract\ClosedBarrierClient;
 use Faluss\Platform\Fans\PfContract\ClosedBarrierPrimaryClient;
 use Faluss\Platform\Fans\PfContract\ClosedRankedClient;
 use Faluss\Platform\Fans\PfContract\ClosedRankedProtocolSchema;
+use Faluss\Platform\Fans\PfContract\ClosedAttributionAttempt;
+use Faluss\Platform\Fans\PfContract\ClosedAttributionAttemptSchema;
 use Faluss\Platform\Fans\Profiles\CreatorProfileService;
 use Faluss\Platform\Fans\Sso\FansSsoService;
 use Faluss\Platform\TokenEngine\PurchasedPf\ModelViolation;
@@ -27,7 +29,7 @@ if (isset($input['cookie'])) {
 }
 $primaryClient=new ClosedBarrierPrimaryClient($wpdb,$inbox,$reader,'recipe-fans-k1',$input['endpoint']);
 if ($input['action']==='selection-register') {
-    RankingRegistry::administrator(); ClosedRankedProtocolSchema::installForRecipe($wpdb);
+    RankingRegistry::administrator(); ClosedRankedProtocolSchema::installForRecipe($wpdb);ClosedAttributionAttemptSchema::installForRecipe($wpdb);
     $owner=CreatorProfileService::activeOwner($input['profile']);
     $subject=$owner===null?null:FansSsoService::linkedIdentity($owner);
     $profile=CreatorProfileService::publicById($input['profile']);
@@ -44,7 +46,7 @@ if ($input['action']==='selection-register') {
         'policy_version'=>RankingPolicy::VERSION,'object'=>$descriptor];
     $prepared=$inbox->prepare($fields);
     $progress=(new ClosedBarrierClient($wpdb,$inbox,'recipe-fans-k1',$input['endpoint']))->advance($prepared['action_id']);
-    if ($progress['phase']!=='acknowledged') { throw new ModelViolation('pf_fixture_policy_required'); }
+    if ($progress['state']!=='acknowledged') { throw new ModelViolation('pf_fixture_policy_required'); }
     $reader->prepare($prepared['action_id']);
     if ($primaryClient->advance($prepared['action_id'])['phase']!=='current') { throw new ModelViolation('pf_fixture_policy_required'); }
     return ['action_id'=>$prepared['action_id'],'subject'=>$subject];
@@ -59,7 +61,11 @@ if ($input['action']==='selection-refresh') {
 }
 $selection=new ClosedAttributionSelection($wpdb,$opening,$reader,new ClosedAttributionPolicy($wpdb,$reader,$input['creator_action'],$input['country_action']));
 $client=new ClosedRankedClient($wpdb,$peer,'recipe-fans-k1',str_replace('/barrier','/ranked',$input['endpoint']));
+$attempt=new ClosedAttributionAttempt($wpdb,$selection,$client);
 return match ($input['action']) {
+    'selection-attempt-current'=>$attempt->current()??[],
+    'selection-attempt-start'=>$attempt->start($input['attribution'],$input['profile'],$input['quantity'],$input['sessions']),
+    'selection-attempt-advance'=>$attempt->advance($input['attribution'],$input['operation']),
     'selection-choices'=>$selection->choices($input['profile'],$input['after']??''),
     'selection-resolve'=>$selection->resolve($input['attribution'],$input['profile'],$input['quantity'],$input['sessions'])->values,
     'selection-reserve'=>$client->reserve(RankedIntent::fromArray($input['intent'])),

@@ -23,6 +23,25 @@ final class ClosedAttributionSelection
         if ($db !== ($GLOBALS['wpdb'] ?? null) || !$policy->usesConnection($db)) { throw new ModelViolation('hof_primary_connection_required'); }
     }
 
+    public function usesConnection(\wpdb $db): bool { return $this->db === $db; }
+
+    /** Labels for explicit choices retained between pages, with the same current admission checks.
+     * @param array<array-key,mixed> $selected
+     * @return list<array<string,string>> */
+    public function selected(string $profile,array $selected): array
+    {
+        $selected=self::ids($selected);
+        return $this->scope($profile,function(array $origin,array $policy,string $member) use($profile,$selected):array {
+            $reader=new ClosedParticipationContext($this->db,$this->primary,$origin['origin_id']);$items=[];
+            foreach ($selected as $id) {
+                $session=$reader->readInTransaction($id,$profile)['session'];
+                if ($session['category']!==$policy['creator_category']) { throw new ModelViolation('hof_attribution_policy_conflict'); }
+                $items[]=array_intersect_key($session,array_flip(['session_id','title','scope','starts_at','ends_at','rules_text']));
+            }
+            return $items;
+        });
+    }
+
     /** @return array{items:list<array<string,string>>,next_cursor:?string} */
     public function choices(string $profile,string $after=''): array
     {
@@ -50,10 +69,7 @@ final class ClosedAttributionSelection
     public function resolve(string $attribution,string $profile,string $quantity,array $selected): RankedIntent
     {
         ModelValues::uuid($attribution); ModelValues::uuid($profile);
-        if (!array_is_list($selected) || count($selected)>RankingPolicy::MAX_ATTRIBUTION_SESSIONS) { throw new ModelViolation('pf_ranking_invalid_sessions'); }
-        $selected=array_map(static fn (mixed $id): string => ModelValues::uuid($id),$selected);
-        if (count(array_unique($selected))!==count($selected)) { throw new ModelViolation('pf_ranking_duplicate_or_order'); }
-        sort($selected,SORT_STRING);
+        $selected=self::ids($selected);
         return $this->scope($profile,function (array $origin,array $policy,string $member) use ($attribution,$profile,$quantity,$selected): RankedIntent {
             $sessions=[]; $reader = new ClosedParticipationContext($this->db,$this->primary,$origin['origin_id']);
             foreach ($selected as $id) {
@@ -68,6 +84,16 @@ final class ClosedAttributionSelection
                 'member_faluss_id' => $member,'creator_faluss_id' => $policy['creator_faluss_id'],'purchased_pf' => $quantity,
                 'policy_version' => RankingPolicy::VERSION,'ranking_context' => $context,'context_sha256' => RankingContext::fingerprint($context)]);
         });
+    }
+
+    /** @param array<array-key,mixed> $selected
+     * @return list<string> */
+    private static function ids(array $selected): array
+    {
+        if (!array_is_list($selected) || count($selected)>RankingPolicy::MAX_ATTRIBUTION_SESSIONS) { throw new ModelViolation('pf_ranking_invalid_sessions'); }
+        $selected=array_map(static fn(mixed $id):string=>ModelValues::uuid($id),$selected);
+        if (count(array_unique($selected))!==count($selected)) { throw new ModelViolation('pf_ranking_duplicate_or_order'); }
+        sort($selected,SORT_STRING);return $selected;
     }
 
     /** @template T

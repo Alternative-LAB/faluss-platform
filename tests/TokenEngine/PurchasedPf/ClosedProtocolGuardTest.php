@@ -20,12 +20,19 @@ final class ClosedProtocolGuardTest extends TestCase
     {
         eval('namespace { class wpdb { public int $queries=0; public function get_row($q,$a=null) { $this->queries++; return null; } } }');
         $database = new \wpdb();
+        $GLOBALS['wpdb']=$database;
         foreach ([static fn () => ClosedProtocolSchema::installForRecipe($database),
             static fn () => new ClosedProtocolStore($database, 'fixture.hub', 'recipe-key'),
             static fn () => \Faluss\Platform\Fans\PfContract\ClosedProtocolSchema::installForRecipe($database),
             static fn () => new \Faluss\Platform\Fans\PfContract\ClosedProtocolStore($database),
             static fn () => \Faluss\Platform\Fans\PfContract\ClosedRankedProtocolSchema::installForRecipe($database),
             static fn () => new \Faluss\Platform\Fans\PfContract\ClosedRankedProtocolStore($database),
+            static fn () => \Faluss\Platform\Fans\PfContract\ClosedAttributionAttemptSchema::installForRecipe($database),
+            static fn () => \Faluss\Platform\Fans\PfContract\ClosedAttributionAttemptSchema::ready($database),
+            static fn () => \Faluss\Platform\Fans\Ui\FansUiSupport::provider('123e4567-e89b-42d3-a456-426614174000'),
+            static fn () => new \Faluss\Platform\Fans\PfContract\ClosedAttributionAttempt($database,
+                (new \ReflectionClass(\Faluss\Platform\Fans\Hof\ClosedAttributionSelection::class))->newInstanceWithoutConstructor(),
+                (new \ReflectionClass(\Faluss\Platform\Fans\PfContract\ClosedRankedClient::class))->newInstanceWithoutConstructor()),
             static fn () => \Faluss\Platform\Fans\PfContract\ClosedDelegation::resolve($database, []),
             static fn () => new \Faluss\Platform\Fans\Hof\ClosedAttributionPolicy($database,
                 (new \ReflectionClass(\Faluss\Platform\Fans\PfContract\ClosedBarrierPrimaryRead::class))->newInstanceWithoutConstructor(),'',''),

@@ -63,7 +63,7 @@ final class FansUiView
         'public-profile' => ['Découvrir', 'Profil créateur', 'explorer', 'Découvrez son univers et ses publications.'],
     ];
 
-    public static function render(string $role, string $view, ?string $creatorId, int $status = 200, string $signIn = '', ?FansUiAuthor $author = null, ?FansUiAdmission $admission = null, ?FansUiEditorial $editorial = null, ?FansUiImages $images = null, ?FansUiMessages $messages = null, ?FansUiAuthor $composer = null, ?FansUiNotifications $notifications = null, ?FansUiHof $hof = null, ?FansUiRankingPrivacy $privacy = null, ?FansUiSessions $sessions = null): void
+    public static function render(string $role, string $view, ?string $creatorId, int $status = 200, string $signIn = '', ?FansUiAuthor $author = null, ?FansUiAdmission $admission = null, ?FansUiEditorial $editorial = null, ?FansUiImages $images = null, ?FansUiMessages $messages = null, ?FansUiAuthor $composer = null, ?FansUiNotifications $notifications = null, ?FansUiHof $hof = null, ?FansUiRankingPrivacy $privacy = null, ?FansUiSessions $sessions = null,?FansUiSupport $support=null): void
     {
         $errorView = in_array($view, ['profile-unavailable', 'creator-unavailable'], true);
         $page = self::PAGES[$view === 'public-profile' || $errorView ? $view : $role . ':' . $view] ?? null;
@@ -77,6 +77,7 @@ final class FansUiView
         if ($messages?->available) { $page[3]='Vos demandes et conversations privées. Chaque échange respecte le choix de son destinataire.'; }
         if ($hof !== null) { $page[3] = in_array($view, ['espace', 'progression'], true) ? 'Votre relevé mensuel privé, distinct des classements permanents.' : 'Sessions, classements permanents et création.'; }
         if ($sessions !== null) { $page[3] = 'Organisez vos sessions et suivez leur examen.'; }
+        if ($support!==null) { $page[1]='Préparer mon soutien';$page[3]='Choisissez les sessions avant de confirmer.';$title=$page[1]; }
         $api = rest_url('faluss-fans/v1/creators');
         $publicBase = home_url('/app/creators/');
         wp_enqueue_style('faluss-fans-ui-v2', plugins_url('assets/fans-ui-v2.css', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'));
@@ -84,7 +85,7 @@ final class FansUiView
         if ($messages !== null) { wp_enqueue_script('faluss-fans-messages', plugins_url('assets/fans-messages.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true); wp_enqueue_style('faluss-fans-messages', plugins_url('assets/fans-messages.css', dirname(__DIR__, 3) . '/faluss-platform.php'), ['faluss-fans-ui-v2'], (string)constant('FALUSS_PLATFORM_VERSION')); }
         if (in_array($role,['fan','creator'],true)) { wp_enqueue_script('faluss-fans-notifications', plugins_url('assets/fans-notifications.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string)constant('FALUSS_PLATFORM_VERSION'), true); }
         if ($notifications !== null) { wp_enqueue_style('faluss-fans-notifications', plugins_url('assets/fans-notifications.css', dirname(__DIR__, 3) . '/faluss-platform.php'), ['faluss-fans-ui-v2'], (string)constant('FALUSS_PLATFORM_VERSION')); }
-        if ($hof !== null || $sessions !== null) { wp_enqueue_style('faluss-fans-hof', plugins_url('assets/fans-hof.css', dirname(__DIR__, 3) . '/faluss-platform.php'), ['faluss-fans-ui-v2'], (string) constant('FALUSS_PLATFORM_VERSION')); }
+        if ($hof !== null || $sessions !== null || $support!==null) { wp_enqueue_style('faluss-fans-hof', plugins_url('assets/fans-hof.css', dirname(__DIR__, 3) . '/faluss-platform.php'), ['faluss-fans-ui-v2'], (string) constant('FALUSS_PLATFORM_VERSION')); }
         wp_enqueue_script('faluss-fans-ui-v2', plugins_url('assets/fans-ui-v2.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true);
         wp_enqueue_script('faluss-fans-reading', plugins_url('assets/fans-ui-reading.js', dirname(__DIR__, 3) . '/faluss-platform.php'), [], (string) constant('FALUSS_PLATFORM_VERSION'), true);
         $sessionExpiry = \Faluss\Platform\Fans\Sso\FansLocalSession::expires();
@@ -149,6 +150,8 @@ final class FansUiView
             <?php FansUiImagesView::render($images); ?>
         <?php elseif ($view === 'messages' && $messages !== null) : ?>
             <?php FansUiMessageView::render($messages); ?>
+        <?php elseif ($support!==null): ?>
+            <?php FansUiSupportView::render($support); ?>
         <?php elseif ($sessions !== null): ?>
             <?php FansUiSessionsView::render($sessions); ?>
         <?php elseif ($hof !== null): ?>

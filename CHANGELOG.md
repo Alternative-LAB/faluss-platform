@@ -8,7 +8,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
-- Choix prospectif fermé des sessions : catégories/pays et admissions relus sur le primaire, contexte0.3 composé côté serveur et client à clés stables. Interface native et recette de bout en bout encore en cours ; aucune attribution réelle ouverte.
+- Choix prospectif fermé des sessions : catégories/pays et admissions relus sur le primaire, contexte0.3 composé côté serveur, formulaire natif et checkpoint durable à clés stables. Recettes de bout en bout et captures encore en cours ; aucune attribution réelle ouverte.
 
 ### Corrigé
 

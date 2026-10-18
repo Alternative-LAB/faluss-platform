@@ -5,6 +5,7 @@ import json
 import secrets
 import shutil
 import uuid
+from concurrent.futures import ThreadPoolExecutor
 
 
 def run_checks(root,source,fixture,origin,actors,deliver,hub,hub_sql,sql,check):
@@ -13,7 +14,8 @@ def run_checks(root,source,fixture,origin,actors,deliver,hub,hub_sql,sql,check):
     assert deliver('dimension-install',actor=admin)==dict(ready=True)
     creator_policy=deliver('selection-register',actor=admin,profile=profile,country=country,kind='creator')
     country_policy=deliver('selection-register',actor=admin,profile=profile,country=country,kind='country')
-    assert 'action_id' in creator_policy and 'action_id' in country_policy,'Primary policy fixture unavailable'
+    assert 'action_id' in creator_policy and 'action_id' in country_policy,\
+        'Primary policy fixture unavailable: '+str(creator_policy.get('error','unknown'))+'/'+str(country_policy.get('error','unknown'))
     cookie=deliver('fixture-cookie',actor=fan)['value']
     fixed=dict(actor=fan,cookie=cookie,profile=profile,creator_action=creator_policy['action_id'],country_action=country_policy['action_id'])
     def own(action,**fields):return deliver(action,**(fixed|fields))
@@ -65,7 +67,7 @@ def run_checks(root,source,fixture,origin,actors,deliver,hub,hub_sql,sql,check):
     shutil.copy2(source/'tests/TokenEngine/recipe/b3-ranked-http-adapter.php',adapter)
     shutil.copy2(source/'tests/TokenEngine/recipe/b6-selection-clock.php',clock_adapter)
     try:
-        purchased=dict(fixture['proof'],purchase_id='synthetic.'+uuid.uuid4().hex,evidence_id=str(uuid.uuid4()),member_faluss_id=chosen['member_faluss_id'],purchased_pf='3')
+        purchased=dict(fixture['proof'],purchase_id='synthetic.'+uuid.uuid4().hex,evidence_id=str(uuid.uuid4()),member_faluss_id=chosen['member_faluss_id'],purchased_pf='5')
         lot=hub('h1-evidence',payload=purchased,key=secrets.token_hex(32))['lot_id']
         assert hub('h2-admit',lot_id=lot,member=purchased['member_faluss_id'],key=secrets.token_hex(32))['state']=='admitted'
         count=int(hub_sql('SELECT COUNT(*) FROM wp_token_engine_pf_b3r_receipts'))
@@ -86,9 +88,56 @@ def run_checks(root,source,fixture,origin,actors,deliver,hub,hub_sql,sql,check):
             and 'error' in own('selection-lookup',actor=target['creator_user'],cookie=self_cookie,attribution=chosen['attribution_id'],operation='confirm')
             and hub_sql('SELECT * FROM wp_token_engine_ledger ORDER BY id')==historical)
         deliver('suspend',creator_profile=profile,status='active')
+        run_attempt_checks(root,own,hub_sql,first,check)
+        from b6_session_selection_ui_checks import run_checks as ui_checks
+        ui_checks(root,source,fixture,origin,actors,deliver,own,
+            dict(profile=profile,creator_action=creator_policy['action_id'],country_action=country_policy['action_id'],sessions=[row['id'] for row in sessions]),hub_sql,check)
         closing=deliver('close-session',actor=organizer['creator_user'],session=first)
         check('B6sc local closing forbids new attachment while retaining the old confirmed immutable intention',
             closing['state']=='closing' and 'error' in intent([first])
             and own('selection-lookup',attribution=chosen['attribution_id'],operation='confirm')==dict(outcome='ok',result=dict(state='confirmed')))
     finally:
         adapter.unlink(missing_ok=True);clock_adapter.unlink(missing_ok=True);policy_path.unlink(missing_ok=True)
+
+
+def run_attempt_checks(root,own,hub_sql,session,check):
+    """Real SQL checkpoints and owner HTTP; no mocked consumption or client response."""
+    attempt=str(uuid.uuid4());different=str(uuid.uuid4())
+    args=dict(attribution=attempt,quantity='1',sessions=[session])
+    def advance(operation):return own('selection-attempt-advance',attribution=attempt,operation=operation)
+    count=int(hub_sql('SELECT COUNT(*) FROM wp_token_engine_pf_b3r_receipts'))
+    fault=root/'ranked-http-fault';fault.write_text('drop-after-commit');fault.chmod(0o600)
+    check('B6sc a lost reserve response leaves a durable unknown member checkpoint before any confirmation',
+        own('selection-attempt-start',**args)==dict(error='pf_transport_unknown')
+        and own('selection-attempt-current')['phase']=='unknown'
+        and int(hub_sql('SELECT COUNT(*) FROM wp_token_engine_pf_b3r_receipts'))==count)
+    check('B6sc a new intention and direct retry cannot bypass unresolved reserve uncertainty',
+        own('selection-attempt-start',**(args|dict(attribution=different)))==dict(error='pf_local_attempt_pending')
+        and advance('retry')==dict(error='pf_local_attempt_lookup_required')
+        and advance('confirm')==dict(error='pf_local_attempt_lookup_required'))
+    check('B6sc a protected primary lookup recovers the existing reservation without a new key or debit',
+        advance('lookup')['phase']=='reserved'
+        and own('selection-attempt-start',**args)['phase']=='reserved'
+        and own('selection-attempt-start',**(args|dict(quantity='2')))==dict(error='pf_local_intent_conflict'))
+    fault.write_text('drop-after-commit');fault.chmod(0o600)
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        confirmed=list(pool.map(lambda _:advance('confirm'),range(4)))
+    check('B6sc a lost confirmed reply retains the same checkpoint while exactly one new receipt commits',
+        sum(answer==dict(error='pf_transport_unknown') for answer in confirmed)==1
+        and all(answer.get('error') in ('pf_transport_unknown','pf_local_attempt_busy','pf_local_attempt_lookup_required') for answer in confirmed)
+        and own('selection-attempt-current')['operation']=='confirm'
+        and own('selection-attempt-current')['phase']=='unknown'
+        and int(hub_sql('SELECT COUNT(*) FROM wp_token_engine_pf_b3r_receipts'))==count+1)
+    check('B6sc visiting or resubmitting the form does not replay an unknown operation',
+        own('selection-attempt-start',**args)['phase']=='unknown'
+        and own('selection-attempt-start',**(args|dict(attribution=different)))==dict(error='pf_local_attempt_pending')
+        and int(hub_sql('SELECT COUNT(*) FROM wp_token_engine_pf_b3r_receipts'))==count+1)
+    check('B6sc a final primary lookup and repeated confirm preserve one authoritative consumption',
+        advance('lookup')['phase']=='confirmed' and advance('confirm')['phase']=='confirmed'
+        and int(hub_sql('SELECT COUNT(*) FROM wp_token_engine_pf_b3r_receipts'))==count+1)
+    another=own('selection-attempt-start',attribution=different,quantity='1',sessions=[])
+    check('B6sc a later independent intention is possible only after terminal proof and an old form cannot replace it',
+        another['phase']=='reserved' and own('selection-attempt-start',**args)==dict(error='pf_local_attempt_pending'))
+    released=own('selection-attempt-advance',attribution=different,operation='release')
+    check('B6sc releasing an unconfirmed later reservation is terminal and adds no receipt',
+        released['phase']=='released' and int(hub_sql('SELECT COUNT(*) FROM wp_token_engine_pf_b3r_receipts'))==count+1)

@@ -58,6 +58,31 @@ Une fermeture locale interdit immédiatement de nouveaux choix. Les faits
 confirmés avant la fermeture effective attestée par Hub restent conservés selon
 le contrat approuvé ; la reprise ne réouvre aucune barrière.
 
+## Checkpoint du parcours
+
+Le checkpoint privé est créé explicitement dans la recette, sans migration de
+site. Il référence l'intention immuable et le profil destinataire ; il ne contient
+ni solde, ni nouveau ledger, ni copie des quantités économiques.
+
+Un seul résultat non rapproché est autorisé par membre lié, même entre onglets
+ou Créateurs distincts. Un mutex local de membre couvre l'action, mais aucune
+transaction SQL ne reste ouverte pendant HTTP. L'état `unknown` et la clé stable
+sont persistés **avant** l'envoi. Une visite, un retour navigateur ou une nouvelle
+soumission identique ne renvoie pas silencieusement l'opération.
+
+Après une réponse perdue, seul le lookup primaire de cette opération permet
+d'avancer. `not_found` autorise explicitement un nouvel essai de **la même clé**,
+pas une nouvelle intention. Un refus signé ne prouve pas l'absence d'une
+consommation antérieure et laisse le parcours fermé. Une réponse `confirmed`,
+`released` ou `expired` attestée rend l'état terminal. Les anciens formulaires ne
+peuvent remplacer le checkpoint d'une nouvelle intention.
+
+La création de l'intention ne consomme rien ; la confirmation reste une action
+distincte. La reprise relit le contexte original même après suspension du profil.
+Les lectures restent liées au vrai cookie/token du membre et ne réactivent aucune
+barrière. Les historiques du protocole sont conservés ; aucune politique de purge
+PF réelle n'est décidée par ce lot (#150).
+
 ## Scénarios et reste avant livraison
 
 Scénarios positifs : liste sans admission, deux admissions natives, pagination,
@@ -70,11 +95,22 @@ contexte fabriqué et fermeture avant un nouveau choix. Les contrats historiques
 et leurs tests doivent rester intacts.
 
 **En cours, pas encore fonctionnel déclaré :** nouvelle recette SQL/HTTP et
-contrôles du head restent à réussir. Le formulaire Fan, son checkpoint durable
-de résultat incertain (qui doit fermer la création d'une autre intention tant
-que la précédente n'est pas rapprochée), les captures et le raccordement natif
-final restent nécessaires. Aucun appel de ce client n'est enregistré dans une
-route de site ou un producteur réel.
+contrôles du nouveau head restent à réussir. Le checkpoint durable et le
+formulaire Fan sont raccordés uniquement après la barrière physique de recette.
+Le profil éligible propose l'entrée vers `hof?support=<profil>` ; ce paramètre est
+un repère de navigation, jamais une identité ou une permission. Le retour SSO ne
+conserve que cette cible exacte, sans quantité ni choix économique.
+
+Le formulaire sans JavaScript propose zéro à dix cases non cochées, des pages de
+sessions avec conservation des choix, puis une préparation et une confirmation
+distinctes. Le membre peut reprendre le même checkpoint et libérer une
+réservation. Toute opération exige le cookie lié courant et un nonce ; les
+champs d'identité, contexte et actions étrangères sont refusés. Chaque lecture
+du service reste privée, sans cache partagé ; un GET ne crée aucune intention.
+Le transport typé de recette n'est jamais consulté avant le garde physique.
+
+Les nouvelles recettes SQL/HTTP, les tests du formulaire natif et les captures
+doivent encore passer. Aucun appel n'est admis sur un site ou un producteur réel.
 
 L'autorité réelle de politique des pays, l'achat et la conservation #150 restent
 distincts. La configuration de recette fictive ne les valide pas à leur place.
