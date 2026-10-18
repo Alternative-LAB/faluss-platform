@@ -6,46 +6,76 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+## [0.14.0] - 2026-10-18
+
 ### Ajouté
 
-- Choix prospectif fermé des sessions : catégories/pays et admissions relus sur le primaire, contexte0.3 composé côté serveur, formulaire natif et checkpoint durable à clés stables. Recettes de bout en bout et captures encore en cours ; aucune attribution réelle ouverte.
+- Resolve explicit session choices from current native primary proofs (`cfcd7c9`)
+- Add durable native session choices and same-key recovery (`cfcd7c9`)
+- Capture durable PF thank-you messages from authenticated confirmations (`d424bec`)
+- Connect native territorial review and durable recovery (`07df4df`)
+- Add creator-owned contact modes without reopening refusals (`3e46374`)
+- Add durable automatic welcome messages and native free follow (`3e46374`)
+- Add the approved private territorial barrier contract (`98de07e`)
+- Persist territorial invalidation and exact barrier recovery (`98de07e`)
+- Add creator-owned contact modes without reopening refusals (#235) (`b8e6b01`)
+- Add the approved private territorial barrier contract (`cd42356`)
+- Add native creator participation and private appeals (`5bc2b8c`)
+- Recover participation after attested session readmission (`a9d5956`)
+- Bind private session participation to durable Hub admission (`991bba3`)
+- Add private coorganizer invitation forms (`6c57975`)
+- Connect native session lifecycle and primary recovery (`3b0db60`)
+- Adapt native session dates without changing calendar authority (`715030d`)
+- List current creator session associations with a private cursor (`956c42e`)
+- Add closed ranking visibility and alias moderation forms (`3fb07d1`)
 
 ### Corrigé
 
-- Horaires du back-office Fans présentés dans le fuseau configuré de WordPress, avec son nom et le décalage été/hiver ; stockage et API UTC, cron, sauvegardes et conservation inchangés.
-- Masquage territorial des seules dimensions HoF concernées : lignes Créateurs et identités d'organisateurs relues sur le primaire, sans modifier les persistants, les relevés privés, les sessions internationales ni les faits corrigés. Recette fermée, aucune nouvelle direction visuelle ou activation.
+- Present Fans back-office times in the configured WordPress zone (`4df849c`)
+- Match WordPress timezone behavior in the isolated SQL adapter (`4df849c`)
+- Validate raw session choices before narrowing their types (`cfcd7c9`)
+- Preserve prospective choices after a completed support (`cfcd7c9`)
+- Preserve territorial return paths and existing access refusals (`07df4df`)
+- Align native territorial scenarios with the authoritative fixture clock (`07df4df`)
+- Scope territorial visibility to eligible session dimensions (`bd4f68c`)
 
-### Ajouté
+### Documentation
 
-- Raccordement fermé des remerciements aux reçus PF0.3 authentifiés et au corpus courant rapproché, avec capture durable unique par attribution et file de messagerie existante ; aucune source réelle, nouveau contrat Hub ou activation.
-- Parcours natif fermé des territoires HoF : critères paginés, déclaration/recours/retrait propriétaire, examen dans le panel Fans et reprise bornée des fermetures avec les mêmes actions Hub. Permissions, nonces, révisions et journal existants conservés ; dates affichées dans le fuseau WordPress, sans activation ni nouveau contrat Hub.
+- Record closed session-selection proof and responsive view captures (`cfcd7c9`)
+- Record closed PF thanks and separate visual evidence (`d424bec`)
+- Record territorial WordPress and separate visual evidence (`07df4df`)
+- Record integrated automatic welcome recipes and captures (`3e46374`)
+- Record automatic messaging fixture cleanup (`3e46374`)
+- Record verified territorial checkpoint and coorganizer recovery (`98de07e`)
+- Record isolated territorial transport and ledger race evidence (`cd42356`)
+- Match evidence hashes to normalized Git artifacts (`cd42356`)
+- Record verified native participation and appeal journeys (`5bc2b8c`)
+- Record the verified crossed participation lifecycle (`a9d5956`)
+- Record integrated participation and appeal recovery evidence (`289e7f3`)
+- Record the combined coorganization recipe and browser evidence (`63ffe4c`)
+- Record authenticated nonce concurrency regression evidence (`cd64925`)
+- Record native session lifecycle and reviewed browser evidence (`7cf519c`)
+- Record real visibility form and browser regression evidence (`56b795b`)
 
-### Ajouté
+### Modifié
 
-- Configuration privée des messages automatiques, aperçu serveur et bienvenue textuelle unique depuis le suivi réel, avec remise asynchrone dans les conversations existantes, reprise durable, quotas et annulation avant envoi. Boutons natifs « Suivre / Ne plus suivre » sans consentement supplémentaire. Les remerciements dépendent du raccordement PF fermé décrit ci-dessus ; les pièces jointes restent indisponibles.
-
-### Ajouté
-
-- Modes de contact Créateur « Ouvert » par défaut et « Sur demande » volontaire, avec réglage propriétaire révisé, formulaire natif et maintien des refus, blocages et conversations existantes ; préparation du lot des messages automatiques sans déclencheur économique réel.
-
-### Corrigé
-
-- Éviter l'interblocage entre admissions de nonces de barrières Hub distincts dans un même intervalle InnoDB, en conservant le mutex par nonce, la clé unique, les contrôles de fraîcheur et le refus des rejeux ; aucun contrat réseau ou réglage d'environnement modifié. Recette fermée sur données fictives uniquement.
-
-### Ajouté
-
-- Reprise fermée des révocations territoriales : journal atomique avec la décision, collecte exhaustive bornée, fermetures acquittées des admissions et des sessions de coorganisateurs, réadmission future sans réécriture historique. Schéma privé explicite, sans migration automatique ni raccordement d'interface ou activation. [Périmètre](docs/modules/FANS-HOF-B6-TERRITORY-CHECKPOINTS.md).
-- Transport privé fermé de révocation des seules admissions territoriales par le contrat Hub1.2 explicitement approuvé, avec compatibilité1.0/1.1 et reprise durable existante ; aucun endpoint, opération économique ou activation. [Périmètre et raccordement restant](docs/modules/HUB-PF-TERRITORY-BARRIERS-12.md).
-- Formulaires privés B6 de participation volontaire, décisions d'organisateur, retrait et reprise, avec recours dans le panel Fans existant et retour SSO canonique vers la demande ; interfaces limitées à la recette fermée, aucune activation ou nouvelle opération Hub. [Contrôles et périmètre](docs/modules/FANS-HOF-B6-PARTICIPATION-UI.md).
-- Requalification fermée des participations après suspension et réadmission attestées d'une session : fermeture préalable du binding antérieur, même clé de reprise, nouvelle admission future et retrait concurrent sans double fermeture. Contrat Hub inchangé ; [portée et reprise](docs/modules/FANS-HOF-B6-PARTICIPATION-REQUALIFICATION.md).
-
-- Pont fermé B6 de participation : admission locale et identité vérifiée liées atomiquement à une version Hub indépendante, reprise des mêmes actions, retrait acquitté et réadmission sans réécriture historique ; contrat de barrière existant, aucune API ou activation de site. [Périmètre et reprise](docs/modules/FANS-HOF-B6-PARTICIPATION-BRIDGE.md).
-- Invitations privées de coorganisation B6 raccordées aux services existants : candidats publics paginés, acceptation/refus explicites et permissions distinctes du propriétaire ; aucun participant ou pouvoir Hub implicite. Retour de navigation SSO canonique pour la page de candidats, sans changement du protocole ; [recette native et captures](docs/evidence/fans-hof-b6-coorganizers/README.md) acquises sur instances jetables, aucune activation.
-- Formulaires fermés de cycle de session B6 : ouverture, annulation confirmée, fin à l'échéance, réadmission et reprise des mêmes actions Hub ; décision administrative commise distinguée de sa fermeture encore incertaine. Lecture primaire séparée après acquittement, sans assimilation d'un ancien reçu à une preuve actuelle. Contrats Hub inchangés, aucune activation ; [recette native et captures](docs/evidence/fans-hof-b6-session-lifecycle/README.md) acquises sur instances jetables.
-- Lecture privée paginée des sessions associées au Créateur courant pour préparer leur gestion B6, sans destinataire choisi par le navigateur ni pouvoir implicite pour une invitation ; tests WordPress/MariaDB des exclusions, suspensions et pages au-delà de vingt. Raccordement d'interface en cours, aucune activation.
-- Adaptateur des dates de formulaire de session vers le calendrier existant : heures ambiguës explicitement départagées, heures inexistantes refusées et fractions UTC conservées lors d'une saisie inchangée. Aucun changement de fuseau global ou de règle de session.
-- Interface fermée de gestion des brouillons et d'examen des règles de session B6 : formulaires natifs protégés, saisies conservées, décisions sur révision exacte, rejet/recours/révocation et fuseau WordPress explicite dans le panel. [Recette WordPress/MariaDB et navigateur](docs/evidence/fans-hof-b6-session-ui/README.md) ; cycle Hub, rôles et territoires restent des raccordements distincts, aucune activation.
-- Formulaires B6 fermés de pseudonyme Fan et consentements de visibilité séparés, modération dans le panel Fans avec nonce/révision et journal existants ; refus des POST ambigus avec l'admission Créateur, retrait possible pendant une incertitude Hub. Recette applicative sur instances jetables uniquement, sans activation ou contrat économique ajouté.
+- Check native proof responses for hidden PHP runtime errors (`4df849c`)
+- Exercise timezone rendering in the existing native WordPress recipe (`4df849c`)
+- Verify native multi-session support and a single durable thank-you together (`cfcd7c9`)
+- Apply the existing spacing to territorial recovery (`07df4df`)
+- Diagnose native admission refusal and cover local-only masking (`bd4f68c`)
+- Verify territorial revocation against real isolated confirmations (`98de07e`)
+- Preserve primary deadline checks in the territorial wire version (`98de07e`)
+- Verify territorial revocation against real isolated confirmations (`cd42356`)
+- Preserve primary deadline checks in the territorial wire version (`cd42356`)
+- Match native participation decisions to the Fans controls (`5bc2b8c`)
+- Preserve the nonce admission fix pending SQL regression proof (`43a5e59`)
+- Coordinate the existing private clocks for native completion (`c254d50`)
+- Prepare native coorganizer browser journeys (`f29ebe5`)
+- Use the existing primary clock for native deadline completion (`06f2233`)
+- Isolate coorganizer invitation form presentation (`da578cf`)
+- Verify native session forms on isolated WordPress (`759cb17`)
+- Save closed session interface before requested pause (`ae4c129`)
 
 ## [0.13.0] - 2026-10-15
 
