@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Corrigé
+
+- Masquage territorial des seules dimensions HoF concernées : lignes Créateurs et identités d'organisateurs relues sur le primaire, sans modifier les persistants, les relevés privés, les sessions internationales ni les faits corrigés. Recette fermée, aucune nouvelle direction visuelle ou activation.
+
 ### Ajouté
 
 - Parcours natif fermé des territoires HoF : critères paginés, déclaration/recours/retrait propriétaire, examen dans le panel Fans et reprise bornée des fermetures avec les mêmes actions Hub. Permissions, nonces, révisions et journal existants conservés ; dates affichées dans le fuseau WordPress, sans activation ni nouveau contrat Hub.
