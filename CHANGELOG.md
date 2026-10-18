@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Corrigé
+
+- Masquage territorial des seules dimensions HoF concernées : lignes Créateurs et identités d'organisateurs relues sur le primaire, sans modifier les persistants, les relevés privés, les sessions internationales ni les faits corrigés. Recette fermée, aucune nouvelle direction visuelle ou activation.
+
 ### Ajouté
 
 - Raccordement fermé en cours des remerciements aux reçus PF0.3 authentifiés et au corpus courant rapproché, avec capture durable unique par attribution et file de messagerie existante ; aucune source réelle, nouveau contrat Hub ou activation.

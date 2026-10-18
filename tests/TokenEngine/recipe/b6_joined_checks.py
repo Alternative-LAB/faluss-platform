@@ -234,6 +234,8 @@ def run_checks(root,source,cli_path,check,command,fixture,hub_sql,hub,delivery_e
         cancelled=deliver('session',session=session['session_id'])
         check('B6dl attested cancellation preserves corrected history without declaring a winner',
               cancelled['state']=='cancelled' and cancelled['items'][0]['points']=='2')
+        from b6_dimension_visibility_checks import run_checks as dimension_checks
+        dimension_checks(dict(fixture,dimension_member=intent['member_faluss_id']),origin,actors,deliver,hub,hub_sql,sql,check)
         from b6_purchased_thanks_checks import run_checks as thanks_checks
         thanks_checks(fixture,origin,actors,intent['member_faluss_id'],deliver,hub,hub_sql,sql,check)
         from b6_purchased_thanks_ui_checks import run_checks as thanks_ui_checks

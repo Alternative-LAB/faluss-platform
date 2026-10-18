@@ -92,8 +92,9 @@ coorganisateur accepté sans lui donner un pouvoir général de propriétaire.
 Elle utilise le motif existant `session_suspended`, jamais une suspension
 globale du Créateur. Une fermeture déjà engagée conserve son motif et sa clé.
 Un ancien acquittement ne peut fermer une nouvelle version de session.
-Le parcours d'interface territorial, son masquage public par dimension et son
-adaptation native restent à raccorder ; la remise privée ne les rend pas disponibles.
+Le parcours d'interface territorial et son adaptation native restent à raccorder ;
+la remise privée ne les rend pas disponibles. Le masquage par dimension est décrit
+dans [le contrat de lecture](FANS-HOF-B6-DIMENSION-VISIBILITY.md).
 
 Les [résultats physiques exacts](../evidence/fans-hof-b6-territory-checkpoints/README.md)
 sont acquis :611 contrôles sans échec, dont45 territoriaux, sur le code fermé.

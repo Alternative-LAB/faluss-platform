@@ -84,7 +84,7 @@ try {
         'statement' => $delivery->statement($input['family'],$input['month']),
         'sessions' => $delivery->sessions($input['after'] ?? ''),
         'overview' => $delivery->overview($input['category'] ?? null,$input['after'] ?? ''),
-        'session' => $delivery->session($input['session']),
+        'session' => $delivery->session($input['session'],$input['family'] ?? 'creator'),
         'private-session' => (static function () use ($wpdb,$input): array {
             $reviews = new SessionModeration($wpdb);
             return (new SessionService($wpdb))->inspect($input['session']) + ['review' => $reviews->own($input['session']), 'history' => $reviews->history($input['session'])];
@@ -227,8 +227,11 @@ try {
             wp_set_current_user($actors['fan_user']); $visibility->consent('fan',true,(int) $visibility->own()['revision']);
             return $actors + ['admin_user' => $admin->ID];
         })(),
-        default => str_starts_with($input['action'],'thanks-') ? require __DIR__ . '/b6-thanks-worker.php'
-            : throw new RuntimeException('Unknown closed delivery fixture operation'),
+        default => match (true) {
+            str_starts_with($input['action'],'thanks-') => require __DIR__ . '/b6-thanks-worker.php',
+            str_starts_with($input['action'],'dimension-') => require __DIR__ . '/b6-dimension-worker.php',
+            default => throw new RuntimeException('Unknown closed delivery fixture operation'),
+        },
     };
 } catch (ModelViolation $error) { $result = ['error' => $error->reason]; }
 echo wp_json_encode($result,JSON_THROW_ON_ERROR);

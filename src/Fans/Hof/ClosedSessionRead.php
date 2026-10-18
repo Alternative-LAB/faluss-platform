@@ -21,7 +21,7 @@ final class ClosedSessionRead
         private readonly string $origin) { ModelValues::uuid($origin); }
 
     /** Called in the delivery's sessions/origin/corpus transaction. No independent COMMIT or HTTP.
-     * @return array{row:array<string,string>,content:array<string,mixed>,organizers:list<string>} */
+     * @return array{row:array<string,string>,content:array<string,mixed>,organizers:list<string>,territory_policy:?string} */
     public function readInTransaction(string $id): array
     {
         ClosedEnvironment::assertIsolated($this->db,'fans');
@@ -37,6 +37,10 @@ final class ClosedSessionRead
         if (CreatorProfileService::publicById($session['owner_creator_id'],true) === null
             || EditorialService::publicNameInTransaction($session['owner_creator_id']) === null) { throw new ModelViolation('hof_session_unavailable'); }
         $policy = $session['scope'] === 'international' ? null : (new TerritoryService($this->db))->boundPolicy($id);
+        $visibility = new SessionDimensionVisibility($this->db);
+        if (!$visibility->creatorInTransaction($session['owner_creator_id'],$session,$policy)) {
+            throw new ModelViolation('hof_session_unavailable');
+        }
         $descriptor = SessionBarrierDescriptor::compose($session,$this->origin,$policy);
         $operation = $session['state'] === 'open' ? 'register' : 'close';
         $binding = $store->storage->row($this->db->prepare('SELECT * FROM %i WHERE session_id=%s AND barrier_version=%s AND operation=%s FOR UPDATE',
@@ -70,8 +74,9 @@ final class ClosedSessionRead
         foreach ($store->roles($id) as $role) {
             if ($role['role'] !== 'organizer' || $role['state'] !== 'accepted') { continue; }
             $name = EditorialService::publicNameInTransaction($role['creator_id']);
-            if (CreatorProfileService::publicById($role['creator_id'],true) !== null && $name !== null) { $organizers[] = $name; }
+            if (CreatorProfileService::publicById($role['creator_id'],true) !== null && $name !== null
+                && $visibility->creatorInTransaction($role['creator_id'],$session,$policy)) { $organizers[] = $name; }
         }
-        return ['row' => $session,'content' => $descriptor['content'],'organizers' => $organizers];
+        return ['row' => $session,'content' => $descriptor['content'],'organizers' => $organizers,'territory_policy' => $policy];
     }
 }
