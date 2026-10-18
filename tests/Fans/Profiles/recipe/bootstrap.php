@@ -55,6 +55,16 @@ final class EditorialSqlAdapter
 $wpdb = new EditorialSqlAdapter($fixtureRoot);
 function get_option(string $key, mixed $default = false): mixed { global $wpdb; return $wpdb->get_var($wpdb->prepare('SELECT value FROM fixture_options WHERE name=%s', $key)) ?? $default; }
 function update_option(string $key, mixed $value, bool $autoload = false): bool { global $wpdb; return $wpdb->query($wpdb->prepare('REPLACE INTO fixture_options(name,value) VALUES(%s,%s)', $key, $value)) !== false; }
+// Match WordPress's configured timezone and numeric-offset fallback; only an application test primitive.
+function wp_timezone(): DateTimeZone
+{
+    $timezone = get_option('timezone_string');
+    if (is_string($timezone) && $timezone !== '') { return new DateTimeZone($timezone); }
+    $offset = (float) get_option('gmt_offset', 0);
+    $hours = (int) $offset;
+    $minutes = ($offset - $hours) * 60;
+    return new DateTimeZone(sprintf('%s%02d:%02d', $offset < 0 ? '-' : '+', abs($hours), abs($minutes)));
+}
 $fixtureUser = (int) ($_COOKIE['fixture_user'] ?? 17);
 function get_current_user_id(): int { return $GLOBALS['fixtureUser']; }
 function is_user_logged_in(): bool { return get_current_user_id() > 0; }

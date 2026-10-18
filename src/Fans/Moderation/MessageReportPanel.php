@@ -41,7 +41,7 @@ final class MessageReportPanel
             else: ?>
                 <p class="fm-warning"><?php echo esc_html((string)$page['overdue']); ?> dossier(s) à réexaminer. Aucune clôture ni prolongation de litige n’est automatique.</p>
                 <?php if($page['items']===[]): ?><p>Aucun dossier sur cette page.</p><?php endif; ?>
-                <div class="fm-items"><?php foreach($page['items'] as $row): ?><article class="fm-card"><p class="fm-meta"><?php echo esc_html(FansUiMessages::state($row['state']==='open'?'open_report':$row['state'])); ?></p><h2>Dossier du <?php echo esc_html($row['created_at']); ?> UTC</h2><?php self::accounts($row); ?><p>Motif : <?php echo esc_html($row['reason']); ?> · réexamen avant <?php echo esc_html($row['review_due_at']); ?> UTC.</p><?php if((bool)$row['overdue']): ?><p class="fm-warning">Réexamen en retard.</p><?php endif; ?><a href="<?php echo esc_url(self::url($row['case_id'])); ?>">Examiner le dossier privé →</a></article><?php endforeach; ?></div>
+                <div class="fm-items"><?php foreach($page['items'] as $row): ?><article class="fm-card"><p class="fm-meta"><?php echo esc_html(FansUiMessages::state($row['state']==='open'?'open_report':$row['state'])); ?></p><h2>Dossier du <?php echo esc_html(BackOfficeTime::utc($row['created_at'])); ?></h2><?php self::accounts($row); ?><p>Motif : <?php echo esc_html($row['reason']); ?> · réexamen avant <?php echo esc_html(BackOfficeTime::utc($row['review_due_at'])); ?>.</p><?php if((bool)$row['overdue']): ?><p class="fm-warning">Réexamen en retard.</p><?php endif; ?><a href="<?php echo esc_url(self::url($row['case_id'])); ?>">Examiner le dossier privé →</a></article><?php endforeach; ?></div>
                 <?php if($page['next_cursor']!==null): ?><a href="<?php echo esc_url(add_query_arg('cursor',$page['next_cursor'],self::url())); ?>">Page suivante →</a><?php endif; ?>
             <?php endif; ?>
         </div>
@@ -52,7 +52,7 @@ final class MessageReportPanel
         $raw=get_option(MessageRetention::STATUS,'');$status=is_string($raw)?json_decode($raw,true):null;
         $ok=is_array($status)&&is_int($status['checked_at']??null)&&$status['checked_at']>time()-7200&&($status['error']??'')===''&&($status['more']??true)===false;
         ?><details class="fm-retention"><summary>Contrôle des purges</summary><p><?php echo $ok?'Dernière exécution terminée sans erreur ni retard de lot signalé.':'Exécution absente, en retard, en erreur ou lots restant à traiter. Faire vérifier le cron de rétention avant toute ouverture.'; ?></p>
-        <?php if(is_array($status)&&is_int($status['checked_at']??null)): ?><p>Dernier contrôle : <?php echo esc_html(gmdate('Y-m-d H:i:s',$status['checked_at'])); ?> UTC. Messages ordinaires et preuves suivent des horloges distinctes.</p><?php endif; ?>
+        <?php if(is_array($status)&&is_int($status['checked_at']??null)): ?><p>Dernier contrôle : <?php echo esc_html(BackOfficeTime::timestamp($status['checked_at'])); ?>. Messages ordinaires et preuves suivent des horloges distinctes.</p><?php endif; ?>
         <p>WP-Cron dépend du trafic : une exécution fiable et la gestion des sauvegardes doivent être configurées par l’exploitant. Aucun contenu privé ne figure dans cet état technique.</p></details><?php
     }
     /** @param array<string,mixed> $row */
@@ -61,9 +61,9 @@ final class MessageReportPanel
         ?>
         <article class="fm-card fm-message-proof"><p class="fm-meta"><?php echo esc_html(FansUiMessages::state($row['state']==='open'?'open_report':$row['state'])); ?> · révision <?php echo esc_html((string)$row['revision']); ?></p>
             <?php self::accounts($row); ?>
-            <h2>Message isolé pour examen</h2><p>Auteur local <?php echo esc_html((string)$row['subject_user']); ?> · envoyé le <?php echo esc_html($row['sent_at']); ?> UTC · motif <?php echo esc_html($row['reason']); ?>.</p><div class="fm-text"><?php echo esc_html($row['body']); ?></div>
-            <p>Réexamen avant <?php echo esc_html($row['review_due_at']); ?> UTC. <?php echo $row['final_at']!==null?'Décision définitive : '.esc_html($row['final_at']).' UTC.':'Aucune décision définitive attestée.'; ?></p>
-            <?php if($row['hold_until']!==null): ?><p class="fm-warning">Conservation de litige jusqu’au <?php echo esc_html($row['hold_until']); ?> UTC. Réexaminer et motiver tout renouvellement.</p><?php endif; ?>
+            <h2>Message isolé pour examen</h2><p>Auteur local <?php echo esc_html((string)$row['subject_user']); ?> · envoyé le <?php echo esc_html(BackOfficeTime::utc($row['sent_at'])); ?> · motif <?php echo esc_html($row['reason']); ?>.</p><div class="fm-text"><?php echo esc_html($row['body']); ?></div>
+            <p>Réexamen avant <?php echo esc_html(BackOfficeTime::utc($row['review_due_at'])); ?>. <?php echo $row['final_at']!==null?'Décision définitive : '.esc_html(BackOfficeTime::utc($row['final_at'])).'.':'Aucune décision définitive attestée.'; ?></p>
+            <?php if($row['hold_until']!==null): ?><p class="fm-warning">Conservation de litige jusqu’au <?php echo esc_html(BackOfficeTime::utc($row['hold_until'])); ?>. Réexaminer et motiver tout renouvellement.</p><?php endif; ?>
             <form method="post" action="<?php echo esc_url(self::url($row['case_id'])); ?>" class="fm-decision">
                 <?php wp_nonce_field('fans_moderation'); ?><input type="hidden" name="kind" value="message-report"><input type="hidden" name="item_id" value="<?php echo esc_attr($row['case_id']); ?>"><input type="hidden" name="revision" value="<?php echo esc_attr((string)$row['revision']); ?>">
                 <label for="fm-message-action">Action après examen</label><select name="action" id="fm-message-action" required><option value="">Choisir une action</option><option value="review">Tracer un réexamen</option>
@@ -76,8 +76,8 @@ final class MessageReportPanel
                 <label class="fm-confirm"><input type="checkbox" name="recourse_complete" value="yes"> Pour finaliser : j’atteste que les notifications et les recours applicables ont été traités et que la décision est définitive.</label>
                 <p>Une restriction existante n’est levée que par une restauration explicite. Une preuve ne recrée jamais un message ordinaire expiré. La finalisation déclenche les douze mois de conservation de la preuve.</p><button type="submit">Confirmer l’action motivée</button>
             </form>
-            <details><summary>Journal des décisions et recours</summary><ul class="fm-journal"><?php foreach($row['events'] as $event): ?><li><?php echo esc_html(implode(' · ',array_map('strval',$event))); ?></li><?php endforeach; ?></ul></details>
-            <details><summary>Journal distinct des conservations de litige</summary><ul class="fm-journal"><?php foreach($row['holds'] as $event): ?><li><?php echo esc_html(implode(' · ',array_map('strval',$event))); ?></li><?php endforeach; ?></ul></details>
+            <details><summary>Journal des décisions et recours</summary><ul class="fm-journal"><?php foreach($row['events'] as $event): ?><li><?php echo esc_html(implode(' · ',array_map('strval',BackOfficeTime::journal($event)))); ?></li><?php endforeach; ?></ul></details>
+            <details><summary>Journal distinct des conservations de litige</summary><ul class="fm-journal"><?php foreach($row['holds'] as $event): ?><li><?php echo esc_html(implode(' · ',array_map('strval',BackOfficeTime::journal($event)))); ?></li><?php endforeach; ?></ul></details>
             <?php if($row['history_truncated']): ?><p>Affichage limité aux 200 dernières traces de chaque journal.</p><?php endif; ?>
         </article>
         <?php

@@ -79,7 +79,7 @@ final class EditorialModerationView
                 </form>
             <?php endif; ?>
             <?php if (isset($row['journal']) && is_array($row['journal'])): ?><details><summary>Journal · 100 dernières traces maximum</summary><ul class="fm-journal">
-                <?php foreach ($row['journal'] as $entry): ?><li><?php echo esc_html(implode(' · ', array_map('strval', $entry))); ?></li><?php endforeach; ?>
+                <?php foreach ($row['journal'] as $entry): ?><li><?php echo esc_html(implode(' · ', array_map('strval', BackOfficeTime::journal($entry)))); ?></li><?php endforeach; ?>
             </ul><p>Aucun ancien contenu n’est conservé dans ce journal.</p></details><?php endif; ?>
         </article>
         <?php

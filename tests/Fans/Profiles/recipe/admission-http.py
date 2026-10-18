@@ -148,6 +148,25 @@ first=api('creators/moderation','admin')[1]
 check('queue bounded to 20 with cursor',len(first['items'])==20 and isinstance(first['next_cursor'],str))
 second=api('creators/moderation&cursor='+first['next_cursor'],'admin')[1]
 check('pagination no duplicate or omitted pending profile',len(second['items'])==2 and second['next_cursor'] is None and len({x['creator_id'] for x in first['items']+second['items']})==22)
+# Exercise date presentation in the native WordPress recipe already executed by CI.
+# The separate full back-office recipe is opt-in; no runner or fixture setup changes.
+settings=json.loads(cli("echo wp_json_encode(['zone'=>get_option('timezone_string'),'offset'=>get_option('gmt_offset')]);"))
+profile_before=api(private_route,'admin')[1]
+cron_before=cli("echo wp_next_scheduled('faluss_fans_messages_retention');")
+try:
+    cli("update_option('timezone_string','Europe/Paris');")
+    check('native WordPress formatter follows the configured summer and winter zone',json.loads(cli("echo wp_json_encode([\\Faluss\\Platform\\Fans\\Moderation\\BackOfficeTime::utc('2026-10-06 08:00:01'),\\Faluss\\Platform\\Fans\\Moderation\\BackOfficeTime::utc('2026-12-06 08:00:01')]);"))==[
+        '06/10/2026 à 10:00:01 +02:00 · Europe/Paris','06/12/2026 à 09:00:01 +01:00 · Europe/Paris'])
+    for zone,offset,label in [('Europe/Paris',0,'Europe/Paris'),('',5.5,'+05:30'),('',-3.5,'-03:30'),('',0,'+00:00')]:
+        cli('update_option("timezone_string",'+json.dumps(zone)+');update_option("gmt_offset",'+json.dumps(offset)+');')
+        code,display,_=http(detail,'admin')
+        check('native WordPress profile dates return HTTP 200 and name '+label,
+              code==200 and '· '+label in display and not any(error in display for error in ('Fatal error','Uncaught Error','Warning:','Parse error')))
+    check('native timezone presentation preserves UTC API dates and decision journal',api(private_route,'admin')[1]==profile_before)
+    check('native timezone presentation preserves the retention event',cli("echo wp_next_scheduled('faluss_fans_messages_retention');")==cron_before)
+finally:
+    cli('update_option("timezone_string",'+json.dumps(settings['zone'])+');update_option("gmt_offset",'+json.dumps(settings['offset'])+');')
+
 debug=(root/'debug.log').read_text() if (root/'debug.log').exists() else ''
 check('no PHP fatal error during recipe', 'Fatal error' not in debug and 'Uncaught' not in debug)
 (root/'checks.json').write_text(json.dumps({'passed':len(passed),'checks':passed},ensure_ascii=False,indent=2))
