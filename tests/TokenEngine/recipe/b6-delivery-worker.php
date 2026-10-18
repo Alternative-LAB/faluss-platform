@@ -226,8 +226,11 @@ try {
             wp_set_current_user($actors['fan_user']); $visibility->consent('fan',true,(int) $visibility->own()['revision']);
             return $actors + ['admin_user' => $admin->ID];
         })(),
-        default => str_starts_with($input['action'],'dimension-') ? require __DIR__ . '/b6-dimension-worker.php'
-            : throw new RuntimeException('Unknown closed delivery fixture operation'),
+        default => match (true) {
+            str_starts_with($input['action'],'dimension-') => require __DIR__ . '/b6-dimension-worker.php',
+            str_starts_with($input['action'],'selection-') => require __DIR__ . '/b6-selection-worker.php',
+            default => throw new RuntimeException('Unknown closed delivery fixture operation'),
+        },
     };
 } catch (ModelViolation $error) { $result = ['error' => $error->reason]; }
 echo wp_json_encode($result,JSON_THROW_ON_ERROR);

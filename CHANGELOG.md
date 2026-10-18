@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Ajouté
+
+- Choix prospectif fermé des sessions : catégories/pays et admissions relus sur le primaire, contexte0.3 composé côté serveur et client à clés stables. Interface native et recette de bout en bout encore en cours ; aucune attribution réelle ouverte.
+
 ### Corrigé
 
 - Masquage territorial des seules dimensions HoF concernées : lignes Créateurs et identités d'organisateurs relues sur le primaire, sans modifier les persistants, les relevés privés, les sessions internationales ni les faits corrigés. Recette fermée, aucune nouvelle direction visuelle ou activation.
