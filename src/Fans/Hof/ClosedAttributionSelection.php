@@ -46,12 +46,12 @@ final class ClosedAttributionSelection
     }
 
     /** No session is selected implicitly. Browser supplies IDs only; every frozen field comes from current primary facts.
-     * @param list<string> $selected */
+     * @param array<array-key,mixed> $selected */
     public function resolve(string $attribution,string $profile,string $quantity,array $selected): RankedIntent
     {
         ModelValues::uuid($attribution); ModelValues::uuid($profile);
         if (!array_is_list($selected) || count($selected)>RankingPolicy::MAX_ATTRIBUTION_SESSIONS) { throw new ModelViolation('pf_ranking_invalid_sessions'); }
-        foreach ($selected as $id) { ModelValues::uuid($id); }
+        $selected=array_map(static fn (mixed $id): string => ModelValues::uuid($id),$selected);
         if (count(array_unique($selected))!==count($selected)) { throw new ModelViolation('pf_ranking_duplicate_or_order'); }
         sort($selected,SORT_STRING);
         return $this->scope($profile,function (array $origin,array $policy,string $member) use ($attribution,$profile,$quantity,$selected): RankedIntent {
