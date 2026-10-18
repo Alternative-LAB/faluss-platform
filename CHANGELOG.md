@@ -8,6 +8,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Corrigé
 
+- Horaires du back-office Fans présentés dans le fuseau configuré de WordPress, avec son nom et le décalage été/hiver ; stockage et API UTC, cron, sauvegardes et conservation inchangés.
 - Masquage territorial des seules dimensions HoF concernées : lignes Créateurs et identités d'organisateurs relues sur le primaire, sans modifier les persistants, les relevés privés, les sessions internationales ni les faits corrigés. Recette fermée, aucune nouvelle direction visuelle ou activation.
 
 ### Ajouté

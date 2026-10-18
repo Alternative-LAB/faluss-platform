@@ -17,7 +17,7 @@ chaque page et l’aperçu ; les permissions REST sont encore exécutées par
 ## Parcours réel
 
 - Textes : page de 20 `pending` au plus, curseur existant, plus anciens en premier,
-  corps échappé en texte, UUID du créateur, activité du profil, dates UTC, état et
+  corps échappé en texte, UUID du créateur, activité du profil, dates dans le fuseau WordPress, état et
   révision. Aucun e-mail, identité centrale ou compte vérifié n’est déduit de ces
   données. Un profil inactif reste dans la file, avec refus possible mais sans
   option d’approbation. La permission finale appartient toujours au serveur.
@@ -42,7 +42,7 @@ chaque page et l’aperçu ; les permissions REST sont encore exécutées par
   Aucun champ libre de notes ou nouveau motif. Le refus purge le contenu courant
   selon le moteur concerné. L’approbation texte peut le rendre public selon la
   politique existante ; l’approbation image n’ouvre pas le flag de diffusion.
-- Journal repliable : révision, acteur WordPress, action, motif, date UTC.
+- Journal repliable : révision, acteur WordPress, action, motif, date dans le fuseau WordPress indiqué.
   Textes : 100 dernières traces au maximum ; images : journal existant complet.
   Une fiche administrative par UUID reste accessible après sortie de la file,
   avec état courant et journal ; aucune lecture publique de cette fiche.
@@ -65,6 +65,24 @@ complet. L’API administrative de nettoyage reste disponible, sans nouveau bout
 de purge globale dans ce panel.
 
 ## Confidentialité et limites de concurrence
+
+### Présentation des horaires
+
+Les vues d'admission des profils, présentations, publications, catalogue,
+signalements et exploitation convertissent les instants UTC uniquement à
+l'affichage avec `wp_timezone()`. Le nom du fuseau et son décalage sont visibles :
+`06/10/2026 à 10:00:01 +02:00 · Europe/Paris`. Le décalage distingue les deux
+occurrences d'une heure lors du changement d'heure d'automne. Un fuseau fixe
+configuré dans WordPress est respecté également ; aucune hypothèse Paris n'est
+imposée à ces vues. Les vues de gouvernance HoF nomment déjà le fuseau WordPress.
+
+Une date absente ou invalide n'est pas remplacée par une échéance inventée.
+Les modèles d'API, curseurs, journaux stockés, calculs de rétention et dates
+techniques restent en UTC. Aucun cron, verrou de sauvegarde, flag ou règle de
+conservation n'est modifié. Les tests vérifient les passages été/hiver et une
+recette native de lecture contrôle la configuration WordPress, les dates de l'API
+et le maintien du prochain événement de purge. Ils ne constituent pas une
+vérification du site cible.
 
 Pages privées et aperçus : `Cache-Control: private, no-store`,
 `CDN-Cache-Control: no-store`, `Surrogate-Control: no-store`, aucune persistance

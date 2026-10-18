@@ -71,6 +71,25 @@ catalog={'_wpnonce':nonce('catalog'),'creator':member,'creation_key':key,'confir
 check('catalog native technical entry succeeds',native('catalog',data=catalog)[0]==200)
 check('catalog replay idempotent',native('catalog',data=catalog)[0]==200 and cli('global $wpdb;echo $wpdb->get_var("SELECT COUNT(*) FROM wp_faluss_fans_store_catalog");')=='1')
 check('catalog private creator context','member@example.invalid' in native('catalog')[1])
+
+# Presentation follows real WordPress settings; stored timestamps and the cron are unchanged.
+settings=json.loads(cli("echo wp_json_encode(['zone'=>get_option('timezone_string'),'offset'=>get_option('gmt_offset')]);"))
+profile_before=api('creators/'+member+'/private','admin')[1]
+cron_before=cli("echo wp_next_scheduled('faluss_fans_messages_retention');")
+try:
+    cli("update_option('timezone_string','Europe/Paris');")
+    check('backoffice uses actual WordPress summer and winter timezone',json.loads(cli("echo wp_json_encode([\\Faluss\\Platform\\Fans\\Moderation\\BackOfficeTime::utc('2026-10-06 08:00:01'),\\Faluss\\Platform\\Fans\\Moderation\\BackOfficeTime::utc('2026-12-06 08:00:01')]);"))==[
+        '06/10/2026 à 10:00:01 +02:00 · Europe/Paris','06/12/2026 à 09:00:01 +01:00 · Europe/Paris'])
+    for view,who in [('profiles&item='+member,'admin'),('texts&item='+pub['publication_id'],'admin'),('editorial&item='+member,'admin'),('catalog','admin'),('operations','admin-two'),('messages','admin-two')]:
+        code,display,_=native(view,who)
+        check('native backoffice date names WordPress zone '+view.split('&')[0],code==200 and 'Europe/Paris' in display)
+    cli("update_option('timezone_string','');update_option('gmt_offset',5.5);")
+    check('backoffice honors WordPress fixed offset too',cli("echo \\Faluss\\Platform\\Fans\\Moderation\\BackOfficeTime::utc('2026-10-06 08:00:01');")=='06/10/2026 à 13:30:01 +05:30 · +05:30')
+    check('timezone presentation preserves technical API values and journal',api('creators/'+member+'/private','admin')[1]==profile_before)
+    check('timezone presentation does not change the retention event',cli("echo wp_next_scheduled('faluss_fans_messages_retention');")==cron_before)
+finally:
+    cli('update_option("timezone_string",'+json.dumps(settings['zone'])+');update_option("gmt_offset",'+json.dumps(settings['offset'])+');')
+
 revoke={**form,'expected':'1','grant':'0'}
 check('staff revocation succeeds',native('staff',data=revoke)[0]==200)
 check('revocation takes effect next request',native('operations','admin-two')[0]==403)
