@@ -1,0 +1,208 @@
+{
+  "scope": "Read-only exact support PHP view replay with fictitious models. Not WordPress, SSO, attribution, primary lookup or API evidence.",
+  "screens": [
+    {
+      "file": "support-choices-1440.png",
+      "width": 1440,
+      "diagnostic": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "tabs": 6,
+        "visibleUUID": false,
+        "preselected": 0
+      },
+      "focus": true
+    },
+    {
+      "file": "support-choices-detail-1440.png",
+      "width": 1440,
+      "diagnostic": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "tabs": 6,
+        "visibleUUID": false,
+        "preselected": 0
+      },
+      "focus": true,
+      "keyboardCheckbox": true,
+      "touchCheckbox": false
+    },
+    {
+      "file": "support-empty-1440.png",
+      "width": 1440,
+      "diagnostic": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "tabs": 6,
+        "visibleUUID": false,
+        "preselected": 0
+      },
+      "focus": true
+    },
+    {
+      "file": "support-unknown-1440.png",
+      "width": 1440,
+      "diagnostic": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "tabs": 6,
+        "visibleUUID": false,
+        "preselected": 0
+      },
+      "focus": true
+    },
+    {
+      "file": "support-confirmed-1440.png",
+      "width": 1440,
+      "diagnostic": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "tabs": 6,
+        "visibleUUID": false,
+        "preselected": 0
+      },
+      "focus": true
+    },
+    {
+      "file": "support-choices-390.png",
+      "width": 390,
+      "diagnostic": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "tabs": 6,
+        "visibleUUID": false,
+        "preselected": 0
+      },
+      "focus": true
+    },
+    {
+      "file": "support-choices-detail-390.png",
+      "width": 390,
+      "diagnostic": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "tabs": 6,
+        "visibleUUID": false,
+        "preselected": 0
+      },
+      "focus": true,
+      "keyboardCheckbox": true,
+      "touchCheckbox": true
+    },
+    {
+      "file": "support-empty-390.png",
+      "width": 390,
+      "diagnostic": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "tabs": 6,
+        "visibleUUID": false,
+        "preselected": 0
+      },
+      "focus": true
+    },
+    {
+      "file": "support-unknown-390.png",
+      "width": 390,
+      "diagnostic": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "tabs": 6,
+        "visibleUUID": false,
+        "preselected": 0
+      },
+      "focus": true
+    },
+    {
+      "file": "support-confirmed-390.png",
+      "width": 390,
+      "diagnostic": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "tabs": 6,
+        "visibleUUID": false,
+        "preselected": 0
+      },
+      "focus": true
+    },
+    {
+      "file": "support-choices-320.png",
+      "width": 320,
+      "diagnostic": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "tabs": 6,
+        "visibleUUID": false,
+        "preselected": 0
+      },
+      "focus": true
+    },
+    {
+      "file": "support-choices-detail-320.png",
+      "width": 320,
+      "diagnostic": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "tabs": 6,
+        "visibleUUID": false,
+        "preselected": 0
+      },
+      "focus": true,
+      "keyboardCheckbox": true,
+      "touchCheckbox": true
+    },
+    {
+      "file": "support-empty-320.png",
+      "width": 320,
+      "diagnostic": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "tabs": 6,
+        "visibleUUID": false,
+        "preselected": 0
+      },
+      "focus": true
+    },
+    {
+      "file": "support-unknown-320.png",
+      "width": 320,
+      "diagnostic": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "tabs": 6,
+        "visibleUUID": false,
+        "preselected": 0
+      },
+      "focus": true
+    },
+    {
+      "file": "support-confirmed-320.png",
+      "width": 320,
+      "diagnostic": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "tabs": 6,
+        "visibleUUID": false,
+        "preselected": 0
+      },
+      "focus": true
+    }
+  ],
+  "failures": [],
+  "source_head": "eb73cbf7d673b435fefc2f44e64db24b0e67230b"
+}

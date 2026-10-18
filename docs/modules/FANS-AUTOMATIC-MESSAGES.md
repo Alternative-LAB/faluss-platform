@@ -31,12 +31,13 @@ suivi et les formulaires gratuits « Suivre / Ne plus suivre ». Aucun opt-in Fa
 n'est lu, enregistré ou demandé ; l'événement de suivi fournit l'autorisation
 limitée au message correspondant. Aucune acceptation générale n'en découle.
 
-Le remerciement peut être rédigé et prévisualisé, mais son **activation échoue
-fermée côté serveur** tant que le raccordement aux faits PF confirmés et rapprochés
-n'est pas livré. Son option Activé est désactivée dans l'UI. Une ligne de file
-fabriquée, un champ REST, un flag ou un rôle ne constituent jamais une preuve PF.
-Le futur raccordement reste limité aux instances Hub/Fans physiquement jetables ;
-ni producteur d'achat réel, ni API économique de site ne sont ajoutés ici.
+Le raccordement aux faits PF confirmés et rapprochés est intégré par #239,
+**uniquement sur les instances Hub/Fans physiquement jetables**. La configuration
+peut y être activée lorsqu'une source typée fermée est réellement disponible.
+Sur un site ordinaire, l'activation échoue toujours fermée côté serveur et
+l'option reste indisponible. Une ligne de file fabriquée, un champ REST, un flag
+ou un rôle ne constituent jamais une preuve PF. Aucun producteur d'achat réel
+ni API économique de site ne sont ajoutés ; [contrôle source et reprise](FANS-AUTOMATIC-PF-THANKS-CLOSED.md).
 
 ### Persistance et livraison de la bienvenue
 
@@ -99,9 +100,10 @@ signalements, recours et purges restent accessibles. Désactiver Bienvenue avant
 un retrait de code, laisser terminer le job puis conserver les données : ne pas
 supprimer les empreintes pour simuler une première bienvenue après rollback.
 
-Le prochain lot raccordera les remerciements aux faits Hub autoritatifs, sans
-nouveau contrat Hub sans accord distinct, ni réseau dans une transaction
-économique, ni annulation d'un soutien si la messagerie est indisponible.
+Le raccordement fermé du remerciement réutilise les faits Hub autoritatifs et la
+file existante. Aucun réseau dans une transaction économique, aucune annulation
+d'un soutien si la messagerie est indisponible et aucun nouveau contrat Hub
+sans accord distinct.
 
 La pièce jointe de bienvenue demeure **indisponible** tant que #161 ne prouve pas
 la compatibilité du stockage privé, l'intégrité, la lecture autorisée et la

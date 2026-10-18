@@ -38,6 +38,23 @@ if (PHP_SAPI === 'cli-server') { ob_start(static fn (string $html): string => st
 $clock = trim(file_get_contents($root . '/corpus-sql-clock'));
 if (!is_numeric($clock)) { throw new RuntimeException('Private fixture clock unavailable'); }
 $wpdb->query($wpdb->prepare('SET timestamp=%f',(float) $clock));
+if (is_array($settings['attribution']??null)) {
+    add_filter('faluss_fans_closed_attribution',static function($unused,string $profile) use($wpdb,$settings,$root) {
+        \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\ClosedEnvironment::assertIsolated($wpdb,'fans');
+        $config=$settings['attribution'];
+        if ($profile!==$config['profile']) { return null; }
+        $policy=json_decode(file_get_contents($root.'/fans-corpus-trust.json'),true,20,JSON_THROW_ON_ERROR);
+        $peer=new \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy($policy['node'],$policy['audience'],$policy['permissions'],$policy['keys']);
+        $inbox=new \Faluss\Platform\Fans\PfContract\ClosedBarrierInbox($wpdb,$peer,$settings['origin'],'1.0.0');
+        $primary=new \Faluss\Platform\Fans\PfContract\ClosedBarrierPrimaryRead($wpdb,$inbox,$peer);
+        $opening=new \Faluss\Platform\Fans\Hof\ClosedOriginOpening($wpdb,$inbox,$settings['origin']);
+        $selection=new \Faluss\Platform\Fans\Hof\ClosedAttributionSelection($wpdb,$opening,$primary,
+            new \Faluss\Platform\Fans\Hof\ClosedAttributionPolicy($wpdb,$primary,$config['creator_action'],$config['country_action']));
+        $client=new \Faluss\Platform\Fans\PfContract\ClosedRankedClient($wpdb,$peer,'recipe-fans-k1',
+            str_replace('/corpus','/ranked',trim(file_get_contents($root.'/corpus-endpoint'))));
+        return new \Faluss\Platform\Fans\PfContract\ClosedAttributionAttempt($wpdb,$selection,$client);
+    },10,2);
+}
 add_filter('faluss_fans_hof_closed_delivery',static function () use ($wpdb,$settings,$root): \Faluss\Platform\Fans\Hof\ClosedRankingDelivery {
     \Faluss\Platform\TokenEngine\PurchasedPf\Protocol\ClosedEnvironment::assertIsolated($wpdb,'fans');
     $policy = json_decode(file_get_contents($root . '/fans-corpus-trust.json'),true,20,JSON_THROW_ON_ERROR);

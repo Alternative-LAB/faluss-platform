@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Ajouté
+
+- Choix prospectif fermé des sessions : catégories/pays et admissions relus sur le primaire, contexte0.3 composé côté serveur, formulaire natif et checkpoint durable à clés stables. Recettes de bout en bout et captures encore en cours ; aucune attribution réelle ouverte.
+
 ### Corrigé
 
 - Horaires du back-office Fans présentés dans le fuseau configuré de WordPress, avec son nom et le décalage été/hiver ; stockage et API UTC, cron, sauvegardes et conservation inchangés.
@@ -13,12 +17,12 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Ajouté
 
-- Raccordement fermé en cours des remerciements aux reçus PF0.3 authentifiés et au corpus courant rapproché, avec capture durable unique par attribution et file de messagerie existante ; aucune source réelle, nouveau contrat Hub ou activation.
+- Raccordement fermé des remerciements aux reçus PF0.3 authentifiés et au corpus courant rapproché, avec capture durable unique par attribution et file de messagerie existante ; aucune source réelle, nouveau contrat Hub ou activation.
 - Parcours natif fermé des territoires HoF : critères paginés, déclaration/recours/retrait propriétaire, examen dans le panel Fans et reprise bornée des fermetures avec les mêmes actions Hub. Permissions, nonces, révisions et journal existants conservés ; dates affichées dans le fuseau WordPress, sans activation ni nouveau contrat Hub.
 
 ### Ajouté
 
-- Configuration privée des messages automatiques, aperçu serveur et bienvenue textuelle unique depuis le suivi réel, avec remise asynchrone dans les conversations existantes, reprise durable, quotas et annulation avant envoi. Boutons natifs « Suivre / Ne plus suivre » sans consentement supplémentaire. Les remerciements attendent encore leur raccordement aux preuves PF fermées ; les pièces jointes restent indisponibles.
+- Configuration privée des messages automatiques, aperçu serveur et bienvenue textuelle unique depuis le suivi réel, avec remise asynchrone dans les conversations existantes, reprise durable, quotas et annulation avant envoi. Boutons natifs « Suivre / Ne plus suivre » sans consentement supplémentaire. Les remerciements dépendent du raccordement PF fermé décrit ci-dessus ; les pièces jointes restent indisponibles.
 
 ### Ajouté
 

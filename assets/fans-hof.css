@@ -1,4 +1,6 @@
 .fu-hof{display:grid;grid-template-columns:minmax(0,1fr);gap:1.5rem;min-width:0;margin-block:1.25rem;color:#eef5f2}
+.fu-support-choice{display:flex;align-items:flex-start;gap:.7rem;min-height:44px;padding:.7rem 0;border-bottom:1px solid #29372f;overflow-wrap:anywhere}.fu-support-choice>input{flex:0 0 auto;width:1.2rem;height:1.2rem;margin:.2rem 0 0}.fu-support-choice>span{display:grid;gap:.35rem;min-width:0}.fu-support-choice small{color:#a5b5ac}.fu-support-choice+ .fu-support-choice{margin-top:.25rem}
+.fu-hof-support{gap:1rem}.fu-hof-support>h2,.fu-hof-support>p{margin:0}.fu-hof-support fieldset{min-width:0;margin:0;padding:1rem;border:1px solid #29372f;border-radius:.7rem}.fu-hof-support legend{padding-inline:.35rem;color:#dce9df;line-height:1.5}.fu-hof-support .fu-hof-session__summary .fu-button{max-width:100%;white-space:normal}
 .fu-hof__tabs{display:flex;gap:.5rem;overflow-x:auto;max-width:100%;padding:.25rem 0 .75rem;scrollbar-width:thin}
 .fu-hof__tabs a{flex:0 0 auto;padding:.7rem 1rem;border:1px solid #2d3934;border-radius:999px;color:#bfcec7;text-decoration:none;white-space:nowrap}
 .fu-hof__tabs a[aria-current=page]{background:#173e31;border-color:#41c295;color:#effff8}
