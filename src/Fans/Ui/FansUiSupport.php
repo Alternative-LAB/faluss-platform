@@ -117,6 +117,8 @@ final class FansUiSupport
             if ($action==='page') {
                 $this->cursor=ModerationPanel::field('choice_cursor',$_POST);
                 if ($this->cursor!=='') { ModelValues::uuid($this->cursor); }
+                $current=$flow->current();
+                $this->fresh=$current===null || $current['attribution_id']!==$this->id;
                 $flow->selected($this->profile,$this->selected);return;
             }
             $flow->start($this->id,$this->profile,$this->quantity,$this->selected);return;

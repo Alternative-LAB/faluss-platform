@@ -55,6 +55,10 @@ def run_checks(root,source,fixture,origin,actors,deliver,own,config,hub_sql,chec
         check('B6sc the native page is private and visiting leaves the current attempt unchanged',
             page[0]==200 and 'no-store' in page[2].get('Cache-Control','')
             and 'sessions[]' in page[1] and own('selection-attempt-current')==initial)
+        first=sorted(config['sessions'])[0]
+        paged=read(path,cookies['fan'],body(page[1],'page',quantity='1',choice_cursor=first,**{'sessions[]':[first]}))
+        check('B6sc native pagination retains explicit choices after an older terminal attribution without writing',
+            paged[0]==200 and form(paged[1]).get('sessions[]')==first and own('selection-attempt-current')==initial)
         check('B6sc an anonymous visitor sees no selection or protected attribution form',
             read(path)[0]==403 and 'fans_support_nonce' not in read(path)[1])
         start=body(page[1],'reserve',quantity='1',**{'sessions[]':[config['sessions'][1]]})
@@ -75,12 +79,12 @@ def run_checks(root,source,fixture,origin,actors,deliver,own,config,hub_sql,chec
         uncertain=read(path,cookies['fan'],body(prepared[1],'confirm'))
         check('B6sc native confirmation uncertainty exposes only recovery and never creates a new intention',
             uncertain[0]==503 and own('selection-attempt-current')['phase']=='unknown'
-            and 'Vérifier le résultat auprès de Hub' in uncertain[1]
+            and 'Vérifier l’état du soutien' in uncertain[1]
             and int(hub_sql('SELECT COUNT(*) FROM wp_token_engine_pf_b3r_receipts'))==count+1)
         recovered=read(path,cookies['fan'],body(uncertain[1],'lookup'))
         check('B6sc the native primary lookup confirms the exact choices without a second debit',
             recovered[0]==200 and own('selection-attempt-current')['phase']=='confirmed'
-            and 'Attribution confirmée par Hub' in recovered[1]
+            and 'Soutien confirmé' in recovered[1]
             and int(hub_sql('SELECT COUNT(*) FROM wp_token_engine_pf_b3r_receipts'))==count+1)
         old=own('selection-attempt-current');new=read(path,cookies['fan'],body(recovered[1],'new'))
         check('B6sc preparing another form after terminal proof changes no stored intent on its own',

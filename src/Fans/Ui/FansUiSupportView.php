@@ -9,7 +9,7 @@ final class FansUiSupportView
 {
     public static function render(FansUiSupport $v): void
     {
-        ?><section class="fu-hof" data-fans-private-reading aria-labelledby="fu-support-title">
+        ?><section class="fu-hof fu-hof-support" data-fans-private-reading aria-labelledby="fu-support-title">
         <a class="fu-link" href="<?php echo esc_url(home_url('/app/creators/'.$v->profile)); ?>">← Profil créateur</a>
         <h2 id="fu-support-title">Choisir les sessions de mon soutien</h2>
         <?php if (!$v->available): ?><p class="fu-hof__note" role="status">Le soutien est indisponible pour le moment.</p>
@@ -56,20 +56,20 @@ final class FansUiSupportView
             <p>Une autre attribution doit être terminée avant de préparer ce soutien.</p>
             <a class="fu-button" href="<?php echo esc_url(FansUiSupport::url($v->role,$row['creator_profile_id'])); ?>">Retrouver mon attribution en cours</a>
         <?php return;endif; ?>
-        <div class="fu-panel"><h3><?php echo esc_html($v->name); ?></h3>
+        <div class="fu-panel fu-hof-session__summary"><h3><?php echo esc_html($v->name); ?></h3>
             <p><strong><?php echo esc_html($v->quantity); ?> PF fictifs</strong> · <?php echo count($v->selected); ?> session(s) choisie(s)</p>
             <p role="status"><?php echo match($row['phase']) {
                 'reserved'=>'Préparation confirmée. Les choix sont figés pour cette attribution.',
-                'confirmed'=>'Attribution confirmée par Hub. Les projections restent soumises aux corrections attestées.',
+                'confirmed'=>'Soutien confirmé. Les points restent soumis aux corrections applicables.',
                 'released'=>'Réservation libérée. Aucun soutien confirmé par cette réservation.',
                 'expired'=>'Réservation expirée. Aucun nouveau débit ne sera tenté avec d’autres choix.',
-                'retry'=>'La dernière opération n’est pas confirmée. Le même essai peut être repris avec sa clé conservée.',
-                default=>'Résultat encore incertain. Vérifiez auprès de Hub avant toute nouvelle attribution.',
+                'retry'=>'La dernière opération n’est pas confirmée. Vous pouvez reprendre le même essai.',
+                default=>'Résultat encore incertain. Vérifiez son état avant de préparer un autre soutien.',
             }; ?></p>
             <?php foreach (match($row['phase']) {
                 'reserved'=>['confirm'=>'Confirmer cette attribution','release'=>'Libérer la réservation'],
                 'retry'=>['retry'=>'Réessayer la même opération'],
-                'unknown'=>['lookup'=>'Vérifier le résultat auprès de Hub'],
+                'unknown'=>['lookup'=>'Vérifier l’état du soutien'],
                 default=>['new'=>'Préparer un autre soutien'],
             } as $action=>$label): ?>
                 <form method="post" action="<?php echo esc_url(FansUiSupport::url($v->role,$v->profile)); ?>"><?php self::fields($v); ?><button class="fu-button<?php echo $action==='release'?' fu-button--outline':''; ?>" name="support_action" value="<?php echo esc_attr($action); ?>" type="submit"><?php echo esc_html($label); ?></button></form>

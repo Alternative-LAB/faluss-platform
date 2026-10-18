@@ -141,3 +141,6 @@ def run_attempt_checks(root,own,hub_sql,session,check):
     released=own('selection-attempt-advance',attribution=different,operation='release')
     check('B6sc releasing an unconfirmed later reservation is terminal and adds no receipt',
         released['phase']=='released' and int(hub_sql('SELECT COUNT(*) FROM wp_token_engine_pf_b3r_receipts'))==count+1)
+    check('B6sc an old completed form cannot replace a later terminal checkpoint or issue another reserve',
+        own('selection-attempt-start',**args)==dict(error='pf_local_attempt_replaced')
+        and int(hub_sql('SELECT COUNT(*) FROM wp_token_engine_pf_b3r_receipts'))==count+1)
