@@ -1,4 +1,4 @@
-# Remerciements PF — raccordement fermé en cours
+# Remerciements PF — raccordement en recette fermée
 
 ## Source et absence de nouveau contrat Hub
 
@@ -59,18 +59,28 @@ même clé de message. Un défaut de source n'expose aucun message ou donnée pr
 dans le statut technique. Même sans source récupérable, l'expiration ordinaire
 des textes en attente est contrôlée ; aucune durée PF réelle n'est introduite.
 
-## Garde et vérifications encore nécessaires
+## Garde, vérifications et limites
 
 Le garde physique Hub/Fans jetables est vérifié avant la factory locale typée
 `faluss_fans_closed_pf_thanks_delivery` ; un marqueur ou flag copié ne l'ouvre pas
 sur un site réel. Aucun nouveau format, permission ou endpoint Hub n'est créé.
 La configuration Remerciement reste indisponible dans un environnement ordinaire.
 
-Ce raccordement est **en cours** : recettes requises avant intégration : signatures,
-réception perdue après COMMIT, panne après insertion du message, concurrence,
-attributions multiples/multidimensions, pack seul, correction/annulation/litige,
-absence de déclenchement par restauration/rejeu, blocage/refus/suspension/quota,
-désactivation et texte figé, incompatibilité des médias, non-régression bienvenue.
-Les preuves de #236 ne démontrent pas ces nouveaux cas. Captures natives et CI
-du head exact puis main conjoint restent nécessaires. Aucune activation sur les
-sites, producteur réel ou publication partielle par ce travail.
+La recette WordPress/MariaDB du head `956914f` réussit **921 contrôles, zéro échec**.
+Elle couvre les nouveaux candidats, concurrence, réceptions et réponses perdues
+après COMMIT, rollback message/résultat, attributions multiples, corrections,
+litiges/résolutions sans nouveau message, blocage, désactivation, texte figé,
+indépendance de la bienvenue et formulaires HTTP natifs (nonce, compte étranger,
+aperçu, média refusé et édition concurrente). Il s'agit de preuves de ce lot,
+distinctes de #236.
+
+Les [preuves et six captures](../evidence/fans-pf-thanks-2026-10-18/README.md)
+distinguent ces parcours HTTP sur de vrais WordPress jetables des **rendus de
+composants** exécutés sous Windows avec modèles fictifs à 1 440, 390 et 320 px.
+Ces captures ne prouvent ni une session WordPress active ni le SSO ; aucune
+soumission navigateur sur WordPress n'est revendiquée. Les vues et leurs CSS
+existants sont conservés, avec focus, police et absence de débordement vérifiés.
+
+Le head final doit garder ses contrôles verts, puis être vérifié avec le main
+conjoint. Aucune activation sur les sites, producteur réel, politique de
+conservation PF ou preuve du stockage RustFS n'est ajoutée par ce travail.

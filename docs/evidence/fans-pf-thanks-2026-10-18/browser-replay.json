@@ -1,0 +1,79 @@
+{
+  "scope": "Read-only exact PHP view replay on Windows with fictitious models. Not WordPress, REST, SSO, source activation or target-site evidence.",
+  "source_head": "956914f29191779dc801e1da3477e6f513a313be",
+  "screens": [
+    {
+      "file": "automatic-welcome-1440.png",
+      "width": 1440,
+      "diagnostic": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "tabs": 8,
+        "visibleUUID": false
+      },
+      "focus": true
+    },
+    {
+      "file": "automatic-thanks-1440.png",
+      "width": 1440,
+      "diagnostic": {
+        "width": 1440,
+        "document": 1425,
+        "fontLoaded": true,
+        "tabs": 8,
+        "visibleUUID": false
+      },
+      "focus": true
+    },
+    {
+      "file": "automatic-welcome-390.png",
+      "width": 390,
+      "diagnostic": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "tabs": 8,
+        "visibleUUID": false
+      },
+      "focus": true
+    },
+    {
+      "file": "automatic-thanks-390.png",
+      "width": 390,
+      "diagnostic": {
+        "width": 390,
+        "document": 390,
+        "fontLoaded": true,
+        "tabs": 8,
+        "visibleUUID": false
+      },
+      "focus": true
+    },
+    {
+      "file": "automatic-welcome-320.png",
+      "width": 320,
+      "diagnostic": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "tabs": 8,
+        "visibleUUID": false
+      },
+      "focus": true
+    },
+    {
+      "file": "automatic-thanks-320.png",
+      "width": 320,
+      "diagnostic": {
+        "width": 320,
+        "document": 320,
+        "fontLoaded": true,
+        "tabs": 8,
+        "visibleUUID": false
+      },
+      "focus": true
+    }
+  ],
+  "failures": []
+}
