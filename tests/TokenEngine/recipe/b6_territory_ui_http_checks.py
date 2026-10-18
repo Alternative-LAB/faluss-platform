@@ -1,6 +1,7 @@
 """Native Creator declaration, administrator examination and exact durable closure on the real isolated pair."""
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime,timedelta,timezone
+import json
 import urllib.parse
 import uuid
 
@@ -8,6 +9,16 @@ from b6_privacy_http_checks import Forms
 
 
 def run_checks(root,read,cookies,actors,deliver,check):
+    # Native routes and the authoritative disposable primary must share the existing scenario clock.
+    primary=root/'barrier-primary-clock';prior=primary.read_bytes() if primary.exists() else None
+    primary.write_text((root/'corpus-sql-clock').read_text().strip());primary.chmod(0o600)
+    try:return _cases(root,read,cookies,actors,deliver,check)
+    finally:
+        if prior is None:primary.unlink(missing_ok=True)
+        else:primary.write_bytes(prior)
+
+
+def _cases(root,read,cookies,actors,deliver,check):
     path='/app/creator/hof?manage=territory';admin=cookies['admin'];owner=cookies['creator']
     creator=actors['creator_profile'];panel='/app/admin?view=territories&creator='+creator
     own=lambda:deliver('territory-ui-own',actor=actors['creator_user'])
@@ -61,7 +72,7 @@ def run_checks(root,read,cookies,actors,deliver,check):
     check('B6tu concurrent native examinations approve once with the exact submitted revision',
           sorted(responses)==[200,409] and own()['state']=='approved' and len(detail()['history'])==4)
     # Real native draft/review/open: the chosen policy comes from the owner's approved declaration.
-    now=datetime.now(timezone.utc);new='/app/creator/hof?manage=new'
+    now=datetime.fromtimestamp(float((root/'corpus-sql-clock').read_text()),timezone.utc);new='/app/creator/hof?manage=new'
     draft=Forms(read(new,owner)[1]).action('hof_session_action','create')
     draft.update(title='Session territoriale native fictive',rules_text='Participation volontaire selon les critères de recette.',category='arts',scope='local',country='FR',territory_ref='FR-A',
         timezone='UTC',starts_local=(now-timedelta(minutes=1)).strftime('%Y-%m-%dT%H:%M:%S'),ends_local=(now+timedelta(minutes=30)).strftime('%Y-%m-%dT%H:%M:%S'),starts_offset='',ends_offset='')
@@ -73,7 +84,12 @@ def run_checks(root,read,cookies,actors,deliver,check):
     session_panel='/app/admin?view=sessions&session='+session_id
     approval=Forms(read(session_panel,admin)[1]).action('session_review_action','approve');approval['reason']='allowed_session'
     assert read(session_panel,admin,approval)[0]==200
-    assert read(session_path,owner,form('open',session_path))[0]==200
+    opened=read(session_path,owner,form('open',session_path))
+    if opened[0]!=200:
+        session=deliver('private-session',actor=actors['creator_user'],session=session_id)['session']
+        current=deliver('territory-ui-clock',actor=actors['admin_user'])['now']
+        raise RuntimeError('Native territorial opening diagnostics: '+json.dumps(dict(status=opened[0],state=session['state'],
+            deadline_reached=current>=session['ends_at'],declaration_state=own()['state'])))
     check('B6tu reviewed native local session opens through the existing primary-confirmed policy bridge',
           deliver('private-session',actor=actors['creator_user'],session=session_id)['session']['state']=='open')
     assert moderator('revoke','needs_revision',dict(confirm_revoke='yes'))[0]==200

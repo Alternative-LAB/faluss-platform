@@ -20,6 +20,9 @@ return match ($input['action']) {
         sort($result,SORT_STRING); return $result;
     })(),
     'territory-ui-own' => (new TerritoryService($wpdb))->own(),
+    'territory-ui-clock' => (static function () use ($wpdb): array {
+        RankingRegistry::administrator(); return ['now' => (new \Faluss\Platform\Fans\Hof\SessionStore($wpdb))->now()];
+    })(),
     'territory-ui-examine' => (new TerritoryService($wpdb))->examine($input['creator']),
     'territory-ui-progress' => (new ClosedTerritoryChanges($wpdb))->progress($input['change']),
     'territory-ui-listing' => (new ClosedTerritoryChanges($wpdb))->listing($input['creator']),
