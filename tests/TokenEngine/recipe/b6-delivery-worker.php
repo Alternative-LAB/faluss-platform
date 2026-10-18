@@ -229,6 +229,7 @@ try {
         })(),
         default => match (true) {
             str_starts_with($input['action'],'thanks-') => require __DIR__ . '/b6-thanks-worker.php',
+            str_starts_with($input['action'],'territory-ui-') => require __DIR__ . '/b6-territory-ui-worker.php',
             str_starts_with($input['action'],'dimension-') => require __DIR__ . '/b6-dimension-worker.php',
             default => throw new RuntimeException('Unknown closed delivery fixture operation'),
         },
