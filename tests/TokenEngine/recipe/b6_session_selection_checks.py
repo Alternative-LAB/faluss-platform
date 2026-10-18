@@ -89,9 +89,13 @@ def run_checks(root,source,fixture,origin,actors,deliver,hub,hub_sql,sql,check):
             and hub_sql('SELECT * FROM wp_token_engine_ledger ORDER BY id')==historical)
         deliver('suspend',creator_profile=profile,status='active')
         run_attempt_checks(root,own,hub_sql,first,check)
+        settings=deliver('thanks-settings',actor=target['creator_user'])
+        assert settings['thanks_delivery_available'] is True
+        assert deliver('thanks-save',actor=target['creator_user'],kind='thanks',enabled=True,
+            body='Merci fictif pour le soutien natif multi-sessions.',revision=settings['thanks']['revision'])['enabled'] is True
         from b6_session_selection_ui_checks import run_checks as ui_checks
         ui_checks(root,source,fixture,origin,actors,deliver,own,
-            dict(profile=profile,creator_action=creator_policy['action_id'],country_action=country_policy['action_id'],sessions=[row['id'] for row in sessions]),hub_sql,check)
+            dict(profile=profile,creator_user=target['creator_user'],creator_action=creator_policy['action_id'],country_action=country_policy['action_id'],sessions=[row['id'] for row in sessions]),hub_sql,check)
         closing=deliver('close-session',actor=organizer['creator_user'],session=first)
         check('B6sc local closing forbids new attachment while retaining the old confirmed immutable intention',
             closing['state']=='closing' and 'error' in intent([first])

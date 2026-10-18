@@ -109,8 +109,19 @@ champs d'identité, contexte et actions étrangères sont refusés. Chaque lectu
 du service reste privée, sans cache partagé ; un GET ne crée aucune intention.
 Le transport typé de recette n'est jamais consulté avant le garde physique.
 
-Les nouvelles recettes SQL/HTTP, les tests du formulaire natif et les captures
-doivent encore passer. Aucun appel n'est admis sur un site ou un producteur réel.
+Le head `65bcc18` a passé la recette complète : **944 contrôles, zéro échec**,
+formulaires natifs et parcours territoriaux intégrés compris. Les
+[captures et limites de preuve](../evidence/fans-session-selection-2026-10-18/README.md)
+séparent ce fonctionnement HTTP des rendus de composants Windows.
+
+Le nouveau head composé avec #239 doit encore passer sa recette conjointe :
+un vrai formulaire natif choisit deux sessions, une réponse de confirmation est
+perdue puis le lookup du même reçu capture un seul remerciement. Le worker doit
+remettre uniquement le texte figé, après rapprochement complet, sans second débit
+ou message lors du rejeu. La préparation et la réponse incertaine sans reçu
+authentifié ne créent aucun message. Ces nouveaux cas ne sont pas annoncés
+réussis avant leurs résultats. Aucun appel n'est admis sur un site ou un
+producteur réel.
 
 L'autorité réelle de politique des pays, l'achat et la conservation #150 restent
 distincts. La configuration de recette fictive ne les valide pas à leur place.
