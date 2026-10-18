@@ -44,7 +44,7 @@ final class FansUiTerritoryView
         }
         echo '<h3>Fermetures à confirmer</h3>';
         if ($value->progress !== null) {
-            $progress = $value->progress; echo '<section class="fu-panel"><p>' . esc_html(self::phase($progress['change']['phase'])) . '</p><p>' . esc_html((string) $progress['applied']) . ' / ' . esc_html((string) $progress['total']) . ' confirmations.</p>';
+            $progress = $value->progress; echo '<section class="fu-panel fu-hof-session__summary"><p>' . esc_html(self::phase($progress['change']['phase'])) . '</p><p>' . esc_html((string) $progress['applied']) . ' / ' . esc_html((string) $progress['total']) . ' confirmations.</p>';
             if ($progress['change']['phase'] !== 'completed') {
                 echo '<form method="post" action="' . esc_url(self::url(['change' => $value->changeId])) . '">'; self::fields('territory_resume',$revision);
                 echo '<input type="hidden" name="change_id" value="' . esc_attr($value->changeId) . '"><button class="fu-button" type="submit">Poursuivre la confirmation</button></form>';
