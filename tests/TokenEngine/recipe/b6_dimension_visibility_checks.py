@@ -11,12 +11,13 @@ def run_checks(fixture,origin,actors,deliver,hub,hub_sql,sql,check):
     other=deliver('fixture-extra-creator');owner=other['creator_user'];policy=str(uuid.uuid4())
     assert deliver('dimension-install',actor=admin)==dict(ready=True)
     criteria=dict(criteria_url='https://criteria.example.invalid/dimensions',criteria_text='Fictitious principal activity criteria.',
-        countries=['FR'],territories={'FR-PARIS':dict(country='FR',name='Fictitious activity area')})
+        countries=['FR'],territories={'FR-PARIS':dict(country='FR',name='Fictitious activity area'),
+            'FR-LYON':dict(country='FR',name='Other fictitious activity area')})
     assert deliver('dimension-policy',actor=admin,policy=policy,criteria=criteria)['policy_id']==policy
     def own(actor):return deliver('dimension-own',actor=actor)
-    def approve(actor,creator):
+    def approve(actor,creator,reference='FR-PARIS'):
         current=own(actor)
-        row=deliver('dimension-submit',actor=actor,policy=policy,country='FR',reference='FR-PARIS',revision=int(current['revision']))
+        row=deliver('dimension-submit',actor=actor,policy=policy,country='FR',reference=reference,revision=int(current['revision']))
         return deliver('dimension-decide',actor=admin,creator=creator,revision=int(row['revision']),decision='approve',reason='criteria_satisfied')
     def revoke(actor,creator):
         return deliver('dimension-decide',actor=admin,creator=creator,revision=int(own(actor)['revision']),decision='revoke',reason='needs_revision')
@@ -39,7 +40,11 @@ def run_checks(fixture,origin,actors,deliver,hub,hub_sql,sql,check):
     intent['ranking_context'].update(origin_id=origin,sessions=sorted(contexts,key=lambda value:value['session_id']))
     intent['context_sha256']=hashlib.sha256(json.dumps(intent['ranking_context'],sort_keys=True,separators=(',',':')).encode()).hexdigest()
     receipts=int(hub_sql('SELECT COUNT(*) FROM wp_token_engine_pf_b3r_receipts'))
-    fixture['consume'](intent)
+    fixture['set_clock']();clock=fixture['set_clock'].path.read_text().strip()
+    reserve=hub('b3r-reserve',payload=intent,key=secrets.token_hex(32),clock_value=clock)
+    assert reserve.get('state')=='reserved','B6dv genuine owner reservation refused: '+str(reserve.get('error','unexpected_state'))
+    confirmed=hub('b3r-confirm',payload=intent,key=secrets.token_hex(32),clock_value=clock)
+    assert confirmed.get('state')=='confirmed','B6dv genuine owner confirmation refused: '+str(confirmed.get('error','unexpected_state'))
     def refresh():
         fixture['set_clock']();read=str(uuid.uuid4())
         assert fixture['inbox']('advance',origin,read_id=read,steps=4)['state']=='verified'
@@ -78,6 +83,11 @@ def run_checks(fixture,origin,actors,deliver,hub,hub_sql,sql,check):
     check('B6dv reviewed readmission reconstructs corrected historical rows without restoring cancelled points',
           all(points(scope)==['3'] for scope in sessions)
           and int(hub_sql('SELECT COUNT(*) FROM wp_token_engine_pf_b3r_receipts'))==receipts+1)
+    assert approve(participant,profile,'FR-LYON')['state']=='approved'
+    check('B6dv a reviewed activity change within the same country masks only its former local dimension',
+          points('local')==[] and points('national')==['3'] and points('international')==['3']
+          and all(points(scope,'fan')==['3'] for scope in sessions))
+    assert approve(participant,profile)['state']=='approved'
     table='wp_fans_hof_territory_creators';temporary=table+'_read_failure'
     sql('RENAME TABLE '+table+' TO '+temporary)
     try:
