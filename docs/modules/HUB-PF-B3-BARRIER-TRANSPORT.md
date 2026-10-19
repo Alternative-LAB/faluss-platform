@@ -138,7 +138,13 @@ réelle n'est introduite.
 Après authentification des deux signatures par le futur gateway,
 `ClosedBarrierAdmission` revalide forme, pair propriétaire, permission dédiée,
 nonce, empreinte, action et validité. Un mutex par pair/nonce sérialise les
-rejeux identiques sans prendre de verrou économique. La validité est relue
+rejeux identiques sans prendre de verrou économique. Le mutex est acquis avant
+le début de la transaction ; la lecture d'existence du nonce ne prend aucun
+verrou de plage. La clé primaire unique reste la dernière défense. Une lecture
+`FOR UPDATE` d'une ligne absente peut interbloquer deux insertions de nonces
+distincts dans le même intervalle sous REPEATABLE READ : ce cas est reproduit
+par deux requêtes réellement signées synchronisées juste avant INSERT. La
+correction ne change ni l'isolation SQL ni les verrous du ledger. La validité est relue
 après l'attente et après insertion, avant la décision COMMIT ; une expiration
 à ces étapes annule l'admission. Le registre ne modifie ni barrière ni ledger.
 
@@ -244,3 +250,11 @@ Les invocations individuelles gardent leurs scénarios antérieurs.
 Cette jonction de recette n'ajoute ni contrat, route, admission ou fonctionnalité
 publique. La livraison complète des projections et la liaison des barrières de
 participants/créateurs/pays aux intentions restent à composer.
+
+
+### Correction de concurrence — 17 octobre 2026
+
+[Recette avant/après et limites](../evidence/hub-barrier-nonce/README.md) :
+490 contrôles, zéro échec ; deux nonces frais dans le même intervalle sont
+admis simultanément, rejeux refusés et ledger inchangé. Aucun changement de
+contrat réseau, de schéma, de CI ou d’environnement. Validation fermée seulement.

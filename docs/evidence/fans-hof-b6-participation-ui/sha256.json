@@ -1,0 +1,23 @@
+{
+  "browser-checks.json": "03f0b91dbd5fe8c810c0fbf843a1226910df26596a6b772f9aa6d46de846860d",
+  "physical-checks.json": "140c0b5d6e371d4ffc10a82e5cf360e8d7d99fd6bee647e2bb4dddca8ff0a938",
+  "quality-proof.json": "2edb491a72152071ee027932c9931b089be2fa47f17dc0a6be9790f1e93937aa",
+  "README.md": "093c116621115ad6dad75dd7fe3115c1d408918a15bb41b5f937e1a6c7f80ffa",
+  "screenshots/creator-participation-controls-1440.png": "578474dfc6c0da06a6079a245e8aa75e48e33d6eb362d8fda49a94f76e3d0fe0",
+  "screenshots/creator-participation-queue-1440.png": "6a169a50329b57879fe4eacd1cd8a0368f8de89b716ee6e282950910cb5936a7",
+  "screenshots/creator-participation-queue-390.png": "e91121416835382b3dfd7aecff7364e64446327c287424dd9ff8b39f7e02a2b7",
+  "screenshots/moderator-participation-decided-1440.png": "95d92ee6a9f6f65b1c01ddfb85556e50f627f104d91b8640778140d77b266f8c",
+  "screenshots/moderator-participation-pending-390.png": "7922d09692c186fbc2520b0447ac5976b324e3d020b075ab0891eba239607aaf",
+  "screenshots/participation-admitted-1440.png": "d07a17941fd4c8787d87762d663448e36d656ef5f75e7564a03e3632601f02db",
+  "screenshots/participation-admitted-390.png": "36cd089dd2d9c36a00dd47d3c504802daf47ab77146c6daf11ef4588a6adfe09",
+  "screenshots/participation-appeal-pending-390.png": "c2019521f912ef19906320b88c4e762644767c09c977286725f0577cff59d564",
+  "screenshots/participation-closing-390.png": "cc973fd76fa2b8e525f7ab9acca7d79b2cb1665c3e48798137d8110ba791df64",
+  "screenshots/participation-join-1440.png": "35b63f5cd8cca2e5bfb541cd19a6c1a2101e7e73a0bd34c5ccdcf4c30ab4f5ba",
+  "screenshots/participation-join-390.png": "f93a67d39405cf613faa92c743158267d045f7103b61dc0adf275431e277cd64",
+  "screenshots/participation-refused-390.png": "64f63c9ac8a4fef45981bd1f5f317d293236652e0720ef49d9538f39cda12917",
+  "screenshots/participation-requested-1440.png": "8a8704c8b4615ea086cefbada03d53afa078967d3ffc86aaafaa50a25bbf0b46",
+  "screenshots/participation-requested-390.png": "50384faebbf28c8f02a9a191300dc20a468047f51e97f160142efc6e7e7900d6",
+  "screenshots/participation-withdrawn-1440.png": "cb32885671ca2632b288eb500807075aadb0096e9887b7bc653d4f5820299e35",
+  "screenshots/participation-withdrawn-390.png": "5d142377ce600caa0a7cdb6a645c1a49d2d683e426114eef41825adbe7b4437a",
+  "source-proof.json": "f30f6350439282de54c3d916789f407a7cb62a0ac189f4da97103b334cf06589"
+}

@@ -89,6 +89,11 @@ MU-plugin sur les autres sites. Les fichiers servis et générés doivent appart
 
 ## Vérifications et preuves
 
+Le catalogue est aussi contrôlé sans accès aux sites par quatre tests dans
+`tests/Workflow/test_signinforge_catalog.py` : chaînes UTF-8, contextes, pluriels
+français et refus d’un appel CLI incomplet. Ils lisent le fichier MO généré avec
+`gettext.GNUTranslations` et font partie du contrôle d’archive de la CI.
+
 [Preuves de recette](../evidence/signinforge-2026-10-15/README.md) : captures finales,
 résultats structurés d’authentification et de mise en page, sans données de compte.
 

@@ -22,6 +22,8 @@ define('FALUSS_FANS_IMAGE_STORAGE_ATTESTED', true);
 final class EditorialSqlAdapter
 {
     public string $prefix = 'test_';
+    public string $users = 'test_users';
+    public string $usermeta = 'test_usermeta';
     public string $last_error = '';
     public PDO $pdo;
     public function __construct(string $root) {
@@ -29,10 +31,14 @@ final class EditorialSqlAdapter
     }
     public function prepare(string $sql, mixed ...$args): string {
         $index = 0;
-        return preg_replace_callback('/%[sd]/', function ($m) use ($args, &$index) {
-            $v = $args[$index++]; return $m[0] === '%d' ? (string) (int) $v : $this->pdo->quote((string) $v);
+        return preg_replace_callback('/%[sdi]/', function ($m) use ($args, &$index) {
+            $v = $args[$index++]; return match ($m[0]) {
+                '%d' => (string) (int) $v, '%i' => '`' . str_replace('`', '``', (string) $v) . '`',
+                default => $this->pdo->quote((string) $v),
+            };
         }, $sql);
     }
+    public function get_blog_prefix(): string { return $this->prefix; }
     public function get_charset_collate(): string { return 'DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin'; }
     public function suppress_errors(bool $v = true): bool { return false; }
     public function query(string $sql): int|false {
@@ -49,6 +55,16 @@ final class EditorialSqlAdapter
 $wpdb = new EditorialSqlAdapter($fixtureRoot);
 function get_option(string $key, mixed $default = false): mixed { global $wpdb; return $wpdb->get_var($wpdb->prepare('SELECT value FROM fixture_options WHERE name=%s', $key)) ?? $default; }
 function update_option(string $key, mixed $value, bool $autoload = false): bool { global $wpdb; return $wpdb->query($wpdb->prepare('REPLACE INTO fixture_options(name,value) VALUES(%s,%s)', $key, $value)) !== false; }
+// Match WordPress's configured timezone and numeric-offset fallback; only an application test primitive.
+function wp_timezone(): DateTimeZone
+{
+    $timezone = get_option('timezone_string');
+    if (is_string($timezone) && $timezone !== '') { return new DateTimeZone($timezone); }
+    $offset = (float) get_option('gmt_offset', 0);
+    $hours = (int) $offset;
+    $minutes = ($offset - $hours) * 60;
+    return new DateTimeZone(sprintf('%s%02d:%02d', $offset < 0 ? '-' : '+', abs($hours), abs($minutes)));
+}
 $fixtureUser = (int) ($_COOKIE['fixture_user'] ?? 17);
 function get_current_user_id(): int { return $GLOBALS['fixtureUser']; }
 function is_user_logged_in(): bool { return get_current_user_id() > 0; }
@@ -56,6 +72,17 @@ function current_user_can(string $cap): bool { return ($cap === 'manage_options'
 class WP_User { public string $user_email = 'recipe@example.invalid'; public function __construct(public int $ID, public array $roles = ['subscriber']) {} }
 function is_email(string $value): string|false { return filter_var($value, FILTER_VALIDATE_EMAIL) ? $value : false; }
 function get_userdata(int $id): WP_User|false { return $id > 0 ? new WP_User($id, in_array($id,[1,42],true) ? ['administrator'] : ['subscriber']) : false; }
+final class EditorialFixtureRoles
+{
+    public function is_role(string $role): bool { return in_array($role, ['subscriber', 'administrator', 'editor'], true); }
+}
+function wp_roles(): EditorialFixtureRoles { return new EditorialFixtureRoles(); }
+function is_serialized(mixed $value): bool
+{
+    if (!is_string($value)) { return false; }
+    try { return @unserialize($value, ['allowed_classes' => false]) !== false || $value === 'b:0;'; }
+    catch (Throwable) { return false; }
+}
 function wp_parse_url(string $url): array|false { return parse_url($url); }
 function home_url(string $path = ''): string { return (getenv('FANS_EDITORIAL_HTTP') ?: 'https://editorial.example.test') . $path; }
 function wp_verify_nonce(string $nonce, string $action): int|false { return $nonce === 'fixture-' . $action ? 1 : false; }

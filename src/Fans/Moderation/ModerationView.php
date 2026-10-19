@@ -74,7 +74,7 @@ final class ModerationView
             <p class="fm-id"><?php echo esc_html($id); ?></p>
             <?php if (!$images): ?>
                 <a href="<?php echo esc_url(add_query_arg('item', $id, self::url(false))); ?>">Fiche et journal</a>
-                <p class="fm-id">Créateur : <?php echo esc_html((string) $row['creator_id']); ?><br>Mis à jour (UTC) : <?php echo esc_html((string) $row['updated_at']); ?></p>
+                <p class="fm-id">Créateur : <?php echo esc_html((string) $row['creator_id']); ?><br>Mis à jour : <?php echo esc_html(BackOfficeTime::utc((string) $row['updated_at'])); ?></p>
                 <p><?php echo $active ? 'Profil actif · approbation éditoriale uniquement.' : 'Profil non public ou indisponible : approbation impossible.'; ?></p>
                 <div class="fm-text"><?php echo esc_html((string) $row['body']); ?></div>
                 <?php if (is_string($row['image_id'] ?? null)): self::previewForm($row['image_id'], $id, (string) $row['revision']); ?>
@@ -128,9 +128,9 @@ final class ModerationView
             <?php if ($response->get_status() !== 200 || !is_array($rows)): ?><p>Journal indisponible.</p>
             <?php else: ?><ul class="fm-journal">
                 <?php foreach ($rows as $entry): ?>
-                    <li><?php echo esc_html(implode(' · ', array_map('strval', array_intersect_key($entry, array_flip(['revision', 'actor_id', 'action', 'reason', 'occurred_at']))))); ?></li>
+                    <li><?php echo esc_html(implode(' · ', array_map('strval', BackOfficeTime::journal(array_intersect_key($entry, array_flip(['revision', 'actor_id', 'action', 'reason', 'occurred_at'])))))); ?></li>
                 <?php endforeach; ?>
-            </ul><p>Révision, acteur WordPress, action, motif et date UTC. Aucun ancien contenu n’est reconstitué.</p><?php endif; ?>
+            </ul><p>Révision, acteur WordPress, action, motif et date dans le fuseau WordPress indiqué. Aucun ancien contenu n’est reconstitué.</p><?php endif; ?>
         </details>
         <?php
     }

@@ -26,19 +26,24 @@ final class MessageService
             $blocked=self::blocks($fan,$creatorId);
             if ($blocked instanceof \WP_Error) { return $blocked; }
             if ($blocked['fan_block'] || $blocked['creator_block']) { return MessagePolicy::error('conversation_blocked',403); }
+            $contact=MessageContact::inTransaction($creatorId);
+            if ($contact instanceof \WP_Error) { return $contact; }
             $hash=hash('sha256','request' . "\0" . $creatorId . "\0" . $body);
             $replay=self::replay($fan,$key,$hash);
             if ($replay!==null) { return $replay; }
             $threads=MessageSchema::table('threads');
-            $old=$wpdb->get_row($wpdb->prepare('SELECT thread_id,DATE_ADD(last_sent_at,INTERVAL 12 MONTH)<=UTC_TIMESTAMP() AS expired FROM `'.$threads.'` WHERE fan_user=%d AND creator_id=%s',$fan,$creatorId),'ARRAY_A');
+            $old=$wpdb->get_row($wpdb->prepare('SELECT thread_id,state,last_seq,DATE_ADD(last_sent_at,INTERVAL 12 MONTH)<=UTC_TIMESTAMP() AS expired FROM `'.$threads.'` WHERE fan_user=%d AND creator_id=%s FOR UPDATE',$fan,$creatorId),'ARRAY_A');
             if (MessageStore::failed()) { return MessagePolicy::error('messages_read_failed'); }
+            $automatic=is_array($old)&&!(bool)$old['expired']&&$old['state']==='automatic'&&MessageAutomationSchema::ready();
             if (is_array($old)) {
-                if (!(bool)$old['expired']) { return MessagePolicy::error('conversation_exists',409); }
-                if (!MessageStore::eraseThread($old['thread_id'])) { return MessagePolicy::error('messages_purge_failed'); }
+                if (!(bool)$old['expired']&&!$automatic) { return MessagePolicy::error('conversation_exists',409); }
+                if ((bool)$old['expired']&&!MessageStore::eraseThread($old['thread_id'])) { return MessagePolicy::error('messages_purge_failed'); }
             }
+            $contactJoin=MessageAutomationSchema::ready()?' LEFT JOIN `'.MessageSchema::table('automatic_contacts').'` c ON c.thread_id=t.thread_id':'';
+            $contactDate=$contactJoin!==''?'COALESCE(c.created_at,t.created_at)':'t.created_at';
             foreach ([
-                [$wpdb->prepare('SELECT COUNT(*) FROM `'.$threads.'` WHERE fan_user=%d AND created_at>UTC_TIMESTAMP()-INTERVAL 1 HOUR',$fan),2],
-                [$wpdb->prepare('SELECT COUNT(*) FROM `'.$threads.'` WHERE fan_user=%d AND created_at>UTC_TIMESTAMP()-INTERVAL 24 HOUR',$fan),10],
+                [$wpdb->prepare('SELECT COUNT(*) FROM `'.$threads.'` t'.$contactJoin.' WHERE t.fan_user=%d AND t.state<>%s AND '.$contactDate.'>UTC_TIMESTAMP()-INTERVAL 1 HOUR',$fan,'automatic'),2],
+                [$wpdb->prepare('SELECT COUNT(*) FROM `'.$threads.'` t'.$contactJoin.' WHERE t.fan_user=%d AND t.state<>%s AND '.$contactDate.'>UTC_TIMESTAMP()-INTERVAL 24 HOUR',$fan,'automatic'),10],
                 [$wpdb->prepare('SELECT COUNT(*) FROM `'.$threads.'` WHERE fan_user=%d AND state=%s AND DATE_ADD(last_sent_at,INTERVAL 12 MONTH)>UTC_TIMESTAMP()',$fan,'pending'),5],
                 [$wpdb->prepare('SELECT COUNT(*) FROM `'.$threads.'` WHERE creator_id=%s AND state=%s AND DATE_ADD(last_sent_at,INTERVAL 12 MONTH)>UTC_TIMESTAMP()',$creatorId,'pending'),100],
             ] as [$query,$limit]) {
@@ -47,13 +52,16 @@ final class MessageService
                 if ((int)$count >= $limit) { return MessagePolicy::error('message_request_limit',429); }
             }
             $quota=self::sendQuota($fan); if ($quota!==null) { return $quota; }
-            $id=wp_generate_uuid4();
-            // Direct opening stays closed until an authoritative subscription contract exists.
-            if ($wpdb->query($wpdb->prepare('INSERT INTO `'.$threads.'` (thread_id,fan_user,creator_id,creator_user,state,revision,last_seq,created_at,last_sent_at) VALUES(%s,%d,%s,%d,%s,1,1,UTC_TIMESTAMP(),UTC_TIMESTAMP())',
-                $id,$fan,$creatorId,$owner,'pending'))!==1) { return MessagePolicy::error('messages_write_failed'); }
-            $message=self::insert($id,1,$fan,$body,$key,$hash);
-            if(!($message instanceof \WP_Error)&&!\Faluss\Platform\Fans\Notifications\NotificationEvents::record($owner,'message_request',$id,1)){return MessagePolicy::error('message_notification_failed');}
-            return $message instanceof \WP_Error ? $message : ['thread_id'=>$id,'message_id'=>$message,'state'=>'pending','direct_opening_available'=>false];
+            $id=$automatic?$old['thread_id']:wp_generate_uuid4();$seq=$automatic?(int)$old['last_seq']+1:1;
+            // The creator's explicit admission mode grants no subscription or economic right.
+            $state=$contact['mode']==='open'?'open':'pending';
+            $sql=$automatic?$wpdb->prepare('UPDATE `'.$threads.'` SET state=%s,revision=revision+1,last_seq=%d,last_sent_at=UTC_TIMESTAMP() WHERE thread_id=%s AND state=%s',$state,$seq,$id,'automatic')
+                :$wpdb->prepare('INSERT INTO `'.$threads.'` (thread_id,fan_user,creator_id,creator_user,state,revision,last_seq,created_at,last_sent_at) VALUES(%s,%d,%s,%d,%s,1,1,UTC_TIMESTAMP(),UTC_TIMESTAMP())',$id,$fan,$creatorId,$owner,$state);
+            if ($wpdb->query($sql)!==1) { return MessagePolicy::error('messages_write_failed'); }
+            if($automatic&&$wpdb->query($wpdb->prepare('INSERT INTO `'.MessageSchema::table('automatic_contacts').'` (thread_id,created_at) VALUES(%s,UTC_TIMESTAMP())',$id))!==1){return MessagePolicy::error('messages_write_failed');}
+            $message=self::insert($id,$seq,$fan,$body,$key,$hash);
+            if(!($message instanceof \WP_Error)&&!\Faluss\Platform\Fans\Notifications\NotificationEvents::record($owner,$state==='open'?'message_received':'message_request',$id,$seq)){return MessagePolicy::error('message_notification_failed');}
+            return $message instanceof \WP_Error ? $message : ['thread_id'=>$id,'message_id'=>$message,'state'=>$state,'direct_opening_available'=>$state==='open'];
         });
     }
     public static function send(mixed $threadId, mixed $body, mixed $key): mixed
@@ -149,5 +157,35 @@ final class MessageService
         $counts=$wpdb->get_row($wpdb->prepare('SELECT COUNT(*) AS daily,COALESCE(SUM(created_at>UTC_TIMESTAMP()-INTERVAL 1 HOUR),0) AS hourly FROM `'.MessageSchema::table('messages').'` WHERE sender_id=%d AND created_at>UTC_TIMESTAMP()-INTERVAL 24 HOUR',$sender),'ARRAY_A');
         if (!is_array($counts) || MessageStore::failed()) { return MessagePolicy::error('messages_read_failed'); }
         return (int)$counts['daily']>=200 || (int)$counts['hourly']>=30?MessagePolicy::error('message_send_limit',429):null;
+    }
+
+    /**
+     * Internal outbox participant, same mutex/transaction as its durable event. No current-user impersonation.
+     * @return array{thread_id:string,message_id:string}|\WP_Error
+     */
+    public static function appendAutomaticInTransaction(int $fan,string $creator,string $body,string $key): array|\WP_Error
+    {
+        if(!MessageStore::ownsTransaction()||!MessageModule::available()||!MessagePolicy::text($body)||!MessagePolicy::uuid($key)) {return MessagePolicy::error('message_admission_closed');}
+        $owner=CreatorProfileService::activeOwner($creator,true);
+        if($owner===null||$owner===$fan||\Faluss\Platform\Fans\Sso\FansLinkedAccounts::identityInTransaction($fan)===null){return MessagePolicy::error('recipient_unavailable',403);}
+        $blocks=self::blocks($fan,$creator);if($blocks instanceof \WP_Error){return $blocks;}
+        if($blocks['fan_block']||$blocks['creator_block']){return MessagePolicy::error('conversation_blocked',403);}
+        global $wpdb;$threads=MessageSchema::table('threads');
+        $thread=$wpdb->get_row($wpdb->prepare('SELECT *,DATE_ADD(last_sent_at,INTERVAL 12 MONTH)<=UTC_TIMESTAMP() AS expired FROM `'.$threads.'` WHERE fan_user=%d AND creator_id=%s FOR UPDATE',$fan,$creator),'ARRAY_A');
+        if(MessageStore::failed()){return MessagePolicy::error('messages_read_failed');}
+        if(is_array($thread)&&(bool)$thread['expired']){if(!MessageStore::eraseThread($thread['thread_id'])){return MessagePolicy::error('messages_purge_failed');}$thread=null;}
+        if(is_array($thread)&&(!in_array($thread['state'],['automatic','pending','open'],true)||(int)$thread['creator_user']!==$owner)){return MessagePolicy::error('conversation_not_open',403);}
+        $quota=self::sendQuota($owner);if($quota!==null){return $quota;}
+        if($thread===null){
+            $id=wp_generate_uuid4();
+            if($wpdb->query($wpdb->prepare('INSERT INTO `'.$threads.'` (thread_id,fan_user,creator_id,creator_user,state,revision,last_seq,created_at,last_sent_at) VALUES(%s,%d,%s,%d,%s,0,0,UTC_TIMESTAMP(),UTC_TIMESTAMP())',$id,$fan,$creator,$owner,'automatic'))!==1){return MessagePolicy::error('messages_write_failed');}
+            $thread=['thread_id'=>$id,'last_seq'=>0];
+        }
+        $id=$thread['thread_id'];$seq=(int)$thread['last_seq']+1;
+        $message=self::insert($id,$seq,$owner,$body,$key,hash('sha256','automatic'."\0".$id."\0".$body));
+        if($message instanceof \WP_Error){return $message;}
+        if($wpdb->query($wpdb->prepare('UPDATE `'.$threads.'` SET last_seq=%d,revision=revision+1,last_sent_at=UTC_TIMESTAMP() WHERE thread_id=%s',$seq,$id))!==1){return MessagePolicy::error('messages_write_failed');}
+        if(!\Faluss\Platform\Fans\Notifications\NotificationEvents::record($fan,'message_received',$id,$seq)){return MessagePolicy::error('message_notification_failed');}
+        return ['thread_id'=>$id,'message_id'=>$message];
     }
 }

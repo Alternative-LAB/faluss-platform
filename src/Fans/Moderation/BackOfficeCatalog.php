@@ -30,7 +30,7 @@ final class BackOfficeCatalog
         if($item!==''){$row=StoreCatalogService::administrationItem($item);if($row===null){BackOfficeView::error('Entrée indisponible.',404);return;}$page=['items'=>[$row],'next_cursor'=>null];}
         if($page instanceof \WP_Error){BackOfficeView::error('Catalogue indisponible.',(int)($page->get_error_data()['status']??503));return;}
         echo '<div class="fb-grid">';
-        foreach($page['items'] as $row){echo '<article class="fb-card faluss-moderation"><h2>'.esc_html($row['category_label']).'</h2><p>'.esc_html($row['archived']?'Archivé':$row['visibility']).' · '.esc_html($row['created_at']).' UTC</p>';AccountContext::creator($row['creator_id']);echo '<p class="fb-meta">Référence privée : '.esc_html($row['product_id']).'</p></article>';}
+        foreach($page['items'] as $row){echo '<article class="fb-card faluss-moderation"><h2>'.esc_html($row['category_label']).'</h2><p>'.esc_html($row['archived']?'Archivé':$row['visibility']).' · '.esc_html(BackOfficeTime::utc($row['created_at'])).'</p>';AccountContext::creator($row['creator_id']);echo '<p class="fb-meta">Référence privée : '.esc_html($row['product_id']).'</p></article>';}
         echo '</div>';if($page['items']===[]){echo '<p class="fb-empty">Aucune entrée dans cet état.</p>';}
         if($page['next_cursor']!==null){echo '<p><a href="'.esc_url(BackOffice::url(['view'=>'catalog','state'=>$state,'cursor'=>$page['next_cursor']])).'">Page suivante →</a></p>';}
         ?>

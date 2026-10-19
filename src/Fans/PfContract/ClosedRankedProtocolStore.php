@@ -109,9 +109,31 @@ final class ClosedRankedProtocolStore
                 'revision' => $payload['revision'], 'attribution_id' => $intent->values['attribution_id'],
                 'member_faluss_id' => $intent->values['member_faluss_id'], 'payload_json' => $bytes, 'payload_sha256' => $digest,
                 'envelope_json' => $proof,'envelope_sha256' => hash('sha256',$proof)]);
+            ClosedPurchasedThanksCapture::inTransaction($this->database,$payload);
             return ['inserted' => true];
         });
         return $result['inserted'];
+    }
+
+    /** Caller owns its primary proof transaction; reads do not prepare keys or replay an economic request.
+     * @return array<string,mixed> */
+    public function confirmedInTransaction(string $attribution, string $member, PeerPolicy $peer): array
+    {
+        ClosedEnvironment::assertIsolated($this->database,'fans');
+        if ($this->database !== ($GLOBALS['wpdb'] ?? null) || (string) $this->database->get_var('SELECT @@in_transaction') !== '1'
+            || $peer->node !== 'fixture.hub' || $peer->audience !== 'fixture.fans') { throw new ModelViolation('pf_thanks_primary_required'); }
+        $intent = $this->recover($attribution,$member);
+        $row = $this->row('receipts','attribution_id=%s',[$attribution]) ?? throw new ModelViolation('pf_receipt_absent');
+        $proof = CanonicalJson::object($row['envelope_json'],65536);
+        if ($row['envelope_sha256'] !== hash('sha256',$row['envelope_json'])) { throw new ModelViolation('pf_receipt_conflict'); }
+        $receipt = SignedEnvelope::open(SignedEnvelope::RANKING_RECEIPT,$proof,$peer,time());
+        RankedReceipt::validate($receipt,'fixture.hub','fixture.fans',$intent);
+        $bytes = CanonicalJson::encode($receipt);
+        if ($row['payload_json'] !== $bytes || $row['payload_sha256'] !== hash('sha256',$bytes)
+            || $row['member_faluss_id'] !== $member || $row['receipt_id'] !== $receipt['receipt_id'] || $row['issuer'] !== $receipt['issuer']) {
+            throw new ModelViolation('pf_receipt_conflict');
+        }
+        return $receipt;
     }
 
     /** @param callable():array<string,mixed> $operation

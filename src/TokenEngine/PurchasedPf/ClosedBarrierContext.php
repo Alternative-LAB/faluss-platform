@@ -17,8 +17,8 @@ final class ClosedBarrierContext
         private readonly string $contract = BarrierTransport::CONTRACT)
     { BarrierTransport::fields($fields,$contract); $this->assertFresh(); }
 
-    public function assertContract(string $expected): void
-    { if ($this->contract !== $expected) { throw new ModelViolation('pf_barrier_context_mismatch'); } }
+    public function assertContract(string ...$expected): void
+    { if (!in_array($this->contract,$expected,true)) { throw new ModelViolation('pf_barrier_context_mismatch'); } }
 
     public function assertFresh(): void
     { DelegatedContext::fresh($this->issuedAt,$this->expiresAt,time()); }

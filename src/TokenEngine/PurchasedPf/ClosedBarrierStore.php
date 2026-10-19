@@ -7,6 +7,7 @@ namespace Faluss\Platform\TokenEngine\PurchasedPf;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\CanonicalJson;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\BarrierCompletion;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\BarrierTransport;
+use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\BarrierTerritoryRevocation;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\ClosedEnvironment;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\PeerPolicy;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\RankedIntent;
@@ -101,7 +102,7 @@ final class ClosedBarrierStore
     private function completion(PeerPolicy $peer, array $input, string $key, ClosedBarrierContext $context, bool $lookup): array
     {
         self::peer($peer,'close'); if ($lookup) { $peer->allow('pf.lookup'); }
-        $context->assertContract(BarrierTransport::COMPLETION_CONTRACT); $ref = BarrierCompletion::reference($input);
+        $context->assertContract(BarrierTransport::COMPLETION_CONTRACT,BarrierTransport::TERRITORY_CONTRACT); $ref = BarrierCompletion::reference($input);
         if ($ref['reason'] !== 'session_completed') { throw new ModelViolation('pf_barrier_invalid_reason'); }
         $hash = ModelValues::keyHash($key); $digest = $context->digest('close',$ref);
         return $this->write(function () use ($peer,$ref,$hash,$digest,$context,$lookup): array {
@@ -119,6 +120,46 @@ final class ClosedBarrierStore
                 || $latest['state'] !== 'active' || $latest['owner'] !== $peer->node) {
                 throw new ModelViolation('pf_barrier_stable_key_or_version_required');
             }
+            $this->connection->update($this->tables['barriers'],['state' => 'closed','closed_at' => $now],
+                ['barrier_key' => $ref['barrier_key'],'version' => $ref['version'],'state' => 'active']);
+            $result = ['operation' => 'close','barrier_key' => $ref['barrier_key'],'version' => $ref['version'],
+                'content_sha256' => $ref['content_sha256'],'reason' => $ref['reason'],'effective_at' => $now];
+            $this->remember($peer->node,'close',$hash,$digest,$result,$now); return $this->current($result);
+        },$context);
+    }
+
+    /** Explicit 1.2 owner entry; the sparse wire reference never supplies its own kind or territory.
+     * @param array<array-key,mixed> $input
+     * @return array<string,mixed> */
+    public function revokeTerritoryAdmission(PeerPolicy $peer, array $input, string $key, ClosedBarrierContext $context): array
+    { return $this->territoryRevocation($peer,$input,$key,$context,false); }
+
+    /** @param array<array-key,mixed> $input
+     * @return array<string,mixed> */
+    public function lookupTerritoryRevocation(PeerPolicy $peer, array $input, string $key, ClosedBarrierContext $context): array
+    { return $this->territoryRevocation($peer,$input,$key,$context,true); }
+
+    /** @param array<array-key,mixed> $input
+     * @return array<string,mixed> */
+    private function territoryRevocation(PeerPolicy $peer, array $input, string $key, ClosedBarrierContext $context, bool $lookup): array
+    {
+        self::peer($peer,'close'); if ($lookup) { $peer->allow('pf.lookup'); }
+        $context->assertContract(BarrierTransport::TERRITORY_CONTRACT); $ref = BarrierTerritoryRevocation::reference($input);
+        if ($ref['reason'] !== BarrierTerritoryRevocation::REASON) { throw new ModelViolation('pf_barrier_invalid_reason'); }
+        $hash = ModelValues::keyHash($key); $digest = $context->digest('close',$ref);
+        return $this->write(function () use ($peer,$ref,$hash,$digest,$context,$lookup): array {
+            $version = $this->version($ref); $context->assertOwner($version);
+            if ($version === null) { throw new ModelViolation('pf_barrier_origin_unavailable'); }
+            BarrierTerritoryRevocation::requireTerritorialAdmission(CanonicalJson::object($version['descriptor_json']));
+            $latest = $this->latest($ref['barrier_key']); $context->assertFresh();
+            $known = $this->known($peer->node,'close',$hash,$digest);
+            if ($known !== null) { return $this->current($known); }
+            if ($lookup) { return ['state' => 'not_found']; }
+            if ($latest === null || $latest['version'] !== $ref['version'] || $latest['content_sha256'] !== $ref['content_sha256']
+                || $latest['state'] !== 'active' || $latest['owner'] !== $peer->node) {
+                throw new ModelViolation('pf_barrier_stable_key_or_version_required');
+            }
+            $now = $this->connection->now();
             $this->connection->update($this->tables['barriers'],['state' => 'closed','closed_at' => $now],
                 ['barrier_key' => $ref['barrier_key'],'version' => $ref['version'],'state' => 'active']);
             $result = ['operation' => 'close','barrier_key' => $ref['barrier_key'],'version' => $ref['version'],

@@ -41,6 +41,7 @@ def main():
     parser.add_argument('--b3-barrier-completion-http', action='store_true', help='Explicit signed 1.1 session completion over private loopback')
     parser.add_argument('--b3-barrier-completion-recovery', action='store_true', help='Durable explicit Fans completion action and same-key recovery')
     parser.add_argument('--b3-barrier-acknowledgement', action='store_true', help='Current signed acknowledgement and atomic local callback')
+    parser.add_argument('--b6-barrier-refresh', action='store_true', help='Explicit fresh lookup and durable closed delivery checkpoint; existing Hub contract only')
     parser.add_argument('--b1-origin-ack', action='store_true', help='Closed B1 actual origin opening from current primary barrier ACK')
     parser.add_argument('--b3-session-lifecycle', action='store_true', help='Closed B2 governed session states to attested primary barriers')
     parser.add_argument('--b3-ranked', action='store_true', help='Closed B3 ranked consumption with official debit; fictitious owner proofs only')
@@ -56,7 +57,10 @@ def main():
     parser.add_argument('--b6-corpus-transaction', action='store_true', help='Caller-owned barrier/corpus transaction and rollback, without public delivery')
     parser.add_argument('--b6-primary-refresh', action='store_true', help='Explicit same-generation primary freshness and uncertain response recovery')
     parser.add_argument('--b6-joined-integration', action='store_true', help='Actual signed barrier HTTP and corpus/cache on the same Fans primary')
+    parser.add_argument('--b6-current-delivery', action='store_true', help='Actual origin, corpus/cache and local identities in closed rankings, statements, sessions and disposable WordPress routes; no real site')
     options = parser.parse_args()
+    if options.b6_current_delivery:
+        options.b6_joined_integration = True
     if options.b6_joined_integration:
         options.b6_corpus_transaction = True
         options.b6_primary_refresh = True
@@ -64,7 +68,7 @@ def main():
         options.b5_sessions = True
     if options.b5_sessions:
         options.b3_corpus_reader = True
-    if options.b1_origin_ack or options.b3_session_lifecycle:
+    if options.b1_origin_ack or options.b3_session_lifecycle or options.b6_barrier_refresh:
         options.b3_barrier_acknowledgement = True
     if options.b3_barrier_acknowledgement:
         options.b3_barrier_completion_recovery = True
@@ -403,6 +407,11 @@ def main():
         if options.b3_barrier_acknowledgement:
             from b3_barrier_acknowledgement_checks import run_checks
             run_checks(root,check,sql,barrier_http)
+        # The existing complete lifecycle recipe includes current-read regression checks.
+        # Keep its CI invocation and environment preparation unchanged.
+        if options.b6_barrier_refresh or options.b3_session_lifecycle:
+            from b6_barrier_refresh_checks import run_checks
+            run_checks(root,check,sql,barrier_http)
         if options.b1_origin_ack:
             from b1_origin_ack_checks import run_checks
             origin_fixture=run_checks(root,check,sql,barrier_http,defer_close=options.b3_session_lifecycle)
@@ -456,7 +465,9 @@ def main():
             run_checks(root,source,options.cli,check,command,corpus_fixture,corpus_reader)
         if options.b6_joined_integration:
             from b6_joined_checks import run_checks
-            run_checks(root,source,options.cli,check,command,corpus_fixture,sql,call)
+            # The complete joined scenario exercises the actual B6 provider too.
+            # No workflow argument, runner or environment preparation change is needed.
+            run_checks(root,source,options.cli,check,command,corpus_fixture,sql,call,delivery_enabled=True)
         b3_ranked_http_start = len(checks)
         ranked_fixture = None
         if options.b3_ranked_http:
@@ -493,7 +504,7 @@ def main():
         report['b3_session_lifecycle_total'] = sum(name.startswith('B3sl ') for name in checks)
         report['b1_b2_integration_total'] = sum(name.startswith('B1B2 ') for name in checks)
         report['b3_barrier_http_total'] = sum(name.startswith('B3bh ') for name in checks)
-        report['b3_barriers_total'] = b3_ranked_start - b3_barriers_start - report['b3_barrier_http_total'] - report['b3_barrier_recovery_total'] - report['b3_barrier_completion_http_total'] - report['b3_barrier_completion_recovery_total'] - report['b3_barrier_acknowledgement_total'] - report['b1_origin_ack_total'] - report['b3_session_lifecycle_total'] - report['b1_b2_integration_total']
+        report['b3_barriers_total'] = b3_ranked_start - b3_barriers_start - report['b3_barrier_http_total'] - report['b3_barrier_recovery_total'] - report['b3_barrier_completion_http_total'] - report['b3_barrier_completion_recovery_total'] - report['b3_barrier_acknowledgement_total'] - report['b1_origin_ack_total'] - report['b3_session_lifecycle_total'] - report['b1_b2_integration_total'] - sum(name.startswith(('B6br ','B6bt ')) for name in checks)
         report['b3_ranked_total'] = b3_snapshots_start - b3_ranked_start
         report['b3_snapshots_total'] = b3_corpus_source_start - b3_snapshots_start
         report['b3_corpus_source_total'] = b3_corpus_start - b3_corpus_source_start
@@ -503,9 +514,12 @@ def main():
         report['b4_projection_total'] = sum(name.startswith('B4b ') for name in checks)
         report['b5_projection_total'] = sum(name.startswith('B5b ') for name in checks)
         report['b6_primary_refresh_total'] = sum(name.startswith('B6pr ') for name in checks)
+        report['b6_barrier_refresh_total'] = sum(name.startswith('B6br ') for name in checks)
+        report['b6_barrier_transaction_total'] = sum(name.startswith('B6bt ') for name in checks)
         report['b6_corpus_transaction_total'] = sum(name.startswith('B6tx ') for name in checks)
         report['b6_joined_integration_total'] = sum(name.startswith('B6join ') for name in checks)
-        report['b3_corpus_reader_total'] = b3_ranked_http_start - b3_corpus_reader_start - report['b4_projection_total'] - report['b5_projection_total'] - report['b6_corpus_transaction_total'] - report['b6_primary_refresh_total'] - report['b6_joined_integration_total']
+        report['b6_current_delivery_total'] = sum(name.startswith('B6dl ') for name in checks)
+        report['b3_corpus_reader_total'] = b3_ranked_http_start - b3_corpus_reader_start - report['b4_projection_total'] - report['b5_projection_total'] - report['b6_corpus_transaction_total'] - report['b6_primary_refresh_total'] - report['b6_joined_integration_total'] - report['b6_current_delivery_total']
         report['b3_ranked_http_total'] = b3_ranked_inbox_start - b3_ranked_http_start
         report['b3_ranked_inbox_total'] = len(checks) - b3_ranked_inbox_start
         report['corpus_source_measurements'] = corpus_measurements
@@ -542,6 +556,9 @@ def main():
             report['scope'] += '; durable explicit Fans 1.1 action/key/version and primary recovery; no B1/B2 lifecycle bridge or real SSO'
         if options.b3_barrier_acknowledgement:
             report['scope'] += '; current signed acknowledgement and atomic local callback; no B1/B2 lifecycle bridge'
+        if options.b6_barrier_refresh:
+            report['scope'] += '; explicit current primary barrier lookup, durable read revision, latest challenge and same-key recovery; no new Hub message or admission'
+            report['barrier_primary_read_schema'] = '1 (closed_b6_barrier_primary_read)'
         if options.b1_origin_ack:
             report['scope'] += '; B1 origin opening separately records primary ACK and frozen earliest admissible instant, no economic source or public delivery'
             report['not_proven'][0] = 'B2 governance barriers, intent choices, public delivery, real SSO and production admission'
@@ -628,7 +645,8 @@ def main():
             report['scope'] += '; explicit existing finish primary recheck of the same generation, no new wire contract or continuous freshness claim'
         if options.b6_joined_integration:
             report['scope'] += '; actual signed barrier gateway and exact corpus cache composed on the same Fans primary, with rollback, revoked trust and closing suppression'
-            report['not_proven'][0] = 'B1/B2 full delivery composition, participant/creator/country governance barriers, intent choices, Identity mapping and public B6 delivery, continuous production freshness'
+            report['scope'] += '; actual closed B6 provider for persistent rankings, current-member monthly statements and approved session reads, corrected facts, Identity links and real-template rendering'
+            report['not_proven'][0] = 'Production admission, complete server intent choices and governance forms, continuously scheduled primary freshness, real Me SSO, real-site or physical-device browser validation'
     finally:
         for process in workers:
             if process.poll() is None:

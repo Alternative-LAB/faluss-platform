@@ -20,6 +20,7 @@ final class OnboardingV3
 
     public static function register(): void
     {
+        LinkImportActions::register();
         add_action('wp_ajax_faluss_studio_v3_manage', [self::class, 'manageStudio']);
         add_action('wp_ajax_faluss_studio_v3_upload_content', [self::class, 'uploadContent']);
         add_action('wp_ajax_faluss_studio_v3_save', [self::class, 'saveStudio']);

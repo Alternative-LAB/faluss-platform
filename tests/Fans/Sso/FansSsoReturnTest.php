@@ -12,6 +12,20 @@ final class FansSsoReturnTest extends TestCase
 {
     protected function setUp(): void { fans_sso_reset(); }
 
+    public function testSupportReturnKeepsOnlyTheExactTargetWithoutGrantingAnAttribution(): void
+    {
+        $id='123e4567-e89b-42d3-a456-426614174000';$state=str_repeat('s',43);
+        foreach (['fan','creator'] as $role) {
+            $path='/app/'.$role.'/hof?support='.$id;
+            self::assertSame($path,FansSsoReturn::path($path));
+            self::assertSame($path,FansSsoReturn::open(FansSsoReturn::seal($path,$state),$state));
+            foreach ([$path.'&quantity=10',$path.'&sessions[]='.$id,$path.'&nonce=x',$path.'&support='.$id,$path.'#fragment',
+                str_replace('?support=','?support[]=',$path)] as $bad) { self::assertNull(FansSsoReturn::path($bad)); }
+        }
+        $GLOBALS['fans_sso_home']='https://fans.example.test/community';
+        self::assertSame('/community/faluss-fans/fan/hof?support='.$id,FansSsoReturn::path('/community/faluss-fans/fan/hof?support='.$id));
+    }
+
     public function testOnlyExplicitFansPathsSurviveIncludingSubdirectories(): void
     {
         foreach (['/app', '/app/fan/explorer', '/app/creator/mon-profil', '/app/creator/images'] as $path) {
@@ -66,6 +80,67 @@ final class FansSsoReturnTest extends TestCase
         self::assertNull(FansSsoReturn::seal('https://evil.example', $state));
         self::assertNull(FansSsoReturn::seal($path, 'invalid'));
     }
+
+    public function testSessionManagementReturnKeepsOnlyAnExactOpaqueSelection(): void
+    {
+        $id = '123e4567-e89b-42d3-a456-426614174000'; $state = str_repeat('s', 43);
+        foreach (['/app/', '/faluss-fans/'] as $prefix) {
+            foreach (['manage=sessions', 'manage=new', 'manage=session&session=' . $id, 'manage=sessions&sessions_cursor=' . $id] as $query) {
+                $path = $prefix . 'creator/hof?' . $query;
+                self::assertSame($path, FansSsoReturn::path($path));
+                self::assertSame($path, FansSsoReturn::open(FansSsoReturn::seal($path, $state), $state));
+                self::assertNull(FansSsoReturn::open(FansSsoReturn::seal($path, $state), str_repeat('t', 43)));
+            }
+        }
+        foreach (['manage=new&nonce=private', 'manage=new&manage=sessions', 'manage=session&sessions_cursor=' . $id,
+            'manage=sessions&session=' . $id, 'manage=session&session[]=' . $id, 'manage=session&session=' . strtoupper($id),
+            'manage=session&session=' . $id . '&redirect=https://other.example', 'manage=sessions#private'] as $query) {
+            self::assertNull(FansSsoReturn::path('/app/creator/hof?' . $query));
+        }
+        self::assertNull(FansSsoReturn::path('/app/fan/hof?manage=new'));
+        $GLOBALS['fans_sso_home'] = 'https://fans.example.test/community';
+        self::assertSame('/community/app/creator/hof?manage=new', FansSsoReturn::path('/community/app/creator/hof?manage=new'));
+    }
+    public function testTerritorialNavigationKeepsOnlyExactOwnerPageAndPublicCursors(): void
+    {
+        $id = '123e4567-e89b-42d3-a456-426614174000'; $state = str_repeat('s',43);
+        foreach (['/app/','/faluss-fans/'] as $prefix) {
+            foreach (['','&policy_cursor=' . $id,'&change_cursor=' . $id,'&change=' . $id] as $query) {
+                $path = $prefix . 'creator/hof?manage=territory' . $query;
+                self::assertSame($path,FansSsoReturn::path($path));
+                self::assertSame($path,FansSsoReturn::open(FansSsoReturn::seal($path,$state),$state));
+            }
+        }
+        foreach (['&change=' . strtoupper($id),'&change=' . $id . '&change=' . $id,
+            '&change[]=' . $id,'&creator=' . $id,'&change=' . $id . '&nonce=private','&redirect=https://other.example'] as $query) {
+            self::assertNull(FansSsoReturn::path('/app/creator/hof?manage=territory' . $query));
+        }
+        self::assertNull(FansSsoReturn::path('/app/fan/hof?manage=territory'));
+        $GLOBALS['fans_sso_home'] = 'https://fans.example.test/community';
+        self::assertSame('/community/app/creator/hof?manage=territory&change=' . $id,
+            FansSsoReturn::path('/community/app/creator/hof?manage=territory&change=' . $id));
+    }
+
+    public function testPrivateCoorganizerPageReturnsToTheSameSessionWithOnlyACanonicalPublicCursor(): void
+    {
+        $id = '123e4567-e89b-42d3-a456-426614174000'; $state = str_repeat('s', 43);
+        $cursor = rawurlencode('d1.all.2026-10-17T12:30:00.' . $id);
+        foreach (['/app/', '/faluss-fans/'] as $prefix) {
+            $path = $prefix . 'creator/hof?manage=session&session=' . $id . '&coorganizer_cursor=' . $cursor;
+            self::assertSame($path, FansSsoReturn::path($path));
+            self::assertSame($path, FansSsoReturn::open(FansSsoReturn::seal($path, $state), $state));
+            self::assertNull(FansSsoReturn::open(FansSsoReturn::seal($path, $state), str_repeat('t', 43)));
+            foreach ([$path . '&nonce=private', $path . '&coorganizer_cursor=' . $cursor,
+                str_replace('d1.all.', 'd1.music.', $path), str_replace('2026-10-17', '2026-02-30', $path),
+                str_replace('%3A', '%253A', $path), str_replace('manage=session&', 'manage=new&', $path)] as $invalid) {
+                self::assertNull(FansSsoReturn::path($invalid));
+            }
+        }
+        $GLOBALS['fans_sso_home'] = 'https://fans.example.test/community';
+        $path = '/community/app/creator/hof?manage=session&session=' . $id . '&coorganizer_cursor=' . $cursor;
+        self::assertSame($path, FansSsoReturn::path($path));
+    }
+
     public function testMessageReturnKeepsOnlyOneOpaqueSelection(): void
     {
         $id='123e4567-e89b-42d3-a456-426614174000';$state=str_repeat('s',43);
@@ -76,5 +151,25 @@ final class FansSsoReturnTest extends TestCase
             foreach([$path.'&body=private',$path.'&nonce=test',$path.'#fragment',$path.'&'.$kind.'='.$id,str_replace('?'.$kind.'=','?'.$kind.'[]=',$path)] as $invalid) {self::assertNull(FansSsoReturn::path($invalid));}
         }}
         self::assertNull(FansSsoReturn::path('/faluss-fans/fan/messages?email=private'));
+    }
+
+    public function testVoluntaryEntryAndParticipantPaginationKeepOnlyTheirCanonicalSelection(): void
+    {
+        $id = '123e4567-e89b-42d3-a456-426614174000'; $state = str_repeat('s',43);
+        foreach (['/app/','/faluss-fans/'] as $prefix) {
+            foreach (['manage=join&session=' . $id,'manage=session&session=' . $id . '&participant_cursor=' . $id] as $query) {
+                $path = $prefix . 'creator/hof?' . $query;
+                self::assertSame($path,FansSsoReturn::path($path));
+                self::assertSame($path,FansSsoReturn::open(FansSsoReturn::seal($path,$state),$state));
+                foreach ([$path . '&nonce=private',$path . '&session=' . $id,$path . '#private',str_replace($id,strtoupper($id),$path)] as $invalid) {
+                    self::assertNull(FansSsoReturn::path($invalid));
+                }
+            }
+        }
+        self::assertNull(FansSsoReturn::path('/app/creator/hof?manage=join&sessions_cursor=' . $id));
+        self::assertNull(FansSsoReturn::path('/app/fan/hof?manage=join&session=' . $id));
+        $GLOBALS['fans_sso_home'] = 'https://fans.example.test/community';
+        self::assertSame('/community/app/creator/hof?manage=join&session=' . $id,
+            FansSsoReturn::path('/community/app/creator/hof?manage=join&session=' . $id));
     }
 }

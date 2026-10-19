@@ -1,0 +1,21 @@
+{
+  "README.md": "33422e4bec1706130006947b7e2e84a8da5d07662ef69e6bed64997c4096ca02",
+  "browser-replay.json": "94a07d79c4bfe019c9d4568fb1f5b859f2591cdf48e42d46fd354debfcb5f44f",
+  "support-choices-1440.png": "26f7fadf283b34954c638cc3b6c6db9115cbe664166387aa8a37bafc139ebaae",
+  "support-choices-320.png": "43ae2d72cb502791a04ad5620f216c77d6705179ef4c66a4076d54a782e33571",
+  "support-choices-390.png": "4a1ca6d749399278b625f7e7d380d71296bc223e23cfbb71366e84ad8396c218",
+  "support-choices-detail-1440.png": "39c14e4ae10801298c9c0963a6163da73d49a93cd3416f7d28206c2c9d9c8099",
+  "support-choices-detail-320.png": "d926c2a8b17bb22fde44e8051d343a1ba4a96fbd5198764dfb124da9c1c615aa",
+  "support-choices-detail-390.png": "24cbdffd46375a8a16952fbd873e57f216364617bda6a0bb680edcf90b9a799f",
+  "support-confirmed-1440.png": "75ad038fcbabbccb0ddaa5f2f2bc3fc05f3efc031da0ec840b0aa7779ce63efd",
+  "support-confirmed-320.png": "a598f895cdd47e780f7828db6416209875ab3c1b5c94f4b74db9e9efc44d516c",
+  "support-confirmed-390.png": "29d4264d21e7602bc3c2004cb89e3aab4f3dc9c16a368903951d080c91f607fe",
+  "support-empty-1440.png": "e14c3e85235ab23bee457dc7285a6b670f9a663600368c8bd632f16f7048861f",
+  "support-empty-320.png": "75de9e65264b44148f6fc1c4d9d3b80f256de9fbcaaded7ac9944924aefe9dbf",
+  "support-empty-390.png": "34ab2d0e08cd35dadcaa04450c429e1f7bb694670787e63f496029ce9f24fc21",
+  "support-unknown-1440.png": "f7a9ed14792e4aeb7f3a08ef44f8e36ecda13cbb54d16c0c88d0fb944812b8bd",
+  "support-unknown-320.png": "2ac5a34df96d6d3e05cfaf0b119f2ea58f054c9f8346d754d38a32bccb4cf6b3",
+  "support-unknown-390.png": "fcbc236534fab611d3cab5df1fdd52f043de643eaaec7ca594b12f4dfcf8a1a8",
+  "wordpress-ci.json": "b3b87726f4c659c5e2ce68b2a2682b48e003c32d2e7d1e8f9f4dabdc6595ff46",
+  "wordpress-integrated-ci.json": "23522ce44d11aa9d1f6769a41bf690e33c6955e59eb1233e1f3ca50f4a0ae7cf"
+}

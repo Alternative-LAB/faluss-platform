@@ -123,7 +123,9 @@ final class FansUiRoutes
         if (self::isCanonicalPath($legacy, (string) ($_SERVER['REQUEST_URI'] ?? ''))) {
             self::noStore();
             $selection = [];
-            foreach (['publication', 'cursor', 'section', 'thread', 'creator', 'archive', 'image', 'image_state', 'images_cursor'] as $key) {
+            $selectionKeys = ['publication', 'cursor', 'section', 'thread', 'creator', 'archive', 'image', 'image_state', 'images_cursor','support'];
+            if (in_array($view, FansUiHof::VIEWS, true)) { $selectionKeys = array_merge($selectionKeys, ['category', 'month', 'rank_page', 'session', 'session_cursor', 'manage', 'sessions_cursor', 'coorganizer_cursor', 'participant_cursor']); }
+            foreach ($selectionKeys as $key) {
                 if (isset($_GET[$key]) && is_string($_GET[$key]) && strlen($_GET[$key]) <= 160) { $selection[$key] = wp_unslash($_GET[$key]); }
             }
             wp_safe_redirect($selection === [] ? $canonical : add_query_arg($selection, $canonical), ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' ? 307 : 302);
@@ -146,7 +148,10 @@ final class FansUiRoutes
         }
         $returnTo = parse_url($canonical, PHP_URL_PATH);
         $query = parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_QUERY);
-        if (!$linked && (($role === 'creator' && $view === 'creer') || $view === 'messages') && is_string($query)) {
+        $management = $view === 'hof' && array_key_exists('manage', $_GET);
+        $support = FansUiSupport::supports($view);
+        if (($support && $management) || (isset($_POST['support_action']) && !$support)) { wp_die('Formulaire indisponible sur cette page.','',['response'=>400]); }
+        if (!$linked && (($role === 'creator' && $view === 'creer') || $view === 'messages' || $management || $support) && is_string($query)) {
             $returnTo = FansSsoReturn::path($returnTo . '?' . $query) ?? $returnTo;
         }
         $signIn = $linked ? '' : FansSsoService::button(['return_to' => $returnTo]);
@@ -164,6 +169,18 @@ final class FansUiRoutes
             }
         }
 
+        if($publicProfile){FansUiFollow::handle($creatorId);}
+
+        if ($management && $role !== 'creator') {
+            FansUiView::render($role, $role === 'visitor' ? 'connexion' : 'creator-unavailable', null, 403, $signIn);
+            exit;
+        }
+        if (FansUiSessions::isPost()) {
+            if (!$management) { wp_die('Formulaire indisponible sur cette page.', '', ['response' => 400]); }
+            foreach (['author_action', 'image_action', 'hof_privacy_action', 'admission_action'] as $other) {
+                if (array_key_exists($other, $_POST)) { wp_die('Formulaire ambigu. Rechargez la page.', '', ['response' => 400]); }
+            }
+        }
         if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && in_array($view, ['creer', 'images'], true)) {
             if (isset($_POST['author_action'], $_POST['image_action'])) { wp_die('Formulaire ambigu. Rechargez la page.', '', ['response' => 400]); }
             if ($_POST === [] && $_FILES === []) { wp_die('Envoi vide ou trop volumineux. Rechargez la page et vérifiez le fichier.', '', ['response' => 413]); }
@@ -179,15 +196,24 @@ final class FansUiRoutes
         }
         $author = $role === 'creator' && $view === 'creer' ? FansUiAuthor::load() : null;
         $images = $role === 'creator' && $view === 'images' ? FansUiImages::load() : null;
-        $admission = $role === 'fan' && $view === 'espace' ? FansUiAdmission::load($profilesEnabled) : null;
+        if ($role === 'fan' && $view === 'espace' && FansUiRankingPrivacy::isPost() && array_key_exists('admission_action', $_POST)) {
+            wp_die('Formulaire ambigu. Rechargez la page.', '', ['response' => 400]);
+        }
+        $admission = $role === 'fan' && $view === 'espace' ? FansUiAdmission::load($profilesEnabled, !FansUiRankingPrivacy::isPost()) : null;
         $editorial = $role === 'creator' && $view === 'mon-profil' ? FansUiEditorial::load() : null;
         $messages = $view === 'messages' ? FansUiMessages::load((string)$role) : null;
         $composer = $role === 'creator' ? FansUiAuthor::load(true) : null;
         $notifications=$view==='notifications'?FansUiNotifications::load((string)$role):null;
+        $sessions = FansUiSessions::load((string) $role, $view);
+        $hof = $sessions === null && !$support ? FansUiHof::load((string) $role, $view) : null;
+        $privacy = FansUiRankingPrivacy::load((string) $role, $view);
+        $supportView=$support?FansUiSupport::load((string)$role):null;
         if($notifications?->destination!==null){wp_safe_redirect($notifications->destination,303);exit;}
+        if ($sessions?->destination !== null) { wp_safe_redirect($sessions->destination, 303); exit; }
         $status = max($author?->httpStatus() ?? 200, $images?->httpStatus() ?? 200, $admission?->httpStatus() ?? 200, $editorial?->httpStatus() ?? 200, $messages?->httpStatus() ?? 200);
-        $status=max($status,$notifications->status??200);
-        FansUiView::render((string) $role, $view, $publicProfile ? $creatorId : null, $status, $signIn, $author, $admission, $editorial, $images, $messages, $composer, $notifications);
+        $status=max($status,$notifications->status??200,$privacy?->httpStatus() ?? 200,$sessions?->httpStatus() ?? 200);
+        $status=max($status,$supportView->status??200);
+        FansUiView::render((string) $role, $view, $publicProfile ? $creatorId : null, $status, $signIn, $author, $admission, $editorial, $images, $messages, $composer, $notifications, $hof, $privacy, $sessions,$supportView);
         exit;
     }
 

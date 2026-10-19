@@ -10,15 +10,19 @@ La table InnoDB `${prefix}faluss_fans_follows` contient seulement le `wp_user_id
 
 | Route `faluss-fans/v1` | Permission | Réponse |
 | --- | --- | --- |
+| `GET /creators/{creator_id}/follow` | Membre SSO Fans lié et nonce REST | État privé du suivi courant, sans paramètre destinataire, corps ni cache partagé. |
 | `POST /creators/{creator_id}/follow` | Membre SSO Fans lié et `X-WP-Nonce` REST | `{creator_id, following: true}` ; profil inactif, inconnu ou propre au membre refusé. |
 | `DELETE /creators/{creator_id}/follow` | Même permission | `{creator_id, following: false}` ; idempotent, y compris après suspension. |
 | `GET /creators/{creator_id}/followers/count` | Public si profil `active` | `{creator_id, count}` ; aucune liste de followers ni identifiant local. |
 
-Le service revérifie la preuve SSO, le format de l'identifiant et l'état public du profil côté serveur ; les routes d'écriture réutilisent la permission REST avec nonce du module Profils. Le compteur public n'accorde aucun droit. Il n'y a ni notification, ni événement, ni projection Hub/Federation/Apps Registry implicite.
+Le service revérifie la preuve SSO, le format de l'identifiant et l'état public du profil côté serveur ; les routes privées réutilisent la permission REST avec nonce du module Profils. Le compteur public n'accorde aucun droit. Lorsque les métadonnées des [messages automatiques](FANS-AUTOMATIC-MESSAGES.md) sont explicitement préparées et la politique attestée, une insertion effective enregistre dans la même transaction la bienvenue unique, sans envoi synchrone. Aucun événement Hub/Federation ni droit commercial n'en découle.
 
 La fiche publique UI peut lire ce compteur après avoir validé son profil actif.
-Elle affiche « Suivis enregistrés » ou un état indisponible, sans valeur de
-secours. Aucun bouton POST/DELETE ni liste de membres n’est ajouté. Voir le
+Elle conserve le compteur existant sans valeur de secours. Le membre lié non
+propriétaire dispose aussi du formulaire natif « Suivre / Ne plus suivre » :
+nonce dédié au Créateur, POST uniquement et redirection303 vers la même fiche.
+Aucune option de consentement Fan, aucun abonnement payant ni liste de membres.
+Voir le
 [contrat de lecture UI](FANS-READING-UI.md#nombre-public-de-suivis).
 
 ## Preuves et limites

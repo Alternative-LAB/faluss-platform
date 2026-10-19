@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Faluss Platform
  * Description: Modular foundation for the Faluss WordPress ecosystem.
- * Version: 0.12.6
+ * Version: 0.14.0
  * Requires at least: 7.1
  * Tested up to: 7.1.2
  * Requires PHP: 8.2
@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-define('FALUSS_PLATFORM_VERSION', '0.12.6');
+define('FALUSS_PLATFORM_VERSION', '0.14.0');
 
 if (!defined('ABSPATH')) {
     exit;
@@ -127,6 +127,7 @@ add_action('plugins_loaded', static function (): void {
     $registry = new \Faluss\Platform\Core\ModuleRegistry($role);
     \Faluss\Platform\Fans\Access\WordPressAccess::register($role);
     \Faluss\Platform\Fans\Messaging\MessageRetention::register();
+    \Faluss\Platform\Fans\Messaging\MessageAutomaticScheduler::register();
     $registry->register(new \Faluss\Platform\Admin\DashboardModule($role, $registry));
     if ($role === \Faluss\Platform\Core\SiteRole::Fans
         && defined('FALUSS_PLATFORM_FANS_SSO')

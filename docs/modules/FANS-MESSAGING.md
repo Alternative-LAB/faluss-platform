@@ -15,8 +15,43 @@ d’ouverture actuelles sont précisées à la fin de ce document.
 
 ## Accès et états
 
-Un membre SSO lié peut agir en Fan et envoyer une demande **textuelle** à un
-Créateur actif autre que lui. Une seule conversation courante par couple.
+### Décision produit du 17 octobre 2026
+
+Le Créateur choisit désormais **Ouvert**, par défaut, ou **Sur demande**. Ouvert
+autorise un membre Fans lié et admissible à commencer une conversation sans
+acceptation manuelle ; aucun visiteur anonyme. Sur demande conserve le parcours
+d'acceptation/refus. Le changement ne concerne que les conversations futures :
+aucune demande en attente ou refusée n'est acceptée automatiquement, aucun
+blocage n'est levé et les conversations acceptées restent accessibles. Les
+quotas de création et d'envoi, suspensions, signalements et rétention subsistent
+dans les deux modes. L'exception d'abonnement historiquement envisagée reste
+indisponible et ne sert pas de preuve pour ce choix du Créateur.
+
+Réglage privé `GET/POST /messages/contact`, lié au Créateur de la session courante,
+sans identifiant propriétaire fourni par le client. POST JSON strict, nonce REST,
+révision attendue, mutex et transaction communs aux nouvelles conversations.
+Formulaire natif sous `creator/messages?section=contact`, nonce distinct et mêmes
+services. Une édition concurrente périmée retourne409. Le GET ne crée rien.
+
+Table additive `faluss_fans_dm_contact`, installée explicitement par la préparation
+opérateur existante ou l'activation explicite. Aucun remplissage des anciens fils,
+aucune DDL au démarrage ou lors d'une lecture ; sans ce schéma, les nouvelles
+conversations échouent fermées mais les fils conservés et recours restent lisibles.
+Une ligne absente dans un schéma prêt signifie Ouvert ; une ligne corrompue ne
+constitue jamais une permission. Retour arrière : arrêter les nouveaux envois,
+conserver les données et recours, retirer le code sans supprimer les fils.
+
+Les [automatisations validées](FANS-AUTOMATIC-MESSAGES.md) sont autorisées par
+leur événement serveur, sans consentement Fan supplémentaire. Le lot suivant
+raccorde la bienvenue textuelle au suivi, avec file durable et état `automatic`
+sans acceptation générale ; le remerciement reste fermé tant que sa source
+attestée n'est pas raccordée. Aucun achat ni activation de site n'en découle.
+
+### Politique initiale et traitements conservés
+
+Un membre SSO lié peut agir en Fan et envoyer un premier message **textuel** à un
+Créateur actif autre que lui. Une seule conversation courante par couple ; le mode
+choisi décide de son admission immédiate ou en attente.
 État pending : seul le texte initial est transmis ; aucun second message ni
 réponse du Créateur avant acceptation. Le Créateur accepte ou refuse. Chacun
 peut bloquer l’autre dans ce couple ; un abonnement ne contourne jamais blocage,

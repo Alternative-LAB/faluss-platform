@@ -20,6 +20,8 @@ final class FansUiMessageView
                 </div>
                 <footer class="fu-message-list-footer">
                     <a class="fu-link" href="<?php echo esc_url(FansUiRoutes::url($v->role,'explorer')); ?>">Trouver un créateur ↗</a>
+                    <?php if($v->role==='creator'): ?><a class="fu-link" href="<?php echo esc_url($v->url(['section'=>'contact'])); ?>" <?php echo $v->section==='contact'?'aria-current="page"':''; ?>>Réglages de contact</a><?php endif; ?>
+                    <?php if($v->role==='creator'): ?><a class="fu-link" href="<?php echo esc_url($v->url(['section'=>'automatic'])); ?>" <?php echo $v->section==='automatic'?'aria-current="page"':''; ?>>Messages automatiques</a><?php endif; ?>
                     <details class="fu-message-tools"><summary>Confidentialité et aide</summary>
                         <nav class="fu-message-tabs" aria-label="Mes échanges">
                         <?php foreach(['inbox'=>'Conversations','blocks'=>'Mes blocages','reports'=>'Signalements et recours'] as $key=>$label): ?>
@@ -28,7 +30,7 @@ final class FansUiMessageView
                         </nav>
                         <details class="fu-message-policy"><summary>Demandes et conservation</summary>
                             <p>Une demande : 1 000 caractères maximum. Une conversation acceptée : messages de 2 000 caractères maximum. Aucun média ni pièce jointe. Vous pouvez bloquer et signaler un message reçu.</p>
-                            <p>L’ouverture directe pour les abonnés Faluss Max ou au Créateur est indisponible ici : leur abonnement ne peut pas encore être vérifié. La demande suit donc le parcours d’acceptation.</p>
+                            <p>Un créateur peut recevoir directement les nouveaux messages ou demander à accepter chaque nouvelle conversation. Un blocage ou un refus reste respecté.</p>
                             <p>Les messages ordinaires expirent douze mois après le dernier envoi. Lire ou bloquer ne prolonge pas cette durée. Un signalement conserve séparément le message choisi et les éléments nécessaires au dossier, réservés aux modérateurs habilités.</p>
                             <p>Ces preuves sont supprimées douze mois après la décision définitive, recours compris, sauf conservation de litige motivée et réexaminée. Les décisions et les recours sont accessibles dans « Signalements et recours ».</p>
                         </details>
@@ -37,7 +39,9 @@ final class FansUiMessageView
             </aside>
             <div class="fu-message-chat" id="fu-conversation">
                 <a class="fu-message-return" href="<?php echo esc_url($v->url()); ?>">← Conversations</a>
-                <?php if($v->section!=='inbox'): ?>
+                <?php if($v->section==='automatic'): FansUiAutomaticMessages::render($v);
+                elseif($v->section==='contact'): self::contact($v);
+                elseif($v->section!=='inbox'): ?>
                     <header class="fu-message-heading"><h2><?php echo $v->section==='blocks'?'Mes blocages':'Signalements et recours'; ?></h2></header>
                     <div class="fu-message-scroll" tabindex="0" aria-label="Mes dossiers privés"><?php self::privateList($v); ?></div>
                 <?php elseif($v->conversation!==null): self::conversation($v);
@@ -61,6 +65,25 @@ final class FansUiMessageView
         <?php endforeach;
         self::next($v,$page['next_cursor']);
     }
+    private static function contact(FansUiMessages $v): void
+    {
+        $data=$v->contact?->get_data();
+        ?><header class="fu-message-heading"><h2>Réglages de contact</h2></header><div class="fu-message-scroll fu-message-contact"><?php
+        if($v->contact?->get_status()!==200||!is_array($data)) {echo '<p role="alert">Ces réglages sont indisponibles. Réessayez plus tard.</p></div>';return;}
+        ?>
+        <p>Choisissez comment les membres Fans peuvent commencer un échange avec vous.</p>
+        <form method="post" action="<?php echo esc_url($v->url(['section'=>'contact'])); ?>">
+            <?php wp_nonce_field('fans_messages','fans_messages_nonce',false); ?>
+            <input type="hidden" name="message_action" value="contact"><input type="hidden" name="revision" value="<?php echo (int)$data['revision']; ?>">
+            <fieldset><legend>Nouvelles conversations</legend>
+                <label><input type="radio" name="mode" value="open" <?php echo $data['mode']==='open'?'checked':''; ?>><span><strong>Ouvert</strong><small>Les membres connectés peuvent vous écrire sans acceptation manuelle.</small></span></label>
+                <label><input type="radio" name="mode" value="request" <?php echo $data['mode']==='request'?'checked':''; ?>><span><strong>Sur demande</strong><small>Vous acceptez ou refusez chaque nouvelle demande.</small></span></label>
+            </fieldset>
+            <p>Vos conversations acceptées restent accessibles. Changer de mode ne débloque personne et ne rouvre aucune demande refusée ou en attente.</p>
+            <button type="submit">Enregistrer le mode de contact</button>
+        </form></div>
+        <?php
+    }
     /** @param array{name:string,portrait:string} $person */
     private static function avatar(array $person): void
     {
@@ -76,8 +99,8 @@ final class FansUiMessageView
         if(!$v->recipientAvailable()) {echo '<div class="fu-message-empty"><h2>Destinataire indisponible</h2><p>Ce profil ne peut pas recevoir votre demande.</p></div>';return;}
         $person=$v->correspondent(false,$v->creatorId);
         ?>
-        <header class="fu-message-heading"><?php self::avatar($person); ?><div><h2><?php echo esc_html($person['name']); ?></h2><p>Nouvelle demande</p></div></header>
-        <div class="fu-message-scroll fu-message-empty"><h3>Faites le premier pas</h3><p>Présentez-vous en quelques mots. Le créateur pourra accepter ou refuser votre demande.</p></div>
+        <header class="fu-message-heading"><?php self::avatar($person); ?><div><h2><?php echo esc_html($person['name']); ?></h2><p>Premier message</p></div></header>
+        <div class="fu-message-scroll fu-message-empty"><h3>Faites le premier pas</h3><p>Présentez-vous en quelques mots. Selon les réglages du créateur, votre échange s’ouvre directement ou attend son acceptation.</p></div>
         <form class="fu-message-form fu-message-composer" method="post" action="<?php echo esc_url($v->url(['creator'=>$v->creatorId])); ?>">
             <?php self::fields('request',['creator_id'=>$v->creatorId,'key'=>$v->key]); ?>
             <label for="fu-message-body">Votre demande textuelle</label>
@@ -122,6 +145,7 @@ final class FansUiMessageView
                 <?php self::fields('send',['thread_id'=>$row['thread_id'],'key'=>$v->key]); ?>
                 <label for="fu-message-body">Votre message</label><div class="fu-message-input"><textarea name="body" id="fu-message-body" rows="2" maxlength="2000" required aria-describedby="fu-message-send-limit" placeholder="Écrire un message…"><?php echo esc_textarea($v->draft); ?></textarea><button type="submit" aria-label="Envoyer le message"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m3 11 18-8-8 18-2-8-8-2Zm8 2L21 3"/></svg></button></div><p id="fu-message-send-limit">2 000 caractères · texte uniquement · 30 envois par heure maximum.</p>
             </form>
+        <?php elseif($row['can_start']??false): ?><div class="fu-message-readonly"><a class="fu-link" href="<?php echo esc_url($v->url(['creator'=>$row['creator_id']])); ?>">Écrire au créateur →</a><p>Votre premier message suit le mode de contact choisi par le créateur.</p></div>
         <?php else: ?><p class="fu-message-readonly"><?php echo $row['blocked']?'Échange bloqué. Aucun nouvel envoi n’est possible.':($row['state']==='pending'?'En attente de l’acceptation du créateur.':'L’envoi est fermé pour cet échange.'); ?></p><?php endif;
     }
     /** @param array<string,mixed> $row */

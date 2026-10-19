@@ -1,0 +1,22 @@
+{
+  "code_commit": "51fe9712e672807fd6c87c7dd8101ad01d3ef660",
+  "code_tree": "43b03d3d71aae7bbc6f2b0fd8a4315c3d621461a",
+  "runtime_tree": "e34eb6351cff5f9dd6f04120df028297a9b86a32",
+  "lf_export": true,
+  "src_and_tests_identical": true,
+  "docs_only_delta": true,
+  "scope": "Actual private territory journal, admissions and coorganizer-session recovery on disposable Hub and Fans",
+  "total": 611,
+  "failed": 0,
+  "territory": 45,
+  "fixture_removed": true,
+  "wordpress": "7.1.2",
+  "php": "8.5.4",
+  "database": "11.8.6-MariaDB-5ubuntu0.1 from Ubuntu",
+  "not_proven": [
+    "Integrated future main and CI",
+    "Native territorial UI and dimension-specific public visibility",
+    "Complete native Fan intention choices, true Me SSO or real site admission",
+    "Real purchase source, production score, activation, retention or RustFS private storage"
+  ]
+}

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Faluss\Platform\Fans\Sso;
 
+use Faluss\Platform\Fans\Profiles\DiscoveryCursor;
+
 /** A navigation hint, never an identity or an authorization grant. */
 final class FansSsoReturn
 {
@@ -23,11 +25,34 @@ final class FansSsoReturn
             return null;
         }
         $relative = substr($candidate, strlen($prefix));
+        if (preg_match('~^(fan|creator)/hof/?\?support=([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$~D',$relative,$selection)===1) {
+            return $prefix.$selection[1].'/hof?support='.$selection[2];
+        }
         if (preg_match('~^(fan|creator)/messages/?\?(creator|thread)=([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$~D', $relative, $selection) === 1) {
             return $prefix.$selection[1].'/messages?'.$selection[2].'='.$selection[3];
         }
         if (preg_match('~^creator/creer/?\?publication=([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$~D', $relative, $selection) === 1) {
             return $prefix . 'creator/creer?publication=' . $selection[1];
+        }
+        if (preg_match('~^creator/hof/?\?manage=(sessions|new|territory)$~D', $relative, $selection) === 1) {
+            return $prefix . 'creator/hof?manage=' . $selection[1];
+        }
+        if (preg_match('~^creator/hof/?\?manage=territory&(policy_cursor|change_cursor|change)=([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$~D',$relative,$selection) === 1) {
+            return $prefix . 'creator/hof?manage=territory&' . $selection[1] . '=' . $selection[2];
+        }
+        if (preg_match('~^creator/hof/?\?manage=session&session=([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})&coorganizer_cursor=([A-Za-z0-9.%-]{1,200})$~D', $relative, $selection) === 1) {
+            $cursor = rawurldecode($selection[2]);
+            if (rawurlencode($cursor) === $selection[2] && DiscoveryCursor::decode($cursor, 'd1.all.') !== false) {
+                return $prefix . 'creator/hof?manage=session&session=' . $selection[1] . '&coorganizer_cursor=' . $selection[2];
+            }
+            return null;
+        }
+        if (preg_match('~^creator/hof/?\?manage=session&session=([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})&participant_cursor=([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$~D', $relative, $selection) === 1) {
+            return $prefix . 'creator/hof?manage=session&session=' . $selection[1] . '&participant_cursor=' . $selection[2];
+        }
+        if (preg_match('~^creator/hof/?\?manage=(session|sessions|join)&(session|sessions_cursor)=([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$~D', $relative, $selection) === 1
+            && ((in_array($selection[1],['session','join'],true) && $selection[2] === 'session') || ($selection[1] === 'sessions' && $selection[2] === 'sessions_cursor'))) {
+            return $prefix . 'creator/hof?manage=' . $selection[1] . '&' . $selection[2] . '=' . $selection[3];
         }
         $fan = 'fan/(?:accueil|explorer|hof(?:/session)?|classements|classement-fans|messages|espace)';
         $creator = 'creator/(?:accueil|explorer|hof(?:/session)?|classements|messages|progression|creer|images|boutique|mon-profil)';

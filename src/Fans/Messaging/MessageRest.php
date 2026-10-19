@@ -13,7 +13,12 @@ final class MessageRest
         $id='/messages/(?P<thread_id>[0-9a-f-]{36})';
         foreach ([['/messages','GET','inbox'],['/messages/requests','POST','request'],[$id,'GET','conversation'],
             [$id.'/send','POST','send'],[$id.'/decision','POST','decide'],['/messages/blocks','GET','blocked'],
-            ['/messages/blocks/(?P<block_id>[0-9a-f-]{36})/unblock','POST','unblock']] as [$route,$method,$callback]) {
+            ['/messages/blocks/(?P<block_id>[0-9a-f-]{36})/unblock','POST','unblock'],
+            ['/messages/contact','GET','contact'],['/messages/contact','POST','saveContact']] as [$route,$method,$callback]) {
+            register_rest_route(CreatorProfileRest::NAMESPACE,$route,['methods'=>$method,'callback'=>[self::class,$callback],'permission_callback'=>[self::class,'member']]);
+        }
+        foreach([['/messages/automatic','GET','automatic'],['/messages/automatic/(?P<kind>welcome|thanks)','POST','saveAutomatic'],
+            ['/messages/automatic/(?P<kind>welcome|thanks)/preview','POST','previewAutomatic']] as [$route,$method,$callback]) {
             register_rest_route(CreatorProfileRest::NAMESPACE,$route,['methods'=>$method,'callback'=>[self::class,$callback],'permission_callback'=>[self::class,'member']]);
         }
     }
@@ -33,6 +38,16 @@ final class MessageRest
     { $d=self::input($r,['revision','action']); return EditorialRest::response($d===null?MessagePolicy::error('invalid_message_decision',400):MessageService::decide($r->get_param('thread_id'),$d['revision'],$d['action'])); }
     public static function unblock(\WP_REST_Request $r): \WP_REST_Response
     { $d=self::input($r,['confirm']); return EditorialRest::response($d===null||$d['confirm']!==true?MessagePolicy::error('invalid_message_block',400):MessageReading::unblock($r->get_param('block_id'))); }
+    public static function contact(\WP_REST_Request $r): \WP_REST_Response
+    { return EditorialRest::response($r->get_query_params()!==[]?MessagePolicy::error('invalid_message_contact',400):MessageContact::own()); }
+    public static function saveContact(\WP_REST_Request $r): \WP_REST_Response
+    { $d=self::input($r,['mode','revision']); return EditorialRest::response($d===null?MessagePolicy::error('invalid_message_contact',400):MessageContact::save($d['mode'],$d['revision'])); }
+    public static function automatic(\WP_REST_Request $r): \WP_REST_Response
+    { return EditorialRest::response($r->get_query_params()!==[]?MessagePolicy::error('invalid_message_automation',400):MessageAutomaticSettings::own()); }
+    public static function saveAutomatic(\WP_REST_Request $r): \WP_REST_Response
+    { $d=self::input($r,['body','enabled','revision']); return EditorialRest::response($d===null?MessagePolicy::error('invalid_message_automation',400):MessageAutomaticSettings::save($r->get_param('kind'),$d['body'],$d['enabled'],$d['revision'])); }
+    public static function previewAutomatic(\WP_REST_Request $r): \WP_REST_Response
+    { $d=self::input($r,['body']); return EditorialRest::response($d===null?MessagePolicy::error('invalid_message_automation',400):MessageAutomaticSettings::preview($r->get_param('kind'),$d['body'])); }
     /**
      * @param list<string> $keys
      * @return array<string,mixed>|null

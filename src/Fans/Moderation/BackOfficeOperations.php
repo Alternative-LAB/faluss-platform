@@ -24,8 +24,8 @@ final class BackOfficeOperations
         if($status instanceof \WP_Error){BackOfficeView::error('Diagnostic indisponible.',503);return;}
         echo '<table class="fb-table"><thead><tr><th>Contrôle</th><th>Résultat</th></tr></thead><tbody>';
         foreach(['schemas_ready'=>'Schémas vérifiés','sso_ready'=>'Préparation SSO','profiles_ready'=>'Schéma des profils','hourly_event'=>'Événement WP-Cron horaire','retention_healthy'=>'Dernière purge complète et récente','policy_attested'=>'Politique attestée par configuration','admission_open'=>'Nouveaux envois ouverts','private_access'=>'Accès privé de conservation'] as $key=>$label){echo '<tr><th>'.esc_html($label).'</th><td>'.($status[$key]?'Oui':'Non').'</td></tr>';}
-        echo '</tbody></table><p>Prochain événement UTC : '.esc_html($status['next_run_utc']??'Aucun').'.</p>';
-        if(is_array($status['purge'])){echo '<p>Dernière exécution UTC : '.esc_html(gmdate('Y-m-d H:i:s',(int)($status['purge']['checked_at']??0))).' · lots restant à traiter : '.(!empty($status['purge']['more'])?'oui':'non').'.</p>';}
+        echo '</tbody></table><p>Prochain événement : '.esc_html($status['next_run_utc']===null?'Aucun':BackOfficeTime::utc($status['next_run_utc'])).'.</p>';
+        if(is_array($status['purge'])){echo '<p>Dernière exécution : '.esc_html(BackOfficeTime::timestamp(is_int($status['purge']['checked_at']??null)?$status['purge']['checked_at']:null)).' · lots restant à traiter : '.(!empty($status['purge']['more'])?'oui':'non').'.</p>';}
         echo '<p class="fb-empty">WP-Cron ne garantit pas une exécution sans trafic. L’exploitant doit installer le cron système fiable, traiter les sauvegardes et attester la politique, ses notifications et recours. Cette page n’atteste rien à sa place.</p>';
         self::form('messages_prepare','Préparer les schémas et l’événement horaire');self::form('messages_purge','Exécuter une purge maintenant');
         echo '<p>Pour fermer les nouveaux envois : désactiver FALUSS_PLATFORM_FANS_MESSAGING en configuration serveur. Conserver les schémas, la politique attestée et le cron de rétention ; signalements, recours et purges restent accessibles selon leurs permissions.</p>';
@@ -47,7 +47,7 @@ final class BackOfficeOperations
         $rows=AdminActionLog::recent();
         if($rows===null){echo '<p>Aucune lecture du journal opérateur disponible avant sa préparation.</p>';return;}
         echo '<details><summary>50 dernières opérations locales</summary><ul>';
-        foreach($rows as $row){echo '<li>'.esc_html(implode(' · ',array_map('strval',$row))).'</li>';}
+        foreach($rows as $row){echo '<li>'.esc_html(implode(' · ',array_map('strval',BackOfficeTime::journal($row)))).'</li>';}
         echo '</ul><p>started = résultat non encore confirmé ; completed = terminé ; failed = échec. Aucun contenu privé ni secret dans ce journal.</p></details>';
     }
 }

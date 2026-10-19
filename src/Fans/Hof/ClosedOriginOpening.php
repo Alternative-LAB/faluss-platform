@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Faluss\Platform\Fans\Hof;
 
 use Faluss\Platform\Fans\PfContract\ClosedBarrierInbox;
+use Faluss\Platform\Fans\PfContract\ClosedBarrierPrimaryRead;
 use Faluss\Platform\TokenEngine\PurchasedPf\ModelValues;
 use Faluss\Platform\TokenEngine\PurchasedPf\ModelViolation;
 use Faluss\Platform\TokenEngine\PurchasedPf\Protocol\CanonicalJson;
@@ -21,6 +22,7 @@ final class ClosedOriginOpening
     public function __construct(private readonly \wpdb $db, private readonly ClosedBarrierInbox $inbox, private readonly string $origin)
     {
         ClosedEnvironment::assertIsolated($db,'fans');ModelValues::uuid($origin);
+        if (!$inbox->usesConnection($db)) { throw new ModelViolation('hof_origin_primary_connection_required'); }
         $this->storage=new RankingStorage($db);$this->table=ClosedOriginOpeningSchema::tables($db)['records'];
     }
 
@@ -76,6 +78,30 @@ final class ClosedOriginOpening
             $now=RankingValues::utc($this->db->get_var('SELECT UTC_TIMESTAMP(6)'));
             if ($now<$row['admissible_from'] || $now>=$ack['fields']['object']['valid_until']) { throw new ModelViolation('hof_origin_unavailable'); }
             return $row;
+        });
+    }
+
+    /** Trusted source reading, distinct from administrator opening actions.
+     * Current lookup must already be prepared/confirmed outside this transaction.
+     * @template T
+     * @param callable(array<string,string>):T $operation
+     * @return T */
+    public function withCurrentRead(ClosedBarrierPrimaryRead $reader, callable $operation): mixed
+    {
+        $this->available();
+        if (!$reader->usesInbox($this->inbox)) { throw new ModelViolation('hof_origin_primary_connection_required'); }
+        $initial = $this->storage->row($this->db->prepare('SELECT * FROM %i WHERE origin_id=%s AND policy_version=%s',
+            $this->table,$this->origin,RankingPolicy::VERSION));
+        if ($initial === null || $initial['state'] !== 'open') { throw new ModelViolation('hof_origin_acknowledgement_required'); }
+        return $reader->withCurrentAcknowledgement($initial['action_id'],function (array $ack) use ($initial,$operation): mixed {
+            $current = $this->row();
+            $this->matching($initial,CanonicalJson::encode($ack['fields']));
+            $opening = OriginOpening::fromAcknowledgement($ack,$this->origin);
+            if ($current !== $initial || $initial['primary_ack_at'] !== $opening['primary_ack_at']
+                || $initial['admissible_from'] !== $opening['admissible_from']) { throw new ModelViolation('hof_origin_conflict'); }
+            $now = RankingValues::utc($this->db->get_var('SELECT UTC_TIMESTAMP(6)'));
+            if ($now < $initial['admissible_from'] || $now >= $ack['fields']['object']['valid_until']) { throw new ModelViolation('hof_origin_unavailable'); }
+            return $operation($initial);
         });
     }
 

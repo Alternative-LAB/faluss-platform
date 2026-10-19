@@ -1,0 +1,43 @@
+{
+  "checked_at": "2026-10-17T23:09:54.539663+00:00",
+  "fixtures": [
+    {
+      "fixture": "fans-editorial-ym7e6_l7",
+      "existed": true,
+      "processes_remaining": 0,
+      "removed": true
+    },
+    {
+      "fixture": "fans-editorial-p5vhoseo",
+      "existed": true,
+      "processes_remaining": 0,
+      "removed": true
+    },
+    {
+      "fixture": "fans-editorial-mi1slv1x",
+      "existed": true,
+      "processes_remaining": 0,
+      "removed": true
+    },
+    {
+      "fixture": "fans-admission-wp-vhvlgmpo",
+      "existed": true,
+      "processes_remaining": 0,
+      "removed": true
+    },
+    {
+      "fixture": "fans-admission-wp-dr5ugimp",
+      "existed": true,
+      "processes_remaining": 0,
+      "removed": true
+    },
+    {
+      "fixture": "fans-admission-wp-njy2fqba",
+      "existed": true,
+      "processes_remaining": 0,
+      "removed": true
+    }
+  ],
+  "production_flags_changed": false,
+  "protected_exports_touched": false
+}

@@ -1,0 +1,17 @@
+{
+  "commit": "747f5d27481c019e2b4d333dad63729fdb2f7282",
+  "tree": "59006ff8698f82614ea43afa6f16f5d608b7dd9c",
+  "tests": 810,
+  "assertions": 8219,
+  "hof_tests": 90,
+  "hof_assertions": 323,
+  "phpstan_errors": 0,
+  "phpstan_target": 80300,
+  "historical_deprecations": 2,
+  "php_lint": 21,
+  "python_compile": 2,
+  "source_comparisons": 23,
+  "relative_links": 9,
+  "secret_scan": "pass",
+  "diff_check": "pass"
+}

@@ -110,6 +110,48 @@ final class TerritoryService
         });
     }
 
+    /** Immutable public criteria, available only to an owning Creator or the reviewing administrator.
+     * @return list<array{policy_id:string,criteria_url:string,criteria_text:string,countries:list<string>,territories:array<string,array{country:string,name:string}>}> */
+    public function policies(string $after = ''): array
+    {
+        if (current_user_can('manage_options')) { RankingRegistry::administrator(); }
+        else { SessionStore::ownerCreator(); }
+        $this->available(); if ($after !== '') { ModelValues::uuid($after); }
+        return $this->store->transaction(function () use ($after): array {
+            $rows = $this->db->get_results($this->db->prepare('SELECT * FROM %i WHERE policy_id>%s ORDER BY policy_id LIMIT 20',
+                $this->tables['policies'],$after),'ARRAY_A');
+            if (!is_array($rows) || $this->db->last_error !== '') { throw new ModelViolation('hof_storage_unavailable'); }
+            return array_map(fn (array $row): array => ['policy_id' => $row['policy_id']] + $this->policyValues($row),$rows);
+        });
+    }
+
+    /** @return array{policy_id:string,criteria_url:string,criteria_text:string,countries:list<string>,territories:array<string,array{country:string,name:string}>} */
+    public function criteria(string $id): array
+    {
+        if (current_user_can('manage_options')) { RankingRegistry::administrator(); }
+        else { SessionStore::ownerCreator(); }
+        ModelValues::uuid($id); $this->available();
+        return $this->store->transaction(function () use ($id): array {
+            return ['policy_id' => $id] + $this->policyValues($this->policyRow($id) ?? throw new ModelViolation('hof_territory_policy_missing'));
+        });
+    }
+
+    /** Moderator-owned detail; private history is bounded and never published as a directory.
+     * @return array{declaration:array<string,string>,policy:array<string,mixed>,history:list<array<string,string>>} */
+    public function examine(string $creator, int $before = 2147483646): array
+    {
+        RankingRegistry::administrator(); ModelValues::uuid($creator); $this->available();
+        if ($before < 1 || $before > 2147483646) { throw new ModelViolation('hof_invalid_territory_cursor'); }
+        return $this->store->transaction(function () use ($creator,$before): array {
+            $row = $this->creatorRow($creator) ?? throw new ModelViolation('hof_territory_not_found');
+            $policy = $this->policyRow($row['policy_id']) ?? throw new ModelViolation('hof_territory_policy_missing');
+            $history = $this->db->get_results($this->db->prepare('SELECT * FROM %i WHERE creator_id=%s AND revision<%d ORDER BY revision DESC LIMIT 20',
+                $this->tables['decisions'],$creator,$before),'ARRAY_A');
+            if (!is_array($history) || $this->db->last_error !== '') { throw new ModelViolation('hof_storage_unavailable'); }
+            return ['declaration' => $row,'policy' => $this->policyValues($policy),'history' => $history];
+        });
+    }
+
     /** Called inside the existing session transaction; an immutable binding has no independent COMMIT. */
     public function bind(string $session, string $policy): void
     {
@@ -175,6 +217,7 @@ final class TerritoryService
 
     private function write(string $id, int $revision, string $state, string $policy, string $country, string $ref, int $approved, string $reason, string $appeal, string $action): void
     {
+        ClosedTerritoryChanges::record($this->db,$this->creatorRow($id),$revision,$action);
         $this->store->storage->query($this->db->prepare('REPLACE INTO %i (creator_id,revision,state,policy_id,country,territory_ref,approved_revision,reason,appeal_text,updated_at) VALUES (%s,%d,%s,%s,%s,%s,%d,%s,%s,UTC_TIMESTAMP(6))',
             $this->tables['creators'], $id, $revision, $state, $policy, $country, $ref, $approved, $reason, $appeal));
         $this->store->storage->query($this->db->prepare('INSERT INTO %i (creator_id,revision,actor_id,action,reason,policy_id,country,territory_ref,occurred_at) VALUES (%s,%d,%d,%s,%s,%s,%s,%s,UTC_TIMESTAMP(6))',

@@ -16,11 +16,11 @@ final class FansUiAdmission
     /** @var array{category:string,status:string}|null */
     public ?array $profile = null;
 
-    public static function load(bool $profilesEnabled): self
+    public static function load(bool $profilesEnabled, bool $processPost = true): self
     {
         $model = new self();
         if (!$profilesEnabled || FansSsoService::currentLinkedSubject() === null) { return $model; }
-        if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+        if ($processPost && ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             $model->category = self::field('category');
             if (wp_verify_nonce(self::field('fans_admission_nonce'), 'fans_admission') === false) {
                 $model->result = new \WP_REST_Response([], 403);

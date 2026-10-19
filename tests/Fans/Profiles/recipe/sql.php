@@ -21,6 +21,14 @@ if (($argv[1] ?? '') === 'race') {
 }
 if (($argv[1] ?? '') === 'setup') {
     $wpdb->query('CREATE TABLE fixture_options(name varchar(191) PRIMARY KEY,value text NOT NULL) ENGINE=InnoDB');
+    check('transactional local account fixture', $wpdb->query('CREATE TABLE test_users (ID bigint unsigned PRIMARY KEY) ENGINE=InnoDB') !== false);
+    check('transactional local roles fixture', $wpdb->query('CREATE TABLE test_usermeta (umeta_id bigint unsigned AUTO_INCREMENT PRIMARY KEY,user_id bigint unsigned NOT NULL,meta_key varchar(255) NOT NULL,meta_value longtext NOT NULL,KEY account_meta (user_id,meta_key)) ENGINE=InnoDB') !== false);
+    foreach ([1 => 'administrator', 17 => 'subscriber', 18 => 'subscriber', 19 => 'subscriber',
+        20 => 'subscriber', 21 => 'subscriber', 22 => 'subscriber', 42 => 'administrator'] as $account => $role) {
+        check('stored fixture account ' . $account, $wpdb->query($wpdb->prepare('INSERT INTO test_users (ID) VALUES (%d)', $account)) === 1
+            && $wpdb->query($wpdb->prepare('INSERT INTO test_usermeta (user_id,meta_key,meta_value) VALUES (%d,%s,%s)',
+                $account, 'test_capabilities', serialize([$role => true]))) === 1);
+    }
     check('real SSO schemas', FansSsoSchema::installOrVerify());
     check('real notification schema', \Faluss\Platform\Fans\Notifications\NotificationSchema::installOrVerify());
     check('real profile schema', CreatorProfileSchema::installOrVerify());
@@ -33,6 +41,23 @@ if (($argv[1] ?? '') === 'setup') {
     $wpdb->query("INSERT INTO test_faluss_fans_identity_links (wp_user_id,faluss_id,created_at,last_proved_at) VALUES (18,'44444444-4444-4444-8444-444444444444',UTC_TIMESTAMP(),UTC_TIMESTAMP())");
     $wpdb->query("INSERT INTO test_faluss_fans_creator_profiles (creator_id,wp_user_id,category,status,created_at,updated_at) VALUES ('" . OWNER . "',17,'arts','active',UTC_TIMESTAMP(),UTC_TIMESTAMP())");
     exit;
+}
+$timezoneBefore = get_option('timezone_string', null);
+$offsetBefore = get_option('gmt_offset', null);
+try {
+    update_option('timezone_string', 'Europe/Paris');
+    check('timezone adapter follows the configured WordPress zone', wp_timezone()->getName() === 'Europe/Paris'
+        && \Faluss\Platform\Fans\Moderation\BackOfficeTime::utc('2026-10-06 08:00:01') === '06/10/2026 à 10:00:01 +02:00 · Europe/Paris');
+    update_option('timezone_string', ''); update_option('gmt_offset', 5.5);
+    check('timezone adapter supports a positive fractional fixed offset', wp_timezone()->getName() === '+05:30');
+    update_option('gmt_offset', -3.5);
+    check('timezone adapter supports a negative fractional fixed offset', wp_timezone()->getName() === '-03:30');
+    update_option('gmt_offset', 0);
+    check('timezone adapter has the WordPress zero-offset fallback', wp_timezone()->getName() === '+00:00');
+} finally {
+    $wpdb->query("DELETE FROM fixture_options WHERE name IN ('timezone_string','gmt_offset')");
+    if ($timezoneBefore !== null) { update_option('timezone_string', $timezoneBefore); }
+    if ($offsetBefore !== null) { update_option('gmt_offset', $offsetBefore); }
 }
 $r = new WP_REST_Request('POST', '/faluss-fans/v1/creators/me/editorial');
 $r->set_header('X-WP-Nonce', 'fixture-wp_rest');

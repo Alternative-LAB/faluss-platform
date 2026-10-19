@@ -177,3 +177,8 @@ Le header Retour / Studio / Aperçu est sticky et opaque dans le scroll du Studi
 Design → Nom expose une seule couleur `secondary_color` pour le handle et la bio : « Actuelle » conserve le rendu historique, les choix blanc/noir et une couleur hexadécimale valide personnalisent ensemble ces deux textes. Le nom et les autres textes sont indépendants. Liens → Disposition des liens et Profil → Réglages → Présentation des liens exposent les mêmes préférences globales `image_border` (none/solid) et `image_border_color` (#RRGGBB). Le mode illustré est sans bordure par défaut ; le mode liste ignore ces préférences.
 
 Ces contrôles de présentation participent immédiatement à l'aperçu ouvert, puis à la transaction existante. Les brouillons de contenus restent indépendants. Aucune nouvelle étape d'onboarding, aucun Shop ou paiement. [Preuves et limites](../evidence/me-v3-063/README.md).
+
+
+## Importation de liens
+
+Studio V3 → Liens propose un [import CSV, JSON et texte avec aperçu modifiable](LINK-IMPORT.md). L’import ajoute les nouveaux liens sans remplacer les contenus existants, avec validation, dédoublonnage et protection transactionnelle de la version courante.

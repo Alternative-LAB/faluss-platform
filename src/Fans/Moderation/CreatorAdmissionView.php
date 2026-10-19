@@ -72,7 +72,7 @@ final class CreatorAdmissionView
                 <div class="fm-items"><?php foreach ($page['items'] as $row): ?>
                     <article class="fm-card"><h3>Demande · <?php echo esc_html(self::category($row['category'])); ?></h3>
                         <?php AccountContext::creator($row['creator_id']); ?>
-                        <p class="fm-meta"><?php echo esc_html(self::label($row['status'])); ?> · demande du <?php echo esc_html($row['created_at']); ?> UTC</p>
+                        <p class="fm-meta"><?php echo esc_html(self::label($row['status'])); ?> · demande du <?php echo esc_html(BackOfficeTime::utc($row['created_at'])); ?></p>
                         <p class="fm-id">Référence privée : <?php echo esc_html($row['creator_id']); ?></p>
                         <a href="<?php echo esc_url(self::url($status, $row['creator_id'])); ?>">Examiner le profil et son journal →</a>
                     </article>
@@ -94,7 +94,7 @@ final class CreatorAdmissionView
             <div class="fm-meta"><strong><?php echo esc_html(self::label($row['status'])); ?></strong><span>Révision de statut <?php echo esc_html((string) $row['status_revision']); ?></span></div>
             <h2>Profil · <?php echo esc_html(self::category($row['category'])); ?></h2>
             <?php AccountContext::creator($id); ?>
-            <p class="fm-id">Référence privée : <?php echo esc_html($id); ?><br>Demande : <?php echo esc_html($row['created_at']); ?> UTC<br>Mis à jour : <?php echo esc_html($row['updated_at']); ?> UTC</p>
+            <p class="fm-id">Référence privée : <?php echo esc_html($id); ?><br>Demande : <?php echo esc_html(BackOfficeTime::utc($row['created_at'])); ?><br>Mis à jour : <?php echo esc_html(BackOfficeTime::utc($row['updated_at'])); ?></p>
             <p><?php echo $row['status'] === 'active' ? 'Profil public. Seules les données éditoriales approuvées séparément peuvent être diffusées.' : 'Profil absent des lectures publiques. Aucun nom ni portrait n’est approuvé par cette décision.'; ?></p>
             <form class="fm-decision" method="post" action="<?php echo esc_url(self::url($filter, $id)); ?>">
                 <?php wp_nonce_field('fans_moderation'); ?>
@@ -110,7 +110,7 @@ final class CreatorAdmissionView
             </form>
             <details class="fm-journal" open><summary>Journal · 20 dernières décisions</summary>
                 <?php if ($row['journal'] === []): ?><p>Aucune décision journalisée. Révision initiale 0 ; un éventuel statut antérieur à cette version n’est pas reconstitué.</p><?php endif; ?>
-                <?php foreach ($row['journal'] as $entry): ?><p>Révision <?php echo esc_html((string) $entry['revision']); ?> · <?php echo esc_html(self::label($entry['previous_status'])); ?> → <?php echo esc_html(self::label($entry['status'])); ?><br>Administrateur local <?php echo esc_html((string) $entry['actor_id']); ?> · <?php echo esc_html($entry['occurred_at']); ?> UTC</p><?php endforeach; ?>
+                <?php foreach ($row['journal'] as $entry): ?><p>Révision <?php echo esc_html((string) $entry['revision']); ?> · <?php echo esc_html(self::label($entry['previous_status'])); ?> → <?php echo esc_html(self::label($entry['status'])); ?><br>Administrateur local <?php echo esc_html((string) $entry['actor_id']); ?> · <?php echo esc_html(BackOfficeTime::utc($entry['occurred_at'])); ?></p><?php endforeach; ?>
             </details>
         </article>
         <?php

@@ -10,7 +10,95 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 - Connexions SignInForge 0.1.1 personnalisées avec Elementor sur les trois sites Faluss : profils visuels reproductibles, catalogue public français, recette d’authentification et procédure de retour arrière.
 
+## [0.14.0] - 2026-10-18
+
+Cette livraison regroupe les modes de contact Créateur, la bienvenue textuelle
+depuis le suivi gratuit, les horaires du back-office selon le fuseau WordPress
+et le raccordement HoF/B6 testé sur Hub/Fans jetables. Le choix prospectif des
+sessions et le remerciement PF sont strictement fermés aux preuves fictives de
+recette ; cette publication n'ouvre aucun achat, score public, pair réel ou flag.
+La pièce jointe de bienvenue attend la vérification du stockage privé (#161).
+
+### Ajouté
+
+- Resolve explicit session choices from current native primary proofs (`cfcd7c9`)
+- Add durable native session choices and same-key recovery (`cfcd7c9`)
+- Capture durable PF thank-you messages from authenticated confirmations (`d424bec`)
+- Connect native territorial review and durable recovery (`07df4df`)
+- Add creator-owned contact modes without reopening refusals (`3e46374`)
+- Add durable automatic welcome messages and native free follow (`3e46374`)
+- Add the approved private territorial barrier contract (`98de07e`)
+- Persist territorial invalidation and exact barrier recovery (`98de07e`)
+- Add creator-owned contact modes without reopening refusals (#235) (`b8e6b01`)
+- Add the approved private territorial barrier contract (`cd42356`)
+- Add native creator participation and private appeals (`5bc2b8c`)
+- Recover participation after attested session readmission (`a9d5956`)
+- Bind private session participation to durable Hub admission (`991bba3`)
+- Add private coorganizer invitation forms (`6c57975`)
+- Connect native session lifecycle and primary recovery (`3b0db60`)
+- Adapt native session dates without changing calendar authority (`715030d`)
+- List current creator session associations with a private cursor (`956c42e`)
+- Add closed ranking visibility and alias moderation forms (`3fb07d1`)
+
+### Corrigé
+
+- Present Fans back-office times in the configured WordPress zone (`4df849c`)
+- Match WordPress timezone behavior in the isolated SQL adapter (`4df849c`)
+- Validate raw session choices before narrowing their types (`cfcd7c9`)
+- Preserve prospective choices after a completed support (`cfcd7c9`)
+- Preserve territorial return paths and existing access refusals (`07df4df`)
+- Align native territorial scenarios with the authoritative fixture clock (`07df4df`)
+- Scope territorial visibility to eligible session dimensions (`bd4f68c`)
+
+### Documentation
+
+- Record closed session-selection proof and responsive view captures (`cfcd7c9`)
+- Record closed PF thanks and separate visual evidence (`d424bec`)
+- Record territorial WordPress and separate visual evidence (`07df4df`)
+- Record integrated automatic welcome recipes and captures (`3e46374`)
+- Record automatic messaging fixture cleanup (`3e46374`)
+- Record verified territorial checkpoint and coorganizer recovery (`98de07e`)
+- Record isolated territorial transport and ledger race evidence (`cd42356`)
+- Match evidence hashes to normalized Git artifacts (`cd42356`)
+- Record verified native participation and appeal journeys (`5bc2b8c`)
+- Record the verified crossed participation lifecycle (`a9d5956`)
+- Record integrated participation and appeal recovery evidence (`289e7f3`)
+- Record the combined coorganization recipe and browser evidence (`63ffe4c`)
+- Record authenticated nonce concurrency regression evidence (`cd64925`)
+- Record native session lifecycle and reviewed browser evidence (`7cf519c`)
+- Record real visibility form and browser regression evidence (`56b795b`)
+
 ### Modifié
+
+- Check native proof responses for hidden PHP runtime errors (`4df849c`)
+- Exercise timezone rendering in the existing native WordPress recipe (`4df849c`)
+- Verify native multi-session support and a single durable thank-you together (`cfcd7c9`)
+- Apply the existing spacing to territorial recovery (`07df4df`)
+- Diagnose native admission refusal and cover local-only masking (`bd4f68c`)
+- Verify territorial revocation against real isolated confirmations (`98de07e`)
+- Preserve primary deadline checks in the territorial wire version (`98de07e`)
+- Verify territorial revocation against real isolated confirmations (`cd42356`)
+- Preserve primary deadline checks in the territorial wire version (`cd42356`)
+- Match native participation decisions to the Fans controls (`5bc2b8c`)
+- Preserve the nonce admission fix pending SQL regression proof (`43a5e59`)
+- Coordinate the existing private clocks for native completion (`c254d50`)
+- Prepare native coorganizer browser journeys (`f29ebe5`)
+- Use the existing primary clock for native deadline completion (`06f2233`)
+- Isolate coorganizer invitation form presentation (`da578cf`)
+- Verify native session forms on isolated WordPress (`759cb17`)
+- Save closed session interface before requested pause (`ae4c129`)
+
+## [0.13.0] - 2026-10-15
+
+### Ajouté
+
+- Importer ses liens dans Studio V3 depuis un fichier CSV / JSON ou du texte, HTML et Markdown : aperçu modifiable, choix des lignes et de l’ordre, validation et détection des doublons. L’import ajoute les liens sans remplacer les données existantes et respecte la capacité de la carte.
+- Analyse locale des sources et confirmation dans la transaction Link existante, avec contrôle de version, rapport des imports partiels et annulation complète des erreurs de stockage. Aucun scraping, migration de schéma ou accès tiers.
+- Guide [d’import des liens](docs/modules/LINK-IMPORT.md) et tests des formats, droits, limites, conservation, conflits, rollback et interface mobile.
+
+### Modifié
+
+- Harmoniser l’import de liens avec le Studio : choix fichier / copier-coller, parcours en deux étapes, liste compacte avec éditeurs dépliables et une seule action principale corail. Conserver séparément les brouillons de chaque source lors des changements d’onglet.
 
 - Réduire les coûts du stockage de la recette WordPress/MariaDB `corpus-joined` sur runner GitHub hébergé avec un montage temporaire en mémoire plafonné à 1 Gio ; scénarios, chemins privés et réglages transactionnels inchangés, aucun effet sur la production.
 - Accélérer la CI WordPress : Identity et administration Fans séparés, cinq recettes PF terminales parallèles et vérification des 1 413 assertions historiques ; outils épinglés et bytecode CLI partagés avec revalidation immédiate, budgets de temps et annulation des workflows obsolètes de PR. Aucun scénario applicatif ou état de production modifié.
@@ -21,6 +109,17 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 - Accepter les emojis Unicode et les codes `:gitmoji:` dans le contrôle de gouvernance des commits, avec tests de non-régression. Livrer cette transition depuis la base de confiance avant la PR #205.
 
 ### Ajouté
+
+- Livraison B6 fermée des classements, relevés privés et sessions depuis l'origine primaire, le corpus/cache complet corrigé et les identités/consentements courants : transaction commune sans quantité ou destinataire fourni par le navigateur, uniquement sur instances jetables ; formulaires de gouvernance, intentions complètes et activation restent distincts.
+- Vues B6 des classements permanents, relevés mensuels privés et sessions approuvées : filtres et pagination serveur, scores entiers sans arrondi, dates affichées dans le fuseau WordPress et mois Europe/Paris ; cycle de vie de session relu depuis sa liaison et son acquittement primaire existants, fermeture en cours masquée et annulation sans vainqueur. Fournisseur physiquement fermé hors recette, états indisponibles sans rang estimé, aucun changement de navigation globale.
+
+- Composition de plusieurs barrières actuelles dans la transaction d'origine déjà détenue : mutex et connexion primaires vérifiés, rollback/commit communs, aucun BEGIN imbriqué ou nouvelle preuve implicite ; périmètre B6 fermé sans contrat Hub ajouté.
+
+- Mutex de gouvernance B6 sans BEGIN pour composer sessions, origine et corpus sous leur transaction propriétaire : ordre conservé, callback incomplet rollbacké et libération vérifiée ; aucun droit, contrat Hub, table ou activation ajouté.
+
+- Relecture primaire fermée des barrières avant livraison B6 : lookup approuvé sur l'action/clé d'origine, challenge durable et reprise sans réenregistrement ; état indisponible pendant l'incertitude, fermeture locale prioritaire et callback transactionnel. Schéma séparé explicitement jetable, aucun contrat Hub nouveau ni activation.
+
+- Filiation serveur B6 entre Faluss ID attesté, membre WordPress lié et profil Créateur local : lectures primaires verrouillées, consentement et noms approuvés recontrôlés sans mapping navigateur ni COMMIT implicite. Recette WordPress/MariaDB avec cache périmé et retrait concurrent ; aucun contrat Hub, route, schéma ou score public ajouté.
 
 - Recette de jonction fermée : acquittement réel des barrières par HTTP signé et lecture atomique du corpus/cache sur les mêmes instances jetables ; 727 contrôles réussis, dont achat fictif sans score et correction attestée sans seconde consommation. Aucun nouveau contrat ou score public.
 

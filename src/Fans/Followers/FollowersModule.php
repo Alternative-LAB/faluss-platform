@@ -18,7 +18,7 @@ final class FollowersModule implements Module
 
     public function boot(): void
     {
-        if (self::enabledForFans() && CreatorProfileSchema::ready() && FollowersSchema::ready()) {
+        if (self::available()) {
             FollowersRest::register();
         }
     }
@@ -29,6 +29,9 @@ final class FollowersModule implements Module
             FollowersSchema::installOrVerify();
         }
     }
+
+    public static function available(): bool
+    { return self::enabledForFans()&&CreatorProfileSchema::ready()&&FollowersSchema::ready(); }
 
     private static function enabledForFans(): bool
     {

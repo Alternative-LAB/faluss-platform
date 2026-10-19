@@ -1,0 +1,13 @@
+{
+  "tested_tree": "3cda352157f1438bd7c29e0da9fc2bda487898a1",
+  "included_main": "cd42356eb62391c8e7f53af3ddc985fade889c14",
+  "php_runtime": "8.5.4",
+  "phpstan_target": "80300",
+  "phpstan_errors": 0,
+  "phpunit_tests": 814,
+  "phpunit_assertions": 8294,
+  "hof_tests": 90,
+  "hof_assertions": 323,
+  "historical_deprecations": 2,
+  "not_proven": "Physical recipe and CI of the new merged head, including the two presentation-checkpoint cases"
+}

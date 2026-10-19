@@ -27,6 +27,10 @@ final class ClosedSessionLifecycle
         $this->sessions = new SessionStore($db); $this->bindings = ClosedSessionLifecycleSchema::tables($db)['bindings'];
     }
 
+    /** A local application adapter cannot apply another fixture connection's acknowledgement. */
+    public function usesConnection(\wpdb $db): bool
+    { ClosedEnvironment::assertIsolated($db, 'fans'); return $this->db === $db; }
+
     /** Same immutable local binding survives the gap between B2 COMMIT and inbox preparation.
      * @return array<string,string> */
     public function prepare(string $sessionId, int $revision): array

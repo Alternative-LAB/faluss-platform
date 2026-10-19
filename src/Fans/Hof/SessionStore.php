@@ -30,6 +30,16 @@ final class SessionStore
         return $this->storage->transaction('sessions', $operation);
     }
 
+    /** Trusted delivery holds sessions before origin/corpus locks, without nesting transactions.
+     * @template T
+     * @param callable():T $operation
+     * @return T */
+    public function withGovernanceMutex(callable $operation): mixed
+    {
+        if (!SessionSchema::ready($this->db)) { throw new ModelViolation('hof_session_schema_unavailable'); }
+        return $this->storage->withMutex('sessions', $operation);
+    }
+
     /** @return array<string,string> */
     public function row(string $id): array
     {

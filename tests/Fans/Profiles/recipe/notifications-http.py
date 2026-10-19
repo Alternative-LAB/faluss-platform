@@ -61,6 +61,7 @@ config=root/'wordpress/wp-config.php';original=config.read_text()
 config.write_text(original.replace('<?php\n','<?php\ndefine("FALUSS_PLATFORM_FANS_MESSAGING",true);\ndefine("FALUSS_FANS_MESSAGING_POLICY_ATTESTED",true);\n',1))
 cli('get_userdata('+str(session['sessions']['admin-two']['id'])+')->add_cap("moderate_faluss_fans_messages");wp_set_current_user('+str(session['sessions']['admin-two']['id'])+');\\Faluss\\Platform\\Fans\\Messaging\\MessageOperations::prepare();\\Faluss\\Platform\\Fans\\Messaging\\MessageOperations::purge();')
 payload={'creator_id':member,'body':'Demande privée de recette.','key':cli('echo wp_generate_uuid4();')}
+check('notification request fixture opts into creator acceptance',api('messages/contact','member',{'mode':'request','revision':api('messages/contact','member')[1]['revision']})[0]==200)
 before=table_count();code,thread,_=api('messages/requests','fan',payload)
 check('real request notification',code==200 and rows()['items'][0]['kind']=='message_request' and table_count()==before+1)
 check('request replay deduplicated',api('messages/requests','fan',payload)[0]==200 and table_count()==before+1)

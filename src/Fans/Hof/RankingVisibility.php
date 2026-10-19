@@ -7,6 +7,7 @@ namespace Faluss\Platform\Fans\Hof;
 use Faluss\Platform\Fans\Profiles\CreatorProfileService;
 use Faluss\Platform\Fans\Profiles\EditorialService;
 use Faluss\Platform\Fans\Sso\FansSsoService;
+use Faluss\Platform\Fans\Sso\FansLinkedAccounts;
 use Faluss\Platform\TokenEngine\PurchasedPf\ModelViolation;
 
 /** Editorial alias and opt-in belong to Fans; Identity remains the account authority. */
@@ -98,9 +99,12 @@ final class RankingVisibility
     /** Server delivery contract only: no recipient is accepted from a public request. */
     public function visibleFan(int $member): ?string
     {
-        if (!RankingSchema::ready($this->db) || !FansSsoService::linkedMember($member)) { return null; }
+        $transaction = $this->inTransaction();
+        if (!RankingSchema::ready($this->db) || ($transaction
+            ? $this->db !== ($GLOBALS['wpdb'] ?? null) || FansLinkedAccounts::identityInTransaction($member) === null
+            : !FansSsoService::linkedMember($member))) { return null; }
         $row = $this->storage->row($this->db->prepare('SELECT approved_alias,fan_public FROM %i WHERE wp_user_id=%d'
-            . ($this->inTransaction() ? ' FOR UPDATE' : ''), $this->tables['members'], $member));
+            . ($transaction ? ' FOR UPDATE' : ''), $this->tables['members'], $member));
         return $row !== null && $row['fan_public'] === '1' && $row['approved_alias'] !== '' ? $row['approved_alias'] : null;
     }
 
@@ -109,6 +113,7 @@ final class RankingVisibility
     {
         if (!RankingSchema::ready($this->db)) { return null; }
         $transaction = $this->inTransaction();
+        if ($transaction && $this->db !== ($GLOBALS['wpdb'] ?? null)) { return null; }
         $owner = CreatorProfileService::activeOwner($creatorId, $transaction);
         if ($owner === null) { return null; }
         $query = 'SELECT revision,creator_public FROM %i WHERE wp_user_id=%d' . ($transaction ? ' FOR UPDATE' : '');
@@ -137,6 +142,15 @@ final class RankingVisibility
         $rows = $this->db->get_results($this->db->prepare('SELECT * FROM %i WHERE alias_state=%s AND wp_user_id>%d ORDER BY wp_user_id LIMIT 20', $this->tables['members'], 'pending', $after), 'ARRAY_A');
         if (!is_array($rows) || $this->db->last_error !== '') { throw new ModelViolation('hof_storage_unavailable'); }
         return $rows;
+    }
+
+    /** Private account detail for moderation; does not create a preference or grant consent.
+     * @return array<string,string> */
+    public function inspectForReview(int $member): array
+    {
+        RankingRegistry::administrator();
+        if ($member < 1 || !FansSsoService::linkedMember($member)) { throw new ModelViolation('hof_linked_member_required'); }
+        return $this->storage->transaction('member:' . $member, fn (): array => $this->member($member));
     }
 
     /** @return array<string,string> */

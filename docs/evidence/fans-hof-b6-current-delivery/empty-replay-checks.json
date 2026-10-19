@@ -1,0 +1,139 @@
+{
+  "scope": "Saved actual templates; fictitious linked accounts and Hub data; not hosted routes or central SSO",
+  "browser": "151.0.7922.34",
+  "screens": [
+    {
+      "name": "visitor-empty",
+      "width": 1440,
+      "layout": {
+        "viewport": 1440,
+        "client": 1440,
+        "document": 1440,
+        "main": {
+          "x": 82,
+          "y": 0,
+          "width": 1358,
+          "height": 1099.609375,
+          "top": 0,
+          "right": 1440,
+          "bottom": 1099.609375,
+          "left": 82
+        },
+        "tables": [],
+        "overflow": []
+      },
+      "screenshot": "visitor-empty-1440.png"
+    },
+    {
+      "name": "visitor-empty",
+      "width": 768,
+      "layout": {
+        "viewport": 768,
+        "client": 768,
+        "document": 768,
+        "main": {
+          "x": 82,
+          "y": 0,
+          "width": 686,
+          "height": 1153.484375,
+          "top": 0,
+          "right": 768,
+          "bottom": 1153.484375,
+          "left": 82
+        },
+        "tables": [],
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "visitor-empty",
+      "width": 430,
+      "layout": {
+        "viewport": 430,
+        "client": 430,
+        "document": 430,
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 430,
+          "height": 1128.90625,
+          "top": 0,
+          "right": 430,
+          "bottom": 1128.90625,
+          "left": 0
+        },
+        "tables": [],
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "visitor-empty",
+      "width": 390,
+      "layout": {
+        "viewport": 390,
+        "client": 390,
+        "document": 390,
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 1153.8125,
+          "top": 0,
+          "right": 390,
+          "bottom": 1153.8125,
+          "left": 0
+        },
+        "tables": [],
+        "overflow": []
+      },
+      "screenshot": "visitor-empty-390.png"
+    },
+    {
+      "name": "visitor-empty",
+      "width": 375,
+      "layout": {
+        "viewport": 375,
+        "client": 375,
+        "document": 375,
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 375,
+          "height": 1153.5,
+          "top": 0,
+          "right": 375,
+          "bottom": 1153.5,
+          "left": 0
+        },
+        "tables": [],
+        "overflow": []
+      },
+      "screenshot": null
+    },
+    {
+      "name": "visitor-empty",
+      "width": 320,
+      "layout": {
+        "viewport": 320,
+        "client": 320,
+        "document": 320,
+        "main": {
+          "x": 0,
+          "y": 0,
+          "width": 320,
+          "height": 1352.59375,
+          "top": 0,
+          "right": 320,
+          "bottom": 1352.59375,
+          "left": 0
+        },
+        "tables": [],
+        "overflow": []
+      },
+      "screenshot": null
+    }
+  ],
+  "failures": []
+}
