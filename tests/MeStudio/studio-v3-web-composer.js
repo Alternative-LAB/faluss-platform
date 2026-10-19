@@ -55,7 +55,7 @@ const initialLabel = 'Dans A';
                     if (url.pathname === '/studio/') {
                         const section = url.searchParams.get('v3_section') || 'v3_links';
                         const view = views[section].replaceAll('https://faluss.test', 'https://studio.test').replaceAll(initialLabel, savedLabel);
-                        return route.fulfill({contentType: 'text/html', body: `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style><main style="width:min(100%,645px);margin:auto">${view}</main><script>window.falussStudioV3={ajaxUrl:'/wp-admin/admin-ajax.php',previewNonce:'preview',managementNonce:'manage'};</script><script>${script}</script>`});
+                        return route.fulfill({contentType: 'text/html', body: `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style><style>:where(main)>*{max-width:645px!important;margin-inline:auto!important}</style><main style="width:min(100%,645px);margin:auto">${view}</main><script>window.falussStudioV3={ajaxUrl:'/wp-admin/admin-ajax.php',previewNonce:'preview',managementNonce:'manage'};</script><script>${script}</script>`});
                     }
                     return route.abort();
                 });
