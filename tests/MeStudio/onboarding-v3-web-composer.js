@@ -80,7 +80,7 @@ const initialLabel = 'Dans A';
                     root: document.querySelector('[data-faluss-onboarding-v3]').getBoundingClientRect().toJSON()
                 }));
                 assert.equal(geometry.overflow, false, `${engine} ${width}x${height}: no horizontal overflow`);
-                if (web) { assert.equal(Math.round(geometry.root.width), width, `${engine} ${width}: composer uses viewport despite theme content width`); }
+                if (web) { assert.equal(Math.round(geometry.root.width), width, `${engine} ${width}: composer uses viewport despite theme content width`); assert.equal(Math.round(geometry.root.left), 0, `${engine} ${width}: composer is centered in viewport`); }
                 assert.equal(geometry.panel.right <= geometry.preview.left, web, `${engine} ${width}x${height}: adaptive layout`);
                 assert.equal(geometry.grabber === 'none', web, `${engine} ${width}x${height}: mobile sheet`);
                 if (width === 390 || web) { await page.screenshot({path: path.join(evidence, `${engine}-onboarding-${width}-${height}.png`)}); }
