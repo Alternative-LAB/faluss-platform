@@ -29,7 +29,8 @@ jobs:
       - name: Composer configuration
         run: composer validate --strict
       - name: PHP syntax
-        run: find src tests -name '*.php' -print0 | xargs -0 -n1 php -l && php -l faluss-platform.php
+        shell: bash
+        run: git ls-files -z -- '*.php' | xargs -0 -r -n1 php -l
       - name: Static analysis
         run: composer analyse
       - name: Unit tests
