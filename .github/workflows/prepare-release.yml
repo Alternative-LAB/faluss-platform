@@ -94,9 +94,25 @@ jobs:
             '' \
             '## Changelog' \
             '' \
+            '### Ajouté' \
+            '' \
+            '- Sans objet' \
+            '' \
             '### Modifié' \
             '' \
             '- Version et notes de publication générées automatiquement.' \
+            '' \
+            '### Corrigé' \
+            '' \
+            '- Sans objet' \
+            '' \
+            '### Supprimé' \
+            '' \
+            '- Sans objet' \
+            '' \
+            '### Migration et compatibilité' \
+            '' \
+            '- Sans objet : aucune migration de données ni contrat modifié.' \
             '' \
             '## Vérifications effectuées' \
             '' \
