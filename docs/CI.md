@@ -62,6 +62,16 @@ emplacements, le nouveau les refuse tous. Les tests existants de rapports et
 d’agrégation continuent de refuser les assertions absentes, compteurs incohérents,
 rapports manquants et résultats échoués, ignorés ou annulés.
 
+La gouvernance exige les sept sections du template et ses cinq catégories de
+changelog remplies, y compris « Migration et compatibilité ». Les commentaires
+HTML ne servent pas de contenu ni de titre ; les fins de ligne Windows sont
+normalisées. Les tests [test_pr_template.py](../tests/Workflow/test_pr_template.py)
+retirent chaque rubrique, vident une catégorie et masquent une section dans un
+commentaire pour vérifier leur refus. Ils génèrent aussi le corps réel d’une PR
+de release, sans appel GitHub, et le soumettent au même contrôle. Ces nouvelles
+règles restent évaluées par la gouvernance déjà présente dans la branche de base
+avant leur fusion ; le workflow privilégié n’exécute jamais le code de la PR.
+
 Les neuf rapports du [dernier main v0.14.0](https://github.com/Alternative-LAB/faluss-platform/actions/runs/39168550172)
 ont été téléchargés et validés indépendamment : **1 874 assertions distinctes**,
 **2 966 exécutions**, toutes les **1 413 assertions de référence** conservées.

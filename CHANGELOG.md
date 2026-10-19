@@ -9,6 +9,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 ### Corrigé
 
 - Étendre le lint PHP à tous les fichiers suivis, y compris les scripts de release et de déploiement ; vérifier son refus des erreurs par injection de syntaxe invalide. Aligner les contrôles obligatoires de fusion sur la gouvernance, les recettes WordPress/SQL et la validation de l’archive.
+- Vérifier toutes les sections et catégories du template de PR, refuser les contenus vides ou commentés, accepter les fins de ligne Windows et générer des PR de release conformes au même contrat.
 
 ## [0.14.0] - 2026-10-18
 
