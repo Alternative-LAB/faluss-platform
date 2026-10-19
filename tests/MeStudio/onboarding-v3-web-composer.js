@@ -112,6 +112,15 @@ const initialLabel = 'Dans A';
                         await page.waitForFunction(() => !document.querySelector('[data-v3-web-editors]').hidden);
                         assert.equal(await editor.isVisible(), true, 'Desktop editor resumes after enlargement');
                         await page.locator('[data-v3-web-edit-close]').click();
+                        await page.locator(`[data-v3-preview] [data-v3-preview-block-id="${blockId}"]`).click();
+                        await editor.locator('[data-field="label"]').fill('Brouillon lors du redimensionnement');
+                        await page.setViewportSize({width: 768, height: 900});
+                        await page.waitForFunction(() => !document.querySelector('[data-v3-step-controls]').hidden);
+                        assert.equal(await page.locator('[data-v3-step-controls]').isVisible(), true, 'Mobile controls win over a pending web draft');
+                        await page.locator('[name="page_background"]').first().check({force: true});
+                        await page.setViewportSize({width: 1440, height: 900});
+                        await page.waitForFunction(() => !document.querySelector('[data-v3-step-controls]').hidden);
+                        assert.equal(await page.locator('[data-v3-step-controls]').isVisible(), true, 'Unsaved mobile step stays visible on desktop');
                     }
                     await page.locator('[name="page_background"]').first().check({force: true});
                     await page.locator(`[data-v3-preview] [data-v3-preview-block-id="${blockId}"]`).click();

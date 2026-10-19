@@ -144,9 +144,11 @@
     scalePreview();
     function onComposerSizeChange() {
         if (selectedWebEditor) {
-            webEditors.hidden = !webLayout();
-            stepControls.hidden = webLayout();
-            root.querySelector('.faluss-onboarding-v3__actions').hidden = webLayout();
+            var showEditor = webLayout() && JSON.stringify(fields()) === stepBaseline;
+            webEditors.hidden = !showEditor;
+            stepControls.hidden = showEditor;
+            root.querySelector('.faluss-onboarding-v3__actions').hidden = showEditor;
+            if (webLayout() && !showEditor) { notice('Enregistre cette étape avant de modifier un lien.', true); }
         }
         scalePreview();
         updateViewportHeight();
@@ -205,7 +207,7 @@
 
     function previewFields() {
         var result = fields();
-        if (webLayout() && selectedWebEditor && selectedWebEditor.dataset.dirty === 'true') {
+        if (webLayout() && selectedWebEditor && !webEditors.hidden && selectedWebEditor.dataset.dirty === 'true') {
             var link = {block_id: selectedWebEditor.dataset.id};
             selectedWebEditor.querySelectorAll('[data-field]').forEach(function (field) { link[field.dataset.field] = field.value; });
             result.link_draft = JSON.stringify(link);
@@ -237,7 +239,7 @@
 
     function selectWebBlock(target) {
         if (!webLayout() || !webEditors || pending || uploading) { return; }
-        if (!selectedWebEditor && JSON.stringify(fields()) !== stepBaseline) {
+        if (JSON.stringify(fields()) !== stepBaseline) {
             notice('Enregistre cette étape avant de modifier un lien.', true);
             return;
         }
@@ -347,7 +349,7 @@
     }
 
     function scheduleIdentityDraft() {
-        if (studio || selectedWebEditor || root.dataset.step !== 'v3_identity') { return; }
+        if (studio || (selectedWebEditor && webLayout() && !webEditors.hidden) || root.dataset.step !== 'v3_identity') { return; }
         window.clearTimeout(draftTimer);
         ++draftRevision;
         draftTimer = window.setTimeout(function () {
@@ -359,6 +361,8 @@
 
     function submit(direction) {
         if (pending || uploading) { return; }
+        if (selectedWebEditor && selectedWebEditor.dataset.dirty === 'true' && (!webLayout() || webEditors.hidden)
+            && !window.confirm('Quitter le lien sans enregistrer ses modifications ?')) { return; }
         pending = true;
         window.clearTimeout(draftTimer);
         ++draftRevision;
@@ -699,7 +703,7 @@
     });
     panel.addEventListener('submit', function (event) {
         event.preventDefault();
-        if (selectedWebEditor) { saveItem(selectedWebEditor, ''); return; }
+        if (selectedWebEditor && webLayout() && !webEditors.hidden) { saveItem(selectedWebEditor, ''); return; }
         if (management) { var editor = event.target.closest('[data-v3-editor]') || document.activeElement.closest('[data-v3-editor]'); if (editor) { saveItem(editor, ''); } return; }
         submit(root.dataset.step === 'v3_review' ? 'publish' : 'next');
     });
