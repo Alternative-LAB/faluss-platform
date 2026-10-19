@@ -1,5 +1,7 @@
 # Recette visuelle locale de l’onboarding web
 
+La [recette complémentaire sur WordPress/MariaDB isolé](wordpress-isolated.md) distingue les écritures réelles des réponses simulées ci-dessous.
+
 Cette PR dépend de la PR Studio web #244 pour les identifiants de bloc dans l’aperçu et le brouillon de lien validé côté serveur. Les vues de cette recette proviennent du PHP du plugin. Chromium et WebKit rendent réellement les pages et exécutent les gestes ; les réponses AJAX et leur persistance après rechargement sont simulées par un serveur jetable en mémoire. Le média de la fixture est synthétique. La vue est aussi placée dans un conteneur de 645 px pour reproduire la largeur de contenu imposée par certains thèmes WordPress : le compositeur web doit malgré cela occuper la largeur du viewport.
 
 Commande : `node tests/MeStudio/onboarding-v3-web-composer.js`, avec `FALUSS_PHP`, `NODE_PATH` (Playwright) et `FALUSS_CHROME` (Chrome système) définis. [Résultats détaillés](results.txt).

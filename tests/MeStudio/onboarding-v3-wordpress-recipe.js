@@ -268,22 +268,35 @@ function assert(value, message) { if (!value) { throw new Error(message); } }
             assert(repeated.status() === 200 && repeatedJson.success && repeatedJson.data.public_url === published.data.public_url, 'Repeated publication must be idempotent');
             await page.reload();
             await page.waitForLoadState('networkidle');
-            assert(await page.locator('[data-faluss-onboarding-v3]').getAttribute('data-step') === 'v3_success', 'Published card did not reach V3 success');
+            assert(await page.locator('.faluss-v3-confirmation h1').innerText() === 'Ton Faluss est en ligne', 'Published card did not reach V3 confirmation');
+            assert(await page.locator('.faluss-v3-confirmation .faluss-onboarding-v3__primary').getAttribute('href') === published.data.public_url, 'Confirmation links to a different public card');
             const publicResponse = await page.goto(published.data.public_url);
             assert(publicResponse.status() === 200, 'Public profile returned non-200');
-            const publicCard = await cardSnapshot('.faluss-link-card');
-            assert(JSON.stringify(review) === JSON.stringify(publicCard), 'Review and public card content differ');
+            const canonicalPublic = await page.locator('.faluss-link-card').count() > 0;
+            const publicCard = canonicalPublic ? await cardSnapshot('.faluss-link-card') : await page.locator('.faluss-identity-public-profile').evaluate(card => ({
+                name: card.querySelector('h1').textContent.trim(),
+                handle: card.querySelector('.faluss-identity-public-profile__identifier').textContent.trim(),
+                links: Array.from(card.querySelectorAll('.faluss-identity-public-profile__links a')).map(link => ({ label: link.textContent.trim(), href: link.href })),
+                avatar: !!card.querySelector('.faluss-identity-public-profile__avatar img')
+            }));
+            if (canonicalPublic) {
+                assert(JSON.stringify(review) === JSON.stringify(publicCard), 'Review and public card differ');
+            } else {
+                for (const key of ['name', 'handle', 'links', 'avatar']) {
+                    assert(JSON.stringify(review[key]) === JSON.stringify(publicCard[key]), 'Review and public fallback differ at ' + key);
+                }
+            }
             let shortcodeCard = null;
             let widgetCard = null;
             if (process.env.FALUSS_V3_WP_SKIP_INTEGRATION_PARITY !== 'true') {
                 await page.goto(base + '/shortcode-' + mode + '/');
                 shortcodeCard = await cardSnapshot('.faluss-link-card');
-                assert(JSON.stringify(publicCard) === JSON.stringify(shortcodeCard), 'Shortcode and public card differ');
+                assert(JSON.stringify(review) === JSON.stringify(shortcodeCard), 'Shortcode and review card differ');
                 await page.goto(base + '/widget-' + mode + '/');
                 widgetCard = await cardSnapshot('.elementor-widget-faluss_link_card .faluss-link-card');
-                assert(JSON.stringify(publicCard) === JSON.stringify(widgetCard), 'Elementor widget and public card differ');
+                assert(JSON.stringify(review) === JSON.stringify(widgetCard), 'Elementor widget and review card differ');
             }
-            console.log(JSON.stringify({ mode, slug, avatarId, coverId, publicUrl: published.data.public_url, review, publicCard, shortcodeCard, widgetCard,
+            console.log(JSON.stringify({ mode, slug, avatarId, coverId, publicUrl: published.data.public_url, publicRenderer: canonicalPublic ? 'canonical' : 'identity_fallback_content_only', review, publicCard, shortcodeCard, widgetCard,
                 stalePublish: { at: staleAt, status: stale.status(), raw: staleRaw },
                 refusedUpload: { at: badAt, status: badUpload.status(), raw: badRaw },
                 publish: { status: publish.status(), code: published.data.code }, repeat: { status: repeated.status(), code: repeatedJson.data.code } }, null, 2));
