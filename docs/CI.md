@@ -38,7 +38,45 @@ Dans le seul groupe `corpus-joined` sur runner GitHub hébergé, le workflow mon
 
 Aucun réglage SQL de journalisation ou de synchronisation n’est assoupli. Les tests d’arrêt de workers, de perte de réponse, de rollback et de concurrence restent exécutés contre le serveur MariaDB réel. Ces recettes ne testent pas la survie à une panne du système ou du stockage ; le montage en mémoire n’apporte pas cette preuve. Une erreur de montage ou le dépassement du plafond fait échouer le job. Pour revenir au stockage disque, retirer l’étape `Keep disposable fixtures on bounded memory storage` par une PR validée.
 
-Les rapports sont conservés sept jours dans des artefacts `wordpress-evidence-*`. Lorsqu’une même PR reçoit un nouveau commit, l’ancien workflow PHP est annulé par concurrence ; les exécutions de `main` restent sérialisées et ne sont pas annulées. Les protections distantes ne sont pas modifiées ; ajouter `WordPress integration tests` aux statuts requis lors d’une évolution autorisée de la protection.
+Les rapports sont conservés sept jours dans des artefacts `wordpress-evidence-*`. Lorsqu’une même PR reçoit un nouveau commit, l’ancien workflow PHP est annulé par concurrence ; les exécutions de `main` restent sérialisées et ne sont pas annulées.
+
+## Contrôles obligatoires et audit du 19 octobre 2026
+
+La protection distante de `main` exige désormais sept statuts, tous liés à
+GitHub Actions : `Check JavaScript syntax`, `Lint, static analysis and tests`,
+`Federation without native Sodium`, `Faluss PR governance`,
+`Fans editorial isolated SQL`, `WordPress integration tests` et
+`Validate WordPress archive`. La branche doit rester à jour. Les protections
+administrateur, l’interdiction de réécriture/suppression de `main` et le ruleset
+sans acteur de contournement restent actifs. Aucun contrôle n’a été retiré.
+Le statut WordPress agrège les recettes et leur couverture ; la gouvernance
+provient toujours du workflow de la base de confiance. Un statut vert d’un
+ancien commit ne suffit pas pour fusionner une branche actualisée.
+
+Le lint PHP parcourt tous les fichiers PHP suivis par Git, avec des séparateurs
+nuls pour préserver les chemins contenant des espaces. Il inclut les scripts et
+exemples PHP de déploiement, tout en excluant les dépendances non suivies.
+Le test [test_php_syntax.py](../tests/Workflow/test_php_syntax.py) injecte une
+erreur dans cinq emplacements : l’ancien contrôle acceptait à tort trois de ces
+emplacements, le nouveau les refuse tous. Les tests existants de rapports et
+d’agrégation continuent de refuser les assertions absentes, compteurs incohérents,
+rapports manquants et résultats échoués, ignorés ou annulés.
+
+Les neuf rapports du [dernier main v0.14.0](https://github.com/Alternative-LAB/faluss-platform/actions/runs/39168550172)
+ont été téléchargés et validés indépendamment : **1 874 assertions distinctes**,
+**2 966 exécutions**, toutes les **1 413 assertions de référence** conservées.
+Les douze jobs PHP sont réussis ; le corpus dure **26 min 49 s**, proche du
+budget de 30 minutes et au-delà de l’objectif initial. Cette mesure n’est ni une
+couverture de lignes, ni une preuve de fonctionnement de la production.
+
+Limites restantes : PHPStan exclut explicitement une partie du code historique ;
+aucun PHPCS/WPCS ni contrôle de couverture de lignes n’est configuré. Les tests
+JavaScript comprennent le contrat Studio mais ne rejouent pas toute l’interface.
+Les recettes utilisent WordPress 7.1.2 et PHP 8.3, sans matrice couvrant PHP 8.2
+ou toutes les versions Elementor. La cause du refus intermittent corpus
+[#217](https://github.com/Alternative-LAB/faluss-platform/issues/217) reste
+inconnue malgré les passages verts. Les tests jetables n’attestent ni SMTP/SSO
+réels, ni stockage privé RustFS, ni restauration après panne du système.
 
 Si la préparation de la preuve d’absence retardée échoue, la recette journalise uniquement le statut HTTP, une raison technique `pf_*` autorisée et l’espace temporaire restant. Les requêtes, réponses signées, clés et identifiants privés ne sont jamais inclus. Le prérequis HTTP 200 reste obligatoire ; ce diagnostic ne constitue pas une reprise automatique ni la preuve qu’un refus intermittent est corrigé.
 

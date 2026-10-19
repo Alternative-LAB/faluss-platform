@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Corrigé
+
+- Étendre le lint PHP à tous les fichiers suivis, y compris les scripts de release et de déploiement ; vérifier son refus des erreurs par injection de syntaxe invalide. Aligner les contrôles obligatoires de fusion sur la gouvernance, les recettes WordPress/SQL et la validation de l’archive.
+
 ## [0.14.0] - 2026-10-18
 
 Cette livraison regroupe les modes de contact Créateur, la bienvenue textuelle
