@@ -49,7 +49,7 @@ html:has(.faluss-studio-v3),body:has(.faluss-studio-v3){height:100%;overflow:hid
 .faluss-studio-v3__layout,.faluss-studio-v3__controls{display:contents}
 .faluss-studio-v3__canvas{display:none}
 @media (min-width:980px) and (min-height:650px){
-  .faluss-studio-v3{max-width:none;padding:0;overflow:hidden}
+  .faluss-studio-v3{position:relative;inset:auto;width:100vw;max-width:100vw;margin-inline:calc(50% - 50vw);padding:0;overflow:hidden}
   .faluss-studio-v3__layout{display:grid;grid-template-columns:minmax(390px,470px) minmax(0,1fr);height:100dvh}
   .faluss-studio-v3__controls{display:flex;flex-direction:column;min-height:0;background:#fff;border-right:1px solid #e8e5e1}
   .faluss-studio-v3__header,.faluss-studio-v3__member,.faluss-studio-v3__tabs,.faluss-studio-v3__bottom,.faluss-studio-v3__shop-note{flex:none}
