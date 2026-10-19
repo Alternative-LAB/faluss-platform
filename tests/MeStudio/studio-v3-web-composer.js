@@ -55,7 +55,7 @@ const initialLabel = 'Dans A';
                     if (url.pathname === '/studio/') {
                         const section = url.searchParams.get('v3_section') || 'v3_links';
                         const view = views[section].replaceAll('https://faluss.test', 'https://studio.test').replaceAll(initialLabel, savedLabel);
-                        return route.fulfill({contentType: 'text/html', body: `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style>${view}<script>window.falussStudioV3={ajaxUrl:'/wp-admin/admin-ajax.php',previewNonce:'preview',managementNonce:'manage'};</script><script>${script}</script>`});
+                        return route.fulfill({contentType: 'text/html', body: `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style><main style="width:min(100%,645px);margin:auto">${view}</main><script>window.falussStudioV3={ajaxUrl:'/wp-admin/admin-ajax.php',previewNonce:'preview',managementNonce:'manage'};</script><script>${script}</script>`});
                     }
                     return route.abort();
                 });
@@ -66,9 +66,11 @@ const initialLabel = 'Dans A';
                 const geometry = await page.evaluate(() => ({
                     overflow: document.documentElement.scrollWidth > innerWidth,
                     panel: document.querySelector('[data-v3-panel]').getBoundingClientRect().toJSON(),
-                    canvas: document.querySelector('[data-studio-canvas]').getBoundingClientRect().toJSON()
+                    canvas: document.querySelector('[data-studio-canvas]').getBoundingClientRect().toJSON(),
+                    root: document.querySelector('[data-faluss-studio-v3]').getBoundingClientRect().toJSON()
                 }));
                 assert.equal(geometry.overflow, false, `${engine} ${width}×${height}: no horizontal overflow`);
+                if (visible) { assert.equal(Math.round(geometry.root.width), width, `${engine} ${width}: composer uses viewport despite theme content width`); }
                 if (width === 390 || visible) { await page.screenshot({path: path.join(evidence, `${engine}-studio-${width}-${height}.png`)}); }
                 if (visible) {
                     assert(geometry.panel.right <= geometry.canvas.left, `${engine} ${width}: editor left, card right`);
