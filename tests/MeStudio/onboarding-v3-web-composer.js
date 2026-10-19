@@ -66,7 +66,7 @@ const initialLabel = 'Dans A';
                     if (url.pathname === '/onboarding/') {
                         const step = url.searchParams.get('step') || 'v3_colors';
                         const view = views[step].replaceAll('https://faluss.test', 'https://onboarding.test').replaceAll(initialLabel, savedLabel);
-                        return route.fulfill({contentType: 'text/html', body: `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style><main style="width:min(100%,645px);margin:auto">${view}</main><script>window.falussOnboardingV3={ajaxUrl:'/wp-admin/admin-ajax.php',previewNonce:'preview',managementNonce:'manage'};</script><script>${script}</script>`});
+                        return route.fulfill({contentType: 'text/html', body: `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style><style>:where(main)>*{max-width:645px!important;margin-inline:auto!important}</style><main style="width:min(100%,645px);margin:auto">${view}</main><script>window.falussOnboardingV3={ajaxUrl:'/wp-admin/admin-ajax.php',previewNonce:'preview',managementNonce:'manage'};</script><script>${script}</script>`});
                     }
                     return route.abort();
                 });
