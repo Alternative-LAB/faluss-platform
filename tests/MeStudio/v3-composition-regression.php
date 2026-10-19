@@ -97,6 +97,16 @@ fl_hotfix_assert($mutate('save_profile', ['publication_status' => 'published'])[
 fl_hotfix_assert($mutate('save_header', ['available' => 1, 'avatar_visible' => 1, 'alignment' => 'left', 'social_layout' => 'bubbles'])['ok'], 'Restore header settings');
 fl_hotfix_assert($mutate('save_atomic_design', ['links_mode' => 'image-grid', 'link_width' => 'compact'])['ok'], 'Restore link layout');
 fl_hotfix_assert($mutate('save_appearance', ['hero_transition_color' => '#82206B', 'hero_transition_intensity' => 60, 'hero_transition_position' => 75])['ok'], 'Restore cover transition');
+$linkForPreview = current(array_filter($initialBlocks, static fn ($block): bool => ($block['type'] ?? '') === 'link'));
+$linkDraft = ['block_id' => $linkForPreview['block_id'], 'label' => 'Lien temporaire', 'url' => 'https://example.test/temporaire'];
+$temporaryPreview = Faluss_Link::studio_v3_preview(['link_draft' => wp_json_encode($linkDraft)]);
+fl_hotfix_assert(is_array($temporaryPreview) && str_contains($temporaryPreview['preview_html'], 'Lien temporaire') && str_contains($temporaryPreview['preview_html'], 'data-v3-preview-block-id="' . $linkForPreview['block_id'] . '"'), 'Existing link draft uses canonical preview and stable block identity');
+fl_hotfix_assert(Faluss_Link::studio_v3_preview(['link_draft' => wp_json_encode($linkDraft + ['unexpected' => 'x'])]) instanceof \WP_Error, 'Unexpected preview field rejected');
+fl_hotfix_assert(Faluss_Link::studio_v3_preview(['link_draft' => wp_json_encode(array_replace($linkDraft, ['url' => 'http://example.test/no']))]) instanceof \WP_Error, 'Non-HTTPS draft rejected');
+fl_hotfix_assert(Faluss_Link::studio_v3_preview(['link_draft' => wp_json_encode(array_replace($linkDraft, ['block_id' => 'ffffffff-ffff-4fff-8fff-ffffffffffff']))]) instanceof \WP_Error, 'Unknown link draft rejected');
+$publicCard = (new ReflectionMethod('Faluss_Link', 'card_markup'))->invoke(null, Faluss_Link::studio_v2_state()['profile'], $prefs_method->invoke(null, $member, false), 'center', false, $initialBlocks);
+fl_hotfix_assert(!str_contains($publicCard, 'data-v3-preview-block-id'), 'Editor identifiers stay out of public markup');
+fl_hotfix_assert(Faluss_Link::studio_v2_state()['blocks'] === $initialBlocks, 'Preview never persists a link draft');
 
 $legacyMode = \Faluss\Platform\MeStudio\OnboardingV3::mode('wizard_atomic_wallpaper', ['structure' => 'simple']);
 fl_hotfix_assert($legacyMode === 'atomic', 'Historical Atomic cursor takes precedence over default preferences');

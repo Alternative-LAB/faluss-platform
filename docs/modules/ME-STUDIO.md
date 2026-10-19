@@ -178,6 +178,16 @@ Design → Nom expose une seule couleur `secondary_color` pour le handle et la b
 
 Ces contrôles de présentation participent immédiatement à l'aperçu ouvert, puis à la transaction existante. Les brouillons de contenus restent indépendants. Aucune nouvelle étape d'onboarding, aucun Shop ou paiement. [Preuves et limites](../evidence/me-v3-063/README.md).
 
+## Compositeur web du Studio V3
+
+À partir de 980 px de large et 650 px de haut, le Studio affiche les réglages à gauche et la carte Link canonique à droite. Le panneau et la carte défilent indépendamment. Le rendu de droite est celui de la preview Link, déjà partagé avec l’onboarding et le profil public ; aucun second stockage de blocs ni nouveau modèle de carte n’est introduit. Les blocs existants portent un identifiant de sélection uniquement dans les aperçus authentifiés. La carte publique, le shortcode et le widget Elementor ne reçoivent pas cet attribut.
+
+Souris, toucher et clavier sélectionnent un lien sans ouvrir son URL, chargent la rubrique `v3_links` et ouvrent le bon éditeur. Les titres de collection, textes, teasers et éléments de profil dirigent vers leur rubrique existante. Les modifications valides d’un lien utilisent la prévisualisation serveur dans leur ordre enregistré, sans écriture ; seul le bouton Enregistrer utilise la mutation Link existante et sa version agrégée. Une sauvegarde confirmée recharge la rubrique canonique ; un refus ou un conflit conserve les champs. Les liens historiques et les blocs non affichés ne sont pas modifiés par la sélection.
+
+Sous ce seuil, le Studio conserve son shell, sa navigation inférieure et sa modal d’aperçu. Le brouillon d’un lien reste réservé à la prévisualisation web : la modal mobile continue de montrer l’état enregistré. Aucun flag, schéma, route, contrat de publication ou réglage global de permissions n’est changé. Pour revenir en arrière avant publication, fermer la PR ; après une installation future, employer le mécanisme normal de mise à jour WordPress et une version précédente compatible.
+
+[Recette navigateur du compositeur](../evidence/me-web-studio/README.md) : vues PHP réelles et navigateurs Chromium/WebKit, avec serveur AJAX simulé. Une vérification installée dans WordPress/MariaDB/Elementor et sur appareils physiques reste nécessaire avant activation.
+
 
 ## Importation de liens
 
