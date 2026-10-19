@@ -1,5 +1,7 @@
 # Recette visuelle locale du Studio web
 
+La [recette complémentaire sur WordPress/MariaDB isolé](wordpress-isolated.md) contient les captures et les écritures réellement observées sur l’instance locale.
+
 Base : `main` à `6b25c3168c1dac90536f2dadd7b14269f01dfa62`. Les vues proviennent du PHP du plugin. Chromium et WebKit rendent réellement les pages et exécutent les interactions ; les réponses AJAX et leur persistance après rechargement proviennent d’un serveur jetable en mémoire. Le média de la fixture est un SVG synthétique local. La vue est aussi placée dans un conteneur de 645 px pour reproduire la largeur de contenu imposée par certains thèmes WordPress : le compositeur web doit malgré cela occuper la largeur du viewport.
 
 Commande : `node tests/MeStudio/studio-v3-web-composer.js` avec `FALUSS_PHP`, `NODE_PATH` pour Playwright et, si nécessaire, `FALUSS_CHROME` définis. [Résultats complets](results.txt).
