@@ -70,7 +70,7 @@ const initialLabel = 'Dans A';
                     root: document.querySelector('[data-faluss-studio-v3]').getBoundingClientRect().toJSON()
                 }));
                 assert.equal(geometry.overflow, false, `${engine} ${width}×${height}: no horizontal overflow`);
-                if (visible) { assert.equal(Math.round(geometry.root.width), width, `${engine} ${width}: composer uses viewport despite theme content width`); }
+                if (visible) { assert.equal(Math.round(geometry.root.width), width, `${engine} ${width}: composer uses viewport despite theme content width`); assert.equal(Math.round(geometry.root.left), 0, `${engine} ${width}: composer is centered in viewport`); }
                 if (width === 390 || visible) { await page.screenshot({path: path.join(evidence, `${engine}-studio-${width}-${height}.png`)}); }
                 if (visible) {
                     assert(geometry.panel.right <= geometry.canvas.left, `${engine} ${width}: editor left, card right`);
