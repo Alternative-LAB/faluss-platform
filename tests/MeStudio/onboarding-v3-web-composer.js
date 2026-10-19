@@ -66,7 +66,7 @@ const initialLabel = 'Dans A';
                     if (url.pathname === '/onboarding/') {
                         const step = url.searchParams.get('step') || 'v3_colors';
                         const view = views[step].replaceAll('https://faluss.test', 'https://onboarding.test').replaceAll(initialLabel, savedLabel);
-                        return route.fulfill({contentType: 'text/html', body: `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style>${view}<script>window.falussOnboardingV3={ajaxUrl:'/wp-admin/admin-ajax.php',previewNonce:'preview',managementNonce:'manage'};</script><script>${script}</script>`});
+                        return route.fulfill({contentType: 'text/html', body: `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style><main style="width:min(100%,645px);margin:auto">${view}</main><script>window.falussOnboardingV3={ajaxUrl:'/wp-admin/admin-ajax.php',previewNonce:'preview',managementNonce:'manage'};</script><script>${script}</script>`});
                     }
                     return route.abort();
                 });
@@ -76,9 +76,11 @@ const initialLabel = 'Dans A';
                     overflow: document.documentElement.scrollWidth > innerWidth,
                     panel: document.querySelector('[data-v3-panel]').getBoundingClientRect().toJSON(),
                     preview: document.querySelector('[data-v3-preview]').getBoundingClientRect().toJSON(),
-                    grabber: getComputedStyle(document.querySelector('[data-v3-grabber]')).display
+                    grabber: getComputedStyle(document.querySelector('[data-v3-grabber]')).display,
+                    root: document.querySelector('[data-faluss-onboarding-v3]').getBoundingClientRect().toJSON()
                 }));
                 assert.equal(geometry.overflow, false, `${engine} ${width}x${height}: no horizontal overflow`);
+                if (web) { assert.equal(Math.round(geometry.root.width), width, `${engine} ${width}: composer uses viewport despite theme content width`); }
                 assert.equal(geometry.panel.right <= geometry.preview.left, web, `${engine} ${width}x${height}: adaptive layout`);
                 assert.equal(geometry.grabber === 'none', web, `${engine} ${width}x${height}: mobile sheet`);
                 if (width === 390 || web) { await page.screenshot({path: path.join(evidence, `${engine}-onboarding-${width}-${height}.png`)}); }
