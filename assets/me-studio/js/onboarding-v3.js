@@ -30,6 +30,22 @@
     var layoutWidth = window.innerWidth;
     var collapsedHeight = 300;
     var keyboardOpen = false;
+    var webEditors = root.querySelector('[data-v3-web-editors]');
+    var stepControls = root.querySelector('[data-v3-step-controls]');
+    var selectedWebEditor = null;
+    var selectedWebBlockId = '';
+    var webEditorBaselines = new WeakMap();
+    if (webEditors) { webEditors.querySelectorAll('[data-v3-editor]').forEach(function (editor) {
+        webEditorBaselines.set(editor, editor.innerHTML);
+    }); }
+    var composerMedia = window.matchMedia('(min-width: 980px) and (min-height: 650px)');
+    function webLayout() { return composerMedia.matches; }
+    function restoreWebEditor(editor) {
+        if (!editor || editor.dataset.dirty !== 'true') { return; }
+        editor.innerHTML = webEditorBaselines.get(editor) || editor.innerHTML;
+        delete editor.dataset.dirty;
+        schedulePreview();
+    }
 
     var keyboardSpacer = document.createElement('div');
     keyboardSpacer.dataset.v3KeyboardSpacer = '';
@@ -37,6 +53,7 @@
     scroll.appendChild(keyboardSpacer);
 
     function fitPanel() {
+        if (webLayout()) { return; }
         if (keyboardOpen || drag) { return; }
         // Measure intrinsic controls without expanding the sheet or counting the keyboard spacer.
         scroll.style.flex = '0 0 auto';
@@ -66,6 +83,14 @@
     }
 
     function updateViewportHeight() {
+        if (webLayout()) {
+            root.style.setProperty('--v3-height', window.innerHeight + 'px');
+            root.style.setProperty('--v3-viewport-top', '0px');
+            root.classList.remove('is-keyboard-open');
+            keyboardOpen = false;
+            keyboardSpacer.style.height = '0px';
+            return;
+        }
         var viewport = window.visualViewport;
         if (viewport && viewport.scale !== 1) { return; } // Preserve intentional pinch zoom.
         var focused = scroll.contains(document.activeElement) && document.activeElement.matches('input, select, textarea');
@@ -102,6 +127,14 @@
     function scalePreview() {
         if (!previewHost || !previewHost.firstElementChild) { return; }
         var card = previewHost.firstElementChild;
+        if (webLayout()) {
+            card.style.width = '100%';
+            card.style.setProperty('--fl-card-min-height', '690px');
+            card.style.setProperty('--fl-composition-height', '690px');
+            card.style.zoom = '1';
+            decorateWebPreview();
+            return;
+        }
         card.style.width = '390px';
         card.style.setProperty('--fl-card-min-height', Math.ceil(previewHost.clientHeight * 390 / previewHost.clientWidth) + 'px');
         card.style.setProperty('--fl-composition-height', (previewHost.clientHeight * 390 / previewHost.clientWidth) + 'px');
@@ -109,6 +142,17 @@
     }
     if (window.ResizeObserver && previewHost) { new ResizeObserver(scalePreview).observe(previewHost); }
     scalePreview();
+    function onComposerSizeChange() {
+        if (selectedWebEditor) {
+            webEditors.hidden = !webLayout();
+            stepControls.hidden = webLayout();
+            root.querySelector('.faluss-onboarding-v3__actions').hidden = webLayout();
+        }
+        scalePreview();
+        updateViewportHeight();
+    }
+    if (composerMedia.addEventListener) { composerMedia.addEventListener('change', onComposerSizeChange); }
+    else if (composerMedia.addListener) { composerMedia.addListener(onComposerSizeChange); }
 
     function notice(message, failed) {
         if (error) { error.textContent = failed ? message : ''; error.hidden = !failed; }
@@ -157,6 +201,76 @@
         if (step === 'v3_links') { result.links = JSON.stringify(links()); }
         return result;
     }
+    var stepBaseline = JSON.stringify(fields());
+
+    function previewFields() {
+        var result = fields();
+        if (webLayout() && selectedWebEditor && selectedWebEditor.dataset.dirty === 'true') {
+            var link = {block_id: selectedWebEditor.dataset.id};
+            selectedWebEditor.querySelectorAll('[data-field]').forEach(function (field) { link[field.dataset.field] = field.value; });
+            result.link_draft = JSON.stringify(link);
+        }
+        return result;
+    }
+
+    function decorateWebPreview() {
+        if (!webLayout() || !previewHost) { return; }
+        previewHost.querySelectorAll('[data-v3-preview-block-id]').forEach(function (node) {
+            if (node.tagName !== 'A') { node.tabIndex = 0; node.setAttribute('role', 'button'); }
+            node.setAttribute('aria-label', 'Modifier ' + (node.textContent.trim() || 'ce lien'));
+            node.toggleAttribute('data-v3-selected', node.dataset.v3PreviewBlockId === selectedWebBlockId);
+        });
+    }
+
+    function closeWebEditor() {
+        if (!webEditors) { return; }
+        if (selectedWebEditor && selectedWebEditor.dataset.dirty === 'true' && !window.confirm('Abandonner les modifications non enregistrées de ce lien ?')) { return; }
+        restoreWebEditor(selectedWebEditor);
+        webEditors.hidden = true;
+        stepControls.hidden = false;
+        root.querySelector('.faluss-onboarding-v3__actions').hidden = false;
+        selectedWebEditor = null;
+        selectedWebBlockId = '';
+        decorateWebPreview();
+        if (root.querySelector('[data-v3-step-controls] h1')) { root.querySelector('[data-v3-step-controls] h1').focus({preventScroll: true}); }
+    }
+
+    function selectWebBlock(target) {
+        if (!webLayout() || !webEditors || pending || uploading) { return; }
+        if (!selectedWebEditor && JSON.stringify(fields()) !== stepBaseline) {
+            notice('Enregistre cette étape avant de modifier un lien.', true);
+            return;
+        }
+        var block = target.closest('[data-v3-preview-block-id]');
+        if (!block) { return; }
+        var editor = Array.from(webEditors.querySelectorAll('[data-v3-editor][data-id]')).find(function (item) { return item.dataset.id === block.dataset.v3PreviewBlockId; });
+        if (!editor) { return; }
+        if (selectedWebEditor && selectedWebEditor !== editor && selectedWebEditor.dataset.dirty === 'true' && !window.confirm('Abandonner les modifications non enregistrées de ce lien ?')) { return; }
+        if (selectedWebEditor !== editor) { restoreWebEditor(selectedWebEditor); }
+        selectedWebEditor = editor;
+        selectedWebBlockId = editor.dataset.id;
+        webEditors.hidden = false;
+        stepControls.hidden = true;
+        root.querySelector('.faluss-onboarding-v3__actions').hidden = true;
+        webEditors.querySelectorAll('[data-v3-editor]').forEach(function (item) { item.hidden = item !== editor; item.open = item === editor; });
+        scroll.scrollTop = 0;
+        decorateWebPreview();
+        editor.querySelector('summary').focus({preventScroll: true});
+    }
+
+    if (previewHost) {
+        previewHost.addEventListener('click', function (event) {
+            if (!webLayout()) { return; }
+            var block = event.target.closest('[data-v3-preview-block-id]');
+            if (block && event.target.closest('a')) { event.preventDefault(); }
+            if (block) { selectWebBlock(block); }
+        });
+        previewHost.addEventListener('keydown', function (event) {
+            if (!webLayout() || (event.key !== 'Enter' && event.key !== ' ')) { return; }
+            var block = event.target.closest('[data-v3-preview-block-id]');
+            if (block) { event.preventDefault(); selectWebBlock(block); }
+        });
+    }
 
     function post(action, nonce, extra, signal) {
         var body = new URLSearchParams();
@@ -196,13 +310,13 @@
         if (previewRequest) { previewRequest.abort(); }
         previewRequest = new AbortController();
         var revision = ++previewRevision;
-        post('faluss_onboarding_v3_preview', config.previewNonce, { fields: JSON.stringify(fields()) }, previewRequest.signal)
+        post('faluss_onboarding_v3_preview', config.previewNonce, { fields: JSON.stringify(previewFields()) }, previewRequest.signal)
             .then(function (payload) {
                 if (revision !== previewRevision) { return; }
                 if (!payload.success || !payload.data || !payload.data.preview_html) { throw new Error(serverError(payload, 'preview_failed')); }
                 previewHost.innerHTML = payload.data.preview_html;
                 scalePreview();
-                if (status) { status.textContent = 'Aperçu à jour.'; }
+                notice('Aperçu à jour.', false);
             }).catch(function (failure) {
                 if (failure.name !== 'AbortError' && revision === previewRevision) { notice(failure.message || 'Aperçu indisponible.', true); }
             });
@@ -233,7 +347,7 @@
     }
 
     function scheduleIdentityDraft() {
-        if (studio || root.dataset.step !== 'v3_identity') { return; }
+        if (studio || selectedWebEditor || root.dataset.step !== 'v3_identity') { return; }
         window.clearTimeout(draftTimer);
         ++draftRevision;
         draftTimer = window.setTimeout(function () {
@@ -377,6 +491,7 @@
             editor.querySelector('[data-field="attachment_id"]').value = result.data.id;
             editor.dataset.dirty = 'true'; dirty = true;
             notice('Image prête. Enregistre cet élément pour l’appliquer à ta carte.', false);
+            if (editor === selectedWebEditor) { schedulePreview(); }
         }).catch(function (failure) { notice(failure.message, true); })
             .finally(function () { uploading = false; input.disabled = false; });
     }
@@ -398,6 +513,7 @@
     }
 
     function setExpanded(value) {
+        if (webLayout()) { return; }
         expanded = value;
         panel.classList.toggle('is-expanded', expanded);
         panel.style.removeProperty('height');
@@ -419,6 +535,7 @@
         if (event.key === 'ArrowDown' || event.key === 'End') { event.preventDefault(); if (scroll.scrollTop > 0) { scroll.scrollTo({ top: 0, behavior: 'smooth' }); } else { setExpanded(false); } }
     });
     grabber.addEventListener('pointerdown', function (event) {
+        if (webLayout()) { return; }
         drag = { y: event.clientY, height: panelHeight(), moved: false };
         panel.classList.add('is-dragging');
         grabber.setPointerCapture(event.pointerId);
@@ -442,6 +559,7 @@
     grabber.addEventListener('pointerup', finishDrag);
     grabber.addEventListener('pointercancel', finishDrag);
     panel.addEventListener('wheel', function (event) {
+        if (webLayout()) { return; }
         if (keyboardOpen) { return; }
         if (!expanded && event.deltaY > 0) { event.preventDefault(); setExpanded(true); }
         else if (expanded && scroll.scrollTop <= 0 && event.deltaY < 0) { event.preventDefault(); setExpanded(false); }
@@ -449,6 +567,7 @@
 
     var touchDrag = null;
     panel.addEventListener('touchstart', function (event) {
+        if (webLayout()) { return; }
         if (!keyboardOpen && event.touches.length === 1 && !event.target.closest('input, select, textarea, button, a')) {
             touchDrag = { y: event.touches[0].clientY, height: panelHeight(), moved: false };
         }
@@ -475,6 +594,7 @@
 
     root.addEventListener('click', function (event) {
         var target = event.target;
+        if (target.closest('[data-v3-web-edit-close]')) { closeWebEditor(); return; }
         var editor = target.closest('[data-v3-editor]');
         if (editor) {
             if (target.closest('[data-v3-save-item]')) { saveItem(editor, ''); return; }
@@ -483,7 +603,9 @@
             if (target.closest('[data-v3-remove-image]')) {
                 editor.querySelector('[data-field="attachment_id"]').value = '0';
                 var image = editor.querySelector('img'); if (image) { image.remove(); }
-                editor.dataset.dirty = 'true'; dirty = true; return;
+                editor.dataset.dirty = 'true'; dirty = true;
+                if (editor === selectedWebEditor) { schedulePreview(); }
+                return;
             }
             var order = target.closest('[data-v3-order]');
             if (order) {
@@ -528,6 +650,11 @@
         event.preventDefault(); activateTab(tabs[index], true);
     });
     root.addEventListener('change', function (event) {
+        if (selectedWebEditor && selectedWebEditor.contains(event.target)) {
+            selectedWebEditor.dataset.dirty = 'true'; dirty = true; schedulePreview();
+            if (event.target.matches('[data-v3-content-upload]')) { uploadContent(event.target); }
+            return;
+        }
         if (event.target.matches('[data-v3-section]')) {
             if (dirty && !window.confirm('Quitter cette rubrique sans enregistrer les modifications ?')) { event.target.value = root.dataset.step; return; }
             var url = new URL(window.location.href);
@@ -562,6 +689,9 @@
         scheduleIdentityDraft();
     });
     root.addEventListener('input', function (event) {
+        if (selectedWebEditor && selectedWebEditor.contains(event.target)) {
+            selectedWebEditor.dataset.dirty = 'true'; dirty = true; schedulePreview(); return;
+        }
         if (management) { var editor = event.target.closest('[data-v3-editor]'); if (editor) { editor.dataset.dirty = 'true'; dirty = true; } return; }
         if (event.target.matches('[data-v3-upload]')) { return; }
         if (event.target.matches('[data-v3-color]')) { event.target.dataset.selected = 'true'; }
@@ -569,10 +699,12 @@
     });
     panel.addEventListener('submit', function (event) {
         event.preventDefault();
+        if (selectedWebEditor) { saveItem(selectedWebEditor, ''); return; }
         if (management) { var editor = event.target.closest('[data-v3-editor]') || document.activeElement.closest('[data-v3-editor]'); if (editor) { saveItem(editor, ''); } return; }
         submit(root.dataset.step === 'v3_review' ? 'publish' : 'next');
     });
     panel.addEventListener('focusin', function (event) {
+        if (webLayout()) { return; }
         if (event.target.matches('textarea, select, input:not([type=radio]):not([type=checkbox]):not([type=file]):not([type=color]):not([type=hidden])')) {
             panel.classList.add('is-editing');
             setExpanded(true);

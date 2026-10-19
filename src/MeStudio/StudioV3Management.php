@@ -14,6 +14,14 @@ final class StudioV3Management
         return in_array($section, ['v3_links', 'v3_collections', 'v3_contents', 'v3_settings'], true);
     }
 
+    /** @param array<int, array<string, mixed>> $blocks */
+    public static function onboardingLinkEditors(array $blocks): void
+    {
+        foreach ($blocks as $block) {
+            if (($block['type'] ?? '') === 'link' && !empty($block['block_id'])) { self::link($block); }
+        }
+    }
+
     /** @param array<string, mixed> $state */
     public static function render(string $section, array $state): void
     {

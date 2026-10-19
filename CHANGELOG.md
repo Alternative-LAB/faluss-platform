@@ -9,6 +9,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 ### Ajouté
 
 - Sur PC et grande tablette, composer la carte Me dans le Studio avec les réglages à gauche et l’aperçu canonique interactif à droite. Un élément existant sélectionne sa rubrique et son éditeur ; le brouillon d’un lien est prévisualisé sans écriture avant son enregistrement.
+- Dans l’onboarding V3 sur PC et grande tablette, afficher les étapes à gauche et la carte interactive à droite. Un lien existant ouvre son éditeur sans déplacer le curseur Simple ou Atomique ; son brouillon reste temporaire jusqu’à l’enregistrement avec la version agrégée.
 
 ### Corrigé
 

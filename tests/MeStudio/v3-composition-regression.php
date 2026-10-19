@@ -121,6 +121,26 @@ $confirmation = (new ReflectionMethod(\Faluss\Platform\MeStudio\OnboardingV3::cl
 fl_hotfix_assert(!str_contains($confirmation, 'data-v3-panel') && !str_contains($confirmation, 'progressbar') && str_contains($confirmation, 'Ouvrir le Studio'), 'Confirmation is outside the onboarding shell');
 fl_hotfix_assert(str_contains($studioViews['v3_network_style'], 'data-v3-tab-panel="color" hidden inert'), 'Color tab hidden initially');
 fl_hotfix_assert(str_contains($studioViews['v3_avatar'], 'Remplacer la photo') && str_contains($studioViews['v3_avatar'], '/77.jpg'), 'Studio reuses retained avatar');
+if (getenv('FALUSS_V3_ONBOARDING_VIEWS')) {
+    // Actual PHP onboarding shell on the same in-memory Link aggregate.
+    function get_user_meta(): string { return ''; }
+    final class Faluss_Identity_Onboarding {
+        public static function v3_context(): array { return ['available' => true, 'step' => $GLOBALS['v3_fixture_step']]; }
+    }
+    $wpdb->identity['publication_status'] = 'draft';
+    $onboardingViews = [];
+    foreach (['v3_identity', 'v3_links', 'v3_colors', 'v3_review'] as $fixtureStep) {
+        $GLOBALS['v3_fixture_step'] = $fixtureStep;
+        $onboardingViews[$fixtureStep] = \Faluss\Platform\MeStudio\OnboardingV3::render();
+        fl_hotfix_assert(str_contains($onboardingViews[$fixtureStep], 'data-v3-web-editors') && str_contains($onboardingViews[$fixtureStep], 'data-v3-step-controls'), 'Web editor and sequential step share shell: ' . $fixtureStep);
+        fl_hotfix_assert(str_contains($onboardingViews[$fixtureStep], 'data-v3-editor') && str_contains($onboardingViews[$fixtureStep], 'data-v3-preview-block-id'), 'Existing links keep editor and preview identity: ' . $fixtureStep);
+    }
+    $wpdb->identity['public_slug'] = '';
+    $GLOBALS['v3_fixture_step'] = 'v3_identity';
+    fl_hotfix_assert(!str_contains(\Faluss\Platform\MeStudio\OnboardingV3::render(), 'data-v3-web-editors'), 'No link editor before slug reservation');
+    echo json_encode($onboardingViews, JSON_THROW_ON_ERROR);
+    exit;
+}
 if (getenv('FALUSS_V3_PAGE')) {
     $state = Faluss_Link::studio_v2_state();
     $prefs = $prefs_method->invoke(null, $member, false);

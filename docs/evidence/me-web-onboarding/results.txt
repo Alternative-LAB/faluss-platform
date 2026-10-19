@@ -1,0 +1,12 @@
+chromium 390x844: mobile step and bottom panel retained
+chromium 768x900: mobile step and bottom panel retained
+chromium 900x900: mobile step and bottom panel retained
+chromium 1024x600: mobile step and bottom panel retained
+chromium 1024x768: touch/mouse select, invalid draft, preview, save/reload OK
+chromium 1440x900: touch/mouse select, invalid draft, preview, save/reload OK
+webkit 390x844: mobile step and bottom panel retained
+webkit 768x900: mobile step and bottom panel retained
+webkit 900x900: mobile step and bottom panel retained
+webkit 1024x600: mobile step and bottom panel retained
+webkit 1024x768: touch/mouse select, invalid draft, preview, save/reload OK
+webkit 1440x900: touch/mouse select, invalid draft, preview, save/reload OK
