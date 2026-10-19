@@ -26,7 +26,7 @@ const initialLabel = 'Dans A';
                 const context = await browser.newContext({viewport: {width, height}, hasTouch: true});
                 const page = await context.newPage();
                 const errors = [];
-                let savedLabel = initialLabel, saveCount = 0, previewDraft = null;
+                let savedLabel = initialLabel, saveCount = 0, previewDraft = null, failSave = true;
                 page.on('pageerror', error => errors.push(error.stack || error.message));
                 page.on('dialog', dialog => dialog.accept());
                 await context.route('**/*', async route => {
@@ -53,6 +53,10 @@ const initialLabel = 'Dans A';
                         if (body.get('action') === 'faluss_studio_v3_manage') {
                             assert.equal(body.get('mutation'), 'update_link');
                             assert.equal(body.get('version') !== '', true);
+                            if (failSave) {
+                                failSave = false;
+                                return route.fulfill({status: 503, contentType: 'application/json', body: JSON.stringify({success: false, data: {code: 'transaction_unavailable'}})});
+                            }
                             savedLabel = JSON.parse(body.get('fields')).label;
                             saveCount++;
                             return route.fulfill({contentType: 'application/json', body: JSON.stringify({success: true})});
@@ -97,6 +101,10 @@ const initialLabel = 'Dans A';
                     assert.equal(await page.locator('[data-v3-error]').isVisible(), false, 'Valid draft clears error');
                     assert.equal(JSON.parse(previewDraft.link_draft).block_id, blockId);
                     assert.equal(saveCount, 0, 'Preview remains transient');
+                    await editor.locator('[data-v3-save-item]').click();
+                    await page.waitForFunction(() => document.querySelector('[data-v3-error]').textContent.includes('temporairement indisponible'));
+                    assert.equal(await editor.locator('[data-field="label"]').inputValue(), 'Lien modifié en onboarding', '503 keeps input');
+                    assert.equal(saveCount, 0, 'Rejected write does not persist');
                     await editor.locator('[data-v3-save-item]').click();
                     await page.waitForFunction(id => document.querySelector(`[data-v3-web-editors] [data-v3-editor][data-id="${id}"] [data-field="label"]`).value === 'Lien modifié en onboarding' && document.querySelector('[data-v3-step-controls]').hidden === false, blockId);
                     assert.equal(saveCount, 1);
