@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Ajouté
+
+- Connexions SignInForge 0.1.1 personnalisées avec Elementor sur les trois sites Faluss : profils visuels reproductibles, catalogue public français, recette d’authentification et procédure de retour arrière ; tests isolés du catalogue.
+
 ### Corrigé
 
 - Étendre le lint PHP à tous les fichiers suivis, y compris les scripts de release et de déploiement ; vérifier son refus des erreurs par injection de syntaxe invalide. Aligner les contrôles obligatoires de fusion sur la gouvernance, les recettes WordPress/SQL et la validation de l’archive.
