@@ -84,7 +84,8 @@ Configurer une règle de protection ou un ruleset ciblant exactement `main` :
    commit de la PR par GitHub Actions, ainsi que les contrôles
    `Lint, static analysis and tests`, `Federation without native Sodium` et
    `Check JavaScript syntax`, `Fans editorial isolated SQL`,
-   `WordPress integration tests` et `Validate WordPress archive`, sur le commit
+   `WordPress integration tests`, `Validate WordPress archive` et
+   `Me Studio browser tests`, sur le commit
    à fusionner. Sélectionner GitHub
    Actions comme source attendue de chaque statut, jamais « n'importe quelle
    source ». Exiger une branche à jour avant fusion si la règle GitHub le permet.

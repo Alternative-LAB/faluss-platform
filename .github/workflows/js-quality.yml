@@ -21,3 +21,42 @@ jobs:
       - run: find assets tests -name '*.js' -print0 | xargs -0 -n1 node --check
       - name: Faluss Link Studio mutation contract
         run: node tests/Link/link-hotfix-autosave-test.js
+
+  me-browser:
+    name: Me Studio browser tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer:v2
+      - uses: ramsey/composer-install@v3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated browser test tools
+        shell: bash
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/me-browsers
+        run: |
+          npm install --prefix "$RUNNER_TEMP/me-browser-tools" --no-package-lock --no-audit --no-fund playwright@1.64.1
+          node "$RUNNER_TEMP/me-browser-tools/node_modules/playwright/cli.js" install --with-deps chromium webkit
+      - name: Exercise the available Me web composers
+        shell: bash
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/me-browsers
+        run: |
+          export NODE_PATH="$RUNNER_TEMP/me-browser-tools/node_modules"
+          export FALUSS_PHP="$(command -v php)"
+          FALUSS_BROWSER_EVIDENCE_DIR="$RUNNER_TEMP/me-web-evidence/studio" node tests/MeStudio/studio-v3-web-composer.js
+          FALUSS_BROWSER_EVIDENCE_DIR="$RUNNER_TEMP/me-web-evidence/onboarding" node tests/MeStudio/onboarding-v3-web-composer.js
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: me-web-browser-evidence
+          path: ${{ runner.temp }}/me-web-evidence
+          if-no-files-found: error
+          retention-days: 7

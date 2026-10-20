@@ -104,3 +104,11 @@ En cas de régression, revenir à l’organisation précédente par une PR valid
 La [première exécution parallèle 38559059477](https://github.com/Alternative-LAB/faluss-platform/actions/runs/38559059477) a réussi en **29 min 56 s**, contre 98 min 42 s pour la référence. Identity termine en 39 secondes et les 1 413 assertions sont conservées indépendamment. Le corpus reste le chemin critique (29 min 35 s). Le cache de bytecode CLI vise ce coût de démarrages répétés.
 
 La [seconde exécution 38566759801](https://github.com/Alternative-LAB/faluss-platform/actions/runs/38566759801), avec cache CLI, a réussi en **17 min 56 s**, dont **17 min 34 s** pour le corpus. Les 1 413 assertions sont encore présentes dans les neuf nouveaux rapports ; le nombre d’exécutions est toujours 2 496. Cette mesure respecte l’objectif initial sans modifier les scripts applicatifs ni les scénarios.
+
+## Complément du 20 octobre — compositeurs Me
+
+Le huitième statut obligatoire `Me Studio browser tests` exécute les deux recettes Studio et onboarding, sur Chromium et WebKit, en plus des sept validations existantes. Le job utilise PHP 8.3, Node 22 et Playwright 1.64.1, installé uniquement dans le répertoire temporaire du runner ; aucune dépendance runtime du plugin n’est ajoutée. Le budget est de 15 minutes. Les captures et résultats sont produits dans un répertoire neuf et publiés sept jours sous `me-web-browser-evidence`, y compris les diagnostics partiels en cas d’échec ; les captures déjà versionnées ne sont pas utilisées comme preuve d’une nouvelle exécution.
+
+Ces recettes utilisent de vraies vues PHP et des navigateurs réels, avec réponses AJAX et persistance simulées. Elles vérifient les seuils de viewport, la sélection d’un lien, les brouillons sans écriture, les erreurs, la sauvegarde/relecture et la géométrie en présence d’un en-tête de thème de 280 px. Le test a échoué avant le correctif CSS du Studio et de l’onboarding, puis réussi sur Chromium. Les recettes WordPress/MariaDB existantes restent obligatoires ; ce job ne certifie ni Elementor, ni appareils physiques, ni production.
+
+Depuis l’intégration de l’onboarding web, les deux fichiers de recette sont obligatoires : leur suppression ne peut plus être interprétée comme une sélection de tests vide.
