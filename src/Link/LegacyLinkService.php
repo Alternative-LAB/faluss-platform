@@ -629,6 +629,21 @@ final class Faluss_Link {
         }
         $preview = self::onboarding_preview_state( $faluss_id, $post );
         if ( false === $preview ) { return new WP_Error( 'invalid_preview' ); }
+        if ( isset( $draft['link_draft'] ) ) {
+            $link_draft = is_string( $draft['link_draft'] ) ? json_decode( $draft['link_draft'], true ) : null;
+            if ( ! is_array( $link_draft ) || array_diff( array_keys( $link_draft ), array( 'block_id', 'label', 'url', 'visibility', 'attachment_id' ) ) || ! self::valid_block_id( $link_draft['block_id'] ?? '' ) ) { return new WP_Error( 'invalid_links' ); }
+            $found = false;
+            foreach ( $preview['blocks'] as &$block ) {
+                if ( 'link' !== ( $block['type'] ?? '' ) || $block['block_id'] !== $link_draft['block_id'] ) { continue; }
+                $updated = self::normalise_block( array_merge( $block, $link_draft ), true );
+                if ( ! $updated ) { return new WP_Error( 'invalid_links' ); }
+                $block = $updated;
+                $found = true;
+                break;
+            }
+            unset( $block );
+            if ( ! $found ) { return new WP_Error( 'invalid_links' ); }
+        }
         $design = array_intersect_key( $draft, array_flip( array( 'avatar_visible', 'structure', 'page_background', 'button_color', 'link_style', 'button_texture', 'avatar_shape', 'avatar_effect', 'cover_attachment_id', 'wallpaper_size', 'wallpaper_effect', 'name_font', 'name_weight', 'name_color', 'social_style', 'social_color', 'links_mode', 'secondary_color', 'image_border', 'image_border_color' ) ) );
         foreach ( $design as $key => $value ) {
             if ( ! is_scalar( $value ) ) { return new WP_Error( 'invalid_preview' ); }
@@ -2139,19 +2154,20 @@ final class Faluss_Link {
         $link_visibility = 'link' === $block['type'] && in_array( $requested_visibility, array( 'all', 'members', 'none' ), true ) ? $requested_visibility : 'all';
         if ( 'link' === $block['type'] && ! $preview && ( 'none' === $link_visibility || ( 'members' === $link_visibility && ! is_user_logged_in() ) ) ) { return ''; }
         ob_start();
-        if ( 'section_title' === $block['type'] ) : ?><h3 class="faluss-link-card__section-title"><?php echo esc_html( $block['value'] ); ?></h3><?php endif;
-        if ( 'text' === $block['type'] ) : ?><p class="faluss-link-card__content-text"><?php echo esc_html( $block['value'] ); ?></p><?php endif;
+        $editor_id = $preview && ! empty( $block['block_id'] ) ? ' data-v3-preview-block-id="' . esc_attr( (string) $block['block_id'] ) . '"' : '';
+        if ( 'section_title' === $block['type'] ) : ?><h3 class="faluss-link-card__section-title"<?php echo $editor_id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped attribute assembled above. ?>><?php echo esc_html( $block['value'] ); ?></h3><?php endif;
+        if ( 'text' === $block['type'] ) : ?><p class="faluss-link-card__content-text"<?php echo $editor_id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped attribute assembled above. ?>><?php echo esc_html( $block['value'] ); ?></p><?php endif;
         if ( 'link' === $block['type'] ) :
             $visibility = $link_visibility;
             $network = self::platform_from_url( $block['url'] );
             $icon_variant = 'atomic' === ( $preferences['structure'] ?? 'simple' ) ? 'full' : self::social_variant( $preferences['social_variant'] ?? 'outline' );
             $icon = '' !== $network ? self::social_asset_markup( $network, $icon_variant ) : '';
             $image = 'image-grid' === ( $preferences['links_mode'] ?? 'neutral' ) ? self::teaser_image_markup( (int) ( $block['attachment_id'] ?? 0 ), '' ) : '';
-            ?><a class="faluss-link-card__link<?php echo '' !== $image ? ' faluss-link-card__link--image' : ''; ?>" href="<?php echo esc_url( $block['url'] ); ?>" target="_blank" rel="noopener noreferrer nofollow" data-faluss-visibility="<?php echo esc_attr( $visibility ); ?>"><?php if ( '' !== $image ) : ?><span class="faluss-link-card__link-image" aria-hidden="true"><?php echo $image; ?></span><?php endif; ?><?php if ( '' !== $icon ) : ?><span class="faluss-link-card__link-icon" aria-hidden="true"><?php echo $icon; ?></span><?php endif; ?><span><?php echo esc_html( $block['label'] ); ?></span></a><?php endif;
+            ?><a class="faluss-link-card__link<?php echo '' !== $image ? ' faluss-link-card__link--image' : ''; ?>" href="<?php echo esc_url( $block['url'] ); ?>" target="_blank" rel="noopener noreferrer nofollow" data-faluss-visibility="<?php echo esc_attr( $visibility ); ?>"<?php echo $editor_id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped attribute assembled above. ?>><?php if ( '' !== $image ) : ?><span class="faluss-link-card__link-image" aria-hidden="true"><?php echo $image; ?></span><?php endif; ?><?php if ( '' !== $icon ) : ?><span class="faluss-link-card__link-icon" aria-hidden="true"><?php echo $icon; ?></span><?php endif; ?><span><?php echo esc_html( $block['label'] ); ?></span></a><?php endif;
         if ( 'media_teaser' === $block['type'] ) :
             $access = self::teaser_access_decision( $block, $profile['faluss_id'] ?? '', $preview );
             $has_copy = '' !== $block['title'] || '' !== $block['text'];
-            ?><section class="faluss-link-card__media-teaser faluss-link-card__media-teaser--format-<?php echo esc_attr( self::teaser_format( $block['format'] ?? 'landscape' ) ); ?><?php echo $has_copy ? '' : ' faluss-link-card__media-teaser--image-only'; ?><?php echo empty( $access['visible'] ) ? ' faluss-link-card__media-teaser--locked' : ''; ?>"><?php echo self::teaser_image_markup( (int) $block['attachment_id'], empty( $access['visible'] ) ? '' : $block['title'] ); ?><?php if ( ! empty( $access['visible'] ) && $has_copy ) : ?><div class="faluss-link-card__media-teaser-copy"><?php if ( '' !== $block['title'] ) : ?><h3><?php echo esc_html( $block['title'] ); ?></h3><?php endif; ?><?php if ( '' !== $block['text'] ) : ?><p><?php echo esc_html( $block['text'] ); ?></p><?php endif; ?></div><?php endif; ?><?php if ( empty( $access['visible'] ) ) : ?><div class="faluss-link-card__media-teaser-lock"><p><?php esc_html_e( 'Contenu réservé', 'faluss-link' ); ?></p><?php if ( ! empty( $access['login_required'] ) ) : ?><a class="faluss-link-card__media-teaser-unlock" href="<?php echo esc_url( self::teaser_login_url() ); ?>"><?php esc_html_e( 'Créer mon Faluss pour débloquer', 'faluss-link' ); ?></a><?php endif; ?></div><?php endif; ?></section><?php endif;
+            ?><section class="faluss-link-card__media-teaser faluss-link-card__media-teaser--format-<?php echo esc_attr( self::teaser_format( $block['format'] ?? 'landscape' ) ); ?><?php echo $has_copy ? '' : ' faluss-link-card__media-teaser--image-only'; ?><?php echo empty( $access['visible'] ) ? ' faluss-link-card__media-teaser--locked' : ''; ?>"<?php echo $editor_id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped attribute assembled above. ?>><?php echo self::teaser_image_markup( (int) $block['attachment_id'], empty( $access['visible'] ) ? '' : $block['title'] ); ?><?php if ( ! empty( $access['visible'] ) && $has_copy ) : ?><div class="faluss-link-card__media-teaser-copy"><?php if ( '' !== $block['title'] ) : ?><h3><?php echo esc_html( $block['title'] ); ?></h3><?php endif; ?><?php if ( '' !== $block['text'] ) : ?><p><?php echo esc_html( $block['text'] ); ?></p><?php endif; ?></div><?php endif; ?><?php if ( empty( $access['visible'] ) ) : ?><div class="faluss-link-card__media-teaser-lock"><p><?php esc_html_e( 'Contenu réservé', 'faluss-link' ); ?></p><?php if ( ! empty( $access['login_required'] ) ) : ?><a class="faluss-link-card__media-teaser-unlock" href="<?php echo esc_url( self::teaser_login_url() ); ?>"><?php esc_html_e( 'Créer mon Faluss pour débloquer', 'faluss-link' ); ?></a><?php endif; ?></div><?php endif; ?></section><?php endif;
         return (string) ob_get_clean();
     }
 

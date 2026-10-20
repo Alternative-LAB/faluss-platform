@@ -1,0 +1,12 @@
+chromium 390x844: existing mobile editor and preview dialog retained
+chromium 768x900: existing mobile editor and preview dialog retained
+chromium 900x900: existing mobile editor and preview dialog retained
+chromium 1024x600: existing mobile editor and preview dialog retained
+chromium 1024x768: touch/mouse selection, live server preview, save and reload OK
+chromium 1440x900: touch/mouse selection, live server preview, save and reload OK
+webkit 390x844: existing mobile editor and preview dialog retained
+webkit 768x900: existing mobile editor and preview dialog retained
+webkit 900x900: existing mobile editor and preview dialog retained
+webkit 1024x600: existing mobile editor and preview dialog retained
+webkit 1024x768: touch/mouse selection, live server preview, save and reload OK
+webkit 1440x900: touch/mouse selection, live server preview, save and reload OK

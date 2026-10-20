@@ -42,6 +42,12 @@ final class StudioV3
         ob_start();
         ?>
         <section class="faluss-studio-v3" data-faluss-studio-v3 data-studio-config="<?php echo esc_attr((string) wp_json_encode(MeStudioAssets::studioV3Config())); ?>" data-studio="true" data-studio-groups="<?php echo esc_attr((string) wp_json_encode(self::GROUPS)); ?>" data-step="<?php echo esc_attr($section); ?>" data-mode="<?php echo esc_attr($mode); ?>" data-version="<?php echo esc_attr((string) ($state['version'] ?? '')); ?>">
+            <dialog class="faluss-studio-v3__preview" aria-label="Aperçu complet de ta carte">
+                <button type="button" data-studio-preview-close autofocus>Fermer l’aperçu ×</button>
+                <div data-v3-preview><?php echo (string) ($state['preview_html'] ?? ''); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Canonical Link renderer. ?></div>
+            </dialog>
+            <div class="faluss-studio-v3__layout">
+            <div class="faluss-studio-v3__controls">
             <header class="faluss-studio-v3__header">
                 <a href="<?php echo esc_url(home_url('/')); ?>" aria-label="Accueil Faluss">←</a>
                 <strong>Studio</strong>
@@ -70,10 +76,12 @@ final class StudioV3
                 <?php self::tab('v3_colors', 'Design', $group === 'design'); self::tab('v3_identity', 'Profil', $group === 'profile'); ?>
             </nav>
             <p id="faluss-studio-shop-note" class="faluss-studio-v3__shop-note">Shop n’est pas encore disponible sur ce site.</p>
-            <dialog class="faluss-studio-v3__preview" aria-label="Aperçu complet de ta carte">
-                <button type="button" data-studio-preview-close autofocus>Fermer l’aperçu ×</button>
-                <div data-v3-preview><?php echo (string) ($state['preview_html'] ?? ''); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Canonical Link renderer. ?></div>
-            </dialog>
+            </div>
+            <aside class="faluss-studio-v3__canvas" aria-label="Aperçu interactif de ta carte" data-studio-canvas>
+                <p>Ta carte · sélectionne un élément pour le modifier</p>
+                <div class="faluss-studio-v3__canvas-card" data-studio-inline-preview><?php echo (string) ($state['preview_html'] ?? ''); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Canonical Link renderer. ?></div>
+            </aside>
+            </div>
         </section>
         <?php
         return (string) ob_get_clean();

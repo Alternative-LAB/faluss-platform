@@ -45,6 +45,28 @@ html:has(.faluss-studio-v3),body:has(.faluss-studio-v3){height:100%;overflow:hid
 .faluss-studio-v3[data-input-modality=pointer] [data-studio-navigate]:focus{outline:none;box-shadow:none}
 .faluss-studio-v3[data-input-modality=keyboard] [data-studio-navigate]:focus{outline:3px solid #7853b3;outline-offset:3px}
 
+/* A wide viewport has room for a persistent, canonical card beside the editor. */
+.faluss-studio-v3__layout,.faluss-studio-v3__controls{display:contents}
+.faluss-studio-v3__canvas{display:none}
+@media (min-width:980px) and (min-height:650px){
+  .faluss-studio-v3{position:fixed;inset:0;width:100vw;max-width:100vw!important;margin-inline:0!important;padding:0;overflow:hidden;transform:none}
+  .faluss-studio-v3__layout{display:grid;grid-template-columns:minmax(390px,470px) minmax(0,1fr);height:100dvh}
+  .faluss-studio-v3__controls{display:flex;flex-direction:column;min-height:0;background:#fff;border-right:1px solid #e8e5e1}
+  .faluss-studio-v3__header,.faluss-studio-v3__member,.faluss-studio-v3__tabs,.faluss-studio-v3__bottom,.faluss-studio-v3__shop-note{flex:none}
+  .faluss-studio-v3__member{padding-block:12px}.faluss-studio-v3__member img,.faluss-studio-v3__avatar{width:52px;height:52px}
+  .faluss-studio-v3__workspace{flex:1;min-height:0;overflow-y:auto;scroll-padding-top:20px}
+  .faluss-studio-v3__bottom{position:relative;bottom:auto;left:auto;transform:none;width:100%;padding:9px 12px}
+  .faluss-studio-v3__shop-note{margin:0;padding:0 18px 9px}
+  .faluss-studio-v3__canvas{display:flex;flex-direction:column;align-items:center;min-width:0;min-height:0;overflow-y:auto;padding:24px max(24px,calc((100vw - 860px)/4));background:#f5f1ec;scrollbar-gutter:stable}
+  .faluss-studio-v3__canvas>p{width:min(100%,390px);margin:0 0 14px;color:#6f6a63;font-size:14px}
+  .faluss-studio-v3__canvas-card{width:min(100%,390px);min-height:690px;border:1px solid #ded8d1;border-radius:22px;background:#fff;box-shadow:0 12px 30px #08080812;overflow:hidden}
+  .faluss-studio-v3__canvas-card .faluss-link-card{width:100%;max-width:none;min-height:690px}
+  .faluss-studio-v3__canvas-card [data-v3-preview-block-id],.faluss-studio-v3__canvas-card .faluss-link-card__avatar,.faluss-studio-v3__canvas-card .faluss-link-card__name,.faluss-studio-v3__canvas-card .faluss-link-card__handle,.faluss-studio-v3__canvas-card .faluss-link-card__bio,.faluss-studio-v3__canvas-card .faluss-link-card__social,.faluss-studio-v3__canvas-card .faluss-link-card__cover{cursor:pointer}
+  .faluss-studio-v3__canvas-card [data-v3-selected]{outline:3px solid var(--v3-coral);outline-offset:3px}
+  .faluss-studio-v3__canvas-card [data-v3-preview-block-id]:hover{outline:2px solid var(--v3-coral);outline-offset:2px}
+  .faluss-studio-v3__header [data-studio-preview-open]{display:none}
+}
+
 /* The importer uses the Studio's neutral surfaces, rhythm and primary action. */
 .faluss-studio-v3 .faluss-link-import{padding:0;border-color:var(--v3-border);border-radius:12px;overflow:visible}
 .faluss-studio-v3 .faluss-link-import>summary{display:flex;align-items:center;gap:12px;min-height:76px;padding:16px;list-style:none;margin:0}

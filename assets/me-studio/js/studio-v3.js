@@ -7,8 +7,11 @@
     var error = root.querySelector('[data-v3-error]');
     var status = root.querySelector('[data-v3-status]');
     var previewHost = root.querySelector('[data-v3-preview]');
+    var canvas = root.querySelector('[data-studio-canvas]');
+    var inlinePreview = canvas && canvas.querySelector('[data-studio-inline-preview]');
     var dialog = root.querySelector('dialog');
-    var pending = false, uploading = false, leaving = false, previewRequest = null;
+    var pending = false, uploading = false, leaving = false, previewRequest = null, previewTimer = 0;
+    var selectedPreview = null, draftEditor = null;
     var management = root.querySelector('[data-v3-management]');
     var importer = null;
     function notice(message, failed) {
@@ -230,21 +233,92 @@
         return (importer && importer.isDirty()) || (management ? Array.from(baselines.keys()).some(editorDirty) : JSON.stringify(fields()) !== baseline);
     }
     function refreshPreview() {
-        if (!dialog.open) { return; }
+        if (!dialog.open && (!canvas || getComputedStyle(canvas).display === 'none')) { return; }
         if (previewRequest) { previewRequest.abort(); }
         previewRequest = new AbortController();
-        // Only presentation controls participate in management previews; block drafts remain independent.
         var draft = management ? {} : fields();
         if (management) {
             panel.querySelectorAll('[data-mutation="save_atomic_design"] [data-field]').forEach(function (field) {
                 if (['links_mode', 'image_border', 'image_border_color'].includes(field.dataset.field)) { draft[field.dataset.field] = field.value; }
             });
+            if (root.dataset.step === 'v3_links' && canvas && getComputedStyle(canvas).display !== 'none') {
+                var editedLink = draftEditor && panel.contains(draftEditor) && editorDirty(draftEditor)
+                    ? draftEditor : Array.from(panel.querySelectorAll('[data-mutation="update_link"]')).find(editorDirty);
+                if (editedLink) {
+                    var link = {block_id: editedLink.dataset.id};
+                    editedLink.querySelectorAll('[data-field]').forEach(function (field) { link[field.dataset.field] = field.value; });
+                    draft.link_draft = JSON.stringify(link);
+                }
+            }
         }
         post('faluss_onboarding_v3_preview', config.previewNonce, {fields: JSON.stringify(draft)}, previewRequest.signal)
             .then(function (response) {
                 if (!response.success || !response.data || !response.data.preview_html) { throw new Error(serverError(response, 'preview_failed')); }
-                previewHost.innerHTML = response.data.preview_html;
-            }).catch(function (failure) { if (failure.name !== 'AbortError') { notice(failure.message, true); dialog.close(); } });
+                if (dialog.open) { previewHost.innerHTML = response.data.preview_html; }
+                if (inlinePreview && getComputedStyle(canvas).display !== 'none') { inlinePreview.innerHTML = response.data.preview_html; decorateCanvas(); }
+            }).catch(function (failure) { if (failure.name !== 'AbortError') { notice(failure.message, true); if (dialog.open) { dialog.close(); } } });
+    }
+    function schedulePreview() {
+        window.clearTimeout(previewTimer);
+        if (previewRequest) { previewRequest.abort(); }
+        previewTimer = window.setTimeout(refreshPreview, 150);
+    }
+    function markPreviewSelection() {
+        if (!inlinePreview) { return; }
+        inlinePreview.querySelectorAll('[data-v3-selected]').forEach(function (node) { node.removeAttribute('data-v3-selected'); });
+        if (!selectedPreview) { return; }
+        var match = selectedPreview.id
+            ? Array.from(inlinePreview.querySelectorAll('[data-v3-preview-block-id]')).find(function (node) { return node.dataset.v3PreviewBlockId === selectedPreview.id; })
+            : inlinePreview.querySelector(selectedPreview.selector);
+        if (match) { match.dataset.v3Selected = ''; }
+    }
+    function decorateCanvas() {
+        if (!inlinePreview) { return; }
+        inlinePreview.querySelectorAll('[data-v3-preview-block-id], .faluss-link-card__avatar, .faluss-link-card__name, .faluss-link-card__handle, .faluss-link-card__bio, .faluss-link-card__social a, .faluss-link-card__cover').forEach(function (node) {
+            if (node.tagName !== 'A') { node.tabIndex = 0; node.setAttribute('role', 'button'); }
+            node.setAttribute('aria-label', 'Modifier ' + (node.textContent.trim() || 'cet élément'));
+        });
+        markPreviewSelection();
+    }
+    function openSelectedEditor() {
+        if (!selectedPreview || !selectedPreview.id) { return; }
+        var editor = Array.from(panel.querySelectorAll('[data-v3-editor][data-id]')).find(function (item) { return item.dataset.id === selectedPreview.id; });
+        if (!editor) { return; }
+        editor.open = true;
+        editor.scrollIntoView({block: 'nearest', behavior: 'instant'});
+        editor.querySelector('summary').focus({preventScroll: true});
+    }
+    function selectCanvasElement(target) {
+        var block = target.closest('[data-v3-preview-block-id]');
+        var route = '', selector = '';
+        if (block) {
+            route = block.matches('.faluss-link-card__link') ? 'v3_links' : block.matches('.faluss-link-card__section-title') ? 'v3_collections' : 'v3_contents';
+        } else {
+            var choices = [
+                ['.faluss-link-card__avatar', 'v3_avatar'], ['.faluss-link-card__name', 'v3_name'],
+                ['.faluss-link-card__handle', 'v3_identity'], ['.faluss-link-card__bio', 'v3_settings'],
+                ['.faluss-link-card__social', 'v3_socials'], ['.faluss-link-card__cover', 'v3_wallpaper']
+            ];
+            choices.some(function (choice) { if (target.closest(choice[0])) { selector = choice[0]; route = choice[1]; return true; } return false; });
+        }
+        if (!route || pending || uploading || navigating || (root.dataset.step !== route && !canLeave())) { return; }
+        selectedPreview = block ? {id: block.dataset.v3PreviewBlockId} : {selector: selector};
+        markPreviewSelection();
+        if (root.dataset.step === route) { openSelectedEditor(); return; }
+        var url = new URL(currentUrl); url.searchParams.set('v3_section', route);
+        loadSection(url.href).then(openSelectedEditor);
+    }
+    if (canvas) {
+        canvas.addEventListener('click', function (event) {
+            if (event.target.closest('a')) { event.preventDefault(); }
+            selectCanvasElement(event.target);
+        });
+        canvas.addEventListener('keydown', function (event) {
+            if (event.key !== 'Enter' && event.key !== ' ') { return; }
+            if (!event.target.closest('[data-v3-preview-block-id], .faluss-link-card__avatar, .faluss-link-card__name, .faluss-link-card__handle, .faluss-link-card__bio, .faluss-link-card__social a, .faluss-link-card__cover')) { return; }
+            event.preventDefault(); selectCanvasElement(event.target);
+        });
+        decorateCanvas();
     }
     function save() {
         if (pending || uploading || navigating) { return; }
@@ -370,15 +444,20 @@
         panel.replaceWith(next.querySelector('[data-v3-panel]'));
         ['step', 'mode', 'version', 'studioConfig'].forEach(function (key) { root.dataset[key] = next.dataset[key] || ''; });
         panel = root.querySelector('[data-v3-panel]');
+        draftEditor = null;
         error = root.querySelector('[data-v3-error]');
         status = root.querySelector('[data-v3-status]');
         management = root.querySelector('[data-v3-management]');
         previewHost.replaceChildren.apply(previewHost, Array.from(next.querySelector('[data-v3-preview]').childNodes));
+        if (inlinePreview) {
+            inlinePreview.innerHTML = next.querySelector('[data-studio-inline-preview]').innerHTML;
+            decorateCanvas();
+        }
         config = nextConfig;
         needsCanonical = false;
         resetBaselines();
         setupImporter();
-        root.scrollTo({ top: 0, behavior: 'instant' });
+        if (getComputedStyle(root).overflowY !== 'hidden') { root.scrollTo({ top: 0, behavior: 'instant' }); }
         var focus = focusArea ? root.querySelector('.faluss-studio-v3__' + focusArea + ' [aria-current]') : panel.querySelector('h1');
         if (focus) { if (!focusArea) { focus.tabIndex = -1; } focus.focus({preventScroll: true}); }
     }
@@ -533,7 +612,13 @@
             var custom = root.querySelector('[data-v3-color="' + event.target.name + '"]');
             if (custom) { custom.dataset.selected = 'false'; }
         }
-        refreshPreview();
+        schedulePreview();
+    });
+    root.addEventListener('input', function (event) {
+        if (panel.contains(event.target) && event.target.matches('input:not([type=file]), textarea, select')) {
+            draftEditor = event.target.closest('[data-mutation="update_link"]');
+            schedulePreview();
+        }
     });
     root.addEventListener('submit', function (event) {
         if (event.target !== panel) { return; }
