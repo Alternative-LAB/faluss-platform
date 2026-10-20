@@ -16,6 +16,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 ### Corrigé
 
 - Garder les actions de l’onboarding web dans la fenêtre lorsque le thème ajoute un en-tête ou un titre au-dessus du formulaire.
+- Synchroniser la recette de redimensionnement sur le retour réel des contrôles mobiles afin d’éviter un échec lié à l’ordonnancement de l’événement navigateur.
 - Garder le Studio web entièrement dans la fenêtre : un en-tête ou un titre du thème ne peut plus masquer sa navigation et ses actions. Vérifier ce cas dans les navigateurs Chromium et WebKit en CI.
 
 - Étendre le lint PHP à tous les fichiers suivis, y compris les scripts de release et de déploiement ; vérifier son refus des erreurs par injection de syntaxe invalide. Aligner les contrôles obligatoires de fusion sur la gouvernance, les recettes WordPress/SQL et la validation de l’archive.

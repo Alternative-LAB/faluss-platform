@@ -116,6 +116,8 @@ const initialLabel = 'Dans A';
                     if (engine === 'chromium' && width === 1440) {
                         await page.locator(`[data-v3-preview] [data-v3-preview-block-id="${blockId}"]`).click();
                         await page.setViewportSize({width: 768, height: 900});
+                        await page.waitForFunction(() => document.querySelector('[data-v3-web-editors]').hidden
+                            && !document.querySelector('[data-v3-step-controls]').hidden);
                         assert.equal(await page.locator('[data-v3-web-editors]').isVisible(), false, 'Tablet contraction restores mobile step');
                         assert.equal(await page.locator('[data-v3-step-controls]').isVisible(), true);
                         await page.setViewportSize({width: 1440, height: 900});
