@@ -6,25 +6,39 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
-### Documentation
-
-- Documenter la recette Me du main fusionné sur WordPress et Elementor isolés, avec captures, écritures réelles, limites visuelles et chemin de publication.
+## [0.15.0] - 2026-10-20
 
 ### Ajouté
 
-- Sur PC et grande tablette, composer la carte Me dans le Studio avec les réglages à gauche et l’aperçu canonique interactif à droite. Un élément existant sélectionne sa rubrique et son éditeur ; le brouillon d’un lien est prévisualisé sans écriture avant son enregistrement.
-- Dans l’onboarding V3 sur PC et grande tablette, afficher les étapes à gauche et la carte interactive à droite. Un lien existant ouvre son éditeur sans déplacer le curseur Simple ou Atomique ; son brouillon reste temporaire jusqu’à l’enregistrement avec la version agrégée.
-
-- Connexions SignInForge 0.1.1 personnalisées avec Elementor sur les trois sites Faluss : profils visuels reproductibles, catalogue public français, recette d’authentification et procédure de retour arrière ; tests isolés du catalogue.
+- Document branded SignInForge rollout and verify catalogue (#220) (`09b1f86`)
+- Add responsive Me onboarding web composer (`f4ceb2f`)
+- Add interactive Me Studio web composer (`6474aca`)
 
 ### Corrigé
 
-- Garder les actions de l’onboarding web dans la fenêtre lorsque le thème ajoute un en-tête ou un titre au-dessus du formulaire.
-- Synchroniser la recette de redimensionnement sur le retour réel des contrôles mobiles afin d’éviter un échec lié à l’ordonnancement de l’événement navigateur.
-- Garder le Studio web entièrement dans la fenêtre : un en-tête ou un titre du thème ne peut plus masquer sa navigation et ses actions. Vérifier ce cas dans les navigateurs Chromium et WebKit en CI.
+- Keep onboarding actions inside the themed viewport (`23be86f`)
+- Keep Studio actions visible beneath WordPress themes (`8046233`)
+- Center onboarding preview in themed pages (`7cd6cce`)
+- Center Studio canvas in themed pages (`9fde979`)
+- Override constrained theme width for onboarding (`fcc9c99`)
+- Override constrained theme width for Studio (`27e27dd`)
+- Keep onboarding preview wide inside WordPress themes (`5b215b0`)
+- Keep Studio canvas wide inside WordPress themes (`91e0299`)
+- Preserve onboarding drafts across viewport changes (`77034e4`)
 
-- Étendre le lint PHP à tous les fichiers suivis, y compris les scripts de release et de déploiement ; vérifier son refus des erreurs par injection de syntaxe invalide. Aligner les contrôles obligatoires de fusion sur la gouvernance, les recettes WordPress/SQL et la validation de l’archive.
-- Vérifier toutes les sections et catégories du template de PR, refuser les contenus vides ou commentés, accepter les fins de ligne Windows et générer des PR de release conformes au même contrat.
+### Documentation
+
+- Record isolated Me Elementor recipe (#246) (`5bcec68`)
+- Record isolated WordPress onboarding recipe (`84a1ab6`)
+- Record isolated WordPress Studio recipe (`23f1e09`)
+
+### Modifié
+
+- Wait for responsive controls after viewport changes (`1149c75`)
+- Cover transient onboarding save failure (`2ec178a`)
+- Refresh onboarding selection evidence (`ffb3ed3`)
+- Validate all tracked PHP and document required CI gates (`6b25c31`)
+- Enforce complete PR templates and release descriptions (`6b25c31`)
 
 ## [0.14.0] - 2026-10-18
 
