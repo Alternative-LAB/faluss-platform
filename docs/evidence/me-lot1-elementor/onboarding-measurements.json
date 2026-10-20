@@ -1,0 +1,140 @@
+[
+  {
+    "mode": "simple",
+    "width": 1440,
+    "height": 900,
+    "step": "v3_review",
+    "scrollWidth": 1440,
+    "root": {
+      "x": 0,
+      "y": 0,
+      "width": 1440,
+      "bottom": 900
+    },
+    "panelRight": 470,
+    "previewLeft": 736,
+    "previewVisible": true,
+    "screenshot": "onboarding-simple-1440x900.png",
+    "selected": "9f4a6675-db53-4a6a-8ce1-a7574714a9a3"
+  },
+  {
+    "mode": "simple",
+    "width": 1024,
+    "height": 768,
+    "step": "v3_review",
+    "scrollWidth": 1024,
+    "root": {
+      "x": 0,
+      "y": 0,
+      "width": 1024,
+      "bottom": 768
+    },
+    "panelRight": 470,
+    "previewLeft": 528,
+    "previewVisible": true,
+    "screenshot": "onboarding-simple-1024x768.png",
+    "selected": "9f4a6675-db53-4a6a-8ce1-a7574714a9a3"
+  },
+  {
+    "mode": "simple",
+    "width": 768,
+    "height": 900,
+    "step": "v3_review",
+    "scrollWidth": 768,
+    "root": {
+      "x": 62,
+      "y": 0,
+      "width": 645,
+      "bottom": 900
+    },
+    "panelRight": 694,
+    "previewLeft": 279,
+    "previewVisible": true
+  },
+  {
+    "mode": "simple",
+    "width": 390,
+    "height": 844,
+    "step": "v3_review",
+    "scrollWidth": 390,
+    "root": {
+      "x": 0,
+      "y": 0,
+      "width": 390,
+      "bottom": 844
+    },
+    "panelRight": 390,
+    "previewLeft": 90,
+    "previewVisible": true,
+    "screenshot": "onboarding-simple-390x844.png"
+  },
+  {
+    "mode": "atomic",
+    "width": 1440,
+    "height": 900,
+    "step": "v3_colors",
+    "scrollWidth": 1440,
+    "root": {
+      "x": 0,
+      "y": 0,
+      "width": 1440,
+      "bottom": 900
+    },
+    "panelRight": 470,
+    "previewLeft": 736,
+    "previewVisible": true,
+    "screenshot": "onboarding-atomic-1440x900.png",
+    "selected": "34ac439b-6717-4442-9934-66473e8bf23b"
+  },
+  {
+    "mode": "atomic",
+    "width": 1024,
+    "height": 768,
+    "step": "v3_colors",
+    "scrollWidth": 1024,
+    "root": {
+      "x": 0,
+      "y": 0,
+      "width": 1024,
+      "bottom": 768
+    },
+    "panelRight": 470,
+    "previewLeft": 528,
+    "previewVisible": true,
+    "screenshot": "onboarding-atomic-1024x768.png",
+    "selected": "34ac439b-6717-4442-9934-66473e8bf23b"
+  },
+  {
+    "mode": "atomic",
+    "width": 768,
+    "height": 900,
+    "step": "v3_colors",
+    "scrollWidth": 768,
+    "root": {
+      "x": 62,
+      "y": 0,
+      "width": 645,
+      "bottom": 900
+    },
+    "panelRight": 694,
+    "previewLeft": 279,
+    "previewVisible": true
+  },
+  {
+    "mode": "atomic",
+    "width": 390,
+    "height": 844,
+    "step": "v3_colors",
+    "scrollWidth": 390,
+    "root": {
+      "x": 0,
+      "y": 0,
+      "width": 390,
+      "bottom": 844
+    },
+    "panelRight": 390,
+    "previewLeft": 90,
+    "previewVisible": true,
+    "screenshot": "onboarding-atomic-390x844.png"
+  }
+]

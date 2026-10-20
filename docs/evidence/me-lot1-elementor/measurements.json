@@ -1,0 +1,402 @@
+[
+  {
+    "mode": "simple",
+    "surface": "public",
+    "width": 1440,
+    "height": 900,
+    "viewport": [
+      1440,
+      900
+    ],
+    "scrollWidth": 1440,
+    "card": {
+      "x": 0,
+      "y": 0,
+      "width": 1440,
+      "height": 900
+    },
+    "background": "rgb(255, 253, 245)",
+    "borderRadius": "0px",
+    "nameFont": "Outfit, ui-sans-serif, system-ui, sans-serif",
+    "nameColor": "rgb(0, 0, 0)",
+    "linkCount": 2,
+    "linkColor": "rgb(255, 255, 255)",
+    "imagesLoaded": true,
+    "screenshot": "simple-public-1440x900.png"
+  },
+  {
+    "mode": "simple",
+    "surface": "widget",
+    "width": 1440,
+    "height": 900,
+    "viewport": [
+      1440,
+      900
+    ],
+    "scrollWidth": 1440,
+    "card": {
+      "x": 160,
+      "y": 10,
+      "width": 560,
+      "height": 900
+    },
+    "background": "rgb(255, 253, 245)",
+    "borderRadius": "0px",
+    "nameFont": "Outfit, ui-sans-serif, system-ui, sans-serif",
+    "nameColor": "rgb(0, 0, 0)",
+    "linkCount": 2,
+    "linkColor": "rgb(255, 255, 255)",
+    "imagesLoaded": true,
+    "screenshot": "simple-widget-1440x900.png"
+  },
+  {
+    "mode": "simple",
+    "surface": "public",
+    "width": 1024,
+    "height": 768,
+    "viewport": [
+      1024,
+      768
+    ],
+    "scrollWidth": 1024,
+    "card": {
+      "x": 0,
+      "y": 0,
+      "width": 1024,
+      "height": 768
+    },
+    "background": "rgb(255, 253, 245)",
+    "borderRadius": "0px",
+    "nameFont": "Outfit, ui-sans-serif, system-ui, sans-serif",
+    "nameColor": "rgb(0, 0, 0)",
+    "linkCount": 2,
+    "linkColor": "rgb(255, 255, 255)",
+    "imagesLoaded": true,
+    "screenshot": "simple-public-1024x768.png"
+  },
+  {
+    "mode": "simple",
+    "surface": "widget",
+    "width": 1024,
+    "height": 768,
+    "viewport": [
+      1024,
+      768
+    ],
+    "scrollWidth": 1024,
+    "card": {
+      "x": 10,
+      "y": 10,
+      "width": 560,
+      "height": 768
+    },
+    "background": "rgb(255, 253, 245)",
+    "borderRadius": "0px",
+    "nameFont": "Outfit, ui-sans-serif, system-ui, sans-serif",
+    "nameColor": "rgb(0, 0, 0)",
+    "linkCount": 2,
+    "linkColor": "rgb(255, 255, 255)",
+    "imagesLoaded": true,
+    "screenshot": "simple-widget-1024x768.png"
+  },
+  {
+    "mode": "simple",
+    "surface": "public",
+    "width": 768,
+    "height": 900,
+    "viewport": [
+      768,
+      900
+    ],
+    "scrollWidth": 768,
+    "card": {
+      "x": 0,
+      "y": 0,
+      "width": 768,
+      "height": 900
+    },
+    "background": "rgb(255, 253, 245)",
+    "borderRadius": "0px",
+    "nameFont": "Outfit, ui-sans-serif, system-ui, sans-serif",
+    "nameColor": "rgb(0, 0, 0)",
+    "linkCount": 2,
+    "linkColor": "rgb(255, 255, 255)",
+    "imagesLoaded": true,
+    "screenshot": "simple-public-768x900.png"
+  },
+  {
+    "mode": "simple",
+    "surface": "widget",
+    "width": 768,
+    "height": 900,
+    "viewport": [
+      768,
+      900
+    ],
+    "scrollWidth": 768,
+    "card": {
+      "x": 10,
+      "y": 10,
+      "width": 560,
+      "height": 900
+    },
+    "background": "rgb(255, 253, 245)",
+    "borderRadius": "0px",
+    "nameFont": "Outfit, ui-sans-serif, system-ui, sans-serif",
+    "nameColor": "rgb(0, 0, 0)",
+    "linkCount": 2,
+    "linkColor": "rgb(255, 255, 255)",
+    "imagesLoaded": true,
+    "screenshot": "simple-widget-768x900.png"
+  },
+  {
+    "mode": "simple",
+    "surface": "public",
+    "width": 390,
+    "height": 844,
+    "viewport": [
+      390,
+      844
+    ],
+    "scrollWidth": 390,
+    "card": {
+      "x": 0,
+      "y": 0,
+      "width": 390,
+      "height": 844
+    },
+    "background": "rgb(255, 253, 245)",
+    "borderRadius": "0px",
+    "nameFont": "Outfit, ui-sans-serif, system-ui, sans-serif",
+    "nameColor": "rgb(0, 0, 0)",
+    "linkCount": 2,
+    "linkColor": "rgb(255, 255, 255)",
+    "imagesLoaded": true,
+    "screenshot": "simple-public-390x844.png"
+  },
+  {
+    "mode": "simple",
+    "surface": "widget",
+    "width": 390,
+    "height": 844,
+    "viewport": [
+      390,
+      844
+    ],
+    "scrollWidth": 390,
+    "card": {
+      "x": 10,
+      "y": 10,
+      "width": 370,
+      "height": 844
+    },
+    "background": "rgb(255, 253, 245)",
+    "borderRadius": "0px",
+    "nameFont": "Outfit, ui-sans-serif, system-ui, sans-serif",
+    "nameColor": "rgb(0, 0, 0)",
+    "linkCount": 2,
+    "linkColor": "rgb(255, 255, 255)",
+    "imagesLoaded": true,
+    "screenshot": "simple-widget-390x844.png"
+  },
+  {
+    "mode": "atomic",
+    "surface": "public",
+    "width": 1440,
+    "height": 900,
+    "viewport": [
+      1440,
+      900
+    ],
+    "scrollWidth": 1440,
+    "card": {
+      "x": 0,
+      "y": 0,
+      "width": 1440,
+      "height": 900
+    },
+    "background": "rgb(222, 212, 228)",
+    "borderRadius": "0px",
+    "nameFont": "system-ui, sans-serif",
+    "nameColor": "rgb(245, 73, 85)",
+    "linkCount": 2,
+    "linkColor": "rgb(0, 0, 0)",
+    "imagesLoaded": true,
+    "screenshot": "atomic-public-1440x900.png"
+  },
+  {
+    "mode": "atomic",
+    "surface": "widget",
+    "width": 1440,
+    "height": 900,
+    "viewport": [
+      1440,
+      900
+    ],
+    "scrollWidth": 1440,
+    "card": {
+      "x": 160,
+      "y": 10,
+      "width": 560,
+      "height": 900
+    },
+    "background": "rgb(222, 212, 228)",
+    "borderRadius": "0px",
+    "nameFont": "system-ui, sans-serif",
+    "nameColor": "rgb(245, 73, 85)",
+    "linkCount": 2,
+    "linkColor": "rgb(0, 0, 0)",
+    "imagesLoaded": true,
+    "screenshot": "atomic-widget-1440x900.png"
+  },
+  {
+    "mode": "atomic",
+    "surface": "public",
+    "width": 1024,
+    "height": 768,
+    "viewport": [
+      1024,
+      768
+    ],
+    "scrollWidth": 1024,
+    "card": {
+      "x": 0,
+      "y": 0,
+      "width": 1024,
+      "height": 768
+    },
+    "background": "rgb(222, 212, 228)",
+    "borderRadius": "0px",
+    "nameFont": "system-ui, sans-serif",
+    "nameColor": "rgb(245, 73, 85)",
+    "linkCount": 2,
+    "linkColor": "rgb(0, 0, 0)",
+    "imagesLoaded": true,
+    "screenshot": "atomic-public-1024x768.png"
+  },
+  {
+    "mode": "atomic",
+    "surface": "widget",
+    "width": 1024,
+    "height": 768,
+    "viewport": [
+      1024,
+      768
+    ],
+    "scrollWidth": 1024,
+    "card": {
+      "x": 10,
+      "y": 10,
+      "width": 560,
+      "height": 768
+    },
+    "background": "rgb(222, 212, 228)",
+    "borderRadius": "0px",
+    "nameFont": "system-ui, sans-serif",
+    "nameColor": "rgb(245, 73, 85)",
+    "linkCount": 2,
+    "linkColor": "rgb(0, 0, 0)",
+    "imagesLoaded": true,
+    "screenshot": "atomic-widget-1024x768.png"
+  },
+  {
+    "mode": "atomic",
+    "surface": "public",
+    "width": 768,
+    "height": 900,
+    "viewport": [
+      768,
+      900
+    ],
+    "scrollWidth": 768,
+    "card": {
+      "x": 0,
+      "y": 0,
+      "width": 768,
+      "height": 900
+    },
+    "background": "rgb(222, 212, 228)",
+    "borderRadius": "0px",
+    "nameFont": "system-ui, sans-serif",
+    "nameColor": "rgb(245, 73, 85)",
+    "linkCount": 2,
+    "linkColor": "rgb(0, 0, 0)",
+    "imagesLoaded": true,
+    "screenshot": "atomic-public-768x900.png"
+  },
+  {
+    "mode": "atomic",
+    "surface": "widget",
+    "width": 768,
+    "height": 900,
+    "viewport": [
+      768,
+      900
+    ],
+    "scrollWidth": 768,
+    "card": {
+      "x": 10,
+      "y": 10,
+      "width": 560,
+      "height": 900
+    },
+    "background": "rgb(222, 212, 228)",
+    "borderRadius": "0px",
+    "nameFont": "system-ui, sans-serif",
+    "nameColor": "rgb(245, 73, 85)",
+    "linkCount": 2,
+    "linkColor": "rgb(0, 0, 0)",
+    "imagesLoaded": true,
+    "screenshot": "atomic-widget-768x900.png"
+  },
+  {
+    "mode": "atomic",
+    "surface": "public",
+    "width": 390,
+    "height": 844,
+    "viewport": [
+      390,
+      844
+    ],
+    "scrollWidth": 390,
+    "card": {
+      "x": 0,
+      "y": 0,
+      "width": 390,
+      "height": 844
+    },
+    "background": "rgb(222, 212, 228)",
+    "borderRadius": "0px",
+    "nameFont": "system-ui, sans-serif",
+    "nameColor": "rgb(245, 73, 85)",
+    "linkCount": 2,
+    "linkColor": "rgb(0, 0, 0)",
+    "imagesLoaded": true,
+    "screenshot": "atomic-public-390x844.png"
+  },
+  {
+    "mode": "atomic",
+    "surface": "widget",
+    "width": 390,
+    "height": 844,
+    "viewport": [
+      390,
+      844
+    ],
+    "scrollWidth": 390,
+    "card": {
+      "x": 10,
+      "y": 10,
+      "width": 370,
+      "height": 844
+    },
+    "background": "rgb(222, 212, 228)",
+    "borderRadius": "0px",
+    "nameFont": "system-ui, sans-serif",
+    "nameColor": "rgb(245, 73, 85)",
+    "linkCount": 2,
+    "linkColor": "rgb(0, 0, 0)",
+    "imagesLoaded": true,
+    "screenshot": "atomic-widget-390x844.png"
+  }
+]

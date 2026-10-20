@@ -6,6 +6,10 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ## Unreleased
 
+### Documentation
+
+- Documenter la recette Me du main fusionné sur WordPress et Elementor isolés, avec captures, écritures réelles, limites visuelles et chemin de publication.
+
 ### Ajouté
 
 - Sur PC et grande tablette, composer la carte Me dans le Studio avec les réglages à gauche et l’aperçu canonique interactif à droite. Un élément existant sélectionne sa rubrique et son éditeur ; le brouillon d’un lien est prévisualisé sans écriture avant son enregistrement.
