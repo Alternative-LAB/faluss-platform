@@ -124,7 +124,15 @@ final class OnboardingV3
             <form class="faluss-onboarding-v3__panel" data-v3-panel novalidate>
                 <button class="faluss-onboarding-v3__grabber" type="button" data-v3-grabber aria-label="Agrandir le panneau" aria-expanded="false"><span></span></button>
                 <div class="faluss-onboarding-v3__scroll" data-v3-scroll>
-                    <?php self::controls($step, $mode, $controlsState, $slug); ?>
+                    <?php if ((string) ($profile['public_slug'] ?? '') !== '') : ?>
+                    <section class="faluss-onboarding-v3__web-editors" data-v3-web-editors hidden>
+                        <h2>Modifier un lien</h2>
+                        <p>Enregistre tes changements sans quitter cette étape.</p>
+                        <?php StudioV3Management::onboardingLinkEditors((array) ($state['blocks'] ?? [])); ?>
+                        <button type="button" class="faluss-onboarding-v3__secondary" data-v3-web-edit-close>Revenir à l’étape</button>
+                    </section>
+                    <?php endif; ?>
+                    <div data-v3-step-controls><?php self::controls($step, $mode, $controlsState, $slug); ?></div>
                     <p class="faluss-onboarding-v3__error" data-v3-error role="alert" hidden></p>
                     <p class="faluss-onboarding-v3__status" data-v3-status role="status" aria-live="polite"></p>
                 </div>

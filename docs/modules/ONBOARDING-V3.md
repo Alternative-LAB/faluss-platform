@@ -1,5 +1,13 @@
 # Onboarding Faluss.me V3 natif
 
+## Compositeur web
+
+À partir de 980 px de largeur et 650 px de hauteur, l'onboarding V3 présente le configurateur à gauche et la carte canonique à droite. Le compositeur occupe toute la fenêtre pour garder les actions accessibles même lorsqu’un thème affiche un en-tête ou un titre de page. Cette règle laisse le téléphone, la petite tablette et une fenêtre basse dans le parcours mobile existant. Les étapes Simple et Atomique, leur curseur et leurs actions conservent le même contrat serveur. La carte est défilable et utilise le rendu public de Link.
+
+Sur la vue web, cliquer ou toucher un lien déjà enregistré dans la carte ouvre son éditeur dans le panneau gauche. Si l'étape courante contient des changements non enregistrés, un message demande d'abord de l'enregistrer pour éviter de perdre ces champs au rechargement. Un brouillon valide appelle le même endpoint de prévisualisation sans écrire. L'enregistrement appelle la mutation Link `update_link` avec le nonce et la version agrégée, puis recharge l'étape courante et le rendu canonique. Une URL non HTTPS, un lien inconnu ou une version périmée est refusé par le serveur ; les champs restent visibles après l'échec. L'éditeur n'est pas offert avant la réservation du slug. La sélection d'un lien n'avance pas le curseur d'onboarding. Les changements de taille de fenêtre restaurent le panneau mobile et retrouvent l'éditeur web au retour à une largeur suffisante.
+
+La [recette navigateur du compositeur](../evidence/me-web-onboarding/README.md) couvre Chromium et WebKit sur PC, grande et petite tablette, et téléphone. Les réponses AJAX et la persistance y sont simulées ; une vérification sur WordPress/MariaDB isolé et sur appareils physiques reste nécessaire avant publication. Aucun flag, donnée ni mécanisme de mise à jour n'est modifié par ce lot.
+
 V3 est le parcours de création de carte du rôle `me`. Le flag `FALUSS_PLATFORM_ONBOARDING_V3` est absent ou `false` par défaut. Il exige les modules Identity, Catalog, Link, Apps Registry et la dépendance de Link `Token Engine Connector`, ainsi que le schéma Link V4 déjà migré. Le module Me Studio fournit l'interface ; Identity conserve l'identité, le slug, la publication et le curseur ; Link conserve les préférences, les réseaux, les blocs ordonnés et le rendu public. La carte affichée dans l'unique téléphone utilise `Faluss_Link::card_markup_from_presentation()`.
 
 ## Parcours et reprise

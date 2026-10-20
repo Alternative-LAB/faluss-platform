@@ -52,9 +52,7 @@ jobs:
           export NODE_PATH="$RUNNER_TEMP/me-browser-tools/node_modules"
           export FALUSS_PHP="$(command -v php)"
           FALUSS_BROWSER_EVIDENCE_DIR="$RUNNER_TEMP/me-web-evidence/studio" node tests/MeStudio/studio-v3-web-composer.js
-          if [[ -f tests/MeStudio/onboarding-v3-web-composer.js ]]; then
-            FALUSS_BROWSER_EVIDENCE_DIR="$RUNNER_TEMP/me-web-evidence/onboarding" node tests/MeStudio/onboarding-v3-web-composer.js
-          fi
+          FALUSS_BROWSER_EVIDENCE_DIR="$RUNNER_TEMP/me-web-evidence/onboarding" node tests/MeStudio/onboarding-v3-web-composer.js
       - uses: actions/upload-artifact@v4
         if: always()
         with:
