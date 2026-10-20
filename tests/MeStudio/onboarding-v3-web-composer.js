@@ -10,7 +10,7 @@ const css = ['assets/link/css/faluss-link.css', 'assets/link/css/faluss-link-imm
     'assets/me-studio/css/card-v2.css', 'assets/me-studio/css/onboarding-v3.css']
     .map(file => fs.readFileSync(path.join(root, file), 'utf8')).join('\n');
 const script = fs.readFileSync(path.join(root, 'assets/me-studio/js/onboarding-v3.js'), 'utf8');
-const evidence = path.join(root, 'docs/evidence/me-web-onboarding');
+const evidence = process.env.FALUSS_BROWSER_EVIDENCE_DIR || path.join(root, 'docs/evidence/me-web-onboarding');
 const blockId = '44444444-4444-4444-8444-444444444444';
 const initialLabel = 'Dans A';
 
@@ -66,7 +66,7 @@ const initialLabel = 'Dans A';
                     if (url.pathname === '/onboarding/') {
                         const step = url.searchParams.get('step') || 'v3_colors';
                         const view = views[step].replaceAll('https://faluss.test', 'https://onboarding.test').replaceAll(initialLabel, savedLabel);
-                        return route.fulfill({contentType: 'text/html', body: `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style><style>:where(main)>*{max-width:645px!important;margin-inline:auto!important}</style><main style="width:min(100%,645px);margin:auto">${view}</main><script>window.falussOnboardingV3={ajaxUrl:'/wp-admin/admin-ajax.php',previewNonce:'preview',managementNonce:'manage'};</script><script>${script}</script>`});
+                        return route.fulfill({contentType: 'text/html', body: `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style><style>:where(main)>*{max-width:645px!important;margin-inline:auto!important}</style><header style="height:${width >= 980 && height >= 650 ? 280 : 0}px">En-tête du thème</header><main style="width:min(100%,645px);margin:auto">${view}</main><script>window.falussOnboardingV3={ajaxUrl:'/wp-admin/admin-ajax.php',previewNonce:'preview',managementNonce:'manage'};</script><script>${script}</script>`});
                     }
                     return route.abort();
                 });
@@ -80,7 +80,7 @@ const initialLabel = 'Dans A';
                     root: document.querySelector('[data-faluss-onboarding-v3]').getBoundingClientRect().toJSON()
                 }));
                 assert.equal(geometry.overflow, false, `${engine} ${width}x${height}: no horizontal overflow`);
-                if (web) { assert.equal(Math.round(geometry.root.width), width, `${engine} ${width}: composer uses viewport despite theme content width`); assert.equal(Math.round(geometry.root.left), 0, `${engine} ${width}: composer is centered in viewport`); }
+                if (web) { assert.equal(Math.round(geometry.root.width), width, `${engine} ${width}: composer uses viewport despite theme content width`); assert.equal(Math.round(geometry.root.left), 0, `${engine} ${width}: composer is centered in viewport`); assert.equal(Math.round(geometry.root.top), 0, `${engine} ${width}: theme header cannot push actions outside viewport`); assert.equal(Math.round(geometry.root.bottom), height, `${engine} ${width}: whole composer fits viewport`); }
                 assert.equal(geometry.panel.right <= geometry.preview.left, web, `${engine} ${width}x${height}: adaptive layout`);
                 assert.equal(geometry.grabber === 'none', web, `${engine} ${width}x${height}: mobile sheet`);
                 if (width === 390 || web) { await page.screenshot({path: path.join(evidence, `${engine}-onboarding-${width}-${height}.png`)}); }
