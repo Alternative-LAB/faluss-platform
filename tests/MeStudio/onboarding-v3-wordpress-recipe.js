@@ -68,7 +68,7 @@ function assert(value, message) { if (!value) { throw new Error(message); } }
         const step = await page.locator('[data-faluss-onboarding-v3]').getAttribute('data-step');
         const config = await page.evaluate(() => window.falussOnboardingV3 || {});
         assert(config.transitionNonce && config.previewNonce, 'Missing V3 AJAX config');
-        assert(['v3_mode', 'v3_socials', 'v3_colors', 'v3_review'].includes(step), 'Account must resume in V3, got ' + step);
+        assert(['v3_mode', 'v3_activity', 'v3_socials', 'v3_colors', 'v3_review'].includes(step), 'Account must resume in V3, got ' + step);
         async function action(expected, selector = '[data-v3-primary]') {
             await page.locator(selector).click();
             await page.waitForSelector('[data-step="' + expected + '"]', { timeout: 12000 });
@@ -112,9 +112,18 @@ function assert(value, message) { if (!value) { throw new Error(message); } }
             assert(await page.locator('[name="public_slug"]').inputValue() === slug, 'Identity slug lost after avatar reload');
             const reloadedAvatar = await page.locator('[name="avatar_attachment_id"]').evaluate((field) => ({ value: field.value, attribute: field.getAttribute('value') }));
             assert(Number(reloadedAvatar.value) === avatarId, 'Avatar lost after reload: ' + JSON.stringify({ avatarId, reloadedAvatar }));
-            await action('v3_socials');
+            await action('v3_activity');
         } else {
             slug = (await page.locator('[data-v3-preview] .faluss-link-card__handle').textContent()).trim().replace(/^@/, '');
+        }
+        if (await page.locator('[data-faluss-onboarding-v3]').getAttribute('data-step') === 'v3_activity') {
+            await page.locator('input[name="activity_category"][value="video"]').check({ force: true });
+            await action('v3_socials');
+            await page.reload();
+            await page.waitForLoadState('networkidle');
+            await action('v3_activity', '[data-v3-back]');
+            assert(await page.locator('input[name="activity_category"][value="video"]').isChecked(), 'Activity category lost after reload');
+            await action('v3_socials');
         }
         if (process.env.FALUSS_V3_WP_STOP_AT_SOCIALS === 'true') {
             assert(await page.locator('[data-faluss-onboarding-v3]').getAttribute('data-step') === 'v3_socials', 'Expected Networks pause');

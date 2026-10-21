@@ -43,7 +43,7 @@
         var step = root.dataset.step;
         var names = {
             v3_mode: ['structure'], v3_identity: ['display_name', 'public_slug', 'avatar_attachment_id'],
-            v3_colors: ['page_background', 'button_color'], v3_buttons: ['link_style', 'button_texture'],
+            v3_activity: ['activity_category'], v3_colors: ['page_background', 'button_color'], v3_buttons: ['link_style', 'button_texture'],
             v3_avatar: ['avatar_attachment_id', 'avatar_shape', 'avatar_effect', 'avatar_visible'],
             v3_wallpaper: ['cover_attachment_id', 'wallpaper_size', 'wallpaper_effect'],
             v3_name: ['name_font', 'name_weight', 'name_color', 'secondary_color'],

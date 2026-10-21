@@ -10,7 +10,7 @@ use Faluss\Platform\Link\LinkStudioContract;
 /** One opt-in route and one cursor graph for both V3 modes. */
 final class OnboardingV3
 {
-    private const COMMON = ['v3_mode', 'v3_identity', 'v3_socials', 'v3_links'];
+    private const COMMON = ['v3_mode', 'v3_identity', 'v3_activity', 'v3_socials', 'v3_links'];
     private const ATOMIC = ['v3_colors', 'v3_buttons', 'v3_avatar', 'v3_wallpaper', 'v3_name', 'v3_network_style'];
 
     public static function enabled(): bool
@@ -137,7 +137,7 @@ final class OnboardingV3
                     <p class="faluss-onboarding-v3__status" data-v3-status role="status" aria-live="polite"></p>
                 </div>
                 <footer class="faluss-onboarding-v3__actions">
-                    <?php if (in_array($step, ['v3_socials', 'v3_links', 'v3_avatar', 'v3_wallpaper', 'v3_network_style'], true)) : ?><button type="button" class="faluss-onboarding-v3__skip" data-v3-skip>Passer</button><?php endif; ?>
+                    <?php if (in_array($step, ['v3_activity', 'v3_socials', 'v3_links', 'v3_avatar', 'v3_wallpaper', 'v3_network_style'], true)) : ?><button type="button" class="faluss-onboarding-v3__skip" data-v3-skip>Passer</button><?php endif; ?>
                     <?php if ($step !== 'v3_success') : ?><button type="submit" class="faluss-onboarding-v3__primary" data-v3-primary><?php echo esc_html($step === 'v3_identity' && empty($controlsState['canonical_slug']) ? 'Revendiquer mon identifiant' : ($step === 'v3_review' ? 'Publier mon Faluss' : 'Continuer')); ?> <span aria-hidden="true">→</span></button><?php endif; ?>
                 </footer>
             </form>
@@ -152,7 +152,7 @@ final class OnboardingV3
         $profile = is_array($state['profile'] ?? null) ? $state['profile'] : [];
         $prefs = is_array($state['preferences'] ?? null) ? $state['preferences'] : [];
         $titles = [
-            'v3_mode' => !empty($state['studio']) ? 'Structure de ta carte' : 'Choisis ton rythme', 'v3_identity' => (empty($state['canonical_slug']) ? 'Revendique ton identifiant' : 'Ton identité'), 'v3_socials' => 'Tes réseaux',
+            'v3_mode' => !empty($state['studio']) ? 'Structure de ta carte' : 'Choisis ton rythme', 'v3_identity' => (empty($state['canonical_slug']) ? 'Revendique ton identifiant' : 'Ton identité'), 'v3_activity' => 'Ton activité', 'v3_socials' => 'Tes réseaux',
             'v3_links' => 'Tes liens', 'v3_colors' => 'Couleurs', 'v3_buttons' => 'Boutons',
             'v3_avatar' => 'Photo de profil', 'v3_wallpaper' => 'Image de fond', 'v3_name' => 'Ton nom',
             'v3_network_style' => 'Tes réseaux', 'v3_review' => 'Dernier regard',
@@ -172,6 +172,11 @@ final class OnboardingV3
                 <label>Photo de profil · facultative<input type="file" accept="image/jpeg,image/png,image/gif,image/webp" data-v3-upload="avatar"></label>
                 <input type="hidden" name="avatar_attachment_id" value="<?php echo (int) ($profile['avatar_attachment_id'] ?? 0); ?>">
                 <p class="faluss-onboarding-v3__hint">L’identifiant devient permanent dès sa réservation.</p><?php
+                break;
+            case 'v3_activity':
+                ?><p>Choisis l'activité qui te ressemble. Tu pourras la changer dans le Studio sans perdre tes contenus.</p>
+                <?php self::choices('activity_category', ['none' => 'Plus tard', 'video' => 'Vidéo', 'music' => 'Musique', 'streaming' => 'Streaming', 'visual_arts' => 'Arts visuels'], (string) ($prefs['activity_category'] ?? 'none')); ?>
+                <p class="faluss-onboarding-v3__hint">Ce choix est facultatif.</p><?php
                 break;
             case 'v3_socials':
                 ?><p>Ajoute les réseaux que tu souhaites montrer.</p><div class="faluss-onboarding-v3__network-list" data-v3-networks><?php
@@ -394,7 +399,7 @@ final class OnboardingV3
     private static function contractFields(string $step, array $fields, array $state, bool $skip): array
     {
         $contracts = [
-            'v3_socials' => ['social_networks'], 'v3_links' => ['links'],
+            'v3_activity' => ['activity_category'], 'v3_socials' => ['social_networks'], 'v3_links' => ['links'],
             'v3_colors' => ['page_background', 'button_color'], 'v3_buttons' => ['link_style', 'button_texture'],
             'v3_avatar' => ['avatar_attachment_id', 'avatar_shape', 'avatar_effect'],
             'v3_wallpaper' => ['cover_attachment_id', 'wallpaper_size', 'wallpaper_effect'],

@@ -30,8 +30,9 @@ final class OnboardingV3StateTest extends TestCase
         self::assertSame('v3_identity', OnboardingV3::step('v3_identity_atomic', 'atomic'));
         self::assertSame('v3_mode', OnboardingV3::step('v3_mode_simple', 'simple'));
         self::assertSame('v3_success', OnboardingV3::step('wizard_finish', 'atomic', ['publication_status' => 'published']));
-        self::assertSame('v3_review', OnboardingV3::sequence('simple')[4]);
-        self::assertSame('v3_name', OnboardingV3::sequence('atomic')[8]);
+        self::assertSame('v3_activity', OnboardingV3::sequence('simple')[2]);
+        self::assertSame('v3_review', OnboardingV3::sequence('simple')[5]);
+        self::assertSame('v3_name', OnboardingV3::sequence('atomic')[9]);
     }
 
     #[RunInSeparateProcess]

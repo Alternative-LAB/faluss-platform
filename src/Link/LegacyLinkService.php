@@ -23,6 +23,7 @@ final class Faluss_Link {
     const LINK_STYLES = array( 'solid' => 'Visuel', 'light' => 'Minutieux', 'outline' => 'Formel' );
     const NAME_COLORS = array( '#BE79FF' => 'Rose', '#F54955' => 'Corail', '#FFFFFF' => 'Blanc', '#000000' => 'Noir', '#82206B' => 'Prune' );
     const SOCIAL_VARIANTS = array( 'outline' => 'Icônes contour', 'full' => 'Logos pleins' );
+    const ACTIVITY_CATEGORIES = array( 'none', 'video', 'music', 'streaming', 'visual_arts' );
     const BLOCK_TYPES = array( 'section_title' => 'Titre de section', 'text' => 'Texte', 'link' => 'Lien', 'media_teaser' => 'Teaser média' );
     const TEASER_FORMATS = array( 'landscape' => 'Paysage', 'portrait' => 'Portrait', 'square' => 'Carré' );
     const TEASER_ACCESS_MODES = array( 'public' => 'Public', 'member' => 'Membre Faluss', 'entitlement' => 'Droit requis' );
@@ -421,7 +422,7 @@ final class Faluss_Link {
         if ( ! is_array( $draft ) ) { return new WP_Error( 'invalid_preview' ); }
         $state = self::studio_v2_state();
         if ( is_wp_error( $state ) ) { return $state; }
-        $allowed = array( 'cover_attachment_id', 'avatar_visible', 'name_font', 'page_background', 'button_color', 'link_style', 'structure', 'button_texture', 'avatar_shape', 'avatar_effect', 'wallpaper_size', 'wallpaper_effect', 'social_style', 'social_color', 'links_mode', 'link_width', 'secondary_color', 'image_border', 'image_border_color' );
+        $allowed = array( 'cover_attachment_id', 'avatar_visible', 'name_font', 'page_background', 'button_color', 'link_style', 'structure', 'button_texture', 'avatar_shape', 'avatar_effect', 'wallpaper_size', 'wallpaper_effect', 'social_style', 'social_color', 'links_mode', 'link_width', 'secondary_color', 'image_border', 'image_border_color', 'activity_category' );
         if ( array_diff( array_keys( $draft ), $allowed ) ) { return new WP_Error( 'unexpected_preview_field' ); }
         $choices = array(
             'structure' => array( 'simple', 'atomic' ),
@@ -434,6 +435,7 @@ final class Faluss_Link {
             'links_mode' => array( 'neutral', 'image-grid' ),
             'link_width' => array( 'wide', 'compact' ),
             'image_border' => array( 'none', 'solid' ),
+            'activity_category' => self::ACTIVITY_CATEGORIES,
         );
         foreach ( $choices as $field => $values ) {
             if ( isset( $draft[ $field ] ) && ! in_array( $draft[ $field ], $values, true ) ) { return new WP_Error( 'invalid_preview' ); }
@@ -478,6 +480,7 @@ final class Faluss_Link {
             'wizard_structure' => array( 'structure' ),
             'v3_mode' => array( 'structure' ),
             'v3_identity' => array( 'display_name', 'avatar_attachment_id' ),
+            'v3_activity' => array( 'activity_category' ),
             'wizard_atomic_warning' => array(),
             'wizard_atomic_colors' => array( 'page_background', 'button_color' ),
             'wizard_atomic_buttons' => array( 'link_style', 'button_texture' ),
@@ -513,6 +516,9 @@ final class Faluss_Link {
             $raw = json_decode( (string) $fields['social_networks'], true );
             if ( ! is_array( $raw ) || count( $raw ) > 32 || count( self::socials( $raw ) ) !== count( $raw ) ) { return array( 'ok' => false, 'status' => 422, 'code' => 'invalid_socials' ); }
             $fields['social_networks'] = $raw;
+        }
+        if ( 'v3_activity' === $step && ( ! is_string( $fields['activity_category'] ) || ! in_array( $fields['activity_category'], self::ACTIVITY_CATEGORIES, true ) ) ) {
+            return array( 'ok' => false, 'status' => 422, 'code' => 'invalid_activity_category' );
         }
         if ( 'v3_links' === $step ) {
             $raw = json_decode( (string) $fields['links'], true );
@@ -902,6 +908,8 @@ final class Faluss_Link {
         $networks = self::socials( array_is_list( $payload ) ? $payload : ( $payload['networks'] ?? array() ) );
         if ( array_is_list( $payload ) ) { $payload = array(); }
         $payload['networks'] = $networks;
+        if ( 'none' !== $old['activity_category'] ) { $payload['activity_category'] = $old['activity_category']; }
+        else { unset( $payload['activity_category'] ); }
         $payload['social_selected'] = self::onboarding_network_selection( $payload['social_selected'] ?? $payload['networks'] );
         $payload['avatar_border'] = ! empty( $payload['avatar_border'] ) ? 1 : 0;
         $payload['name_font'] = self::onboarding_name_font( $payload['name_font'] ?? 'outfit' );
@@ -913,6 +921,14 @@ final class Faluss_Link {
         $payload_changed = false;
 
         foreach ( $fields as $key => $value ) {
+            if ( 'activity_category' === $key ) {
+                if ( ! is_string( $value ) || ! in_array( $value, self::ACTIVITY_CATEGORIES, true ) ) { return false; }
+                $old['activity_category'] = $value;
+                if ( 'none' === $value ) { unset( $payload['activity_category'] ); }
+                else { $payload['activity_category'] = $value; }
+                $payload_changed = true;
+                continue;
+            }
             if ( 'selected_theme' === $key ) {
                 $reference = self::theme_reference( $value );
                 $theme = self::catalog_theme( $reference );
@@ -1052,7 +1068,8 @@ final class Faluss_Link {
             if ( method_exists( 'Faluss_Link_Schema', 'composition_ready' ) && Faluss_Link_Schema::composition_ready() ) {
                 $composition = self::composition_from_preferences( $old );
                 $updates['composition'] = wp_json_encode( $composition ); $formats[] = '%s';
-                $updates['social_links'] = wp_json_encode( $payload['networks'] ); $formats[] = '%s';
+                $stored_networks = isset( $payload['activity_category'] ) ? array( 'networks' => $payload['networks'], 'activity_category' => $payload['activity_category'] ) : $payload['networks'];
+                $updates['social_links'] = wp_json_encode( $stored_networks ); $formats[] = '%s';
                 $old['composition'] = $updates['composition'];
             } else {
                 $updates['social_links'] = wp_json_encode( $payload ); $formats[] = '%s';
@@ -1944,7 +1961,9 @@ final class Faluss_Link {
         $payload = array( 'networks' => $networks, 'social_selected' => $social_selected, 'avatar_border' => $avatar_border, 'name_font' => $name_font, 'alignment' => $pick( $field( 'alignment', $old['alignment'] ), array( 'left', 'center' ), $old['alignment'] ), 'page_background' => $page_background ? $page_background : '#FFFDF5', 'button_color' => $button_color ? $button_color : '#080808', 'hero_transition_color' => $color ? $color : '#FFFDF5', 'hero_transition_intensity' => min( 100, max( 0, (int) $field( 'hero_transition_intensity', $old['hero_transition_intensity'] ) ) ), 'hero_transition_position' => min( 100, max( 35, (int) $field( 'hero_transition_position', $old['hero_transition_position'] ) ) ), 'name_color' => $name_color, 'social_variant' => $social_variant, 'selected_theme' => $theme_reference, 'theme_overrides' => $theme_overrides );
         $composition_ready = method_exists( 'Faluss_Link_Schema', 'composition_ready' ) && Faluss_Link_Schema::composition_ready();
         $composition_source = array_merge( $old, $payload );
-        $values = array( 'cover_attachment_id' => $cover, 'avatar_visible' => array_key_exists( 'avatar_visible', $post ) ? ( ! empty( $post['avatar_visible'] ) ? 1 : 0 ) : (int) $old['avatar_visible'], 'name_weight' => 'bold', 'name_treatment' => $pick( $field( 'name_treatment', $old['name_treatment'] ), array_keys( self::NAME_TREATMENTS ), $old['name_treatment'] ), 'available' => array_key_exists( 'available', $post ) ? ( ! empty( $post['available'] ) ? 1 : 0 ) : (int) $old['available'], 'bio_mode' => $pick( $field( 'bio_mode', $old['bio_mode'] ), array( 'editorial', 'announcement' ), $old['bio_mode'] ), 'announcement' => sanitize_text_field( $field( 'announcement', $old['announcement'] ) ), 'announcement_variant' => $pick( $field( 'announcement_variant', $old['announcement_variant'] ), array_keys( self::ANNOUNCEMENTS ), $old['announcement_variant'] ), 'social_links' => wp_json_encode( $composition_ready ? $networks : $payload ), 'social_layout' => $pick( $field( 'social_layout', $old['social_layout'] ), array_keys( self::LAYOUTS ), $old['social_layout'] ), 'link_style' => $pick( $field( 'link_style', $old['link_style'] ), array_keys( self::LINK_STYLES ), $old['link_style'] ) );
+        if ( 'none' !== $old['activity_category'] ) { $payload['activity_category'] = $old['activity_category']; }
+        $stored_socials = $composition_ready ? ( 'none' === $old['activity_category'] ? $networks : array( 'networks' => $networks, 'activity_category' => $old['activity_category'] ) ) : $payload;
+        $values = array( 'cover_attachment_id' => $cover, 'avatar_visible' => array_key_exists( 'avatar_visible', $post ) ? ( ! empty( $post['avatar_visible'] ) ? 1 : 0 ) : (int) $old['avatar_visible'], 'name_weight' => 'bold', 'name_treatment' => $pick( $field( 'name_treatment', $old['name_treatment'] ), array_keys( self::NAME_TREATMENTS ), $old['name_treatment'] ), 'available' => array_key_exists( 'available', $post ) ? ( ! empty( $post['available'] ) ? 1 : 0 ) : (int) $old['available'], 'bio_mode' => $pick( $field( 'bio_mode', $old['bio_mode'] ), array( 'editorial', 'announcement' ), $old['bio_mode'] ), 'announcement' => sanitize_text_field( $field( 'announcement', $old['announcement'] ) ), 'announcement_variant' => $pick( $field( 'announcement_variant', $old['announcement_variant'] ), array_keys( self::ANNOUNCEMENTS ), $old['announcement_variant'] ), 'social_links' => wp_json_encode( $stored_socials ), 'social_layout' => $pick( $field( 'social_layout', $old['social_layout'] ), array_keys( self::LAYOUTS ), $old['social_layout'] ), 'link_style' => $pick( $field( 'link_style', $old['link_style'] ), array_keys( self::LINK_STYLES ), $old['link_style'] ) );
         if ( $composition_ready ) { $values['composition'] = wp_json_encode( self::composition_from_preferences( $composition_source ) ); }
         $now = gmdate( 'Y-m-d H:i:s' );
         if ( empty( $old['_has_row'] ) ) {
@@ -2186,12 +2205,14 @@ final class Faluss_Link {
      */
     private static function prefs( $faluss_id, $resolve_entitlement = true ) {
         global $wpdb;
-        $defaults = array( 'faluss_id' => '', 'cover_attachment_id' => 0, 'avatar_visible' => 1, 'avatar_border' => 1, 'name_font' => 'outfit', 'name_weight' => 'bold', 'name_treatment' => 'strong', 'available' => 0, 'bio_mode' => 'editorial', 'announcement' => '', 'announcement_variant' => 'accent', 'social_links' => '[]', 'social_selected' => array(), 'social_layout' => 'bubbles', 'link_style' => 'solid', 'alignment' => 'center', 'page_background' => '#FFFDF5', 'button_color' => '#080808', 'hero_transition_color' => '#FFFDF5', 'hero_transition_intensity' => 82, 'hero_transition_position' => 72, 'name_color' => '#000000', 'social_variant' => 'outline', 'theme_reference' => 'faluss-default', 'selected_theme' => 'faluss-default', 'theme_overrides' => array(), 'composition' => '', 'structure' => 'simple', 'button_texture' => 'smooth', 'avatar_shape' => 'round', 'avatar_effect' => 'border', 'wallpaper_size' => 'compact', 'wallpaper_effect' => 'gradient', 'social_style' => 'brand-light', 'social_color' => '', 'links_mode' => 'neutral', 'link_width' => 'wide' );
+        $defaults = array( 'faluss_id' => '', 'cover_attachment_id' => 0, 'avatar_visible' => 1, 'avatar_border' => 1, 'name_font' => 'outfit', 'name_weight' => 'bold', 'name_treatment' => 'strong', 'available' => 0, 'bio_mode' => 'editorial', 'announcement' => '', 'announcement_variant' => 'accent', 'social_links' => '[]', 'activity_category' => 'none', 'social_selected' => array(), 'social_layout' => 'bubbles', 'link_style' => 'solid', 'alignment' => 'center', 'page_background' => '#FFFDF5', 'button_color' => '#080808', 'hero_transition_color' => '#FFFDF5', 'hero_transition_intensity' => 82, 'hero_transition_position' => 72, 'name_color' => '#000000', 'social_variant' => 'outline', 'theme_reference' => 'faluss-default', 'selected_theme' => 'faluss-default', 'theme_overrides' => array(), 'composition' => '', 'structure' => 'simple', 'button_texture' => 'smooth', 'avatar_shape' => 'round', 'avatar_effect' => 'border', 'wallpaper_size' => 'compact', 'wallpaper_effect' => 'gradient', 'social_style' => 'brand-light', 'social_color' => '', 'links_mode' => 'neutral', 'link_width' => 'wide' );
         $row = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . Faluss_Link_Schema::table() . ' WHERE faluss_id=%s', $faluss_id ), ARRAY_A );
         $preferences = is_array( $row ) ? array_merge( $defaults, $row ) : $defaults;
         $preferences['_has_row'] = is_array( $row );
         $preferences['faluss_id'] = (string) $faluss_id;
         $payload = json_decode( $preferences['social_links'], true );
+        $category = is_array( $payload ) ? ( $payload['activity_category'] ?? 'none' ) : 'none';
+        $preferences['activity_category'] = is_string( $category ) && in_array( $category, self::ACTIVITY_CATEGORIES, true ) ? $category : 'none';
         $legacy = is_array( $payload ) && ! array_key_exists( 'selected_theme', $payload );
         if ( is_array( $payload ) ) {
             $preferences['avatar_border'] = array_key_exists( 'avatar_border', $payload ) ? ( ! empty( $payload['avatar_border'] ) ? 1 : 0 ) : (int) $preferences['avatar_border'];

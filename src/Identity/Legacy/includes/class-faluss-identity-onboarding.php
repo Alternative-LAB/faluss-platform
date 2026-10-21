@@ -28,7 +28,7 @@ final class Faluss_Identity_Onboarding {
         'wizard_atomic_warning', 'wizard_atomic_colors', 'wizard_atomic_buttons', 'wizard_atomic_avatar_upload',
         'wizard_atomic_avatar', 'wizard_atomic_wallpaper_upload', 'wizard_atomic_wallpaper', 'wizard_atomic_networks',
         'wizard_finish', 'complete',
-        'v3_mode', 'v3_mode_simple', 'v3_mode_atomic', 'v3_identity_simple', 'v3_identity_atomic', 'v3_socials', 'v3_links',
+        'v3_mode', 'v3_mode_simple', 'v3_mode_atomic', 'v3_identity_simple', 'v3_identity_atomic', 'v3_activity', 'v3_socials', 'v3_links',
         'v3_colors', 'v3_buttons', 'v3_avatar', 'v3_wallpaper', 'v3_name',
         'v3_network_style', 'v3_review',
     );
