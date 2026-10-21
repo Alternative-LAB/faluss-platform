@@ -11,7 +11,7 @@ define('FALUSS_PLATFORM_IDENTITY', true);
 
 `faluss.me` reste l’unique autorité d’identité. Le module refuse de démarrer si une classe du plugin historique est déjà chargée; l’ancien plugin et le module Platform ne doivent donc jamais être actifs dans la même requête. `faluss.com` reste un client SSO et conserve ses utilisateurs, rôles et sessions WordPress locaux.
 
-Les seize sources PHP historiques et les huit assets CSS/JavaScript sont conservés octet pour octet depuis le commit audité `4c84e4bbfc859f9d6c17b1d44a76c79bdbcdadb4`. Les shortcodes, widgets Elementor, routes, actions, options, classes publiques, libellés et sélecteurs historiques restent disponibles. Le lot n’effectue aucune refonte visuelle.
+Les sources historiques restent conservées, sauf les deux adaptations ciblées de durée et de persistance de la session membre Me. Le test de caractérisation verrouille leur contenu. Les shortcodes, widgets Elementor, routes, actions, options, classes publiques, libellés et sélecteurs historiques restent disponibles. Le lot n’effectue aucune refonte visuelle.
 
 ## Données et comportements conservés
 
@@ -26,8 +26,14 @@ Les seize sources PHP historiques et les huit assets CSS/JavaScript sont conserv
 | Onboarding | état minimal sur le profil Identity existant, poignée navigateur opaque et retours strictement locaux; aucune seconde table d’identité |
 | OAuth | Authorization Code à usage unique, 60 secondes, URI exacte, PKCE S256 et secret serveur pour un client confidentiel |
 | Consentement | `identity.basic` obligatoire, `identity.email` seulement lorsqu’il est demandé et accordé; le marqueur `first_party` est limité au callback exact de Faluss.com |
-| Session membre | une heure fixe pour le seul rôle `subscriber` possédant un profil Identity actif; les challenges et codes conservent leurs durées propres |
+| Session membre | huit heures fixes pour le seul rôle `subscriber` possédant un profil Identity actif ; cookie persistant pour traverser une fermeture du navigateur, sans renouvellement automatique ; les challenges et codes conservent leurs durées propres |
 | Audit | identifiant d’événement, type, client et dates; aucun e-mail, OTP, code, state, verifier ou secret brut |
+
+La nouvelle session Me commence au succès du passwordless et garde une échéance serveur fixe de huit heures. Le cookie persistant permet de fermer complètement puis rouvrir le navigateur avant cette échéance. Une visite du Studio, du login ou d'un client SSO ne renouvelle pas cette session ; à l'échéance, Me exige une nouvelle preuve. Les sessions établies avant la mise à jour gardent leur échéance initiale. Une déconnexion explicite sur Me invalide cette session Me ; elle n'est pas une déconnexion globale des sessions WordPress déjà ouvertes sur Hub ou Fans.
+
+Scénarios positifs à vérifier : membre `subscriber` actif encore reconnu sur Me après fermeture du navigateur avant huit heures ; Hub sans session locale qui traverse Me déjà authentifié et revient à sa destination sans e-mail ni OTP ; compte administrateur dont la durée WordPress ne change pas. Scénarios négatifs : membre sans identité active et rôle combiné inchangés ; jeton Me expiré refusé ; aucun cookie Me partagé avec `faluss.com` ; déconnexion Me n'effaçant pas silencieusement une session Hub ou Fans.
+
+Cette modification ne suffit pas à imposer une échéance commune stricte à tous les produits : Hub crée encore une session locale d'une heure et Fans une session locale de huit heures à partir de leurs propres callbacks. Un callback peu avant l'expiration centrale peut donc laisser une session cliente active après celle-ci. Faire coïncider toutes les échéances avec l'OTP initial demanderait un contrat d'expiration attesté par Identity et une durée locale bornée dans chaque client, avec une migration et des tests de compatibilité séparés. Aucun délai OAuth, OTP ou consentement n'est allongé ici.
 
 L’installation vérifie le schéma avant d’enregistrer les surfaces publiques. Une installation partielle ou incompatible échoue fermée; elle n’est ni réparée en supprimant des tables ni convertie silencieusement. Les tables et options existantes restent la source de vérité : aucun compte, profil, client, consentement ou audit n’est recopié dans un nouveau stockage.
 

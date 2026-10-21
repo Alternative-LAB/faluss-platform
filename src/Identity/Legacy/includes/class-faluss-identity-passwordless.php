@@ -273,7 +273,9 @@ final class Faluss_Identity_Passwordless {
 
     private static function open_session( $user ) {
         wp_set_current_user( $user->ID );
-        wp_set_auth_cookie( $user->ID, false, is_ssl() );
+        // A persistent browser cookie lets this fixed session survive a browser
+        // restart; the signed WordPress token still expires after eight hours.
+        wp_set_auth_cookie( $user->ID, true, is_ssl() );
         do_action( 'wp_login', $user->user_login, $user );
         self::clear_cookie();
         self::record_audit( 'passwordless_session_opened' );
