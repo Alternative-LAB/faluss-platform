@@ -268,3 +268,13 @@
 .faluss-link-card.faluss-link-card--canonical.faluss-link-card--links-mode-image-grid .faluss-link-card__link-icon {position:absolute;top:10px;left:10px;width:24px;height:24px}
 .faluss-link-card.faluss-link-card--canonical.faluss-link-card--links-mode-image-grid .faluss-link-card__link--image {color:#fff;background:#292929}
 .faluss-link-card.faluss-link-card--canonical.faluss-link-card--links-mode-image-grid .faluss-link-card__link--image > span:last-child {text-shadow:0 1px 3px #000}
+.faluss-link-card.faluss-link-card--canonical .faluss-link-card__contextual{display:grid;gap:12px;width:100%;margin:0 0 20px;padding:16px;border:1px solid color-mix(in srgb,var(--fl-action) 18%,transparent);border-radius:18px;background:color-mix(in srgb,var(--fl-page-background) 88%,#fff);text-align:left}
+.faluss-link-card.faluss-link-card--canonical.faluss-link-card--links-mode-image-grid .faluss-link-card__contextual{grid-column:1/-1;min-width:0}
+.faluss-link-card.faluss-link-card--canonical .faluss-link-card__contextual-cover img{display:block;width:100%;max-height:240px;object-fit:cover;border-radius:12px}
+.faluss-link-card.faluss-link-card--canonical .faluss-link-card__contextual-copy span{font-size:12px;font-weight:700;opacity:.7}
+.faluss-link-card.faluss-link-card--canonical .faluss-link-card__contextual-copy h3{margin:4px 0;color:var(--fl-name-color);font-size:20px;line-height:1.25}
+.faluss-link-card.faluss-link-card--canonical .faluss-link-card__contextual-copy p{margin:4px 0 0;font-size:14px;line-height:1.45}
+.faluss-link-card.faluss-link-card--canonical .faluss-link-card__contextual>button,.faluss-link-card.faluss-link-card--canonical .faluss-link-card__contextual>a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 14px;border:1px solid var(--fl-action);border-radius:12px;background:var(--fl-action);color:var(--fl-action-text);font:600 14px/1.3 Outfit,system-ui,sans-serif;text-decoration:none;cursor:pointer}
+.faluss-link-card.faluss-link-card--canonical .faluss-link-card__contextual>a{background:transparent;color:var(--fl-name-color)}
+.faluss-link-card.faluss-link-card--canonical .faluss-link-card__contextual-player iframe{display:block;width:100%;aspect-ratio:16/9;min-height:225px;border:0;border-radius:12px}
+.faluss-link-card.faluss-link-card--canonical .faluss-link-card__contextual[data-faluss-contextual-provider=twitch] .faluss-link-card__contextual-player iframe{min-height:300px}

@@ -55,10 +55,10 @@ final class MeStudioAssets
         self::register();
         $file = dirname(__DIR__, 2) . '/faluss-platform.php';
         if (!wp_style_is(self::ONBOARDING_V3_STYLE, 'registered')) {
-            wp_register_style(self::ONBOARDING_V3_STYLE, plugins_url('assets/me-studio/css/onboarding-v3.css', $file), [self::CARD_STYLE], MeStudioModule::VERSION);
+            wp_register_style(self::ONBOARDING_V3_STYLE, plugins_url('assets/me-studio/css/onboarding-v3.css', $file), [self::CARD_STYLE], self::assetVersion());
             $scriptUrl = plugins_url('assets/me-studio/js/onboarding-v3.js', $file);
             if ($scriptUrl !== '') {
-                wp_register_script(self::ONBOARDING_V3_SCRIPT, $scriptUrl, [], MeStudioModule::VERSION, true);
+                wp_register_script(self::ONBOARDING_V3_SCRIPT, $scriptUrl, [], self::assetVersion(), true);
             }
         }
         wp_localize_script(self::ONBOARDING_V3_SCRIPT, 'falussOnboardingV3', [
@@ -75,6 +75,7 @@ final class MeStudioAssets
         ]);
         wp_enqueue_style(self::CARD_STYLE);
         wp_enqueue_style(self::ONBOARDING_V3_STYLE);
+        wp_enqueue_script('faluss-link-card', plugins_url('assets/link/js/faluss-link-card.js', $file), [], self::assetVersion(), true);
         wp_enqueue_script(self::ONBOARDING_V3_SCRIPT);
     }
 
@@ -82,9 +83,10 @@ final class MeStudioAssets
     {
         self::register();
         $file = dirname(__DIR__, 2) . '/faluss-platform.php';
-        wp_enqueue_style('faluss-studio-v3', plugins_url('assets/me-studio/css/studio-v3.css', $file), [self::CARD_STYLE], MeStudioModule::VERSION);
+        wp_enqueue_style('faluss-studio-v3', plugins_url('assets/me-studio/css/studio-v3.css', $file), [self::CARD_STYLE], self::assetVersion());
         wp_enqueue_script('faluss-link-import', plugins_url('assets/me-studio/js/link-import.js', $file), [], MeStudioModule::VERSION, true);
-        wp_enqueue_script('faluss-studio-v3', plugins_url('assets/me-studio/js/studio-v3.js', $file), ['faluss-link-import'], MeStudioModule::VERSION, true);
+        wp_enqueue_script('faluss-link-card', plugins_url('assets/link/js/faluss-link-card.js', $file), [], self::assetVersion(), true);
+        wp_enqueue_script('faluss-studio-v3', plugins_url('assets/me-studio/js/studio-v3.js', $file), ['faluss-link-import'], self::assetVersion(), true);
         wp_localize_script('faluss-studio-v3', 'falussStudioV3', self::studioV3Config());
     }
 
@@ -107,7 +109,7 @@ final class MeStudioAssets
     {
         $file = dirname(__DIR__, 2) . '/faluss-platform.php';
         if (!wp_style_is(self::CARD_STYLE, 'registered')) {
-            wp_register_style(self::CARD_STYLE, plugins_url('assets/me-studio/css/card-v2.css', $file), [], MeStudioModule::VERSION);
+            wp_register_style(self::CARD_STYLE, plugins_url('assets/me-studio/css/card-v2.css', $file), [], self::assetVersion());
             wp_register_style(self::STUDIO_STYLE, plugins_url('assets/me-studio/css/studio-v2.css', $file), [self::CARD_STYLE], MeStudioModule::VERSION);
             wp_register_style(self::ONBOARDING_STYLE, plugins_url('assets/me-studio/css/onboarding-v2.css', $file), [self::CARD_STYLE], MeStudioModule::VERSION);
             $studioScriptUrl = plugins_url('assets/me-studio/js/studio-v2.js', $file);
@@ -119,5 +121,10 @@ final class MeStudioAssets
                 wp_register_script(self::ONBOARDING_SCRIPT, $onboardingScriptUrl, [], MeStudioModule::VERSION, true);
             }
         }
+    }
+
+    private static function assetVersion(): string
+    {
+        return defined('FALUSS_PLATFORM_VERSION') ? (string) constant('FALUSS_PLATFORM_VERSION') : MeStudioModule::VERSION;
     }
 }

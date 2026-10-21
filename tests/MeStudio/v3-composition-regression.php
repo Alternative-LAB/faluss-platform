@@ -83,6 +83,49 @@ $mutate = static function ($mutation, $fields, $version = null) {
     return Faluss_Link::studio_v2_mutate(array_merge($fields, ['mutation' => $mutation, 'aggregate_version' => $version ?? Faluss_Link::studio_v2_state()['version']]));
 };
 $initialBlocks = Faluss_Link::studio_v2_state()['blocks'];
+$contextCases = [
+    'video' => ['youtube', 'https://youtu.be/dQw4w9WgXcQ', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'],
+    'music' => ['music_link', 'https://open.spotify.com/track/example', 'https://open.spotify.com/track/example'],
+    'streaming' => ['twitch', 'https://twitch.tv/example', 'https://www.twitch.tv/example'],
+    'visual_arts' => ['dribbble', 'https://dribbble.com/example', 'https://www.dribbble.com/example'],
+];
+$contextIds = [];
+foreach ($contextCases as $category => [$provider, $url, $canonical]) {
+    $id = wp_generate_uuid4(); $contextIds[$category] = $id;
+    $fields = ['block_id' => $id, 'category' => $category, 'provider' => $provider, 'url' => $url, 'title' => 'À la une ' . $category, 'subtitle' => 'Description', 'cover_attachment_id' => '0', 'enabled' => '1'];
+    fl_hotfix_assert($mutate('create_contextual', $fields)['ok'], 'Optional contextual block saves: ' . $category);
+    $saved = current(array_filter(Faluss_Link::studio_v2_state()['blocks'], static fn ($block): bool => $block['block_id'] === $id));
+    fl_hotfix_assert($saved['url'] === $canonical && $saved['enabled'], 'Provider URL canonicalized: ' . $category);
+}
+$before = $wpdb->digest();
+fl_hotfix_assert(!$mutate('create_contextual', ['block_id' => wp_generate_uuid4(), 'category' => 'video', 'provider' => 'youtube', 'url' => 'https://youtu.be/dQw4w9WgXcQ', 'enabled' => '1'])['ok'] && $wpdb->digest() === $before, 'One contextual block per category');
+foreach (['http://youtu.be/dQw4w9WgXcQ', 'https://youtube.com.evil.test/watch?v=dQw4w9WgXcQ', 'https://user@youtube.com/watch?v=dQw4w9WgXcQ', 'https://youtube.com:8443/watch?v=dQw4w9WgXcQ', 'https://youtu.be/dQw4w9WgXcQ#x', 'https://127.0.0.1/watch?v=dQw4w9WgXcQ'] as $hostile) {
+    fl_hotfix_assert(!$mutate('update_contextual', ['block_id' => $contextIds['video'], 'category' => 'video', 'provider' => 'youtube', 'url' => $hostile])['ok'] && $wpdb->digest() === $before, 'Unsafe provider URL rejected without write');
+}
+fl_hotfix_assert(!$mutate('update_contextual', ['block_id' => $contextIds['video'], 'category' => 'music', 'provider' => 'music_link', 'url' => 'https://open.spotify.com/track/example'])['ok'] && $wpdb->digest() === $before, 'Category cannot move an existing block');
+fl_hotfix_assert(!$mutate('update_contextual', ['block_id' => $contextIds['video'], 'category' => 'video', 'provider' => 'youtube', 'url' => 'https://youtu.be/dQw4w9WgXcQ', 'cover_attachment_id' => '999'])['ok'] && $wpdb->digest() === $before, 'Foreign cover rejected');
+fl_hotfix_assert($save('v3_activity', ['activity_category' => 'video'])['ok'], 'Activate video category');
+$videoState = Faluss_Link::studio_v2_state();
+fl_hotfix_assert(str_contains($videoState['preview_html'], 'À la une video') && strpos($videoState['preview_html'], 'À la une video') < strpos($videoState['preview_html'], 'Premier onglet') && !str_contains($videoState['preview_html'], 'À la une music'), 'Only active contextual block renders first');
+$draft = ['block_id' => $contextIds['video'], 'category' => 'video', 'provider' => 'youtube', 'url' => 'https://youtube.com/shorts/dQw4w9WgXcQ', 'title' => 'Brouillon vidéo', 'subtitle' => 'Modifié', 'cover_attachment_id' => '0', 'enabled' => '1'];
+$before = $wpdb->digest();
+$preview = Faluss_Link::studio_v3_preview(['contextual_draft' => wp_json_encode($draft)]);
+fl_hotfix_assert(is_array($preview) && str_contains($preview['preview_html'], 'Brouillon vidéo') && $wpdb->digest() === $before, 'Contextual draft previews without writing');
+$stale = $videoState['version'];
+fl_hotfix_assert($mutate('update_contextual', ['block_id' => $contextIds['video'], 'category' => 'video', 'provider' => 'youtube', 'url' => $draft['url'], 'title' => 'Vidéo modifiée', 'enabled' => '1'])['ok'], 'Contextual edit persists');
+$before = $wpdb->digest();
+fl_hotfix_assert($mutate('update_contextual', ['block_id' => $contextIds['video'], 'category' => 'video', 'provider' => 'youtube', 'url' => $draft['url'], 'enabled' => '0'], $stale)['status'] === 409 && $wpdb->digest() === $before, 'Stale contextual edit rejects without write');
+fl_hotfix_assert($save('v3_activity', ['activity_category' => 'music'])['ok'], 'Category switch retains contextual content');
+$musicState = Faluss_Link::studio_v2_state();
+fl_hotfix_assert(str_contains($musicState['preview_html'], 'À la une music') && !str_contains($musicState['preview_html'], 'Vidéo modifiée') && count(array_filter($musicState['blocks'], static fn ($block): bool => $block['type'] === 'contextual_feature')) === 4, 'Inactive blocks stay private but remain editable');
+$publicMusic = (new ReflectionMethod('Faluss_Link', 'card_markup'))->invoke(null, $musicState['profile'] + ['faluss_id' => $member], $prefs_method->invoke(null, $member, false), 'center', false, $musicState['blocks']);
+fl_hotfix_assert(str_contains($publicMusic, 'À la une music') && !str_contains($publicMusic, 'Vidéo modifiée') && !str_contains($publicMusic, 'data-v3-preview-block-id'), 'Public and preview use the same active block projection');
+fl_hotfix_assert($mutate('update_contextual', ['block_id' => $contextIds['visual_arts'], 'category' => 'visual_arts', 'provider' => 'pinterest', 'url' => 'https://pinterest.com/example', 'enabled' => '1'])['ok'], 'Pinterest portfolio is a valid visual-arts alternative');
+fl_hotfix_assert($mutate('update_contextual', ['block_id' => $contextIds['music'], 'category' => 'music', 'provider' => 'music_link', 'url' => 'https://open.spotify.com/track/example', 'enabled' => '0'])['ok'], 'Member can hide a contextual block');
+fl_hotfix_assert(!str_contains(Faluss_Link::studio_v2_state()['preview_html'], 'À la une music'), 'Hidden block has no public projection');
+fl_hotfix_assert($mutate('update_contextual', ['block_id' => $contextIds['music'], 'category' => 'music', 'provider' => 'music_link', 'url' => 'https://open.spotify.com/track/example', 'enabled' => '1'])['ok'], 'Member can reactivate a contextual block');
+foreach ($contextIds as $id) { fl_hotfix_assert($mutate('delete_contextual', ['block_id' => $id])['ok'], 'Explicit contextual deletion succeeds'); }
+fl_hotfix_assert($save('v3_activity', ['activity_category' => 'none'])['ok'] && Faluss_Link::studio_v2_state()['blocks'] === $initialBlocks, 'Contextual scenario restores the original card');
 $textId = 'a0000000-0000-4000-8000-000000000001';
 $mediaId = 'a0000000-0000-4000-8000-000000000002';
 $collectionId = 'a0000000-0000-4000-8000-000000000003';
@@ -132,6 +175,13 @@ fl_hotfix_assert(Faluss_Link::studio_v2_state()['blocks'] === $initialBlocks, 'P
 $legacyMode = \Faluss\Platform\MeStudio\OnboardingV3::mode('wizard_atomic_wallpaper', ['structure' => 'simple']);
 fl_hotfix_assert($legacyMode === 'atomic', 'Historical Atomic cursor takes precedence over default preferences');
 $studioViews = [];
+$contextFixtureId = wp_generate_uuid4();
+fl_hotfix_assert($save('v3_activity', ['activity_category' => 'video'])['ok'], 'Context browser fixture selects video');
+fl_hotfix_assert($mutate('create_contextual', ['block_id' => $contextFixtureId, 'category' => 'video', 'provider' => 'youtube', 'url' => 'https://youtu.be/dQw4w9WgXcQ', 'title' => 'Vidéo à la une', 'subtitle' => 'Démonstration', 'cover_attachment_id' => '0', 'enabled' => '1'])['ok'], 'Context browser fixture stores a video');
+$_GET['v3_section'] = 'v3_context';
+$studioViews['v3_context'] = \Faluss\Platform\MeStudio\StudioV3::render();
+fl_hotfix_assert(str_contains($studioViews['v3_context'], 'data-mutation="update_contextual"') && str_contains($studioViews['v3_context'], 'data-faluss-contextual-embed'), 'Context browser fixture includes editor and public projection');
+fl_hotfix_assert($mutate('delete_contextual', ['block_id' => $contextFixtureId])['ok'] && $save('v3_activity', ['activity_category' => 'none'])['ok'], 'Context browser fixture restores card');
 foreach (['v3_mode', 'v3_identity', 'v3_activity', 'v3_socials', 'v3_links', 'v3_colors', 'v3_buttons', 'v3_avatar', 'v3_wallpaper', 'v3_name', 'v3_network_style', 'v3_collections', 'v3_contents', 'v3_settings'] as $section) {
     $_GET['v3_section'] = $section;
     $studioViews[$section] = \Faluss\Platform\MeStudio\StudioV3::render();
