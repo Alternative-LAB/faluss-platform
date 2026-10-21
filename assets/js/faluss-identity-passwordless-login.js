@@ -1,11 +1,13 @@
 (function () {
     'use strict';
 
-    function setNotice(component, message) {
+    function setNotice(component, message, state) {
         var notice = component.querySelector('.faluss-identity-login__ajax-notice');
         if (!notice) { return; }
         notice.textContent = message || '';
         notice.hidden = !message;
+        if (state) { notice.setAttribute('data-state', state); }
+        else { notice.removeAttribute('data-state'); }
     }
 
     function replaceStage(form, markup, expectedStage) {
@@ -49,7 +51,7 @@
         setSubmitting(form, true);
         var body = new FormData(form);
         body.set('action', action.value + '_ajax');
-        setNotice(component, '');
+        setNotice(component, action.value === 'faluss_identity_request_code' ? 'Envoi en cours…' : 'Vérification en cours…', 'pending');
         fetch(falussIdentityLogin.url, { method: 'POST', credentials: 'same-origin', body: body })
             .then(function (response) { return response.json(); })
             .then(function (result) {

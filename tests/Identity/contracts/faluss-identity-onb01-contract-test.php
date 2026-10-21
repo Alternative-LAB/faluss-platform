@@ -68,6 +68,11 @@ onb01_assert( 'https://faluss.me/start/' === onb01_private( 'resolve_authenticat
 onb01_assert( 'https://faluss.me/' === onb01_private( 'resolve_authenticated_destination', null, 'https://faluss.me/', $complete_requires_onboarding ), 'A completed member keeps the generic Navigation return.' );
 onb01_assert( 'https://faluss.me/origin' === onb01_private( 'resolve_authenticated_destination', array( 'intent' => 'unlock_teaser', 'return_to' => 'https://faluss.me/origin' ), 'https://faluss.me/', $fresh_requires_onboarding ), 'A signed teaser intent stays ahead of onboarding for a fresh member.' );
 onb01_assert( 'https://faluss.me/origin?reward=daily' === onb01_private( 'resolve_authenticated_destination', array( 'intent' => 'claim_reward', 'return_to' => 'https://faluss.me/origin?reward=daily' ), 'https://faluss.me/', $fresh_requires_onboarding ), 'A signed reward intent stays ahead of onboarding for a fresh member.' );
+$studio_flow = onb01_private( 'create_login_flow', 'open_studio', 'https://faluss.me/mon-faluss/' );
+$studio_context = Faluss_Identity_Onboarding::login_flow_context( $studio_flow );
+onb01_assert( is_array( $studio_context ) && 'https://faluss.me/mon-faluss/' === onb01_private( 'resolve_authenticated_destination', $studio_context, 'https://faluss.me/', $fresh_requires_onboarding ), 'A direct Studio login returns to the V3 page even for a new member.' );
+$unsafe_studio_flow = onb01_private( 'create_login_flow', 'open_studio', 'https://attacker.example/out' );
+onb01_assert( 'https://faluss.me/' === Faluss_Identity_Onboarding::login_flow_context( $unsafe_studio_flow )['return_to'], 'A Studio login flow cannot carry an external destination.' );
 $onb_template_id = 0;
 onb01_assert( 'https://faluss.me/commencer/' === onb01_private( 'resolve_authenticated_destination', null, 'https://faluss.me/', $fresh_requires_onboarding ), 'The legacy route is used only when no onboarding page is configured.' );
 $onb_template_id = 77;
@@ -92,7 +97,7 @@ foreach ( array( 'reserve_public_slug', 'START TRANSACTION', 'FOR UPDATE', 'publ
     onb01_assert( false !== strpos( $profile, $needle ), 'Public slug ownership, atomicity, or route protection is missing: ' . $needle );
 }
 onb01_assert( false !== strpos( $profile, "'draft'" ) && false !== strpos( $profile, "'[]'" ), 'Final reservation creates only a minimal unpublished FI-03 record.' );
-foreach ( array( 'unlock_teaser', 'claim_reward', 'create_card', 'generic_login', 'FLOW_TTL', 'hash_hmac', 'set_transient', 'delete_transient', 'safe_local_return', 'render_route', 'DONOTCACHEPAGE', 'litespeed_control_set_nocache', 'handle_choice_ajax', 'handle_availability_ajax', 'handle_reserve_slug_ajax', 'record_state', 'current_member_onboarding_state' ) as $needle ) {
+foreach ( array( 'unlock_teaser', 'claim_reward', 'create_card', 'generic_login', 'open_studio', 'FLOW_TTL', 'hash_hmac', 'set_transient', 'delete_transient', 'safe_local_return', 'render_route', 'DONOTCACHEPAGE', 'litespeed_control_set_nocache', 'handle_choice_ajax', 'handle_availability_ajax', 'handle_reserve_slug_ajax', 'record_state', 'current_member_onboarding_state' ) as $needle ) {
     onb01_assert( false !== strpos( $onboarding, $needle ), 'The bounded onboarding flow is missing: ' . $needle );
 }
 foreach ( array( 'CARD_WIZARD_STEPS', 'card_wizard_context', 'current_member_has_completed_public_profile', "'wizard_name'", "'wizard_finish'" ) as $needle ) {

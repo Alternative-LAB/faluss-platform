@@ -2,7 +2,7 @@
 
 ## Périmètre et autorité
 
-Le module `identity` reprend Faluss Identity `0.4.15` sur le seul rôle `me`. Il demeure inactif sans activation explicite :
+Le module `identity` reprend Faluss Identity sur le seul rôle `me` ; sa version interne est `0.4.16`. Il demeure inactif sans activation explicite :
 
 ```php
 define('FALUSS_PLATFORM_ROLE', 'me');
@@ -11,7 +11,9 @@ define('FALUSS_PLATFORM_IDENTITY', true);
 
 `faluss.me` reste l’unique autorité d’identité. Le module refuse de démarrer si une classe du plugin historique est déjà chargée; l’ancien plugin et le module Platform ne doivent donc jamais être actifs dans la même requête. `faluss.com` reste un client SSO et conserve ses utilisateurs, rôles et sessions WordPress locaux.
 
-Les seize sources PHP historiques et les huit assets CSS/JavaScript sont conservés octet pour octet depuis le commit audité `4c84e4bbfc859f9d6c17b1d44a76c79bdbcdadb4`. Les shortcodes, widgets Elementor, routes, actions, options, classes publiques, libellés et sélecteurs historiques restent disponibles. Le lot n’effectue aucune refonte visuelle.
+Les sources historiques restent conservées, sauf la résolution explicite du retour `open_studio` dans l’onboarding Identity et le retour visuel pendant la requête passwordless. Le test de caractérisation continue à verrouiller les autres fichiers audités. Les shortcodes, widgets Elementor, routes, actions, options et classes publiques historiques restent disponibles.
+
+Une visite invitée de `/mon-faluss/` mène à `/login/` avec un flux opaque `open_studio`. Après la preuve passwordless, ce flux revient sur `/mon-faluss/` même si le membre doit encore terminer V3 ; le compositeur y reprend son état. La destination est filtrée par le contrat local Identity. Le retour SSO `/oauth/authorize/` conserve sa priorité et son registre serveur. Le formulaire affiche « Envoi en cours… » dès la soumission, désactive le bouton pendant la requête et ne passe au code qu’après la confirmation AJAX ; l’événement `passwordless_code_requested` et un retour positif de `wp_mail` ne certifient pas la livraison par Brevo.
 
 ## Données et comportements conservés
 

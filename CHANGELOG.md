@@ -19,6 +19,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Corrigé
 
+- Sur Me, guider directement les visiteurs de `/mon-faluss/` vers la connexion avec retour local explicite ; remplacer le code `identity_unavailable` visible par un écran stylé et un diagnostic serveur borné.
+- Pendant la demande passwordless, afficher immédiatement « Envoi en cours… » accessible jusqu’à la réponse du serveur, sans modifier la création ni l’envoi des OTP.
 - Garder les actions de l’onboarding web dans la fenêtre lorsque le thème ajoute un en-tête ou un titre au-dessus du formulaire.
 - Synchroniser la recette de redimensionnement sur le retour réel des contrôles mobiles afin d’éviter un échec lié à l’ordonnancement de l’événement navigateur.
 - Garder le Studio web entièrement dans la fenêtre : un en-tête ou un titre du thème ne peut plus masquer sa navigation et ses actions. Vérifier ce cas dans les navigateurs Chromium et WebKit en CI.

@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 final class IdentityCharacterizationTest extends TestCase
 {
-    public function testHistoricalSourcesAndAssetsRemainContentIdentical(): void
+    public function testUnmodifiedHistoricalSourcesAndAssetsRemainContentIdentical(): void
     {
         $root = dirname(__DIR__, 2);
         $legacy = $root . '/src/Identity/Legacy/includes/';
@@ -21,7 +21,6 @@ final class IdentityCharacterizationTest extends TestCase
             'class-faluss-identity-navigation-elementor-widget.php' => 'c91ab42ee4b6244e542aaf6b999275334f443db32e81cbc8791158bcf49e17bd',
             'class-faluss-identity-navigation.php' => 'a28c6b56e7d7093164da35fc1b5aa1e1941d41535e8b490d4a876860c0b8f9ae',
             'class-faluss-identity-onboarding-elementor-widget.php' => 'e22059042b83a245154b784570db3a1c05a4e4907d75f40da7a65d99a51c32af',
-            'class-faluss-identity-onboarding.php' => '009b55fc513feb83ad6115a9af8dc797183a665889159059ea7862e9b37fe2f6',
             'class-faluss-identity-passwordless.php' => '3d1aa52e40bf0303cae7e494fc7ebe27f2a3acbd874b0e33e85b6c11a2501fe7',
             'class-faluss-identity-plugin.php' => '34355d758eaade3738e0bd063274b8f5bdd5fdb0815d22418225c29c319526f1',
             'class-faluss-identity-public-profile-elementor-widgets.php' => '9b10d26e71ccecb4784f959e51775bb89b83bac5a400d9e6364de69472a30aa3',
@@ -34,11 +33,9 @@ final class IdentityCharacterizationTest extends TestCase
             'assets/css/faluss-identity-authorization.css' => '9dc325ecb768e5cb615bb7a2db12f27764b19a1cc66fd064d02458122a69efd8',
             'assets/css/faluss-identity-navigation.css' => 'b0ee91dbd0bb8b01b6713e546ecdf73684e31b83dc64aa7c86d3443db5597dd3',
             'assets/css/faluss-identity-onboarding.css' => '8f099388b9a249d0890c0b8411e98b56a0dc407c33f852f5838beace6d371f41',
-            'assets/css/faluss-identity-passwordless.css' => '98f17deca03474c710b674435d0d8d42e802b88be6c1c817396df6dc2b6bff7e',
             'assets/css/faluss-identity-public-profile.css' => '1309afadec29703fabc7da1027c1d600b973d4ca9d238a01a9a6f1d43edc0905',
             'assets/js/faluss-identity-navigation.js' => '520cf6e32a0d2200e2d7e262fb62de6ec2efea496d908d8993abfd41e6d5c58a',
             'assets/js/faluss-identity-onboarding.js' => '486b6fa938508393564e19bd0ba7adba970d96f6fed6125f7e1c76ab7f256b42',
-            'assets/js/faluss-identity-passwordless-login.js' => 'f6fe696ae0eadd4bd20eaadb5b43adbc4d73619ad65d73a27df7c6034c101199',
         ];
 
         foreach ($files as $file => $hash) {

@@ -67,7 +67,7 @@ final class IdentityModuleTest extends TestCase
         self::assertSame('identity', $module->id());
         self::assertSame([SiteRole::Me], $module->roles());
         self::assertSame(['admin-dashboard'], $module->dependencies());
-        self::assertSame('0.4.15', FALUSS_IDENTITY_VERSION);
+        self::assertSame('0.4.16', FALUSS_IDENTITY_VERSION);
         self::assertSame('6', \Faluss_Identity_Schema::VERSION);
         self::assertTrue(class_exists('Faluss_Identity_Registry', false));
         self::assertTrue(class_exists('Faluss_Identity_Passwordless', false));
