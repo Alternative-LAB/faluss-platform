@@ -72,7 +72,7 @@ h,status=request('https://fans.local.test/wp-json/faluss-fans/v1/session',replay
 check('Replayed cookie cannot authorize REST after logout',' 403 ' in h.splitlines()[0] or ' 401 ' in h.splitlines()[0])
 check('Me central session remains valid after local logout',cli('me',"echo wp_validate_auth_cookie("+json.dumps(fixtures['success']['cookie'])+",'logged_in')?'valid':'invalid';")=='valid')
 check('Fans administrator duration remains WordPress default',cli('fans',"echo apply_filters('auth_cookie_expiration',172800,1,false).':'.apply_filters('auth_cookie_expiration',1209600,1,true);")=='172800:1209600')
-check('Me member duration remains one hour',cli('me',"$u=get_user_by('email',"+json.dumps(fixtures['success']['email'])+");echo apply_filters('auth_cookie_expiration',172800,$u->ID,false);")=='3600')
+check('Me member duration is eight hours',cli('me',"$u=get_user_by('email',"+json.dumps(fixtures['success']['email'])+");echo apply_filters('auth_cookie_expiration',172800,$u->ID,false);")=='28800')
 admin=json.loads(cli('fans',"wp_set_current_user(1);$t=WP_Session_Tokens::get_instance(1)->create(time()+172800);$l=wp_generate_auth_cookie(1,time()+172800,'logged_in',$t);$_COOKIE[LOGGED_IN_COOKIE]=$l;echo wp_json_encode(['cookies'=>[LOGGED_IN_COOKIE=>$l,SECURE_AUTH_COOKIE=>wp_generate_auth_cookie(1,time()+172800,'secure_auth',$t)],'nonce'=>wp_create_nonce('faluss_fans_logout')]);"))
 admin_jar=root/'admin.cookies';admin_jar.write_text('# Netscape HTTP Cookie File\n'+''.join('fans.local.test\tFALSE\t/\tTRUE\t0\t'+k+'\t'+v+'\n' for k,v in admin['cookies'].items()))
 h,page=request('https://fans.local.test/sso-local/',admin_jar)

@@ -35,9 +35,10 @@ $authorization_source = file_get_contents( $root . '/src/Identity/Legacy/include
 $client_source = file_get_contents( $root . '/src/IdentityClient/IdentityClientService.php' );
 $client_admin_source = file_get_contents( $root . '/src/IdentityClient/IdentityClientAdmin.php' );
 
-foreach ( array( 'const TTL = 3600', 'auth_cookie_expiration', "array( 'subscriber' )", 'get_active_for_wp_user' ) as $needle ) {
-    fi06_sso_assert( false !== strpos( $identity_session_source, $needle ), 'Identity one-hour member-session invariant is missing: ' . $needle );
+foreach ( array( 'const TTL = 28800', 'auth_cookie_expiration', "array( 'subscriber' )", 'get_active_for_wp_user' ) as $needle ) {
+    fi06_sso_assert( false !== strpos( $identity_session_source, $needle ), 'Identity eight-hour member-session invariant is missing: ' . $needle );
 }
+fi06_sso_assert( false !== strpos( $passwordless_source, 'wp_set_auth_cookie( $user->ID, true, is_ssl() )' ), 'Passwordless must issue a persistent Me member cookie.' );
 fi06_sso_assert( false !== strpos( $passwordless_source, 'const COOKIE_TTL = 600' ) && false !== strpos( $passwordless_source, 'const REQUEST_WINDOW = 900' ), 'OTP challenge and request rate limit stay independent and short.' );
 fi06_sso_assert( false !== strpos( $authorization_source, 'const REQUEST_TTL = 600' ) && false !== strpos( $authorization_source, 'const CODE_TTL = 60' ), 'OAuth request and authorization-code TTLs stay independent and short.' );
 
@@ -50,7 +51,8 @@ $fi06_sso_users = array(
 );
 $fi06_sso_active_profiles = array( 10 => '550e8400-e29b-41d4-a716-446655440000', 11 => '550e8400-e29b-41d4-a716-446655440000', 12 => '550e8400-e29b-41d4-a716-446655440000' );
 require_once $root . '/src/Identity/Legacy/includes/class-faluss-identity-member-session.php';
-fi06_sso_assert( 3600 === Faluss_Identity_Member_Session::member_cookie_expiration( 172800, 10, false ), 'An active sole-subscriber Identity member receives a fixed one-hour session.' );
+fi06_sso_assert( 28800 === Faluss_Identity_Member_Session::member_cookie_expiration( 172800, 10, true ), 'An active sole-subscriber Identity member receives a fixed eight-hour session.' );
+fi06_sso_assert( 28800 === Faluss_Identity_Member_Session::member_cookie_expiration( 172800, 10, false ), 'The server deadline stays eight hours without remember-me.' );
 fi06_sso_assert( 172800 === Faluss_Identity_Member_Session::member_cookie_expiration( 172800, 11, false ), 'An administrator session is not widened or modified.' );
 fi06_sso_assert( 172800 === Faluss_Identity_Member_Session::member_cookie_expiration( 172800, 12, false ), 'A combined-role session is not modified.' );
 fi06_sso_assert( 172800 === Faluss_Identity_Member_Session::member_cookie_expiration( 172800, 13, false ), 'A subscriber without an active Faluss profile is not modified.' );
@@ -117,6 +119,6 @@ fi06_sso_assert( false !== strpos( $client_admin_source, "isset(\$candidate['use
 
 $protocol = file_get_contents( $root . '/docs/modules/IDENTITY.md' );
 $client_docs = file_get_contents( $root . '/docs/modules/IDENTITY-CLIENT.md' );
-fi06_sso_assert( false !== strpos( $protocol, 'une heure' ) && false !== strpos( $protocol, 'first_party' ) && false !== strpos( $client_docs, 'faluss_identity_client_continue' ), 'FI-06 session and first-party SSO decisions are documented.' );
+fi06_sso_assert( false !== strpos( $protocol, 'huit heures' ) && false !== strpos( $protocol, 'first_party' ) && false !== strpos( $client_docs, 'faluss_identity_client_continue' ), 'FI-06 session and first-party SSO decisions are documented.' );
 
 echo "FI-06 session and first-party SSO contract: OK\n";

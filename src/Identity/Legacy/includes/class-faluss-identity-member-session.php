@@ -10,16 +10,16 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 final class Faluss_Identity_Member_Session {
 
-    const TTL = 3600;
+    const TTL = 28800;
 
     public static function boot() {
         add_filter( 'auth_cookie_expiration', array( __CLASS__, 'member_cookie_expiration' ), PHP_INT_MAX, 3 );
     }
 
     /**
-     * Do not change administrators, role combinations, technical users, or
-     * remember-me semantics. Normal member sessions remain fixed at one hour:
-     * no code in this plugin reissues them in the background.
+     * Do not change administrators, role combinations or technical users.
+     * Normal member sessions have a fixed eight-hour server deadline; no
+     * code in this plugin reissues them in the background.
      *
      * @param int  $expiration Current WordPress expiration in seconds.
      * @param int  $user_id WordPress user ID.
