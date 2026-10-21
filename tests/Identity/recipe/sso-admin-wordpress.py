@@ -138,8 +138,10 @@ add_filter('pre_wp_mail',static function(){return false;});
             return listing_html
         listing_html=check_list()
         # Real token endpoint + seeded one-use code: tests secret authentication, not a simulated Fans SSO login.
+        # The last four code bytes carry the same bounded deadline as an issued member code.
         def exchange(secret, expect, code=None, verifier=None):
-            code=code or secrets.token_urlsafe(32);verifier=verifier or secrets.token_urlsafe(48)
+            code=code or base64.urlsafe_b64encode(os.urandom(28)+int(time.time()+28800).to_bytes(4,'big')).decode().rstrip('=')
+            verifier=verifier or secrets.token_urlsafe(48)
             codehash=hashlib.sha256(code.encode()).hexdigest()
             challenge=base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).decode().rstrip('=')
             sql("INSERT IGNORE INTO wp_faluss_identity_auth_codes (code_hash,faluss_id,client_id,redirect_uri,pkce_challenge,scopes,expires_at,created_at) VALUES ('"+codehash+"','"+str(uuid.uuid4())+"','"+client+"','https://fans.faluss.me/faluss-fans/sso/callback','"+challenge+"','identity.basic',DATE_ADD(UTC_TIMESTAMP(),INTERVAL 60 SECOND),UTC_TIMESTAMP())")

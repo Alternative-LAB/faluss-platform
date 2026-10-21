@@ -263,6 +263,8 @@ final class Faluss_Identity_Authorization {
     private static function approve_and_issue_code( $request, $faluss_id, $allowed_statuses = array( 'pending' ) ) {
         $allowed_statuses = is_array( $allowed_statuses ) ? array_values( array_filter( $allowed_statuses, static function( $status ) { return in_array( $status, array( 'pending', 'onboarding' ), true ); } ) ) : array();
         if ( empty( $allowed_statuses ) ) { return null; }
+        $session_deadline = Faluss_Identity_Member_Session::current_member_deadline();
+        if ( null === $session_deadline ) { return null; }
         global $wpdb;
         $tables = Faluss_Identity_Schema::get_table_names();
         if ( empty( $tables['auth_codes'] ) || false === $wpdb->query( 'START TRANSACTION' ) ) { return null; }
@@ -276,10 +278,12 @@ final class Faluss_Identity_Authorization {
             if ( ! is_array( $locked ) || ! in_array( $locked['status'], $allowed_statuses, true ) || ! self::future( $locked['expires_at'] ) ) { $wpdb->query( 'ROLLBACK' ); return null; }
             if ( 'grant' === ( $request['consent_mode'] ?? '' ) && ! Faluss_Identity_Consent::grant( $faluss_id, $request ) ) { $wpdb->query( 'ROLLBACK' ); return null; }
             for ( $attempt = 0; $attempt < 3; ++$attempt ) {
-                try { $code = self::base64url_encode( random_bytes( 32 ) ); } catch ( Exception $exception ) { $wpdb->query( 'ROLLBACK' ); return null; }
+                // The code hash binds the final four bytes (central deadline)
+                // to 224 random bits without changing the 43-character format.
+                try { $code = self::base64url_encode( random_bytes( 28 ) . pack( 'N', $session_deadline ) ); } catch ( Exception $exception ) { $wpdb->query( 'ROLLBACK' ); return null; }
                 $inserted = $wpdb->query( $wpdb->prepare(
                     'INSERT INTO ' . self::quote_identifier( $tables['auth_codes'] ) . ' (code_hash, faluss_id, client_id, redirect_uri, pkce_challenge, scopes, expires_at, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)',
-                    hash( 'sha256', $code ), $faluss_id, $request['client_id'], $request['redirect_uri'], $request['pkce_challenge'], implode( ' ', $request['scopes'] ), gmdate( 'Y-m-d H:i:s', time() + self::CODE_TTL ), gmdate( 'Y-m-d H:i:s' )
+                    hash( 'sha256', $code ), $faluss_id, $request['client_id'], $request['redirect_uri'], $request['pkce_challenge'], implode( ' ', $request['scopes'] ), gmdate( 'Y-m-d H:i:s', min( time() + self::CODE_TTL, $session_deadline ) ), gmdate( 'Y-m-d H:i:s' )
                 ) );
                 if ( 1 === $inserted ) {
                     $updated = $wpdb->query( $wpdb->prepare( 'UPDATE ' . self::quote_identifier( Faluss_Identity_Schema::get_authorization_requests_table() ) . ' SET status = %s, updated_at = %s WHERE id = %d AND status = %s', 'approved', gmdate( 'Y-m-d H:i:s' ), (int) $locked['id'], $locked['status'] ) );
@@ -302,6 +306,8 @@ final class Faluss_Identity_Authorization {
         $code = isset( $input['code'] ) && is_string( $input['code'] ) ? $input['code'] : '';
         $verifier = isset( $input['code_verifier'] ) && is_string( $input['code_verifier'] ) ? $input['code_verifier'] : '';
         if ( 'authorization_code' !== ( isset( $input['grant_type'] ) ? $input['grant_type'] : '' ) || null === $client || ! self::client_allows_redirect( $client, $redirect_uri ) || ! self::is_opaque_code( $code ) || ! self::is_valid_code_verifier( $verifier ) ) { self::token_error( 'invalid_grant', 400 ); }
+        $session_deadline = self::code_session_deadline( $code );
+        if ( null === $session_deadline ) { self::token_error( 'invalid_grant', 400 ); }
         if ( ! empty( $client['client_secret_hash'] ) ) {
             $secret = isset( $input['client_secret'] ) && is_string( $input['client_secret'] ) ? $input['client_secret'] : '';
             $hash = self::hash_client_secret( $secret );
@@ -314,20 +320,20 @@ final class Faluss_Identity_Authorization {
         try {
             $row = $wpdb->get_row( $wpdb->prepare( 'SELECT id, faluss_id, redirect_uri, pkce_challenge, scopes, expires_at, consumed_at FROM ' . self::quote_identifier( $tables['auth_codes'] ) . ' WHERE code_hash = %s AND client_id = %s FOR UPDATE', hash( 'sha256', $code ), $client_id ), ARRAY_A );
             $challenge = self::base64url_encode( hash( 'sha256', $verifier, true ) );
-            if ( ! is_array( $row ) || null !== $row['consumed_at'] || ! self::future( $row['expires_at'] ) || ! hash_equals( $row['redirect_uri'], $redirect_uri ) || ! hash_equals( $row['pkce_challenge'], $challenge ) ) { $wpdb->query( 'ROLLBACK' ); self::token_error( 'invalid_grant', 400 ); }
+            if ( ! is_array( $row ) || null !== $row['consumed_at'] || ! self::future( $row['expires_at'] ) || $session_deadline <= time() || ! hash_equals( $row['redirect_uri'], $redirect_uri ) || ! hash_equals( $row['pkce_challenge'], $challenge ) ) { $wpdb->query( 'ROLLBACK' ); self::token_error( 'invalid_grant', 400 ); }
             $consumed = $wpdb->query( $wpdb->prepare( 'UPDATE ' . self::quote_identifier( $tables['auth_codes'] ) . ' SET consumed_at = %s WHERE id = %d AND consumed_at IS NULL', gmdate( 'Y-m-d H:i:s' ), (int) $row['id'] ) );
             if ( 1 !== $consumed || false === $wpdb->query( 'COMMIT' ) ) { $wpdb->query( 'ROLLBACK' ); self::token_error( 'invalid_grant', 400 ); }
         } catch ( Exception $exception ) { $wpdb->query( 'ROLLBACK' ); self::token_error( 'temporarily_unavailable', 503 ); }
-        $claims = self::claims( $row['faluss_id'], self::normalize_scopes( $row['scopes'] ) );
+        $claims = self::claims( $row['faluss_id'], self::normalize_scopes( $row['scopes'] ), $session_deadline );
         if ( null === $claims ) { self::token_error( 'invalid_grant', 400 ); }
         self::record_audit( 'authorization_code_exchanged', $client_id );
         wp_send_json( $claims, 200 );
     }
 
     /** @return array<string, mixed>|null */
-    private static function claims( $faluss_id, $scopes ) {
-        if ( ! Faluss_Identity_Registry::is_valid_faluss_id( $faluss_id ) || ! is_array( $scopes ) ) { return null; }
-        $claims = array( 'faluss_id' => $faluss_id, 'scope' => implode( ' ', $scopes ) );
+    private static function claims( $faluss_id, $scopes, $session_deadline ) {
+        if ( ! Faluss_Identity_Registry::is_valid_faluss_id( $faluss_id ) || ! is_array( $scopes ) || ! is_int( $session_deadline ) || $session_deadline <= time() ) { return null; }
+        $claims = array( 'faluss_id' => $faluss_id, 'scope' => implode( ' ', $scopes ), 'session_expires_at' => $session_deadline );
         if ( in_array( self::SCOPE_EMAIL, $scopes, true ) ) {
             global $wpdb;
             $tables = Faluss_Identity_Schema::get_table_names();
@@ -546,6 +552,13 @@ final class Faluss_Identity_Authorization {
     private static function schema_ready() { $status = Faluss_Identity_Schema::get_status(); return ! empty( $status['ready'] ); }
     private static function future( $value ) { return is_string( $value ) && 1 === preg_match( '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/D', $value ) && $value > gmdate( 'Y-m-d H:i:s' ); }
     private static function is_opaque_code( $code ) { return is_string( $code ) && 1 === preg_match( '/^[A-Za-z0-9_-]{43}$/D', $code ); }
+    private static function code_session_deadline( $code ) {
+        $raw = self::is_opaque_code( $code ) ? self::base64url_decode( $code ) : null;
+        if ( ! is_string( $raw ) || 32 !== strlen( $raw ) ) { return null; }
+        $unpacked = unpack( 'Ndeadline', substr( $raw, -4 ) );
+        $deadline = is_array( $unpacked ) ? (int) $unpacked['deadline'] : 0;
+        return $deadline > time() && $deadline <= time() + Faluss_Identity_Member_Session::TTL ? $deadline : null;
+    }
     private static function write_request_cookie( $value ) { setcookie( self::REQUEST_COOKIE, $value, self::cookie_options( time() + self::REQUEST_TTL ) ); $_COOKIE[ self::REQUEST_COOKIE ] = $value; }
     private static function refresh_request_cookie( $expires_at ) {
         $value = isset( $_COOKIE[ self::REQUEST_COOKIE ] ) && is_string( $_COOKIE[ self::REQUEST_COOKIE ] ) ? $_COOKIE[ self::REQUEST_COOKIE ] : '';

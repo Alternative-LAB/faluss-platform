@@ -93,6 +93,22 @@ final class IdentityClientSecurityTest extends TestCase
         self::assertSame('11111111-1111-4111-8111-111111111111', $claims['faluss_id']);
         self::assertSame('authorization_code', $GLOBALS['identity_client_test_remote_calls'][0]['args']['body']['grant_type']);
 
+        $deadline = time() + 3600;
+        $GLOBALS['identity_client_test_remote_queue'] = [identity_client_test_response([
+            'faluss_id' => '11111111-1111-4111-8111-111111111111',
+            'scope' => 'identity.basic',
+            'session_expires_at' => $deadline,
+        ])];
+        self::assertSame($deadline, self::privateMethod('exchange')->invoke(null, str_repeat('c', 43), str_repeat('p', 43))['session_expires_at']);
+        foreach (['3600', time() - 1, time() + 28801] as $invalidDeadline) {
+            $GLOBALS['identity_client_test_remote_queue'] = [identity_client_test_response([
+                'faluss_id' => '11111111-1111-4111-8111-111111111111',
+                'scope' => 'identity.basic',
+                'session_expires_at' => $invalidDeadline,
+            ])];
+            self::assertNull(self::privateMethod('exchange')->invoke(null, str_repeat('c', 43), str_repeat('p', 43)));
+        }
+
         $GLOBALS['identity_client_test_remote_queue'] = [identity_client_test_response([
             'faluss_id' => 'not-a-uuid',
             'scope' => 'identity.basic',

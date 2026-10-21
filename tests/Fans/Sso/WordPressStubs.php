@@ -186,5 +186,6 @@ namespace Faluss\Platform\Fans\Sso {
     function wp_remote_retrieve_body(mixed $response): string { return $response['body'] ?? ''; }
     function add_action(string $hook, callable $callback, int $priority = 10): void { $GLOBALS['fans_sso_hooks'][$hook] = $callback; }
     function add_filter(string $hook, callable $callback, int $priority = 10, int $acceptedArgs = 1): void { $GLOBALS['fans_sso_filters'][$hook] = $callback; }
+    function remove_filter(string $hook, callable $callback, int $priority = 10): bool { unset($GLOBALS['fans_sso_filters'][$hook]); return true; }
     function add_shortcode(string $tag, callable $callback): void { $GLOBALS['fans_sso_shortcodes'][$tag] = $callback; }
 }

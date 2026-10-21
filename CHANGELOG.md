@@ -19,6 +19,7 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Corrigé
 
+- Lier les nouvelles sessions Hub et Fans à l'échéance de la preuve Identity initiale : code SSO de format inchangé, claim serveur borné, cookies persistants et refus après huit heures sans migration de données.
 - Garder la session Identity des membres Me huit heures après le passwordless, y compris après fermeture du navigateur, sans prolongation à chaque visite ; ne pas modifier les sessions administrateur ni les délais OTP et OAuth.
 
 - Garder les actions de l’onboarding web dans la fenêtre lorsque le thème ajoute un en-tête ou un titre au-dessus du formulaire.

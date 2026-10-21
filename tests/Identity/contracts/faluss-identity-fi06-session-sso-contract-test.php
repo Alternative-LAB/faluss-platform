@@ -13,12 +13,19 @@ $fi06_sso_users = array();
 $fi06_sso_active_profiles = array();
 function get_userdata( $user_id ) { global $fi06_sso_users; return isset( $fi06_sso_users[ (int) $user_id ] ) ? $fi06_sso_users[ (int) $user_id ] : false; }
 function wp_parse_url( $url ) { return parse_url( $url ); }
+function get_current_user_id() { return $GLOBALS['fi06_sso_current_user']; }
+function wp_parse_auth_cookie( $cookie, $scheme ) { return $GLOBALS['fi06_sso_auth_cookie']; }
+final class WP_Session_Tokens {
+    public static function get_instance( $user_id ) { return new self(); }
+    public function get( $token ) { return $GLOBALS['fi06_sso_token_session']; }
+}
 
 final class Faluss_Identity_Registry {
     public static function get_active_for_wp_user( $user_id ) {
         global $fi06_sso_active_profiles;
         return isset( $fi06_sso_active_profiles[ (int) $user_id ] ) ? $fi06_sso_active_profiles[ (int) $user_id ] : null;
     }
+    public static function is_valid_faluss_id( $value ) { return is_string( $value ) && 36 === strlen( $value ); }
 }
 
 function fi06_sso_assert( $condition, $message ) {
@@ -56,8 +63,27 @@ fi06_sso_assert( 28800 === Faluss_Identity_Member_Session::member_cookie_expirat
 fi06_sso_assert( 172800 === Faluss_Identity_Member_Session::member_cookie_expiration( 172800, 11, false ), 'An administrator session is not widened or modified.' );
 fi06_sso_assert( 172800 === Faluss_Identity_Member_Session::member_cookie_expiration( 172800, 12, false ), 'A combined-role session is not modified.' );
 fi06_sso_assert( 172800 === Faluss_Identity_Member_Session::member_cookie_expiration( 172800, 13, false ), 'A subscriber without an active Faluss profile is not modified.' );
+$GLOBALS['fi06_sso_current_user'] = 10;
+$GLOBALS['fi06_sso_auth_cookie'] = array( 'token' => 'fixture-token', 'expiration' => time() + 7200 );
+$GLOBALS['fi06_sso_token_session'] = array( 'expiration' => time() + 7000 );
+fi06_sso_assert( $GLOBALS['fi06_sso_token_session']['expiration'] === Faluss_Identity_Member_Session::current_member_deadline(), 'The attested deadline is the earlier verified cookie or server-token expiry.' );
+$GLOBALS['fi06_sso_auth_cookie']['expiration'] = time() - 1;
+fi06_sso_assert( null === Faluss_Identity_Member_Session::current_member_deadline(), 'An expired browser session cannot authorize a client.' );
+$GLOBALS['fi06_sso_current_user'] = 11;
+$GLOBALS['fi06_sso_auth_cookie']['expiration'] = time() + 7200;
+fi06_sso_assert( null === Faluss_Identity_Member_Session::current_member_deadline(), 'An administrator does not gain a member deadline.' );
 
 require_once $root . '/src/Identity/Legacy/includes/class-faluss-identity-authorization.php';
+$claims_method = new ReflectionMethod( 'Faluss_Identity_Authorization', 'claims' );
+$session_deadline = time() + 3600;
+$attested_claims = $claims_method->invoke( null, '550e8400-e29b-41d4-a716-446655440000', array( 'identity.basic' ), $session_deadline );
+fi06_sso_assert( is_array( $attested_claims ) && $session_deadline === $attested_claims['session_expires_at'], 'The token response carries the original central session deadline.' );
+fi06_sso_assert( null === $claims_method->invoke( null, '550e8400-e29b-41d4-a716-446655440000', array( 'identity.basic' ), time() - 1 ), 'An expired central deadline cannot produce token claims.' );
+$decode_deadline = new ReflectionMethod( 'Faluss_Identity_Authorization', 'code_session_deadline' );
+$valid_code = rtrim( strtr( base64_encode( random_bytes( 28 ) . pack( 'N', $session_deadline ) ), '+/', '-_' ), '=' );
+fi06_sso_assert( 43 === strlen( $valid_code ) && $session_deadline === $decode_deadline->invoke( null, $valid_code ), 'The unchanged code format carries its central deadline.' );
+$expired_code = rtrim( strtr( base64_encode( random_bytes( 28 ) . pack( 'N', time() - 1 ) ), '+/', '-_' ), '=' );
+fi06_sso_assert( null === $decode_deadline->invoke( null, $expired_code ), 'An expired code deadline is rejected before exchange.' );
 $first_party = new ReflectionMethod( 'Faluss_Identity_Authorization', 'first_party_auto_approval_allowed' );
 $first_party->setAccessible( true );
 $callback = Faluss_Identity_Authorization::FIRST_PARTY_FALUSS_COM_CALLBACK;
