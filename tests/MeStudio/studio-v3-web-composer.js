@@ -71,6 +71,14 @@ const initialLabel = 'Dans A';
                 }));
                 assert.equal(geometry.overflow, false, `${engine} ${width}×${height}: no horizontal overflow`);
                 if (visible) { assert.equal(Math.round(geometry.root.width), width, `${engine} ${width}: composer uses viewport despite theme content width`); assert.equal(Math.round(geometry.root.left), 0, `${engine} ${width}: composer is centered in viewport`); assert.equal(Math.round(geometry.root.top), 0, `${engine} ${width}: theme header cannot push actions outside viewport`); assert.equal(Math.round(geometry.root.bottom), height, `${engine} ${width}: whole composer fits viewport`); }
+                await page.goto('https://studio.test/studio/?v3_section=v3_activity');
+                assert.equal(await page.locator('input[name="activity_category"]').count(), 5, `${engine} ${width}×${height}: activity choices`);
+                if (visible) {
+                    const activity = await page.evaluate(() => ({panel: document.querySelector('[data-v3-panel]').getBoundingClientRect().toJSON(), canvas: document.querySelector('[data-studio-canvas]').getBoundingClientRect().toJSON()}));
+                    assert(activity.panel.right <= activity.canvas.left, `${engine} ${width}×${height}: activity editor left of card`);
+                }
+                if (engine === 'chromium' && (width === 390 || width === 1440)) { await page.screenshot({path: path.join(evidence, `activity-studio-${width}.png`)}); }
+                await page.goto('https://studio.test/studio/?v3_section=v3_colors');
                 if (width === 390 || visible) { await page.screenshot({path: path.join(evidence, `${engine}-studio-${width}-${height}.png`)}); }
                 if (visible) {
                     assert(geometry.panel.right <= geometry.canvas.left, `${engine} ${width}: editor left, card right`);

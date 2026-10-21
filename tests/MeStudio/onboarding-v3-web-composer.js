@@ -83,6 +83,15 @@ const initialLabel = 'Dans A';
                 if (web) { assert.equal(Math.round(geometry.root.width), width, `${engine} ${width}: composer uses viewport despite theme content width`); assert.equal(Math.round(geometry.root.left), 0, `${engine} ${width}: composer is centered in viewport`); assert.equal(Math.round(geometry.root.top), 0, `${engine} ${width}: theme header cannot push actions outside viewport`); assert.equal(Math.round(geometry.root.bottom), height, `${engine} ${width}: whole composer fits viewport`); }
                 assert.equal(geometry.panel.right <= geometry.preview.left, web, `${engine} ${width}x${height}: adaptive layout`);
                 assert.equal(geometry.grabber === 'none', web, `${engine} ${width}x${height}: mobile sheet`);
+                await page.goto('https://onboarding.test/onboarding/?step=v3_activity');
+                assert.equal(await page.locator('input[name="activity_category"]').count(), 5, `${engine} ${width}x${height}: activity choices`);
+                assert.equal(await page.locator('input[name="activity_category"][value="none"]').isChecked(), true);
+                if (web) {
+                    const activity = await page.evaluate(() => ({panel: document.querySelector('[data-v3-panel]').getBoundingClientRect().toJSON(), preview: document.querySelector('[data-v3-preview]').getBoundingClientRect().toJSON()}));
+                    assert(activity.panel.right <= activity.preview.left, `${engine} ${width}x${height}: activity editor left of preview`);
+                }
+                if (engine === 'chromium' && (width === 390 || width === 1440)) { await page.screenshot({path: path.join(evidence, `activity-onboarding-${width}.png`)}); }
+                await page.goto('https://onboarding.test/onboarding/?step=v3_colors');
                 if (width === 390 || web) { await page.screenshot({path: path.join(evidence, `${engine}-onboarding-${width}-${height}.png`)}); }
                 const editor = page.locator(`[data-v3-web-editors] [data-v3-editor][data-id="${blockId}"]`);
                 assert.equal(await editor.isVisible(), false, 'Step starts with link editor hidden');

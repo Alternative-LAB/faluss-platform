@@ -13,7 +13,7 @@ final class StudioV3
     private const GROUPS = [
         'links' => ['v3_links' => 'Liens', 'v3_collections' => 'Collections', 'v3_contents' => 'Contenus et ordre'],
         'design' => ['v3_mode' => 'Structure', 'v3_colors' => 'Couleurs', 'v3_buttons' => 'Boutons', 'v3_avatar' => 'Avatar', 'v3_wallpaper' => 'Fond', 'v3_name' => 'Nom', 'v3_network_style' => 'Style des réseaux'],
-        'profile' => ['v3_identity' => 'Identité', 'v3_socials' => 'Réseaux', 'v3_settings' => 'Réglages'],
+        'profile' => ['v3_identity' => 'Identité', 'v3_activity' => 'Activité', 'v3_socials' => 'Réseaux', 'v3_settings' => 'Réglages'],
     ];
 
     public static function render(): string

@@ -83,7 +83,7 @@ async function geometry(page, engine, width, step) {
         const browser = await engine.browser.launch(engine.options);
         try {
             for (const width of [320, 375, 430, 768]) {
-                for (const step of ['v3_mode', 'v3_socials', 'v3_links', 'v3_name', 'v3_success']) {
+                for (const step of ['v3_mode', 'v3_activity', 'v3_socials', 'v3_links', 'v3_name', 'v3_success']) {
                     if (!fixture.atomic[step]) { continue; }
                     const page = await browser.newPage({ viewport: { width, height: 844 }, reducedMotion: 'reduce' });
                     const errors = [];

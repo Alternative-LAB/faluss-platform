@@ -13,6 +13,17 @@ $save = static function ($section, $fields, $version = null) {
     $state = Faluss_Link::studio_v2_state();
     return Faluss_Link::studio_v2_save_onboarding_step($section, '', $fields, $version ?? $state['version'], true);
 };
+$initialVersion = Faluss_Link::studio_v2_state()['version'];
+$before = $wpdb->digest();
+fl_hotfix_assert(!is_wp_error(Faluss_Link::studio_v3_preview(['activity_category' => 'video'])) && $wpdb->digest() === $before, 'Category preview is read only');
+fl_hotfix_assert($save('v3_activity', ['activity_category' => 'video'])['ok'], 'Category saves through the V3 aggregate');
+$activityState = Faluss_Link::studio_v2_state();
+fl_hotfix_assert($activityState['preferences']['activity_category'] === 'video' && $activityState['version'] !== $initialVersion, 'Category is canonical and versioned');
+$storedSocials = json_decode($wpdb->card['social_links'], true);
+fl_hotfix_assert($storedSocials['activity_category'] === 'video' && is_array($storedSocials['networks']), 'Category and networks share the Link envelope');
+$before = $wpdb->digest();
+fl_hotfix_assert($save('v3_activity', ['activity_category' => 'music'], $initialVersion)['status'] === 409 && $wpdb->digest() === $before, 'Stale category save cannot overwrite the current choice');
+fl_hotfix_assert(!$save('v3_activity', ['activity_category' => 'unknown'])['ok'] && $wpdb->digest() === $before, 'Unknown category is rejected without a write');
 $cards = [];
 foreach (['simple', 'atomic'] as $structure) {
     fl_hotfix_assert($save('v3_mode', ['structure' => $structure])['ok'], 'Studio changes structure without onboarding cursor');
@@ -29,6 +40,13 @@ foreach (['simple', 'atomic'] as $structure) {
         $cards[$structure . '-' . $size . '-' . $effect] = $state['preview_html'];
     }
 }
+fl_hotfix_assert($save('v3_socials', ['social_networks' => wp_json_encode([['network' => 'instagram', 'url' => 'https://instagram.com/recette']])])['ok'], 'V3 networks save after activity choice');
+fl_hotfix_assert(Faluss_Link::studio_v2_state()['preferences']['activity_category'] === 'video', 'V3 networks save preserves the category');
+$legacySave = new ReflectionMethod('Faluss_Link', 'save_preferences');
+fl_hotfix_assert($legacySave->invoke(null, $member, ['social_networks' => [['network' => 'instagram', 'url' => 'https://instagram.com/recette']]]), 'Legacy preferences save after activity choice');
+fl_hotfix_assert(Faluss_Link::studio_v2_state()['preferences']['activity_category'] === 'video', 'Legacy preferences save preserves the category');
+fl_hotfix_assert($save('v3_socials', ['social_networks' => '[]'])['ok'], 'Fixture restores its initial networks');
+fl_hotfix_assert(Faluss_Link::studio_v2_state()['preferences']['activity_category'] === 'video', 'Clearing networks preserves the category');
 foreach ([
     ['v3_colors', ['page_background' => '#DED4E4', 'button_color' => '#FFFFFF'], '--fl-page-background:#DED4E4'],
     ['v3_buttons', ['link_style' => 'light', 'button_texture' => 'grain'], 'faluss-link-card--links-light'],
@@ -50,6 +68,9 @@ foreach ([
     fl_hotfix_assert($conflict['status'] === 409 && $wpdb->digest() === $digest, 'Concurrent save rejected: ' . $section);
 }
 fl_hotfix_assert(str_contains($state['preview_html'], '--fl-action-text:#000000'), 'White buttons have black text before JavaScript');
+fl_hotfix_assert($state['preferences']['activity_category'] === 'video', 'Unrelated V3 design saves preserve the category');
+fl_hotfix_assert($save('v3_activity', ['activity_category' => 'none'])['ok'], 'Member can clear the category without removing other card data');
+fl_hotfix_assert(Faluss_Link::studio_v2_state()['preferences']['activity_category'] === 'none', 'Cleared category persists as the default');
 $before = $wpdb->digest();
 $rejected = $save('v3_identity', ['display_name' => '', 'avatar_attachment_id' => '77']);
 fl_hotfix_assert(!$rejected['ok'] && $wpdb->digest() === $before, 'Empty identity cannot erase a published profile');
@@ -111,7 +132,7 @@ fl_hotfix_assert(Faluss_Link::studio_v2_state()['blocks'] === $initialBlocks, 'P
 $legacyMode = \Faluss\Platform\MeStudio\OnboardingV3::mode('wizard_atomic_wallpaper', ['structure' => 'simple']);
 fl_hotfix_assert($legacyMode === 'atomic', 'Historical Atomic cursor takes precedence over default preferences');
 $studioViews = [];
-foreach (['v3_mode', 'v3_identity', 'v3_socials', 'v3_links', 'v3_colors', 'v3_buttons', 'v3_avatar', 'v3_wallpaper', 'v3_name', 'v3_network_style', 'v3_collections', 'v3_contents', 'v3_settings'] as $section) {
+foreach (['v3_mode', 'v3_identity', 'v3_activity', 'v3_socials', 'v3_links', 'v3_colors', 'v3_buttons', 'v3_avatar', 'v3_wallpaper', 'v3_name', 'v3_network_style', 'v3_collections', 'v3_contents', 'v3_settings'] as $section) {
     $_GET['v3_section'] = $section;
     $studioViews[$section] = \Faluss\Platform\MeStudio\StudioV3::render();
     fl_hotfix_assert(str_contains($studioViews[$section], 'data-studio="true"'), 'Native Studio renders ' . $section);
@@ -121,6 +142,7 @@ $confirmation = (new ReflectionMethod(\Faluss\Platform\MeStudio\OnboardingV3::cl
 fl_hotfix_assert(!str_contains($confirmation, 'data-v3-panel') && !str_contains($confirmation, 'progressbar') && str_contains($confirmation, 'Ouvrir le Studio'), 'Confirmation is outside the onboarding shell');
 fl_hotfix_assert(str_contains($studioViews['v3_network_style'], 'data-v3-tab-panel="color" hidden inert'), 'Color tab hidden initially');
 fl_hotfix_assert(str_contains($studioViews['v3_avatar'], 'Remplacer la photo') && str_contains($studioViews['v3_avatar'], '/77.jpg'), 'Studio reuses retained avatar');
+fl_hotfix_assert(str_contains($studioViews['v3_activity'], 'name="activity_category"') && str_contains($studioViews['v3_activity'], 'Plus tard'), 'Activity is editable in the Studio profile group');
 if (getenv('FALUSS_V3_ONBOARDING_VIEWS')) {
     // Actual PHP onboarding shell on the same in-memory Link aggregate.
     function get_user_meta(): string { return ''; }
@@ -129,7 +151,7 @@ if (getenv('FALUSS_V3_ONBOARDING_VIEWS')) {
     }
     $wpdb->identity['publication_status'] = 'draft';
     $onboardingViews = [];
-    foreach (['v3_identity', 'v3_links', 'v3_colors', 'v3_review'] as $fixtureStep) {
+    foreach (['v3_identity', 'v3_activity', 'v3_links', 'v3_colors', 'v3_review'] as $fixtureStep) {
         $GLOBALS['v3_fixture_step'] = $fixtureStep;
         $onboardingViews[$fixtureStep] = \Faluss\Platform\MeStudio\OnboardingV3::render();
         fl_hotfix_assert(str_contains($onboardingViews[$fixtureStep], 'data-v3-web-editors') && str_contains($onboardingViews[$fixtureStep], 'data-v3-step-controls'), 'Web editor and sequential step share shell: ' . $fixtureStep);

@@ -42,7 +42,7 @@ function pageHtml(step, studio=false) {
     assert(await page.locator('input[type=url]').first().evaluate(e=>parseFloat(getComputedStyle(e).fontSize)>=16));
     // Keyboard is an overlay: only the internal scroll range may change.
     const heights={};
-    for(const step of ['v3_identity','v3_socials','v3_links','v3_review']) {
+    for(const step of ['v3_identity','v3_activity','v3_socials','v3_links','v3_review']) {
      await page.setContent(pageHtml(step));
      await page.evaluate(()=>document.fonts.ready);
      const geometry=()=>page.evaluate(()=>{
