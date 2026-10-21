@@ -81,7 +81,10 @@ final class StudioV3Management
         echo '</div>';
     }
 
-    /** @param array<string, mixed> $state @param array<int, array<string, mixed>> $blocks */
+    /**
+     * @param array<string, mixed> $state
+     * @param array<int, array<string, mixed>> $blocks
+     */
     private static function contextual(array $state, array $blocks): void
     {
         $category = (string) ($state['preferences']['activity_category'] ?? 'none');
