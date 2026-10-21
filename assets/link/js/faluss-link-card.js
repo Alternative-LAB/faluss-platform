@@ -52,6 +52,34 @@
     function initialize(root) { var scope = root && root.jquery ? root[0] : (root || document); if (!scope.querySelectorAll) { return; } scope.querySelectorAll('.faluss-link-card').forEach(refresh); }
 
     window.FalussLinkCard = { refresh: refresh, initialize: initialize, contrastRatio: contrastRatio, bestContrastColor: bestContrastColor, surfaceFor: surfaceFor };
+    document.addEventListener('click', function (event) {
+        var button = event.target.closest('[data-faluss-contextual-embed]');
+        if (!button) { return; }
+        if (button.closest('[data-studio-canvas]')) { return; }
+        var card = button.closest('.faluss-link-card__contextual');
+        var player = card && card.querySelector('.faluss-link-card__contextual-player');
+        if (!player) { return; }
+        var url;
+        try { url = new URL(button.dataset.falussContextualEmbed); } catch (ignored) { return; }
+        var youtube = url.protocol === 'https:' && url.hostname === 'www.youtube-nocookie.com' && /^\/embed\/[A-Za-z0-9_-]{11}$/.test(url.pathname);
+        var twitch = url.protocol === 'https:' && url.hostname === 'player.twitch.tv' && url.searchParams.get('parent') === window.location.hostname;
+        if (!youtube && !twitch) { return; }
+        if (twitch && player.clientWidth < 400) {
+            var fallback = card.querySelector('a[href]');
+            if (fallback) { fallback.click(); }
+            return;
+        }
+        var frame = document.createElement('iframe');
+        frame.src = url.href;
+        frame.title = youtube ? 'Lecteur YouTube' : 'Lecteur Twitch';
+        frame.loading = 'lazy';
+        frame.referrerPolicy = 'strict-origin-when-cross-origin';
+        frame.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen';
+        frame.allowFullscreen = true;
+        player.replaceChildren(frame);
+        player.hidden = false;
+        button.hidden = true;
+    });
     if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', function () { initialize(document); }); } else { initialize(document); }
     window.addEventListener('elementor/frontend/init', function () { if (window.elementorFrontend && window.elementorFrontend.hooks) { window.elementorFrontend.hooks.addAction('frontend/element_ready/faluss_link_card.default', initialize); window.elementorFrontend.hooks.addAction('frontend/element_ready/faluss_link_studio.default', initialize); window.elementorFrontend.hooks.addAction('frontend/element_ready/faluss_link_appearance.default', initialize); } });
 }());

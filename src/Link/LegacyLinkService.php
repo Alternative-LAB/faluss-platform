@@ -24,6 +24,7 @@ final class Faluss_Link {
     const NAME_COLORS = array( '#BE79FF' => 'Rose', '#F54955' => 'Corail', '#FFFFFF' => 'Blanc', '#000000' => 'Noir', '#82206B' => 'Prune' );
     const SOCIAL_VARIANTS = array( 'outline' => 'Icônes contour', 'full' => 'Logos pleins' );
     const ACTIVITY_CATEGORIES = array( 'none', 'video', 'music', 'streaming', 'visual_arts' );
+    const CONTEXTUAL_PROVIDERS = array( 'video' => array( 'youtube' ), 'music' => array( 'music_link' ), 'streaming' => array( 'twitch' ), 'visual_arts' => array( 'dribbble', 'pinterest' ) );
     const BLOCK_TYPES = array( 'section_title' => 'Titre de section', 'text' => 'Texte', 'link' => 'Lien', 'media_teaser' => 'Teaser média' );
     const TEASER_FORMATS = array( 'landscape' => 'Paysage', 'portrait' => 'Portrait', 'square' => 'Carré' );
     const TEASER_ACCESS_MODES = array( 'public' => 'Public', 'member' => 'Membre Faluss', 'entitlement' => 'Droit requis' );
@@ -84,13 +85,14 @@ final class Faluss_Link {
     }
 
     public static function assets() {
-        wp_register_style( 'faluss-me-studio-v2-card', plugins_url( 'assets/me-studio/css/card-v2.css', FALUSS_LINK_FILE ), array(), '3.1.3' );
+        $asset_version = defined( 'FALUSS_PLATFORM_VERSION' ) ? (string) constant( 'FALUSS_PLATFORM_VERSION' ) : '0.14.0';
+        wp_register_style( 'faluss-me-studio-v2-card', plugins_url( 'assets/me-studio/css/card-v2.css', FALUSS_LINK_FILE ), array(), $asset_version );
         wp_register_style( self::STYLE, plugins_url( 'assets/link/css/faluss-link.css', FALUSS_LINK_FILE ), array( 'faluss-me-studio-v2-card' ), '3.1.3' );
         wp_register_style( self::IMMERSIVE_STYLE, plugins_url( 'assets/link/css/faluss-link-immersive.css', FALUSS_LINK_FILE ), array( self::STYLE ), '3.1.3' );
         wp_register_style( self::STUDIO_STYLE, plugins_url( 'assets/link/css/faluss-link-studio.css', FALUSS_LINK_FILE ), array( self::STYLE, self::IMMERSIVE_STYLE ), FALUSS_LINK_VERSION );
         wp_register_style( self::DISCOVERIES_STYLE, plugins_url( 'assets/link/css/faluss-link-discoveries.css', FALUSS_LINK_FILE ), array(), FALUSS_LINK_VERSION );
         wp_register_style( self::ONBOARDING_STYLE, plugins_url( 'assets/link/css/faluss-link-onboarding.css', FALUSS_LINK_FILE ), array( self::STYLE ), FALUSS_LINK_VERSION );
-        wp_register_script( self::CARD_SCRIPT, plugins_url( 'assets/link/js/faluss-link-card.js', FALUSS_LINK_FILE ), array(), '0.6.3', true );
+        wp_register_script( self::CARD_SCRIPT, plugins_url( 'assets/link/js/faluss-link-card.js', FALUSS_LINK_FILE ), array(), $asset_version, true );
         wp_register_script( self::SCRIPT, plugins_url( 'assets/link/js/faluss-link-editor.js', FALUSS_LINK_FILE ), array( 'jquery', self::CARD_SCRIPT ), FALUSS_LINK_VERSION, true );
         wp_register_script( self::IMMERSIVE_SCRIPT, plugins_url( 'assets/link/js/faluss-link-immersive.js', FALUSS_LINK_FILE ), array(), '0.6.2', true );
         wp_register_script( self::ONBOARDING_SCRIPT, plugins_url( 'assets/link/js/faluss-link-onboarding.js', FALUSS_LINK_FILE ), array( self::CARD_SCRIPT ), FALUSS_LINK_VERSION, true );
@@ -650,6 +652,30 @@ final class Faluss_Link {
             unset( $block );
             if ( ! $found ) { return new WP_Error( 'invalid_links' ); }
         }
+        if ( isset( $draft['contextual_draft'] ) ) {
+            $context_draft = is_string( $draft['contextual_draft'] ) ? json_decode( $draft['contextual_draft'], true ) : null;
+            $allowed_context = array( 'block_id', 'category', 'provider', 'url', 'title', 'subtitle', 'cover_attachment_id', 'enabled' );
+            if ( ! is_array( $context_draft ) || array_diff( array_keys( $context_draft ), $allowed_context ) || ( $context_draft['category'] ?? '' ) !== ( $preview['preferences']['activity_category'] ?? 'none' ) ) { return new WP_Error( 'invalid_contextual' ); }
+            $id = $context_draft['block_id'] ?? '';
+            if ( '' !== $id && ! self::valid_block_id( $id ) ) { return new WP_Error( 'invalid_contextual' ); }
+            $found = false;
+            foreach ( $preview['blocks'] as &$block ) {
+                if ( 'contextual_feature' !== ( $block['type'] ?? '' ) || $block['block_id'] !== $id || $block['category'] !== $context_draft['category'] ) { continue; }
+                $updated = self::normalise_block( array_replace( $block, $context_draft ), true );
+                if ( ! $updated ) { return new WP_Error( 'invalid_contextual' ); }
+                $block = $updated; $found = true; break;
+            }
+            unset( $block );
+            if ( '' !== $id && ! $found ) { return new WP_Error( 'invalid_contextual' ); }
+            if ( ! $found ) {
+                if ( count( $preview['blocks'] ) >= 32 ) { return new WP_Error( 'invalid_contextual' ); }
+                foreach ( $preview['blocks'] as $block ) { if ( 'contextual_feature' === ( $block['type'] ?? '' ) && $block['category'] === $context_draft['category'] ) { return new WP_Error( 'invalid_contextual' ); } }
+                $context_draft['block_id'] = wp_generate_uuid4();
+                $created = self::normalise_block( $context_draft + array( 'type' => 'contextual_feature' ), true );
+                if ( ! $created ) { return new WP_Error( 'invalid_contextual' ); }
+                $preview['blocks'][] = $created;
+            }
+        }
         $design = array_intersect_key( $draft, array_flip( array( 'avatar_visible', 'structure', 'page_background', 'button_color', 'link_style', 'button_texture', 'avatar_shape', 'avatar_effect', 'cover_attachment_id', 'wallpaper_size', 'wallpaper_effect', 'name_font', 'name_weight', 'name_color', 'social_style', 'social_color', 'links_mode', 'secondary_color', 'image_border', 'image_border_color' ) ) );
         foreach ( $design as $key => $value ) {
             if ( ! is_scalar( $value ) ) { return new WP_Error( 'invalid_preview' ); }
@@ -725,6 +751,9 @@ final class Faluss_Link {
             'create_content'       => array( 'block_id', 'type', 'value', 'attachment_id', 'title', 'text', 'format', 'access_mode', 'entitlement_code' ),
             'update_content'       => array( 'block_id', 'type', 'value', 'attachment_id', 'title', 'text', 'format', 'access_mode', 'entitlement_code' ),
             'delete_content'       => array( 'block_id' ),
+            'create_contextual'    => array( 'block_id', 'category', 'provider', 'url', 'title', 'subtitle', 'cover_attachment_id', 'enabled' ),
+            'update_contextual'    => array( 'block_id', 'category', 'provider', 'url', 'title', 'subtitle', 'cover_attachment_id', 'enabled' ),
+            'delete_contextual'    => array( 'block_id' ),
             'create_collection'    => array( 'block_id', 'description_block_id', 'name', 'description' ),
             'update_collection'    => array( 'block_id', 'name', 'description' ),
             'dissolve_collection'  => array( 'block_id' ),
@@ -749,7 +778,7 @@ final class Faluss_Link {
     /** One member aggregate, one MariaDB transaction, one commit owner. */
     private static function run_studio_mutation( $faluss_id, $request ) {
         global $wpdb;
-        $block_mutations = array( 'import_links', 'create_content', 'update_content', 'delete_content', 'create_link', 'update_link', 'delete_link', 'create_collection', 'update_collection', 'dissolve_collection', 'reorder_blocks' );
+        $block_mutations = array( 'import_links', 'create_content', 'update_content', 'delete_content', 'create_contextual', 'update_contextual', 'delete_contextual', 'create_link', 'update_link', 'delete_link', 'create_collection', 'update_collection', 'dissolve_collection', 'reorder_blocks' );
         if ( ! \Faluss\Platform\Link\LinkIdentityAdapter::studioAvailable() || false === $wpdb->query( 'START TRANSACTION' ) ) {
             return array( 'ok' => false, 'status' => 503, 'code' => 'transaction_unavailable', 'message' => __( 'La sauvegarde transactionnelle est indisponible.', 'faluss-link' ) );
         }
@@ -1097,6 +1126,25 @@ final class Faluss_Link {
         $blocks = self::stored_blocks( $faluss_id )['blocks'];
         $by_id = array(); foreach ( $blocks as $index => $block ) { $by_id[ $block['block_id'] ] = $index; }
         $id = strtolower( (string) ( $payload['block_id'] ?? '' ) );
+        if ( in_array( $mutation, array( 'create_contextual', 'update_contextual', 'delete_contextual' ), true ) ) {
+            $existing = isset( $by_id[ $id ] ) ? $blocks[ $by_id[ $id ] ] : null;
+            if ( 'create_contextual' === $mutation ) {
+                if ( count( $blocks ) >= 32 || ! self::valid_block_id( $id ) || null !== $existing ) { return false; }
+            } elseif ( null === $existing || 'contextual_feature' !== $existing['type'] ) { return false; }
+            if ( 'delete_contextual' === $mutation ) {
+                if ( ! self::mutation_checkpoint( 'before_block_delete' ) || 1 !== (int) $wpdb->delete( $table, array( 'faluss_id' => $faluss_id, 'block_id' => $id, 'block_type' => 'contextual_feature' ), array( '%s', '%s', '%s' ) ) ) { return false; }
+                return self::write_block_order_in_transaction( $faluss_id, array_values( array_diff( array_keys( $by_id ), array( $id ) ) ) );
+            }
+            foreach ( $payload as $value ) { if ( ! is_scalar( $value ) ) { return false; } }
+            $candidate = array_replace( $existing ?? array(), $payload, array( 'block_id' => $id, 'type' => 'contextual_feature' ) );
+            if ( null !== $existing && ( $candidate['category'] ?? '' ) !== $existing['category'] ) { return false; }
+            foreach ( $blocks as $block ) {
+                if ( 'contextual_feature' === $block['type'] && $block['block_id'] !== $id && ( $block['category'] ?? '' ) === ( $candidate['category'] ?? '' ) ) { return false; }
+            }
+            $block = self::normalise_block( $candidate, true );
+            if ( ! $block ) { return false; }
+            return null === $existing ? self::insert_block_in_transaction( $faluss_id, $block, count( $blocks ) + 1 ) : self::update_block_payload_in_transaction( $faluss_id, $block );
+        }
         if ( in_array( $mutation, array( 'create_content', 'update_content', 'delete_content' ), true ) ) {
             $existing = isset( $by_id[ $id ] ) ? $blocks[ $by_id[ $id ] ] : null;
             if ( 'create_content' === $mutation ) {
@@ -1271,6 +1319,7 @@ final class Faluss_Link {
             'text' => array( 'value' ),
             'link' => array( 'label', 'url', 'attachment_id', 'visibility' ),
             'media_teaser' => array( 'attachment_id', 'title', 'text', 'format', 'access_mode', 'entitlement_code' ),
+            'contextual_feature' => array( 'category', 'provider', 'url', 'title', 'subtitle', 'cover_attachment_id', 'enabled' ),
         );
         ?><div class="faluss-link-studio__block-store" data-fl-block-store hidden aria-hidden="true"><?php foreach ( array_values( (array) $blocks ) as $index => $block ) : $type = (string) $block['type']; $prefix = 'content_blocks[' . (int) $index . ']'; ?><div data-fl-stored-block data-block-id="<?php echo esc_attr( $block['block_id'] ); ?>" data-block-type="<?php echo esc_attr( $type ); ?>"><input data-fl-block-field="block_id" name="<?php echo esc_attr( $prefix ); ?>[block_id]" type="hidden" value="<?php echo esc_attr( $block['block_id'] ); ?>"><input data-fl-block-field="type" name="<?php echo esc_attr( $prefix ); ?>[type]" type="hidden" value="<?php echo esc_attr( $type ); ?>"><?php foreach ( $fields[ $type ] ?? array() as $field ) : ?><input data-fl-block-field="<?php echo esc_attr( $field ); ?>" name="<?php echo esc_attr( $prefix ); ?>[<?php echo esc_attr( $field ); ?>]" type="hidden" value="<?php echo esc_attr( $block[ $field ] ?? '' ); ?>"><?php endforeach; ?></div><?php endforeach; ?></div><?php
     }
@@ -2019,7 +2068,11 @@ final class Faluss_Link {
     }
 
     private static function content_block_fields( $block, $index, $count ) {
-        $type = $block['type']; $label = self::BLOCK_TYPES[ $type ]; $prefix = 'content_blocks[' . (int) $index . ']';
+        if ( 'contextual_feature' === ( $block['type'] ?? '' ) ) {
+            echo '<article class="faluss-link-content-block" data-block-type="contextual_feature"><p>Le bloc à la une se modifie dans le Studio V3.</p></article>';
+            return;
+        }
+        $type = $block['type']; $label = 'contextual_feature' === $type ? 'Bloc à la une' : ( self::BLOCK_TYPES[ $type ] ?? 'Élément' ); $prefix = 'content_blocks[' . (int) $index . ']';
         ?><article class="faluss-link-content-block" data-block-type="<?php echo esc_attr( $type ); ?>"><input data-fl-block-field="block_id" name="<?php echo esc_attr( $prefix ); ?>[block_id]" type="hidden" value="<?php echo esc_attr( $block['block_id'] ); ?>"><input data-fl-block-field="type" name="<?php echo esc_attr( $prefix ); ?>[type]" type="hidden" value="<?php echo esc_attr( $type ); ?>"><header class="faluss-link-content-block__header"><strong><?php echo esc_html( $label ); ?></strong><div class="faluss-link-content-block__actions"><button data-fl-block-action="up" type="button" aria-label="<?php echo esc_attr( sprintf( __( 'Monter %s', 'faluss-link' ), $label ) ); ?>" <?php disabled( 0 === (int) $index ); ?>><?php esc_html_e( 'Monter', 'faluss-link' ); ?></button><button data-fl-block-action="down" type="button" aria-label="<?php echo esc_attr( sprintf( __( 'Descendre %s', 'faluss-link' ), $label ) ); ?>" <?php disabled( (int) $index === (int) $count - 1 ); ?>><?php esc_html_e( 'Descendre', 'faluss-link' ); ?></button><button data-fl-block-action="remove" type="button" aria-label="<?php echo esc_attr( sprintf( __( 'Supprimer %s', 'faluss-link' ), $label ) ); ?>"><?php esc_html_e( 'Supprimer', 'faluss-link' ); ?></button></div></header><?php if ( 'section_title' === $type ) : ?><label><?php esc_html_e( 'Titre', 'faluss-link' ); ?><input data-fl-block-field="value" name="<?php echo esc_attr( $prefix ); ?>[value]" type="text" maxlength="80" value="<?php echo esc_attr( $block['value'] ); ?>"></label><?php elseif ( 'text' === $type ) : ?><label><?php esc_html_e( 'Texte', 'faluss-link' ); ?><textarea data-fl-block-field="value" name="<?php echo esc_attr( $prefix ); ?>[value]" maxlength="480" rows="3"><?php echo esc_textarea( $block['value'] ); ?></textarea></label><?php elseif ( 'media_teaser' === $type ) : ?><div class="faluss-link-content-block__media"><input data-fl-block-field="attachment_id" name="<?php echo esc_attr( $prefix ); ?>[attachment_id]" type="hidden" value="<?php echo (int) $block['attachment_id']; ?>"><button class="faluss-link-content-block__select-teaser" type="button"><?php esc_html_e( 'Choisir une image', 'faluss-link' ); ?></button><button class="faluss-link-content-block__remove-teaser" type="button"><?php esc_html_e( 'Retirer', 'faluss-link' ); ?></button><div class="faluss-link-content-block__media-preview"><?php echo self::teaser_image_markup( (int) $block['attachment_id'], $block['title'] ); ?></div></div><label><?php esc_html_e( 'Titre facultatif', 'faluss-link' ); ?><input data-fl-block-field="title" name="<?php echo esc_attr( $prefix ); ?>[title]" type="text" maxlength="80" value="<?php echo esc_attr( $block['title'] ); ?>"></label><label><?php esc_html_e( 'Texte facultatif', 'faluss-link' ); ?><textarea data-fl-block-field="text" name="<?php echo esc_attr( $prefix ); ?>[text]" maxlength="240" rows="3"><?php echo esc_textarea( $block['text'] ); ?></textarea></label><?php self::teaser_access_fields( $block, $prefix ); ?><?php else : ?><label><?php esc_html_e( 'Libellé', 'faluss-link' ); ?><input data-fl-block-field="label" name="<?php echo esc_attr( $prefix ); ?>[label]" type="text" maxlength="80" value="<?php echo esc_attr( $block['label'] ); ?>"></label><label><?php esc_html_e( 'URL HTTPS', 'faluss-link' ); ?><input data-fl-block-field="url" name="<?php echo esc_attr( $prefix ); ?>[url]" type="url" maxlength="2048" value="<?php echo esc_attr( $block['url'] ); ?>" placeholder="https://"></label><?php endif; ?></article><?php
     }
 
@@ -2160,6 +2213,14 @@ final class Faluss_Link {
     }
 
     private static function public_blocks_markup( $blocks, $profile = array(), $preview = false, $preview_demo_links = false, $preferences = array() ) {
+        $active_category = (string) ( $preferences['activity_category'] ?? 'none' );
+        $featured = array(); $ordinary = array();
+        foreach ( (array) $blocks as $block ) {
+            if ( is_array( $block ) && 'contextual_feature' === ( $block['type'] ?? '' ) ) {
+                if ( ! empty( $block['enabled'] ) && $active_category === ( $block['category'] ?? '' ) ) { $featured[] = $block; }
+            } else { $ordinary[] = $block; }
+        }
+        $blocks = array_merge( $featured, $ordinary );
         $has_link = false;
         foreach ( (array) $blocks as $block ) { if ( is_array( $block ) && 'link' === ( $block['type'] ?? '' ) ) { $has_link = true; break; } }
         if ( ! $blocks && ! ( $preview && $preview_demo_links ) ) { return ''; }
@@ -2183,6 +2244,15 @@ final class Faluss_Link {
             $icon = '' !== $network ? self::social_asset_markup( $network, $icon_variant ) : '';
             $image = 'image-grid' === ( $preferences['links_mode'] ?? 'neutral' ) ? self::teaser_image_markup( (int) ( $block['attachment_id'] ?? 0 ), '' ) : '';
             ?><a class="faluss-link-card__link<?php echo '' !== $image ? ' faluss-link-card__link--image' : ''; ?>" href="<?php echo esc_url( $block['url'] ); ?>" target="_blank" rel="noopener noreferrer nofollow" data-faluss-visibility="<?php echo esc_attr( $visibility ); ?>"<?php echo $editor_id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped attribute assembled above. ?>><?php if ( '' !== $image ) : ?><span class="faluss-link-card__link-image" aria-hidden="true"><?php echo $image; ?></span><?php endif; ?><?php if ( '' !== $icon ) : ?><span class="faluss-link-card__link-icon" aria-hidden="true"><?php echo $icon; ?></span><?php endif; ?><span><?php echo esc_html( $block['label'] ); ?></span></a><?php endif;
+        if ( 'contextual_feature' === $block['type'] ) :
+            $provider = $block['provider'];
+            $service = array( 'youtube' => 'YouTube', 'music_link' => 'la plateforme musicale', 'twitch' => 'Twitch', 'dribbble' => 'Dribbble', 'pinterest' => 'Pinterest' )[ $provider ] ?? 'le site';
+            $title = '' !== $block['title'] ? $block['title'] : ( 'music' === $block['category'] ? 'Ma musique' : ( 'visual_arts' === $block['category'] ? 'Mon portfolio' : ( 'streaming' === $block['category'] ? 'Ma chaîne' : 'Ma vidéo' ) ) );
+            $action = 'music_link' === $provider ? 'Écouter' : ( in_array( $provider, array( 'dribbble', 'pinterest' ), true ) ? 'Voir le portfolio' : 'Ouvrir' );
+            $embed = '';
+            if ( 'youtube' === $provider ) { $parts = wp_parse_url( $block['url'] ); parse_str( (string) ( $parts['query'] ?? '' ), $query ); $embed = 'https://www.youtube-nocookie.com/embed/' . (string) ( $query['v'] ?? '' ); }
+            if ( 'twitch' === $provider ) { $site = wp_parse_url( home_url( '/' ) ); $channel = basename( (string) ( wp_parse_url( $block['url'] )['path'] ?? '' ) ); if ( is_array( $site ) && 'https' === strtolower( $site['scheme'] ?? '' ) && ! empty( $site['host'] ) ) { $embed = 'https://player.twitch.tv/?channel=' . rawurlencode( $channel ) . '&parent=' . rawurlencode( $site['host'] ); } }
+            ?><section class="faluss-link-card__contextual" data-faluss-contextual-provider="<?php echo esc_attr( $provider ); ?>"<?php echo $editor_id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped attribute assembled above. ?>><?php if ( (int) $block['cover_attachment_id'] ) : ?><div class="faluss-link-card__contextual-cover"><?php echo self::teaser_image_markup( (int) $block['cover_attachment_id'], $title ); ?></div><?php endif; ?><div class="faluss-link-card__contextual-copy"><span><?php echo esc_html( $service ); ?></span><h3><?php echo esc_html( $title ); ?></h3><?php if ( '' !== $block['subtitle'] ) : ?><p><?php echo esc_html( $block['subtitle'] ); ?></p><?php endif; ?></div><?php if ( '' !== $embed ) : ?><button type="button" data-faluss-contextual-embed="<?php echo esc_url( $embed ); ?>">Lire ici</button><div class="faluss-link-card__contextual-player" hidden></div><?php endif; ?><a href="<?php echo esc_url( $block['url'] ); ?>" target="_blank" rel="noopener noreferrer nofollow"><?php echo esc_html( $action . ' sur ' . $service ); ?></a></section><?php endif;
         if ( 'media_teaser' === $block['type'] ) :
             $access = self::teaser_access_decision( $block, $profile['faluss_id'] ?? '', $preview );
             $has_copy = '' !== $block['title'] || '' !== $block['text'];
@@ -2655,7 +2725,40 @@ final class Faluss_Link {
             return '' === $label || '' === $url ? null : array( 'block_id' => $block_id, 'type' => $type, 'label' => $label, 'url' => $url, 'attachment_id' => $attachment_id, 'visibility' => $visibility );
         }
         if ( 'media_teaser' === $type ) { $attachment_id = self::media_attachment_id( $block['attachment_id'] ?? 0, $require_owned_media ); if ( ! $attachment_id ) { return null; } $access_mode = self::teaser_access_mode( $block['access_mode'] ?? 'public' ); $entitlement_code = 'entitlement' === $access_mode ? self::entitlement_code( $block['entitlement_code'] ?? '' ) : ''; return array( 'block_id' => $block_id, 'type' => $type, 'attachment_id' => $attachment_id, 'title' => self::block_text( $block['title'] ?? '', 80, false ), 'text' => self::block_text( $block['text'] ?? '', 240, true ), 'format' => self::teaser_format( $block['format'] ?? 'landscape' ), 'access_mode' => $access_mode, 'entitlement_code' => $entitlement_code ); }
+        if ( 'contextual_feature' === $type ) {
+            $category = $block['category'] ?? '';
+            $provider = $block['provider'] ?? '';
+            if ( ! is_string( $category ) || ! is_string( $provider ) || ! in_array( $provider, self::CONTEXTUAL_PROVIDERS[ $category ] ?? array(), true ) ) { return null; }
+            $url = self::contextual_url( $provider, $block['url'] ?? '' );
+            $cover = $block['cover_attachment_id'] ?? 0;
+            if ( '' === $url || ! ctype_digit( (string) $cover ) || (int) $cover < 0 || ( (int) $cover > 0 && 0 === self::media_attachment_id( $cover, $require_owned_media ) ) ) { return null; }
+            $enabled = $block['enabled'] ?? false;
+            if ( ! in_array( $enabled, array( false, true, 0, 1, '0', '1' ), true ) ) { return null; }
+            return array( 'block_id' => $block_id, 'type' => $type, 'category' => $category, 'provider' => $provider, 'url' => $url, 'title' => self::block_text( $block['title'] ?? '', 80, false ), 'subtitle' => self::block_text( $block['subtitle'] ?? '', 120, false ), 'cover_attachment_id' => (int) $cover, 'enabled' => in_array( $enabled, array( true, 1, '1' ), true ) );
+        }
         return null;
+    }
+
+    /** A closed provider URL parser; no remote fetch or caller-supplied embed HTML. */
+    private static function contextual_url( $provider, $value ) {
+        if ( ! is_string( $value ) || strlen( $value ) > 2048 || ! filter_var( $value, FILTER_VALIDATE_URL ) ) { return ''; }
+        $parts = wp_parse_url( $value );
+        if ( ! is_array( $parts ) || 'https' !== strtolower( $parts['scheme'] ?? '' ) || empty( $parts['host'] ) || isset( $parts['user'] ) || isset( $parts['pass'] ) || isset( $parts['port'] ) || isset( $parts['fragment'] ) ) { return ''; }
+        $host = strtolower( (string) $parts['host'] );
+        if ( filter_var( $host, FILTER_VALIDATE_IP ) ) { return ''; }
+        $path = (string) ( $parts['path'] ?? '' );
+        $query = (string) ( $parts['query'] ?? '' );
+        if ( 'youtube' === $provider ) {
+            $id = '';
+            if ( in_array( $host, array( 'youtube.com', 'www.youtube.com' ), true ) && '/watch' === $path ) { parse_str( $query, $params ); $id = is_string( $params['v'] ?? null ) ? $params['v'] : ''; }
+            elseif ( in_array( $host, array( 'youtube.com', 'www.youtube.com' ), true ) && 1 === preg_match( '#^/shorts/([A-Za-z0-9_-]{11})/?$#D', $path, $matches ) && '' === $query ) { $id = $matches[1]; }
+            elseif ( 'youtu.be' === $host && 1 === preg_match( '#^/([A-Za-z0-9_-]{11})/?$#D', $path, $matches ) && '' === $query ) { $id = $matches[1]; }
+            return 1 === preg_match( '/^[A-Za-z0-9_-]{11}$/D', $id ) ? 'https://www.youtube.com/watch?v=' . $id : '';
+        }
+        if ( 'twitch' === $provider && in_array( $host, array( 'twitch.tv', 'www.twitch.tv' ), true ) && '' === $query && 1 === preg_match( '#^/([A-Za-z0-9_]{4,25})/?$#D', $path, $matches ) ) { return 'https://www.twitch.tv/' . strtolower( $matches[1] ); }
+        if ( in_array( $provider, array( 'dribbble', 'pinterest' ), true ) && in_array( $host, array( $provider . '.com', 'www.' . $provider . '.com' ), true ) && '' === $query && 1 === preg_match( '#^/([A-Za-z0-9_-]{1,40})/?$#D', $path, $matches ) ) { return 'https://www.' . $provider . '.com/' . $matches[1]; }
+        if ( 'music_link' === $provider && ( in_array( $host, array( 'open.spotify.com', 'music.apple.com', 'soundcloud.com', 'bandcamp.com' ), true ) || str_ends_with( $host, '.bandcamp.com' ) ) && '' !== trim( $path, '/' ) ) { return $value; }
+        return '';
     }
 
     private static function valid_block_id( $value ) { return 1 === preg_match( '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/', strtolower( (string) $value ) ); }

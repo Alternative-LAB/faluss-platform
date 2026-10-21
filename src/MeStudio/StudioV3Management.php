@@ -11,7 +11,7 @@ final class StudioV3Management
 {
     public static function handles(string $section): bool
     {
-        return in_array($section, ['v3_links', 'v3_collections', 'v3_contents', 'v3_settings'], true);
+        return in_array($section, ['v3_context', 'v3_links', 'v3_collections', 'v3_contents', 'v3_settings'], true);
     }
 
     /** @param array<int, array<string, mixed>> $blocks */
@@ -25,11 +25,13 @@ final class StudioV3Management
     /** @param array<string, mixed> $state */
     public static function render(string $section, array $state): void
     {
-        $titles = ['v3_links' => 'Tes liens', 'v3_collections' => 'Tes collections', 'v3_contents' => 'Contenus et ordre', 'v3_settings' => 'Réglages de ta carte'];
+        $titles = ['v3_context' => 'À la une', 'v3_links' => 'Tes liens', 'v3_collections' => 'Tes collections', 'v3_contents' => 'Contenus et ordre', 'v3_settings' => 'Réglages de ta carte'];
         echo '<div data-v3-management><h1 tabindex="-1">' . esc_html($titles[$section]) . '</h1><p>Enregistre chaque élément avant de passer au suivant.</p>';
         $blocks = (array) ($state['blocks'] ?? []);
         $collections = (array) ($state['collections'] ?? []);
-        if ($section === 'v3_links') {
+        if ($section === 'v3_context') {
+            self::contextual($state, $blocks);
+        } elseif ($section === 'v3_links') {
             LinkImportPanel::render();
             self::start('save_atomic_design', 'Disposition des liens');
             self::select('links_mode', 'Disposition', ['neutral' => 'Liste', 'image-grid' => 'Images · vedette puis deux colonnes'], $state['preferences']['links_mode'] ?? 'neutral');
@@ -77,6 +79,40 @@ final class StudioV3Management
             self::settings($state);
         }
         echo '</div>';
+    }
+
+    /** @param array<string, mixed> $state @param array<int, array<string, mixed>> $blocks */
+    private static function contextual(array $state, array $blocks): void
+    {
+        $category = (string) ($state['preferences']['activity_category'] ?? 'none');
+        if ($category === 'none') {
+            echo '<p>Choisis d’abord ton activité dans Profil → Activité. Le bloc reste facultatif.</p>';
+            return;
+        }
+        $providers = [
+            'video' => ['youtube' => 'YouTube'],
+            'music' => ['music_link' => 'Lien d’écoute'],
+            'streaming' => ['twitch' => 'Twitch'],
+            'visual_arts' => ['dribbble' => 'Dribbble', 'pinterest' => 'Pinterest'],
+        ];
+        $current = [];
+        foreach ($blocks as $block) {
+            if (($block['type'] ?? '') === 'contextual_feature' && ($block['category'] ?? '') === $category) { $current = $block; break; }
+        }
+        $existing = !empty($current['block_id']);
+        echo '<p>Ce bloc est optionnel. Il apparaît en premier sur ta carte uniquement quand tu l’actives. Changer d’activité ne supprime aucun contenu.</p>';
+        self::start($existing ? 'update_contextual' : 'create_contextual', $existing ? 'Modifier le bloc à la une' : 'Créer un bloc à la une', (string) ($current['block_id'] ?? ''));
+        self::input('category', '', $category, 20, 'hidden');
+        self::select('provider', 'Service', $providers[$category] ?? [], $current['provider'] ?? array_key_first($providers[$category] ?? []));
+        self::input('url', 'URL HTTPS du contenu ou du portfolio', $current['url'] ?? '', 2048, 'url');
+        self::input('title', 'Titre facultatif', $current['title'] ?? '', 80);
+        self::input('subtitle', 'Artiste, album ou description facultative', $current['subtitle'] ?? '', 120);
+        $cover = (int) ($current['cover_attachment_id'] ?? 0);
+        if ($cover) { echo wp_get_attachment_image($cover, 'thumbnail', false, ['alt' => 'Image enregistrée']); }
+        self::input('cover_attachment_id', '', $cover, 12, 'hidden');
+        echo '<label>Image facultative<input type="file" accept="image/jpeg,image/png,image/gif,image/webp" data-v3-content-upload></label><button type="button" data-v3-remove-image>Retirer l’image</button>';
+        self::select('enabled', 'Afficher sur la carte', ['0' => 'Non, garder le brouillon', '1' => 'Oui'], !empty($current['enabled']) ? '1' : '0');
+        self::end($existing ? 'Enregistrer' : 'Ajouter', $existing ? 'delete_contextual' : '', 'Supprimer ce bloc');
     }
 
     /** @param array<string, mixed> $block */

@@ -188,7 +188,8 @@
             });
         }).then(function (result) {
             if (!result.success || !result.data || !result.data.id) { throw new Error(serverError(result, 'upload_failed')); }
-            editor.querySelector('[data-field="attachment_id"]').value = result.data.id;
+            var imageField = editor.querySelector('[data-field="cover_attachment_id"]') || editor.querySelector('[data-field="attachment_id"]');
+            imageField.value = result.data.id;
             var image = editor.querySelector('img');
             if (!image) { image = document.createElement('img'); input.closest('label').before(image); }
             var localUrl = URL.createObjectURL(file);
@@ -196,6 +197,7 @@
             image.removeAttribute('srcset'); image.src = localUrl; image.alt = 'Image retenue';
 
             notice('Image prête. Enregistre cet élément pour l’appliquer à ta carte.', false);
+            schedulePreview();
         }).catch(function (failure) { notice(failure.message, true); })
             .finally(function () { uploading = false; input.disabled = false; });
     }
@@ -250,6 +252,15 @@
                     draft.link_draft = JSON.stringify(link);
                 }
             }
+            if (root.dataset.step === 'v3_context') {
+                var contextEditor = panel.querySelector('[data-mutation="update_contextual"], [data-mutation="create_contextual"]');
+                if (contextEditor && editorDirty(contextEditor)) {
+                    var contextDraft = {};
+                    contextEditor.querySelectorAll('[data-field]').forEach(function (field) { contextDraft[field.dataset.field] = field.value; });
+                    if (contextEditor.dataset.id) { contextDraft.block_id = contextEditor.dataset.id; }
+                    if (contextDraft.url) { draft.contextual_draft = JSON.stringify(contextDraft); }
+                }
+            }
         }
         post('faluss_onboarding_v3_preview', config.previewNonce, {fields: JSON.stringify(draft)}, previewRequest.signal)
             .then(function (response) {
@@ -292,7 +303,7 @@
         var block = target.closest('[data-v3-preview-block-id]');
         var route = '', selector = '';
         if (block) {
-            route = block.matches('.faluss-link-card__link') ? 'v3_links' : block.matches('.faluss-link-card__section-title') ? 'v3_collections' : 'v3_contents';
+            route = block.matches('.faluss-link-card__contextual') ? 'v3_context' : block.matches('.faluss-link-card__link') ? 'v3_links' : block.matches('.faluss-link-card__section-title') ? 'v3_collections' : 'v3_contents';
         } else {
             var choices = [
                 ['.faluss-link-card__avatar', 'v3_avatar'], ['.faluss-link-card__name', 'v3_name'],
@@ -561,8 +572,10 @@
             var remove = target.closest('[data-v3-delete-item]');
             if (remove) { saveItem(editor, remove.dataset.v3DeleteItem); return; }
             if (target.closest('[data-v3-remove-image]')) {
-                editor.querySelector('[data-field="attachment_id"]').value = '0';
+                var imageField = editor.querySelector('[data-field="cover_attachment_id"]') || editor.querySelector('[data-field="attachment_id"]');
+                if (imageField) { imageField.value = '0'; }
                 var image = editor.querySelector('img'); if (image) { image.remove(); }
+                schedulePreview();
                  return;
             }
             var order = target.closest('[data-v3-order]');
