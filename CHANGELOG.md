@@ -8,6 +8,8 @@ Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/
 
 ### Documentation
 
+- Définir les contrats, URL sûres, rendus de secours et critères d'acceptation du prochain lot Me catégorie d'activité et bloc contextuel facultatif ; aucune fonctionnalité activée par ce document.
+
 - Documenter la recette Me du main fusionné sur WordPress et Elementor isolés, avec captures, écritures réelles, limites visuelles et chemin de publication.
 
 ### Ajouté
