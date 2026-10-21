@@ -171,8 +171,20 @@ final class FansSsoService
             self::localNotice();
         }
 
+        $deadline = $claims['session_expires_at'] ?? null;
+        if ($deadline !== null && $deadline <= time()) {
+            self::localNotice();
+        }
+
         wp_set_current_user($user->ID);
+        $bound = static function (int $expiration, int $userId, bool $remember) use ($deadline, $user): int {
+            unset($remember);
+            return $deadline !== null && $userId === $user->ID && self::linkedMember($userId)
+                ? min($expiration, max(1, $deadline - time())) : $expiration;
+        };
+        add_filter('auth_cookie_expiration', $bound, PHP_INT_MAX, 3);
         wp_set_auth_cookie($user->ID, true, is_ssl());
+        remove_filter('auth_cookie_expiration', $bound, PHP_INT_MAX);
         do_action('wp_login', $user->user_login, $user);
         wp_safe_redirect($pending['return_to'] ?? home_url('/'));
         exit;
@@ -317,7 +329,7 @@ final class FansSsoService
         }
     }
 
-    /** @return array{faluss_id:string,scope:string,email?:string}|null */
+    /** @return array{faluss_id:string,scope:string,email?:string,session_expires_at?:int}|null */
     private static function exchange(string $code, string $verifier, string $mode): ?array
     {
         if (!self::configured() || !self::opaque($code) || !self::opaque($verifier)) {
@@ -354,6 +366,10 @@ final class FansSsoService
             || $scopes !== ($mode === 'link' ? ['identity.basic'] : ['identity.basic', 'identity.email'])
             || ($mode === 'login' && !is_email($claims['email'] ?? null))
             || ($mode === 'link' && isset($claims['email']))
+            || (array_key_exists('session_expires_at', $claims)
+                && (!is_int($claims['session_expires_at'])
+                    || $claims['session_expires_at'] <= time()
+                    || $claims['session_expires_at'] > time() + self::SESSION_TTL))
         ) {
             return null;
         }
@@ -364,6 +380,9 @@ final class FansSsoService
         ];
         if ($mode === 'login') {
             $result['email'] = $claims['email'];
+        }
+        if (isset($claims['session_expires_at'])) {
+            $result['session_expires_at'] = $claims['session_expires_at'];
         }
 
         return $result;

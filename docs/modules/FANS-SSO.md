@@ -26,8 +26,8 @@ sequenceDiagram
     B->>F: /faluss-fans/sso/callback
     F->>F: état lié au navigateur consommé en transaction
     F->>M: POST /oauth/token avec secret et verifier
-    M-->>F: identité et scopes bornés
-    F->>F: liaison locale et session subscriber fixe de huit heures
+    M-->>F: identité, scopes et échéance centrale bornés
+    F->>F: liaison locale et session subscriber bornée à huit heures
 ```
 
 ## Configuration et activation
@@ -71,7 +71,9 @@ Le flag est inactif par défaut. L'activation du plugin, après configuration, i
 
 Le démarrage crée 32 octets aléatoires indépendants pour l'état, le verifier et la liaison navigateur. Le cookie est limité à l'hôte Fans, `Secure`, `HttpOnly`, `SameSite=Lax`. Le callback vérifie le cookie, l'état, l'expiration et la consommation sous verrou InnoDB avant l'échange réseau ; les erreurs redirigent vers une notice locale sans renvoyer le code ni le secret. Le token doit contenir un UUID v4 et exactement les scopes demandés. Les autres claims, dont `apps`, sont ignorés.
 
-Le flux anonyme peut créer uniquement un compte `subscriber` local après une preuve `identity.email`, et refuse une collision avec un e-mail déjà présent. La liaison d'un compte existant exige un `subscriber` connecté, le nonce et le même compte au retour. Un rôle privilégié ne reçoit pas de session SSO. Une nouvelle session locale liée expire huit heures après sa création (28 800 secondes), sans renouvellement à chaque visite. Le cookie est persistant, avec exactement la même échéance que sa signature et le jeton serveur WordPress ; fermer puis rouvrir le navigateur ne l’expire pas avant cette date. Les anciennes sessions conservent leur échéance initiale. Les administrateurs WordPress et les sessions Identity sur Me sont inchangés. Ni l'e-mail ni le `wp_user_id` d'un autre site ne servent de clé de droit.
+Le flux anonyme peut créer uniquement un compte `subscriber` local après une preuve `identity.email`, et refuse une collision avec un e-mail déjà présent. La liaison d'un compte existant exige un `subscriber` connecté, le nonce et le même compte au retour. Un rôle privilégié ne reçoit pas de session SSO. Une nouvelle session locale liée expire au plus huit heures après sa création (28 800 secondes), sans renouvellement à chaque visite. Le cookie est persistant, avec exactement la même échéance que sa signature et le jeton serveur WordPress ; fermer puis rouvrir le navigateur ne l’expire pas avant cette date. Les anciennes sessions conservent leur échéance initiale. Les administrateurs WordPress et les sessions Identity sur Me sont inchangés. Ni l'e-mail ni le `wp_user_id` d'un autre site ne servent de clé de droit.
+
+Quand Me renvoie `session_expires_at` dans l'échange serveur à serveur, Fans vérifie qu'il s'agit d'un entier futur à au plus huit heures. Le cookie, sa signature et le jeton serveur expirent alors à la plus proche de cette échéance centrale et du plafond local de huit heures. Un callback tardif ne prolonge donc pas l'accès au-delà de l'OTP initial. Un claim présent mais invalide est refusé ; son absence conserve temporairement le comportement historique lors d'un déploiement progressif. La déconnexion Fans reste locale : elle détruit le jeton Fans, mais pas la session Identity sur Me ni une session Hub. La recette doit couvrir un retour SSO avant échéance, un refus après huit heures, la fermeture complète du navigateur et la déconnexion.
 
 La création anonyme exige que `wp_users` et `wp_usermeta` soient InnoDB, comme la table de liaison Fans. Un verrou MariaDB par `faluss_id`, puis un par e-mail, sérialise les tentatives concurrentes avant la vérification de collision. `wp_insert_user()` et l'insertion de la liaison s'exécutent dans **la même transaction** sur la connexion `$wpdb` : si l'insertion de liaison échoue, `ROLLBACK` retire le compte créé et `clean_user_cache()` invalide le compte que WordPress avait déjà mis en cache, ce qui permet une nouvelle tentative. Le chemin de liaison explicite ne crée ni ne supprime de compte ; son échec laisse intact le membre préexistant. Si un verrou ou la vérification InnoDB échoue, aucune création n'est tentée. Les hooks WordPress de création peuvent déclencher des effets externes hors transaction ; une recette jetable doit vérifier les plugins présents avant activation réelle.
 

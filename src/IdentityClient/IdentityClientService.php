@@ -220,8 +220,21 @@ final class IdentityClientService
             self::localNotice('invalid', (string) $row['redirect_url']);
         }
 
+        $deadline = isset($claims['session_expires_at']) && is_int($claims['session_expires_at'])
+            ? $claims['session_expires_at'] : null;
+        if ($deadline !== null && $deadline <= time()) {
+            self::localNotice('invalid', (string) $row['redirect_url']);
+        }
+
         wp_set_current_user($user->ID);
-        wp_set_auth_cookie($user->ID, false, is_ssl());
+        $bound = static function (int $expiration, int $userId, bool $remember) use ($deadline, $user): int {
+            unset($remember);
+            return $deadline !== null && $userId === $user->ID && self::isLinkedNormalMember($userId)
+                ? min($expiration, max(1, $deadline - time())) : $expiration;
+        };
+        add_filter('auth_cookie_expiration', $bound, PHP_INT_MAX, 3);
+        wp_set_auth_cookie($user->ID, true, is_ssl());
+        remove_filter('auth_cookie_expiration', $bound, PHP_INT_MAX);
         do_action('wp_login', $user->user_login, $user);
         self::redirectToLocal((string) $row['redirect_url']);
     }
@@ -417,6 +430,13 @@ final class IdentityClientService
         }
         if (isset($claims['email'])
             && (!in_array('identity.email', $scopes, true) || !is_email($claims['email']))
+        ) {
+            return null;
+        }
+        if (array_key_exists('session_expires_at', $claims)
+            && (!is_int($claims['session_expires_at'])
+                || $claims['session_expires_at'] <= time()
+                || $claims['session_expires_at'] > time() + 28800)
         ) {
             return null;
         }

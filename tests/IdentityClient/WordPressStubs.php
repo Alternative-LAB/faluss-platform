@@ -211,6 +211,12 @@ namespace Faluss\Platform\IdentityClient {
         $GLOBALS['identity_client_test_filters'][$hook] = compact('callback', 'priority', 'acceptedArgs');
     }
 
+    function remove_filter(string $hook, callable $callback, int $priority = 10): bool
+    {
+        unset($GLOBALS['identity_client_test_filters'][$hook]);
+        return true;
+    }
+
     function add_shortcode(string $tag, callable $callback): void
     {
         $GLOBALS['identity_client_test_shortcodes'][$tag] = $callback;

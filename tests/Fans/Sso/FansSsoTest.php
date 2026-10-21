@@ -129,6 +129,9 @@ final class FansSsoTest extends TestCase
         $GLOBALS['fans_sso_remote_queue'][] = self::response($valid);
         $claims = self::method('exchange')->invoke(null, str_repeat('c', 43), str_repeat('p', 43), 'login');
         self::assertSame(['faluss_id' => self::ID, 'scope' => 'identity.basic identity.email', 'email' => 'member@example.test'], $claims);
+        $deadline = time() + 3600;
+        $GLOBALS['fans_sso_remote_queue'][] = self::response($valid + ['session_expires_at' => $deadline]);
+        self::assertSame($deadline, self::method('exchange')->invoke(null, str_repeat('c', 43), str_repeat('p', 43), 'login')['session_expires_at']);
         $call = $GLOBALS['fans_sso_remote_calls'][0];
         self::assertSame('https://faluss.me/oauth/token', $call['url']);
         self::assertSame(str_repeat('s', 43), $call['args']['body']['client_secret']);
@@ -139,6 +142,9 @@ final class FansSsoTest extends TestCase
             ['faluss_id' => 'invalid', 'scope' => 'identity.basic identity.email', 'email' => 'member@example.test'],
             ['faluss_id' => self::ID, 'scope' => 'identity.basic', 'email' => 'member@example.test'],
             ['faluss_id' => self::ID, 'scope' => 'identity.basic identity.email', 'email' => 'bad'],
+            ['faluss_id' => self::ID, 'scope' => 'identity.basic identity.email', 'email' => 'member@example.test', 'session_expires_at' => 'later'],
+            ['faluss_id' => self::ID, 'scope' => 'identity.basic identity.email', 'email' => 'member@example.test', 'session_expires_at' => time() - 1],
+            ['faluss_id' => self::ID, 'scope' => 'identity.basic identity.email', 'email' => 'member@example.test', 'session_expires_at' => time() + 28801],
         ] as $invalid) {
             $GLOBALS['fans_sso_remote_queue'][] = self::response($invalid);
             self::assertNull(self::method('exchange')->invoke(null, str_repeat('c', 43), str_repeat('p', 43), 'login'));

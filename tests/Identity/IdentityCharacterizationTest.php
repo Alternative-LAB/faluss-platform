@@ -14,10 +14,10 @@ final class IdentityCharacterizationTest extends TestCase
         $legacy = $root . '/src/Identity/Legacy/includes/';
         $files = [
             'class-faluss-identity-admin-diagnostic.php' => 'daf9a4df9ff17ca375ed95e4ae59d81b7447dbf5a3702880e77e2c6fdac64a64',
-            'class-faluss-identity-authorization.php' => '7248022e748b646463b74c79fd0eaf3c1fedde2882dfa8da53351ec4851922bf',
+            'class-faluss-identity-authorization.php' => 'f666b85634e646421ef6de24247cd447ad3cb23b8e08dcd66b67116500112bf1',
             'class-faluss-identity-elementor-widget.php' => 'f7f8236e85f2e0bdae94d919106098d39548fa0b97854ee8894ffc092dd0df62',
             'class-faluss-identity-front-preferences.php' => '292eb4c3da88a5486618da45126658d48cd3e7693fb2c15c68feaaad06ffc38b',
-            'class-faluss-identity-member-session.php' => '02d90347fcd486f989ed6731039bc289bbc5f2991fca9b5e0dbbf8c7c01ea81c',
+            'class-faluss-identity-member-session.php' => '388bbc957f2d5fcc1d781ee544556e4080c3b4bb70b5147d07e7391212c9684f',
             'class-faluss-identity-navigation-elementor-widget.php' => 'c91ab42ee4b6244e542aaf6b999275334f443db32e81cbc8791158bcf49e17bd',
             'class-faluss-identity-navigation.php' => 'a28c6b56e7d7093164da35fc1b5aa1e1941d41535e8b490d4a876860c0b8f9ae',
             'class-faluss-identity-onboarding-elementor-widget.php' => 'e22059042b83a245154b784570db3a1c05a4e4907d75f40da7a65d99a51c32af',

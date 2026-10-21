@@ -33,7 +33,12 @@ function add_query_arg(array|string $args, string $value, ?string $url = null): 
 }
 function get_query_var(string $name): string { return '1'; }
 function wp_set_current_user(int $id): void { $GLOBALS['fans_return_session'] = $id; }
-function wp_set_auth_cookie(int $id, bool $remember, bool $secure): void { $GLOBALS['fans_return_auth'][] = [$id, $remember, $secure]; }
+function wp_set_auth_cookie(int $id, bool $remember, bool $secure): void {
+    $GLOBALS['fans_return_auth'][] = [$id, $remember, $secure];
+    if (isset($GLOBALS['fans_sso_filters']['auth_cookie_expiration'])) {
+        $GLOBALS['fans_return_duration'] = $GLOBALS['fans_sso_filters']['auth_cookie_expiration'](28800, $id, $remember);
+    }
+}
 function is_ssl(): bool { return true; }
 function do_action(string $name, mixed ...$args): void {}
 
@@ -49,6 +54,7 @@ final class FansSsoReturnFlowTest extends TestCase
         }
         $GLOBALS['fans_return_cookies'] = [];
         $GLOBALS['fans_return_auth'] = [];
+        $GLOBALS['fans_return_duration'] = null;
         $_SERVER['REQUEST_METHOD'] = 'POST';
     }
 
@@ -126,6 +132,22 @@ final class FansSsoReturnFlowTest extends TestCase
         $state = $this->start('https://evil.example');
         $this->readyCallback($state);
         self::assertSame(home_url('/'), $this->redirect(fn () => FansSsoService::callback()));
+    }
+
+    public function testCallbackBoundsTheLocalSessionToTheInitialIdentityDeadline(): void
+    {
+        $state = $this->start('/faluss-fans/fan/espace');
+        $this->readyCallback($state);
+        $deadline = time() + 1800;
+        $GLOBALS['fans_sso_remote_queue'] = [['code' => 200, 'body' => json_encode([
+            'faluss_id' => '11111111-1111-4111-8111-111111111111',
+            'scope' => 'identity.basic identity.email',
+            'email' => 'fixture@example.test',
+            'session_expires_at' => $deadline,
+        ])]];
+        self::assertSame('/faluss-fans/fan/espace', $this->redirect(fn () => FansSsoService::callback()));
+        self::assertGreaterThanOrEqual(1795, $GLOBALS['fans_return_duration']);
+        self::assertLessThanOrEqual(1800, $GLOBALS['fans_return_duration']);
     }
 
     public function testInvalidNonceAndPrivilegedAccountDoNotStartLogin(): void
