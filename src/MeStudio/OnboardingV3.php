@@ -21,6 +21,8 @@ final class OnboardingV3
     public static function register(): void
     {
         LinkImportActions::register();
+        add_action('template_redirect', [self::class, 'redirectGuest']);
+        add_action('wp_enqueue_scripts', [self::class, 'enqueueAccessStyle']);
         add_action('wp_ajax_faluss_studio_v3_manage', [self::class, 'manageStudio']);
         add_action('wp_ajax_faluss_studio_v3_upload_content', [self::class, 'uploadContent']);
         add_action('wp_ajax_faluss_studio_v3_save', [self::class, 'saveStudio']);
@@ -30,6 +32,21 @@ final class OnboardingV3
         add_action('wp_ajax_faluss_onboarding_v3_publish', [self::class, 'publish']);
         add_action('wp_ajax_faluss_onboarding_v3_upload_avatar', [self::class, 'uploadAvatar']);
         add_action('wp_ajax_faluss_onboarding_v3_upload_cover', [self::class, 'uploadCover']);
+    }
+
+    public static function redirectGuest(): void
+    {
+        if (is_user_logged_in() || !is_page('mon-faluss')) { return; }
+        $login = IdentityContract::loginUrl('open_studio', home_url('/mon-faluss/'));
+        if ($login === '') {
+            $login = add_query_arg('redirect_to', home_url('/mon-faluss/'), home_url('/login/'));
+        }
+        if (wp_safe_redirect($login, 302, 'Faluss Me')) { exit; }
+    }
+
+    public static function enqueueAccessStyle(): void
+    {
+        if (is_page('mon-faluss')) { MeStudioAssets::enqueueAccessStyle(); }
     }
 
     /** @return list<string> */
@@ -86,7 +103,7 @@ final class OnboardingV3
         $context = IdentityContract::onboardingV3Context();
         $state = LinkStudioContract::state();
         if (empty($context['available']) || is_wp_error($state)) {
-            return self::unavailable(is_wp_error($state) ? (string) $state->get_error_code() : 'identity_unavailable');
+            return self::unavailable(is_wp_error($state) ? (string) $state->get_error_code() : 'v3_context_unavailable');
         }
         $profile = is_array($state['profile'] ?? null) ? $state['profile'] : [];
         $preferences = is_array($state['preferences'] ?? null) ? $state['preferences'] : [];
@@ -278,13 +295,23 @@ final class OnboardingV3
 
     public static function login(): string
     {
-        $url = IdentityContract::loginUrl('create_card', home_url('/mon-faluss/'));
-        return '<section class="faluss-onboarding-v3__unavailable"><h1>Retrouve ton Faluss</h1><p>Connecte-toi pour reprendre ta création ou ouvrir ton Studio.</p><a href="' . esc_url($url ?: home_url('/login/')) . '">Se connecter</a></section>';
+        MeStudioAssets::enqueueAccessStyle();
+        $url = IdentityContract::loginUrl('open_studio', home_url('/mon-faluss/'));
+        return '<section class="faluss-onboarding-v3__unavailable"><h1>Connecte-toi à Faluss Me</h1><p>Ouvre ton Studio avec ton compte Faluss.</p><a href="' . esc_url($url ?: home_url('/login/')) . '">Se connecter</a></section>';
     }
 
     public static function unavailable(string $code): string
     {
-        return '<section class="faluss-onboarding-v3__unavailable" role="alert"><h1>Création temporairement indisponible</h1><p>Votre brouillon est conservé. Réessayez dans un instant.</p><code>' . esc_html($code) . '</code><a href="">Réessayer</a></section>';
+        MeStudioAssets::enqueueAccessStyle();
+        $reason = in_array($code, ['identity_unavailable', 'studio_unavailable', 'composition_invalid', 'v3_context_unavailable'], true) ? $code : 'state_error';
+        error_log('[Faluss Me Studio] unavailable=' . $reason . '; wp_admin=' . (current_user_can('manage_options') ? 'yes' : 'no'));
+        do_action('faluss_me_studio_diagnostic', $reason);
+        if ($reason === 'identity_unavailable') {
+            $login = IdentityContract::loginUrl('open_studio', home_url('/mon-faluss/'));
+            $logout = wp_logout_url($login ?: home_url('/login/'));
+            return '<section class="faluss-onboarding-v3__unavailable" role="alert"><h1>Ce compte n’a pas accès au Studio</h1><p>Cette session WordPress n’est pas liée à une identité Faluss Me active. Connecte-toi avec le compte Faluss associé à ta carte.</p><a href="' . esc_url($logout) . '">Changer de compte</a></section>';
+        }
+        return '<section class="faluss-onboarding-v3__unavailable" role="alert"><h1>Studio momentanément indisponible</h1><p>Nous ne pouvons pas charger ton espace pour le moment. Réessaie dans un instant.</p><a href="' . esc_url(home_url('/mon-faluss/')) . '">Réessayer</a></section>';
     }
 
     private static function confirmation(string $slug): string

@@ -34,7 +34,7 @@ final class Faluss_Identity_Onboarding {
     );
 
     /** @var array<int, string> */
-    const INTENTS = array( 'unlock_teaser', 'claim_reward', 'create_card', 'generic_login' );
+    const INTENTS = array( 'unlock_teaser', 'claim_reward', 'create_card', 'generic_login', 'open_studio' );
 
     public static function register() {
         add_shortcode( 'faluss_identity_onboarding', array( __CLASS__, 'shortcode' ) );
@@ -452,7 +452,7 @@ final class Faluss_Identity_Onboarding {
      */
     private static function resolve_authenticated_destination( $context, $fallback, $requires_onboarding ) {
         if ( is_array( $context ) ) {
-            if ( in_array( $context['intent'], array( 'unlock_teaser', 'claim_reward' ), true ) ) {
+            if ( in_array( $context['intent'], array( 'unlock_teaser', 'claim_reward', 'open_studio' ), true ) ) {
                 return $context['return_to'];
             }
             if ( 'create_card' === $context['intent'] ) {

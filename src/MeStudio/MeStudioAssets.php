@@ -52,10 +52,9 @@ final class MeStudioAssets
 
     public static function enqueueOnboardingV3(): void
     {
-        self::register();
+        self::enqueueAccessStyle();
         $file = dirname(__DIR__, 2) . '/faluss-platform.php';
-        if (!wp_style_is(self::ONBOARDING_V3_STYLE, 'registered')) {
-            wp_register_style(self::ONBOARDING_V3_STYLE, plugins_url('assets/me-studio/css/onboarding-v3.css', $file), [self::CARD_STYLE], MeStudioModule::VERSION);
+        if (!wp_script_is(self::ONBOARDING_V3_SCRIPT, 'registered')) {
             $scriptUrl = plugins_url('assets/me-studio/js/onboarding-v3.js', $file);
             if ($scriptUrl !== '') {
                 wp_register_script(self::ONBOARDING_V3_SCRIPT, $scriptUrl, [], MeStudioModule::VERSION, true);
@@ -73,9 +72,18 @@ final class MeStudioAssets
             'avatarNonce' => wp_create_nonce('faluss_onboarding_v3_upload_avatar'),
             'coverNonce' => wp_create_nonce('faluss_onboarding_v3_upload_cover'),
         ]);
+        wp_enqueue_script(self::ONBOARDING_V3_SCRIPT);
+    }
+
+    public static function enqueueAccessStyle(): void
+    {
+        self::register();
+        if (!wp_style_is(self::ONBOARDING_V3_STYLE, 'registered')) {
+            $file = dirname(__DIR__, 2) . '/faluss-platform.php';
+            wp_register_style(self::ONBOARDING_V3_STYLE, plugins_url('assets/me-studio/css/onboarding-v3.css', $file), [self::CARD_STYLE], MeStudioModule::VERSION);
+        }
         wp_enqueue_style(self::CARD_STYLE);
         wp_enqueue_style(self::ONBOARDING_V3_STYLE);
-        wp_enqueue_script(self::ONBOARDING_V3_SCRIPT);
     }
 
     public static function enqueueStudioV3(): void

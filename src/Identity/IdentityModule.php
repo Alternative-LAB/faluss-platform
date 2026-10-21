@@ -10,7 +10,7 @@ use LogicException;
 
 final class IdentityModule implements Module
 {
-    public const VERSION = '0.4.15';
+    public const VERSION = '0.4.16';
 
     private static bool $compatibilityLoaded = false;
 
