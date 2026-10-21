@@ -41,6 +41,7 @@ function is_user_logged_in() { return true; }
 function wp_logout_url( $url ) { return $url; }
 function wp_list_pluck( $items, $field ) { return array_map( static function( $item ) use ( $field ) { return $item[ $field ] ?? null; }, $items ); }
 function wp_style_is() { return true; }
+function wp_script_is() { return true; }
 function wp_enqueue_style() {}
 function wp_enqueue_script() {}
 function wp_localize_script() {}
